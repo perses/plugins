@@ -10,8 +10,30 @@ on:
       - published
 
 jobs:
+  get-schemas-deps:
+    name: "Get dependencies for plugin schemas"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.7.1
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+      - uses: ./.github/perses-ci/actions/install_percli
+        with:
+          cli_version: "v0.50.0-rc.0"
+      - run: go run ./scripts/get-schemas-deps/get-schemas-deps.go
+      - name: store plugin schema dependencies
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugins-schema-deps
+          path: |
+            */cue.mod/pkg
+
   build:
     name: "build"
+    needs: "get-schemas-deps"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -21,6 +43,10 @@ jobs:
         with:
           enable_npm: true
           enable_go: true
+      - name: retrieve plugin schema dependencies
+        uses: actions/download-artifact@v4
+        with:
+          name: plugins-schema-deps
       - run: npm ci
       - run: npm run build
       - run: go run ./scripts/build-archive/build-archive.go
@@ -45,27 +71,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
-  get-schemas-deps:
-    name: "Get dependencies for plugin schemas"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.7.1
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_go: true
-      - uses: ./.github/perses-ci/actions/install_percli
-        with:
-          cli_version: "v0.50.0-rc.0"
-      - run: go run ./scripts/get-schemas-deps/get-schemas-deps.go
-      - name: store plugin schema dependencies
-        uses: actions/upload-artifact@v4
-        with:
-          name: plugins-schema-deps
-          path: |
-            */cue.mod/pkg
-
   validate-schemas:
     name: "Validate plugin schemas"
     needs: "get-schemas-deps"
@@ -87,7 +92,7 @@ jobs:
 
   release:
     name: "release"
-    needs: ["build","validate-schemas"]
+    needs: "build"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -102,10 +107,6 @@ jobs:
         with:
           enable_npm: false
           enable_go: true
-      - name: retrieve plugin schema dependencies
-        uses: actions/download-artifact@v4
-        with:
-          name: plugins-schema-deps
       - name: Download archive
         uses: actions/download-artifact@v4
         with:
