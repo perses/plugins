@@ -1,7 +1,7 @@
 {
   "name": "@perses-dev/bar-chart",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.3.1",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
@@ -31,11 +31,13 @@
   "perses": {
     "plugins": [
       {
-        "display": {
-          "name": "Bar Chart"
-        },
-        "kind": "BarChart",
-        "pluginType": "Panel"
+        "kind": "Panel",
+        "spec": {
+          "name": "BarChart",
+          "display": {
+            "name": "Bar Chart"
+          }
+        }
       }
     ]
   }
