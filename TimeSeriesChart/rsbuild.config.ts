@@ -35,7 +35,7 @@ export default defineConfig({
         new ModuleFederationPlugin({
           name: 'TimeSeriesChart',
           exposes: {
-            './TimeSeriesChart': './src/TimeSeriesChart.tsx',
+            './TimeSeriesChart': './src/TimeSeriesChart.ts',
           },
           shared: {
             react: { requiredVersion: '18.2.0', singleton: true },

@@ -53,6 +53,8 @@ export default defineConfig({
             '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
             '@emotion/styled': { singleton: true },
             '@hookform/resolvers': { singleton: true },
+            '@tanstack/react-query': { singleton: true },
+            'react-hook-form': { singleton: true },
           },
           dts: false,
           runtime: false,

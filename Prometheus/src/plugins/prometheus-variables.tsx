@@ -10,6 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -17,9 +18,9 @@ import {
   useDatasourceClient,
   VariableOption,
 } from '@perses-dev/plugin-system';
-import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import { produce } from 'immer';
 import { ReactElement } from 'react';
+import { PromQLEditor } from '../components';
 import {
   DEFAULT_PROM,
   isDefaultPromSelector,
@@ -29,13 +30,12 @@ import {
   PrometheusClient,
   VectorData,
 } from '../model';
-import { PromQLEditor } from '../components';
+import { MatcherEditor } from './MatcherEditor';
 import {
   PrometheusLabelNamesVariableOptions,
   PrometheusLabelValuesVariableOptions,
   PrometheusPromQLVariableOptions,
 } from './types';
-import { MatcherEditor } from './MatcherEditor';
 
 export function PrometheusLabelValuesVariableEditor(
   props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>

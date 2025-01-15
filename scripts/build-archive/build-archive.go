@@ -15,8 +15,10 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"path"
+	"runtime"
 
 	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
@@ -30,7 +32,7 @@ var pluginFiles = []string{
 	"README.md",
 }
 
-func createArchive(pluginName string) error {
+func createArchive(pluginName string, createGroupArchive bool) error {
 	manifest, err := npm.ReadManifest(pluginName)
 	if err != nil {
 		return err
@@ -44,21 +46,38 @@ func createArchive(pluginName string) error {
 
 	// Then let's create the archive with the folder previously created
 	archiveName := fmt.Sprintf("%s-%s.tar.gz", manifest.ID, manifest.Metadata.BuildInfo.Version)
-	if execErr := exec.Command("tar", "-czvf", path.Join(pluginName, archiveName), "-C", pluginName, pluginName).Run(); execErr != nil {
+	args := []string{"-czvf", path.Join(pluginName, archiveName), "-C", pluginName, pluginName}
+
+	// Remove the copyfile metadata on macos
+	if runtime.GOOS == "darwin" {
+		args = append([]string{"--disable-copyfile"}, args...)
+	}
+
+	if execErr := exec.Command("tar", args...).Run(); execErr != nil {
 		return execErr
+	}
+
+	if createGroupArchive {
+		if execErr := exec.Command("cp", path.Join(pluginName, archiveName), path.Join("./plugins-archive", archiveName)).Run(); execErr != nil {
+			return execErr
+		}
 	}
 
 	return exec.Command("rm", "-rf", newArchiveFolder).Run()
 }
 
 func main() {
+	createGroupArchive := false
+	if len(os.Args) > 1 && os.Args[1] == "--group" {
+		createGroupArchive = true
+	}
 	workspaces, err := npm.GetWorkspaces()
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
 	}
 	for _, workspace := range workspaces {
 		logrus.Infof("building archive for the plugin %s", workspace)
-		if createArchiveErr := createArchive(workspace); createArchiveErr != nil {
+		if createArchiveErr := createArchive(workspace, createGroupArchive); createArchiveErr != nil {
 			logrus.WithError(createArchiveErr).Fatalf("unable to generate the archive for the plugin %s", workspace)
 		}
 	}

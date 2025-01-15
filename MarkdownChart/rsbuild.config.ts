@@ -35,7 +35,7 @@ export default defineConfig({
         new ModuleFederationPlugin({
           name: 'MarkdownChart',
           exposes: {
-            './MarkdownChart': './src/MarkdownChart.tsx',
+            './MarkdownChart': './src/MarkdownChart.ts',
           },
           shared: {
             react: { requiredVersion: '18.2.0', singleton: true },

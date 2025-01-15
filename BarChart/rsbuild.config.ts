@@ -35,7 +35,7 @@ export default defineConfig({
         new ModuleFederationPlugin({
           name: 'BarChart',
           exposes: {
-            './BarChart': './src/Chart.tsx',
+            './BarChart': './src/BarChart.ts',
           },
           shared: {
             react: { requiredVersion: '^18.2.0', singleton: true },
@@ -51,6 +51,7 @@ export default defineConfig({
             '@hookform/resolvers': { singleton: true },
             'use-resize-observer': { requiredVersion: '^9.1.0', singleton: true },
             'mdi-material-ui': { requiredVersion: '^7.4.0', singleton: true },
+            immer: { singleton: true },
           },
           dts: false,
           runtime: false,

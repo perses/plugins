@@ -35,7 +35,7 @@ export default defineConfig({
         new ModuleFederationPlugin({
           name: 'StatChart',
           exposes: {
-            './StatChart': './src/StatChart.tsx',
+            './StatChart': './src/StatChart.ts',
           },
           shared: {
             react: { requiredVersion: '18.2.0', singleton: true },

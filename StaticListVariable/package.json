@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "cross-env LC_ALL=C TZ=UTC jest --passWithNoTests",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@module-federation/enhanced": "^0.1.11",

@@ -11,7 +11,7 @@ on:
 
 jobs:
   get-schemas-deps:
-    name: "Get dependencies for plugin schemas"
+    name: 'Get dependencies for plugin schemas'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -22,7 +22,7 @@ jobs:
           enable_go: true
       - uses: ./.github/perses-ci/actions/install_percli
         with:
-          cli_version: "v0.50.0-rc.0"
+          cli_version: 'v0.50.0-rc.0'
       - run: go run ./scripts/get-schemas-deps/get-schemas-deps.go
       - name: store plugin schema dependencies
         uses: actions/upload-artifact@v4
@@ -32,8 +32,8 @@ jobs:
             */cue.mod/pkg
 
   build:
-    name: "build"
-    needs: "get-schemas-deps"
+    name: 'build'
+    needs: 'get-schemas-deps'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -59,7 +59,7 @@ jobs:
             !node_modules
 
   lint:
-    name: "lint"
+    name: 'lint'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -71,9 +71,22 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  test:
+    name: 'test'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.5.2
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+      - run: npm ci
+      - run: npm run test
+
   validate-schemas:
-    name: "Validate plugin schemas"
-    needs: "get-schemas-deps"
+    name: 'Validate plugin schemas'
+    needs: 'get-schemas-deps'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -82,7 +95,7 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-          cue_version: "v0.11.0"
+          cue_version: 'v0.11.0'
           enable_cue: true
       - name: retrieve plugin schema dependencies
         uses: actions/download-artifact@v4
@@ -91,8 +104,8 @@ jobs:
       - run: go run ./scripts/validate-schemas/validate-schemas.go
 
   release:
-    name: "release"
-    needs: "build"
+    name: 'release'
+    needs: 'build'
     runs-on: ubuntu-latest
     permissions:
       contents: write

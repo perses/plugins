@@ -13,3 +13,5 @@ export interface StatChartOptions {
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
 }
+
+export const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
