@@ -3,7 +3,7 @@ module github.com/perses/plugins
 go 1.22.4
 
 require (
-	cuelang.org/go v0.11.0
+	cuelang.org/go v0.11.2
 	github.com/sirupsen/logrus v1.9.3
 )
 
