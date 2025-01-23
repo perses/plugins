@@ -17,10 +17,24 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 type Package struct {
+	Version    string   `json:"version"`
 	Workspaces []string `json:"workspaces"`
+}
+
+func GetVersion(pluginPath string) (string, error) {
+	data, err := os.ReadFile(filepath.Join(pluginPath, "package.json"))
+	if err != nil {
+		return "", err
+	}
+	pkg := Package{}
+	if unmarshalErr := json.Unmarshal(data, &pkg); unmarshalErr != nil {
+		return "", unmarshalErr
+	}
+	return pkg.Version, nil
 }
 
 func GetWorkspaces() ([]string, error) {
