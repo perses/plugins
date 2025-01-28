@@ -23,7 +23,7 @@ import (
 )
 
 // Defined as a const and not as a flag or whatever because it's supposed to be removed when moving to CUE's dependencies management
-const percliVersion = "v0.50.0"
+const percliVersion = "v0.50.1"
 
 /*
  * Get the dependencies (= CUE packages imported) for the given plugin
