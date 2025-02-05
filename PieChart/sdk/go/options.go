@@ -11,36 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gauge
+package pie
 
-import (
-	"github.com/perses/perses/go-sdk/common"
-)
+import "github.com/perses/perses/go-sdk/common"
 
-func Calculation(calculation common.Calculation) Option {
+func WithLegend(legend Legend) Option {
 	return func(builder *Builder) error {
-		builder.Calculation = calculation
+		builder.Legend = &legend
 		return nil
 	}
 }
 
-func Format(format common.Format) Option {
+func WithVisual(visual Visual) Option {
 	return func(builder *Builder) error {
-		builder.Format = &format
+		builder.Visual = &visual
 		return nil
 	}
 }
 
-func Thresholds(thresholds common.Thresholds) Option {
+func WithFormat(format *common.Format) Option {
 	return func(builder *Builder) error {
-		builder.Thresholds = &thresholds
+		builder.Format = format
 		return nil
 	}
 }
 
-func Max(max float64) Option { // nolint: revive
+func WithQuerySettings(querySettingsList []QuerySettingsItem) Option {
 	return func(builder *Builder) error {
-		builder.Max = max
+		builder.QuerySettings = &querySettingsList
 		return nil
 	}
 }
