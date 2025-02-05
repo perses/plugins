@@ -26,7 +26,7 @@ import {
 } from './gauge-chart-model';
 import { convertThresholds, defaultThresholdInput } from './thresholds';
 
-const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
+const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };
 const GAUGE_MIN_WIDTH = 90;
 const PANEL_PADDING_OFFSET = 20;
 
