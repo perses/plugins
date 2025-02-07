@@ -39,7 +39,11 @@ func release(pluginName string, optionalReleaseMessage string) {
 	}
 }
 
-// Here the usage of this script:
+// Prerequisites for running this script:
+// - Install the GitHub CLI (gh): https://github.com/cli/cli#installation
+// - Use it to login to GitHub: `gh auth login`
+//
+// Usage:
 // This will release every plugins that are not yet released
 //
 //	go run ./scripts/release/release.go --all
@@ -51,6 +55,8 @@ func release(pluginName string, optionalReleaseMessage string) {
 // Add a release message that will appear in every release
 //
 //	go run ./scripts/release/release.go --all --message="Release message"
+//
+// NB: this script doesn't handle the plugin archive creation, this is achieved by a CI task.
 func main() {
 	releaseAll := flag.Bool("all", false, "release all the plugins")
 	releaseSingleName := flag.String("name", "", "release a single plugin")
