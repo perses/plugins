@@ -20,22 +20,22 @@ export default defineConfig({
     port: 3005,
   },
   dev: {
-    assetPrefix: '/plugins/MarkdownChart/',
+    assetPrefix: '/plugins/Markdown/',
   },
   output: {
-    assetPrefix: '/plugins/MarkdownChart/',
+    assetPrefix: '/plugins/Markdown/',
     copy: [{ from: './package.json' }, { from: 'README.md' }],
   },
   plugins: [pluginReact()],
   tools: {
     htmlPlugin: false,
     rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'MarkdownChart';
+      config.output!.uniqueName = 'Markdown';
       appendPlugins([
         new ModuleFederationPlugin({
-          name: 'MarkdownChart',
+          name: 'Markdown',
           exposes: {
-            './MarkdownChart': './src/MarkdownChart.ts',
+            './Markdown': './src/Markdown.ts',
           },
           shared: {
             react: { requiredVersion: '18.2.0', singleton: true },

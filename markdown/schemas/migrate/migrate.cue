@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,19 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from '@perses-dev/core';
+package migrate
 
-/**
- * The schema for a Markdown panel.
- */
-export interface MarkdownPanelDefinition extends Definition<MarkdownPanelOptions> {
-  kind: 'MarkdownChart';
+#grafanaType: "text"
+#panel:       _
+
+// NB: Convert text panels with mode=html as markdown panels as best effort while we dont provide a proper panel type for this
+kind: "Markdown"
+if #panel.mode != _|_ {
+	spec: {
+		text: #panel.content
+	}
 }
-
-export interface MarkdownPanelOptions {
-  text: string;
+if #panel.options != _|_ {
+	spec: {
+		text: #panel.options.content
+	}
 }
-
-export function createInitialMarkdownPanelOptions(): MarkdownPanelOptions {
-  return { text: '' };
+if #panel.options == _|_ && #panel.mode == _|_ {
+	spec: {
+		text: ""
+	}
 }

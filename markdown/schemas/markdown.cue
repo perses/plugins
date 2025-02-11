@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,25 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+package model
 
-#grafanaType: "text"
-#panel:       _
-
-// NB: Convert text panels with mode=html as markdown panels as best effort while we dont provide a proper panel type for this
-kind: "MarkdownChart"
-if #panel.mode != _|_ {
-	spec: {
-		text: #panel.content
-	}
-}
-if #panel.options != _|_ {
-	spec: {
-		text: #panel.options.content
-	}
-}
-if #panel.options == _|_ && #panel.mode == _|_ {
-	spec: {
-		text: ""
-	}
-}
+kind: "Markdown"
+spec: close({
+	text: string
+})

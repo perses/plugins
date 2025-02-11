@@ -19,7 +19,7 @@ import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';
 /**
  * The core Markdown panel plugin in Perses.
  */
-export const MarkdownChart: PanelPlugin<MarkdownPanelOptions> = {
+export const Markdown: PanelPlugin<MarkdownPanelOptions> = {
   PanelComponent: MarkdownPanel,
   supportedQueryTypes: [],
   panelOptionsEditorComponents: [
