@@ -57,6 +57,7 @@ jobs:
           name: archives
           path: |
             **/*.tar.gz
+            **/dist/mf-manifest.json
             !node_modules
 
   lint:

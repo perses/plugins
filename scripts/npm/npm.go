@@ -16,7 +16,6 @@ package npm
 import (
 	"encoding/json"
 	"os"
-	"path"
 	"path/filepath"
 )
 
@@ -65,7 +64,7 @@ type Manifest struct {
 }
 
 func ReadManifest(pluginPath string) (*Manifest, error) {
-	manifestFilePath := path.Join(pluginPath, "dist", "mf-manifest.json")
+	manifestFilePath := filepath.Join(pluginPath, "dist", "mf-manifest.json")
 	data, err := os.ReadFile(manifestFilePath)
 	if err != nil {
 		return nil, err

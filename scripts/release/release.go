@@ -27,7 +27,8 @@ func release(pluginName string, optionalReleaseMessage string) {
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to get the version of the plugin %s", pluginName)
 	}
-	releaseName := fmt.Sprintf("%s-%s", pluginName, version)
+	// To be compliant with Golang, the tag must be in the format `folder/vX.Y.Z`
+	releaseName := fmt.Sprintf("%s/v%s", pluginName, version)
 	// ensure the tag does not already exist
 	if execErr := exec.Command("git", "rev-parse", "--verify", releaseName).Run(); execErr == nil {
 		logrus.Infof("release %s already exists", releaseName)
@@ -41,22 +42,22 @@ func release(pluginName string, optionalReleaseMessage string) {
 
 // Prerequisites for running this script:
 // - Install the GitHub CLI (gh): https://github.com/cli/cli#installation
-// - Use it to login to GitHub: `gh auth login`
+// - Use it to log in to GitHub: `gh auth login`
 //
 // Usage:
-// This will release every plugins that are not yet released
+// This will release every plugin not yet released
 //
 //	go run ./scripts/release/release.go --all
 //
-// This will release only the Tempo plugin
+// This will release only the tempo plugin. Note that the `--name` flag is set with the folder name not the plugin name.
 //
-//	go run ./scripts/release/release.go --name=Tempo
+//	go run ./scripts/release/release.go --name=tempo
 //
 // Add a release message that will appear in every release
 //
 //	go run ./scripts/release/release.go --all --message="Release message"
 //
-// NB: this script doesn't handle the plugin archive creation, this is achieved by a CI task.
+// NB: this script doesn't handle the plugin archive creation, a CI task achieves this.
 func main() {
 	releaseAll := flag.Bool("all", false, "release all the plugins")
 	releaseSingleName := flag.String("name", "", "release a single plugin")

@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"runtime"
 
 	"github.com/perses/plugins/scripts/npm"
@@ -37,16 +37,16 @@ func createArchive(pluginName string, createGroupArchive bool) error {
 	if err != nil {
 		return err
 	}
-	newArchiveFolder := path.Join(pluginName, pluginName)
+	newArchiveFolder := filepath.Join(pluginName, pluginName)
 	for _, f := range pluginFiles {
-		if execErr := exec.Command("cp", "-r", path.Join(pluginName, f), newArchiveFolder).Run(); execErr != nil {
+		if execErr := exec.Command("cp", "-r", filepath.Join(pluginName, f), newArchiveFolder).Run(); execErr != nil {
 			return fmt.Errorf("unable to copy the file or folder %s: %w", f, execErr)
 		}
 	}
 
 	// Then let's create the archive with the folder previously created
 	archiveName := fmt.Sprintf("%s-%s.tar.gz", manifest.ID, manifest.Metadata.BuildInfo.Version)
-	args := []string{"-czvf", path.Join(pluginName, archiveName), "-C", pluginName, pluginName}
+	args := []string{"-czvf", filepath.Join(pluginName, archiveName), "-C", pluginName, pluginName}
 
 	// Remove the copyfile metadata on macos
 	if runtime.GOOS == "darwin" {
@@ -58,7 +58,7 @@ func createArchive(pluginName string, createGroupArchive bool) error {
 	}
 
 	if createGroupArchive {
-		if execErr := exec.Command("cp", path.Join(pluginName, archiveName), path.Join("./plugins-archive", archiveName)).Run(); execErr != nil {
+		if execErr := exec.Command("cp", filepath.Join(pluginName, archiveName), filepath.Join("./plugins-archive", archiveName)).Run(); execErr != nil {
 			return execErr
 		}
 	}
