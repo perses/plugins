@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tsx ./scripts/devserver/devserver.ts",
+    "dev": "turbo run dev --concurrency 20",
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
     "test": "npm run test --workspaces",
@@ -56,6 +56,8 @@
     "jest-environment-jsdom": "^29.7.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
+    "turbo": "^2.3.4",
     "typescript": "^5.4.2"
-  }
+  },
+  "packageManager": "npm@10.9.2"
 }
