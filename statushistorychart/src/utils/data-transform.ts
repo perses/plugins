@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -60,6 +60,25 @@ export function useStatusHistoryDataModel(
       };
     }
 
+    const allSeries = queryResults.reduce<TimeSeriesData['series']>((acc, { data }) => {
+      if (data && data.series) {
+        acc.push(...data.series);
+      }
+      return acc;
+    }, []);
+
+    if (spec.sorting) {
+      allSeries.sort((a, b) => {
+        const nameA = a.formattedName || '';
+        const nameB = b.formattedName || '';
+        if (spec.sorting === 'asc') {
+          return nameA.localeCompare(nameA);
+        } else {
+          return nameB.localeCompare(nameB);
+        }
+      });
+    }
+
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     const statusHistoryData: StatusHistoryDataItem[] = [];
     const yAxisCategories: string[] = [];
@@ -68,33 +87,24 @@ export function useStatusHistoryDataModel(
 
     const xAxisCategories = generateCompleteTimestamps(timeScale);
 
-    queryResults.forEach(({ data }) => {
-      if (!data) {
-        return;
-      }
-
-      data.series.forEach((item) => {
-        const instance = item.formattedName || '';
-
-        yAxisCategories.push(instance);
-
-        const yIndex = yAxisCategories.length - 1;
-
-        item.values.forEach(([time, value]) => {
-          const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time);
-          if (value !== null && itemIndexOnXaxis !== -1) {
-            let itemLabel: string | number = value;
-            if (hasValueMappings) {
-              const mappedValue = applyValueMapping(value, spec.mappings);
-              itemLabel = mappedValue.value;
-            }
-            legendSet.add(value);
-            statusHistoryData.push({
-              value: [itemIndexOnXaxis, yIndex, value],
-              label: String(itemLabel),
-            });
+    allSeries.forEach((item) => {
+      const instance = item.formattedName || '';
+      yAxisCategories.push(instance);
+      const yIndex = yAxisCategories.length - 1;
+      item.values.forEach(([time, value]) => {
+        const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time);
+        if (value !== null && itemIndexOnXaxis !== -1) {
+          let itemLabel: string | number = value;
+          if (hasValueMappings) {
+            const mappedValue = applyValueMapping(value, spec.mappings);
+            itemLabel = mappedValue.value;
           }
-        });
+          legendSet.add(value);
+          statusHistoryData.push({
+            value: [itemIndexOnXaxis, yIndex, value],
+            label: String(itemLabel),
+          });
+        }
       });
     });
 
@@ -141,5 +151,5 @@ export function useStatusHistoryDataModel(
       timeScale,
       colors,
     };
-  }, [queryResults, spec.mappings, themeColors]);
+  }, [queryResults, themeColors, spec]);
 }
