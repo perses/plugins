@@ -14,7 +14,7 @@
 package migrate
 
 import (
-	commonMigrate "github.com/perses/perses/cuelang/common/migrate"
+	commonMigrate "github.com/perses/perses/cue/common/migrate"
 )
 import "list"
 

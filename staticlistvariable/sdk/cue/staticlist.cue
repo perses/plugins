@@ -15,7 +15,7 @@ package staticlist
 
 import (
 	staticListVar "github.com/perses/plugins/staticlistvariable/schemas:model"
-	listVarBuilder "github.com/perses/perses/cuelang/dac-utils/variable/list"
+	listVarBuilder "github.com/perses/perses/cue/dac-utils/variable/list"
 )
 
 // include the definitions of listVarBuilder at the root

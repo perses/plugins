@@ -18,7 +18,7 @@ package panel
 
 import (
 	"strings"
-	"github.com/perses/perses/cuelang/model/api/v1"
+	"github.com/perses/perses/cue/model/api/v1"
 )
 
 // expected user inputs

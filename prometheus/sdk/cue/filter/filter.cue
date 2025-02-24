@@ -15,7 +15,7 @@ package filter
 
 import (
 	"strings"
-	varBuilder "github.com/perses/perses/cuelang/dac-utils/variable"
+	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 	labelNamesVar "github.com/perses/plugins/prometheus/schemas/prometheus-label-names:model"
 )
 

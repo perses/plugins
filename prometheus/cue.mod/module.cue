@@ -6,8 +6,8 @@ source: {
 	kind: "git"
 }
 deps: {
-	"github.com/perses/perses/cuelang@v0": {
-		v:       "v0.0.0-test"
+	"github.com/perses/perses/cue@v0": {
+		v:       "v0.0.2-test"
 		default: true
 	}
 }

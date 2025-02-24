@@ -86,7 +86,7 @@ jobs:
           enable_cue: true
       - name: Login to CUE's Central Registry to allow retrieving deps
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
-      - run: go run ./scripts/validate-schemas/validate-schemas.go
+      - run: make validate-schemas
 
   release:
     name: 'release'
