@@ -16,11 +16,34 @@ import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@pe
 import { ReactElement, useMemo, useState } from 'react';
 import { formatValue, Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
+import { PanelPluginLoader } from '@perses-dev/dashboards';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 
 function generateCellContentConfig(
   column: ColumnSettings
 ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
+  const plugin = column.plugin;
+  if (plugin !== undefined && plugin.kind === 'StatChart') {
+    return {
+      cell: (ctx) => {
+        const panelData: PanelData<TimeSeriesData> | undefined = ctx.getValue();
+        if (!panelData) return <></>;
+        return (
+          <PanelPluginLoader
+            kind="StatChart"
+            contentDimensions={{
+              width: 400,
+              height: 60,
+            }}
+            spec={plugin.spec}
+            queryResults={[panelData]}
+          />
+        );
+      },
+      cellDescription: column.cellDescription ? () => `${column.cellDescription}` : () => '', // disable hover text
+    };
+  }
+
   return {
     cell: (ctx) => {
       const cellValue = ctx.getValue();
@@ -114,35 +137,54 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
   return undefined;
 }
 
+export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant' | 'range' } {
+  // if any cell renders a panel plugin, perform a range query instead of an instant query
+  return {
+    mode: (spec.columnSettings ?? []).some((c) => c.plugin) ? 'range' : 'instant',
+  };
+}
+
 export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
 
 export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
   // TODO: handle other query types
+  const queryMode = getTablePanelQueryOptions(spec).mode;
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
+    // Transform query results to a tabular format:
+    // [ { timestamp: 123, value: 456, labelName1: labelValue1 }, ... ]
     return queryResults
-      .flatMap(
-        (d: PanelData<TimeSeriesData>, queryIndex: number) =>
-          d.data?.series.map((ts: TimeSeries) => ({ ts, queryIndex })) || []
+      .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
+        data.data.series.map((ts: TimeSeries) => ({ data, ts, queryIndex }))
       )
-      .map(({ ts, queryIndex }: { ts: TimeSeries; queryIndex: number }) => {
+      .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
         if (ts.values[0] === undefined) {
           return { ...ts.labels };
         }
-        if (queryResults.length === 1) {
-          return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels };
+
+        // If there are multiple queries, we need to add the query index to the value key and label key to avoid conflicts
+        const valueColumnName = queryResults.length === 1 ? 'value' : `value #${queryIndex + 1}`;
+        const labels =
+          queryResults.length === 1
+            ? ts.labels
+            : Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
+                if (key) acc[`${key} #${queryIndex + 1}`] = value;
+                return acc;
+              }, {} as Labels);
+
+        // If the cell visualization is a panel plugin, filter the data by the current series
+        const columnValue = (spec.columnSettings ?? []).find((x) => x.name === valueColumnName)?.plugin
+          ? { ...data, data: { ...data.data, series: data.data.series.filter((s) => s === ts) } }
+          : ts.values[0][1];
+
+        if (queryMode === 'instant') {
+          // Timestamp is not indexed as it will be the same for all queries
+          return { timestamp: ts.values[0][0], [valueColumnName]: columnValue, ...labels };
+        } else {
+          // Don't add a timestamp for range queries
+          return { [valueColumnName]: columnValue, ...labels };
         }
-
-        // If there is more than one query, we need to add the query index to the value key to avoid conflicts
-        const labels = Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
-          if (key) acc[`${key} #${queryIndex + 1}`] = value;
-          return acc;
-        }, {} as Labels);
-
-        // If there are multiple queries, we need to add the query index to the value key to avoid conflicts
-        // Timestamp is not indexed as it will be the same for all queries
-        return { timestamp: ts.values[0][0], [`value #${queryIndex + 1}`]: ts.values[0][1], ...labels };
       });
-  }, [queryResults]);
+  }, [queryResults, queryMode, spec.columnSettings]);
 
   // Transform will be applied by their orders on the original data
   const data = useTransformData(rawData, spec.transforms ?? []);
