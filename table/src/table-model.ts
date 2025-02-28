@@ -31,6 +31,13 @@ export interface ColumnSettings {
    * ellipsized to fit in the space.
    */
   cellDescription?: string;
+  /**
+   * Type of cell content to render.
+   * Default: text.
+   * Other option: sparkline.
+   */
+  cellType?: 'text' | 'sparkline';
+
   // Alignment of the content in the cell.
   align?: 'left' | 'center' | 'right';
 

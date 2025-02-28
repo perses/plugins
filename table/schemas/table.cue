@@ -33,6 +33,7 @@ spec: close({
 	header?:            string
 	headerDescription?: string
 	cellDescription?:   string
+	cellType?:          "text" | "sparkline"
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool
 	sort?:              "asc" | "desc"

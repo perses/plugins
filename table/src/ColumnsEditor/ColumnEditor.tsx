@@ -11,7 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
+import {
+  Divider,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  StackProps,
+  Switch,
+  TextField,
+} from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { AlignSelector, SortSelectorButtons } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
@@ -58,6 +69,23 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           fullWidth
           onChange={(e) => onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })}
         />
+        <FormControl fullWidth>
+          <InputLabel id="cell-type-label">Cell Type</InputLabel>
+          <Select
+            label="Cell Type"
+            labelId="cell-type-label"
+            value={column.cellType ?? 'text'}
+            onChange={(e) =>
+              onChange({
+                ...column,
+                cellType: e.target.value ? (e.target.value as ColumnSettings['cellType']) : undefined,
+              })
+            }
+          >
+            <MenuItem value="text">Text</MenuItem>
+            <MenuItem value="sparkline">Sparkline</MenuItem>
+          </Select>
+        </FormControl>
       </Stack>
 
       <Divider orientation="vertical" flexItem />
