@@ -1,7 +1,6 @@
 {
-  "name": "@perses-dev/prometheus",
-  "private": true,
-  "version": "0.5.1",
+  "name": "@perses-dev/prometheus-plugin",
+  "version": "0.51.0",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
