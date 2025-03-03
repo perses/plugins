@@ -17,7 +17,7 @@ import { pluginReact } from '@rsbuild/plugin-react';
 
 export default defineConfig({
   server: {
-    port: 3005,
+    port: 3016,
   },
   dev: {
     assetPrefix: '/plugins/TimeSeriesChart/',

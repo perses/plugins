@@ -17,7 +17,7 @@ import { pluginReact } from '@rsbuild/plugin-react';
 
 export default defineConfig({
   server: {
-    port: 3005,
+    port: 3012,
   },
   dev: {
     assetPrefix: '/plugins/StaticListVariable/',
