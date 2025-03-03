@@ -11,7 +11,7 @@ on:
 
 jobs:
   get-schemas-deps:
-    name: 'Get dependencies for plugin schemas'
+    name: "Get dependencies for plugin schemas"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -23,7 +23,7 @@ jobs:
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.1.0
         with:
-          cli_version: 'v0.50.1'
+          cli_version: "v0.50.1"
       - run: go run ./scripts/get-schemas-deps/get-schemas-deps.go
       - name: store plugin schema dependencies
         uses: actions/upload-artifact@v4
@@ -33,8 +33,8 @@ jobs:
             */cue.mod/pkg
 
   build:
-    name: 'build'
-    needs: 'get-schemas-deps'
+    name: "build"
+    needs: "get-schemas-deps"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -61,7 +61,7 @@ jobs:
             !node_modules
 
   lint:
-    name: 'lint'
+    name: "lint"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -74,7 +74,7 @@ jobs:
       - run: npm run lint
 
   test:
-    name: 'test'
+    name: "test"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -87,7 +87,7 @@ jobs:
       - run: npm run test
 
   type-check:
-    name: 'type-check'
+    name: "type-check"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -100,8 +100,8 @@ jobs:
       - run: npm run type-check
 
   validate-schemas:
-    name: 'Validate plugin schemas'
-    needs: 'get-schemas-deps'
+    name: "Validate plugin schemas"
+    needs: "get-schemas-deps"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -110,7 +110,7 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-          cue_version: 'v0.11.0'
+          cue_version: "v0.11.0"
           enable_cue: true
       - name: retrieve plugin schema dependencies
         uses: actions/download-artifact@v4
@@ -119,8 +119,8 @@ jobs:
       - run: go run ./scripts/validate-schemas/validate-schemas.go
 
   release:
-    name: 'release'
-    needs: 'build'
+    name: "release"
+    needs: "build"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -139,4 +139,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: archives
-      - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
+      - name: Upload archives to GitHub releases
+        run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
+      - name: Publish npm package
+        run: go run ./scripts/npm/npm-publish.go -tag=${{ github.event.release.tag_name }}

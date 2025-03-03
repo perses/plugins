@@ -30,6 +30,7 @@ var pluginFiles = []string{
 	"schemas/",
 	"package.json",
 	"README.md",
+	"../LICENSE",
 }
 
 func createArchive(pluginName string, createGroupArchive bool) error {
