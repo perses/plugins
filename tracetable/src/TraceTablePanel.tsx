@@ -40,7 +40,7 @@ export function defaultTraceLink({
   query.spec.plugin.spec.query = traceId;
 
   const traceLinkParams = new URLSearchParams({
-    explorer: 'traces',
+    explorer: 'Tempo-TempoExplorer',
     data: JSON.stringify({ queries: [query] }),
   });
 
