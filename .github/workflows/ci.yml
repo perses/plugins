@@ -105,8 +105,11 @@ jobs:
         with:
           enable_npm: false
           enable_go: true
+          enable_cue: true
       - name: Download archive
         uses: actions/download-artifact@v4
         with:
           name: archives
       - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
+      - name: Publish CUE module
+        run: go run ./scripts/cue-publish/cue-publish.go -tag=${{ github.event.release.tag_name }} -token=${{ secrets.CUE_REG_TOKEN }}
