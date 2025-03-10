@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
+import { useId } from '@perses-dev/components';
 import { produce } from 'immer';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import { ReactElement } from 'react';
@@ -29,6 +30,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_TEMPO;
+  const datasourceSelectLabelID = useId('tempo-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
 
   const { data: client } = useDatasourceClient<TempoClient>(selectedDatasource);
 
@@ -53,15 +55,16 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
-        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
-                maintain 17 compatibility somehow with a polyfill/shim? */}
-        <InputLabel id="tempo-datasource-label">Tempo Datasource</InputLabel>
+        <InputLabel id={datasourceSelectLabelID} shrink>
+          Tempo Datasource
+        </InputLabel>
         <DatasourceSelect
           datasourcePluginKind={TEMPO_DATASOURCE_KIND}
           value={selectedDatasource}
           onChange={handleDatasourceChange}
-          labelId="tempo-datasource-label"
+          labelId={datasourceSelectLabelID}
           label="Tempo Datasource"
+          notched
         />
       </FormControl>
       <Stack direction="row" spacing={2}>
