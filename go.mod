@@ -4,6 +4,7 @@ go 1.22.4
 
 require (
 	cuelang.org/go v0.12.0
+	github.com/perses/common v0.27.0
 	github.com/sirupsen/logrus v1.9.3
 )
 
