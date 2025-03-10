@@ -40,6 +40,8 @@ func release(pluginName string, optionalReleaseMessage string) {
 	}
 }
 
+// This script generates Github release(s).
+//
 // Prerequisites for running this script:
 // - Install the GitHub CLI (gh): https://github.com/cli/cli#installation
 // - Use it to log in to GitHub: `gh auth login`
