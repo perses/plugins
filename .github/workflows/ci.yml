@@ -21,9 +21,15 @@ jobs:
         with:
           enable_npm: true
           enable_go: true
-      - run: npm ci
-      - run: npm run build
-      - run: go run ./scripts/build-archive/build-archive.go
+          enable_cue: true
+      - name: install percli
+        uses: perses/cli-actions/actions/install_percli@v0.1.0
+        with:
+          cli_version: "v0.51.0-beta.0"
+      - name: Login to CUE's Central Registry to allow retrieving deps
+        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
+      - run: build plugin
+      - run: go run ./scripts/build-plugin/build-plugin.go
       - name: store plugin archives
         uses: actions/upload-artifact@v4
         with:
