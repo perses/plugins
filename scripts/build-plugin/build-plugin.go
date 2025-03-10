@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/perses/common/async"
 	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
@@ -42,10 +43,24 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
 	}
+
+	pluginToBeBuilt := make([]async.Future[string], 0, len(workspaces))
+
 	for _, workspace := range workspaces {
 		logrus.Infof("Building plugin %s", workspace)
-		if errCMD := runCommand("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true"); errCMD != nil {
-			logrus.WithError(errCMD).Fatalf("Unable to build plugin %s", workspace)
+		pluginToBeBuilt = append(pluginToBeBuilt, async.Async(func() (string, error) {
+			return workspace, runCommand("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true")
+		}))
+	}
+	isErr := false
+	for _, built := range pluginToBeBuilt {
+		workspace, buildErr := built.Await()
+		if buildErr != nil {
+			isErr = true
+			logrus.WithError(buildErr).Errorf("failed to build plugin %s", workspace)
 		}
+	}
+	if isErr {
+		logrus.Fatal("some plugins have not been built successfully")
 	}
 }
