@@ -44,8 +44,8 @@ func main() {
 	}
 	for _, workspace := range workspaces {
 		logrus.Infof("Building plugin %s", workspace)
-		if err := runCommand("percli", "plugin", "build", "--plugin.path="+workspace); err != nil {
-			logrus.WithError(err).Fatalf("Unable to build plugin %s", workspace)
+		if errCMD := runCommand("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true"); errCMD != nil {
+			logrus.WithError(errCMD).Fatalf("Unable to build plugin %s", workspace)
 		}
 	}
 }
