@@ -26,7 +26,7 @@ jobs:
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.1.0
         with:
-          cli_version: "v0.51.0-beta.0"
+          cli_version: "main-2025-03-11-40259f7f-distroless"
       - name: Login to CUE's Central Registry to allow retrieving deps
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: install dependencies
