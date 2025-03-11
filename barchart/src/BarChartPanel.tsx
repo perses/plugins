@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BarChart, BarChartData, LoadingOverlay, useChartsTheme } from '@perses-dev/components';
+import { BarChart, BarChartData, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
 import { CalculationType, CalculationsMap, TimeSeriesData } from '@perses-dev/core';
-import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
+import { PanelProps } from '@perses-dev/plugin-system';
 import { BarChartOptions } from './bar-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
 
