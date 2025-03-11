@@ -139,3 +139,5 @@ export interface ParseQueryRequestParameters {
 }
 
 export type ParseQueryResponse = ApiResponse<ASTNode>;
+
+export type FlagsResponse = ApiResponse<Record<string, string>>;
