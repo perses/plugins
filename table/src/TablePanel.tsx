@@ -245,6 +245,7 @@ export function TablePanel({ contentDimensions, spec }: TableProps): ReactElemen
       width={contentDimensions.width}
       density={spec.density}
       defaultColumnWidth={spec.defaultColumnWidth}
+      defaultColumnHeight={spec.defaultColumnHeight}
       sorting={sorting}
       onSortingChange={setSorting}
     />
