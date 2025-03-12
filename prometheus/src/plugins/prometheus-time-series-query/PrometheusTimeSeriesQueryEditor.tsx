@@ -31,6 +31,7 @@ import {
   useFormatState,
   useMinStepState,
 } from './query-editor-model';
+import { createCodeMirrorPromClient } from '../../model/prometheus-client.codemirror-adapter';
 
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
@@ -42,7 +43,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const datasourceSelectLabelID = `prom-datasource-label-${selectedDatasource.name || 'default'}`;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
-  const promURL = client?.options.datasourceUrl;
+  const codeMirrorPromClient = createCodeMirrorPromClient(client);
   const { data: datasourceResource } = useDatasource(selectedDatasource);
 
   const { handleQueryChange, handleQueryBlur } = useQueryState(props);
@@ -81,7 +82,9 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         />
       </FormControl>
       <PromQLEditor
-        completeConfig={{ remote: { url: promURL } }}
+        completeConfig={{
+          remote: codeMirrorPromClient,
+        }}
         value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
         datasource={selectedDatasource}
         onChange={handleQueryChange}
