@@ -1,5 +1,2 @@
-import { PanelProps } from '@perses-dev/plugin-system';
-
-interface TimeSeriesTableOptions {}
-
-export type TimeSeriesTableProps = PanelProps<TimeSeriesTableOptions>;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface TimeSeriesTableOptions {}

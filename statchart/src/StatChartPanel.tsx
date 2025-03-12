@@ -12,18 +12,11 @@
 // limitations under the License.
 
 import { TitleComponentOption } from 'echarts';
-import {
-  StatChart,
-  StatChartData,
-  useChartsTheme,
-  GraphSeries,
-  LoadingOverlay,
-  PersesChartsTheme,
-} from '@perses-dev/components';
+import { StatChart, StatChartData, useChartsTheme, GraphSeries, PersesChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
 import { FC, useMemo } from 'react';
 import { applyValueMapping, Labels, createRegexFromString, TimeSeriesData, ValueMapping } from '@perses-dev/core';
-import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
+import { PanelProps, PanelData } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline } from './utils/data-transform';
 import { calculateValue } from './utils/calculate-value';
@@ -32,25 +25,18 @@ import { getStatChartColor } from './utils/get-color';
 const MIN_WIDTH = 100;
 const SPACING = 2;
 
-export type StatChartPanelProps = PanelProps<StatChartOptions>;
+export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
-  const { spec, contentDimensions } = props;
+  const { spec, contentDimensions, queryResults } = props;
 
   const { format, sparkline, valueFontSize: valueFontSize } = spec;
   const chartsTheme = useChartsTheme();
-  const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery');
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
   const isMultiSeries = statChartData.length > 1;
 
-  if (queryResults[0]?.error) throw queryResults[0]?.error;
-
   if (contentDimensions === undefined) return null;
-
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
 
   // Calculates chart width
   const spacing = SPACING * (statChartData.length - 1);
@@ -98,7 +84,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 };
 
 const useStatChartData = (
-  queryResults: UseDataQueryResults<TimeSeriesData>['queryResults'],
+  queryResults: Array<PanelData<TimeSeriesData>>,
   spec: StatChartOptions,
   chartsTheme: PersesChartsTheme
 ): StatChartData[] => {
@@ -107,9 +93,6 @@ const useStatChartData = (
 
     const statChartData: StatChartData[] = [];
     for (const result of queryResults) {
-      // Skip queries that are still loading or don't have data
-      if (result.isLoading || result.isFetching || result.data === undefined) continue;
-
       for (const seriesData of result.data.series) {
         const calculatedValue = calculateValue(calculation, seriesData);
 
