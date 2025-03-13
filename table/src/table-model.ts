@@ -31,6 +31,13 @@ export interface ColumnSettings {
    * ellipsized to fit in the space.
    */
   cellDescription?: string;
+  /**
+   * Type of cell content to render.
+   * Default: text.
+   * Other option: sparkline.
+   */
+  cellType?: 'text' | 'sparkline';
+
   // Alignment of the content in the cell.
   align?: 'left' | 'center' | 'right';
 
@@ -101,9 +108,12 @@ export interface TableDefinition extends Definition<TableOptions> {
 export interface TableOptions {
   // Change row height.
   density?: TableDensity;
-  // When true, the table will try to automatically adjust the width of columns to fit without overflowing.
+  // When set to 'auto', the table will try to automatically adjust the width of columns to fit without overflowing.
   // Only for column without custom width specified in columnSettings.
   defaultColumnWidth?: 'auto' | number;
+  // When set to 'auto', the table will calculate the cell height based on the line height of the theme and the density setting of the table.
+  // Only for column without custom height specified in columnSettings.
+  defaultColumnHeight?: 'auto' | number;
   // Customize column display and order them by their index in the array.
   columnSettings?: ColumnSettings[];
   // Customize cell display based on their value.

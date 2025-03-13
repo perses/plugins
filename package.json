@@ -7,6 +7,7 @@
     "dev": "turbo run dev --concurrency 20",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
     "test": "turbo run test",
     "type-check": "turbo run type-check"
   },
@@ -27,6 +28,11 @@
     "tracetable",
     "tracingganttchart"
   ],
+  "peerDependencies": {
+    "@types/react-dom": "^18.3.0",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
+  },
   "devDependencies": {
     "@rsbuild/core": "^1.1.10",
     "@rsbuild/plugin-react": "^1.1.0",
@@ -41,8 +47,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.5",
-    "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",

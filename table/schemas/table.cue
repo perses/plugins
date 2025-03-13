@@ -20,8 +20,9 @@ import (
 
 kind: "Table"
 spec: close({
-	density?:            "compact" | "standard" | "comfortable"
-	defaultColumnWidth?: "auto" | number
+	density?:             "compact" | "standard" | "comfortable"
+	defaultColumnWidth?:  "auto" | number
+	defaultColumnHeight?: "auto" | number
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
 	transforms?: [...common.#transform]
@@ -32,6 +33,7 @@ spec: close({
 	header?:            string
 	headerDescription?: string
 	cellDescription?:   string
+	cellType?:          "text" | "sparkline"
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool
 	sort?:              "asc" | "desc"
