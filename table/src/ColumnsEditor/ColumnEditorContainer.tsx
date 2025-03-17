@@ -61,7 +61,7 @@ export function ColumnEditorContainer({
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
           </IconButton>
           <Typography variant="overline" component="h4" sx={{ textTransform: 'none' }}>
-            COLUMN:
+            COLUMN:{' '}
             {column.header ? (
               <span>
                 <strong>{column.header}</strong> ({column.name})
@@ -100,7 +100,13 @@ export function ColumnEditorContainer({
           </Tooltip>
         </Stack>
       </Stack>
-      {!isCollapsed && <ColumnEditor column={column} onChange={onChange} />}
+
+      {/* When a <Grid> is inside a <Stack> with gap, the negative margin of the grid is not applied. Therefore, let's wrap it in a div. */}
+      {!isCollapsed && (
+        <div>
+          <ColumnEditor column={column} onChange={onChange} />
+        </div>
+      )}
     </DragAndDropElement>
   );
 }

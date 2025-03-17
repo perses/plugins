@@ -11,9 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { StackProps, Switch, TextField } from '@mui/material';
 import { ReactElement, useState } from 'react';
-import { AlignSelector, SortSelectorButtons } from '@perses-dev/components';
+import {
+  AlignSelector,
+  OptionsEditorColumn,
+  OptionsEditorControl,
+  OptionsEditorGrid,
+  OptionsEditorGroup,
+  SortSelectorButtons,
+} from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
@@ -29,109 +36,94 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
   );
 
   return (
-    <Stack gap={2} direction="row" {...others}>
-      <Stack gap={2} sx={{ width: '100%' }}>
-        <TextField
-          label="Name"
-          value={column.name}
-          onChange={(e) => onChange({ ...column, name: e.target.value })}
-          required
-        />
-
-        <Divider orientation="horizontal" flexItem variant="middle" />
-
-        <TextField
-          label="Header"
-          value={column.header ?? ''}
-          fullWidth
-          onChange={(e) => onChange({ ...column, header: e.target.value ? e.target.value : undefined })}
-        />
-        <TextField
-          label="Header Description"
-          value={column.headerDescription ?? ''}
-          fullWidth
-          onChange={(e) => onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })}
-        />
-        <TextField
-          label="Cell Description"
-          value={column.cellDescription ?? ''}
-          fullWidth
-          onChange={(e) => onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })}
-        />
-      </Stack>
-
-      <Divider orientation="vertical" flexItem />
-
-      <Stack gap={2} justifyContent="space-between" alignItems="start">
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} gap={1}>
-          <FormControlLabel
-            label="Hide column"
-            sx={{ width: '100%', alignItems: 'start', textWrap: 'nowrap' }}
-            labelPlacement="top"
+    <OptionsEditorGrid {...others}>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Column">
+          <OptionsEditorControl
+            label="Name*"
             control={
-              <Switch
-                value={column.hide ?? false}
-                checked={column.hide ?? false}
-                onChange={(e) => onChange({ ...column, hide: e.target.checked })}
+              <TextField value={column.name} onChange={(e) => onChange({ ...column, name: e.target.value })} required />
+            }
+          />
+          <OptionsEditorControl
+            label="Header"
+            control={
+              <TextField
+                value={column.header ?? ''}
+                onChange={(e) => onChange({ ...column, header: e.target.value ? e.target.value : undefined })}
               />
             }
           />
-          <FormControlLabel
-            label="Alignment"
-            sx={{ width: '100%', alignItems: 'start', margin: 0 }}
-            labelPlacement="top"
+          <OptionsEditorControl
+            label="Header Tooltip"
             control={
-              <AlignSelector
-                size="medium"
-                value={column.align ?? 'left'}
-                sx={{ margin: 0.5 }}
-                onChange={(align) => onChange({ ...column, align: align })}
+              <TextField
+                value={column.headerDescription ?? ''}
+                onChange={(e) =>
+                  onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })
+                }
               />
             }
           />
-        </Stack>
-
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} gap={1}>
-          <FormControlLabel
+          <OptionsEditorControl
+            label="Cell Tooltip"
+            control={
+              <TextField
+                value={column.cellDescription ?? ''}
+                onChange={(e) => onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })}
+              />
+            }
+          />
+          <OptionsEditorControl
             label="Enable sorting"
-            sx={{ width: '100%', alignItems: 'start', textWrap: 'nowrap' }}
-            labelPlacement="top"
             control={
               <Switch
-                value={column.enableSorting ?? false}
                 checked={column.enableSorting ?? false}
                 onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
               />
             }
           />
+          {column.enableSorting && (
+            <OptionsEditorControl
+              label="Default Sort"
+              control={
+                <SortSelectorButtons
+                  size="medium"
+                  value={column.sort}
+                  sx={{
+                    margin: 0.5,
+                  }}
+                  onChange={(sort) => onChange({ ...column, sort: sort })}
+                />
+              }
+            />
+          )}
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
 
-          <FormControlLabel
-            label="Default Sort"
-            sx={{
-              width: '100%',
-              alignItems: 'start',
-              margin: 0,
-              visibility: column.enableSorting ? 'visible' : 'hidden',
-            }}
-            labelPlacement="top"
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Visual">
+          <OptionsEditorControl
+            label="Show column"
             control={
-              <SortSelectorButtons
-                size="medium"
-                value={column.sort}
-                sx={{
-                  margin: 0.5,
-                }}
-                onChange={(sort) => onChange({ ...column, sort: sort })}
+              <Switch
+                checked={!(column.hide ?? false)}
+                onChange={(e) => onChange({ ...column, hide: !e.target.checked })}
               />
             }
           />
-        </Stack>
-
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} gap={1}>
-          <FormControlLabel
+          <OptionsEditorControl
+            label="Alignment"
+            control={
+              <AlignSelector
+                size="small"
+                value={column.align ?? 'left'}
+                onChange={(align) => onChange({ ...column, align: align })}
+              />
+            }
+          />
+          <OptionsEditorControl
             label="Custom width"
-            sx={{ width: '100%', alignItems: 'start', textWrap: 'nowrap', flex: 1 }}
-            labelPlacement="top"
             control={
               <Switch
                 checked={column.width !== undefined && column.width !== 'auto'}
@@ -139,21 +131,24 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
-          <TextField
-            label="Width"
-            type="number"
-            value={width}
-            fullWidth
-            // set visibility instead of wrapping in a if condition, in order to keep same layout
-            sx={{ visibility: column.width === 'auto' || column.width === undefined ? 'hidden' : 'visible', flex: 2 }}
-            InputProps={{ inputProps: { min: 1 } }}
-            onChange={(e) => {
-              setWidth(+e.target.value);
-              onChange({ ...column, width: +e.target.value });
-            }}
-          />
-        </Stack>
-      </Stack>
-    </Stack>
+          {column.width !== undefined && column.width !== 'auto' && (
+            <OptionsEditorControl
+              label="Width"
+              control={
+                <TextField
+                  type="number"
+                  value={width}
+                  slotProps={{ htmlInput: { min: 1 } }}
+                  onChange={(e) => {
+                    setWidth(+e.target.value);
+                    onChange({ ...column, width: +e.target.value });
+                  }}
+                />
+              }
+            />
+          )}
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+    </OptionsEditorGrid>
   );
 }
