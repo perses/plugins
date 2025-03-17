@@ -100,4 +100,18 @@ describe('TablePanel', () => {
     expect(await screen.findAllByRole('cell')).toHaveLength(8); // 1 row of 8 columns (not joined => 16)
     expect(await screen.findByRole('cell', { name: 'demo' })).toBeInTheDocument();
   });
+
+  it('should apply formats', async () => {
+    renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+      columnSettings: [
+        {
+          name: 'value',
+          format: {
+            unit: 'percent-decimal',
+          },
+        },
+      ],
+    });
+    expect(await screen.findByRole('cell', { name: '27.7%' })).toBeInTheDocument();
+  });
 });

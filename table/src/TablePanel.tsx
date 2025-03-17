@@ -14,9 +14,21 @@
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
 import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useMemo, useState } from 'react';
-import { Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
+import { formatValue, Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
+
+function generateCellContentConfig(
+  column: ColumnSettings
+): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
+  return {
+    cell: (ctx) => {
+      const cellValue = ctx.getValue();
+      return typeof cellValue === 'number' && column.format ? formatValue(cellValue, column.format) : cellValue;
+    },
+    cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
+  };
+}
 
 /*
  * Generate column config from column definitions, if a column has multiple definitions, the first one will be used.
@@ -34,10 +46,10 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
         accessorKey: name,
         header: column.header ?? name,
         headerDescription: column.headerDescription,
-        cellDescription: column.cellDescription ? (_): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
         enableSorting: column.enableSorting,
         width: column.width,
         align: column.align,
+        ...generateCellContentConfig(column),
       };
     }
   }

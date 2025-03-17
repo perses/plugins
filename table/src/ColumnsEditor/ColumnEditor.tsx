@@ -15,13 +15,20 @@ import { StackProps, Switch, TextField } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
+  FormatControls,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   SortSelectorButtons,
 } from '@perses-dev/components';
+import { FormatOptions } from '@perses-dev/core';
 import { ColumnSettings } from '../table-model';
+
+const DEFAULT_FORMAT: FormatOptions = {
+  unit: 'decimal',
+  shortValues: true,
+};
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
@@ -110,6 +117,15 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                 checked={!(column.hide ?? false)}
                 onChange={(e) => onChange({ ...column, hide: !e.target.checked })}
               />
+            }
+          />
+          <FormatControls
+            value={column.format ?? DEFAULT_FORMAT}
+            onChange={(newFormat): void =>
+              onChange({
+                ...column,
+                format: newFormat,
+              })
             }
           />
           <OptionsEditorControl
