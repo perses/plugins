@@ -1,4 +1,4 @@
-# Bar Panel Builder
+# BarChart Panel Builder
 
 ## Constructor
 
