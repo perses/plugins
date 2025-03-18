@@ -72,6 +72,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
           onBlur={handleQueryBlur}
         />
         <TextField
+          size="small"
           label="Max Traces"
           value={limit}
           error={limitHasError}

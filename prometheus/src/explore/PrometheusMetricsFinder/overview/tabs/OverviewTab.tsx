@@ -16,6 +16,7 @@ import { ReactElement, useMemo, useState } from 'react';
 import {
   Autocomplete,
   Button,
+  Chip,
   CircularProgress,
   Divider,
   IconButton,
@@ -33,6 +34,7 @@ import {
 import PlusIcon from 'mdi-material-ui/Plus';
 import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
+import { ErrorAlert } from '@perses-dev/components';
 import { LabelFilter, LabelValueCounter, Operator } from '../../types';
 import { ListboxComponent } from '../../filter/FilterInputs';
 import { useMetricMetadata, useSeriesStates } from '../../utils';
@@ -237,8 +239,8 @@ export function OverviewTab({
   onFilterAdd,
   ...props
 }: OverviewTabProps): ReactElement {
-  const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource);
-  const { series, labelValueCounters, isLoading } = useSeriesStates(metricName, filters, datasource);
+  const { metadata, isLoading: isMetadataLoading, error: metadataError } = useMetricMetadata(metricName, datasource);
+  const { series, labelValueCounters, isLoading, error } = useSeriesStates(metricName, filters, datasource);
 
   return (
     <Stack gap={2} {...props}>
@@ -252,24 +254,39 @@ export function OverviewTab({
             <Skeleton variant="text" width={180} />
           ) : (
             <Typography style={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
-              {metadata ? metadata.help : 'unknown'}
+              {metadataError ? 'Failed to fetch metadata' : (metadata?.help ?? 'unknown')}
             </Typography>
           )}
         </Stack>
         <Stack gap={1} justifyContent="center">
-          {isLoading ? <Skeleton variant="rounded" width={75} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
+          {isMetadataLoading ? (
+            <Skeleton variant="rounded" width={75} />
+          ) : metadataError ? (
+            <Chip label="failed to fetch" color="error" sx={{ fontStyle: 'italic' }} />
+          ) : (
+            <MetricChip label={metadata?.type ?? 'unknown'} />
+          )}
           <Typography>
             Result:{' '}
             {isLoading ? (
               <Skeleton variant="text" width={20} sx={{ display: 'inline-block' }} />
+            ) : error ? (
+              <strong>failed to fetch series</strong>
             ) : (
-              <strong>{series?.length ?? 0} series</strong>
+              <strong>{series?.length ?? 'unknown'} series</strong>
             )}
           </Typography>
         </Stack>
       </Stack>
 
-      {series?.length === 0 ? (
+      {error ? (
+        <ErrorAlert
+          error={{
+            name: `Failed to fetch series ${error?.status && `(${error.status})`}`,
+            message: error?.message ?? 'Failed to fetch series',
+          }}
+        />
+      ) : series?.length === 0 ? (
         <Stack {...props}>
           <Typography sx={{ color: (theme) => theme.palette.warning.main }}>
             No series found with current filters.

@@ -17,7 +17,18 @@ import (
 	"regexp"
 )
 
-#var: _
+#var: {
+	type: "query"
+	query: string // TODO move "#var.query =~ "^query_result" constraint there
+	...
+} | {
+	type: "query"
+	query: {
+		query: string // TODO move "#var.query.query =~ "^query_result" constraint there
+		...
+	}
+	...
+}
 
 // NB we would need `if` to support short-circuit in order to avoid code duplication here.
 //    See https://github.com/cue-lang/cue/issues/2232
