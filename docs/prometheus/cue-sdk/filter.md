@@ -1,4 +1,4 @@
-# Filter builder
+# Filter Builder
 
 The Filter builder helps generating a filter, a.k.a a labels matcher expression.
 

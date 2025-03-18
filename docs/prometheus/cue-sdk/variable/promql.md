@@ -1,4 +1,4 @@
-# PromQL Variable builder
+# PromQL Variable Builder
 
 The PromQL Variable builder helps creating prometheus promQL variables in the format expected by Perses.
 

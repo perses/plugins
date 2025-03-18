@@ -1,4 +1,4 @@
-# Label Names Variable builder
+# Label Names Variable Builder
 
 The Label Names Variable builder helps creating prometheus label names variables in the format expected by Perses.
 
