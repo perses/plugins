@@ -1,4 +1,4 @@
-# Stat Panel Builder
+# StatChart Panel Builder
 
 ## Constructor
 
