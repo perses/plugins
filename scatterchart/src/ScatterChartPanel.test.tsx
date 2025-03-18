@@ -11,46 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  TraceQueryPlugin,
-  MockPlugin,
-  useDataQueries,
-  PluginRegistry,
-  TimeRangeContext,
-  mockPluginRegistry,
-} from '@perses-dev/plugin-system';
-import { UnknownSpec, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
+import { PanelData } from '@perses-dev/plugin-system';
+import { TraceData } from '@perses-dev/core';
 import { screen, render } from '@testing-library/react';
-import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import {
-  MOCK_TRACE_SEARCH_RESULT,
-  MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
-  MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY,
-} from './mock-trace-data';
+import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT, MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY } from './mock-trace-data';
 import { getSymbolSize, ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 
-jest.mock('@perses-dev/plugin-system', () => {
-  return {
-    ...jest.requireActual('@perses-dev/plugin-system'),
-    useDataQueries: jest.fn(),
-  };
-});
-
-const FakeTraceQueryPlugin: TraceQueryPlugin<UnknownSpec> = {
-  getTraceData: async () => {
-    return MOCK_TRACE_SEARCH_RESULT;
-  },
-  createInitialOptions: () => ({}),
-};
-
-const MOCK_TRACE_QUERY_PLUGIN: MockPlugin = {
-  kind: 'TempoTraceQuery',
-  pluginType: 'TraceQuery',
-  plugin: FakeTraceQueryPlugin,
-};
-
-const TEST_SCATTER_PANEL: ScatterChartPanelProps = {
+const TEST_SCATTER_PANEL: Omit<ScatterChartPanelProps, 'queryResults'> = {
   contentDimensions: {
     width: 500,
     height: 500,
@@ -58,49 +26,22 @@ const TEST_SCATTER_PANEL: ScatterChartPanelProps = {
   spec: {},
 };
 
-const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
-
 describe('ScatterChartPanel', (): void => {
-  const renderPanel = (): void => {
-    const mockTimeRangeContext = {
-      refreshIntervalInMs: 0,
-      setRefreshInterval: () => ({}),
-      timeRange: TEST_TIME_RANGE,
-      setTimeRange: () => ({}),
-      absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
-      refresh: jest.fn(),
-      refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
-    };
+  const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
     render(
-      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <PluginRegistry {...mockPluginRegistry(MOCK_TRACE_QUERY_PLUGIN)}>
-          <ChartsProvider chartsTheme={testChartsTheme}>
-            <TimeRangeContext.Provider value={mockTimeRangeContext}>
-              <ScatterChartPanel {...TEST_SCATTER_PANEL} />
-            </TimeRangeContext.Provider>
-          </ChartsProvider>
-        </PluginRegistry>
-      </VirtuosoMockContext.Provider>
+      <ChartsProvider chartsTheme={testChartsTheme}>
+        <ScatterChartPanel {...TEST_SCATTER_PANEL} queryResults={queryResults} />
+      </ChartsProvider>
     );
   };
 
   it('should render a ScatterPlot', async () => {
-    (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
-      isLoading: false,
-      isFetching: false,
-    });
-    renderPanel();
+    renderPanel(MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT);
     expect(await screen.findByTestId('ScatterChartPanel_ScatterPlot')).toBeInTheDocument();
   });
 
   it('should not render a ScatterPlot because trace results are empty', async () => {
-    (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY,
-      isLoading: false,
-      isFetching: false,
-    });
-    renderPanel();
+    renderPanel(MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY);
     // expect it to return a Alert because the query produces no trace results
     expect(await screen.findByText('No traces')).toBeInTheDocument();
   });

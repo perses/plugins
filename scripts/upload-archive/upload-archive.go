@@ -18,23 +18,16 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 
 	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
 
-var tagNamePattern = regexp.MustCompile(`(?m)(.+)/v(\d.\d.\d)`)
-
 func main() {
-	tag := flag.String("tag", "", "Name of the tag")
+	t := tag.Flag()
 	flag.Parse()
-	tagSplitted := tagNamePattern.FindStringSubmatch(*tag)
-	if len(tagSplitted) != 3 {
-		logrus.Fatalf("Invalid tag name: %s", *tag)
-	}
-	pluginFolderName := tagSplitted[1]
-	version := tagSplitted[2]
+	pluginFolderName, version := tag.Parse(t)
 	// The manifest is hopefully uploaded by a previous task in the CI
 	// It should be available in the plugin folder
 	manifest, err := npm.ReadManifest(pluginFolderName)
@@ -42,7 +35,7 @@ func main() {
 		logrus.WithError(err).Fatalf("unable to read manifest file for plugin %s", pluginFolderName)
 	}
 	pluginName := manifest.Name
-	if execErr := exec.Command("gh", "release", "upload", *tag, filepath.Join(pluginFolderName, fmt.Sprintf("%s-%s.tar.gz", pluginName, version))).Run(); execErr != nil {
+	if execErr := exec.Command("gh", "release", "upload", *t, filepath.Join(pluginFolderName, fmt.Sprintf("%s-%s.tar.gz", pluginName, version))).Run(); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to upload archive %s", pluginName)
 	}
 }

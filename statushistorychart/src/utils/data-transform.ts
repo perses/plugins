@@ -13,7 +13,7 @@
 
 import { FALLBACK_COLOR, getColorsForValues, LegendItem, StatusHistoryDataItem } from '@perses-dev/components';
 import { applyValueMapping, TimeScale, TimeSeriesData } from '@perses-dev/core';
-import { QueryData } from '@perses-dev/plugin-system';
+import { PanelData } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 import { StatusHistoryChartOptions } from '../status-history-model';
 import { getCommonTimeScaleForQueries } from './get-timescale';
@@ -43,7 +43,7 @@ function generateCompleteTimestamps(timescale?: TimeScale): number[] {
 }
 
 export function useStatusHistoryDataModel(
-  queryResults: Array<QueryData<TimeSeriesData>>,
+  queryResults: Array<PanelData<TimeSeriesData>>,
   themeColors: string[],
   spec: StatusHistoryChartOptions
 ): StatusHistoryDataModel {

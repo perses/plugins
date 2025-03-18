@@ -1,0 +1,13 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {},
+    "test": {},
+    "lint": {},
+    "type-check": {},
+    "dev": {
+      "persistent": true,
+      "cache": false
+    }
+  }
+}

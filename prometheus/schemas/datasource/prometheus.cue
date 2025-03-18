@@ -14,8 +14,8 @@
 package model
 
 import (
-	"github.com/perses/perses/cue/schemas/common"
-	commonProxy "github.com/perses/perses/cue/schemas/common/proxy"
+	"github.com/perses/perses/cue/common"
+	commonProxy "github.com/perses/perses/cue/common/proxy"
 )
 
 kind: "PrometheusDatasource"

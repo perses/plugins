@@ -132,13 +132,20 @@ export function useSeriesStates(
   series: Metric[] | undefined;
   labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>>;
   isLoading: boolean;
+  isError: boolean;
+  error: StatusError | null;
 } {
   const {
     absoluteTimeRange: { start, end },
   } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
-  const { data: seriesData, isLoading } = useQuery<SeriesResponse>({
+  const {
+    data: seriesData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<SeriesResponse, StatusError>({
     enabled: !!client,
     queryKey: ['series', metricName, 'datasource', datasource, 'start', start, 'end', 'filters', ...filters],
     queryFn: async () => {
@@ -178,5 +185,5 @@ export function useSeriesStates(
     return result;
   }, [seriesData]);
 
-  return { series: seriesData?.data, labelValueCounters, isLoading };
+  return { series: seriesData?.data, labelValueCounters, isLoading, isError, error };
 }

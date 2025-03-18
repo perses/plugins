@@ -16,7 +16,7 @@ package migrate
 import (
 	"list"
 
-	commonMigrate "github.com/perses/perses/cue/schemas/common/migrate"
+	commonMigrate "github.com/perses/perses/cue/common/migrate"
 )
 
 #grafanaType: "table" | "table-old"
