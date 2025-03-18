@@ -1,4 +1,4 @@
-# Prometheus Panel builder
+# Prometheus Panel Builder
 
 The Prometheus Panel builder is a simple wrapper to help creating panels that query a prometheus datasource.
 

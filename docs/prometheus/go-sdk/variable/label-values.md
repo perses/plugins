@@ -1,4 +1,4 @@
-# Label-Values Variable Builder
+# Label Values Variable Builder
 
 ## Constructor
 
