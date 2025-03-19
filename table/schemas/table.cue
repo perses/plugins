@@ -20,8 +20,9 @@ import (
 
 kind: "Table"
 spec: close({
-	density?:            "compact" | "standard" | "comfortable"
-	defaultColumnWidth?: "auto" | number
+	density?:             "compact" | "standard" | "comfortable"
+	defaultColumnWidth?:  "auto" | number
+	defaultColumnHeight?: "auto" | number
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
 	transforms?: [...common.#transform]
