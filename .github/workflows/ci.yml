@@ -26,7 +26,7 @@ jobs:
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.1.0
         with:
-          cli_version: "main-2025-03-19-60e4124a-distroless"
+          cli_version: "main-2025-03-20-398b7919-distroless"
       - name: cache cue deps
         uses: actions/cache@v4
         with:
