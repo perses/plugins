@@ -158,6 +158,7 @@ jobs:
           enable_npm: false
           enable_go: true
           enable_cue: true
+          cue_version: "v0.12.0"
       - name: Download archive
         uses: actions/download-artifact@v4
         with:
