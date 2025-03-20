@@ -15,9 +15,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/perses/common/async"
 	"github.com/perses/plugins/scripts/npm"
@@ -54,11 +56,13 @@ func main() {
 	}
 	isErr := false
 	for _, built := range pluginToBeBuilt {
-		workspace, buildErr := built.Await()
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+		workspace, buildErr := built.AwaitWithContext(ctx)
 		if buildErr != nil {
 			isErr = true
 			logrus.WithError(buildErr).Errorf("failed to build plugin %s", workspace)
 		}
+		cancel()
 	}
 	if isErr {
 		logrus.Fatal("some plugins have not been built successfully")
