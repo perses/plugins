@@ -14,7 +14,11 @@
 package tag
 
 import (
+	"bytes"
 	"flag"
+	"fmt"
+	"os"
+	"os/exec"
 	"regexp"
 
 	"github.com/sirupsen/logrus"
@@ -34,4 +38,18 @@ func Parse(tag *string) (string, string) {
 	pluginFolderName := tagSplit[1]
 	version := tagSplit[2]
 	return pluginFolderName, version
+}
+
+func RunCommand(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to run %s %v: %w\nstderr: %s", name, args, err, stderr.String())
+	}
+	return nil
 }

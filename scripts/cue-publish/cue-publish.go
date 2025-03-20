@@ -1,31 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
 
 const modulePrefix = "github.com/perses/plugins"
-
-func runCommand(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run %s %v: %w\nstderr: %s", name, args, err, stderr.String())
-	}
-	return nil
-}
 
 func main() {
 	token := flag.String("token", "", "Authentication token for CUE Central Registry login")
@@ -50,17 +34,17 @@ func main() {
 	}
 
 	logrus.Info("Logging into the CUE Central Registry...")
-	if err := runCommand("cue", "login", "--token="+*token); err != nil {
+	if err := tag.RunCommand("cue", "login", "--token="+*token); err != nil {
 		logrus.WithError(err).Fatal("Error logging into CUE Central Registry")
 	}
 
 	logrus.Info("Ensuring the module is tidy...")
-	if err := runCommand("cue", "mod", "tidy"); err != nil {
+	if err := tag.RunCommand("cue", "mod", "tidy"); err != nil {
 		logrus.WithError(err).Fatal("Error ensuring the module is tidy")
 	}
 
 	logrus.Info("Publishing module...")
-	if err := runCommand("cue", "mod", "publish", version); err != nil {
+	if err := tag.RunCommand("cue", "mod", "publish", version); err != nil {
 		logrus.WithError(err).Fatal("Error publishing module")
 	}
 
