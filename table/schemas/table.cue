@@ -22,6 +22,7 @@ kind: "Table"
 spec: close({
 	density?:            "compact" | "standard" | "comfortable"
 	defaultColumnWidth?: "auto" | number
+	pagination?: bool
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
 	transforms?: [...common.#transform]

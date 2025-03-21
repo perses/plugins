@@ -108,6 +108,8 @@ export interface TableOptions {
   // When true, the table will try to automatically adjust the width of columns to fit without overflowing.
   // Only for column without custom width specified in columnSettings.
   defaultColumnWidth?: 'auto' | number;
+  // Enable pagination.
+  pagination?: boolean;
   // Customize column display and order them by their index in the array.
   columnSettings?: ColumnSettings[];
   // Customize cell display based on their value.
