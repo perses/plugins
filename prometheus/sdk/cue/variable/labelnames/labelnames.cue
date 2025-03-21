@@ -19,6 +19,14 @@ import (
 	filterBuilder "github.com/perses/plugins/prometheus/sdk/cue/filter"
 )
 
+// The Label Names Variable builder helps creating prometheus label names variables in the format expected by Perses.
+// Parameters:
+// - every parameter from promVarBuilder
+// - (Optional) `#metric`: The name of the source metric to be used. ⚠️ Mandatory if you want to rely on the standard query pattern, thus didn't provide a value to the `#query` parameter.
+// - (Optional) `#query`:  Custom query to be used for this variable. ⚠️ Mandatory if you didn't provide a value to the `#metric` parameter.
+// Output:
+// - `variable`: The final variable object, to be passed to the dashboard.
+
 // include the definitions of promVarBuilder at the root
 promVarBuilder
 
