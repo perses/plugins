@@ -19,39 +19,46 @@ import {
   OptionsEditorGroup,
   TableDensity,
   DEFAULT_COLUMN_WIDTH,
+  DEFAULT_COLUMN_HEIGHT,
 } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Switch, TextField } from '@mui/material';
 import { ChangeEvent, ReactElement } from 'react';
 import { TableOptions } from './table-model';
 
-function DefaultColumnsWidthControl({
+interface DefaultColumnsDimensionsControlProps {
+  label: string;
+  defaultValue: number;
+  value?: 'auto' | number;
+  onChange: (value: 'auto' | number) => void;
+}
+
+function DefaultColumnsDimensionsControl({
+  label,
+  defaultValue,
   value,
   onChange,
-}: {
-  value?: 'auto' | number;
-  onChange: (defaultWidth: 'auto' | number) => void;
-}): ReactElement {
-  function handleAutoWidthChange(_: ChangeEvent, checked: boolean): void {
+}: DefaultColumnsDimensionsControlProps): ReactElement {
+  function handleAutoSwitchChange(_: ChangeEvent, checked: boolean): void {
     if (checked) {
       return onChange('auto');
     }
-    onChange(DEFAULT_COLUMN_WIDTH);
+    onChange(defaultValue);
   }
 
   return (
     <>
       <OptionsEditorControl
-        label="Auto Columns Width"
-        control={<Switch checked={value === 'auto'} onChange={handleAutoWidthChange} />}
+        label={`Auto Columns ${label}`}
+        control={<Switch checked={value === undefined || value === 'auto'} onChange={handleAutoSwitchChange} />}
       />
-      {value !== 'auto' && (
+      {value !== undefined && value !== 'auto' && (
         <OptionsEditorControl
-          label="Default Columns Width"
+          label={`Default Columns ${label}`}
           control={
             <TextField
               type="number"
-              value={value ?? DEFAULT_COLUMN_WIDTH}
+              value={value ?? defaultValue}
               InputProps={{ inputProps: { min: 1, step: 1 } }}
               onChange={(e) => onChange(parseInt(e.target.value))}
             />
@@ -73,12 +80,27 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
     onChange({ ...value, defaultColumnWidth: newValue });
   }
 
+  function handleAutoHeightChange(newValue: 'auto' | number): void {
+    onChange({ ...value, defaultColumnHeight: newValue });
+  }
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Display">
           <DensitySelector value={value.density} onChange={handleDensityChange} />
-          <DefaultColumnsWidthControl value={value.defaultColumnWidth} onChange={handleAutoWidthChange} />
+          <DefaultColumnsDimensionsControl
+            label="Width"
+            defaultValue={DEFAULT_COLUMN_WIDTH}
+            value={value.defaultColumnWidth}
+            onChange={handleAutoWidthChange}
+          />
+          <DefaultColumnsDimensionsControl
+            label="Height"
+            defaultValue={DEFAULT_COLUMN_HEIGHT}
+            value={value.defaultColumnHeight}
+            onChange={handleAutoHeightChange}
+          />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>
