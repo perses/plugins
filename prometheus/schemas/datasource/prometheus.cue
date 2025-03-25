@@ -16,13 +16,14 @@ package model
 import (
 	"github.com/perses/perses/cue/common"
 	commonProxy "github.com/perses/perses/cue/common/proxy"
+	promCommon "github.com/perses/plugins/prometheus/schemas:common"
 )
 
 kind: "PrometheusDatasource"
-spec: {
+spec: close({
 	#directUrl | #proxy
-	scrapeInterval?: =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
-}
+	scrapeInterval?: =~promCommon.#durationRegex
+})
 
 #directUrl: {
 	directUrl: common.#url

@@ -17,15 +17,8 @@ import (
 	"github.com/perses/perses/cue/common"
 )
 
-#legend: {
-	position: "bottom" | "right"
-	mode?:    "list" | "table"
-	size?:    "small" | "medium"
-}
-
 kind: "StatusHistoryChart"
-
 spec: close({
-	legend?: #legend
+	legend?: common.#legend
 	mappings?: [...common.#mappings]
 })

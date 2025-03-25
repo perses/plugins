@@ -14,15 +14,12 @@
 package model
 
 import (
-	prometheus "github.com/perses/plugins/prometheus/schemas/datasource:model"
+	"github.com/perses/plugins/prometheus/schemas:common"
 )
 
 kind: "PrometheusLabelValuesVariable"
 spec: close({
-	datasource?: {
-		kind:  prometheus.kind
-		name?: string
-	}
+	common.#datasourceSelector
 	labelName: string
 	matchers?: [...string]
 })

@@ -19,9 +19,9 @@ import (
 )
 
 kind: "TempoDatasource"
-spec: {
+spec: close({
 	#directUrl | #proxy
-}
+})
 
 #directUrl: {
 	directUrl: common.#url

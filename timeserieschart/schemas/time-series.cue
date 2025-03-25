@@ -17,14 +17,15 @@ import (
 	"github.com/perses/perses/cue/common"
 )
 
-#legendValue: common.#calculation
-
-#legend: {
-	position: "bottom" | "right"
-	mode?:    "list" | "table"
-	size?:    "small" | "medium"
-	values?: [...#legendValue]
-}
+kind: "TimeSeriesChart"
+spec: close({
+	legend?:        common.#legendWithValues
+	tooltip?:       #tooltip
+	yAxis?:         #yAxis
+	thresholds?:    common.#thresholds
+	visual?:        #visual
+	querySettings?: #querySettings
+})
 
 #tooltip: {
 	enablePinning?: bool
@@ -52,16 +53,6 @@ import (
 	min?:    number
 	max?:    number
 }
-
-kind: "TimeSeriesChart"
-spec: close({
-	legend?:        #legend
-	tooltip?:       #tooltip
-	yAxis?:         #yAxis
-	thresholds?:    common.#thresholds
-	visual?:        #visual
-	querySettings?: #querySettings
-})
 
 #querySettings: [...{
 	queryIndex: int & >=0
