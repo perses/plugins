@@ -19,16 +19,14 @@ import (
 
 kind: "StatChart"
 spec: close({
-	calculation:    common.#calculation
-	metricLabel?:   common.#metricLabel
-	format?:        common.#format
-	thresholds?:    common.#thresholds
-	sparkline?:     #sparkline
-	valueFontSize?: number
-	mappings?: [...common.#mappings]
-
-	#sparkline: {
+	calculation:  common.#calculation
+	metricLabel?: common.#metricLabel
+	format?:      common.#format
+	thresholds?:  common.#thresholds
+	sparkline?: close({
 		color?: string
 		width?: number
-	}
+	})
+	valueFontSize?: number
+	mappings?: [...common.#mappings]
 })

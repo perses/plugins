@@ -17,14 +17,17 @@ import (
 	"github.com/perses/perses/cue/common"
 )
 
-#legendValue: common.#calculation
-
-#legend: {
-	position: "bottom" | "right"
-	mode?:    "list" | "table"
-	size?:    "small" | "medium"
-	values?: [...#legendValue]
-}
+kind: "PieChart"
+spec: close({
+	legend?:        common.#legendWithValues
+	querySettings?: #querySettings
+	calculation:    common.#calculation
+	format?:        common.#format
+	sort?:          "asc" | "desc"
+	mode?:          "value" | "percentage"
+	visual?:        #visual
+	radius:         number
+})
 
 #palette: {
 	mode: "auto" | "categorical"
@@ -40,18 +43,6 @@ import (
 	stack?:        "all" | "percent" // TODO: percent option is disabled until support is added
 	connectNulls?: bool
 }
-
-kind: "PieChart"
-spec: close({
-	legend?:        #legend
-	querySettings?: #querySettings
-	calculation:    common.#calculation
-	format?:        common.#format
-	sort?:          "asc" | "desc"
-	mode?:          "value" | "percentage"
-	visual?:        #visual
-	radius:         number
-})
 
 #querySettings: [...{
 	queryIndex: int & >=0
