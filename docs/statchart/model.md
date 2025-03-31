@@ -12,15 +12,15 @@ spec:
 
 ## Calculation specification
 
-See [common plugin definitions](https://github.com/perses/perses/blob/main/docs/plugins/common.md#calculation-specification).
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#calculation-specification).
 
 ## Format specification
 
-See [common plugin definitions](https://github.com/perses/perses/blob/main/docs/plugins/common.md#format-specification).
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#format-specification).
 
 ## Thresholds specification
 
-See [common plugin definitions](https://github.com/perses/perses/blob/main/docs/plugins/common.md#thresholds-specification).
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#thresholds-specification).
 
 ## Sparkline specification
 

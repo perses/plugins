@@ -33,6 +33,7 @@ spec: close({
 	header?:            string
 	headerDescription?: string
 	cellDescription?:   string
+	format?:            common.#format
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool
 	sort?:              "asc" | "desc"

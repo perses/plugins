@@ -16,9 +16,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os/exec"
 	"path/filepath"
 
+	"github.com/perses/plugins/scripts/command"
 	"github.com/perses/plugins/scripts/npm"
 	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
@@ -35,7 +35,7 @@ func main() {
 		logrus.WithError(err).Fatalf("unable to read manifest file for plugin %s", pluginFolderName)
 	}
 	pluginName := manifest.Name
-	if execErr := exec.Command("gh", "release", "upload", *t, filepath.Join(pluginFolderName, fmt.Sprintf("%s-%s.tar.gz", pluginName, version))).Run(); execErr != nil {
+	if execErr := command.Run("gh", "release", "upload", *t, filepath.Join(pluginFolderName, fmt.Sprintf("%s-%s.tar.gz", pluginName, version))); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to upload archive %s", pluginName)
 	}
 }

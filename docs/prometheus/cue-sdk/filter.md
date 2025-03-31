@@ -8,7 +8,7 @@ The Filter builder helps generating a filter, a.k.a a labels matcher expression.
 package myDaC
 
 import (
-	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
+	promFilterBuilder "github.com/perses/plugins/prometheus/sdk/cue/filter"
 )
 
 promFilterBuilder & {} // input parameters expected
@@ -32,10 +32,10 @@ promFilterBuilder & {} // input parameters expected
 package myDaC
 
 import (
-	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	textVarBuilder "github.com/perses/perses/cue/dac-utils/variable/text"
-	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
-	labelValuesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelvalues"
+	promFilterBuilder "github.com/perses/plugins/prometheus/sdk/cue/filter"
+	promQLVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/promql"
+	labelValuesVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/labelvalues"
 )
 
 {promFilterBuilder & {

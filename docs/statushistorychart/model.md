@@ -18,4 +18,4 @@ size:     <enum = "small" | "medium"> # Optional
 
 ## Mapping specification
 
-See [common plugin definitions](https://github.com/perses/perses/blob/main/docs/plugins/common.md#mapping-specification).
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#mapping-specification).

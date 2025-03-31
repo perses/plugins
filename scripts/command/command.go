@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getCommonTimeScale, TimeScale, TimeSeriesData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
+package command
 
-export function getCommonTimeScaleForQueries(queries: Array<PanelData<TimeSeriesData>>): TimeScale | undefined {
-  const seriesData = queries.map((query) => query.data);
-  return getCommonTimeScale(seriesData);
+import (
+	"bytes"
+	"fmt"
+	"os"
+	"os/exec"
+)
+
+func Run(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to run %s %v: %w\nstderr: %s", name, args, err, stderr.String())
+	}
+	return nil
 }

@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   merge_group:
   release:
     types:
@@ -25,13 +26,21 @@ jobs:
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.1.0
         with:
-          cli_version: "main-2025-03-11-40259f7f-distroless"
+          cli_version: "main-2025-03-20-398b7919-distroless"
+      - name: cache cue deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cue
+          key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
+          restore-keys: |
+            ${{ runner.os }}-cue-
       - name: Login to CUE's Central Registry to allow retrieving deps
+        if: ${{ github.secret_source == 'Actions' }}
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: install dependencies
         run: npm ci
-      - name: build plugin
-        run: go run ./scripts/build-plugin/build-plugin.go
+      - name: build plugins
+        run: go run ./scripts/build-plugins/build-plugins.go
       - name: store plugin archives
         uses: actions/upload-artifact@v4
         with:
@@ -41,8 +50,8 @@ jobs:
             **/dist/mf-manifest.json
             !node_modules
 
-  lint:
-    name: 'lint'
+  lint-npm:
+    name: 'lint-npm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -54,8 +63,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
-  test:
-    name: 'test'
+  test-npm:
+    name: 'test-npm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -80,7 +89,7 @@ jobs:
       - run: npm ci
       - run: npm run type-check
 
-  validate-schemas:
+  lint-schemas:
     name: 'Validate plugin schemas'
     runs-on: ubuntu-latest
     steps:
@@ -90,11 +99,23 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-          cue_version: 'v0.12.0'
           enable_cue: true
+          cue_version: 'v0.12.0'
+      - name: Install percli
+        uses: perses/cli-actions/actions/install_percli@v0.1.0
+        with:
+          cli-version: "v0.51.0-beta.1"
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: ~/.cache/cue
+          key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
+          restore-keys: |
+            ${{ runner.os }}-cue-
       - name: Login to CUE's Central Registry to allow retrieving deps
+        if: ${{ github.secret_source == 'Actions' }}
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
-      - run: make validate-schemas
+      - run: make lint-plugins
   
   module-check:
     name: 'Check plugin modules'
@@ -108,7 +129,15 @@ jobs:
           enable_go: true
           enable_cue: true
           cue_version: 'v0.12.0'
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: ~/.cache/cue
+          key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
+          restore-keys: |
+            ${{ runner.os }}-cue-
       - name: Login to CUE's Central Registry to allow retrieving deps
+        if: ${{ github.secret_source == 'Actions' }}
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: Tidy modules
         run: make tidy-modules
@@ -133,6 +162,7 @@ jobs:
           enable_npm: false
           enable_go: true
           enable_cue: true
+          cue_version: "v0.12.0"
       - name: Download archive
         uses: actions/download-artifact@v4
         with:

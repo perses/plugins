@@ -11,12 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
-import { LoadingOverlay, Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import { PanelData, PanelProps } from '@perses-dev/plugin-system';
+import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useMemo, useState } from 'react';
-import { Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
+import { formatValue, Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
+
+function generateCellContentConfig(
+  column: ColumnSettings
+): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
+  return {
+    cell: (ctx) => {
+      const cellValue = ctx.getValue();
+      return typeof cellValue === 'number' && column.format ? formatValue(cellValue, column.format) : cellValue;
+    },
+    cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
+  };
+}
 
 /*
  * Generate column config from column definitions, if a column has multiple definitions, the first one will be used.
@@ -34,10 +46,10 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
         accessorKey: name,
         header: column.header ?? name,
         headerDescription: column.headerDescription,
-        cellDescription: column.cellDescription ? (_): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
         enableSorting: column.enableSorting,
         width: column.width,
         align: column.align,
+        ...generateCellContentConfig(column),
       };
     }
   }
@@ -102,16 +114,14 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
   return undefined;
 }
 
-export type TableProps = PanelProps<TableOptions>;
+export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
 
-export function TablePanel({ contentDimensions, spec }: TableProps): ReactElement | null {
+export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
   // TODO: handle other query types
-  const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
-
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
     return queryResults
       .flatMap(
-        (d: QueryData<TimeSeriesData>, queryIndex: number) =>
+        (d: PanelData<TimeSeriesData>, queryIndex: number) =>
           d.data?.series.map((ts: TimeSeries) => ({ ts, queryIndex })) || []
       )
       .map(({ ts, queryIndex }: { ts: TimeSeries; queryIndex: number }) => {
@@ -227,10 +237,6 @@ export function TablePanel({ contentDimensions, spec }: TableProps): ReactElemen
   }
 
   const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
-
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
 
   if (contentDimensions === undefined) {
     return null;

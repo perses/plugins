@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, Transform } from '@perses-dev/core';
+import { Definition, FormatOptions, Transform } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 
 export interface ColumnSettings {
@@ -31,6 +31,10 @@ export interface ColumnSettings {
    * ellipsized to fit in the space.
    */
   cellDescription?: string;
+
+  /** Formatting options. */
+  format?: FormatOptions;
+
   // Alignment of the content in the cell.
   align?: 'left' | 'center' | 'right';
 

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/perses/plugins/scripts/command"
 	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
@@ -30,12 +31,12 @@ func release(pluginName string, optionalReleaseMessage string) {
 	// To be compliant with Golang, the tag must be in the format `folder/vX.Y.Z`
 	releaseName := fmt.Sprintf("%s/v%s", pluginName, version)
 	// ensure the tag does not already exist
-	if execErr := exec.Command("git", "rev-parse", "--verify", releaseName).Run(); execErr == nil {
+	if execErr := command.Run("git", "rev-parse", "--verify", releaseName); execErr == nil {
 		logrus.Infof("release %s already exists", releaseName)
 		return
 	}
 	// create the GitHub release
-	if execErr := exec.Command("gh", "release", "create", releaseName, "-t", releaseName, "-n", optionalReleaseMessage).Run(); execErr != nil {
+	if execErr := command.Run("gh", "release", "create", releaseName, "-t", releaseName, "-n", optionalReleaseMessage); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to create the release %s", releaseName)
 	}
 }

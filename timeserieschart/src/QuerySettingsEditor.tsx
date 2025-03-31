@@ -16,7 +16,7 @@ import { InfoTooltip, OptionsEditorGroup, OptionsColorPicker } from '@perses-dev
 import { ReactElement, RefObject, useEffect, useMemo, useRef } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useQueryCountContext } from '@perses-dev/plugin-system';
 import { QuerySettingsOptions } from './time-series-chart-model';
 

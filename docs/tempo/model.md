@@ -18,7 +18,7 @@ spec:
 
 ### HTTP Proxy specification
 
-See [common plugin definitions](https://github.com/perses/perses/blob/main/docs/plugins/common.md#http-proxy-specification).
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#http-proxy-specification).
 
 ## Query
 
@@ -37,7 +37,7 @@ spec:
 ### Tempo Datasource selector
 
 !!! note
-	See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
 
 ```yaml
 kind: "TempoDatasource"

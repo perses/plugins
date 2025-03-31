@@ -48,8 +48,12 @@ export interface QueryOptions {
 
 export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>): Promise<T> => {
   const response = await fetch(...args);
-  const jsonData = await response.json();
-  return jsonData;
+  try {
+    return await response.json();
+  } catch (e) {
+    console.error('Invalid response from server', e);
+    throw new Error('Invalid response from server');
+  }
 };
 
 function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptions: QueryOptions): Promise<TResponse> {

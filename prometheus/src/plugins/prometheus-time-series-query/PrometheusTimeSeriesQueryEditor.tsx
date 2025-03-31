@@ -13,6 +13,7 @@
 
 import { produce } from 'immer';
 import { DatasourceSelect, DatasourceSelectProps, useDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
+import { useId } from '@perses-dev/components';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import { ReactElement } from 'react';
 import {
@@ -39,7 +40,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_PROM;
-  const datasourceSelectLabelID = `prom-datasource-label-${selectedDatasource.name || 'default'}`;
+  const datasourceSelectLabelID = useId('prom-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
@@ -71,13 +72,16 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
-        <InputLabel id={datasourceSelectLabelID}>Prometheus Datasource</InputLabel>
+        <InputLabel id={datasourceSelectLabelID} shrink>
+          Prometheus Datasource
+        </InputLabel>
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
           value={selectedDatasource}
           onChange={handleDatasourceChange}
           labelId={datasourceSelectLabelID}
           label="Prometheus Datasource"
+          notched
         />
       </FormControl>
       <PromQLEditor

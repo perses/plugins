@@ -8,7 +8,7 @@ The Prometheus Panel builder is a simple wrapper to help creating panels that qu
 package myDaC
 
 import (
-	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
 )
 
 panelBuilder & {} // input parameters expected
@@ -16,11 +16,11 @@ panelBuilder & {} // input parameters expected
 
 ## Parameters
 
-| Parameter       | Type                                                       | Mandatory/Optional | Default | Description                                                |
-|-----------------|------------------------------------------------------------|--------------------|---------|------------------------------------------------------------|
-| `spec`          | [PanelSpec](../../../api/dashboard.md#panel-specification) | Mandatory          |         | A PanelSpec object                                         |
-| `#clause`       | `"by"` \| `"without"` \| `""`                              | Optional           | `""`    | The aggregation clause for this panel's queries.           |
-| `#clauseLabels` | [...string]                                                | Optional           | []      | The labels on which to aggregate for this panel's queries. |
+| Parameter       | Type                                                                           | Mandatory/Optional | Default | Description                                                |
+|-----------------|--------------------------------------------------------------------------------|--------------------|---------|------------------------------------------------------------|
+| `spec`          | [PanelSpec](https://perses.dev/perses/docs/api/dashboard/#panel-specification) | Mandatory          |         | A PanelSpec object                                         |
+| `#clause`       | `"by"` \| `"without"` \| `""`                                                  | Optional           | `""`    | The aggregation clause for this panel's queries.           |
+| `#clauseLabels` | [...string]                                                                    | Optional           | []      | The labels on which to aggregate for this panel's queries. |
 
 the panel spec object can use the following string fields provided by the builder, via interpolation:
 
@@ -34,9 +34,9 @@ the panel spec object can use the following string fields provided by the builde
 package myDaC
 
 import (
-	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
-	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
+	timeseriesChart "github.com/perses/plugins/timeserieschart/schemas:model"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
+	promQuery "github.com/perses/plugins/prometheus/schemas/prometheus-time-series-query:model"
 )
 
 #cpuPanel: this=panelBuilder & {

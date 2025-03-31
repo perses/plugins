@@ -12,13 +12,25 @@
 # limitations under the License.
 
 GO ?= go
+MDOX ?= mdox
 
-.PHONY: schemas-validate
-validate-schemas:
-	@echo ">> Validate schemas for all plugins"
-	$(GO) run ./scripts/validate-schemas/validate-schemas.go
+.PHONY: lint-plugins
+lint-plugins:
+	@echo ">> Lint all plugins"
+	$(GO) run ./scripts/lint-plugins/lint-plugins.go
 
 .PHONY: tidy-modules
 tidy-modules:
 	@echo ">> Tidy CUE module for all plugins"
 	$(GO) run ./scripts/tidy-modules/tidy-modules.go
+
+.PHONY: checkdocs
+checkdocs:
+	@echo ">> check format markdown docs"
+	@make fmt-docs
+	@git diff --exit-code -- *.md
+
+.PHONY: fmt-docs
+fmt-docs:
+	@echo ">> format markdown document"
+	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "**/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
