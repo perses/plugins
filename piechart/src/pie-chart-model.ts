@@ -13,15 +13,18 @@
 
 import { ModeOption, SortOption } from '@perses-dev/components';
 import { CalculationType, DEFAULT_CALCULATION, Definition, FormatOptions } from '@perses-dev/core';
-import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
+import { LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
 
-import { DEFAULT_CONNECT_NULLS, DEFAULT_POINT_RADIUS, StackOptions } from './model';
+import { QuerySettingsOptions, StackOptions } from './model';
 
+export const DEFAULT_CONNECT_NULLS = false;
+export const POINT_SIZE_OFFSET = 1.5;
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal', shortValues: true };
 export const DEFAULT_SORT: SortOption = 'desc';
 export const DEFAULT_MODE: ModeOption = 'value';
 export const DEFAULT_LINE_WIDTH = 1.25;
 export const DEFAULT_AREA_OPACITY = 0;
+export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
 
 export const VISUAL_CONFIG = {
   lineWidth: {
@@ -77,11 +80,6 @@ export interface PieChartOptions {
   mode?: ModeOption;
 }
 
-export interface QuerySettingsOptions {
-  queryIndex: number;
-  colorMode: 'fixed' | 'fixed-single';
-  colorValue: string;
-}
 export type PieChartVisualOptions = {
   display?: 'line' | 'bar';
   lineWidth?: number;

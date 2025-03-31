@@ -3,18 +3,18 @@
   "jsc": {
     "parser": {
       "syntax": "typescript",
-      "tsx": true
+      "tsx": true,
     },
-    "target": "es2018",
+    "target": "es2022",
     "transform": {
       "react": {
         "runtime": "automatic",
-        "useBuiltins": true
-      }
-    }
+        "useBuiltins": true,
+      },
+    },
   },
   "module": {
-    "type": "commonjs"
+    "type": "commonjs",
   },
-  "exclude": ["\\.(stories|test)\\."]
+  "exclude": ["\\.(stories|test)\\."],
 }

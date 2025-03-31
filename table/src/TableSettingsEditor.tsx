@@ -11,20 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Switch, TextField } from '@mui/material';
 import {
+  DEFAULT_COLUMN_HEIGHT,
+  DEFAULT_COLUMN_WIDTH,
   DensitySelector,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   TableDensity,
-  DEFAULT_COLUMN_WIDTH,
-  DEFAULT_COLUMN_HEIGHT,
 } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Switch, TextField } from '@mui/material';
 import { ChangeEvent, ReactElement } from 'react';
-import { TableOptions } from './table-model';
+import { TableSettingsEditorProps } from './table-model';
 
 interface DefaultColumnsDimensionsControlProps {
   label: string;
@@ -68,8 +67,6 @@ function DefaultColumnsDimensionsControl({
     </>
   );
 }
-
-export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
 
 export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProps): ReactElement {
   function handleDensityChange(density: TableDensity): void {

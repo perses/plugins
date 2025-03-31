@@ -11,5 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './bar-chart-model';
 export * from './BarChart';
-export type { BarChartDefinition, BarChartOptions } from './bar-chart-model';
+export * from './BarChartOptionsEditorSettings';
+export { getPluginModule } from './getPluginModule';
+export * from './utils';

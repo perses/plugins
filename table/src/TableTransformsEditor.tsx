@@ -11,13 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Transform } from '@perses-dev/core';
 import { TransformsEditor } from '@perses-dev/components';
+import { Transform } from '@perses-dev/core';
 import { ReactElement } from 'react';
-import { TableOptions } from './table-model';
-
-export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
+import { TableSettingsEditorProps } from './table-model';
 
 export function TableTransformsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {
   function handleTransformsChange(transforms: Transform[]): void {

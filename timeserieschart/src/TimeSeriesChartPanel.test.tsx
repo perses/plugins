@@ -17,7 +17,7 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
 import { TimeRangeContext } from '@perses-dev/plugin-system';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { MOCK_TIME_SERIES_DATA_MULTIVALUE } from './test/mock-query-results';
+import { MOCK_TIME_SERIES_DATA_MULTIVALUE } from './test/mock-query-results.test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
