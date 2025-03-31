@@ -150,7 +150,7 @@ jobs:
       - uses: perses/github-actions@v0.9.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
-          enable_npm: false
+          enable_npm: true
           enable_go: true
           enable_cue: true
           cue_version: "v0.12.0"
@@ -161,3 +161,7 @@ jobs:
       - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
       - name: Publish CUE module
         run: go run ./scripts/cue-publish/cue-publish.go -tag=${{ github.event.release.tag_name }} -token=${{ secrets.CUE_REG_TOKEN }}
+      - name: Publish npm package
+        run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

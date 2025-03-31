@@ -13,9 +13,8 @@
 
 import { Fragment, ReactElement, ReactNode, useMemo } from 'react';
 import { Alert, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
+import { TimeSeries, TimeSeriesData, BucketTuple, TimeSeriesHistogramTuple, HistogramValue } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
-import { BucketTuple, HistogramTuple, HistogramValue } from '@perses-dev/prometheus/src/model';
 import { SeriesName } from './SeriesName';
 import { HistogramChart } from './HistogramChart';
 
@@ -69,7 +68,7 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
         })
       : [];
     const histogramsAndTimes = s.histograms
-      ? s.histograms.map((h: HistogramTuple, hisIdx: number) => {
+      ? s.histograms.map((h: TimeSeriesHistogramTuple, hisIdx: number) => {
           return (
             <Fragment key={-hisIdx}>
               <HistogramChart width={400} height={200} data={{ buckets: h[1].buckets! }} /> {/* TODO: calc size ? */}

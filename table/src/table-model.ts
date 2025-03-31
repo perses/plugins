@@ -13,6 +13,7 @@
 
 import { Definition, FormatOptions, Transform, UnknownSpec } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export interface ColumnSettings {
   name: string;
@@ -135,3 +136,5 @@ export function createInitialTableOptions(): TableOptions {
     density: 'standard',
   };
 }
+
+export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;

@@ -1,11 +1,10 @@
-import { ReactElement, useMemo } from 'react';
-import { FormatOptions } from '@perses-dev/core';
-import { EChart, ModeOption, useChartsTheme } from '@perses-dev/components';
-import { use, EChartsCoreOption } from 'echarts/core';
 import { Box } from '@mui/material';
-import { BucketTuple } from '@perses-dev/prometheus/src/model';
-import { CustomChart } from 'echarts/charts';
+import { EChart, ModeOption, useChartsTheme } from '@perses-dev/components';
+import { BucketTuple, FormatOptions } from '@perses-dev/core';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
+import { CustomChart } from 'echarts/charts';
+import { EChartsCoreOption, use } from 'echarts/core';
+import { ReactElement, useMemo } from 'react';
 
 use([CustomChart]);
 
@@ -48,7 +47,7 @@ export function HistogramChart({ width, height, data }: HistogramChartProps): Re
       tooltip: {},
       xAxis: {
         scale: false,
-        max: Math.ceil(transformedData[transformedData.length - 1].value[1]),
+        max: Math.ceil(transformedData[transformedData.length - 1]?.value[1] ?? 1),
       },
       yAxis: {},
       series: [

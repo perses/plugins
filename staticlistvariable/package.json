@@ -1,16 +1,21 @@
 {
-  "name": "@perses-dev/static-list-variable",
-  "private": true,
-  "version": "0.2.0",
+  "name": "@perses-dev/static-list-variable-plugin",
+  "version": "0.3.0",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "cross-env LC_ALL=C TZ=UTC jest --passWithNoTests",
     "type-check": "tsc --noEmit"
   },
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "dependencies": {
-    "@module-federation/enhanced": "^0.8.9",
     "color-hash": "^2.0.2"
   },
   "peerDependencies": {
@@ -29,7 +34,10 @@
     "use-resize-observer": "^9.0.0"
   },
   "files": [
-    "dist"
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
   ],
   "perses": {
     "plugins": [
