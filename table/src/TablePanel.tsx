@@ -14,31 +14,21 @@
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
 import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useMemo, useState } from 'react';
-import { formatValue, Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
+import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
-import { PanelPluginLoader } from '@perses-dev/dashboards';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
+import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
   column: ColumnSettings
 ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
-  if (plugin !== undefined && plugin.kind === 'StatChart') {
+  if (plugin !== undefined) {
     return {
       cell: (ctx) => {
-        const panelData: PanelData<TimeSeriesData> | undefined = ctx.getValue();
+        const panelData: PanelData<QueryDataType> | undefined = ctx.getValue();
         if (!panelData) return <></>;
-        return (
-          <PanelPluginLoader
-            kind="StatChart"
-            contentDimensions={{
-              width: 400,
-              height: 60,
-            }}
-            spec={plugin.spec}
-            queryResults={[panelData]}
-          />
-        );
+        return <EmbeddedPanel kind={plugin.kind} spec={plugin.spec} queryResults={[panelData]} />;
       },
       cellDescription: column.cellDescription ? () => `${column.cellDescription}` : () => '', // disable hover text
     };

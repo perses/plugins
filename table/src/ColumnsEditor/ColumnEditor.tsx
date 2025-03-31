@@ -31,10 +31,8 @@ const DEFAULT_FORMAT: FormatOptions = {
   shortValues: true,
 };
 
-const DISPLAY_OPTIONS = [
-  { id: 'text', label: 'Text' },
-  { id: 'StatChart', label: 'StatChart' },
-];
+const TEXT_DISPLAY_OPTION = { id: 'text', label: 'Text' };
+const PANEL_DISPLAY_OPTION = { id: 'panel', label: 'Embedded Panel' };
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
@@ -129,13 +127,13 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             label="Display"
             control={
               <SettingsAutocomplete
-                value={DISPLAY_OPTIONS.find((x) => x.id === (column.plugin?.kind ?? 'text')) ?? DISPLAY_OPTIONS[0]}
-                options={DISPLAY_OPTIONS}
+                value={column.plugin ? PANEL_DISPLAY_OPTION : TEXT_DISPLAY_OPTION}
+                options={[TEXT_DISPLAY_OPTION, PANEL_DISPLAY_OPTION]}
                 onChange={(_e, value) =>
                   onChange(
-                    value.id === 'text'
+                    value.id === TEXT_DISPLAY_OPTION.id
                       ? { ...column, plugin: undefined }
-                      : { ...column, plugin: { kind: value.id, spec: {} } }
+                      : { ...column, plugin: { kind: 'StatChart', spec: {} } }
                   )
                 }
                 disableClearable

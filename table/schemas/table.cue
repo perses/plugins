@@ -33,7 +33,7 @@ spec: close({
 	header?:            string
 	headerDescription?: string
 	cellDescription?:   string
-	plugin?             common.#Plugin
+	plugin?:            common.#Plugin
 	format?:            common.#format
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool
