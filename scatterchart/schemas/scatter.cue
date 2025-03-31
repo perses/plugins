@@ -15,5 +15,5 @@ package model
 
 kind: "ScatterChart"
 spec: close({
-	sizeRange?: [number, number]
+	sizeRange?: [number & < sizeRange[1], number]
 })
