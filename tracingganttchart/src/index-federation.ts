@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,25 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface QuerySettingsOptions {
-  queryIndex: number;
-  colorMode: 'fixed' | 'fixed-single';
-  colorValue: string;
-}
-
-export interface ChartPaletteOptions {
-  mode: 'auto' | 'categorical';
-}
-
-export type StackOptions = 'none' | 'all';
-
-export type ChartVisualOptions = {
-  display?: 'line' | 'bar';
-  lineWidth?: number;
-  areaOpacity?: number;
-  showPoints?: 'auto' | 'always';
-  palette?: ChartPaletteOptions;
-  pointRadius?: number;
-  stack?: StackOptions;
-  connectNulls?: boolean;
-};
+import('./bootstrap');

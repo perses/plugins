@@ -166,68 +166,70 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
         }
       }
 
-      for (let i = 0; i < result.data.series.length; i++) {
-        const timeSeries: TimeSeries | undefined = result.data.series[i];
-        if (timeSeries === undefined) {
-          return { timeChartData: [], timeSeriesMapping: [], legendItems: [] };
-        }
+      if (result) {
+        for (let i = 0; i < result.data.series.length; i++) {
+          const timeSeries: TimeSeries | undefined = result.data.series[i];
+          if (timeSeries === undefined) {
+            return { timeChartData: [], timeSeriesMapping: [], legendItems: [] };
+          }
 
-        // Format is determined by seriesNameFormat in query spec
-        const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
+          // Format is determined by seriesNameFormat in query spec
+          const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        // Color is used for line, tooltip, and legend
-        const seriesColor = getSeriesColor({
-          // ECharts type for color is not always an array but it is always an array in ChartsProvider
-          categoricalPalette: categoricalPalette as string[],
-          visual,
-          muiPrimaryColor: muiTheme.palette.primary.main,
-          seriesName: formattedSeriesName,
-          seriesIndex,
-          querySettings: querySettings,
-          queryHasMultipleResults: (queryResults[queryIndex]?.data?.series?.length ?? 0) > 1,
-        });
-
-        // We add a unique id for the chart to disambiguate items across charts
-        // when there are multiple on the page.
-        const seriesId = chartId + timeSeries.name + seriesIndex;
-
-        const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
-
-        // When we initially load the chart, we want to show all series, but
-        // DO NOT want to visualy highlight all the items in the legend.
-        const isSelectAll = selectedLegendItems === 'ALL';
-        const isSelected = !isSelectAll && !!selectedLegendItems[seriesId];
-        const showTimeSeries = isSelected || isSelectAll;
-
-        if (showTimeSeries) {
-          // Use timeChartData.length to ensure the data that is passed into the tooltip accounts for
-          // which legend items are selected. This must happen before timeChartData.push to avoid an
-          // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
-          const datasetIndex = timeChartData.length;
-
-          // Each series is stored as a separate dataset source.
-          // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
-          timeSeriesMapping.push(
-            getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor)
-          );
-
-          timeChartData.push({
-            name: formattedSeriesName,
-            values: getTimeSeriesValues(timeSeries, timeScale),
+          // Color is used for line, tooltip, and legend
+          const seriesColor = getSeriesColor({
+            // ECharts type for color is not always an array but it is always an array in ChartsProvider
+            categoricalPalette: categoricalPalette as string[],
+            visual,
+            muiPrimaryColor: muiTheme.palette.primary.main,
+            seriesName: formattedSeriesName,
+            seriesIndex,
+            querySettings: querySettings,
+            queryHasMultipleResults: (queryResults[queryIndex]?.data?.series?.length ?? 0) > 1,
           });
-        }
 
-        if (legend && legendItems) {
-          legendItems.push({
-            id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
-            label: formattedSeriesName,
-            color: seriesColor,
-            data: legendCalculations,
-          });
-        }
+          // We add a unique id for the chart to disambiguate items across charts
+          // when there are multiple on the page.
+          const seriesId = chartId + timeSeries.name + seriesIndex;
 
-        // Used for repeating colors in Categorical palette
-        seriesIndex++;
+          const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
+
+          // When we initially load the chart, we want to show all series, but
+          // DO NOT want to visualy highlight all the items in the legend.
+          const isSelectAll = selectedLegendItems === 'ALL';
+          const isSelected = !isSelectAll && !!selectedLegendItems[seriesId];
+          const showTimeSeries = isSelected || isSelectAll;
+
+          if (showTimeSeries) {
+            // Use timeChartData.length to ensure the data that is passed into the tooltip accounts for
+            // which legend items are selected. This must happen before timeChartData.push to avoid an
+            // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
+            const datasetIndex = timeChartData.length;
+
+            // Each series is stored as a separate dataset source.
+            // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
+            timeSeriesMapping.push(
+              getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor)
+            );
+
+            timeChartData.push({
+              name: formattedSeriesName,
+              values: getTimeSeriesValues(timeSeries, timeScale),
+            });
+          }
+
+          if (legend && legendItems) {
+            legendItems.push({
+              id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
+              label: formattedSeriesName,
+              color: seriesColor,
+              data: legendCalculations,
+            });
+          }
+
+          // Used for repeating colors in Categorical palette
+          seriesIndex++;
+        }
       }
     }
 
