@@ -13,12 +13,24 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeSeriesData } from '@perses-dev/core';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
+import {
+  dynamicImportPluginLoader,
+  PluginLoader,
+  PluginModuleResource,
+  PluginRegistry,
+} from '@perses-dev/plugin-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as packagejson from '../package.json';
 import { TimeSeriesTableProps } from './model';
 import { TableOptions } from './table-model';
 import { TablePanel } from './TablePanel';
-import { MOCK_TIME_SERIES_DATA_SINGLEVALUE, MOCK_TIME_SERIES_QUERY_DEFINITION } from './test/mock-query-results';
+import {
+  MOCK_TIME_SERIES_DATA_MULTIVALUE,
+  MOCK_TIME_SERIES_DATA_SINGLEVALUE,
+  MOCK_TIME_SERIES_QUERY_DEFINITION,
+} from './test/mock-query-results';
 
 const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> = {
   contentDimensions: {
@@ -113,5 +125,58 @@ describe('TablePanel', () => {
       ],
     });
     expect(await screen.findByRole('cell', { name: '27.7%' })).toBeInTheDocument();
+  });
+
+  it('should render an embedded panel', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
+    });
+    const pluginResource = {
+      kind: 'PluginModule',
+      metadata: { name: 'Table Panel' },
+      spec: {
+        plugins: packagejson.perses.plugins,
+      },
+    };
+    const testPluginLoader: PluginLoader = dynamicImportPluginLoader([
+      { resource: pluginResource as PluginModuleResource, importPlugin: () => import('./Table') },
+    ]);
+
+    render(
+      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+        <ChartsProvider chartsTheme={testChartsTheme}>
+          <QueryClientProvider client={queryClient}>
+            <PluginRegistry pluginLoader={testPluginLoader}>
+              <TablePanel
+                {...TEST_TIME_SERIES_TABLE_PROPS}
+                spec={{
+                  columnSettings: [
+                    {
+                      name: 'value',
+                      plugin: {
+                        // This renders a table panel inside a table panel cell, because we don't have access to other panels from this unit test
+                        kind: 'Table',
+                        spec: {},
+                      },
+                    },
+                  ],
+                }}
+                queryResults={[
+                  { definition: MOCK_TIME_SERIES_QUERY_DEFINITION, data: MOCK_TIME_SERIES_DATA_MULTIVALUE },
+                ]}
+              />
+            </PluginRegistry>
+          </QueryClientProvider>
+        </ChartsProvider>
+      </VirtuosoMockContext.Provider>
+    );
+
+    // embedded panel is loaded async
+    await waitFor(async () => {
+      // the outer table has two rows
+      // each row has one table in the 'value' column
+      // in total, 3 tables should be visible
+      expect(await screen.findAllByRole('table')).toHaveLength(3);
+    });
   });
 });

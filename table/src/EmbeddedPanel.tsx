@@ -15,7 +15,6 @@ import { PanelData } from '@perses-dev/plugin-system';
 import { QueryDataType, UnknownSpec } from '@perses-dev/core';
 import { PanelPluginLoader } from '@perses-dev/dashboards';
 import useResizeObserver from 'use-resize-observer';
-import { useMemo } from 'react';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 
 interface EmbeddedPanelProps {
@@ -25,15 +24,11 @@ interface EmbeddedPanelProps {
 }
 
 export function EmbeddedPanel({ kind, spec, queryResults }: EmbeddedPanelProps) {
-  const { ref, width, height } = useResizeObserver<HTMLDivElement>();
-  const contentDimensions = useMemo(() => {
-    return width && height ? { width, height: height } : undefined;
-  }, [width, height]);
-
+  const { ref, width = 1, height = 1 } = useResizeObserver<HTMLDivElement>();
   return (
     <div ref={ref} style={{ height: '100%' }}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PanelPluginLoader kind={kind} contentDimensions={contentDimensions} spec={spec} queryResults={queryResults} />
+        <PanelPluginLoader kind={kind} contentDimensions={{ width, height }} spec={spec} queryResults={queryResults} />
       </ErrorBoundary>
     </div>
   );
