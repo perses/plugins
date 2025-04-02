@@ -20,6 +20,7 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  SettingsAutocomplete,
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
@@ -29,6 +30,9 @@ const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
   shortValues: true,
 };
+
+const TEXT_DISPLAY_OPTION = { id: 'text', label: 'Text' };
+const PANEL_DISPLAY_OPTION = { id: 'panel', label: 'Embedded Panel' };
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
@@ -119,15 +123,34 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
-          <FormatControls
-            value={column.format ?? DEFAULT_FORMAT}
-            onChange={(newFormat): void =>
-              onChange({
-                ...column,
-                format: newFormat,
-              })
+          <OptionsEditorControl
+            label="Display"
+            control={
+              <SettingsAutocomplete
+                value={column.plugin ? PANEL_DISPLAY_OPTION : TEXT_DISPLAY_OPTION}
+                options={[TEXT_DISPLAY_OPTION, PANEL_DISPLAY_OPTION]}
+                onChange={(_e, value) =>
+                  onChange(
+                    value.id === TEXT_DISPLAY_OPTION.id
+                      ? { ...column, plugin: undefined }
+                      : { ...column, plugin: { kind: 'StatChart', spec: {} } }
+                  )
+                }
+                disableClearable
+              />
             }
           />
+          {!column.plugin && (
+            <FormatControls
+              value={column.format ?? DEFAULT_FORMAT}
+              onChange={(newFormat): void =>
+                onChange({
+                  ...column,
+                  format: newFormat,
+                })
+              }
+            />
+          )}
           <OptionsEditorControl
             label="Alignment"
             control={

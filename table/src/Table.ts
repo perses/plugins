@@ -13,7 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTableOptions, TableOptions } from './table-model';
-import { TablePanel, TableProps } from './TablePanel';
+import { getTablePanelQueryOptions, TablePanel, TableProps } from './TablePanel';
 import { TableColumnsEditor } from './TableColumnsEditor';
 import { TableSettingsEditor } from './TableSettingsEditor';
 import { TableCellsEditor } from './TableCellsEditor';
@@ -25,9 +25,7 @@ import { TableTransformsEditor } from './TableTransformsEditor';
 export const Table: PanelPlugin<TableOptions, TableProps> = {
   PanelComponent: TablePanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
-  queryOptions: {
-    mode: 'instant',
-  },
+  queryOptions: getTablePanelQueryOptions,
   panelOptionsEditorComponents: [
     { label: 'General Settings', content: TableSettingsEditor },
     { label: 'Column Settings', content: TableColumnsEditor },

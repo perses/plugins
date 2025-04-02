@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, FormatOptions, Transform } from '@perses-dev/core';
+import { Definition, FormatOptions, Transform, UnknownSpec } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 
 export interface ColumnSettings {
@@ -32,7 +32,13 @@ export interface ColumnSettings {
    */
   cellDescription?: string;
 
-  /** Formatting options. */
+  /**
+   * Panel plugin to render.
+   * By default, the cells are rendered as text.
+   */
+  plugin?: Definition<UnknownSpec>;
+
+  /** Formatting options. Only applicable if plugin is unset. */
   format?: FormatOptions;
 
   // Alignment of the content in the cell.
