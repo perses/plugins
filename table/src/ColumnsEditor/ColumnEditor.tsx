@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StackProps, Switch, TextField } from '@mui/material';
+import { Button, ButtonGroup, StackProps, Switch, TextField } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
@@ -20,7 +20,6 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
-  SettingsAutocomplete,
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
@@ -31,9 +30,6 @@ const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
   shortValues: true,
 };
-
-const TEXT_DISPLAY_OPTION = { id: 'text', label: 'Text' };
-const PANEL_DISPLAY_OPTION = { id: 'panel', label: 'Embedded Panel' };
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
@@ -127,18 +123,20 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           <OptionsEditorControl
             label="Display"
             control={
-              <SettingsAutocomplete
-                value={column.plugin ? PANEL_DISPLAY_OPTION : TEXT_DISPLAY_OPTION}
-                options={[TEXT_DISPLAY_OPTION, PANEL_DISPLAY_OPTION]}
-                onChange={(_e, value) =>
-                  onChange(
-                    value.id === TEXT_DISPLAY_OPTION.id
-                      ? { ...column, plugin: undefined }
-                      : { ...column, plugin: { kind: 'StatChart', spec: {} } }
-                  )
-                }
-                disableClearable
-              />
+              <ButtonGroup aria-label="Display" size="small">
+                <Button
+                  variant={!column.plugin ? 'contained' : 'outlined'}
+                  onClick={() => onChange({ ...column, plugin: undefined })}
+                >
+                  Text
+                </Button>
+                <Button
+                  variant={column.plugin ? 'contained' : 'outlined'}
+                  onClick={() => onChange({ ...column, plugin: { kind: 'StatChart', spec: {} } })}
+                >
+                  Embedded Panel
+                </Button>
+              </ButtonGroup>
             }
           />
           {column.plugin ? (
