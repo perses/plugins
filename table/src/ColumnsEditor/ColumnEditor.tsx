@@ -24,6 +24,7 @@ import {
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
+import { PluginKindSelect } from '@perses-dev/plugin-system';
 import { ColumnSettings } from '../table-model';
 
 const DEFAULT_FORMAT: FormatOptions = {
@@ -140,7 +141,18 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
-          {!column.plugin && (
+          {column.plugin ? (
+            <OptionsEditorControl
+              label="Panel Type"
+              control={
+                <PluginKindSelect
+                  pluginTypes={['Panel']}
+                  value={{ type: 'Panel', kind: column.plugin.kind }}
+                  onChange={(event) => onChange({ ...column, plugin: { kind: event.kind, spec: {} } })}
+                />
+              }
+            />
+          ) : (
             <FormatControls
               value={column.format ?? DEFAULT_FORMAT}
               onChange={(newFormat): void =>
