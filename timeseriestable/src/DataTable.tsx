@@ -17,6 +17,7 @@ import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
 import { BucketTuple, HistogramTuple, HistogramValue } from '@perses-dev/prometheus/src/model';
 import { SeriesName } from './SeriesName';
+import { HistogramChart } from './components';
 
 const MAX_FORMATABLE_SERIES = 1000;
 
@@ -32,7 +33,7 @@ export interface DataTableProps {
  * @param result timeseries query result
  * @constructor
  */
-const DataTable = ({ result }: DataTableProps): ReactElement | null => {
+export const DataTable = ({ result }: DataTableProps): ReactElement | null => {
   if (!result) {
     return null;
   }
@@ -70,6 +71,7 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
       ? s.histograms.map((h: HistogramTuple, hisIdx: number) => {
           return (
             <Fragment key={-hisIdx}>
+              <HistogramChart width={400} height={200} data={{ buckets: h[1].buckets! }} /> {/* TODO: calc size ? */}
               <Stack flexDirection="row" justifyContent="space-between">
                 <Typography>Total count: {h[1].count}</Typography>
                 <Typography>Sum: {h[1].sum}</Typography>
@@ -125,4 +127,3 @@ export const histogramTable = (h: HistogramValue): ReactNode => (
     </TableBody>
   </Table>
 );
-export default DataTable;
