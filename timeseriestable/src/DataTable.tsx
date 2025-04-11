@@ -16,7 +16,9 @@ import { Alert, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typogra
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
 import { BucketTuple, HistogramTuple, HistogramValue } from '@perses-dev/prometheus/src/model';
+import { EmbeddedPanel } from '@perses-dev/table/src/EmbeddedPanel';
 import { SeriesName } from './SeriesName';
+import { HistogramChart } from './components/HistogramChart';
 
 const MAX_FORMATABLE_SERIES = 1000;
 
@@ -70,6 +72,7 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
       ? s.histograms.map((h: HistogramTuple, hisIdx: number) => {
           return (
             <Fragment key={-hisIdx}>
+              <HistogramChart width={400} height={200} data={{ buckets: h[1].buckets! }} /> {/* TODO: calc size ? */}
               <Stack flexDirection="row" justifyContent="space-between">
                 <Typography>Total count: {h[1].count}</Typography>
                 <Typography>Sum: {h[1].sum}</Typography>
