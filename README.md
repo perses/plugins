@@ -7,7 +7,6 @@ This repository contains the core plugins for [Perses](https://github.com/perses
 As prerequisites, you need:
 - NodeJS [version 22 or greater](https://nodejs.org/).
 - npm [version 10 or greater](https://www.npmjs.com/).
-- ⚠️ if the plugin's schema depends on the `github.com/perses/perses/cue` module, you have to authenticate to CUE's Central Registry with `cue login` to be allowed to retrieve dependencies.
 
 You should first run `npm install` at the root of the repository.
 

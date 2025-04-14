@@ -34,7 +34,7 @@ func main() {
 		logrus.WithError(err).Fatalf("Error moving to the plugin directory: %s", pluginName)
 	}
 
-	logrus.Info("Logging into the CUE Central Registry...")
+	logrus.Info("Logging into the CUE Central Registry...") // still required to push new modules
 	if err := command.Run("cue", "login", "--token="+*token); err != nil {
 		logrus.WithError(err).Fatal("Error logging into CUE Central Registry")
 	}

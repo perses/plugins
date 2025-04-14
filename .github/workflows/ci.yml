@@ -34,9 +34,6 @@ jobs:
           key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
           restore-keys: |
             ${{ runner.os }}-cue-
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        if: ${{ github.secret_source == 'Actions' }}
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: install dependencies
         run: npm ci
       - name: build plugins
@@ -112,9 +109,6 @@ jobs:
           key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
           restore-keys: |
             ${{ runner.os }}-cue-
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        if: ${{ github.secret_source == 'Actions' }}
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - run: make lint-plugins
   
   module-check:
@@ -136,9 +130,6 @@ jobs:
           key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
           restore-keys: |
             ${{ runner.os }}-cue-
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        if: ${{ github.secret_source == 'Actions' }}
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: Tidy modules
         run: make tidy-modules
       - name: Check for unused/missing packages in all cue.mod
