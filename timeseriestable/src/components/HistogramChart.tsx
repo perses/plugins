@@ -72,8 +72,7 @@ export function HistogramChart({ width, height, data }: HistogramChartProps): Re
             };
           },
           label: {
-            show: true,
-            position: 'top',
+            show: false,
           },
           dimensions: ['from', 'to'],
           encode: {

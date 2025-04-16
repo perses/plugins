@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Fragment, ReactElement, ReactNode } from 'react';
+import { Fragment, ReactElement, ReactNode, useMemo } from 'react';
 import { Alert, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
@@ -34,11 +34,12 @@ export interface DataTableProps {
  * @constructor
  */
 export const DataTable = ({ result }: DataTableProps): ReactElement | null => {
+  const series = useMemo(() => result.flatMap((d) => d.data).flatMap((d) => d?.series || []), [result]);
+  const rows = useMemo(() => buildRows(series), [series]);
+
   if (!result) {
-    return null;
+    return <Typography>No data</Typography>;
   }
-  const series = result.flatMap((d) => d.data).flatMap((d) => d?.series || []);
-  const rows = buildRows(series);
 
   return (
     <>
