@@ -28,9 +28,9 @@ export function HistogramChart({ width, height, data }: HistogramChartProps): Re
   const transformedData = useMemo(() => {
     if (!data) return [];
 
-    return data.buckets.map((bucket) => {
+    return data.buckets.map(([bucket, upperBound, lowerBound, count]) => {
       return {
-        value: [+bucket[1], +bucket[2], +bucket[3], bucket[0]],
+        value: [parseFloat(upperBound), parseFloat(lowerBound), parseFloat(count), bucket],
         itemStyle: {
           color: chartsTheme.echartsTheme[0],
         },
