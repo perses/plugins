@@ -17,7 +17,7 @@ import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
 import { BucketTuple, HistogramTuple, HistogramValue } from '@perses-dev/prometheus/src/model';
 import { SeriesName } from './SeriesName';
-import { HistogramChart } from './components';
+import { HistogramChart } from './HistogramChart';
 
 const MAX_FORMATABLE_SERIES = 1000;
 
