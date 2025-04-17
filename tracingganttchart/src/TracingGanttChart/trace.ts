@@ -63,7 +63,7 @@ export interface Event {
  * Time complexity: O(2n)
  */
 export function getTraceModel(trace: otlptracev1.TracesData): Trace {
-  // first pass: build lookup table <spanId, Span>, find root span and compute min/max
+  // first pass: build lookup table <spanId, Span> and compute min/max
   const lookup = new Map<string, Span>();
   const rootSpans: Span[] = [];
   let startTimeUnixMs: number = 0;
