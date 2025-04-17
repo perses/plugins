@@ -11,23 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Span, SpanStatusError } from '@perses-dev/core';
 import { PersesChartsTheme } from '@perses-dev/components';
 import { Theme } from '@mui/material';
 import { getConsistentCategoricalColor, getConsistentColor } from './palette';
-
-/**
- * Viewport contains the current zoom, i.e. which timeframe of the trace should be visible
- */
-export interface Viewport {
-  startTimeUnixMs: number;
-  endTimeUnixMs: number;
-}
-
-/** minimum span width, i.e. increase width if the calculated width is too small to be visible */
-export const minSpanWidthPx = 2;
-export const rowHeight = '2rem';
-export const spanHasError = (span: Span): boolean => span.status?.code === SpanStatusError;
 
 export function getServiceColor(
   muiTheme: Theme,
@@ -47,23 +33,4 @@ export function getServiceColor(
     default:
       return getConsistentColor(serviceName, error);
   }
-}
-
-export function getSpanColor(
-  muiTheme: Theme,
-  chartsTheme: PersesChartsTheme,
-  paletteMode: 'auto' | 'categorical' | undefined,
-  span: Span
-): string {
-  return getServiceColor(muiTheme, chartsTheme, paletteMode, span.resource.serviceName, spanHasError(span));
-}
-
-export function formatDuration(timeMs: number): string {
-  if (timeMs < 1) {
-    return `${Math.round(timeMs * 1000)}μs`;
-  }
-  if (timeMs < 1000) {
-    return `${+timeMs.toFixed(2)}ms`;
-  }
-  return `${+(timeMs / 1000).toFixed(2)}s`;
 }

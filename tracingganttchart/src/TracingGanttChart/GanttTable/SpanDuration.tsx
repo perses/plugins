@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
-import { Span } from '@perses-dev/core';
 import { useChartsTheme } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { Viewport, formatDuration, getSpanColor, minSpanWidthPx } from '../utils';
 import { Ticks } from '../Ticks';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { Span } from '../trace';
 
 export interface SpanDurationProps {
   options: TracingGanttChartOptions;

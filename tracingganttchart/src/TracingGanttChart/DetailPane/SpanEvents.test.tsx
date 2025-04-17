@@ -13,16 +13,19 @@
 
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
-import { MOCK_GANTT_TRACE } from '../../test/mock-trace-data';
+import { otlptracev1 } from '@perses-dev/core';
+import * as exampleTrace from '../../test/traces/example_otlp.json';
+import { getTraceModel } from '../trace';
 import { SpanEventList, SpanEventListProps } from './SpanEvents';
 
 describe('SpanEvents', () => {
+  const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
   const renderComponent = (props: SpanEventListProps): RenderResult => {
     return render(<SpanEventList {...props} />);
   };
 
   it('render', () => {
-    renderComponent({ trace: MOCK_GANTT_TRACE, span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]! });
+    renderComponent({ trace, span: trace.rootSpans[0]!.childSpans[0]! });
 
     expect(screen.getByText('150ms')).toBeInTheDocument();
     expect(screen.getByText('event1_name')).toBeInTheDocument();

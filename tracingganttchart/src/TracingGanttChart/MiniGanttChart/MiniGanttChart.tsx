@@ -16,12 +16,12 @@ import { ReactElement } from 'react';
 import { TicksHeader } from '../Ticks';
 import { Viewport, rowHeight } from '../utils';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
-import { GanttTrace } from '../trace';
+import { Trace } from '../trace';
 import { Canvas } from './Canvas';
 
 interface MiniGanttChartProps {
   options: TracingGanttChartOptions;
-  trace: GanttTrace;
+  trace: Trace;
   viewport: Viewport;
   setViewport: (v: Viewport) => void;
 }

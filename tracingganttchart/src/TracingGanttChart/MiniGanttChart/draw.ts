@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Span } from '@perses-dev/core';
-import { GanttTrace } from '../trace';
+import { Span, Trace } from '../trace';
 import { minSpanWidthPx } from '../utils';
 
 const MIN_BAR_HEIGHT = 1;
@@ -30,11 +29,11 @@ export function drawSpans(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  trace: GanttTrace,
+  trace: Trace,
   spanColorGenerator: (span: Span) => string
 ): void {
   // calculate optimal height, enforce min and max bar height and finally round to an integer
-  const numSpans = countSpans(trace.rootSpan);
+  const numSpans = trace.rootSpans.map(countSpans).reduce((acc, n) => acc + n, 0);
   const barHeight = Math.round(Math.min(Math.max(height / numSpans, MIN_BAR_HEIGHT), MAX_BAR_HEIGHT));
 
   const traceDuration = trace.endTimeUnixMs - trace.startTimeUnixMs;
@@ -62,5 +61,7 @@ export function drawSpans(
     }
   };
 
-  drawSpan(trace.rootSpan);
+  for (const rootSpan of trace.rootSpans) {
+    drawSpan(rootSpan);
+  }
 }

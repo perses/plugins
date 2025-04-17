@@ -14,10 +14,10 @@
 import { Box, styled } from '@mui/material';
 import { ReactElement } from 'react';
 import { Viewport, formatDuration } from './utils';
-import { GanttTrace } from './trace';
+import { Trace } from './trace';
 
 export interface TicksHeaderProps {
-  trace: GanttTrace;
+  trace: Trace;
   viewport: Viewport;
 }
 

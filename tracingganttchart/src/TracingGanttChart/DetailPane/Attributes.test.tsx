@@ -14,7 +14,7 @@
 import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router-dom';
-import { TraceAttributeValue } from '@perses-dev/core';
+import { otlpcommonv1 } from '@perses-dev/core';
 import { AttributeLinks, AttributeList, AttributeListProps } from './Attributes';
 
 describe('Attributes', () => {
@@ -54,7 +54,7 @@ describe('Attributes', () => {
   });
 
   it('render an attribute with a link', () => {
-    const stringValue = (val?: TraceAttributeValue): string => (val && 'stringValue' in val ? val.stringValue : '');
+    const stringValue = (val?: otlpcommonv1.AnyValue): string => (val && 'stringValue' in val ? val.stringValue : '');
     const attributeLinks: AttributeLinks = {
       'k8s.pod.name': (attrs) =>
         `/console/ns/${stringValue(attrs['k8s.namespace.name'])}/pod/${stringValue(attrs['k8s.pod.name'])}/detail`,

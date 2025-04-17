@@ -12,16 +12,15 @@
 // limitations under the License.
 
 import { Box, Divider, IconButton, Tab, Tabs, Typography } from '@mui/material';
-import { Span } from '@perses-dev/core';
 import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
-import { GanttTrace } from '../trace';
+import { Span, Trace } from '../trace';
 import { AttributeLinks, AttributeList } from './Attributes';
 import { SpanEventList } from './SpanEvents';
 
 export interface DetailPaneProps {
   attributeLinks?: AttributeLinks;
-  trace: GanttTrace;
+  trace: Trace;
   span: Span;
   onCloseBtnClick: () => void;
 }

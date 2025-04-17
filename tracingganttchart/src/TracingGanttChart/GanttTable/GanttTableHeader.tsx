@@ -15,10 +15,10 @@ import { Box, Stack, useTheme } from '@mui/material';
 import { ReactElement } from 'react';
 import { Viewport, rowHeight } from '../utils';
 import { TicksHeader } from '../Ticks';
-import { GanttTrace } from '../trace';
+import { Trace } from '../trace';
 
 interface GanttTableHeaderProps {
-  trace: GanttTrace;
+  trace: Trace;
   viewport: Viewport;
   nameColumnWidth: number;
   divider: React.ReactNode;

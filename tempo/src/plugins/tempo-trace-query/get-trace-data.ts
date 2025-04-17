@@ -12,27 +12,11 @@
 // limitations under the License.
 
 import { TraceQueryPlugin } from '@perses-dev/plugin-system';
-import {
-  TraceSearchResult,
-  AbsoluteTimeRange,
-  Trace,
-  Span,
-  isValidTraceId,
-  TraceResource,
-  SpanEvent,
-} from '@perses-dev/core';
+import { TraceSearchResult, AbsoluteTimeRange, isValidTraceId, otlptracev1 } from '@perses-dev/core';
 import { getUnixTime } from 'date-fns';
-import { sortedIndexBy } from 'lodash';
 import { TempoTraceQuerySpec, TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model';
 import { TempoClient } from '../../model/tempo-client';
-import {
-  SearchRequestParameters,
-  QueryResponse,
-  SearchResponse,
-  Resource as TempoResource,
-  Span as TempoSpan,
-  SpanEvent as TempoSpanEvent,
-} from '../../model/api-types';
+import { SearchRequestParameters, QueryResponse, SearchResponse } from '../../model/api-types';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
@@ -100,97 +84,9 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
   }
 };
 
-function parseResource(resource: TempoResource): TraceResource {
-  let serviceName = 'unknown';
-  for (const attr of resource.attributes) {
-    if (attr.key === 'service.name' && 'stringValue' in attr.value) {
-      serviceName = attr.value.stringValue;
-      break;
-    }
-  }
-
+function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
   return {
-    serviceName,
-    attributes: resource.attributes,
-  };
-}
-
-function parseEvent(event: TempoSpanEvent): SpanEvent {
-  return {
-    timeUnixMs: parseInt(event.timeUnixNano) * 1e-6, // convert to milliseconds because JS cannot handle numbers larger than 9007199254740991
-    name: event.name,
-    attributes: event.attributes || [],
-  };
-}
-
-/**
- * parseSpan parses the Span API type to the internal representation
- * i.e. convert strings to numbers etc.
- */
-function parseSpan(span: TempoSpan): Omit<Span, 'resource' | 'scope' | 'childSpans'> {
-  return {
-    traceId: span.traceId,
-    spanId: span.spanId,
-    parentSpanId: span.parentSpanId,
-    name: span.name,
-    kind: span.kind,
-    startTimeUnixMs: parseInt(span.startTimeUnixNano) * 1e-6, // convert to milliseconds because JS cannot handle numbers larger than 9007199254740991
-    endTimeUnixMs: parseInt(span.endTimeUnixNano) * 1e-6,
-    attributes: span.attributes || [],
-    events: (span.events || []).map(parseEvent),
-    status: span.status,
-  };
-}
-
-/**
- * parseTraceResponse builds a tree of spans from the Tempo API response
- * time complexity: O(2n)
- */
-function parseTraceResponse(response: QueryResponse): Trace {
-  // first pass: build lookup table <spanId, Span>
-  const lookup = new Map<string, Span>();
-  for (const batch of response.batches) {
-    const resource = parseResource(batch.resource);
-
-    for (const scopeSpan of batch.scopeSpans) {
-      const scope = scopeSpan.scope;
-
-      for (const tempoSpan of scopeSpan.spans) {
-        const span: Span = {
-          resource,
-          scope,
-          childSpans: [],
-          ...parseSpan(tempoSpan),
-        };
-        lookup.set(tempoSpan.spanId, span);
-      }
-    }
-  }
-
-  // second pass: build tree based on parentSpanId property
-  let rootSpan: Span | null = null;
-  for (const [, span] of lookup) {
-    if (!span.parentSpanId) {
-      rootSpan = span;
-    } else {
-      const parent = lookup.get(span.parentSpanId);
-      if (!parent) {
-        console.error(`span ${span.spanId} has parent ${span.parentSpanId} which has not been received yet`);
-        continue;
-      }
-
-      span.parentSpan = parent;
-      const insertChildSpanAt = sortedIndexBy(parent.childSpans, span, (s) => s.startTimeUnixMs);
-      parent.childSpans.splice(insertChildSpanAt, 0, span);
-    }
-  }
-
-  if (!rootSpan) {
-    throw new Error('root span not found');
-  }
-
-  return {
-    rootSpan,
+    resourceSpans: response.batches,
   };
 }
 

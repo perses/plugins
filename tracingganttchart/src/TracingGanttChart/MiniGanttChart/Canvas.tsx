@@ -14,19 +14,19 @@
 import { Box, styled, useTheme } from '@mui/material';
 import useResizeObserver from 'use-resize-observer';
 import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback, ReactElement } from 'react';
-import { Span, useEvent } from '@perses-dev/core';
+import { useEvent } from '@perses-dev/core';
 import { useChartsTheme } from '@perses-dev/components';
 import { Ticks } from '../Ticks';
 import { getSpanColor, Viewport } from '../utils';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
-import { GanttTrace } from '../trace';
+import { Span, Trace } from '../trace';
 import { drawSpans } from './draw';
 
 const CANVAS_HEIGHT = 60;
 
 interface CanvasProps {
   options: TracingGanttChartOptions;
-  trace: GanttTrace;
+  trace: Trace;
   viewport: Viewport;
   setViewport: (v: Viewport) => void;
 }

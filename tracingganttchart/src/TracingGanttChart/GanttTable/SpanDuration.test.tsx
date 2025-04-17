@@ -14,11 +14,14 @@
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
-import { MOCK_GANTT_TRACE } from '../../test/mock-trace-data';
+import { otlptracev1 } from '@perses-dev/core';
+import * as exampleTrace from '../../test/traces/example_otlp.json';
+import { getTraceModel } from '../trace';
 import { GanttTableProvider } from './GanttTableProvider';
 import { SpanDuration, SpanDurationProps } from './SpanDuration';
 
 describe('SpanDuration', () => {
+  const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
   const renderComponent = (props: SpanDurationProps): RenderResult => {
     return render(
       <ChartsProvider chartsTheme={testChartsTheme}>
@@ -32,10 +35,10 @@ describe('SpanDuration', () => {
   it('render span bar', () => {
     renderComponent({
       options: {},
-      span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
+      span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]!,
       viewport: {
-        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
-        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
+        startTimeUnixMs: trace.startTimeUnixMs,
+        endTimeUnixMs: trace.endTimeUnixMs,
       },
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();
@@ -46,10 +49,10 @@ describe('SpanDuration', () => {
   it('render span bar duration on left side', () => {
     renderComponent({
       options: {},
-      span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
+      span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]!,
       viewport: {
-        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs + 290,
-        endTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs + 400,
+        startTimeUnixMs: trace.startTimeUnixMs + 290,
+        endTimeUnixMs: trace.startTimeUnixMs + 400,
       },
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();
@@ -59,10 +62,10 @@ describe('SpanDuration', () => {
   it('render span bar with colors from eCharts theme', () => {
     renderComponent({
       options: { visual: { palette: { mode: 'categorical' } } },
-      span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
+      span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]!,
       viewport: {
-        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
-        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
+        startTimeUnixMs: trace.startTimeUnixMs,
+        endTimeUnixMs: trace.endTimeUnixMs,
       },
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();

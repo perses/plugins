@@ -13,7 +13,7 @@
 
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, Stack, useTheme } from '@mui/material';
-import { Span, Trace } from '@perses-dev/core';
+import { otlptracev1 } from '@perses-dev/core';
 import { TracingGanttChartOptions } from '../gantt-chart-model';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';
@@ -22,12 +22,12 @@ import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { AttributeLinks } from './DetailPane/Attributes';
-import { getTraceModel } from './trace';
+import { getTraceModel, Span } from './trace';
 
 export interface TracingGanttChartProps {
   options: TracingGanttChartOptions;
   attributeLinks?: AttributeLinks;
-  trace: Trace;
+  trace: otlptracev1.TracesData;
 }
 
 /**
@@ -37,13 +37,16 @@ export interface TracingGanttChartProps {
  * https://github.com/jaegertracing/jaeger-ui
  */
 export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
-  const { options, attributeLinks, trace: coreTrace } = props;
+  const { options, attributeLinks, trace: otlpTrace } = props;
 
   const theme = useTheme();
   const trace = useMemo(() => {
-    // calculate (and memoize) common properties, for example start and end time of the trace
-    return getTraceModel(coreTrace);
-  }, [coreTrace]);
+    try {
+      return getTraceModel(otlpTrace);
+    } catch (e) {
+      throw new Error(`Error: unable to parse trace: ${e}`);
+    }
+  }, [otlpTrace]);
   const [viewport, setViewport] = useState<Viewport>({
     startTimeUnixMs: trace.startTimeUnixMs,
     endTimeUnixMs: trace.endTimeUnixMs,

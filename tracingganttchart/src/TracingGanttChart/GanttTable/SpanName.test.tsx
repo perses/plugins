@@ -13,11 +13,14 @@
 
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
-import { MOCK_GANTT_TRACE } from '../../test/mock-trace-data';
-import { GanttTableProvider } from './GanttTableProvider';
+import { otlptracev1 } from '@perses-dev/core';
+import * as exampleTrace from '../../test/traces/example_otlp.json';
+import { getTraceModel } from '../trace';
 import { SpanName, SpanNameProps } from './SpanName';
+import { GanttTableProvider } from './GanttTableProvider';
 
 describe('SpanName', () => {
+  const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
   const renderComponent = (props: Omit<SpanNameProps, 'nameColumnWidth'>): RenderResult => {
     return render(
       <GanttTableProvider>
@@ -27,13 +30,13 @@ describe('SpanName', () => {
   };
 
   it('render span name without error', () => {
-    renderComponent({ span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]! });
+    renderComponent({ span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]! });
     expect(screen.getByText('testChildSpan3')).toBeInTheDocument();
     expect(screen.queryByText('error')).not.toBeInTheDocument();
   });
 
   it('render span name with error', () => {
-    renderComponent({ span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]! });
+    renderComponent({ span: trace.rootSpans[0]!.childSpans[0]! });
     expect(screen.getByText('testChildSpan2')).toBeInTheDocument();
     expect(screen.getByText('error')).toBeInTheDocument();
   });

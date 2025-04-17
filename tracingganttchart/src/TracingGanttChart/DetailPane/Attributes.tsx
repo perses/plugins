@@ -14,13 +14,13 @@
 import { ReactElement, useMemo } from 'react';
 import { Link, List, ListItem, ListItemText } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { TraceAttribute, TraceAttributeValue } from '@perses-dev/core';
+import { otlpcommonv1 } from '@perses-dev/core';
 
-export type AttributeLinks = Record<string, (attributes: Record<string, TraceAttributeValue>) => string>;
+export type AttributeLinks = Record<string, (attributes: Record<string, otlpcommonv1.AnyValue>) => string>;
 
 export interface AttributeListProps {
   attributeLinks?: AttributeLinks;
-  attributes: TraceAttribute[];
+  attributes: otlpcommonv1.KeyValue[];
 }
 
 export function AttributeList(props: AttributeListProps): ReactElement {
@@ -44,7 +44,7 @@ export function AttributeList(props: AttributeListProps): ReactElement {
 }
 
 interface AttributeItemProps {
-  attribute: TraceAttribute;
+  attribute: otlpcommonv1.KeyValue;
   linkTo?: string;
 }
 
@@ -71,7 +71,7 @@ function AttributeItem(props: AttributeItemProps): ReactElement {
   );
 }
 
-function renderAttributeValue(value: TraceAttributeValue): string {
+function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
   if ('stringValue' in value) return value.stringValue.length > 0 ? value.stringValue : '<empty string>';
   if ('intValue' in value) return value.intValue;
   if ('boolValue' in value) return value.boolValue.toString();
