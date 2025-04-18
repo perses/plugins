@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, RequestHeaders } from '@perses-dev/core';
+import { fetch, otlptracev1, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
 import {
   QueryRequestParameters,
@@ -20,7 +20,6 @@ import {
   SearchTagsResponse,
   QueryResponse,
   ServiceStats,
-  SpanStatusError,
   SearchResponse,
   SearchTagValuesRequestParameters,
   SearchTagValuesResponse,
@@ -123,8 +122,8 @@ export async function searchWithFallback(
 
         // For every trace, get the full trace, and find the number of spans and errors.
         for (const batch of searchTraceIDResponse.batches) {
-          let serviceName = '?';
-          for (const attr of batch.resource.attributes) {
+          let serviceName = 'unknown';
+          for (const attr of batch.resource?.attributes ?? []) {
             if (attr.key === 'service.name' && 'stringValue' in attr.value) {
               serviceName = attr.value.stringValue;
               break;
@@ -135,7 +134,7 @@ export async function searchWithFallback(
           for (const scopeSpan of batch.scopeSpans) {
             stats.spanCount += scopeSpan.spans.length;
             for (const span of scopeSpan.spans) {
-              if (span.status?.code === SpanStatusError) {
+              if (span.status?.code === otlptracev1.StatusCodeError) {
                 stats.errorCount = (stats.errorCount ?? 0) + 1;
               }
             }

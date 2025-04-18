@@ -11,19 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Common types
- */
-export interface Attribute {
-  key: string;
-  value: AttributeValue;
-}
-
-export type AttributeValue =
-  | { stringValue: string }
-  | { intValue: string }
-  | { boolValue: boolean }
-  | { arrayValue: { values: AttributeValue[] } };
+import { otlpcommonv1, otlptracev1 } from '@perses-dev/core';
 
 /**
  * Request parameters of Tempo HTTP API endpoint GET /api/search
@@ -72,7 +60,7 @@ export interface SpanSearchResponse {
   name?: string;
   startTimeUnixNano: string;
   durationNanos: string;
-  attributes?: Attribute[];
+  attributes?: otlpcommonv1.KeyValue[];
 }
 
 export interface ServiceStats {
@@ -94,54 +82,8 @@ export interface QueryRequestParameters {
  * OTEL trace proto: https://github.com/open-telemetry/opentelemetry-proto-go/blob/main/otlp/trace/v1/trace.pb.go
  */
 export interface QueryResponse {
-  batches: Batch[];
+  batches: otlptracev1.ResourceSpan[];
 }
-
-export interface Batch {
-  resource: Resource;
-  scopeSpans: ScopeSpan[];
-}
-
-export interface Resource {
-  attributes: Attribute[];
-}
-
-export interface ScopeSpan {
-  scope: Scope;
-  spans: Span[];
-}
-
-export interface Scope {
-  name: string;
-}
-
-export interface Span {
-  traceId: string;
-  spanId: string;
-  parentSpanId?: string;
-  name: string;
-  kind: string;
-  startTimeUnixNano: string;
-  endTimeUnixNano: string;
-  attributes?: Attribute[];
-  events?: SpanEvent[];
-  status?: SpanStatus;
-}
-
-export interface SpanEvent {
-  timeUnixNano: string;
-  name: string;
-  attributes?: Attribute[];
-}
-
-export interface SpanStatus {
-  code?: typeof SpanStatusUnset | typeof SpanStatusOk | typeof SpanStatusError;
-  message?: string;
-}
-
-export const SpanStatusUnset = 'STATUS_CODE_UNSET';
-export const SpanStatusOk = 'STATUS_CODE_OK';
-export const SpanStatusError = 'STATUS_CODE_ERROR';
 
 /**
  * Request parameters of Tempo HTTP API endpoint GET /api/v2/search/tags

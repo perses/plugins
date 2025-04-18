@@ -11,15 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Span, TraceData } from '@perses-dev/core';
+import { TraceData } from '@perses-dev/core';
 import { QueryResponse, SearchResponse } from '../model/api-types';
-
-function addParentReferences(span: Span): void {
-  for (const child of span.childSpans) {
-    child.parentSpan = span;
-    addParentReferences(child);
-  }
-}
 
 export const MOCK_TRACE_RESPONSE: QueryResponse = {
   batches: [
@@ -2433,96 +2426,3 @@ export const MOCK_TRACE_DATA_SEARCHRESULT: TraceData = {
   ],
   metadata: { executedQueryString: 'duration > 900ms' },
 };
-
-export const MOCK_TRACE_DATA_TRACE: TraceData = {
-  trace: {
-    rootSpan: {
-      resource: {
-        serviceName: 'shop-backend',
-        attributes: [{ key: 'service.name', value: { stringValue: 'shop-backend' } }],
-      },
-      scope: { name: 'k6' },
-      traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
-      spanId: 'nCLrd8tcFMc=',
-      name: 'article-to-cart',
-      kind: 'SPAN_KIND_SERVER',
-      startTimeUnixMs: 1718122135898.4426,
-      endTimeUnixMs: 1718122136696.6519,
-      attributes: [
-        { key: 'http.url', value: { stringValue: 'https://shop-backend.local:8523/article-to-cart' } },
-        { key: 'http.status_code', value: { intValue: '202' } },
-      ],
-      events: [],
-      status: {},
-      childSpans: [
-        {
-          resource: {
-            serviceName: 'shop-backend',
-            attributes: [{ key: 'service.name', value: { stringValue: 'shop-backend' } }],
-          },
-          scope: { name: 'k6' },
-          childSpans: [
-            {
-              resource: {
-                serviceName: 'auth-service',
-                attributes: [{ key: 'service.name', value: { stringValue: 'auth-service' } }],
-              },
-              scope: { name: 'k6' },
-              childSpans: [],
-              traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
-              spanId: 'AYBIFdTlycc=',
-              parentSpanId: 'hGe8oRN3wWY=',
-              name: 'authenticate',
-              kind: 'SPAN_KIND_SERVER',
-              startTimeUnixMs: 1718122135970.602,
-              endTimeUnixMs: 1718122136107.7405,
-              attributes: [],
-              events: [],
-              status: { message: 'Forbidden', code: 'STATUS_CODE_ERROR' },
-            },
-          ],
-          traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
-          spanId: 'hGe8oRN3wWY=',
-          parentSpanId: 'nCLrd8tcFMc=',
-          name: 'authenticate',
-          kind: 'SPAN_KIND_CLIENT',
-          startTimeUnixMs: 1718122135954.7656,
-          endTimeUnixMs: 1718122136154.2273,
-          attributes: [{ key: 'net.transport', value: { stringValue: 'ip_tcp' } }],
-          events: [
-            {
-              timeUnixMs: 1718122136068.6138,
-              name: 'event_k6.7W272ywYih',
-              attributes: [
-                { key: 'k6.sJekvnAr5h7vJfK', value: { stringValue: 'SZ9vwpLkAzAm2Bju1VJroUlGD8u3pS' } },
-                { key: 'k6.81JLO5NlT1lAeF1', value: { stringValue: '4AzrPTOML11aIN3dYgbKSaAe9HErnZ' } },
-                { key: 'k6.tdj0bfOxLndyJuN', value: { stringValue: 'PeMAsdQ5469IjQgGtifBA7OgfFdoMb' } },
-              ],
-            },
-          ],
-          status: {},
-        },
-        {
-          resource: {
-            serviceName: 'shop-backend',
-            attributes: [{ key: 'service.name', value: { stringValue: 'shop-backend' } }],
-          },
-          scope: { name: 'k6' },
-          childSpans: [],
-          traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
-          spanId: 'r2NxHHPjciM=',
-          parentSpanId: 'nCLrd8tcFMc=',
-          name: 'get-article',
-          kind: 'SPAN_KIND_CLIENT',
-          startTimeUnixMs: 1718122135965.2107,
-          endTimeUnixMs: 1718122136520.158,
-          attributes: [{ key: 'http.method', value: { stringValue: 'DELETE' } }],
-          events: [],
-          status: {},
-        },
-      ],
-    },
-  },
-  metadata: { executedQueryString: '61a1487c461d9e08' },
-};
-addParentReferences(MOCK_TRACE_DATA_TRACE.trace!.rootSpan);

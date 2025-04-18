@@ -1,0 +1,694 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "k6",
+            "value": {
+              "stringValue": "true"
+            }
+          },
+          {
+            "key": "k8s.pod.ip",
+            "value": {
+              "stringValue": "10.244.0.65"
+            }
+          },
+          {
+            "key": "k8s.pod.uid",
+            "value": {
+              "stringValue": "40ddac83-e7e2-4621-a164-4f2321f4fa20"
+            }
+          },
+          {
+            "key": "k8s.deployment.name",
+            "value": {
+              "stringValue": "k6-tracing"
+            }
+          },
+          {
+            "key": "k8s.node.name",
+            "value": {
+              "stringValue": "minikube"
+            }
+          },
+          {
+            "key": "k8s.pod.start_time",
+            "value": {
+              "stringValue": "2025-03-31T16:09:18Z"
+            }
+          },
+          {
+            "key": "container.image.name",
+            "value": {
+              "stringValue": "ghcr.io/grafana/xk6-client-tracing"
+            }
+          },
+          {
+            "key": "container.image.tag",
+            "value": {
+              "stringValue": "v0.0.5"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "shop-backend"
+            }
+          },
+          {
+            "key": "k8s.namespace.name",
+            "value": {
+              "stringValue": "tracing-app-k6"
+            }
+          },
+          {
+            "key": "k8s.pod.name",
+            "value": {
+              "stringValue": "k6-tracing-697b6ddfd7-vvcsd"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "k6"
+          },
+          "spans": [
+            {
+              "traceId": "HbsI5l8tlR19CSvMReI2Tw==",
+              "spanId": "RDmSeSCV3dE=",
+              "name": "get-inventory",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1744817139545250561",
+              "endTimeUnixNano": "1744817140277780094",
+              "attributes": [
+                {
+                  "key": "one",
+                  "value": {
+                    "stringValue": "three"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.sock.family",
+                  "value": {
+                    "stringValue": "inet"
+                  }
+                },
+                {
+                  "key": "net.sock.host.addr",
+                  "value": {
+                    "stringValue": "192.168.222.186"
+                  }
+                },
+                {
+                  "key": "net.host.name",
+                  "value": {
+                    "stringValue": "shop-backend.local"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "8923"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.response.header.content-type",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "text/plain"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "https"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/get-inventory"
+                  }
+                },
+                {
+                  "key": "http.response_content_length",
+                  "value": {
+                    "intValue": "628631"
+                  }
+                },
+                {
+                  "key": "http.request_content_length",
+                  "value": {
+                    "intValue": "38146"
+                  }
+                },
+                {
+                  "key": "k6.NiWmVaWJbQFvxRm",
+                  "value": {
+                    "stringValue": "yMbfLBYg7NSPS2wKKSpTpa94RdRreJ"
+                  }
+                },
+                {
+                  "key": "k6.x43leDoDD1jBklm",
+                  "value": {
+                    "stringValue": "IXSKq8CfyPi39sqjQg4LF7mtzmG7DO"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "https://shop-backend.local:8923/get-inventory"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "403"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1744817140239737350",
+                  "name": "exception",
+                  "attributes": [
+                    {
+                      "key": "exception.stacktrace",
+                      "value": {
+                        "stringValue": "panic: runtime error: can't divide by 0\npayment.collect()"
+                      }
+                    },
+                    {
+                      "key": "exception.type",
+                      "value": {
+                        "stringValue": "error.type_k6.V6CRNrmIaj"
+                      }
+                    },
+                    {
+                      "key": "exception.escape",
+                      "value": {
+                        "boolValue": false
+                      }
+                    },
+                    {
+                      "key": "exception.message",
+                      "value": {
+                        "stringValue": "error: k6.6XeI3oO9MPbEZDfHG5kB"
+                      }
+                    },
+                    {
+                      "key": "k6.vJMnC6LuLPhwSR0",
+                      "value": {
+                        "stringValue": "b1UAJsi2SG0ZX45MdF17aV4hR0t2An"
+                      }
+                    },
+                    {
+                      "key": "k6.lXD5EmurzieCcfI",
+                      "value": {
+                        "stringValue": "2Sn80mG3W8n9mIyCC2hxnevxixxMSH"
+                      }
+                    },
+                    {
+                      "key": "k6.WAmGYs15FvKL8rn",
+                      "value": {
+                        "stringValue": "4VwKtwuj6mVV5fLjc9GbvpjZmfehUS"
+                      }
+                    },
+                    {
+                      "key": "k6.AFF9lt9TolyUhoT",
+                      "value": {
+                        "stringValue": "6ta36Dy5vyFkJIOkHoEnsbt56X0AM6"
+                      }
+                    },
+                    {
+                      "key": "k6.X5oNsNbwsavliRv",
+                      "value": {
+                        "stringValue": "cGfrNF0wvEg9VkdrGdaoOI9JQLugt0"
+                      }
+                    },
+                    {
+                      "key": "k6.q5W5pyx3QiobhrM",
+                      "value": {
+                        "stringValue": "H6xPDzIYBWnlMjDt1OUKQxv1WXgmFM"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "HbsI5l8tlR19CSvMReI2Tw==",
+              "spanId": "URmmGVn2TEs=",
+              "parentSpanId": "RDmSeSCV3dE=",
+              "name": "authenticate",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1744817139584814319",
+              "endTimeUnixNano": "1744817140076849911",
+              "attributes": [
+                {
+                  "key": "one",
+                  "value": {
+                    "stringValue": "three"
+                  }
+                },
+                {
+                  "key": "http.request.header.accept",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "application/json"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.sock.family",
+                  "value": {
+                    "stringValue": "inet"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "8891"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "k6.NiWmVaWJbQFvxRm",
+                  "value": {
+                    "stringValue": "yMbfLBYg7NSPS2wKKSpTpa94RdRreJ"
+                  }
+                },
+                {
+                  "key": "k6.x43leDoDD1jBklm",
+                  "value": {
+                    "stringValue": "IXSKq8CfyPi39sqjQg4LF7mtzmG7DO"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "192.168.239.110"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "auth-service.local"
+                  }
+                },
+                {
+                  "key": "http.response_content_length",
+                  "value": {
+                    "intValue": "259572"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "https://auth-service.local:8233/authenticate"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "403"
+                  }
+                }
+              ],
+              "status": {
+                "message": "Forbidden",
+                "code": "STATUS_CODE_ERROR"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "k6",
+            "value": {
+              "stringValue": "true"
+            }
+          },
+          {
+            "key": "k8s.pod.ip",
+            "value": {
+              "stringValue": "10.244.0.65"
+            }
+          },
+          {
+            "key": "k8s.pod.start_time",
+            "value": {
+              "stringValue": "2025-03-31T16:09:18Z"
+            }
+          },
+          {
+            "key": "k8s.pod.uid",
+            "value": {
+              "stringValue": "40ddac83-e7e2-4621-a164-4f2321f4fa20"
+            }
+          },
+          {
+            "key": "k8s.deployment.name",
+            "value": {
+              "stringValue": "k6-tracing"
+            }
+          },
+          {
+            "key": "k8s.node.name",
+            "value": {
+              "stringValue": "minikube"
+            }
+          },
+          {
+            "key": "container.image.name",
+            "value": {
+              "stringValue": "ghcr.io/grafana/xk6-client-tracing"
+            }
+          },
+          {
+            "key": "container.image.tag",
+            "value": {
+              "stringValue": "v0.0.5"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "auth-service"
+            }
+          },
+          {
+            "key": "k8s.namespace.name",
+            "value": {
+              "stringValue": "tracing-app-k6"
+            }
+          },
+          {
+            "key": "k8s.pod.name",
+            "value": {
+              "stringValue": "k6-tracing-697b6ddfd7-vvcsd"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "k6"
+          },
+          "spans": [
+            {
+              "traceId": "HbsI5l8tlR19CSvMReI2Tw==",
+              "spanId": "mqK3KmW+5js=",
+              "parentSpanId": "URmmGVn2TEs=",
+              "name": "authenticate",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1744817139615856695",
+              "endTimeUnixNano": "1744817139948998344",
+              "attributes": [
+                {
+                  "key": "one",
+                  "value": {
+                    "stringValue": "three"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.sock.family",
+                  "value": {
+                    "stringValue": "inet"
+                  }
+                },
+                {
+                  "key": "net.sock.host.addr",
+                  "value": {
+                    "stringValue": "192.168.239.110"
+                  }
+                },
+                {
+                  "key": "net.host.name",
+                  "value": {
+                    "stringValue": "auth-service.local"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "8233"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.response.header.content-type",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "application/json"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "https"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/authenticate"
+                  }
+                },
+                {
+                  "key": "http.response_content_length",
+                  "value": {
+                    "intValue": "259572"
+                  }
+                },
+                {
+                  "key": "k6.NiWmVaWJbQFvxRm",
+                  "value": {
+                    "stringValue": "yMbfLBYg7NSPS2wKKSpTpa94RdRreJ"
+                  }
+                },
+                {
+                  "key": "k6.x43leDoDD1jBklm",
+                  "value": {
+                    "stringValue": "IXSKq8CfyPi39sqjQg4LF7mtzmG7DO"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "https://auth-service.local:8233/authenticate"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "403"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1744817139789721799",
+                  "name": "exception",
+                  "attributes": [
+                    {
+                      "key": "exception.escape",
+                      "value": {
+                        "boolValue": false
+                      }
+                    },
+                    {
+                      "key": "exception.message",
+                      "value": {
+                        "stringValue": "error: k6.3Q3VR93FSppHK8bvvOKS"
+                      }
+                    },
+                    {
+                      "key": "exception.stacktrace",
+                      "value": {
+                        "stringValue": "panic: runtime error: can't divide by 0\naccount.login()"
+                      }
+                    },
+                    {
+                      "key": "exception.type",
+                      "value": {
+                        "stringValue": "error.type_k6.up7wyR970H"
+                      }
+                    },
+                    {
+                      "key": "k6.t0fRGurc8O43FqV",
+                      "value": {
+                        "stringValue": "J5Fsgp4VKsJotpSn1szNipIDdlm9YE"
+                      }
+                    },
+                    {
+                      "key": "k6.CA9ruAp9oOWD62o",
+                      "value": {
+                        "stringValue": "NvjAY6KgX1HPLkzLcRN9MSwcmDVGrc"
+                      }
+                    },
+                    {
+                      "key": "k6.fqxLpBCUHkrug9D",
+                      "value": {
+                        "stringValue": "wkqaKu6Ja2u2QWo5PVRrjI7Wcij4Jg"
+                      }
+                    },
+                    {
+                      "key": "k6.zWe8l5JQ2wjwRcv",
+                      "value": {
+                        "stringValue": "mnKLtHjOpHOeuCKB8jdoj7uJ6Ud3ur"
+                      }
+                    },
+                    {
+                      "key": "k6.aIUepzjHTVxZysu",
+                      "value": {
+                        "stringValue": "TDYxLuPe19D6vx2XqB99eEGmIa8AAf"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "timeUnixNano": "1744817139890995713",
+                  "name": "exception",
+                  "attributes": [
+                    {
+                      "key": "exception.escape",
+                      "value": {
+                        "boolValue": false
+                      }
+                    },
+                    {
+                      "key": "exception.message",
+                      "value": {
+                        "stringValue": "error: k6.ftifKuB0kP6IJCx5GSi2"
+                      }
+                    },
+                    {
+                      "key": "exception.stacktrace",
+                      "value": {
+                        "stringValue": "panic: runtime error: can't divide by 0\npayment.collect()"
+                      }
+                    },
+                    {
+                      "key": "exception.type",
+                      "value": {
+                        "stringValue": "error.type_k6.Z8EEAqaHKw"
+                      }
+                    },
+                    {
+                      "key": "k6.rJRKzRnfimM91Nd",
+                      "value": {
+                        "stringValue": "mqfTWvOHh6kYH3BMP4lmXi5G8Ys73Q"
+                      }
+                    },
+                    {
+                      "key": "k6.Kx3BULeW9jtSv28",
+                      "value": {
+                        "stringValue": "ucw8lXCr2DNFAULZqPT1kgbBWjRhbo"
+                      }
+                    },
+                    {
+                      "key": "k6.vXrG60SYEtzqoAq",
+                      "value": {
+                        "stringValue": "K7x1D8gmx0ToBys776kb7UFezBjIBh"
+                      }
+                    },
+                    {
+                      "key": "k6.diJE0SBJgg5roRk",
+                      "value": {
+                        "stringValue": "nNArNW24Vy62a0clOG3LlxIlcVR0eJ"
+                      }
+                    },
+                    {
+                      "key": "k6.AylDHApZfitA57G",
+                      "value": {
+                        "stringValue": "b9zizL1vfEe6okzCxSjIpb67Ki8bk0"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

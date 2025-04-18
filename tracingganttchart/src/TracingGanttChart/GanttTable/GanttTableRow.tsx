@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { Stack, styled, useTheme } from '@mui/material';
-import { Span } from '@perses-dev/core';
 import { memo } from 'react';
 import { Viewport, rowHeight } from '../utils';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { Span } from '../trace';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
 

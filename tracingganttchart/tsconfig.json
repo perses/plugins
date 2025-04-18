@@ -5,6 +5,7 @@
     "module": "ESNext",
     "jsx": "react-jsx",
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "resolveJsonModule": true,

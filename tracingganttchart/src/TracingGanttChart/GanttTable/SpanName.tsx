@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { Span } from '@perses-dev/core';
 import AlertIcon from 'mdi-material-ui/AlertCircleOutline';
 import { ReactElement } from 'react';
 import { spanHasError } from '../utils';
+import { Span } from '../trace';
 import { SpanIndents } from './SpanIndents';
 
 export interface SpanNameProps {

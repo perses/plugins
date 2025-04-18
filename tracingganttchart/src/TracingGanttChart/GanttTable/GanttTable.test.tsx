@@ -15,11 +15,14 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { fireEvent, screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { MOCK_GANTT_TRACE } from '../../test/mock-trace-data';
+import { otlptracev1 } from '@perses-dev/core';
+import * as exampleTrace from '../../test/traces/example_otlp.json';
+import { getTraceModel } from '../trace';
 import { GanttTable, GanttTableProps } from './GanttTable';
 import { GanttTableProvider } from './GanttTableProvider';
 
 describe('GanttTable', () => {
+  const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
   const renderComponent = (props: Omit<GanttTableProps, 'onSpanClick'>): RenderResult => {
     const onSpanClick = jest.fn();
     return render(
@@ -36,10 +39,10 @@ describe('GanttTable', () => {
   it('render table', () => {
     renderComponent({
       options: {},
-      trace: MOCK_GANTT_TRACE,
+      trace,
       viewport: {
-        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
-        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
+        startTimeUnixMs: trace.startTimeUnixMs,
+        endTimeUnixMs: trace.endTimeUnixMs,
       },
     });
     expect(screen.getByText('testRootSpan')).toBeInTheDocument();
@@ -50,10 +53,10 @@ describe('GanttTable', () => {
   it('collapses a span on click', () => {
     renderComponent({
       options: {},
-      trace: MOCK_GANTT_TRACE,
+      trace,
       viewport: {
-        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
-        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
+        startTimeUnixMs: trace.startTimeUnixMs,
+        endTimeUnixMs: trace.endTimeUnixMs,
       },
     });
     fireEvent.click(screen.getAllByTitle('collapse')[1]!);

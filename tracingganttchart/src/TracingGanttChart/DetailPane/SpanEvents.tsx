@@ -12,15 +12,14 @@
 // limitations under the License.
 
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
-import { Span, SpanEvent } from '@perses-dev/core';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
 import { ReactElement } from 'react';
 import { formatDuration } from '../utils';
-import { GanttTrace } from '../trace';
+import { Trace, Span, Event } from '../trace';
 import { AttributeList } from './Attributes';
 
 export interface SpanEventListProps {
-  trace: GanttTrace;
+  trace: Trace;
   span: Span;
 }
 
@@ -39,8 +38,8 @@ export function SpanEventList(props: SpanEventListProps): ReactElement {
 }
 
 interface SpanEventItemProps {
-  trace: GanttTrace;
-  event: SpanEvent;
+  trace: Trace;
+  event: Event;
 }
 
 function SpanEventItem(props: SpanEventItemProps): ReactElement {

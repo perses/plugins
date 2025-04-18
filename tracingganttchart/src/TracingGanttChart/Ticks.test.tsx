@@ -13,18 +13,21 @@
 
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
-import { MOCK_GANTT_TRACE } from '../test/mock-trace-data';
+import { otlptracev1 } from '@perses-dev/core';
+import * as otlpTrace from '../test/traces/example_otlp.json';
 import { TicksHeader, TicksHeaderProps } from './Ticks';
+import { getTraceModel } from './trace';
 
 describe('Ticks', () => {
+  const trace = getTraceModel(otlpTrace as otlptracev1.TracesData);
   const renderComponent = (props: TicksHeaderProps): RenderResult => {
     return render(<TicksHeader {...props} />);
   };
 
   it('render <TicksHeader>', () => {
     renderComponent({
-      trace: MOCK_GANTT_TRACE,
-      viewport: { startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs, endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs },
+      trace,
+      viewport: { startTimeUnixMs: trace.startTimeUnixMs, endTimeUnixMs: trace.endTimeUnixMs },
     });
     expect(screen.getByText('0μs')).toBeInTheDocument();
     expect(screen.getByText('250ms')).toBeInTheDocument();

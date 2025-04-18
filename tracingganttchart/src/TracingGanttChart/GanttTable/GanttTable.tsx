@@ -12,12 +12,11 @@
 // limitations under the License.
 
 import { Virtuoso, ListRange } from 'react-virtuoso';
-import { Span } from '@perses-dev/core';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
-import { GanttTrace } from '../trace';
+import { Span, Trace } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
 import { GanttTableHeader } from './GanttTableHeader';
@@ -25,7 +24,7 @@ import { ResizableDivider } from './ResizableDivider';
 
 export interface GanttTableProps {
   options: TracingGanttChartOptions;
-  trace: GanttTrace;
+  trace: Trace;
   viewport: Viewport;
   selectedSpan?: Span;
   onSpanClick: (span: Span) => void;
@@ -40,9 +39,11 @@ export function GanttTable(props: GanttTableProps): ReactElement {
 
   const rows = useMemo(() => {
     const rows: Span[] = [];
-    treeToRows(rows, trace.rootSpan, collapsedSpans);
+    for (const rootSpan of trace.rootSpans) {
+      treeToRows(rows, rootSpan, collapsedSpans);
+    }
     return rows;
-  }, [trace.rootSpan, collapsedSpans]);
+  }, [trace.rootSpans, collapsedSpans]);
 
   const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
 

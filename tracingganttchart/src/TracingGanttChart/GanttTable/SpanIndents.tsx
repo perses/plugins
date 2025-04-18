@@ -15,7 +15,7 @@ import { styled, useTheme } from '@mui/material';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import { MouseEvent, ReactElement, useCallback } from 'react';
-import { Span } from '@perses-dev/core';
+import { Span } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 
 const MIN_INDENT_WIDTH = 8;
