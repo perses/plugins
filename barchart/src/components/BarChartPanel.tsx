@@ -16,8 +16,8 @@ import { Box } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
 import { CalculationType, CalculationsMap, TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
-import { BarChartOptions } from './bar-chart-model';
-import { calculatePercentages, sortSeriesData } from './utils';
+import { BarChartOptions } from '../bar-chart-model';
+import { calculatePercentages, sortSeriesData } from '../utils';
 
 export type BarChartPanelProps = PanelProps<BarChartOptions, TimeSeriesData>;
 

@@ -13,8 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialBarChartOptions, BarChartOptions } from './bar-chart-model';
-import { BarChartOptionsEditorSettings } from './BarChartOptionsEditorSettings';
-import { BarChartPanel, BarChartPanelProps } from './BarChartPanel';
+import { BarChartOptionsEditorSettings, BarChartPanel, BarChartPanelProps } from './components';
 
 /**
  * The core BarChart panel plugin for Perses.

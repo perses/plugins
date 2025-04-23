@@ -36,7 +36,7 @@ import {
   DEFAULT_FORMAT,
   DEFAULT_MODE,
   DEFAULT_SORT,
-} from './bar-chart-model';
+} from '../bar-chart-model';
 
 export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
