@@ -14,9 +14,12 @@
 import { PanelPlugin } from '@perses-dev/plugin-system';
 
 import { createInitialStatusHistoryChartOptions, StatusHistoryChartOptions } from './status-history-model';
-import { StatusHistoryChartOptionsEditorSettings } from './StatusHistoryChartOptionsEditorSettings';
-import { StatusHistoryChartPanelProps, StatusHistoryPanel } from './StatusHistoryPanel';
-import { StatusHistoryValueMappingEditor } from './StatusHistoryValueMappingEditor';
+import {
+  StatusHistoryChartOptionsEditorSettings,
+  StatusHistoryChartPanelProps,
+  StatusHistoryPanel,
+  StatusHistoryValueMappingEditor,
+} from './components';
 
 export const StatusHistoryChart: PanelPlugin<StatusHistoryChartOptions, StatusHistoryChartPanelProps> = {
   PanelComponent: StatusHistoryPanel,

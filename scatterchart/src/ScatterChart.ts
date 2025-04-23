@@ -13,7 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialScatterChartOptions, ScatterChartOptions } from './scatter-chart-model';
-import { ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
+import { ScatterChartPanel, ScatterChartPanelProps } from './components';
 
 /**
  * The core ScatterChart panel plugin for Perses.

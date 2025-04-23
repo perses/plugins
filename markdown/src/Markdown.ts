@@ -13,8 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialMarkdownPanelOptions, MarkdownPanelOptions } from './markdown-panel-model';
-import { MarkdownPanel } from './MarkdownPanel';
-import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';
+import { MarkdownPanel, MarkdownPanelOptionsEditor } from './components';
 
 /**
  * The core Markdown panel plugin in Perses.

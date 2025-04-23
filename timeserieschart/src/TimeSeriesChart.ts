@@ -13,8 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
-import { TimeSeriesChartOptionsEditorSettings } from './TimeSeriesChartOptionsEditorSettings';
-import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import { TimeSeriesChartOptionsEditorSettings, TimeSeriesChartPanel, TimeSeriesChartProps } from './components';
 
 /**
  * The core TimeSeriesChart panel plugin for Perses.

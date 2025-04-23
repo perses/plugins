@@ -13,8 +13,12 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialGaugeChartOptions, GaugeChartOptions } from './gauge-chart-model';
-import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
-import { GaugeChartLoading, GaugeChartPanel, GaugeChartPanelProps } from './GaugeChartPanel';
+import {
+  GaugeChartLoading,
+  GaugeChartOptionsEditorSettings,
+  GaugeChartPanel,
+  GaugeChartPanelProps,
+} from './components';
 
 /**
  * The core GaugeChart panel plugin for Perses.
