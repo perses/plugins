@@ -1,4 +1,4 @@
-# Perses Datasource Plugin
+# Prometheus Plugins
 
 ## Setup
 

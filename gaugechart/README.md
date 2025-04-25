@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# GaugeChart Panel Plugin
 
 ## Setup
 

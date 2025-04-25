@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# StatChart Panel Plugin
 
 ## Setup
 

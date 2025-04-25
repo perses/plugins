@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# Table Panel Plugin
 
 ## Setup
 
