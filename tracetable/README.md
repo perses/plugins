@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# TraceTable Panel Plugin
 
 ## Setup
 

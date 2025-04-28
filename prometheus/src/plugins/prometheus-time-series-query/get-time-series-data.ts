@@ -143,32 +143,52 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
 
 function buildVectorData(query: string, data: VectorData, seriesNameFormat: string | undefined): TimeSeries[] {
   return data.result.map((res) => {
-    const { metric, value } = res;
+    const { metric, value, histogram } = res;
 
     // Account for seriesNameFormat from query editor when determining name to show in legend, tooltip, etc.
     const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
 
+    if (histogram) {
+      return {
+        name,
+        formattedName,
+        labels: metric,
+        values: [parseValueTuple([histogram[0], histogram[1].sum])],
+        histograms: [histogram],
+      };
+    }
+
     return {
       name,
-      values: [parseValueTuple(value)],
       formattedName,
       labels: metric,
+      values: [parseValueTuple(value)],
     };
   });
 }
 
 function buildMatrixData(query: string, data: MatrixData, seriesNameFormat: string | undefined): TimeSeries[] {
   return data.result.map((res) => {
-    const { metric, values } = res;
+    const { metric, values, histograms } = res;
 
     // Account for seriesNameFormat from query editor when determining name to show in legend, tooltip, etc.
     const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
 
+    if (histograms) {
+      return {
+        name,
+        formattedName,
+        labels: metric,
+        values: histograms.map((histogram) => parseValueTuple([histogram[0], histogram[1].sum])),
+        histograms: histograms.map((histogram) => histogram),
+      };
+    }
+
     return {
       name,
-      values: values.map(parseValueTuple),
       formattedName,
       labels: metric,
+      values: values.map(parseValueTuple),
     };
   });
 }
@@ -190,7 +210,6 @@ function buildTimeSeries(query: string, data?: InstantQueryResultType, seriesNam
   }
 
   const resultType = data.resultType;
-
   switch (resultType) {
     case 'vector':
       return buildVectorData(query, data, seriesNameFormat);

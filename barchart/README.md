@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# BarChart Panel Plugin
 
 ## Setup
 

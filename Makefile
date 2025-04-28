@@ -14,10 +14,10 @@
 GO ?= go
 MDOX ?= mdox
 
-.PHONY: schemas-validate
-validate-schemas:
-	@echo ">> Validate schemas for all plugins"
-	$(GO) run ./scripts/validate-schemas/validate-schemas.go
+.PHONY: lint-plugins
+lint-plugins:
+	@echo ">> Lint all plugins"
+	$(GO) run ./scripts/lint-plugins/lint-plugins.go
 
 .PHONY: tidy-modules
 tidy-modules:

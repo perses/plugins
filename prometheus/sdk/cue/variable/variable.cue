@@ -17,10 +17,17 @@ import (
 	listVarBuilder "github.com/perses/perses/cue/dac-utils/variable/list"
 )
 
+// The Prometheus Variable builder helps creating any kind of prometheus variable in the format expected by Perses.
+// Parameters:
+// - every parameter from listVarBuilder
+// - (Optional) `#datasourceName`: the name of the datasource to query
+// Output:
+// - `variable`: the variable object
+
 // include the definitions of listVarBuilder at the root
 listVarBuilder
 
-#datasourceName: _ // this is needed for below reference
+#datasourceName?: string
 
 variable: listVarBuilder.variable & {
 	spec: {
@@ -28,7 +35,9 @@ variable: listVarBuilder.variable & {
 			spec: {
 				datasource: {
 					kind: "PrometheusDatasource"
-					name: #datasourceName
+					if #datasourceName != _|_ {
+						name: #datasourceName
+					}
 				}
 			}
 		}

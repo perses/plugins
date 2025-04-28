@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StackProps, Switch, TextField } from '@mui/material';
+import { Button, ButtonGroup, StackProps, Switch, TextField } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
@@ -23,6 +23,7 @@ import {
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
+import { PluginKindSelect } from '@perses-dev/plugin-system';
 import { ColumnSettings } from '../table-model';
 
 const DEFAULT_FORMAT: FormatOptions = {
@@ -119,15 +120,47 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
-          <FormatControls
-            value={column.format ?? DEFAULT_FORMAT}
-            onChange={(newFormat): void =>
-              onChange({
-                ...column,
-                format: newFormat,
-              })
+          <OptionsEditorControl
+            label="Display"
+            control={
+              <ButtonGroup aria-label="Display" size="small">
+                <Button
+                  variant={!column.plugin ? 'contained' : 'outlined'}
+                  onClick={() => onChange({ ...column, plugin: undefined })}
+                >
+                  Text
+                </Button>
+                <Button
+                  variant={column.plugin ? 'contained' : 'outlined'}
+                  onClick={() => onChange({ ...column, plugin: { kind: 'StatChart', spec: {} } })}
+                >
+                  Embedded Panel
+                </Button>
+              </ButtonGroup>
             }
           />
+          {column.plugin ? (
+            <OptionsEditorControl
+              label="Panel Type"
+              control={
+                <PluginKindSelect
+                  pluginTypes={['Panel']}
+                  value={{ type: 'Panel', kind: column.plugin.kind }}
+                  onChange={(event) => onChange({ ...column, plugin: { kind: event.kind, spec: {} } })}
+                />
+              }
+            />
+          ) : (
+            <FormatControls
+              value={column.format ?? DEFAULT_FORMAT}
+              onChange={(newFormat): void =>
+                onChange({
+                  ...column,
+                  format: newFormat,
+                })
+              }
+            />
+          )}
           <OptionsEditorControl
             label="Alignment"
             control={

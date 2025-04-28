@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,29 +14,15 @@
 package main
 
 import (
-	"bytes"
+	"context"
 	"fmt"
-	"os"
-	"os/exec"
+	"time"
 
 	"github.com/perses/common/async"
+	"github.com/perses/plugins/scripts/command"
 	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
-
-func runCommand(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run %s %v: %w\nstderr: %s", name, args, err, stderr.String())
-	}
-	return nil
-}
 
 func main() {
 	workspaces, err := npm.GetWorkspaces()
@@ -44,21 +30,23 @@ func main() {
 		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
 	}
 
-	pluginToBeBuilt := make([]async.Future[string], 0, len(workspaces))
+	pluginsToBuild := make([]async.Future[string], 0, len(workspaces))
 
 	for _, workspace := range workspaces {
 		logrus.Infof("Building plugin %s", workspace)
-		pluginToBeBuilt = append(pluginToBeBuilt, async.Async(func() (string, error) {
-			return workspace, runCommand("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true")
+		pluginsToBuild = append(pluginsToBuild, async.Async(func() (string, error) {
+			return workspace, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true")
 		}))
 	}
 	isErr := false
-	for _, built := range pluginToBeBuilt {
-		workspace, buildErr := built.Await()
+	for _, pluginToBuild := range pluginsToBuild {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		workspace, buildErr := pluginToBuild.AwaitWithContext(ctx)
 		if buildErr != nil {
 			isErr = true
 			logrus.WithError(buildErr).Errorf("failed to build plugin %s", workspace)
 		}
+		cancel()
 	}
 	if isErr {
 		logrus.Fatal("some plugins have not been built successfully")

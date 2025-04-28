@@ -39,6 +39,12 @@ export type UnixTimestampSeconds = number;
 
 export type ValueTuple = [unixTimeSeconds: UnixTimestampSeconds, sampleValue: string];
 
+export type BucketTuple = [bucket: number, upperBound: string, lowerBound: string, count: string];
+
+export type HistogramValue = { count: number; sum: string; buckets?: BucketTuple[] };
+
+export type HistogramTuple = [unixTimeSeconds: UnixTimestampSeconds, value: HistogramValue];
+
 export type Metric = Record<string, string>;
 
 export interface VectorData {
@@ -46,6 +52,7 @@ export interface VectorData {
   result: Array<{
     metric: Metric;
     value: ValueTuple;
+    histogram?: HistogramTuple;
   }>;
 }
 
@@ -54,6 +61,7 @@ export interface MatrixData {
   result: Array<{
     metric: Metric;
     values: ValueTuple[];
+    histograms?: HistogramTuple[];
   }>;
 }
 

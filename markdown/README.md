@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# Markdown Panel Plugin
 
 ## Setup
 

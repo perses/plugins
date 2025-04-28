@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, FormatOptions, Transform } from '@perses-dev/core';
+import { Definition, FormatOptions, Transform, UnknownSpec } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 
 export interface ColumnSettings {
@@ -32,7 +32,13 @@ export interface ColumnSettings {
    */
   cellDescription?: string;
 
-  /** Formatting options. */
+  /**
+   * Panel plugin to render.
+   * By default, the cells are rendered as text.
+   */
+  plugin?: Definition<UnknownSpec>;
+
+  /** Formatting options. Only applicable if plugin is unset. */
   format?: FormatOptions;
 
   // Alignment of the content in the cell.
@@ -105,9 +111,12 @@ export interface TableDefinition extends Definition<TableOptions> {
 export interface TableOptions {
   // Change row height.
   density?: TableDensity;
-  // When true, the table will try to automatically adjust the width of columns to fit without overflowing.
+  // When set to 'auto', the table will try to automatically adjust the width of columns to fit without overflowing.
   // Only for column without custom width specified in columnSettings.
   defaultColumnWidth?: 'auto' | number;
+  // When set to 'auto', the table will calculate the cell height based on the line height of the theme and the density setting of the table.
+  // Only for column without custom height specified in columnSettings.
+  defaultColumnHeight?: 'auto' | number;
   // Enable pagination.
   pagination?: boolean;
   // Customize column display and order them by their index in the array.

@@ -12,7 +12,7 @@ on:
 
 jobs:
   docs-fmt:
-    name: "check doc format"
+    name: "Check docs format"
     runs-on: ubuntu-latest
     steps:
       - name: checkout

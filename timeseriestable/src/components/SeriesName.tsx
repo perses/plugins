@@ -31,7 +31,7 @@ export function SeriesName({ name, labels, formattedName, isFormatted }: SeriesN
   if (isFormatted && labels && Object.keys(labels).length > 0) {
     return <FormatedSeriesName labels={labels} />;
   }
-  return <Typography>{formattedName ?? name}</Typography>;
+  return <Typography sx={{ textWrap: 'auto' }}>{formattedName ?? name}</Typography>;
 }
 
 function FormatedSeriesName({ labels }: { labels: Labels }): ReactElement {
@@ -83,7 +83,7 @@ function FormatedSeriesName({ labels }: { labels: Labels }): ReactElement {
   }
 
   return (
-    <Typography>
+    <Typography sx={{ textWrap: 'auto' }}>
       {labels ? labels.__name__ : ''}
       {'{'}
       {labelNodes}

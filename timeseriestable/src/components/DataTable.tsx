@@ -10,14 +10,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-/*
- eslint-disable @typescript-eslint/no-explicit-any
- */
-import { Fragment, ReactElement, ReactNode } from 'react';
-import { Alert, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+
+import { Fragment, ReactElement, ReactNode, useMemo } from 'react';
+import { Alert, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
+import { BucketTuple, HistogramTuple, HistogramValue } from '@perses-dev/prometheus/src/model';
 import { SeriesName } from './SeriesName';
+import { HistogramChart } from './HistogramChart';
 
 const MAX_FORMATABLE_SERIES = 1000;
 
@@ -33,12 +33,13 @@ export interface DataTableProps {
  * @param result timeseries query result
  * @constructor
  */
-const DataTable = ({ result }: DataTableProps): ReactElement | null => {
+export const DataTable = ({ result }: DataTableProps): ReactElement | null => {
+  const series = useMemo(() => result.flatMap((d) => d.data).flatMap((d) => d?.series || []), [result]);
+  const rows = useMemo(() => buildRows(series), [series]);
+
   if (!result) {
-    return null;
+    return <Typography>No data</Typography>;
   }
-  const series = result.flatMap((d) => d.data).flatMap((d) => d?.series || []);
-  const rows = buildRows(series);
 
   return (
     <>
@@ -68,10 +69,15 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
         })
       : [];
     const histogramsAndTimes = s.histograms
-      ? s.histograms.map((h: any, hisIdx: number) => {
+      ? s.histograms.map((h: HistogramTuple, hisIdx: number) => {
           return (
             <Fragment key={-hisIdx}>
-              {histogramTable(h[1])} @<span>{h[0]}</span>
+              <HistogramChart width={400} height={200} data={{ buckets: h[1].buckets! }} /> {/* TODO: calc size ? */}
+              <Stack flexDirection="row" justifyContent="space-between">
+                <Typography>Total count: {h[1].count}</Typography>
+                <Typography>Sum: {h[1].sum}</Typography>
+              </Stack>
+              {histogramTable(h[1])}
             </Fragment>
           );
         })
@@ -81,10 +87,7 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
         <TableCell>
           <SeriesName name={s.name} formattedName={s.formattedName} labels={s.labels} isFormatted={isFormatted} />
         </TableCell>
-        <TableCell>
-          {valuesAndTimes}
-          {histogramsAndTimes}
-        </TableCell>
+        <TableCell>{s.histograms ? histogramsAndTimes : valuesAndTimes}</TableCell>
       </TableRow>
     );
   });
@@ -102,9 +105,7 @@ export const bucketRangeString = ([boundaryRule, leftBoundary, rightBoundary]: [
   return `${leftDelim(boundaryRule)}${leftBoundary} -> ${rightBoundary}${rightDelim(boundaryRule)}`;
 };
 
-// TODO: add typing to histogram and remove this exception
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const histogramTable = (h: any): ReactNode => (
+export const histogramTable = (h: HistogramValue): ReactNode => (
   <Table>
     <TableHead>
       <TableRow>
@@ -118,7 +119,7 @@ export const histogramTable = (h: any): ReactNode => (
         <TableCell>Range</TableCell>
         <TableCell>Count</TableCell>
       </TableRow>
-      {h.buckets?.map((b: any, i: any) => (
+      {h.buckets?.map((b: BucketTuple, i: number) => (
         <TableRow key={i}>
           <TableCell>{bucketRangeString(b)}</TableCell>
           <TableCell>{b[3]}</TableCell>
@@ -127,4 +128,3 @@ export const histogramTable = (h: any): ReactNode => (
     </TableBody>
   </Table>
 );
-export default DataTable;
