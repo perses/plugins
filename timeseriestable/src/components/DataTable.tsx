@@ -12,16 +12,16 @@
 // limitations under the License.
 
 import { Fragment, ReactElement, ReactNode, useMemo } from 'react';
-import { Alert, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { TimeSeries, TimeSeriesData, BucketTuple, TimeSeriesHistogramTuple, HistogramValue } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
+import { EmbeddedPanel } from '@perses-dev/table/src/EmbeddedPanel';
 import { SeriesName } from './SeriesName';
-import { HistogramChart } from './HistogramChart';
 
 const MAX_FORMATABLE_SERIES = 1000;
 
 export interface DataTableProps {
-  result: Array<PanelData<TimeSeriesData>>;
+  queryResults: Array<PanelData<TimeSeriesData>>;
 }
 
 /**
@@ -32,11 +32,11 @@ export interface DataTableProps {
  * @param result timeseries query result
  * @constructor
  */
-export const DataTable = ({ result }: DataTableProps): ReactElement | null => {
-  const series = useMemo(() => result.flatMap((d) => d.data).flatMap((d) => d?.series || []), [result]);
-  const rows = useMemo(() => buildRows(series), [series]);
+export const DataTable = ({ queryResults }: DataTableProps): ReactElement | null => {
+  const series = useMemo(() => queryResults.flatMap((d) => d.data).flatMap((d) => d?.series || []), [queryResults]);
+  const rows = useMemo(() => buildRows(series, queryResults), [series, queryResults]);
 
-  if (!result) {
+  if (!queryResults) {
     return <Typography>No data</Typography>;
   }
 
@@ -54,7 +54,7 @@ export const DataTable = ({ result }: DataTableProps): ReactElement | null => {
   );
 };
 
-function buildRows(series: TimeSeries[]): ReactNode[] {
+function buildRows(series: TimeSeries[], queryResults: Array<PanelData<TimeSeriesData>>): ReactNode[] {
   const isFormatted = series.length < MAX_FORMATABLE_SERIES; // only format series names if we have less than 1000 series for performance reasons
   return series.map((s, seriesIdx) => {
     const displayTimeStamps = (s.values?.length ?? 0) > 1;
@@ -67,17 +67,33 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
           );
         })
       : [];
+
+    // Query results contains multiple series, create a new query result with only the current series
+    const seriesQueryResult: PanelData<TimeSeriesData> = {
+      ...queryResults[0],
+      data: {
+        ...queryResults[0].data,
+        series: [queryResults[0].data.series[seriesIdx]],
+      },
+    };
+
     const histogramsAndTimes = s.histograms
       ? s.histograms.map((h: TimeSeriesHistogramTuple, hisIdx: number) => {
           return (
-            <Fragment key={-hisIdx}>
-              <HistogramChart width={400} height={200} data={{ buckets: h[1].buckets! }} /> {/* TODO: calc size ? */}
-              <Stack flexDirection="row" justifyContent="space-between">
+            <Stack alignItems="center" key={-hisIdx}>
+              <Box width={400} height={200}>
+                <EmbeddedPanel
+                  kind="HistogramChart"
+                  spec={{ unit: 'decimal', width: 400, height: 200 }}
+                  queryResults={[seriesQueryResult]}
+                />
+              </Box>
+              <Stack flexDirection="row" justifyContent="space-between" width="100%">
                 <Typography>Total count: {h[1].count}</Typography>
                 <Typography>Sum: {h[1].sum}</Typography>
               </Stack>
               {histogramTable(h[1])}
-            </Fragment>
+            </Stack>
           );
         })
       : [];

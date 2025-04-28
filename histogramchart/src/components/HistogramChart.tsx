@@ -1,10 +1,10 @@
-import { Box } from '@mui/material';
-import { EChart, ModeOption, useChartsTheme } from '@perses-dev/components';
-import { BucketTuple, FormatOptions } from '@perses-dev/core';
+import { ReactElement, useMemo } from 'react';
+import { FormatOptions } from '@perses-dev/core';
+import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
+import { use, EChartsCoreOption } from 'echarts/core';
+import { BucketTuple } from '@perses-dev/prometheus/src/model';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
-import { EChartsCoreOption, use } from 'echarts/core';
-import { ReactElement, useMemo } from 'react';
 
 use([CustomChart]);
 
@@ -15,18 +15,17 @@ export interface HistogramChartData {
 export interface HistogramChartProps {
   width: number;
   height: number;
-  data?: HistogramChartData;
+  data: HistogramChartData;
   format?: FormatOptions;
-  mode?: ModeOption;
-  exponential?: boolean;
+  min?: number;
+  max?: number;
+  // TODO: exponential?: boolean;
 }
 
-export function HistogramChart({ width, height, data }: HistogramChartProps): ReactElement | null {
+export function HistogramChart({ width, height, data, format, min, max }: HistogramChartProps): ReactElement | null {
   const chartsTheme = useChartsTheme();
 
   const transformedData = useMemo(() => {
-    if (!data) return [];
-
     return data.buckets.map(([bucket, upperBound, lowerBound, count]) => {
       return {
         value: [parseFloat(upperBound), parseFloat(lowerBound), parseFloat(count), bucket],
@@ -36,6 +35,16 @@ export function HistogramChart({ width, height, data }: HistogramChartProps): Re
       };
     });
   }, [chartsTheme.echartsTheme, data]);
+
+  const maxXAxis: number | undefined = useMemo(() => {
+    if (max) {
+      return max;
+    }
+    if (transformedData && transformedData[transformedData.length - 1]) {
+      return Math.ceil(transformedData[transformedData.length - 1]?.value[1] ?? 1);
+    }
+    return undefined;
+  }, [max, transformedData]);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (!transformedData) return chartsTheme.noDataOption;
@@ -47,9 +56,10 @@ export function HistogramChart({ width, height, data }: HistogramChartProps): Re
       tooltip: {},
       xAxis: {
         scale: false,
-        max: Math.ceil(transformedData[transformedData.length - 1]?.value[1] ?? 1),
+        min: min,
+        max: maxXAxis,
       },
-      yAxis: {},
+      yAxis: getFormattedAxis({}, format),
       series: [
         {
           type: 'custom',
@@ -84,23 +94,17 @@ export function HistogramChart({ width, height, data }: HistogramChartProps): Re
         },
       ],
     };
-  }, [chartsTheme.noDataOption, transformedData]);
+  }, [chartsTheme.noDataOption, format, maxXAxis, min, transformedData]);
 
   return (
-    <Box
-      style={{
+    <EChart
+      sx={{
         width: width,
         height: height,
+        padding: `${chartsTheme.container.padding.default}px`,
       }}
-      sx={{ overflow: 'auto' }}
-    >
-      <EChart
-        sx={{
-          minHeight: height,
-        }}
-        option={option}
-        theme={chartsTheme.echartsTheme}
-      />
-    </Box>
+      option={option}
+      theme={chartsTheme.echartsTheme}
+    />
   );
 }
