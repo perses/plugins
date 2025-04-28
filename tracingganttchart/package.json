@@ -10,7 +10,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@perses-dev/components": "0.0.0-snapshot-histogram-types-78c5104",
     "@perses-dev/core": "0.0.0-snapshot-histogram-types-78c5104",
+    "@perses-dev/plugin-system": "0.0.0-snapshot-histogram-types-78c5104",
     "@module-federation/enhanced": "^0.8.9",
     "color-hash": "^2.0.2"
   },
