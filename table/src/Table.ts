@@ -13,11 +13,15 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTableOptions, TableOptions } from './table-model';
-import { getTablePanelQueryOptions, TablePanel, TableProps } from './TablePanel';
-import { TableColumnsEditor } from './TableColumnsEditor';
-import { TableSettingsEditor } from './TableSettingsEditor';
-import { TableCellsEditor } from './TableCellsEditor';
-import { TableTransformsEditor } from './TableTransformsEditor';
+import {
+  getTablePanelQueryOptions,
+  TableCellsEditor,
+  TableColumnsEditor,
+  TablePanel,
+  TableProps,
+  TableSettingsEditor,
+  TableTransformsEditor,
+} from './components';
 
 /**
  * The core TimeSeriesTable panel plugin for Perses.

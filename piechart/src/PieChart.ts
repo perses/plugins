@@ -13,8 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialPieChartOptions, PieChartOptions } from './pie-chart-model';
-import { PieChartOptionsEditorSettings } from './PieChartOptionsEditorSettings';
-import { PieChartPanel, PieChartPanelProps } from './PieChartPanel';
+import { PieChartOptionsEditorSettings, PieChartPanel, PieChartPanelProps } from './components';
 
 /**
  * The core PieChart panel plugin for Perses.

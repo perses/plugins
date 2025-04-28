@@ -13,9 +13,12 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialStatChartOptions, StatChartOptions } from './stat-chart-model';
-import { StatChartValueMappingEditor } from './StatChartValueMappingEditor';
-import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
-import { StatChartPanel, StatChartPanelProps } from './StatChartPanel';
+import {
+  StatChartOptionsEditorSettings,
+  StatChartPanel,
+  StatChartPanelProps,
+  StatChartValueMappingEditor,
+} from './components';
 
 /**
  * The core StatChart panel plugin for Perses.
