@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Fragment, ReactElement, ReactNode, useMemo } from 'react';
+import { ReactElement, ReactNode, useMemo } from 'react';
 import { Alert, Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { TimeSeries, TimeSeriesData, BucketTuple, TimeSeriesHistogramTuple, HistogramValue } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
-import { EmbeddedPanel } from '@perses-dev/table/src/EmbeddedPanel';
 import { SeriesName } from './SeriesName';
+import { EmbeddedPanel } from './EmbeddedPanel';
 
 const MAX_FORMATABLE_SERIES = 1000;
 
@@ -68,35 +68,36 @@ function buildRows(series: TimeSeries[], queryResults: Array<PanelData<TimeSerie
         })
       : [];
 
-    // Query results contains multiple series, create a new query result with only the current series
-    const seriesQueryResult: PanelData<TimeSeriesData> = {
-      ...queryResults[0],
-      data: {
-        ...queryResults[0].data,
-        series: [queryResults[0].data.series[seriesIdx]],
-      },
-    };
+    let histogramsAndTimes = null;
+    if (s.histograms && s.histograms.length > 0) {
+      // Query results contains multiple series, create a new query result with only the current series
+      const seriesQueryResult: PanelData<TimeSeriesData> = {
+        ...queryResults[0]!,
+        data: {
+          ...queryResults[0]!.data,
+          series: [queryResults[0]!.data.series[seriesIdx]!],
+        },
+      };
 
-    const histogramsAndTimes = s.histograms
-      ? s.histograms.map((h: TimeSeriesHistogramTuple, hisIdx: number) => {
-          return (
-            <Stack alignItems="center" key={-hisIdx}>
-              <Box width={400} height={200}>
-                <EmbeddedPanel
-                  kind="HistogramChart"
-                  spec={{ unit: 'decimal', width: 400, height: 200 }}
-                  queryResults={[seriesQueryResult]}
-                />
-              </Box>
-              <Stack flexDirection="row" justifyContent="space-between" width="100%">
-                <Typography>Total count: {h[1].count}</Typography>
-                <Typography>Sum: {h[1].sum}</Typography>
-              </Stack>
-              {histogramTable(h[1])}
+      histogramsAndTimes = s.histograms.map((h: TimeSeriesHistogramTuple, hisIdx: number) => {
+        return (
+          <Stack alignItems="center" key={-hisIdx}>
+            <Box width={400} height={200}>
+              <EmbeddedPanel
+                kind="HistogramChart"
+                spec={{ unit: 'decimal', width: 400, height: 200 }}
+                queryResults={[seriesQueryResult]}
+              />
+            </Box>
+            <Stack flexDirection="row" justifyContent="space-between" width="100%">
+              <Typography>Total count: {h[1].count}</Typography>
+              <Typography>Sum: {h[1].sum}</Typography>
             </Stack>
-          );
-        })
-      : [];
+            {histogramTable(h[1])}
+          </Stack>
+        );
+      });
+    }
     return (
       <TableRow style={{ whiteSpace: 'pre' }} key={seriesIdx}>
         <TableCell>

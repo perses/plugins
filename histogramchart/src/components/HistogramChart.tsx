@@ -1,8 +1,7 @@
 import { ReactElement, useMemo } from 'react';
-import { FormatOptions } from '@perses-dev/core';
+import { FormatOptions, BucketTuple } from '@perses-dev/core';
 import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
-import { BucketTuple } from '@perses-dev/prometheus/src/model';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
 
@@ -36,6 +35,17 @@ export function HistogramChart({ width, height, data, format, min, max }: Histog
     });
   }, [chartsTheme.echartsTheme, data]);
 
+  const minXAxis: number | undefined = useMemo(() => {
+    if (min) {
+      return min;
+    }
+
+    if (transformedData && transformedData[0]) {
+      return Math.min(0, Math.floor(transformedData[0]?.value[0] ?? 0));
+    }
+    return undefined;
+  }, [min, transformedData]);
+
   const maxXAxis: number | undefined = useMemo(() => {
     if (max) {
       return max;
@@ -56,7 +66,7 @@ export function HistogramChart({ width, height, data, format, min, max }: Histog
       tooltip: {},
       xAxis: {
         scale: false,
-        min: min,
+        min: minXAxis,
         max: maxXAxis,
       },
       yAxis: getFormattedAxis({}, format),
@@ -94,7 +104,7 @@ export function HistogramChart({ width, height, data, format, min, max }: Histog
         },
       ],
     };
-  }, [chartsTheme.noDataOption, format, maxXAxis, min, transformedData]);
+  }, [chartsTheme.noDataOption, format, maxXAxis, minXAxis, transformedData]);
 
   return (
     <EChart
