@@ -11,20 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Switch, TextField } from '@mui/material';
 import {
+  DEFAULT_COLUMN_HEIGHT,
+  DEFAULT_COLUMN_WIDTH,
   DensitySelector,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   TableDensity,
-  DEFAULT_COLUMN_WIDTH,
-  DEFAULT_COLUMN_HEIGHT,
 } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Switch, TextField } from '@mui/material';
 import { ChangeEvent, ReactElement } from 'react';
-import { TableOptions } from './table-model';
+import { TableSettingsEditorProps } from './table-model';
 
 interface DefaultColumnsDimensionsControlProps {
   label: string;
@@ -69,11 +68,13 @@ function DefaultColumnsDimensionsControl({
   );
 }
 
-export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
-
 export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProps): ReactElement {
   function handleDensityChange(density: TableDensity): void {
     onChange({ ...value, density: density });
+  }
+
+  function handlePaginationChange(_event: ChangeEvent, newValue: boolean): void {
+    onChange({ ...value, pagination: newValue });
   }
 
   function handleAutoWidthChange(newValue: 'auto' | number): void {
@@ -89,6 +90,10 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Display">
           <DensitySelector value={value.density} onChange={handleDensityChange} />
+          <OptionsEditorControl
+            label="Pagination"
+            control={<Switch checked={!!value.pagination} onChange={handlePaginationChange} />}
+          />
           <DefaultColumnsDimensionsControl
             label="Width"
             defaultValue={DEFAULT_COLUMN_WIDTH}

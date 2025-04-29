@@ -24,7 +24,7 @@ jobs:
           enable_cue: true
           cue_version: "v0.12.0"
       - name: install percli
-        uses: perses/cli-actions/actions/install_percli@v0.1.0
+        uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
           cli_version: "main-2025-03-20-398b7919-distroless"
       - name: cache cue deps
@@ -34,9 +34,6 @@ jobs:
           key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
           restore-keys: |
             ${{ runner.os }}-cue-
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        if: ${{ github.secret_source == 'Actions' }}
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: install dependencies
         run: npm ci
       - name: build plugins
@@ -102,7 +99,7 @@ jobs:
           enable_cue: true
           cue_version: 'v0.12.0'
       - name: Install percli
-        uses: perses/cli-actions/actions/install_percli@v0.1.0
+        uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
           cli-version: "v0.51.0-beta.1"
       - uses: actions/cache@v4
@@ -112,9 +109,6 @@ jobs:
           key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
           restore-keys: |
             ${{ runner.os }}-cue-
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        if: ${{ github.secret_source == 'Actions' }}
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - run: make lint-plugins
   
   module-check:
@@ -136,9 +130,6 @@ jobs:
           key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
           restore-keys: |
             ${{ runner.os }}-cue-
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        if: ${{ github.secret_source == 'Actions' }}
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: Tidy modules
         run: make tidy-modules
       - name: Check for unused/missing packages in all cue.mod
@@ -159,7 +150,7 @@ jobs:
       - uses: perses/github-actions@v0.9.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
-          enable_npm: false
+          enable_npm: true
           enable_go: true
           enable_cue: true
           cue_version: "v0.12.0"
@@ -170,3 +161,7 @@ jobs:
       - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
       - name: Publish CUE module
         run: go run ./scripts/cue-publish/cue-publish.go -tag=${{ github.event.release.tag_name }} -token=${{ secrets.CUE_REG_TOKEN }}
+      - name: Publish npm package
+        run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

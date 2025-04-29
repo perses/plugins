@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# StatusHistoryChart Panel Plugin
 
 ## Setup
 

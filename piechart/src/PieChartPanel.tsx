@@ -11,25 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, useTheme } from '@mui/material';
 import {
+  ChartInstance,
+  ContentWithLegend,
+  LegendItem,
+  LegendProps,
   PieChart,
   PieChartData,
-  useChartsTheme,
-  ContentWithLegend,
   SelectedLegendItemState,
-  LegendProps,
-  ChartInstance,
+  useChartsTheme,
   useId,
-  LegendItem,
 } from '@perses-dev/components';
-import { Box, useTheme } from '@mui/material';
-import { useMemo, useState, useRef, ReactElement } from 'react';
 import { CalculationType, CalculationsMap, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
-import { validateLegendSpec, PanelProps } from '@perses-dev/plugin-system';
+import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
+import { ReactElement, useMemo, useRef, useState } from 'react';
+import { QuerySettingsOptions } from './model';
 import { getSeriesColor } from './palette-gen';
-import { DEFAULT_VISUAL, QuerySettingsOptions } from './model';
-import { PieChartOptions } from './pie-chart-model';
+import { DEFAULT_VISUAL, PieChartOptions } from './pie-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
@@ -59,7 +59,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
       const result = queryResults[queryIndex];
 
       let seriesIndex = 0;
-      for (const seriesData of result.data.series) {
+      for (const seriesData of result?.data.series ?? []) {
         // Retrieve querySettings for this query, if exists.
         // queries & querySettings indices do not necessarily match, so we have to check the tail value of the $ref attribute
         let querySettings: QuerySettingsOptions | undefined;

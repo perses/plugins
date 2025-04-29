@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# TimeSeriesChart Panel Plugin
 
 ## Setup
 

@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# TracingGanttChart Panel Plugin
 
 ## Setup
 

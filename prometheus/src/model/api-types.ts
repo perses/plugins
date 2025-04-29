@@ -39,7 +39,7 @@ export type UnixTimestampSeconds = number;
 
 export type ValueTuple = [unixTimeSeconds: UnixTimestampSeconds, sampleValue: string];
 
-export type BucketTuple = [number, string, string, string]; // [bucket, upperBound, lowerBound, count]
+export type BucketTuple = [bucket: number, upperBound: string, lowerBound: string, count: string];
 
 export type HistogramValue = { count: number; sum: string; buckets?: BucketTuple[] };
 

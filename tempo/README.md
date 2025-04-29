@@ -1,4 +1,4 @@
-# Perses Datasource Plugin
+# Tempo Plugins
 
 ## Setup
 

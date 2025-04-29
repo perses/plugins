@@ -1,9 +1,15 @@
-export const DEFAULT_CONNECT_NULLS = false;
-export const DEFAULT_LINE_WIDTH = 1.25;
-export const POINT_SIZE_OFFSET = 1.5;
-export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
-export const DEFAULT_AREA_OPACITY = 0;
-export type StackOptions = 'none' | 'all';
+// Copyright 2023 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 export interface QuerySettingsOptions {
   queryIndex: number;
@@ -11,9 +17,19 @@ export interface QuerySettingsOptions {
   colorValue: string;
 }
 
-export const DEFAULT_VISUAL = {
-  lineWidth: DEFAULT_LINE_WIDTH,
-  areaOpacity: DEFAULT_AREA_OPACITY,
-  pointRadius: DEFAULT_POINT_RADIUS,
-  connectNulls: DEFAULT_CONNECT_NULLS,
+export interface ChartPaletteOptions {
+  mode: 'auto' | 'categorical';
+}
+
+export type StackOptions = 'none' | 'all';
+
+export type ChartVisualOptions = {
+  display?: 'line' | 'bar';
+  lineWidth?: number;
+  areaOpacity?: number;
+  showPoints?: 'auto' | 'always';
+  palette?: ChartPaletteOptions;
+  pointRadius?: number;
+  stack?: StackOptions;
+  connectNulls?: boolean;
 };

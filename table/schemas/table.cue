@@ -23,6 +23,7 @@ spec: close({
 	density?:             "compact" | "standard" | "comfortable"
 	defaultColumnWidth?:  "auto" | number
 	defaultColumnHeight?: "auto" | number
+	pagination?:          bool
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
 	transforms?: [...common.#transform]

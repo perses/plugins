@@ -13,9 +13,9 @@
 
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
 import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
-import { SortingState } from '@tanstack/react-table';
+import { PaginationState, SortingState } from '@tanstack/react-table';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
@@ -270,6 +270,19 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
 
+  const [pagination, setPagination] = useState<PaginationState | undefined>(
+    spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
+  );
+
+  useEffect(() => {
+    // If the pagination setting changes from no pagination to pagination, but the pagination state is undefined, update the pagination state
+    if (spec.pagination && !pagination) {
+      setPagination({ pageIndex: 0, pageSize: 10 });
+    } else if (!spec.pagination && pagination) {
+      setPagination(undefined);
+    }
+  }, [spec.pagination, pagination]);
+
   if (contentDimensions === undefined) {
     return null;
   }
@@ -286,6 +299,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       defaultColumnHeight={spec.defaultColumnHeight}
       sorting={sorting}
       onSortingChange={setSorting}
+      pagination={pagination}
+      onPaginationChange={setPagination}
     />
   );
 }

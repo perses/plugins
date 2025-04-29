@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# ScatterChart Panel Plugin
 
 ## Setup
 

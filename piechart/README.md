@@ -1,4 +1,4 @@
-# Perses Panel Plugin
+# PieChart Panel Plugin
 
 ## Setup
 

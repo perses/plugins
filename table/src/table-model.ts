@@ -13,6 +13,7 @@
 
 import { Definition, FormatOptions, Transform, UnknownSpec } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export interface ColumnSettings {
   name: string;
@@ -117,6 +118,8 @@ export interface TableOptions {
   // When set to 'auto', the table will calculate the cell height based on the line height of the theme and the density setting of the table.
   // Only for column without custom height specified in columnSettings.
   defaultColumnHeight?: 'auto' | number;
+  // Enable pagination.
+  pagination?: boolean;
   // Customize column display and order them by their index in the array.
   columnSettings?: ColumnSettings[];
   // Customize cell display based on their value.
@@ -133,3 +136,5 @@ export function createInitialTableOptions(): TableOptions {
     density: 'standard',
   };
 }
+
+export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
