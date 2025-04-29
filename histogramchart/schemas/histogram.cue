@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,8 +19,7 @@ import (
 
 kind: "HistogramChart"
 spec: close({
-	calculation: common.#calculation
-	format?:     common.#format
-	thresholds?: common.#thresholds
-	max?:        number // determines end value of last threshold color segment when unit is not a percent
+	format?: common.#format
+	min?:    number
+	max?:    number
 })

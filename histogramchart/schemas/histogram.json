@@ -1,20 +1,11 @@
 {
   "kind": "HistogramChart",
   "spec": {
-    "calculation": "last-number",
     "format": {
-      "unit": "percent",
+      "unit": "decimal",
       "decimalPlaces": 2
     },
-    "thresholds": {
-      "steps": [
-        {
-          "value": 85
-        },
-        {
-          "value": 95
-        }
-      ]
-    }
+    "min": 0,
+    "max": 100
   }
 }

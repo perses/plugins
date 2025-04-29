@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,52 +11,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 
+const assetPrefix = '/plugins/HistogramChart/';
+
 export default defineConfig({
-  server: {
-    port: 3020,
-  },
-  dev: {
-    assetPrefix: '/plugins/HistogramChart/',
-  },
+  server: { port: 3020 },
+  dev: { assetPrefix },
+  source: { entry: { main: './src/index-federation.ts' } },
   output: {
-    assetPrefix: '/plugins/HistogramChart/',
-    copy: [{ from: './package.json' }, { from: 'README.md' }],
+    assetPrefix,
+    copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
+    distPath: {
+      root: 'dist',
+      js: '__mf/js',
+      css: '__mf/css',
+      font: '__mf/font',
+    },
   },
-  plugins: [pluginReact()],
+  plugins: [
+    pluginReact(),
+    pluginModuleFederation({
+      name: 'HistogramChart',
+      exposes: {
+        './HistogramChart': './src/HistogramChart.ts',
+      },
+      shared: {
+        react: { requiredVersion: '18.2.0', singleton: true },
+        'react-dom': { requiredVersion: '18.2.0', singleton: true },
+        echarts: { singleton: true },
+        lodash: { singleton: true },
+        '@perses-dev/core': { singleton: true },
+        '@perses-dev/components': { singleton: true },
+        '@perses-dev/plugin-system': { singleton: true },
+      },
+      dts: false,
+      runtime: false,
+    }),
+  ],
   tools: {
     htmlPlugin: false,
-    rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'HistogramChart';
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'HistogramChart',
-          exposes: {
-            './HistogramChart': './src/HistogramChart.ts',
-          },
-          shared: {
-            react: { requiredVersion: '18.2.0', singleton: true },
-            'react-dom': { requiredVersion: '18.2.0', singleton: true },
-            echarts: { singleton: true },
-            'date-fns': { singleton: true },
-            'date-fns-tz': { singleton: true },
-            lodash: { singleton: true },
-            '@perses-dev/components': { singleton: true },
-            '@perses-dev/plugin-system': { singleton: true },
-            '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
-            '@emotion/styled': { singleton: true },
-            '@hookform/resolvers': { singleton: true },
-            'use-resize-observer': { requiredVersion: '9.1.0', singleton: true },
-            'mdi-material-ui': { requiredVersion: '7.4.0', singleton: true },
-            immer: { singleton: true },
-          },
-          dts: false,
-          runtime: false,
-        }),
-      ]);
-    },
   },
 });

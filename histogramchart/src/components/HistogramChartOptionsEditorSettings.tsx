@@ -15,9 +15,6 @@ import { TextField } from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
-  ModeOption,
-  ModeSelector,
-  ModeSelectorProps,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
@@ -26,7 +23,6 @@ import {
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import { ReactElement } from 'react';
-import { isPercentUnit } from '@perses-dev/core';
 import {
   DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,

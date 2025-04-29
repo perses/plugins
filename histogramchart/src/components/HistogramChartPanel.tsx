@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -33,28 +33,28 @@ export function HistogramChartPanel(props: HistogramChartPanelProps): ReactEleme
   const format = merge({}, DEFAULT_FORMAT, pluginSpec.format);
 
   const histogramData: HistogramChartData[] = useMemo(() => {
-    const buckets: HistogramChartData[] = [];
+    const histograms: HistogramChartData[] = [];
 
     for (const result of queryResults) {
       for (const timeSeries of result.data.series) {
-        if (!timeSeries.histograms) {
+        if (!timeSeries.histograms || timeSeries.histograms.length === 0) {
           continue;
         }
 
-        const [, histoBuckets] = timeSeries.histograms[0];
-        if (histoBuckets) {
-          buckets.push(histoBuckets);
+        const [, histoBuckets] = timeSeries.histograms[0]!;
+        if (histoBuckets && histoBuckets.buckets) {
+          histograms.push({ buckets: histoBuckets.buckets });
         }
       }
     }
-    return buckets;
+    return histograms;
   }, [queryResults]);
 
   // no data message handled inside chart component
   if (histogramData.length === 0) {
     return (
       <Stack justifyContent="center" height="100%">
-        <Typography variant="body2" color="text.secondary" textAlign="center">
+        <Typography variant="body2" textAlign="center">
           No data available (only native histograms are supported for now)
         </Typography>
       </Stack>
