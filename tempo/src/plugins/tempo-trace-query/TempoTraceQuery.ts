@@ -11,18 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { isVariableDatasource, parseVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { TempoTraceQuerySpec } from '../../model';
 import { getTraceData } from './get-trace-data';
 import { TempoTraceQueryEditor } from './TempoTraceQueryEditor';
 
 /**
  * The core Tempo TraceQuery plugin for Perses.
  */
-export const TempoTraceQuery = {
+export const TempoTraceQuery: TraceQueryPlugin<TempoTraceQuerySpec> = {
   getTraceData,
   OptionsEditorComponent: TempoTraceQueryEditor,
-  createInitialOptions: (): { query: string; limit: number; datasource?: string } => ({
+  createInitialOptions: () => ({
     query: '',
     limit: 20,
     datasource: undefined,
   }),
+  dependsOn: (spec) => {
+    const datasourceVariables = isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource ?? '') : [];
+
+    return {
+      variables: [...datasourceVariables],
+    };
+  },
 };

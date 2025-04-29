@@ -11,17 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString } from '@perses-dev/core';
-import { DatasourceSelectValue } from '@perses-dev/plugin-system';
-import { PrometheusDatasourceSelector } from '../../model';
+package model
 
-/**
- * The spec/options for the PrometheusTimeSeriesQuery plugin.
- */
-export interface PrometheusTimeSeriesQuerySpec {
-  query: string;
-  seriesNameFormat?: string;
-  minStep?: DurationString;
-  resolution?: number;
-  datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
-}
+
+kind: "DatasourceVariable"
+spec: close({
+	datasourcePluginKind: string
+})
