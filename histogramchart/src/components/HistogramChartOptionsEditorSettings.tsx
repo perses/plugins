@@ -19,6 +19,8 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  ThresholdsEditor,
+  ThresholdsEditorProps,
 } from '@perses-dev/components';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
@@ -29,6 +31,7 @@ import {
   DEFAULT_MAX_PERCENT_DECIMAL,
   DEFAULT_MIN_PERCENT,
   DEFAULT_MIN_PERCENT_DECIMAL,
+  DEFAULT_THRESHOLDS,
   HistogramChartOptions,
   HistogramChartOptionsEditorProps,
 } from '../histogram-chart-model';
@@ -44,8 +47,17 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
     );
   };
 
+  const handleThresholdsChange: ThresholdsEditorProps['onChange'] = (thresholds) => {
+    onChange(
+      produce(value, (draft: HistogramChartOptions) => {
+        draft.thresholds = thresholds;
+      })
+    );
+  };
+
   // ensures decimalPlaces defaults to correct value
   const format = merge({}, DEFAULT_FORMAT, value.format);
+  const thresholds = merge({}, DEFAULT_THRESHOLDS, value.thresholds);
 
   // max only needs to be set explicitly for units other than percent and percent-decimal
   let minPlaceholder = 'Enter value';
@@ -109,6 +121,9 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
             }
           />
         </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <ThresholdsEditor thresholds={thresholds} onChange={handleThresholdsChange} />
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );

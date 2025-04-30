@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, FormatOptions } from '@perses-dev/core';
+import { Definition, FormatOptions, ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
+export const DEFAULT_THRESHOLDS: ThresholdOptions = { defaultColor: '#56b4e9' };
 export const DEFAULT_MIN_PERCENT = 0;
 export const DEFAULT_MAX_PERCENT = 100;
 export const DEFAULT_MIN_PERCENT_DECIMAL = 0;
@@ -34,6 +35,7 @@ export interface HistogramChartOptions {
   format?: FormatOptions;
   min?: number;
   max?: number;
+  thresholds?: ThresholdOptions;
 }
 
 export type HistogramChartOptionsEditorProps = OptionsEditorProps<HistogramChartOptions>;

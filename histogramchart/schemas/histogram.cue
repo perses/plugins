@@ -19,7 +19,8 @@ import (
 
 kind: "HistogramChart"
 spec: close({
-	format?: common.#format
-	min?:    number
-	max?:    number
+	format?:     common.#format
+	min?:        number
+	max?:        number
+	thresholds?: common.#thresholds
 })
