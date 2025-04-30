@@ -15,12 +15,14 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"time"
 
 	"github.com/perses/common/async"
 	"github.com/perses/plugins/scripts/command"
 	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,11 +34,23 @@ func main() {
 
 	pluginsToBuild := make([]async.Future[string], 0, len(workspaces))
 
-	for _, workspace := range workspaces {
-		logrus.Infof("Building plugin %s", workspace)
+	t := tag.Flag()
+	flag.Parse()
+
+	if *t != "" {
+		pluginPath, _ := tag.Parse(t)
 		pluginsToBuild = append(pluginsToBuild, async.Async(func() (string, error) {
-			return workspace, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true")
+			return pluginPath, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", pluginPath), "--skip.npm-install=true")
 		}))
+	} else {
+		logrus.Info("no tag provided, building all plugins")
+
+		for _, workspace := range workspaces {
+			logrus.Infof("Building plugin %s", workspace)
+			pluginsToBuild = append(pluginsToBuild, async.Async(func() (string, error) {
+				return workspace, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true")
+			}))
+		}
 	}
 	isErr := false
 	for _, pluginToBuild := range pluginsToBuild {

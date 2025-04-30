@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: 'build'
+    name: "build"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -26,7 +26,7 @@ jobs:
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli_version: "main-2025-03-20-398b7919-distroless"
+          cli-version: "main-2025-03-20-398b7919-distroless"
       - name: cache cue deps
         uses: actions/cache@v4
         with:
@@ -37,6 +37,10 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: build plugins
+        if: github.event_name == 'release'
+        run: go run ./scripts/build-plugins/build-plugins.go --tag=${{ github.event.release.tag_name }}
+      - name: build all plugins
+        if: github.event_name != 'release'
         run: go run ./scripts/build-plugins/build-plugins.go
       - name: store plugin archives
         uses: actions/upload-artifact@v4
@@ -44,11 +48,11 @@ jobs:
           name: archives
           path: |
             **/*.tar.gz
-            **/dist/mf-manifest.json
+            **/dist
             !node_modules
 
   lint-npm:
-    name: 'lint-npm'
+    name: "lint-npm"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -61,7 +65,7 @@ jobs:
       - run: npm run lint
 
   test-npm:
-    name: 'test-npm'
+    name: "test-npm"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -74,7 +78,7 @@ jobs:
       - run: npm run test
 
   type-check:
-    name: 'type-check'
+    name: "type-check"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -87,7 +91,7 @@ jobs:
       - run: npm run type-check
 
   lint-schemas:
-    name: 'Validate plugin schemas'
+    name: "Validate plugin schemas"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -97,7 +101,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: 'v0.12.0'
+          cue_version: "v0.12.0"
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
@@ -110,9 +114,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cue-
       - run: make lint-plugins
-  
+
   module-check:
-    name: 'Check plugin modules'
+    name: "Check plugin modules"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -122,7 +126,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: 'v0.12.0'
+          cue_version: "v0.12.0"
       - uses: actions/cache@v4
         id: cache
         with:
@@ -136,8 +140,8 @@ jobs:
         run: git diff --exit-code -- */cue.mod
 
   release:
-    name: 'release'
-    needs: 'build'
+    name: "release"
+    needs: "build"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -154,6 +158,7 @@ jobs:
           enable_go: true
           enable_cue: true
           cue_version: "v0.12.0"
+          nvmrc_path: "./.nvmrc"
       - name: Download archive
         uses: actions/download-artifact@v4
         with:

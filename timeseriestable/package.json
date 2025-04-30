@@ -1,5 +1,5 @@
 {
-  "name": "@perses-dev/time-series-table-plugin",
+  "name": "@perses-dev/timeseries-table-plugin",
   "version": "0.6.0",
   "scripts": {
     "dev": "rsbuild dev",

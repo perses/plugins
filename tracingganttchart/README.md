@@ -1,6 +1,24 @@
 # TracingGanttChart Panel Plugin
 
-## Setup
+### How to install
+
+This plugin requires react and react-dom 18
+
+Install peer dependencies:
+
+```bash
+npm install react@18 react-dom@18
+```
+
+Install the plugin:
+
+```bash
+npm install @perses-dev/tracing-gantt-chart-plugin
+```
+
+## Development
+
+### Setup
 
 Install dependencies:
 
@@ -8,7 +26,7 @@ Install dependencies:
 npm install
 ```
 
-## Get Started
+### Get Started
 
 Start the dev server:
 
