@@ -35,6 +35,14 @@ func main() {
 		logrus.WithError(err).Fatalf("unable to read manifest file for plugin %s", pluginFolderName)
 	}
 	pluginName := manifest.Name
+
+	// Check that the archive release does not already exist
+	if execErr := command.Run("gh", "release", "view", *t); execErr == nil {
+		logrus.Warnf("archive %s already exists, skipping upload", *t)
+
+		return
+	}
+	// Upload the archive to GitHub
 	if execErr := command.Run("gh", "release", "upload", *t, filepath.Join(pluginFolderName, fmt.Sprintf("%s-%s.tar.gz", pluginName, version))); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to upload archive %s", pluginName)
 	}
