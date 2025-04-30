@@ -17,7 +17,7 @@ import { PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
 import { useChartsTheme } from '@perses-dev/components';
-import { DEFAULT_FORMAT, HistogramChartOptions } from '../histogram-chart-model';
+import { DEFAULT_FORMAT, DEFAULT_THRESHOLDS, HistogramChartOptions } from '../histogram-chart-model';
 import { HistogramChart, HistogramChartData } from './HistogramChart';
 
 const HISTOGRAM_MIN_WIDTH = 90;
@@ -31,6 +31,7 @@ export function HistogramChartPanel(props: HistogramChartPanelProps): ReactEleme
   const chartsTheme = useChartsTheme();
   // ensures all default format properties set if undef
   const format = merge({}, DEFAULT_FORMAT, pluginSpec.format);
+  const thresholds = merge({}, DEFAULT_THRESHOLDS, pluginSpec.thresholds);
 
   const histogramData: HistogramChartData[] = useMemo(() => {
     const histograms: HistogramChartData[] = [];
@@ -90,6 +91,7 @@ export function HistogramChartPanel(props: HistogramChartPanelProps): ReactEleme
               format={format}
               min={min}
               max={max}
+              thresholds={thresholds}
             />
           </Box>
         );

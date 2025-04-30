@@ -1,9 +1,23 @@
+// Copyright 2025 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import { ReactElement, useMemo } from 'react';
-import { FormatOptions, BucketTuple } from '@perses-dev/core';
+import { FormatOptions, BucketTuple, ThresholdOptions } from '@perses-dev/core';
 import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
+import { getColorFromThresholds } from '../utils';
 
 use([CustomChart]);
 
@@ -18,22 +32,36 @@ export interface HistogramChartProps {
   format?: FormatOptions;
   min?: number;
   max?: number;
+  thresholds?: ThresholdOptions;
   // TODO: exponential?: boolean;
 }
 
-export function HistogramChart({ width, height, data, format, min, max }: HistogramChartProps): ReactElement | null {
+export function HistogramChart({
+  width,
+  height,
+  data,
+  format,
+  min,
+  max,
+  thresholds,
+}: HistogramChartProps): ReactElement | null {
   const chartsTheme = useChartsTheme();
 
   const transformedData = useMemo(() => {
-    return data.buckets.map(([bucket, upperBound, lowerBound, count]) => {
+    return data.buckets.map(([bucket, lowerBound, upperBound, count]) => {
       return {
-        value: [parseFloat(upperBound), parseFloat(lowerBound), parseFloat(count), bucket],
+        value: [parseFloat(lowerBound), parseFloat(upperBound), parseFloat(count), bucket],
         itemStyle: {
-          color: chartsTheme.echartsTheme[0],
+          color: getColorFromThresholds(
+            parseFloat(lowerBound),
+            thresholds,
+            chartsTheme,
+            chartsTheme.echartsTheme[0] as string
+          ),
         },
       };
     });
-  }, [chartsTheme.echartsTheme, data]);
+  }, [chartsTheme, data.buckets, thresholds]);
 
   const minXAxis: number | undefined = useMemo(() => {
     if (min) {

@@ -46,6 +46,7 @@ export default defineConfig({
         '@perses-dev/core': { singleton: true },
         '@perses-dev/components': { singleton: true },
         '@perses-dev/plugin-system': { singleton: true },
+        immer: { singleton: true },
       },
       dts: false,
       runtime: false,

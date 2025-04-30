@@ -11,7 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { getPluginModule } from './getPluginModule';
-export { HistogramChartPanel } from './components';
-export * from './histogram-chart-model';
-export * from './HistogramChart';
+export * from './thresholds';
