@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-cue-
       - name: install dependencies
         run: npm ci
-      - name: build plugins
+      - name: build plugin
         if: github.event_name == 'release'
         run: go run ./scripts/build-plugins/build-plugins.go --tag=${{ github.event.release.tag_name }}
       - name: build all plugins
