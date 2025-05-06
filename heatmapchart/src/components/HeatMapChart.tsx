@@ -1,0 +1,156 @@
+// Copyright 2025 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { ReactElement, useMemo } from 'react';
+import { FormatOptions, ThresholdOptions, TimeScale } from '@perses-dev/core';
+import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { use, EChartsCoreOption } from 'echarts/core';
+import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
+import { getFormattedStatusHistoryAxisLabel } from '@perses-dev/components/dist/StatusHistoryChart/get-formatted-axis-label';
+import { useTheme } from '@mui/material';
+import { generateTooltipHTML } from './HeatMapTooltip';
+
+use([EChartsHeatmapChart]);
+
+export type HeatMapData = [number, number, number | undefined]; // [x, y, value]
+
+export interface HeatMapDataItem {
+  value: HeatMapData;
+  label?: string;
+  itemStyle?: {
+    color?: string;
+    borderColor?: string;
+    borderWidth?: number;
+  };
+}
+
+export interface HeatMapChartProps {
+  width: number;
+  height: number;
+  data: HeatMapDataItem[];
+  xAxisCategories: number[];
+  yAxisCategories: string[];
+  format?: FormatOptions;
+  countMin?: number;
+  countMax?: number;
+  thresholds?: ThresholdOptions;
+  timeScale?: TimeScale;
+
+  // TODO: exponential?: boolean;
+}
+
+export function HeatMapChart({
+  width,
+  height,
+  data,
+  xAxisCategories,
+  yAxisCategories,
+  format,
+  countMin,
+  countMax,
+  thresholds,
+  timeScale,
+}: HeatMapChartProps): ReactElement | null {
+  const chartsTheme = useChartsTheme();
+  const theme = useTheme();
+  const { timeZone } = useTimeZone();
+
+  // const [minValue, maxValue] = useMemo(() => {
+  //   const values = data.map((d) => d.value[2] ?? 0);
+  //   return [Math.xMin(...values), Math.xMax(...values)];
+  // }, [data]);
+
+  const option: EChartsCoreOption = useMemo(() => {
+    return {
+      tooltip: {
+        appendToBody: true,
+        formatter: (params: { data: HeatMapDataItem; marker: string }) => {
+          return generateTooltipHTML({
+            data: params.data.value,
+            label: params.data.label,
+            marker: params.marker,
+            xAxisCategories,
+            yAxisCategories,
+            theme,
+          });
+        },
+      },
+      xAxis: {
+        type: 'category',
+        data: xAxisCategories,
+        axisLabel: {
+          hideOverlap: true,
+          formatter: getFormattedStatusHistoryAxisLabel(timeScale?.rangeMs ?? 0, timeZone),
+        },
+      },
+      yAxis: {
+        type: 'category',
+        data: yAxisCategories,
+      },
+      visualMap: {
+        show: true,
+        type: 'continuous',
+        min: countMin,
+        max: countMax,
+        realtime: false,
+        itemHeight: height - 30,
+        itemWidth: 10,
+        orient: 'vertical',
+        left: 'right',
+        top: 'center',
+        inRange: {
+          color: [
+            '#313695',
+            '#4575b4',
+            '#74add1',
+            '#abd9e9',
+            '#e0f3f8',
+            '#ffffbf',
+            '#fee090',
+            '#fdae61',
+            '#f46d43',
+            '#d73027',
+            '#a50026',
+          ],
+        },
+      },
+      series: [
+        {
+          name: 'Gaussian',
+          type: 'heatmap',
+          data: data,
+          emphasis: {
+            itemStyle: {
+              borderColor: '#333',
+              borderWidth: 1,
+            },
+          },
+          progressive: 1000,
+          animation: false,
+        },
+      ],
+    };
+  }, [xAxisCategories, timeScale?.rangeMs, timeZone, yAxisCategories, countMin, countMax, height, data, theme]);
+
+  return (
+    <EChart
+      sx={{
+        width: width,
+        height: height,
+        padding: `${chartsTheme.container.padding.default}px`,
+      }}
+      option={option}
+      theme={chartsTheme.echartsTheme}
+    />
+  );
+}
