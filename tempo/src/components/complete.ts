@@ -255,12 +255,12 @@ async function completeTagValue(client: TempoClient, tag: string): Promise<Compl
   for (const { type, value } of response.tagValues) {
     switch (type) {
       case 'string':
-        completions.push({ label: value ?? "", displayLabel: value ?? "(empty string)", apply: applyQuotedCompletion });
+        completions.push({ label: value ?? '', displayLabel: value ?? '(empty string)', apply: applyQuotedCompletion });
         break;
 
       case 'keyword':
       case 'int':
-        completions.push({ label: value ?? "", displayLabel: value ?? "(empty string)" });
+        completions.push({ label: value ?? '', displayLabel: value ?? '(empty string)' });
         break;
     }
   }
