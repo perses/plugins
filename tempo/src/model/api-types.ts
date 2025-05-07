@@ -130,5 +130,6 @@ export interface SearchTagValuesResponse {
 
 export interface SearchTagValue {
   type: string;
-  value: string;
+  /** The tag value. Empty strings are omitted (i.e. undefined) in the response. */
+  value?: string;
 }
