@@ -11,52 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartVisualOptions, QuerySettingsOptions } from './model';
 import { getConsistentColor } from './palette';
 
 export interface SeriesColorProps {
   categoricalPalette: string[];
-  visual: ChartVisualOptions;
   muiPrimaryColor: string;
   seriesName: string;
-  seriesIndex: number;
-  querySettings?: QuerySettingsOptions;
-  queryHasMultipleResults?: boolean;
 }
 
 /**
  * Get line color as well as color for tooltip and legend, account for whether palette is 'categorical' or 'auto' aka generative
  */
 export function getSeriesColor(props: SeriesColorProps): string {
-  const {
-    categoricalPalette,
-    visual,
-    muiPrimaryColor,
-    seriesName,
-    seriesIndex,
-    querySettings,
-    queryHasMultipleResults,
-  } = props;
-
-  // Use color overrides defined in query settings in priority, if applicable
-  if (querySettings) {
-    if (querySettings.colorMode === 'fixed') {
-      return querySettings.colorValue;
-    } else if (querySettings.colorMode === 'fixed-single' && !queryHasMultipleResults) {
-      return querySettings.colorValue;
-    }
-  }
+  const { categoricalPalette, muiPrimaryColor, seriesName } = props;
 
   // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
   const fallbackColor =
     Array.isArray(categoricalPalette) && categoricalPalette[0]
       ? (categoricalPalette[0] as string) // Needed since echarts color property isn't always an array.
       : muiPrimaryColor;
-
-  // Explicit way to always cycle through classical palette instead of changing when based on number of series.
-  if (visual.palette?.mode === 'categorical') {
-    return getCategoricalPaletteColor(categoricalPalette, seriesIndex, fallbackColor);
-  }
 
   return getAutoPaletteColor(seriesName, fallbackColor);
 }
