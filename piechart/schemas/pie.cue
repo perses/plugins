@@ -26,35 +26,12 @@ import (
 	values?: [...#legendValue]
 }
 
-#palette: {
-	mode: "auto" | "categorical"
-}
-
-#visual: {
-	display?:      "line" | "bar"
-	lineWidth?:    number & >=0.25 & <=3
-	areaOpacity?:  number & >=0 & <=1
-	showPoints?:   "auto" | "always"
-	palette?:      #palette
-	pointRadius?:  number & >=0 & <=6
-	stack?:        "all" | "percent" // TODO: percent option is disabled until support is added
-	connectNulls?: bool
-}
-
 kind: "PieChart"
 spec: close({
 	legend?:        #legend
-	querySettings?: #querySettings
 	calculation:    common.#calculation
 	format?:        common.#format
 	sort?:          "asc" | "desc"
 	mode?:          "value" | "percentage"
-	visual?:        #visual
 	radius:         number
 })
-
-#querySettings: [...{
-	queryIndex: int & >=0
-	colorMode:  "fixed" | "fixed-single"       // NB: "palette" could be added later
-	colorValue: =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
-}]

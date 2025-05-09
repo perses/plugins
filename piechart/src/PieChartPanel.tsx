@@ -27,16 +27,15 @@ import { CalculationType, CalculationsMap, DEFAULT_LEGEND, TimeSeriesData } from
 import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { QuerySettingsOptions } from './model';
 import { getSeriesColor } from './palette-gen';
-import { DEFAULT_VISUAL, PieChartOptions } from './pie-chart-model';
+import { PieChartOptions } from './pie-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode, querySettings: querySettingsList },
+    spec: { calculation, sort, mode },
     contentDimensions,
     queryResults,
   } = props;
@@ -45,10 +44,6 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const PADDING = chartsTheme.container.padding.default;
   const chartId = useId('time-series-panel');
   const categoricalPalette = chartsTheme.echartsTheme.color;
-
-  const visual = useMemo(() => {
-    return merge({}, DEFAULT_VISUAL, props.spec.visual);
-  }, [props.spec.visual]);
 
   const { pieChartData, legendItems } = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];
@@ -60,24 +55,10 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
 
       let seriesIndex = 0;
       for (const seriesData of result?.data.series ?? []) {
-        // Retrieve querySettings for this query, if exists.
-        // queries & querySettings indices do not necessarily match, so we have to check the tail value of the $ref attribute
-        let querySettings: QuerySettingsOptions | undefined;
-        for (const item of querySettingsList ?? []) {
-          if (item.queryIndex === queryIndex) {
-            querySettings = item;
-            // We don't break the loop here just in case there are multiple querySettings defined for the
-            // same queryIndex, because in that case we want the last one to take precedence.
-          }
-        }
         const seriesColor = getSeriesColor({
           categoricalPalette: categoricalPalette as string[],
-          visual,
           muiPrimaryColor: muiTheme.palette.primary.main,
           seriesName: seriesData.name,
-          seriesIndex,
-          querySettings: querySettings,
-          queryHasMultipleResults: (queryResults[queryIndex]?.data?.series?.length ?? 0) > 1,
         });
         const series = {
           value: calculate(seriesData.values) ?? null,
@@ -109,17 +90,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
       pieChartData: sortedPieChartData,
       legendItems,
     };
-  }, [
-    calculation,
-    sort,
-    mode,
-    queryResults,
-    categoricalPalette,
-    visual,
-    muiTheme.palette.primary.main,
-    chartId,
-    querySettingsList,
-  ]);
+  }, [calculation, sort, mode, queryResults, categoricalPalette, muiTheme.palette.primary.main, chartId]);
 
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
