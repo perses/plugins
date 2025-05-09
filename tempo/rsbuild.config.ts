@@ -56,7 +56,6 @@ export default defineConfig({
         '@hookform/resolvers': { singleton: true },
         '@tanstack/react-query': { singleton: true },
         'react-hook-form': { singleton: true },
-        'react-router-dom': { singleton: true },
       },
       dts: false,
       runtime: false,
