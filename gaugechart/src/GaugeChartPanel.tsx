@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Skeleton, Stack } from '@mui/material';
-import { GaugeSeries, useChartsTheme } from '@perses-dev/components';
+import { useChartsTheme } from '@perses-dev/components';
 import { CalculationsMap, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import type { GaugeSeriesOption } from 'echarts';
@@ -25,7 +25,7 @@ import {
   GaugeChartOptions,
 } from './gauge-chart-model';
 import { convertThresholds, defaultThresholdInput } from './thresholds';
-import { GaugeChartBase } from './GaugeChartBase';
+import { GaugeChartBase, GaugeSeries } from './GaugeChartBase';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };
 const GAUGE_MIN_WIDTH = 90;
