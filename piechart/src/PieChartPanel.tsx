@@ -17,7 +17,6 @@ import {
   ContentWithLegend,
   LegendItem,
   LegendProps,
-  PieChartData,
   SelectedLegendItemState,
   useChartsTheme,
   useId,
@@ -30,7 +29,7 @@ import { QuerySettingsOptions } from './model';
 import { getSeriesColor } from './palette-gen';
 import { DEFAULT_VISUAL, PieChartOptions } from './pie-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
-import { PieChartBase } from './PieChartBase';
+import { PieChartBase, PieChartData } from './PieChartBase';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
