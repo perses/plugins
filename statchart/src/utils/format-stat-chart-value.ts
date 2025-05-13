@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { getPluginModule } from './getPluginModule';
-export * from './stat-chart-model';
-export * from './StatChart';
-export * from './StatChartOptionsEditorSettings';
-export * from './StatChartPanel';
-export * from './StatChartValueMappingEditor';
-export * from './StatChartBase';
+import { FormatOptions, formatValue } from '@perses-dev/core';
+
+export const formatStatChartValue = (value?: string | number | null, format?: FormatOptions): string => {
+  if (value === null) {
+    return 'null';
+  } else if (typeof value === 'number') {
+    return formatValue(value, format);
+  } else if (value === undefined) {
+    return '';
+  } else {
+    return value;
+  }
+};
