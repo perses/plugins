@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { getPluginModule } from './getPluginModule';
-export * from './status-history-model';
-export * from './StatusHistoryChart';
-export * from './StatusHistoryChartOptionsEditorSettings';
-export * from './StatusHistoryPanel';
-export * from './StatusHistoryValueMappingEditor';
+export * from './data-transform';
+export * from './get-color';
+export * from './get-formatted-axis-label';
+export * from './get-timescale';
+export * from './get-tooltip-position';

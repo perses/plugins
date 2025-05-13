@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { ContentWithLegend, StatusHistoryChart, useChartsTheme } from '@perses-dev/components';
+import { ContentWithLegend, useChartsTheme } from '@perses-dev/components';
 import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import { merge } from 'lodash';
 import { ReactElement, useMemo } from 'react';
 import { TimeSeriesData } from '@perses-dev/core';
 import { useStatusHistoryDataModel } from './utils/data-transform';
 import { StatusHistoryChartOptions } from './status-history-model.js';
+import { StatusHistoryChartBase } from './StatusHistoryChartBase';
 
 export type StatusHistoryChartPanelProps = PanelProps<StatusHistoryChartOptions, TimeSeriesData>;
 
@@ -64,7 +65,7 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
         {({ height, width }) => {
           return (
             <Box sx={{ height, width }}>
-              <StatusHistoryChart
+              <StatusHistoryChartBase
                 xAxisCategories={xAxisCategories}
                 yAxisCategories={yAxisCategories}
                 data={statusHistoryData}
