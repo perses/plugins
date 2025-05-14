@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { testChartsTheme } from '@perses-dev/components';
 import { useOptimalFontSize } from './calculate-font-size';
 
-jest.mock('@perses-dev/components', () => ({
-  ...jest.requireActual('@perses-dev/components'),
-  useChartsTheme: jest.fn().mockReturnValue(testChartsTheme),
-}));
+jest.mock('@perses-dev/components', () => {
+  const actual = jest.requireActual('@perses-dev/components');
+  return {
+    ...actual,
+    useChartsTheme: jest.fn().mockReturnValue(actual.testChartsTheme),
+  };
+});
 
 describe('useOptimalFontSize', () => {
   const mockCanvasContext = {
