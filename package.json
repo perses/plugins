@@ -17,6 +17,7 @@
     "markdown",
     "piechart",
     "prometheus",
+    "pyroscope",
     "scatterchart",
     "statchart",
     "staticlistvariable",
