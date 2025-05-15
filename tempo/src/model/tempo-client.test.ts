@@ -63,7 +63,10 @@ describe('tempo-client', () => {
   it('formats the search params and ignores undefined values', async () => {
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
-    await searchTagValues({ tag:"name", q: '{}', start: 10, end: undefined }, { datasourceUrl: '' });
-    expect(fetchMock).toHaveBeenCalledWith("/api/v2/search/tag/name/values?q=%7B%7D&start=10", {"headers": {}, "method": "GET"});
+    await searchTagValues({ tag: 'name', q: '{}', start: 10, end: undefined }, { datasourceUrl: '' });
+    expect(fetchMock).toHaveBeenCalledWith('/api/v2/search/tag/name/values?q=%7B%7D&start=10', {
+      headers: {},
+      method: 'GET',
+    });
   });
 });
