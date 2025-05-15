@@ -26,7 +26,8 @@ import {
   FieldOp,
 } from '@grafana/lezer-traceql';
 import { EditorView } from '@uiw/react-codemirror';
-import { TempoClient } from '../model/tempo-client';
+import { isAbsoluteTimeRange, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
+import { CompletionConfig } from './TraceQLExtension';
 
 /** CompletionScope specifies the completion kind, e.g. whether to complete tag names or values etc. */
 type CompletionScope =
@@ -45,8 +46,8 @@ export interface Completions {
 }
 
 export async function complete(
-  { state, pos }: CompletionContext,
-  client?: TempoClient
+  completionCfg: CompletionConfig,
+  { state, pos }: CompletionContext
 ): Promise<CompletionResult | null> {
   // First, identify the completion scopes, for example Scopes() and TagName(scope=intrinsic)
   const completions = identifyCompletions(state, pos, syntaxTree(state));
@@ -56,7 +57,7 @@ export async function complete(
   }
 
   // Then, retrieve completion options for all identified scopes (from the Tempo API).
-  const options = await retrieveOptions(completions.scopes, client);
+  const options = await retrieveOptions(completionCfg, completions.scopes);
   return { options, from: completions.from, to: completions.to };
 }
 
@@ -197,7 +198,7 @@ export function identifyCompletions(state: EditorState, pos: number, tree: Tree)
 /**
  * Retrieve all completion options based on the previously identified completion scopes.
  */
-async function retrieveOptions(completions: CompletionScope[], client?: TempoClient): Promise<Completion[]> {
+async function retrieveOptions(completionCfg: CompletionConfig, completions: CompletionScope[]): Promise<Completion[]> {
   const results: Array<Promise<Completion[]>> = [];
 
   for (const completion of completions) {
@@ -207,15 +208,11 @@ async function retrieveOptions(completions: CompletionScope[], client?: TempoCli
         break;
 
       case 'TagName':
-        if (client) {
-          results.push(completeTagName(client, completion.scope));
-        }
+        results.push(completeTagName(completionCfg, completion.scope));
         break;
 
       case 'TagValue':
-        if (client) {
-          results.push(completeTagValue(client, completion.tag));
-        }
+        results.push(completeTagValue(completionCfg, completion.tag));
         break;
     }
   }
@@ -226,8 +223,29 @@ async function retrieveOptions(completions: CompletionScope[], client?: TempoCli
   return options.flat();
 }
 
-async function completeTagName(client: TempoClient, scope: 'resource' | 'span' | 'intrinsic'): Promise<Completion[]> {
-  const response = await client.searchTags({ scope });
+function getUnixTimeRange(timeRange?: TimeRangeValue): { start?: number; end?: number } {
+  if (!timeRange) {
+    return {};
+  }
+
+  const absTimeRange = !isAbsoluteTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+  const start = Math.round(absTimeRange.start.getTime() / 1000);
+  const end = Math.round(absTimeRange.end.getTime() / 1000);
+  return { start, end };
+}
+
+async function completeTagName(
+  completionCfg: CompletionConfig,
+  scope: 'resource' | 'span' | 'intrinsic'
+): Promise<Completion[]> {
+  if (!completionCfg.client) {
+    return [];
+  }
+
+  const { start, end } = getUnixTimeRange(completionCfg.timeRange);
+  const { limit, maxStaleValues } = completionCfg;
+
+  const response = await completionCfg.client.searchTags({ scope, start, end, limit, maxStaleValues });
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
 }
 
@@ -249,8 +267,15 @@ function applyQuotedCompletion(view: EditorView, completion: Completion, from: n
   view.dispatch(insertCompletionText(view.state, insertText, from, to));
 }
 
-async function completeTagValue(client: TempoClient, tag: string): Promise<Completion[]> {
-  const response = await client.searchTagValues({ tag });
+async function completeTagValue(completionCfg: CompletionConfig, tag: string): Promise<Completion[]> {
+  if (!completionCfg.client) {
+    return [];
+  }
+
+  const { start, end } = getUnixTimeRange(completionCfg.timeRange);
+  const { limit, maxStaleValues } = completionCfg;
+
+  const response = await completionCfg.client.searchTagValues({ tag, start, end, limit, maxStaleValues });
   const completions: Completion[] = [];
   for (const { type, value } of response.tagValues) {
     switch (type) {

@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
+import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { produce } from 'immer';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import {
   DEFAULT_TEMPO,
   isDefaultTempoSelector,
@@ -33,6 +33,10 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   const datasourceSelectLabelID = useId('tempo-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
 
   const { data: client } = useDatasourceClient<TempoClient>(selectedDatasource);
+  const { timeRange } = useTimeRange();
+  const completionConfig = useMemo(() => {
+    return { client, timeRange };
+  }, [client, timeRange]);
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { limit, handleLimitChange, handleLimitBlur, limitHasError } = useLimitState(props);
@@ -69,7 +73,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
       </FormControl>
       <Stack direction="row" spacing={2}>
         <TraceQLEditor
-          completeConfig={{ client }}
+          completionConfig={completionConfig}
           value={query}
           onChange={handleQueryChange}
           onBlur={handleQueryBlur}
