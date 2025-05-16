@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelectValue, isVariableDatasource } from '@perses-dev/plugin-system';
 
 export const PROM_DATASOURCE_KIND = 'PrometheusDatasource' as const;
 
@@ -28,15 +29,17 @@ export interface PrometheusDatasourceSelector extends DatasourceSelector {
 export const DEFAULT_PROM: PrometheusDatasourceSelector = { kind: PROM_DATASOURCE_KIND };
 
 /**
- * Returns true if the provided PrometheusDatasourceSelector is the default one.
+ * Returns true if the provided datasourceSelectValue is the default PrometheusDatasourceSelector.
  */
-export function isDefaultPromSelector(selector: PrometheusDatasourceSelector): boolean {
-  return selector.name === undefined;
+export function isDefaultPromSelector(datasourceSelectValue: DatasourceSelectValue): boolean {
+  return !isVariableDatasource(datasourceSelectValue) && datasourceSelectValue.name === undefined;
 }
 
 /**
- * Type guard to make sure a DatasourceSelector is a Prometheus one.
+ * Type guard to make sure a datasourceSelectValue is a Prometheus one.
  */
-export function isPrometheusDatasourceSelector(selector: DatasourceSelector): selector is PrometheusDatasourceSelector {
-  return selector.kind === PROM_DATASOURCE_KIND;
+export function isPrometheusDatasourceSelector(
+  datasourceSelectValue: DatasourceSelectValue
+): datasourceSelectValue is PrometheusDatasourceSelector {
+  return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === PROM_DATASOURCE_KIND;
 }

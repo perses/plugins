@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { TraceSearchResult, AbsoluteTimeRange, isValidTraceId, otlptracev1 } from '@perses-dev/core';
 import { getUnixTime } from 'date-fns';
 import { TempoTraceQuerySpec, TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model';
@@ -37,9 +37,12 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     kind: TEMPO_DATASOURCE_KIND,
   };
 
-  const client: TempoClient = await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? defaultTempoDatasource
-  );
+  const listDatasourceSelectItems = await context.datasourceStore.listDatasourceSelectItems(TEMPO_DATASOURCE_KIND);
+  const datasourceSelector =
+    datasourceSelectValueToSelector(spec.datasource, context.variableState, listDatasourceSelectItems) ??
+    defaultTempoDatasource;
+
+  const client = await context.datasourceStore.getDatasourceClient<TempoClient>(datasourceSelector);
 
   const getQuery = (): SearchRequestParameters => {
     const params: SearchRequestParameters = {

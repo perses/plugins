@@ -25,7 +25,8 @@
     "timeserieschart",
     "timeseriestable",
     "tracetable",
-    "tracingganttchart"
+    "tracingganttchart",
+    "datasourcevariable"
   ],
   "peerDependencies": {
     "@types/react-dom": "^18.3.0",

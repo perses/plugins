@@ -12,7 +12,13 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { DatasourceSelect, DatasourceSelectProps, useDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
+import {
+  DatasourceSelect,
+  DatasourceSelectProps,
+  useDatasource,
+  useDatasourceClient,
+  useDatasourceSelectValueToSelector,
+} from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import { ReactElement } from 'react';
@@ -23,6 +29,7 @@ import {
   isPrometheusDatasourceSelector,
   PROM_DATASOURCE_KIND,
   PrometheusClient,
+  PrometheusDatasourceSelector,
 } from '../../model';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
 import { PromQLEditor } from '../../components';
@@ -39,8 +46,14 @@ import {
 export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
-  const selectedDatasource = datasource ?? DEFAULT_PROM;
+  const datasourceSelectValue = datasource ?? DEFAULT_PROM;
+
   const datasourceSelectLabelID = useId('prom-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
+
+  const selectedDatasource = useDatasourceSelectValueToSelector(
+    datasourceSelectValue,
+    PROM_DATASOURCE_KIND
+  ) as PrometheusDatasourceSelector;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
@@ -77,7 +90,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         </InputLabel>
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
-          value={selectedDatasource}
+          value={datasourceSelectValue}
           onChange={handleDatasourceChange}
           labelId={datasourceSelectLabelID}
           label="Prometheus Datasource"

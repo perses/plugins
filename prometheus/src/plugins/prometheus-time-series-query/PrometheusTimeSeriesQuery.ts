@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryPlugin, isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
 import { getTimeSeriesData } from './get-time-series-data';
 import { PrometheusTimeSeriesQueryEditor } from './PrometheusTimeSeriesQueryEditor';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
@@ -30,7 +30,8 @@ export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeri
     // Variables can be used in the query and/or in the legend format string
     const queryVariables = parseVariables(spec.query);
     const legendVariables = parseVariables(spec.seriesNameFormat || '');
-    const allVariables = [...new Set([...queryVariables, ...legendVariables])];
+    const datasourceVariable = isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource ?? '') : [];
+    const allVariables = [...new Set([...queryVariables, ...legendVariables, ...datasourceVariable])];
     return {
       variables: allVariables,
     };

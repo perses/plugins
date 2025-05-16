@@ -19,7 +19,7 @@ import {
   TimeSeries,
   TimeSeriesData,
 } from '@perses-dev/core';
-import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
 import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   parseValueTuple,
@@ -32,6 +32,7 @@ import {
   VectorData,
   ScalarData,
   InstantQueryResultType,
+  PROM_DATASOURCE_KIND,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
@@ -47,8 +48,17 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     return { series: [] };
   }
 
+  const listDatasourceSelectItems = await context.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND);
+
+  const selectedDatasource =
+    datasourceSelectValueToSelector(
+      spec.datasource ?? DEFAULT_PROM,
+      context.variableState,
+      listDatasourceSelectItems
+    ) ?? DEFAULT_PROM;
+
   const datasource = (await context.datasourceStore.getDatasource(
-    spec.datasource ?? DEFAULT_PROM
+    selectedDatasource
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
   const datasourceScrapeInterval = Math.trunc(
     milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
@@ -87,7 +97,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   }
 
   // Get the datasource, using the default Prom Datasource if one isn't specified in the query
-  const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
+  const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(selectedDatasource);
 
   // Make the request to Prom
   let response;
