@@ -36,6 +36,7 @@ import {
   PrometheusLabelValuesVariableOptions,
   PrometheusPromQLVariableOptions,
 } from './types';
+import { createCodeMirrorPromClient } from '../model/prometheus-client.codemirror-adapter';
 
 export function PrometheusLabelValuesVariableEditor(
   props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>
@@ -146,7 +147,7 @@ export function PrometheusPromQLVariableEditor(
   const selectedDatasource = datasource ?? DEFAULT_PROM;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
-  const promURL = client?.options.datasourceUrl;
+  const codeMirrorPromClient = createCodeMirrorPromClient(client);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {
@@ -176,7 +177,7 @@ export function PrometheusPromQLVariableEditor(
         />
       </FormControl>
       <PromQLEditor
-        completeConfig={{ remote: { url: promURL } }}
+        completeConfig={{ remote: codeMirrorPromClient }}
         value={value.expr}
         datasource={selectedDatasource}
         onBlur={(event) => {
