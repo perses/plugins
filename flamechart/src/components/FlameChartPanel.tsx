@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { TitleComponentOption } from 'echarts';
-import { useChartsTheme, FlameChart } from '@perses-dev/components';
+import { useChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
 import { FC } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
-import { FlameChartOptions } from './flame-chart-model';
+import { FlameChartOptions } from '../flame-chart-model';
+import { FlameChart } from './FlameChart';
 
 // const MIN_WIDTH = 100;
 const SPACING = 2;
@@ -46,11 +47,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     >
       {flameChartData ? (
         // Convert the server response into the opentelemetry format
-        <FlameChart
-          width={contentDimensions.width}
-          height={contentDimensions.height}
-          data={flameChartData.data.profile}
-        />
+        <FlameChart width={contentDimensions.width} height={contentDimensions.height} data={flameChartData.data} />
       ) : (
         <Typography sx={{ ...noDataTextStyle } as SxProps}>No data</Typography>
       )}

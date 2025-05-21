@@ -34,7 +34,7 @@ export function Filters(props: FiltersProps): ReactElement {
     if (value.length === 0) {
       onChange?.([{ id: Date.now(), value: '' }]); // keep at least one empty filter
     }
-  }, [value]);
+  }, [value, onChange]);
 
   const addFilterItem = () => {
     const updatedFilters = [...value, { id: Date.now(), value: '' }];

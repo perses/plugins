@@ -32,23 +32,62 @@ export function FilterItem(props: FilterItemProps): ReactElement {
   const [labelName, setLabelName] = useState('');
   const [operator, setOperator] = useState('');
   const [labelValue, setLabelValue] = useState('');
+  const [isValueComplete, setIsValueComplete] = useState(false);
 
   // initialize states with the spec if needed
   useEffect(() => {
+    const decomposeValue = () => {
+      let sep = '';
+
+      switch (true) {
+        case value.includes('!='):
+          sep = '!=';
+          break;
+        case value.includes('=~'):
+          sep = '=~';
+          break;
+        case value.includes('!~'):
+          sep = '!~';
+          break;
+        case value.includes('='):
+          sep = '=';
+          break;
+        default:
+          console.warn('No valid operator found in value:', value);
+          break;
+      }
+
+      if (sep !== '') {
+        setLabelName(value.split(sep)[0]);
+        setOperator(sep);
+        setLabelValue(value.split(sep)[1].slice(1, -1));
+      }
+    };
+
     if (value !== '') {
       decomposeValue();
     }
-  }, []);
+  }, [value]);
 
   // update the filterItem value when one of his children change
   useEffect(() => {
+    // const newValue = isValueComplete ? labelName + operator + '"' + labelValue + '"' : '';
+    // if (labelName !== '' && operator !== '' && labelValue !== '') {
+    //   setIsValueComplete(true);
+    // }
+
     const newValue = labelName + operator + '"' + labelValue + '"';
+
     if (labelName !== '' && operator !== '' && labelValue !== '' && newValue !== value) {
       onChange?.(newValue);
     }
-  }, [labelName, operator, labelValue]);
+  }, [labelName, operator, labelValue, onChange, value]);
 
   const handleLabelNameChange = (name: string) => {
+    setIsValueComplete(false);
+    if (labelValue !== '') {
+      setLabelValue('');
+    }
     setLabelName(name);
   };
 
@@ -62,34 +101,6 @@ export function FilterItem(props: FilterItemProps): ReactElement {
 
   const handleDeleteClick = () => {
     deleteItem?.();
-  };
-
-  const decomposeValue = () => {
-    let sep = '';
-
-    switch (true) {
-      case value.includes('!='):
-        sep = '!=';
-        break;
-      case value.includes('=~'):
-        sep = '=~';
-        break;
-      case value.includes('!~'):
-        sep = '!~';
-        break;
-      case value.includes('='):
-        sep = '=';
-        break;
-      default:
-        console.warn('No valid operator found in value:', value);
-        break;
-    }
-
-    if (sep !== '') {
-      setLabelName(value.split(sep)[0]);
-      setOperator(sep);
-      setLabelValue(value.split(sep)[1].slice(1, -1));
-    }
   };
 
   return (
