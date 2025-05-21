@@ -59,7 +59,7 @@ export function LabelValue(props: LabelValueProps): ReactElement {
     updateOptions().catch((error) => {
       console.error('Failed to fetch label values:', error);
     });
-  }, [client, labelName]);
+  }, [client, labelName, onChange, value]);
 
   return (
     <Select

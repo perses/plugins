@@ -13,8 +13,8 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialFlameChartOptions, FlameChartOptions } from './flame-chart-model';
-import { FlameChartOptionsEditorSettings } from './FlameChartOptionsEditorSettings';
-import { FlameChartPanel, FlameChartPanelProps } from './FlameChartPanel';
+import { FlameChartOptionsEditorSettings } from './components/FlameChartOptionsEditorSettings';
+import { FlameChartPanel, FlameChartPanelProps } from './components/FlameChartPanel';
 
 /**
  * The core FlameChart panel plugin for Perses.

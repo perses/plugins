@@ -12,6 +12,7 @@
   },
   "workspaces": [
     "barchart",
+    "flamechart",
     "gaugechart",
     "histogramchart",
     "markdown",

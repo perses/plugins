@@ -13,7 +13,7 @@
 
 import { ChangeEvent, ReactElement } from 'react';
 import { Stack, TextField } from '@mui/material';
-import { FlameChartOptionsEditorProps } from './flame-chart-model';
+import { FlameChartOptionsEditorProps } from '../flame-chart-model';
 
 export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorProps): ReactElement {
   const {
