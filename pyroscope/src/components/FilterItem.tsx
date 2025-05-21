@@ -32,7 +32,6 @@ export function FilterItem(props: FilterItemProps): ReactElement {
   const [labelName, setLabelName] = useState('');
   const [operator, setOperator] = useState('=');
   const [labelValue, setLabelValue] = useState('');
-  const [isValueComplete, setIsValueComplete] = useState(false);
 
   // initialize states with the spec if needed
   useEffect(() => {
@@ -71,11 +70,6 @@ export function FilterItem(props: FilterItemProps): ReactElement {
 
   // update the filterItem value when one of his children change
   useEffect(() => {
-    // const newValue = isValueComplete ? labelName + operator + '"' + labelValue + '"' : '';
-    // if (labelName !== '' && operator !== '' && labelValue !== '') {
-    //   setIsValueComplete(true);
-    // }
-
     const newValue = labelName + operator + '"' + labelValue + '"';
 
     if (labelName !== '' && operator !== '' && labelValue !== '' && newValue !== value) {
@@ -84,9 +78,9 @@ export function FilterItem(props: FilterItemProps): ReactElement {
   }, [labelName, operator, labelValue, onChange, value]);
 
   const handleLabelNameChange = (name: string) => {
-    setIsValueComplete(false);
     if (labelValue !== '') {
       setLabelValue('');
+      onChange?.('');
     }
     setLabelName(name);
   };
