@@ -30,7 +30,7 @@ export function FilterItem(props: FilterItemProps): ReactElement {
   const { client, value, onChange, deleteItem } = props;
 
   const [labelName, setLabelName] = useState('');
-  const [operator, setOperator] = useState('');
+  const [operator, setOperator] = useState('=');
   const [labelValue, setLabelValue] = useState('');
   const [isValueComplete, setIsValueComplete] = useState(false);
 
