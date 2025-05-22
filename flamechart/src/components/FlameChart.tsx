@@ -50,8 +50,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const chartsTheme = useChartsTheme();
   const [scheme, setScheme] = useState(0); // 0 = by package name, 1 = by value
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
-  const [menuTitle, setMenuTitle] = useState();
-  const [selectedId, setSelectedId] = useState<number | undefined>(); // id of the selected item
+  const [menuTitle, setMenuTitle] = useState('');
+  const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
 
   const formatCount = (value: number): string => {
     if (value >= 1_000_000_000) {
