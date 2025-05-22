@@ -25,9 +25,8 @@ export const FlameChart: PanelPlugin<FlameChartOptions, FlameChartPanelProps> = 
   panelOptionsEditorComponents: [
     {
       label: 'Settings',
-      content: FlameChartOptionsEditorSettings, // set of colors, etc.
+      content: FlameChartOptionsEditorSettings,
     },
-    // other frames (label, content) to be displayed at the left of frames Links and JSON in Edit section of a panel
   ],
   createInitialOptions: createInitialFlameChartOptions,
 };
