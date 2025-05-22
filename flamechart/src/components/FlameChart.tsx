@@ -20,10 +20,11 @@ import {
 } from 'echarts';
 import * as echarts from 'echarts';
 // import { CanvasRenderer } from 'echarts/renderers';
-import { Box } from '@mui/material';
+import { Box, Menu, MenuItem, Divider } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { StackTrace, ProfileData } from '@perses-dev/core';
-import { useChartsTheme, EChart } from '@perses-dev/components';
+import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
+import { EChartsCoreOption } from 'echarts/core';
 
 const ITEM_GAP = 2; // vertical gap between flame chart levels (lines)
 const TOP_SHIFT = 10; // margin from the top of the flame chart container
@@ -48,6 +49,9 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const { width, height, data } = props;
   const chartsTheme = useChartsTheme();
   const [scheme, setScheme] = useState(0); // 0 = by package name, 1 = by value
+  const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
+  const [menuTitle, setMenuTitle] = useState();
+  const [selectedId, setSelectedId] = useState<number | undefined>(); // id of the selected item
 
   const formatCount = (value: number): string => {
     if (value >= 1_000_000_000) {
@@ -124,16 +128,39 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     return valueWithUnit;
   };
 
-  // todo: modify this first
-  const handleItemClick = (params: any): void => {
-    console.log('id:', params.data.name);
-    // const dataIndex = params.dataIndex;
-    // if (dataIndex !== undefined) {
-    //   const sample = option.series[0].data[dataIndex] as Sample;
-    //   console.log('id:', sample.name);
-    //   const id = Number(sample.name);
-    //   data.profile.stackTrace = filterJson(data.profile.stackTrace, id);
-    // }
+  const handleItemClick = (params: MouseEventsParameters<unknown>): void => {
+    const data: Sample = params.data;
+    setMenuTitle(data.value[6].toString());
+    setSelectedId(data.name);
+
+    if (params.event.event) {
+      const mouseEvent = params.event.event as MouseEvent;
+      setMenuPosition({
+        mouseX: mouseEvent.clientX - 2,
+        mouseY: mouseEvent.clientY - 4,
+      });
+    }
+  };
+
+  const handleFocusBlock = (): void => {
+    // focus block
+    handleClose();
+  };
+
+  const handleCopyFunctionName = (): void => {
+    if ((selectedId || selectedId === 0) && menuTitle) {
+      navigator.clipboard.writeText(menuTitle);
+    }
+    handleClose();
+  };
+
+  const handleResetGraph = (): void => {
+    // reset flame graph
+    handleClose();
+  };
+
+  const handleClose = (): void => {
+    setMenuPosition(null);
   };
 
   // color scheme to display flame chart by total value (12 colors)
@@ -325,7 +352,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const levelOfOriginalJson = heightOfJson(data.profile.stackTrace);
 
-  const option = {
+  const option: EChartsCoreOption = {
     title: [
       {
         show: false,
@@ -383,8 +410,44 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         theme={chartsTheme.echartsTheme}
         onEvents={{
           click: handleItemClick,
+          dblclick: handleItemClick,
         }}
       />
+      <Menu
+        sx={{
+          '& .MuiPaper-root': {
+            backgroundColor: '#3b4252',
+            color: 'white',
+            padding: '5px',
+            paddingBottom: '0px',
+          },
+          '& .MuiMenuItem-root': {
+            '&:hover': {
+              backgroundColor: '#4c566a',
+            },
+            '&.Mui-selected': {
+              backgroundColor: '#3b4252',
+            },
+          },
+        }}
+        open={menuPosition !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={menuPosition !== null ? { top: menuPosition.mouseY, left: menuPosition.mouseX } : undefined}
+      >
+        <Box
+          sx={{
+            paddingLeft: '16px',
+            paddingBottom: '8px',
+          }}
+        >
+          {menuTitle}
+        </Box>
+        <Divider sx={{ backgroundColor: '#4c566a', height: '2px' }} />
+        <MenuItem onClick={handleFocusBlock}>Focus block</MenuItem>
+        <MenuItem onClick={handleCopyFunctionName}>Copy function name</MenuItem>
+        <MenuItem onClick={handleResetGraph}>Reset graph</MenuItem>
+      </Menu>
     </Box>
   );
 }
