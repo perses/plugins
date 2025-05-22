@@ -50,7 +50,7 @@ export function LabelValue(props: LabelValueProps): ReactElement {
         setOptions(menuItems);
 
         // Reset selected value when labelName changes
-        if (!labelValues.includes(value)) {
+        if (!labelValues.includes(value) && value !== '') {
           onChange?.('');
         }
       }
