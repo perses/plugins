@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { ReactElement, useEffect, useState } from 'react';
-//import { useId } from '@perses-dev/components';
 import { Select, MenuItem } from '@mui/material';
 import { PyroscopeClient } from '../model';
 
@@ -34,7 +33,7 @@ async function fetchLabelNames(client: PyroscopeClient): Promise<string[]> {
 export function LabelName(props: LabelNameProps): ReactElement {
   const { client, value, onChange } = props;
 
-  const [options, setOptions] = useState<ReactElement[]>([]);
+  const [options, setOptions] = useState<string[]>([]);
 
   // update options when client changes
   useEffect(() => {
@@ -42,14 +41,7 @@ export function LabelName(props: LabelNameProps): ReactElement {
       if (client) {
         const regex = /^__.*__$/;
         const labelNames = await fetchLabelNames(client);
-        const menuItems = labelNames
-          .filter((labelName) => !regex.test(labelName) && labelName !== 'service_name')
-          .map((labelName) => (
-            <MenuItem key={labelName} value={labelName}>
-              {labelName}
-            </MenuItem>
-          ));
-        setOptions(menuItems);
+        setOptions(labelNames.filter((labelName) => !regex.test(labelName) && labelName !== 'service_name'));
       }
     };
 
@@ -72,7 +64,11 @@ export function LabelName(props: LabelNameProps): ReactElement {
         return selected;
       }}
     >
-      {options.length > 0 && options}
+      {options.map((labelName) => (
+        <MenuItem key={labelName} value={labelName}>
+          {labelName}
+        </MenuItem>
+      ))}
     </Select>
   );
 }
