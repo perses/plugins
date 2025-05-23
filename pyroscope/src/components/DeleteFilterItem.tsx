@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Button } from '@mui/material';
+import { Button, useTheme } from '@mui/material';
 
 export interface DeleteFilterItemProps {
   onClick: () => void;
@@ -20,18 +20,20 @@ export interface DeleteFilterItemProps {
 
 export function DeleteFilterItem(props: DeleteFilterItemProps): ReactElement {
   const { onClick } = props;
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
   return (
     <Button
       sx={{
         width: '40px',
         minWidth: 'unset', // Disable the default minWidth
-        border: '1px solid rgba(0, 0, 0, 0.23)',
+        border: `1px solid ${theme.palette.divider}`,
         color: 'grey',
+        backgroundColor: 'transparent',
         transition: 'all 0.3s ease',
         '&:hover': {
-          borderColor: 'black',
-          backgroundColor: 'white',
+          borderColor: isDarkMode ? 'white' : 'black',
         },
         borderTopLeftRadius: '0',
         borderBottomLeftRadius: '0',
