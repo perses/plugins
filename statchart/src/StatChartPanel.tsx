@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TitleComponentOption } from 'echarts';
-import { StatChart, StatChartData, useChartsTheme, GraphSeries, PersesChartsTheme } from '@perses-dev/components';
+import { useChartsTheme, GraphSeries, PersesChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
 import { FC, useMemo } from 'react';
 import { applyValueMapping, Labels, createRegexFromString, TimeSeriesData, ValueMapping } from '@perses-dev/core';
@@ -21,6 +21,7 @@ import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline } from './utils/data-transform';
 import { calculateValue } from './utils/calculate-value';
 import { getStatChartColor } from './utils/get-color';
+import { StatChartBase, StatChartData } from './StatChartBase';
 
 const MIN_WIDTH = 100;
 const SPACING = 2;
@@ -64,7 +65,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
           const sparklineConfig = convertSparkline(chartsTheme, series.color, sparkline);
 
           return (
-            <StatChart
+            <StatChartBase
               key={index}
               width={chartWidth}
               height={contentDimensions.height}

@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/status-history-chart-plugin",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",

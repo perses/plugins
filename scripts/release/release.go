@@ -48,15 +48,16 @@ func release(pluginName string, optionalReleaseMessage string) {
 // - Use it to log in to GitHub: `gh auth login`
 //
 // Usage:
-// This will release every plugin not yet released
+//
+// This will release every plugin not yet released:
 //
 //	go run ./scripts/release/release.go --all
 //
-// This will release only the tempo plugin. Note that the `--name` flag is set with the folder name not the plugin name.
+// This will release only the tempo plugin (note that the `--name` flag is set with the folder name not the plugin name):
 //
 //	go run ./scripts/release/release.go --name=tempo
 //
-// Add a release message that will appear in every release
+// To add a release message that will appear in every release:
 //
 //	go run ./scripts/release/release.go --all --message="Release message"
 //

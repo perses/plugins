@@ -15,8 +15,8 @@ import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-traceql';
 import { CompletionContext } from '@codemirror/autocomplete';
 import { Extension } from '@uiw/react-codemirror';
+import { TimeRangeValue } from '@perses-dev/core';
 import { TempoClient } from '../model/tempo-client';
-import { TempoDatasource } from '../plugins/tempo-datasource';
 import { traceQLHighlight } from './highlight';
 import { complete } from './complete';
 
@@ -32,27 +32,28 @@ function traceQLLanguage(): LRLanguage {
   });
 }
 
-function getTempoClient(completionCfg: CompletionConfig): TempoClient | undefined {
-  if (completionCfg.client) {
-    return completionCfg.client;
-  }
-  if (completionCfg.endpoint) {
-    return TempoDatasource.createClient({ directUrl: completionCfg.endpoint }, {});
-  }
-  return undefined;
-}
-
 export interface CompletionConfig {
+  /** a TempoClient instance, can be created with TempoDatasource.createClient() */
   client?: TempoClient;
-  endpoint?: string;
+
+  /** search for tag values in a given time range */
+  timeRange?: TimeRangeValue;
+
+  /** limit number of returned tag values */
+  limit?: number;
+
+  /**
+   * stop search early if number of cache hits exceeds this setting
+   * https://grafana.com/docs/tempo/latest/api_docs/#search-tag-values-v2
+   */
+  maxStaleValues?: number;
 }
 
 export function TraceQLExtension(completionCfg: CompletionConfig): Array<LRLanguage | Extension> {
-  const tempoClient = getTempoClient(completionCfg);
   const language = traceQLLanguage();
   const completion = language.data.of({
     autocomplete: (ctx: CompletionContext) =>
-      complete(ctx, tempoClient).catch((e) => console.error('error during TraceQL auto-complete', e)),
+      complete(completionCfg, ctx).catch((e) => console.error('error during TraceQL auto-complete', e)),
   });
   return [language, completion];
 }

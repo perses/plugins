@@ -54,7 +54,7 @@ func main() {
 	}
 	isErr := false
 	for _, pluginToBuild := range pluginsToBuild {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 		workspace, buildErr := pluginToBuild.AwaitWithContext(ctx)
 		if buildErr != nil {
 			isErr = true
