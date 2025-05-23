@@ -11,22 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package migrate
 
-import (
-	pyroscope "github.com/perses/plugins/pyroscope/schemas/datasource:model"
-)
+#grafanaType: "flame"
+#panel:       _
 
-kind: "PyroscopeProfileQuery"
-spec: close({
-	datasource?: {
-		kind: pyroscope.kind
-	}
-	maxNodes?: number
-	profileType: string
-	filters?: [...{ 
-		id: number
-		value: string 
-	}]
-	service?: string
-})
+// todo : complete this file
+kind: "FlameChart"
+spec: {
+	content: ""
+}

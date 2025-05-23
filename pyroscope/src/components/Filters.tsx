@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState, useEffect } from 'react';
+import { ReactElement, useState } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import { PyroscopeClient } from '../model';
 import { FilterItem } from './FilterItem';
@@ -20,7 +20,7 @@ import { AddFilterItem } from './AddFilterItem';
 export interface FiltersProps {
   client: PyroscopeClient | undefined;
   value: Array<{ id: number; value: string }>;
-  onChange?(value: Array<{ id: number; value: string }>): void;
+  onChange?: (value: Array<{ id: number; value: string }>) => void;
 }
 
 export function Filters(props: FiltersProps): ReactElement {
@@ -29,12 +29,6 @@ export function Filters(props: FiltersProps): ReactElement {
 
   // state to manage the focus
   const [isFocused, setIsFocused] = useState(false);
-
-  useEffect(() => {
-    if (value.length === 0) {
-      onChange?.([{ id: Date.now(), value: '' }]); // keep at least one empty filter
-    }
-  }, [value, onChange]);
 
   const addFilterItem = () => {
     const updatedFilters = [...value, { id: Date.now(), value: '' }];
@@ -48,7 +42,11 @@ export function Filters(props: FiltersProps): ReactElement {
 
   const deleteFilter = (index: number) => {
     const updatedFilters = value.filter((_, i) => i !== index);
-    onChange?.(updatedFilters);
+    if (updatedFilters.length === 0) {
+      onChange?.([{ id: Date.now(), value: '' }]); // keep at least one empty filter
+    } else {
+      onChange?.(updatedFilters);
+    }
   };
 
   return (

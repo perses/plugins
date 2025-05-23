@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState, useEffect } from 'react';
+import { ReactElement, useState } from 'react';
 import { Stack } from '@mui/material';
 import { PyroscopeClient } from '../model';
 import { LabelName } from './LabelName';
@@ -22,60 +22,45 @@ import { DeleteFilterItem } from './DeleteFilterItem';
 export interface FilterItemProps {
   client: PyroscopeClient | undefined;
   value: string;
-  onChange?(value: string): void;
-  deleteItem?(): void; // this function is used to delete the current filter
+  onChange?: (value: string) => void;
+  deleteItem?: () => void; // this function is used to delete the current filter
 }
 
 export function FilterItem(props: FilterItemProps): ReactElement {
   const { client, value, onChange, deleteItem } = props;
 
-  const [labelName, setLabelName] = useState('');
-  const [operator, setOperator] = useState('=');
-  const [labelValue, setLabelValue] = useState('');
+  const getSeparator = (value: string): string | null => {
+    if (value === '') return null;
+    if (value.includes('!=')) return '!=';
+    if (value.includes('=~')) return '=~';
+    if (value.includes('!~')) return '!~';
+    if (value.includes('=')) return '=';
+    console.warn('No valid operator found in value:', value);
+    return null;
+  };
 
-  // initialize states with the spec if needed
-  useEffect(() => {
-    const decomposeValue = () => {
-      let sep = '';
+  const [labelName, setLabelName] = useState(() => {
+    const sep = getSeparator(value);
+    return sep ? value.split(sep)[0] : '';
+  });
 
-      switch (true) {
-        case value.includes('!='):
-          sep = '!=';
-          break;
-        case value.includes('=~'):
-          sep = '=~';
-          break;
-        case value.includes('!~'):
-          sep = '!~';
-          break;
-        case value.includes('='):
-          sep = '=';
-          break;
-        default:
-          console.warn('No valid operator found in value:', value);
-          break;
-      }
+  const [operator, setOperator] = useState(() => {
+    return getSeparator(value) || '=';
+  });
 
-      if (sep !== '') {
-        setLabelName(value.split(sep)[0]);
-        setOperator(sep);
-        setLabelValue(value.split(sep)[1].slice(1, -1));
-      }
-    };
+  const [labelValue, setLabelValue] = useState(() => {
+    const sep = getSeparator(value);
+    return sep ? value.split(sep)[1].slice(1, -1) : '';
+  });
 
-    if (value !== '') {
-      decomposeValue();
-    }
-  }, [value]);
-
-  // update the filterItem value when one of his children change
-  useEffect(() => {
+  // update the filterItem value when one of its children changes
+  const handleFilterItemValueChange = (labelName: string, operator: string, labelValue: string) => {
     const newValue = labelName + operator + '"' + labelValue + '"';
 
     if (labelName !== '' && operator !== '' && labelValue !== '' && newValue !== value) {
       onChange?.(newValue);
     }
-  }, [labelName, operator, labelValue, onChange, value]);
+  };
 
   const handleLabelNameChange = (name: string) => {
     if (labelValue !== '') {
@@ -87,10 +72,12 @@ export function FilterItem(props: FilterItemProps): ReactElement {
 
   const handleOperatorChange = (op: string) => {
     setOperator(op);
+    handleFilterItemValueChange(labelName, op, labelValue);
   };
 
   const handleLabelValueChange = (value: string) => {
     setLabelValue(value);
+    handleFilterItemValueChange(labelName, operator, value);
   };
 
   const handleDeleteClick = () => {
