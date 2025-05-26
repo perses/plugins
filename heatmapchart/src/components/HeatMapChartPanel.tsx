@@ -42,8 +42,6 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     data: HeatMapDataItem[];
     xAxisCategories: number[];
     yAxisCategories: string[];
-    yMin: number;
-    yMax: number;
     countMin: number;
     countMax: number;
   } = useMemo(() => {
@@ -60,8 +58,8 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     }
 
     if (
-      queryResults.length != 1 &&
-      queryResults[0]!.data.series.length != 1 &&
+      queryResults.length != 1 ||
+      queryResults[0]!.data.series.length != 1 ||
       queryResults[0]!.data.series[0]!.histograms === undefined
     ) {
       return {
@@ -80,6 +78,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     const xAxisCategories: number[] = generateCompleteTimestamps(timeScale);
 
+    // Dummy value that will be replaced at the first iteration
     let lowestBound = Infinity;
     let highestBound = -Infinity;
     let countMin = Infinity;
@@ -111,33 +110,26 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     const height = contentDimensions?.height ?? HEATMAP_MIN_HEIGHT;
     const totalRange = highestBound - lowestBound;
     const rangePerItem = (totalRange * HEATMAP_ITEM_MIN_HEIGHT) / height;
+    const totalItems = Math.ceil(height / HEATMAP_ITEM_MIN_HEIGHT);
 
-    const yAxisCategories: string[] = Array.from({ length: Math.ceil(height / HEATMAP_ITEM_MIN_HEIGHT) }, (_, index) =>
+    // Generating value of the Y axis based on the height divided by the size of a cell (item)
+    const yAxisCategories: string[] = Array.from({ length: totalItems }, (_, index) =>
       (lowestBound + index * rangePerItem).toFixed(3)
     );
 
     const data: HeatMapDataItem[] = [];
-
-    // Logic for filling all cell where a bucket is present
+    // Logic for filling all cells where a bucket is present
     for (const [time, histogram] of series?.histograms ?? []) {
-      for (const bucket of histogram?.buckets ?? []) {
-        const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time * 1000);
+      const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time * 1000);
 
+      for (const bucket of histogram?.buckets ?? []) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, lowerBound, upperBound, count] = bucket;
         const yLowerBoundItem = Math.floor((parseFloat(lowerBound) - lowestBound) / rangePerItem);
         const yUpperBoundItem = Math.ceil((parseFloat(upperBound) - lowestBound) / rangePerItem);
 
         for (let i = 0; i < yUpperBoundItem - yLowerBoundItem; i++) {
-          // TODO: following code need optimization, idea: some bucket may have overlapping cells, we could use avg value
-          // const existingItem = data.find(
-          //   (item) => item.value[0] === itemIndexOnXaxis && item.value[1] === yLowerBoundItem + i
-          // );
-          // if (existingItem && existingItem.value[2]) {
-          //   existingItem.value[2] = (existingItem.value[2] + parseFloat(count)) * 0.5;
-          //   continue;
-          // }
-
+          // TODO: some bucket may have overlapping cells, we could use avg value. Probably will need to move to a matrix data structure for performance reasons
           data.push({
             value: [itemIndexOnXaxis, yLowerBoundItem + i, parseFloat(count)],
             label: count,
@@ -145,15 +137,32 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
         }
       }
     }
-    return { data, xAxisCategories, yAxisCategories, yMin: lowestBound, yMax: highestBound, countMin, countMax };
+    return {
+      data,
+      xAxisCategories,
+      yAxisCategories,
+      countMin,
+      countMax,
+    };
   }, [contentDimensions?.height, queryResults]);
 
-  // no data message handled inside chart component
+  // TODO: add support for multiple queries
+  if (queryResults.length > 1) {
+    return (
+      <Stack justifyContent="center" height="100%">
+        <Typography variant="body2" textAlign="center">
+          Only one query at a time is supported for now
+        </Typography>
+      </Stack>
+    );
+  }
+
+  // Mo data message handled inside chart component
   if (data.length === 0) {
     return (
       <Stack justifyContent="center" height="100%">
         <Typography variant="body2" textAlign="center">
-          No data available (only native native histograms are supported for now)
+          No data available (only native histograms are supported for now)
         </Typography>
       </Stack>
     );
