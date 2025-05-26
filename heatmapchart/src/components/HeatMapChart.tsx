@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { FormatOptions, ThresholdOptions, TimeScale } from '@perses-dev/core';
-import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { FormatOptions, TimeScale } from '@perses-dev/core';
+import { EChart, getFormattedAxis, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
 import { getFormattedStatusHistoryAxisLabel } from '@perses-dev/components/dist/StatusHistoryChart/get-formatted-axis-label';
@@ -26,7 +26,7 @@ export type HeatMapData = [number, number, number | undefined]; // [x, y, value]
 
 export interface HeatMapDataItem {
   value: HeatMapData;
-  label?: string;
+  label: string;
   itemStyle?: {
     color?: string;
     borderColor?: string;
@@ -40,12 +40,12 @@ export interface HeatMapChartProps {
   data: HeatMapDataItem[];
   xAxisCategories: number[];
   yAxisCategories: string[];
-  format?: FormatOptions;
+  yAxisFormat?: FormatOptions;
+  countFormat?: FormatOptions;
   countMin?: number;
   countMax?: number;
-  thresholds?: ThresholdOptions;
-  timeScale?: TimeScale;
-
+  timeScale?: TimeScale; // todo: check usage
+  showVisualMap?: boolean;
   // TODO: exponential?: boolean;
 }
 
@@ -55,20 +55,16 @@ export function HeatMapChart({
   data,
   xAxisCategories,
   yAxisCategories,
-  format,
+  yAxisFormat,
+  countFormat,
   countMin,
   countMax,
-  thresholds,
   timeScale,
+  showVisualMap,
 }: HeatMapChartProps): ReactElement | null {
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
   const { timeZone } = useTimeZone();
-
-  // const [minValue, maxValue] = useMemo(() => {
-  //   const values = data.map((d) => d.value[2] ?? 0);
-  //   return [Math.xMin(...values), Math.xMax(...values)];
-  // }, [data]);
 
   const option: EChartsCoreOption = useMemo(() => {
     return {
@@ -82,6 +78,7 @@ export function HeatMapChart({
             xAxisCategories,
             yAxisCategories,
             theme,
+            format: countFormat,
           });
         },
       },
@@ -93,12 +90,15 @@ export function HeatMapChart({
           formatter: getFormattedStatusHistoryAxisLabel(timeScale?.rangeMs ?? 0, timeZone),
         },
       },
-      yAxis: {
-        type: 'category',
-        data: yAxisCategories,
-      },
+      yAxis: getFormattedAxis(
+        {
+          type: 'category',
+          data: yAxisCategories,
+        },
+        yAxisFormat
+      ),
       visualMap: {
-        show: true,
+        show: showVisualMap ?? false,
         type: 'continuous',
         min: countMin,
         max: countMax,
@@ -123,6 +123,11 @@ export function HeatMapChart({
             '#a50026',
           ],
         },
+        textStyle: {
+          color: theme.palette.text.primary,
+          textBorderColor: theme.palette.background.default,
+          textBorderWidth: 5,
+        },
       },
       series: [
         {
@@ -140,7 +145,20 @@ export function HeatMapChart({
         },
       ],
     };
-  }, [xAxisCategories, timeScale?.rangeMs, timeZone, yAxisCategories, countMin, countMax, height, data, theme]);
+  }, [
+    xAxisCategories,
+    timeScale?.rangeMs,
+    timeZone,
+    yAxisCategories,
+    yAxisFormat,
+    showVisualMap,
+    countMin,
+    countMax,
+    height,
+    theme,
+    data,
+    countFormat,
+  ]);
 
   return (
     <EChart

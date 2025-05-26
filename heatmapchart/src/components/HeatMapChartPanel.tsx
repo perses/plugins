@@ -16,7 +16,7 @@ import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
-import { DEFAULT_FORMAT, DEFAULT_THRESHOLDS, HeatMapChartOptions } from '../heat-map-chart-model';
+import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
 import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils/data-transform';
 import { HeatMapChart, HeatMapDataItem } from './HeatMapChart';
 
@@ -29,8 +29,8 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
   const { spec: pluginSpec, contentDimensions, queryResults } = props;
 
   // ensures all default format properties set if undef
-  const format = merge({}, DEFAULT_FORMAT, pluginSpec.format);
-  const thresholds = merge({}, DEFAULT_THRESHOLDS, pluginSpec.thresholds);
+  const yAxisFormat = merge({}, DEFAULT_FORMAT, pluginSpec.yAxisFormat);
+  const countFormat = merge({}, DEFAULT_FORMAT, pluginSpec.countFormat);
 
   const {
     data,
@@ -85,8 +85,10 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     let countMin = Infinity;
     let countMax = -Infinity;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [_, histogram] of series?.histograms ?? []) {
       for (const bucket of histogram?.buckets ?? []) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, lowerBound, upperBound, count] = bucket;
         const lowerBoundFloat = parseFloat(lowerBound);
         const upperBoundFloat = parseFloat(upperBound);
@@ -121,6 +123,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
       for (const bucket of histogram?.buckets ?? []) {
         const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time * 1000);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, lowerBound, upperBound, count] = bucket;
         const yLowerBoundItem = Math.floor((parseFloat(lowerBound) - lowestBound) / rangePerItem);
         const yUpperBoundItem = Math.ceil((parseFloat(upperBound) - lowestBound) / rangePerItem);
@@ -166,10 +169,11 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
         data={data}
         xAxisCategories={xAxisCategories}
         yAxisCategories={yAxisCategories}
-        format={format}
+        yAxisFormat={yAxisFormat}
+        countFormat={countFormat}
         countMin={countMin}
         countMax={countMax}
-        thresholds={thresholds}
+        showVisualMap={pluginSpec.showVisualMap}
       />
     </Stack>
   );

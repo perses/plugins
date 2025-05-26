@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, FormatOptions, ThresholdOptions } from '@perses-dev/core';
+import { Definition, FormatOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
-export const DEFAULT_THRESHOLDS: ThresholdOptions = { defaultColor: '#56b4e9' };
 export const DEFAULT_MIN_PERCENT = 0;
 export const DEFAULT_MAX_PERCENT = 100;
 export const DEFAULT_MIN_PERCENT_DECIMAL = 0;
@@ -32,10 +31,11 @@ export interface HeatMapChartDefinition extends Definition<HeatMapChartOptions> 
  * The Options object type supported by the HeatMapChart panel plugin.
  */
 export interface HeatMapChartOptions {
-  format?: FormatOptions;
+  yAxisFormat?: FormatOptions;
+  countFormat?: FormatOptions;
   min?: number;
   max?: number;
-  thresholds?: ThresholdOptions;
+  showVisualMap?: boolean;
 }
 
 export type HeatMapChartOptionsEditorProps = OptionsEditorProps<HeatMapChartOptions>;
@@ -45,6 +45,8 @@ export type HeatMapChartOptionsEditorProps = OptionsEditorProps<HeatMapChartOpti
  */
 export function createInitialHeatMapChartOptions(): HeatMapChartOptions {
   return {
-    format: DEFAULT_FORMAT,
+    yAxisFormat: DEFAULT_FORMAT,
+    countFormat: DEFAULT_FORMAT,
+    showVisualMap: true,
   };
 }

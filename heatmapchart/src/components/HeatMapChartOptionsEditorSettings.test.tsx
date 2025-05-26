@@ -15,7 +15,7 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { HeatMapChartOptions } from '../heatMap-chart-model';
+import { HeatMapChartOptions } from '../heat-map-chart-model';
 import { HeatMapChartOptionsEditorSettings } from './HeatMapChartOptionsEditorSettings';
 
 describe('HeatMapChartOptionsEditorSettings', () => {
@@ -31,7 +31,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderHeatMapChartOptionsEditorSettings(
       {
-        format: {
+        yAxisFormat: {
           unit: 'decimal',
         },
       },
@@ -52,14 +52,14 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     );
   });
 
-  it('can modify xMin', async () => {
+  it('can modify yAxisMin', async () => {
     let minValue: number | undefined = undefined;
     const onChange = jest.fn((e) => {
       minValue = e.min;
     });
     renderHeatMapChartOptionsEditorSettings(
       {
-        format: {
+        yAxisFormat: {
           unit: 'decimal',
         },
         min: 1,
@@ -74,14 +74,14 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     expect(minValue).toBe(5);
   });
 
-  it('can modify xMax', async () => {
+  it('can modify yAxisMax', async () => {
     let maxValue: number | undefined = undefined;
     const onChange = jest.fn((e) => {
       maxValue = e.max;
     });
     renderHeatMapChartOptionsEditorSettings(
       {
-        format: {
+        yAxisFormat: {
           unit: 'decimal',
         },
         max: 1,

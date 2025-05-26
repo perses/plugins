@@ -13,15 +13,17 @@
 
 import { css, Theme } from '@mui/material';
 import { getDateAndTime } from '@perses-dev/components';
+import { FormatOptions, formatValue } from '@perses-dev/core';
 import { HeatMapData } from './HeatMapChart';
 
 interface CustomTooltipProps {
   data: HeatMapData;
-  label?: string;
+  label: string;
   marker: string;
   xAxisCategories: number[];
   yAxisCategories: string[];
   theme: Theme;
+  format?: FormatOptions;
 }
 
 export function generateTooltipHTML({
@@ -31,6 +33,7 @@ export function generateTooltipHTML({
   xAxisCategories,
   yAxisCategories,
   theme,
+  format,
 }: CustomTooltipProps): string {
   const [x, y] = data;
   const xAxisLabel = xAxisCategories[x];
@@ -62,7 +65,7 @@ export function generateTooltipHTML({
           <strong>${yAxisCategories[y]} - ${yAxisCategories[y + 1]}</strong>
         </div>
         <div>
-          ${label}
+          ${formatValue(parseFloat(label), format)}
         </div>
       </div>
     </div>
