@@ -4,6 +4,7 @@ export * from './prometheus-time-series-query';
 export * from './prometheus-variables';
 export * from './PrometheusDatasourceEditor';
 export * from './PrometheusLabelNamesVariable';
+export * from './PrometheusLabelValuesVariable';
 export * from './PrometheusPromQLVariable';
 export * from './types';
 export * from './variable';

@@ -42,7 +42,6 @@ export interface PieChartBaseProps {
 }
 
 export function PieChartBase(props: PieChartBaseProps): ReactElement {
-  console.log(props);
   const { width, height, data } = props;
   const chartsTheme = useChartsTheme();
 
