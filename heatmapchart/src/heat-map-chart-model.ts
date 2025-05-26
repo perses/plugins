@@ -33,8 +33,6 @@ export interface HeatMapChartDefinition extends Definition<HeatMapChartOptions> 
 export interface HeatMapChartOptions {
   yAxisFormat?: FormatOptions;
   countFormat?: FormatOptions;
-  min?: number;
-  max?: number;
   showVisualMap?: boolean;
 }
 

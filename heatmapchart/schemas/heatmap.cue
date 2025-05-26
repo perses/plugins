@@ -21,10 +21,6 @@ kind: "HeatMapChart"
 spec: close({
 	yAxisFormat?:   common.#format
 	countFormat?:   common.#format
-	// Min is the lower bound of the bucket range to display
-	min?:           number
-	// Max is the upper bound of the bucket range to display
-	max?:           number
 	// The visual map is an helper for highlighting cell with the targeted value
 	showVisualMap?: bool
 })

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps, TextField } from '@mui/material';
+import { Switch, SwitchProps } from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
@@ -23,15 +23,7 @@ import {
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import { ReactElement } from 'react';
-import {
-  DEFAULT_FORMAT,
-  DEFAULT_MAX_PERCENT,
-  DEFAULT_MAX_PERCENT_DECIMAL,
-  DEFAULT_MIN_PERCENT,
-  DEFAULT_MIN_PERCENT_DECIMAL,
-  HeatMapChartOptions,
-  HeatMapChartOptionsEditorProps,
-} from '../heat-map-chart-model';
+import { DEFAULT_FORMAT, HeatMapChartOptions, HeatMapChartOptionsEditorProps } from '../heat-map-chart-model';
 
 export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -64,22 +56,6 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
   const yAxisFormat = merge({}, DEFAULT_FORMAT, value.yAxisFormat);
   const countFormat = merge({}, DEFAULT_FORMAT, value.countFormat);
 
-  // max only needs to be set explicitly for units other than percent and percent-decimal
-  let minPlaceholder = 'Enter value';
-  if (yAxisFormat.unit === 'percent') {
-    minPlaceholder = DEFAULT_MIN_PERCENT.toString();
-  } else if (yAxisFormat.unit === 'percent-decimal') {
-    minPlaceholder = DEFAULT_MIN_PERCENT_DECIMAL.toString();
-  }
-
-  // max only needs to be set explicitly for units other than percent and percent-decimal
-  let maxPlaceholder = 'Enter value';
-  if (yAxisFormat.unit === 'percent') {
-    maxPlaceholder = DEFAULT_MAX_PERCENT.toString();
-  } else if (yAxisFormat.unit === 'percent-decimal') {
-    maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
-  }
-
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -94,46 +70,6 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Y Axis">
           <FormatControls value={yAxisFormat} onChange={handleYAxisFormatChange} />
-          <OptionsEditorControl
-            label="Min"
-            control={
-              <TextField
-                type="number"
-                value={value.min ?? ''}
-                onChange={(e) => {
-                  // ensure empty value resets to undef to allow chart to calculate max
-                  const newValue = e.target.value ? Number(e.target.value) : undefined;
-                  onChange(
-                    produce(value, (draft: HeatMapChartOptions) => {
-                      draft.min = newValue;
-                    })
-                  );
-                }}
-                placeholder={minPlaceholder}
-                sx={{ width: '100%' }}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Max"
-            control={
-              <TextField
-                type="number"
-                value={value.max ?? ''}
-                onChange={(e) => {
-                  // ensure empty value resets to undef to allow chart to calculate max
-                  const newValue = e.target.value ? Number(e.target.value) : undefined;
-                  onChange(
-                    produce(value, (draft: HeatMapChartOptions) => {
-                      draft.max = newValue;
-                    })
-                  );
-                }}
-                placeholder={maxPlaceholder}
-                sx={{ width: '100%' }}
-              />
-            }
-          />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>
