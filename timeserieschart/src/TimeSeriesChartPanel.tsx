@@ -43,10 +43,9 @@ import {
   LegendItem,
   LegendProps,
   useId,
-  TimeChart,
-  TimeChartSeriesMapping,
   TooltipConfig,
   DEFAULT_TOOLTIP_CONFIG,
+  TimeChartSeriesMapping,
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
@@ -63,6 +62,7 @@ import {
   convertPercentThreshold,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
+import { TimeSeriesChartBase } from './TimeSeriesChartBase';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions, TimeSeriesData>;
 
@@ -393,7 +393,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           return (
             <Box style={{ height, width }}>
               {yAxis && yAxis.show && yAxis.label && <YAxisLabel name={yAxis.label} height={height} />}
-              <TimeChart
+              <TimeSeriesChartBase
                 ref={chartRef}
                 height={height}
                 data={timeChartData}
