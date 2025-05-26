@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextField } from '@mui/material';
+import { Switch, SwitchProps, TextField } from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
@@ -19,8 +19,6 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
-  ThresholdsEditor,
-  ThresholdsEditorProps,
 } from '@perses-dev/components';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
@@ -31,7 +29,6 @@ import {
   DEFAULT_MAX_PERCENT_DECIMAL,
   DEFAULT_MIN_PERCENT,
   DEFAULT_MIN_PERCENT_DECIMAL,
-  DEFAULT_THRESHOLDS,
   HeatMapChartOptions,
   HeatMapChartOptionsEditorProps,
 } from '../heat-map-chart-model';
@@ -39,47 +36,64 @@ import {
 export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
 
-  const handleUnitChange: FormatControlsProps['onChange'] = (newFormat) => {
+  const handleYAxisFormatChange: FormatControlsProps['onChange'] = (newFormat) => {
     onChange(
       produce(value, (draft: HeatMapChartOptions) => {
-        draft.format = newFormat;
+        draft.yAxisFormat = newFormat;
       })
     );
   };
 
-  const handleThresholdsChange: ThresholdsEditorProps['onChange'] = (thresholds) => {
+  const handleCountFormatChange: FormatControlsProps['onChange'] = (newFormat) => {
     onChange(
       produce(value, (draft: HeatMapChartOptions) => {
-        draft.thresholds = thresholds;
+        draft.countFormat = newFormat;
+      })
+    );
+  };
+
+  const handleShowVisualMapChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
+    onChange(
+      produce(value, (draft: HeatMapChartOptions) => {
+        draft.showVisualMap = checked;
       })
     );
   };
 
   // ensures decimalPlaces defaults to correct value
-  const format = merge({}, DEFAULT_FORMAT, value.format);
-  const thresholds = merge({}, DEFAULT_THRESHOLDS, value.thresholds);
+  const yAxisFormat = merge({}, DEFAULT_FORMAT, value.yAxisFormat);
+  const countFormat = merge({}, DEFAULT_FORMAT, value.countFormat);
 
   // max only needs to be set explicitly for units other than percent and percent-decimal
   let minPlaceholder = 'Enter value';
-  if (format.unit === 'percent') {
+  if (yAxisFormat.unit === 'percent') {
     minPlaceholder = DEFAULT_MIN_PERCENT.toString();
-  } else if (format.unit === 'percent-decimal') {
+  } else if (yAxisFormat.unit === 'percent-decimal') {
     minPlaceholder = DEFAULT_MIN_PERCENT_DECIMAL.toString();
   }
 
   // max only needs to be set explicitly for units other than percent and percent-decimal
   let maxPlaceholder = 'Enter value';
-  if (format.unit === 'percent') {
+  if (yAxisFormat.unit === 'percent') {
     maxPlaceholder = DEFAULT_MAX_PERCENT.toString();
-  } else if (format.unit === 'percent-decimal') {
+  } else if (yAxisFormat.unit === 'percent-decimal') {
     maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
   }
 
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <OptionsEditorGroup title="Misc">
-          <FormatControls value={format} onChange={handleUnitChange} />
+        <OptionsEditorGroup title="Bucket Count">
+          <FormatControls value={countFormat} onChange={handleCountFormatChange} />
+          <OptionsEditorControl
+            label="Show Visual Map"
+            control={<Switch checked={!!value.showVisualMap} onChange={handleShowVisualMapChange} />}
+          />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Y Axis">
+          <FormatControls value={yAxisFormat} onChange={handleYAxisFormatChange} />
           <OptionsEditorControl
             label="Min"
             control={
@@ -121,9 +135,6 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
             }
           />
         </OptionsEditorGroup>
-      </OptionsEditorColumn>
-      <OptionsEditorColumn>
-        <ThresholdsEditor thresholds={thresholds} onChange={handleThresholdsChange} />
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );
