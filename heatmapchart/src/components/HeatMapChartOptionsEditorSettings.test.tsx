@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { HeatMapChartOptions } from '../heat-map-chart-model';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React, { act } from 'react';
+import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
 import { HeatMapChartOptionsEditorSettings } from './HeatMapChartOptionsEditorSettings';
 
 describe('HeatMapChartOptionsEditorSettings', () => {
@@ -27,72 +26,25 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     );
   };
 
-  it('can modify unit', () => {
-    const onChange = jest.fn();
-    renderHeatMapChartOptionsEditorSettings(
-      {
-        yAxisFormat: {
-          unit: 'decimal',
-        },
-      },
-      onChange
-    );
-    const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
-    userEvent.click(unitSelector);
-    const yearOption = screen.getByRole('option', {
-      name: 'Years',
-    });
-    userEvent.click(yearOption);
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        format: {
-          unit: 'years',
-        },
-      })
-    );
-  });
-
-  it('can modify yAxisMin', async () => {
-    let minValue: number | undefined = undefined;
+  it('can modify visual map', async () => {
+    let showVisualMap: boolean | undefined = false;
     const onChange = jest.fn((e) => {
-      minValue = e.min;
+      showVisualMap = e.showVisualMap;
     });
     renderHeatMapChartOptionsEditorSettings(
       {
-        yAxisFormat: {
-          unit: 'decimal',
-        },
-        min: 1,
+        yAxisFormat: DEFAULT_FORMAT,
+        countFormat: DEFAULT_FORMAT,
+        showVisualMap: false,
       },
       onChange
     );
-    const minInput = await screen.findByLabelText(/Min/);
-    expect(minInput).toBeInTheDocument();
-    userEvent.clear(minInput);
-    userEvent.type(minInput, '5');
-    expect(onChange).toHaveBeenCalledTimes(2);
-    expect(minValue).toBe(5);
-  });
-
-  it('can modify yAxisMax', async () => {
-    let maxValue: number | undefined = undefined;
-    const onChange = jest.fn((e) => {
-      maxValue = e.max;
+    const showVisualMapSwitch = await screen.findByLabelText(/Show Visual Map/);
+    expect(showVisualMapSwitch).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(showVisualMapSwitch);
     });
-    renderHeatMapChartOptionsEditorSettings(
-      {
-        yAxisFormat: {
-          unit: 'decimal',
-        },
-        max: 1,
-      },
-      onChange
-    );
-    const maxInput = await screen.findByLabelText(/Max/);
-    expect(maxInput).toBeInTheDocument();
-    userEvent.clear(maxInput);
-    userEvent.type(maxInput, '5');
-    expect(onChange).toHaveBeenCalledTimes(2);
-    expect(maxValue).toBe(5);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(showVisualMap).toBe(true);
   });
 });
