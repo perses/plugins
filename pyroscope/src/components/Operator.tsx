@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { Select, MenuItem } from '@mui/material';
 
 export interface OperatorProps {
@@ -22,26 +22,15 @@ export interface OperatorProps {
 export function Operator(props: OperatorProps): ReactElement {
   const { value, onChange } = props;
 
-  const [options, setOptions] = useState<ReactElement[]>([]);
-
-  useEffect(() => {
-    // operators explanation:
-    // '=': equals
-    // '!=': not equals
-    // '=~': matches regex
-    // '!~': does not match regex
-    const operators = ['=', '!=', '=~', '!~'];
-    const menuItems = operators.map((op) => (
-      <MenuItem key={op} value={op}>
-        {op}
-      </MenuItem>
-    ));
-    setOptions(menuItems);
-  }, []);
+  const operators = ['=', '!=', '=~', '!~'];
 
   return (
     <Select sx={{ borderRadius: '0' }} value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
-      {options}
+      {operators.map((op) => (
+        <MenuItem key={op} value={op}>
+          {op}
+        </MenuItem>
+      ))}
     </Select>
   );
 }
