@@ -1,12 +1,14 @@
 {
   "kind": "HeatMapChart",
   "spec": {
-    "format": {
+    "yAxisFormat": {
       "unit": "decimal",
       "decimalPlaces": 2
     },
-    "min": 0,
-    "max": 100,
+    "countFormat": {
+      "unit": "decimal",
+      "decimalPlaces": 2
+    },
     "showVisualMap": true
   }
 }
