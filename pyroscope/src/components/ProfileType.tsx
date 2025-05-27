@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement } from 'react';
 import { InputLabel, Stack, useTheme, Select, MenuItem } from '@mui/material';
 import { PyroscopeClient } from '../model';
+import { useProfileTypes } from './utils';
 
 export interface ProfileTypeProps {
   client: PyroscopeClient | undefined;
@@ -21,42 +22,11 @@ export interface ProfileTypeProps {
   onChange?(value: string): void;
 }
 
-async function fetchProfileTypes(client: PyroscopeClient): Promise<Array<{ ID: string; text: string }>> {
-  const response = await client.searchProfileTypes(
-    {}, //param
-    { 'content-type': 'application/json' }, // headers
-    {} // body
-  );
-  return response.profileTypes.map((type) => ({
-    ID: type.ID,
-    text: type.name + '/' + type.sampleType,
-  }));
-}
-
 export function ProfileType(props: ProfileTypeProps): ReactElement {
   const theme = useTheme();
   const { client, value, onChange } = props;
 
-  const [options, setOptions] = useState<ReactElement[]>([]);
-
-  // update options when the client changes
-  useEffect(() => {
-    const updateOptions = async () => {
-      if (client) {
-        const profileTypes = await fetchProfileTypes(client);
-        const menuItems = profileTypes.map((type) => (
-          <MenuItem key={type.ID} value={type.ID}>
-            {type.text}
-          </MenuItem>
-        ));
-        setOptions(menuItems);
-      }
-    };
-
-    updateOptions().catch((error) => {
-      console.error('Failed to fetch profile types:', error);
-    });
-  }, [client]);
+  const { data: profileTypesOptions } = useProfileTypes(client);
 
   return (
     <Stack position="relative" sx={{ flexGrow: 1 }}>
@@ -75,7 +45,12 @@ export function ProfileType(props: ProfileTypeProps): ReactElement {
         Profile Type
       </InputLabel>
       <Select value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
-        {options.length > 0 && options}
+        {profileTypesOptions?.profileTypes &&
+          profileTypesOptions?.profileTypes.map((type) => (
+            <MenuItem key={type.ID} value={type.ID}>
+              {type.name + '/' + type.sampleType}
+            </MenuItem>
+          ))}
       </Select>
     </Stack>
   );

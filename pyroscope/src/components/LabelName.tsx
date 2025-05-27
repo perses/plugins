@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement } from 'react';
 import { Select, MenuItem } from '@mui/material';
 import { PyroscopeClient } from '../model';
+import { useLabelNames } from './utils';
 
 export interface LabelNameProps {
   client: PyroscopeClient | undefined;
@@ -21,34 +22,12 @@ export interface LabelNameProps {
   onChange?(value: string): void;
 }
 
-async function fetchLabelNames(client: PyroscopeClient): Promise<string[]> {
-  const response = await client.searchLabelNames(
-    {}, //param
-    { 'content-type': 'application/json' }, // headers
-    {} // body
-  );
-  return response.names;
-}
-
 export function LabelName(props: LabelNameProps): ReactElement {
   const { client, value, onChange } = props;
 
-  const [options, setOptions] = useState<string[]>([]);
+  const { data: labelNamesOptions } = useLabelNames(client);
 
-  // update options when client changes
-  useEffect(() => {
-    const updateOptions = async () => {
-      if (client) {
-        const regex = /^__.*__$/;
-        const labelNames = await fetchLabelNames(client);
-        setOptions(labelNames.filter((labelName) => !regex.test(labelName) && labelName !== 'service_name'));
-      }
-    };
-
-    updateOptions().catch((error) => {
-      console.error('Failed to fetch label names:', error);
-    });
-  }, [client]);
+  const regex = /^__.*__$/;
 
   return (
     <Select
@@ -64,11 +43,14 @@ export function LabelName(props: LabelNameProps): ReactElement {
         return selected;
       }}
     >
-      {options.map((labelName) => (
-        <MenuItem key={labelName} value={labelName}>
-          {labelName}
-        </MenuItem>
-      ))}
+      {labelNamesOptions?.names &&
+        labelNamesOptions?.names
+          .filter((labelName) => !regex.test(labelName) && labelName !== 'service_name')
+          .map((labelName) => (
+            <MenuItem key={labelName} value={labelName}>
+              {labelName}
+            </MenuItem>
+          ))}
     </Select>
   );
 }
