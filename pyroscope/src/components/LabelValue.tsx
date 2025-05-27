@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement } from 'react';
 //import { useId } from '@perses-dev/components';
 import { Select, MenuItem } from '@mui/material';
 import { PyroscopeClient } from '../model';
+import { useLabelValues } from './utils';
 
 export interface LabelValueProps {
   client: PyroscopeClient | undefined;
@@ -23,43 +24,10 @@ export interface LabelValueProps {
   onChange?(value: string): void;
 }
 
-async function fetchLabelValues(client: PyroscopeClient, labelName: string): Promise<string[]> {
-  const response = await client.searchLabelValues(
-    {}, //param
-    { 'content-type': 'application/json' }, // headers
-    { name: labelName } // body
-  );
-  return response.names;
-}
-
 export function LabelValue(props: LabelValueProps): ReactElement {
   const { client, value, labelName, onChange } = props;
 
-  const [options, setOptions] = useState<ReactElement[]>([]);
-
-  // update options when labelName changes
-  useEffect(() => {
-    const updateOptions = async () => {
-      if (client && labelName) {
-        const labelValues = await fetchLabelValues(client, labelName);
-        const menuItems = labelValues.map((labelValue) => (
-          <MenuItem key={labelValue} value={labelValue}>
-            {labelValue}
-          </MenuItem>
-        ));
-        setOptions(menuItems);
-
-        // Reset selected value when labelName changes
-        if (!labelValues.includes(value) && value !== '') {
-          onChange?.('');
-        }
-      }
-    };
-
-    updateOptions().catch((error) => {
-      console.error('Failed to fetch label values:', error);
-    });
-  }, [client, labelName, onChange, value]);
+  const { data: labelValuesOptions } = useLabelValues(client, labelName);
 
   return (
     <Select
@@ -76,7 +44,12 @@ export function LabelValue(props: LabelValueProps): ReactElement {
         return selected;
       }}
     >
-      {options.length > 0 && options}
+      {labelValuesOptions?.names &&
+        labelValuesOptions?.names.map((labelValue) => (
+          <MenuItem key={labelValue} value={labelValue}>
+            {labelValue}
+          </MenuItem>
+        ))}
     </Select>
   );
 }

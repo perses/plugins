@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement } from 'react';
 import { InputLabel, Stack, useTheme, Select, MenuItem } from '@mui/material';
 import { PyroscopeClient } from '../model';
+import { useServices } from './utils';
 
 export interface ServiceProps {
   client: PyroscopeClient | undefined;
@@ -21,38 +22,11 @@ export interface ServiceProps {
   onChange?(value: string): void;
 }
 
-async function fetchServices(client: PyroscopeClient): Promise<string[]> {
-  const response = await client.searchServices(
-    {}, //param
-    { 'content-type': 'application/json' } // headers
-  );
-  return response.names;
-}
-
 export function Service(props: ServiceProps): ReactElement {
   const theme = useTheme();
   const { client, value, onChange } = props;
 
-  const [options, setOptions] = useState<ReactElement[]>([]);
-
-  // update options when the client changes
-  useEffect(() => {
-    const updateOptions = async () => {
-      if (client) {
-        const services = await fetchServices(client);
-        const menuItems = services.map((service) => (
-          <MenuItem key={service} value={service}>
-            {service}
-          </MenuItem>
-        ));
-        setOptions(menuItems);
-      }
-    };
-
-    updateOptions().catch((error) => {
-      console.error('Failed to fetch services:', error);
-    });
-  }, [client]);
+  const { data: servicesOptions } = useServices(client);
 
   return (
     <Stack position="relative" sx={{ flexGrow: 1 }}>
@@ -71,7 +45,12 @@ export function Service(props: ServiceProps): ReactElement {
         Service
       </InputLabel>
       <Select value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
-        {options.length > 0 && options}
+        {servicesOptions?.names &&
+          servicesOptions?.names.map((service) => (
+            <MenuItem key={service} value={service}>
+              {service}
+            </MenuItem>
+          ))}
       </Select>
     </Stack>
   );
