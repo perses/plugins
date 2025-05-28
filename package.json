@@ -13,6 +13,7 @@
   "workspaces": [
     "barchart",
     "gaugechart",
+    "heatmapchart",
     "histogramchart",
     "markdown",
     "piechart",
