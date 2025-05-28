@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Stack, Typography } from '@mui/material';
-import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
+import { TimeScale, TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
@@ -38,22 +38,23 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     yAxisCategories,
     countMin,
     countMax,
+    timeScale,
   }: {
     data: HeatMapDataItem[];
     xAxisCategories: number[];
     yAxisCategories: string[];
     countMin: number;
     countMax: number;
+    timeScale?: TimeScale;
   } = useMemo(() => {
     if (!queryResults || queryResults.length === 0) {
       return {
         data: [],
         xAxisCategories: [],
         yAxisCategories: [],
-        yMin: 0,
-        yMax: 0,
         countMin: 0,
         countMax: 0,
+        timeScale: undefined,
       };
     }
 
@@ -66,10 +67,9 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
         data: [],
         xAxisCategories: [],
         yAxisCategories: [],
-        yMin: 0,
-        yMax: 0,
         countMin: 0,
         countMax: 0,
+        timeScale: undefined,
       };
     }
 
@@ -143,6 +143,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
       yAxisCategories,
       countMin,
       countMax,
+      timeScale,
     };
   }, [contentDimensions?.height, queryResults]);
 
@@ -182,6 +183,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
         countFormat={countFormat}
         countMin={countMin}
         countMax={countMax}
+        timeScale={timeScale}
         showVisualMap={pluginSpec.showVisualMap}
       />
     </Stack>
