@@ -23,7 +23,8 @@ interface CustomTooltipProps {
   xAxisCategories: number[];
   yAxisCategories: string[];
   theme: Theme;
-  format?: FormatOptions;
+  yAxisFormat?: FormatOptions;
+  countFormat?: FormatOptions;
 }
 
 export function generateTooltipHTML({
@@ -33,7 +34,8 @@ export function generateTooltipHTML({
   xAxisCategories,
   yAxisCategories,
   theme,
-  format,
+  yAxisFormat,
+  countFormat,
 }: CustomTooltipProps): string {
   const [x, y] = data;
   const xAxisLabel = xAxisCategories[x];
@@ -55,17 +57,21 @@ export function generateTooltipHTML({
     margin-right: 16px;
   `;
 
-  // TODO: handle overflow for yAxisCategories for last cell
+  const lowerBound = parseFloat(yAxisCategories[y]!);
+  const upperBound = yAxisCategories[y + 1]
+    ? parseFloat(yAxisCategories[y + 1]!)
+    : parseFloat(yAxisCategories[y]!) + parseFloat(yAxisCategories[y]!) - parseFloat(yAxisCategories[y - 1]!); // Top cell, upper bound need to be calculated from previous cell
+
   return `
     <div>
       <div style="${tooltipHeader.styles}">${formattedDate} ${formattedTime}</div>
       <div style="${tooltipContentStyles.styles}">
         <div style="${labelStyles.styles}">
           ${marker}
-          <strong>${yAxisCategories[y]} - ${yAxisCategories[y + 1]}</strong>
+          <strong>${formatValue(lowerBound, yAxisFormat)} - ${formatValue(upperBound, yAxisFormat)}</strong>
         </div>
         <div>
-          ${formatValue(parseFloat(label), format)}
+          ${formatValue(parseFloat(label), countFormat)}
         </div>
       </div>
     </div>

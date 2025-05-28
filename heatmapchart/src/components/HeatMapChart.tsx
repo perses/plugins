@@ -44,7 +44,7 @@ export interface HeatMapChartProps {
   countFormat?: FormatOptions;
   countMin?: number;
   countMax?: number;
-  timeScale?: TimeScale; // todo: check usage
+  timeScale?: TimeScale;
   showVisualMap?: boolean;
   // TODO: exponential?: boolean;
 }
@@ -78,7 +78,8 @@ export function HeatMapChart({
             xAxisCategories,
             yAxisCategories,
             theme,
-            format: countFormat,
+            yAxisFormat: yAxisFormat,
+            countFormat: countFormat,
           });
         },
       },
