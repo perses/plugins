@@ -17,11 +17,15 @@ import {
   MOCK_SEARCH_RESPONSE_VPARQUET4,
   MOCK_TRACE_RESPONSE,
 } from '../test';
-import { searchWithFallback } from './tempo-client';
+import { searchTagValues, searchWithFallback } from './tempo-client';
 
 const fetchMock = (global.fetch = jest.fn());
 
 describe('tempo-client', () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+  });
+
   it('should return query results as-is when serviceStats are present', async () => {
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_VPARQUET4) });
 
@@ -53,6 +57,16 @@ describe('tempo-client', () => {
       'cart-service': { spanCount: 2 },
       postgres: { spanCount: 1 },
       'shop-backend': { spanCount: 4 },
+    });
+  });
+
+  it('formats the search params and ignores undefined values', async () => {
+    fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve({}) });
+
+    await searchTagValues({ tag: 'name', q: '{}', start: 10, end: undefined }, { datasourceUrl: '' });
+    expect(fetchMock).toHaveBeenCalledWith('/api/v2/search/tag/name/values?q=%7B%7D&start=10', {
+      headers: {},
+      method: 'GET',
     });
   });
 });

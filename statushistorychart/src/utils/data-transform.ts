@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FALLBACK_COLOR, getColorsForValues, LegendItem, StatusHistoryDataItem } from '@perses-dev/components';
+import { FALLBACK_COLOR, LegendItem, StatusHistoryDataItem } from '@perses-dev/components';
 import { applyValueMapping, TimeScale, TimeSeriesData } from '@perses-dev/core';
 import { PanelData } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 import { StatusHistoryChartOptions } from '../status-history-model';
 import { getCommonTimeScaleForQueries } from './get-timescale';
+import { getColorsForValues } from './get-color';
 
 interface StatusHistoryDataModel {
   legendItems: LegendItem[];

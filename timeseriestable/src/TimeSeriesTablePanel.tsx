@@ -28,7 +28,7 @@ export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement 
 
   return (
     <Box sx={{ height: contentDimensions?.height || 0, padding: `${contentPadding}px`, overflowY: 'scroll' }}>
-      <DataTable result={queryResults} />
+      <DataTable queryResults={queryResults} />
     </Box>
   );
 }

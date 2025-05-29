@@ -18,16 +18,16 @@ import { isValidTraceId } from '@perses-dev/core';
 import { CompletionConfig, TraceQLExtension } from './TraceQLExtension';
 
 export interface TraceQLEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {
-  completeConfig: CompletionConfig;
+  completionConfig: CompletionConfig;
 }
 
-export function TraceQLEditor({ completeConfig, ...rest }: TraceQLEditorProps): ReactElement {
+export function TraceQLEditor({ completionConfig, ...rest }: TraceQLEditorProps): ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
   const traceQLExtension = useMemo(() => {
-    return TraceQLExtension(completeConfig);
-  }, [completeConfig]);
+    return TraceQLExtension(completionConfig);
+  }, [completionConfig]);
 
   const codemirrorTheme = useMemo(() => {
     // https://github.com/mui/material-ui/blob/v5.16.7/packages/mui-material/src/OutlinedInput/OutlinedInput.js#L43

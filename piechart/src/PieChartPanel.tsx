@@ -17,8 +17,6 @@ import {
   ContentWithLegend,
   LegendItem,
   LegendProps,
-  PieChart,
-  PieChartData,
   SelectedLegendItemState,
   useChartsTheme,
   useId,
@@ -30,6 +28,7 @@ import { ReactElement, useMemo, useRef, useState } from 'react';
 import { getSeriesColor } from './palette-gen';
 import { PieChartOptions } from './pie-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
+import { PieChartBase, PieChartData } from './PieChartBase';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
@@ -149,7 +148,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
         {({ height, width }) => {
           return (
             <Box style={{ height, width }}>
-              <PieChart
+              <PieChartBase
                 data={pieChartData}
                 width={contentDimensions.width - PADDING * 2}
                 height={contentDimensions.height - PADDING * 2}

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Skeleton, Stack } from '@mui/material';
-import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
+import { useChartsTheme } from '@perses-dev/components';
 import { CalculationsMap, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import type { GaugeSeriesOption } from 'echarts';
@@ -25,6 +25,7 @@ import {
   GaugeChartOptions,
 } from './gauge-chart-model';
 import { convertThresholds, defaultThresholdInput } from './thresholds';
+import { GaugeChartBase, GaugeSeries } from './GaugeChartBase';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };
 const GAUGE_MIN_WIDTH = 90;
@@ -89,7 +90,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
   // no data message handled inside chart component
   if (gaugeData.length === 0) {
     return (
-      <GaugeChart
+      <GaugeChartBase
         width={contentDimensions.width}
         height={contentDimensions.height}
         data={EMPTY_GAUGE_SERIES}
@@ -123,7 +124,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
       {gaugeData.map((series, seriesIndex) => {
         return (
           <Box key={`gauge-series-${seriesIndex}`}>
-            <GaugeChart
+            <GaugeChartBase
               width={chartWidth}
               height={contentDimensions.height}
               data={series}

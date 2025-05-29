@@ -94,6 +94,8 @@ export interface SearchTagsRequestParameters {
   q?: string;
   start?: number;
   end?: number;
+  limit?: number;
+  maxStaleValues?: number;
 }
 
 /**
@@ -118,6 +120,8 @@ export interface SearchTagValuesRequestParameters {
   q?: string;
   start?: number;
   end?: number;
+  limit?: number;
+  maxStaleValues?: number;
 }
 
 /**

@@ -55,12 +55,17 @@ export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>
   }
 };
 
-function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptions: QueryOptions): Promise<TResponse> {
+function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
+  apiURI: string,
+  params: TRequest,
+  queryOptions: QueryOptions
+): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
-  if (params) {
-    url += '?' + new URLSearchParams(params);
+  const urlParams = buildSearchParams(params).toString();
+  if (urlParams !== '') {
+    url += '?' + urlParams;
   }
   const init = {
     method: 'GET',
@@ -68,6 +73,25 @@ function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptio
   };
 
   return executeRequest<TResponse>(url, init);
+}
+
+type RequestParams<T> = { [K in keyof T]: string | number };
+
+function buildSearchParams<T>(params: RequestParams<T>): URLSearchParams {
+  const urlSearchParams = new URLSearchParams();
+  for (const key in params) {
+    const value = params[key];
+    switch (typeof value) {
+      case 'string':
+        urlSearchParams.append(key, value);
+        break;
+
+      case 'number':
+        urlSearchParams.append(key, value.toString());
+        break;
+    }
+  }
+  return urlSearchParams;
 }
 
 /**
@@ -81,7 +105,11 @@ export function search(params: SearchRequestParameters, queryOptions: QueryOptio
  * Returns an entire trace.
  */
 export function query(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryResponse> {
-  return fetchWithGet<null, QueryResponse>(`/api/traces/${encodeURIComponent(params.traceId)}`, null, queryOptions);
+  return fetchWithGet<Record<string, never>, QueryResponse>(
+    `/api/traces/${encodeURIComponent(params.traceId)}`,
+    {},
+    queryOptions
+  );
 }
 
 /**
