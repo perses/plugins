@@ -13,11 +13,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@perses-dev/components": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/core": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/plugin-system": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/dashboards": "0.0.0-snapshot-histogram-types-78c5104",
-    "@module-federation/enhanced": "^0.8.9"
+    "@perses-dev/plugin-system": "^0.51.0-rc.0",
+    "@perses-dev/components": "^0.51.0-rc.0",
+    "@perses-dev/dashboards": "^0.51.0-rc.0"
   },
   "main": "lib/cjs/index.js",
   "module": "lib/index.js",

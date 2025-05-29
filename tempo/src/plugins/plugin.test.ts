@@ -43,6 +43,7 @@ const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<TempoDatasourceSpec>
 });
 
 const stubTempoContext: TraceQueryContext = {
+  variableState: {},
   datasourceStore: {
     getDatasource: getDatasource,
     getDatasourceClient: getDatasourceClient,

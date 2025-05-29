@@ -19,11 +19,8 @@
     "@codemirror/autocomplete": "^6.18.4",
     "@lezer/highlight": "^1.2.1x",
     "@grafana/lezer-traceql": "^0.0.20",
-    "@perses-dev/components": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/core": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/dashboards": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/explore":"0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/plugin-system": "0.0.0-snapshot-histogram-types-78c5104"
+    "@perses-dev/core": "^0.51.0-rc.0",
+    "@perses-dev/plugin-system": "^0.51.0-rc.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",

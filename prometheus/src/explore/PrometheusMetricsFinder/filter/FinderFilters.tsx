@@ -13,7 +13,12 @@
 
 import { Button, FormControl, InputLabel, Stack, StackProps } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
-import { DatasourceSelect } from '@perses-dev/plugin-system';
+import {
+  DatasourceSelect,
+  DatasourceSelectValue,
+  datasourceSelectValueToSelector,
+  useListDatasourceSelectItems,
+} from '@perses-dev/plugin-system';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement } from 'react';
 import { PROM_DATASOURCE_KIND } from '../../../model/prometheus-selectors';
@@ -36,8 +41,10 @@ export function FinderFilters({
   onFiltersChange,
   ...props
 }: ExplorerFiltersProps): ReactElement {
-  function handleDatasourceChange(next: DatasourceSelector): void {
-    onDatasourceChange(next);
+  const { data } = useListDatasourceSelectItems(PROM_DATASOURCE_KIND);
+  function handleDatasourceChange(next: DatasourceSelectValue): void {
+    const datasourceSelector = datasourceSelectValueToSelector(next, {}, data) ?? { kind: PROM_DATASOURCE_KIND };
+    onDatasourceChange(datasourceSelector);
   }
 
   return (
