@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { use } from 'echarts/core';
 import {
   CustomSeriesRenderItem,
   CustomSeriesRenderItemAPI,
@@ -19,12 +18,13 @@ import {
   CustomSeriesRenderItemReturn,
 } from 'echarts';
 import * as echarts from 'echarts';
-// import { CanvasRenderer } from 'echarts/renderers';
 import { Box, Menu, MenuItem, Divider } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { StackTrace, ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import { EChartsCoreOption } from 'echarts/core';
+import { formatValue } from '../utils/format';
+import { getSpanColor } from '../utils/palette-gen';
 
 const ITEM_GAP = 2; // vertical gap between flame chart levels (lines)
 const TOP_SHIFT = 10; // margin from the top of the flame chart container
@@ -38,8 +38,17 @@ export interface FlameChartProps {
 
 interface Sample {
   name: number;
-  // [level, start_val, end_val, name, total_percentage, self_percentage, shortName, self, total]
-  value: Array<string | number>;
+  value: [
+    level: number,
+    start_val: number,
+    end_val: number,
+    name: string,
+    total_percentage: number,
+    self_percentage: number,
+    shortName: string,
+    self: number,
+    total: number,
+  ];
   itemStyle: {
     color: string;
   };
@@ -48,91 +57,25 @@ interface Sample {
 export function FlameChart(props: FlameChartProps): ReactElement {
   const { width, height, data } = props;
   const chartsTheme = useChartsTheme();
-  const [scheme, setScheme] = useState(0); // 0 = by package name, 1 = by value
+  const [palette, setPalette] = useState('package-name'); // can take values 'package-name' and 'value'
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
-
-  const formatCount = (value: number): string => {
-    if (value >= 1_000_000_000) {
-      return (value / 1_000_000_000).toFixed(1) + ' Bil'; // Bil -> billion
-    } else if (value >= 1_000_000) {
-      return (value / 1_000_000).toFixed(1) + ' Mil'; // Mil -> million
-    } else if (value >= 1_000) {
-      return (value / 1_000).toFixed(1) + ' K'; // K -> thousand
-    } else {
-      return value.toString();
-    }
-  };
-
-  const formatByte = (value: number): string => {
-    if (value >= 1_000_000_000_000) {
-      return (value / 1_000_000_000_000).toFixed(1) + ' TB'; // T -> Tera
-    } else if (value >= 1_000_000_000) {
-      return (value / 1_000_000_000).toFixed(1) + ' GB'; // G -> Giga
-    } else if (value >= 1_000_000) {
-      return (value / 1_000_000).toFixed(1) + ' MB'; // M -> Mega
-    } else if (value >= 1_000) {
-      return (value / 1_000).toFixed(1) + ' KB'; // K -> Kilo
-    } else {
-      return value.toString() + ' B'; // B -> byte
-    }
-  };
-
-  const formatTime = (value: number): string => {
-    const nanosecondsInMillisecond = 1_000_000; // 1 ms = 1,000,000 ns
-    const nanosecondsInSecond = 1_000_000_000; // 1 s = 1,000,000,000 ns
-    const nanosecondsInMinute = 60 * nanosecondsInSecond; // 1 min = 60 s
-
-    if (value >= nanosecondsInMinute) {
-      const minutes = value / nanosecondsInMinute;
-      return `${minutes.toFixed(2)} mins`;
-    } else if (value >= nanosecondsInSecond) {
-      const seconds = value / nanosecondsInSecond;
-      return `${seconds.toFixed(2)} s`;
-    } else if (value >= nanosecondsInMillisecond) {
-      const milliseconds = value / nanosecondsInMillisecond;
-      return `${milliseconds.toFixed(2)} ms`;
-    } else {
-      return `${value} ns`;
-    }
-  };
+  const [isCopied, setIsCopied] = useState(false);
 
   // build the name of the corresponding flamechart item
-  const getName = (item: StackTrace, rootVal: number): string => {
-    return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${getValueWithUnit(item.total)})`;
-  };
-
-  const getValueWithUnit = (value: number): string => {
-    let valueWithUnit = '';
-    switch (data.metadata?.units) {
-      case 'count':
-        valueWithUnit = formatCount(value);
-        break;
-      case 'samples':
-        valueWithUnit = formatCount(value);
-        break;
-      case 'objects':
-        valueWithUnit = `${formatCount(value)} objects`;
-        break;
-      case 'bytes':
-        valueWithUnit = formatByte(value);
-        break;
-      case 'nanoseconds':
-        valueWithUnit = formatTime(value);
-        break;
-      default:
-        valueWithUnit = `${value} ${data.metadata?.units}`;
-        break;
-    }
-    return valueWithUnit;
+  const formatName = (item: StackTrace, rootVal: number): string => {
+    return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${formatValue(data.metadata?.units, item.total)})`;
   };
 
   const handleItemClick = (params: MouseEventsParameters<unknown>): void => {
     const data: Sample = params.data;
-    setMenuTitle(data.value[6].toString());
+    const functionName = 6;
+    setMenuTitle(data.value[functionName].toString());
     setSelectedId(data.name);
 
+    // To ensure that the cursor is positioned inside the menu when it opens,
+    // we adjust the click event coordinates as follows:
     if (params.event.event) {
       const mouseEvent = params.event.event as MouseEvent;
       setMenuPosition({
@@ -151,7 +94,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     if ((selectedId || selectedId === 0) && menuTitle) {
       navigator.clipboard.writeText(menuTitle);
     }
-    handleClose();
+    setIsCopied(true);
   };
 
   const handleResetGraph = (): void => {
@@ -161,63 +104,12 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const handleClose = (): void => {
     setMenuPosition(null);
+    if (isCopied) setIsCopied(false);
   };
 
-  // color scheme to display flame chart by total value (12 colors)
-  const valueColorTypes: string[] = [
-    '#dee2e6',
-    '#d95850',
-    '#b5c334',
-    '#ffb248',
-    '#f2d643',
-    '#fcce10',
-    '#eb8146',
-    '#ebdba4',
-    '#8fd3e8',
-    '#8fd3e8',
-    '#59c0a3',
-    '#1bca93',
-  ];
-
-  // color scheme to display flame chart by package name (12 colors)
-  const packageNameColorTypes = {
-    lessThanOne: '#dee2e6',
-    notFound: '#8982c9',
-    lib: '#68b7cf',
-    http: '#5095ce',
-    connectrpc: '#ff6eb4',
-    golang: '#f4d699',
-    net: '#e0ad6c',
-    sync: '#df8b53',
-    other: '#d95850',
-    github: '#f29191',
-    runtime: '#59c0a3',
-    total: '#4e92f9',
-  };
-
-  const getColorType = (name: string, value: number): string => {
-    if (scheme === 0) {
-      if (value < 1) {
-        return packageNameColorTypes['lessThanOne'];
-      }
-
-      const splitedName = name.split('.')[0];
-      if ((splitedName ?? '') in packageNameColorTypes) {
-        return packageNameColorTypes[splitedName as keyof typeof packageNameColorTypes];
-      } else if (splitedName?.includes('net')) {
-        return packageNameColorTypes['net'];
-      } else if (splitedName?.includes('lib')) {
-        return packageNameColorTypes['lib'];
-      } else if (splitedName?.includes('http')) {
-        return packageNameColorTypes['http'];
-      } else {
-        return packageNameColorTypes['notFound'];
-      }
-    } else {
-      return (value < 1 ? valueColorTypes[0] : valueColorTypes[Math.floor(value / 10) + 1]) || '#393d47';
-    }
-  };
-
+  /*
+   * Filter the global stacktrace by a function ID to focus on that function and display its corresponding flame chart
+   */
   const filterJson = (json: StackTrace, id?: number): StackTrace => {
     if (id === null) {
       return json;
@@ -248,7 +140,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   const recursionJson = (jsonObj: StackTrace, id?: number): Sample[] => {
-    //console.log('data in perses : ', jsonObj);
     const data: Sample[] = [];
     const filteredJson = filterJson(structuredClone(jsonObj), id);
 
@@ -257,12 +148,11 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     const recur = (item: StackTrace): void => {
       const temp = {
         name: item.id,
-        // [level, start_val, end_val, name, total_percentage, self_percentage, shortName, self, total]
         value: [
           item.level,
           item.start,
           item.end,
-          getName(item, rootVal),
+          formatName(item, rootVal),
           (item.total / rootVal) * 100,
           (item.self / rootVal) * 100,
           item.name,
@@ -270,10 +160,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
           item.total,
         ],
         itemStyle: {
-          color: getColorType(item.name, (item.total / rootVal) * 100),
+          color: getSpanColor(palette, item.name, (item.total / rootVal) * 100),
         },
       };
-      data.push(temp);
+      data.push(temp as Sample);
 
       for (const child of item.children || []) {
         recur(child);
@@ -281,7 +171,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     };
 
     recur(filteredJson);
-    console.log('data in perses :', data);
     return data;
   };
 
@@ -361,8 +250,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     tooltip: {
       formatter: (params: Sample): string => {
         return `${params.value[6]}<br/><br/>
-        Total: ${getValueWithUnit(Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
-        Self: ${getValueWithUnit(Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
+        Total: ${formatValue(data.metadata?.units, Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
+        Self: ${formatValue(data.metadata?.units, Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
         Samples: ${echarts.format.addCommas(Number(params.value[8]))}`;
       },
     },
@@ -445,7 +334,9 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         </Box>
         <Divider sx={{ backgroundColor: '#4c566a', height: '2px' }} />
         <MenuItem onClick={handleFocusBlock}>Focus block</MenuItem>
-        <MenuItem onClick={handleCopyFunctionName}>Copy function name</MenuItem>
+        <MenuItem onClick={handleCopyFunctionName} disabled={isCopied}>
+          {isCopied ? 'Copied' : 'Copy function name'}
+        </MenuItem>
         <MenuItem onClick={handleResetGraph}>Reset graph</MenuItem>
       </Menu>
     </Box>
