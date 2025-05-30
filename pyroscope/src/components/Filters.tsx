@@ -36,16 +36,18 @@ export function Filters(props: FiltersProps): ReactElement {
   };
 
   const updateFilter = (index: number, newValue: string) => {
-    const updatedFilters = value.map((filter, i) => (i === index ? { ...filter, value: newValue } : filter));
-    onChange?.(updatedFilters);
+    const nextFilters = [...value];
+    nextFilters[index] = { id: nextFilters[index].id, value: newValue };
+    onChange?.(nextFilters);
   };
 
   const deleteFilter = (index: number) => {
-    const updatedFilters = value.filter((_, i) => i !== index);
-    if (updatedFilters.length === 0) {
+    const nextFilters = [...value];
+    nextFilters.splice(index, 1);
+    if (nextFilters.length === 0) {
       onChange?.([{ id: Date.now(), value: '' }]); // keep at least one empty filter
     } else {
-      onChange?.(updatedFilters);
+      onChange?.(nextFilters);
     }
   };
 
