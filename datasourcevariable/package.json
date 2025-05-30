@@ -1,7 +1,7 @@
 {
   "name": "@perses-dev/datasource-variable-plugin",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
@@ -9,16 +9,13 @@
     "test": "cross-env LC_ALL=C TZ=UTC jest --passWithNoTests",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {
-    "@module-federation/enhanced": "^0.8.9"
-  },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.51.0-beta.1",
-    "@perses-dev/core": "^0.51.0-beta.1",
-    "@perses-dev/plugin-system": "^0.51.0-beta.1",
+    "@perses-dev/components": "^0.51.0-rc.0",
+    "@perses-dev/core": "^0.51.0-rc.0",
+    "@perses-dev/plugin-system": "^0.51.0-rc.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
