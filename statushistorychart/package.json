@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/status-history-chart-plugin",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",
@@ -19,9 +19,9 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.51.0-beta.1",
-    "@perses-dev/core": "^0.51.0-beta.1",
-    "@perses-dev/plugin-system": "^0.51.0-beta.1",
+    "@perses-dev/components": "^0.51.0-rc.0",
+    "@perses-dev/core": "^0.51.0-rc.0",
+    "@perses-dev/plugin-system": "^0.51.0-rc.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",

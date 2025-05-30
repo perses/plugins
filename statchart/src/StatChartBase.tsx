@@ -167,7 +167,6 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
           sx={{
             width: '100%',
           }}
-          // @ts-expect-error: Perses need to be released
           style={{
             // ECharts rounds the height to the nearest integer by default.
             // This can cause unneccessary scrollbars when the total height of this chart exceeds the 'height' prop.
