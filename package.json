@@ -12,11 +12,13 @@
   },
   "workspaces": [
     "barchart",
+    "flamechart",
     "gaugechart",
     "histogramchart",
     "markdown",
     "piechart",
     "prometheus",
+    "pyroscope",
     "scatterchart",
     "statchart",
     "staticlistvariable",
