@@ -17,14 +17,13 @@ import {
   CustomSeriesRenderItemParams,
   CustomSeriesRenderItemReturn,
 } from 'echarts';
-import * as echarts from 'echarts';
 import { Box, Menu, MenuItem, Divider } from '@mui/material';
 import { ReactElement, useState, useMemo } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import { EChartsCoreOption } from 'echarts/core';
-import { formatValue } from '../utils/format';
 import { heightOfJson, recursionJson } from '../utils/data-transform';
+import { generateTooltip } from '../utils/tooltip';
 
 const ITEM_GAP = 2; // vertical gap between flame chart levels (lines)
 const TOP_SHIFT = 10; // margin from the top of the flame chart container
@@ -162,12 +161,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         },
       ],
       tooltip: {
-        formatter: (params: Sample): string => {
-          return `${params.value[6]}<br/><br/>
-          Total: ${formatValue(data.metadata?.units, Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
-          Self: ${formatValue(data.metadata?.units, Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
-          Samples: ${echarts.format.addCommas(Number(params.value[8]))}`;
-        },
+        formatter: (params: Sample): string => generateTooltip(params, data.metadata?.units),
       },
       xAxis: {
         show: false,
@@ -201,8 +195,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   return (
     <Box
       style={{
-        width: '100%',
-        height: '100%',
+        width: width,
+        height: height,
       }}
     >
       <EChart
