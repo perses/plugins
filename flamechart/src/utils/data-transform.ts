@@ -14,7 +14,7 @@
 import { ProfileMetaData, StackTrace } from '@perses-dev/core';
 import { Sample } from '../components/FlameChart';
 import { getSpanColor } from './palette-gen';
-import { formatValue } from './format';
+import { formaItemValue } from './format';
 
 /**
  * Filter the global stacktrace by a function ID to focus on that function and display its corresponding flame chart
@@ -70,7 +70,7 @@ export function heightOfJson(json: StackTrace): number {
 
 // build the name of the corresponding flamechart item
 function formatName(item: StackTrace, rootVal: number, unit: string | undefined): string {
-  return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${formatValue(unit, item.total)})`;
+  return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${formaItemValue(unit, item.total)})`;
 }
 
 /**

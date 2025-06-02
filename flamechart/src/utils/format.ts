@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { msToPrometheusDuration, formatDuration, formatBytes } from '@perses-dev/core';
+import { msToPrometheusDuration, formatDuration, formatValue } from '@perses-dev/core';
 
 export function formatCount(value: number): string {
   const formatterOptions: Intl.NumberFormatOptions = {
@@ -34,7 +34,7 @@ export function formatNanoDuration(value: number): string {
   }
 }
 
-export function formatValue(unit: string | undefined, value: number): string {
+export function formaItemValue(unit: string | undefined, value: number): string {
   let valueWithUnit = '';
   switch (unit) {
     case 'count':
@@ -47,7 +47,7 @@ export function formatValue(unit: string | undefined, value: number): string {
       valueWithUnit = `${formatCount(value)} objects`;
       break;
     case 'bytes':
-      valueWithUnit = formatBytes(value, { unit: 'bytes' });
+      valueWithUnit = formatValue(value, { unit: 'bytes' });
       break;
     case 'nanoseconds':
       valueWithUnit = formatNanoDuration(value);

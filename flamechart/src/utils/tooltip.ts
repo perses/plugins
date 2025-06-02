@@ -13,15 +13,15 @@
 
 import * as echarts from 'echarts';
 import { Sample } from '../components/FlameChart';
-import { formatValue } from './format';
+import { formaItemValue } from './format';
 
 /**
  * Generates a tooltip for the flame chart samples.
  */
 export function generateTooltip(params: Sample, unit: string | undefined): string {
   const tooltip = `${params.value[6]}<br/><br/>
-            Total: ${formatValue(unit, Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
-            Self: ${formatValue(unit, Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
+            Total: ${formaItemValue(unit, Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
+            Self: ${formaItemValue(unit, Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
             Samples: ${echarts.format.addCommas(Number(params.value[8]))}`;
   return tooltip;
 }
