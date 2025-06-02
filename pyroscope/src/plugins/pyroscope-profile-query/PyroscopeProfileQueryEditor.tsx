@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
+import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { produce } from 'immer';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
@@ -22,7 +22,6 @@ import {
   isPyroscopeDatasourceSelector,
   PYROSCOPE_DATASOURCE_KIND,
 } from '../../model/pyroscope-selectors';
-import { PyroscopeClient } from '../../model/pyroscope-client';
 import { ProfileType, Service, Filters } from '../../components';
 import {
   ProfileQueryEditorProps,
@@ -37,8 +36,6 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_PYROSCOPE;
   const datasourceSelectLabelID = useId('pyroscope-datasource-label');
-
-  const { data: client } = useDatasourceClient<PyroscopeClient>(selectedDatasource);
 
   const { maxNodes, handleMaxNodesChange, maxNodesHasError } = useMaxNodesState(props);
   const { profileType, handleProfileTypeChange } = useProfileTypeState(props);
@@ -76,8 +73,8 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
         />
       </FormControl>
       <Stack direction="row" spacing={2}>
-        <Service client={client} value={service} onChange={handleServiceChange} />
-        <ProfileType client={client} value={profileType} onChange={handleProfileTypeChange} />
+        <Service datasource={selectedDatasource} value={service} onChange={handleServiceChange} />
+        <ProfileType datasource={selectedDatasource} value={profileType} onChange={handleProfileTypeChange} />
         <TextField
           size="small"
           label="Max Nodes"
@@ -87,7 +84,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
           sx={{ width: '110px' }}
         />
       </Stack>
-      <Filters client={client} value={filters} onChange={handleFiltersChange} />
+      <Filters datasource={selectedDatasource} value={filters} onChange={handleFiltersChange} />
     </Stack>
   );
 }

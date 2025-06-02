@@ -13,20 +13,20 @@
 
 import { ReactElement } from 'react';
 import { InputLabel, Stack, useTheme, Select, MenuItem } from '@mui/material';
-import { PyroscopeClient } from '../model';
+import { PyroscopeDatasourceSelector } from '../model';
 import { useProfileTypes } from './utils';
 
 export interface ProfileTypeProps {
-  client: PyroscopeClient | undefined;
+  datasource: PyroscopeDatasourceSelector;
   value: string;
   onChange?(value: string): void;
 }
 
 export function ProfileType(props: ProfileTypeProps): ReactElement {
   const theme = useTheme();
-  const { client, value, onChange } = props;
+  const { datasource, value, onChange } = props;
 
-  const { data: profileTypesOptions } = useProfileTypes(client);
+  const { data: profileTypesOptions } = useProfileTypes(datasource);
 
   return (
     <Stack position="relative" sx={{ flexGrow: 1 }}>

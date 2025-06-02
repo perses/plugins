@@ -14,20 +14,20 @@
 import { ReactElement } from 'react';
 //import { useId } from '@perses-dev/components';
 import { Select, MenuItem } from '@mui/material';
-import { PyroscopeClient } from '../model';
+import { PyroscopeDatasourceSelector } from '../model';
 import { useLabelValues } from './utils';
 
 export interface LabelValueProps {
-  client: PyroscopeClient | undefined;
+  datasource: PyroscopeDatasourceSelector;
   value: string;
   labelName: string;
   onChange?(value: string): void;
 }
 
 export function LabelValue(props: LabelValueProps): ReactElement {
-  const { client, value, labelName, onChange } = props;
+  const { datasource, value, labelName, onChange } = props;
 
-  const { data: labelValuesOptions } = useLabelValues(client, labelName);
+  const { data: labelValuesOptions } = useLabelValues(datasource, labelName);
 
   return (
     <Select

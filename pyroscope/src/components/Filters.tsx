@@ -13,19 +13,19 @@
 
 import { ReactElement, useState } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
-import { PyroscopeClient } from '../model';
+import { PyroscopeDatasourceSelector } from '../model';
 import { FilterItem } from './FilterItem';
 import { AddFilterItem } from './AddFilterItem';
 
 export interface FiltersProps {
-  client: PyroscopeClient | undefined;
+  datasource: PyroscopeDatasourceSelector;
   value: Array<{ id: number; value: string }>;
   onChange?: (value: Array<{ id: number; value: string }>) => void;
 }
 
 export function Filters(props: FiltersProps): ReactElement {
   const theme = useTheme();
-  const { client, value, onChange } = props;
+  const { datasource, value, onChange } = props;
 
   // state to manage the focus
   const [isFocused, setIsFocused] = useState(false);
@@ -89,7 +89,7 @@ export function Filters(props: FiltersProps): ReactElement {
       {value.map((filter, index) => (
         <FilterItem
           key={filter.id}
-          client={client}
+          datasource={datasource}
           value={filter.value}
           onChange={(newValue) => updateFilter(index, newValue)}
           deleteItem={() => deleteFilter(index)}

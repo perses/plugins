@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatusError } from '@perses-dev/core';
+import { useDatasourceClient } from '@perses-dev/plugin-system';
+import { DatasourceSelector, StatusError } from '@perses-dev/core';
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
@@ -21,12 +22,12 @@ import {
   PyroscopeClient,
 } from '../model';
 
-export function useLabelNames(
-  client: PyroscopeClient | undefined
-): UseQueryResult<SearchLabelNamesResponse, StatusError> {
+export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<SearchLabelNamesResponse, StatusError> {
+  const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+
   return useQuery<SearchLabelNamesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelNames', 'client', client],
+    queryKey: ['searchLabelNames', 'datasource', datasource],
     queryFn: async () => {
       return await client!.searchLabelNames({}, { 'content-type': 'application/json' }, {});
     },
@@ -34,12 +35,14 @@ export function useLabelNames(
 }
 
 export function useLabelValues(
-  client: PyroscopeClient | undefined,
+  datasource: DatasourceSelector,
   labelName: string
 ): UseQueryResult<SearchLabelValuesResponse, StatusError> {
+  const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelValues', 'client', client, labelName],
+    queryKey: ['searchLabelValues', 'datasource', datasource, labelName],
     queryFn: async () => {
       return await client!.searchLabelValues({}, { 'content-type': 'application/json' }, { name: labelName });
     },
@@ -47,25 +50,32 @@ export function useLabelValues(
 }
 
 export function useProfileTypes(
-  client: PyroscopeClient | undefined
+  datasource: DatasourceSelector
 ): UseQueryResult<SearchProfileTypesResponse, StatusError> {
+  const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+
   return useQuery<SearchProfileTypesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchProfileTypes', 'client', client],
+    queryKey: ['searchProfileTypes', 'datasource', datasource],
     queryFn: async () => {
       return await client!.searchProfileTypes({}, { 'content-type': 'application/json' }, {});
     },
   });
 }
 
-export function useServices(
-  client: PyroscopeClient | undefined
-): UseQueryResult<SearchLabelValuesResponse, StatusError> {
+export function useServices(datasource: DatasourceSelector): UseQueryResult<SearchLabelValuesResponse, StatusError> {
+  const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchServices', 'client', client],
+    queryKey: ['searchServices', 'datasource', datasource],
     queryFn: async () => {
       return await client!.searchServices({}, { 'content-type': 'application/json' });
     },
   });
+}
+
+export function filterLabelNamesOptions(labelNamesOptions: string[]): string[] {
+  const regex = /^__.*__$/;
+  return labelNamesOptions.filter((labelName) => !regex.test(labelName) && labelName !== 'service_name');
 }

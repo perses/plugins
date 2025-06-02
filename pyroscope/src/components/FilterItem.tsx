@@ -13,21 +13,21 @@
 
 import { ReactElement, useState } from 'react';
 import { Stack } from '@mui/material';
-import { PyroscopeClient } from '../model';
+import { PyroscopeDatasourceSelector } from '../model';
 import { LabelName } from './LabelName';
 import { Operator } from './Operator';
 import { LabelValue } from './LabelValue';
 import { DeleteFilterItem } from './DeleteFilterItem';
 
 export interface FilterItemProps {
-  client: PyroscopeClient | undefined;
+  datasource: PyroscopeDatasourceSelector;
   value: string;
   onChange?: (value: string) => void;
   deleteItem?: () => void; // this function is used to delete the current filter
 }
 
 export function FilterItem(props: FilterItemProps): ReactElement {
-  const { client, value, onChange, deleteItem } = props;
+  const { datasource, value, onChange, deleteItem } = props;
 
   const getSeparator = (value: string): string | null => {
     if (value === '') return null;
@@ -86,9 +86,9 @@ export function FilterItem(props: FilterItemProps): ReactElement {
 
   return (
     <Stack direction="row" spacing={0}>
-      <LabelName client={client} value={labelName} onChange={handleLabelNameChange} />
+      <LabelName datasource={datasource} value={labelName} onChange={handleLabelNameChange} />
       <Operator value={operator} onChange={handleOperatorChange} />
-      <LabelValue client={client} value={labelValue} labelName={labelName} onChange={handleLabelValueChange} />
+      <LabelValue datasource={datasource} value={labelValue} labelName={labelName} onChange={handleLabelValueChange} />
       <DeleteFilterItem onClick={handleDeleteClick} />
     </Stack>
   );
