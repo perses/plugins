@@ -20,9 +20,6 @@ import { PanelProps } from '@perses-dev/plugin-system';
 import { FlameChartOptions } from '../flame-chart-model';
 import { FlameChart } from './FlameChart';
 
-// const MIN_WIDTH = 100;
-const SPACING = 2;
-
 export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 
 export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
@@ -32,6 +29,11 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
 
+  // display a message if there is more than one query result
+  if (queryResults.length > 1) {
+    console.log('There is more than one queryResult');
+  }
+
   if (contentDimensions === undefined) return null;
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
@@ -40,7 +42,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     <Stack
       height={contentDimensions.height}
       width={contentDimensions.width}
-      spacing={`${SPACING}px`}
+      spacing="2px"
       direction="row"
       justifyContent="center"
       alignItems="center"
