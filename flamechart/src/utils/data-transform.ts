@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StackTrace } from '@perses-dev/core';
+import { ProfileMetaData, StackTrace } from '@perses-dev/core';
+import { Sample } from '../components/FlameChart';
+import { getSpanColor } from './palette-gen';
+import { formatValue } from './format';
 
 /**
  * Filter the global stacktrace by a function ID to focus on that function and display its corresponding flame chart
@@ -63,4 +66,52 @@ export function heightOfJson(json: StackTrace): number {
   };
 
   return recur(json);
+}
+
+// build the name of the corresponding flamechart item
+function formatName(item: StackTrace, rootVal: number, unit: string | undefined): string {
+  return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${formatValue(unit, item.total)})`;
+}
+
+/**
+ * Build series data for the flame chart option
+ */
+export function recursionJson(
+  palette: string,
+  metadata: ProfileMetaData | undefined,
+  jsonObj: StackTrace,
+  id?: number
+): Sample[] {
+  const data: Sample[] = [];
+  const filteredJson = filterJson(structuredClone(jsonObj), id);
+
+  const rootVal = filteredJson.total; // total samples of root node
+
+  const recur = (item: StackTrace): void => {
+    const temp = {
+      name: item.id,
+      value: [
+        item.level,
+        item.start,
+        item.end,
+        formatName(item, rootVal, metadata?.units),
+        (item.total / rootVal) * 100,
+        (item.self / rootVal) * 100,
+        item.name,
+        item.self,
+        item.total,
+      ],
+      itemStyle: {
+        color: getSpanColor(palette, item.name, (item.total / rootVal) * 100),
+      },
+    };
+    data.push(temp as Sample);
+
+    for (const child of item.children || []) {
+      recur(child);
+    }
+  };
+
+  recur(filteredJson);
+  return data;
 }
