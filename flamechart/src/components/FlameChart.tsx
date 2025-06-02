@@ -19,13 +19,12 @@ import {
 } from 'echarts';
 import * as echarts from 'echarts';
 import { Box, Menu, MenuItem, Divider } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { StackTrace, ProfileData } from '@perses-dev/core';
+import { ReactElement, useState, useMemo } from 'react';
+import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import { EChartsCoreOption } from 'echarts/core';
 import { formatValue } from '../utils/format';
-import { getSpanColor } from '../utils/palette-gen';
-import { filterJson, heightOfJson } from '../utils/filter-data';
+import { heightOfJson, recursionJson } from '../utils/data-transform';
 
 const ITEM_GAP = 2; // vertical gap between flame chart levels (lines)
 const TOP_SHIFT = 10; // margin from the top of the flame chart container
@@ -37,7 +36,7 @@ export interface FlameChartProps {
   data: ProfileData;
 }
 
-interface Sample {
+export interface Sample {
   name: number;
   value: [
     level: number,
@@ -63,11 +62,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
   const [isCopied, setIsCopied] = useState(false);
-
-  // build the name of the corresponding flamechart item
-  const formatName = (item: StackTrace, rootVal: number): string => {
-    return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${formatValue(data.metadata?.units, item.total)})`;
-  };
 
   const handleItemClick = (params: MouseEventsParameters<unknown>): void => {
     const data: Sample = params.data;
@@ -106,41 +100,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const handleClose = (): void => {
     setMenuPosition(null);
     if (isCopied) setIsCopied(false);
-  };
-
-  const recursionJson = (jsonObj: StackTrace, id?: number): Sample[] => {
-    const data: Sample[] = [];
-    const filteredJson = filterJson(structuredClone(jsonObj), id);
-
-    const rootVal = filteredJson.total; // total samples of root node
-
-    const recur = (item: StackTrace): void => {
-      const temp = {
-        name: item.id,
-        value: [
-          item.level,
-          item.start,
-          item.end,
-          formatName(item, rootVal),
-          (item.total / rootVal) * 100,
-          (item.self / rootVal) * 100,
-          item.name,
-          item.self,
-          item.total,
-        ],
-        itemStyle: {
-          color: getSpanColor(palette, item.name, (item.total / rootVal) * 100),
-        },
-      };
-      data.push(temp as Sample);
-
-      for (const child of item.children || []) {
-        recur(child);
-      }
-    };
-
-    recur(filteredJson);
-    return data;
   };
 
   const renderItem: CustomSeriesRenderItem = (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) => {
@@ -191,48 +150,53 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     } as CustomSeriesRenderItemReturn;
   };
 
-  const levelOfOriginalJson = heightOfJson(data.profile.stackTrace);
+  const option: EChartsCoreOption = useMemo(() => {
+    if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
 
-  const option: EChartsCoreOption = {
-    title: [
-      {
-        show: false,
-      },
-    ],
-    tooltip: {
-      formatter: (params: Sample): string => {
-        return `${params.value[6]}<br/><br/>
-        Total: ${formatValue(data.metadata?.units, Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
-        Self: ${formatValue(data.metadata?.units, Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
-        Samples: ${echarts.format.addCommas(Number(params.value[8]))}`;
-      },
-    },
+    const levelOfOriginalJson = heightOfJson(data.profile.stackTrace);
 
-    xAxis: {
-      show: false,
-      max: data.profile.stackTrace.total, // todo: remove some space on the right
-    },
-    yAxis: {
-      show: false,
-      max: levelOfOriginalJson,
-      inverse: true, // Reverse Y axis
-    },
-    axisLabel: {
-      overflow: 'truncate',
-      width: width / 3,
-    },
-    series: [
-      {
-        type: 'custom',
-        renderItem,
-        encode: {
-          x: [0, 1, 2],
-          y: 0,
+    const option = {
+      title: [
+        {
+          show: false,
         },
-        data: recursionJson(data.profile.stackTrace),
+      ],
+      tooltip: {
+        formatter: (params: Sample): string => {
+          return `${params.value[6]}<br/><br/>
+          Total: ${formatValue(data.metadata?.units, Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
+          Self: ${formatValue(data.metadata?.units, Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
+          Samples: ${echarts.format.addCommas(Number(params.value[8]))}`;
+        },
       },
-    ],
-  };
+      xAxis: {
+        show: false,
+        max: data.profile.stackTrace.total, // todo: remove some space on the right
+      },
+      yAxis: {
+        show: false,
+        max: levelOfOriginalJson,
+        inverse: true, // Reverse Y axis
+      },
+      axisLabel: {
+        overflow: 'truncate',
+        width: width / 3,
+      },
+      series: [
+        {
+          type: 'custom',
+          renderItem,
+          encode: {
+            x: [0, 1, 2],
+            y: 0,
+          },
+          data: recursionJson(palette, data.metadata, data.profile.stackTrace),
+        },
+      ],
+    };
+
+    return option;
+  }, [data, chartsTheme, width, palette]);
 
   return (
     <Box
