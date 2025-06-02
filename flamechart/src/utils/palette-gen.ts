@@ -49,7 +49,7 @@ export function getValuePaletteColor(value: number): string {
   return value < 1 ? LESS_THAN_ONE_COLOR : valueColorPalette[Math.floor(value / 10)] || NOT_FOUND_COLOR;
 }
 
-/*
+/**
  * Generate a consistent span color for displaying flame chart by package-name
  * (if function name includes 'error', it will have a red hue).
  */

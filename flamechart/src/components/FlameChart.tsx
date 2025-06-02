@@ -25,6 +25,7 @@ import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/compo
 import { EChartsCoreOption } from 'echarts/core';
 import { formatValue } from '../utils/format';
 import { getSpanColor } from '../utils/palette-gen';
+import { filterJson, heightOfJson } from '../utils/filter-data';
 
 const ITEM_GAP = 2; // vertical gap between flame chart levels (lines)
 const TOP_SHIFT = 10; // margin from the top of the flame chart container
@@ -107,38 +108,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     if (isCopied) setIsCopied(false);
   };
 
-  /*
-   * Filter the global stacktrace by a function ID to focus on that function and display its corresponding flame chart
-   */
-  const filterJson = (json: StackTrace, id?: number): StackTrace => {
-    if (id === null) {
-      return json;
-    }
-
-    const recur = (item: StackTrace, id?: number): StackTrace | undefined => {
-      if (item.id === id) {
-        return item;
-      }
-
-      for (const child of item.children || []) {
-        const temp = recur(child, id);
-        if (temp) {
-          item.children = [temp];
-
-          // change the parents' values (todo : verify this)
-          item.start = temp.start;
-          item.end = temp.end;
-          // item.self = temp.self;
-          // item.total = temp.total;
-
-          return item;
-        }
-      }
-    };
-
-    return recur(json, id) || json;
-  };
-
   const recursionJson = (jsonObj: StackTrace, id?: number): Sample[] => {
     const data: Sample[] = [];
     const filteredJson = filterJson(structuredClone(jsonObj), id);
@@ -172,23 +141,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
     recur(filteredJson);
     return data;
-  };
-
-  const heightOfJson = (json: StackTrace): number => {
-    const recur = (item: StackTrace): number => {
-      if ((item.children || []).length === 0) {
-        return item.level;
-      }
-
-      let maxLevel = item.level;
-      for (const child of item.children!) {
-        const tempLevel = recur(child);
-        maxLevel = Math.max(maxLevel, tempLevel);
-      }
-      return maxLevel;
-    };
-
-    return recur(json);
   };
 
   const renderItem: CustomSeriesRenderItem = (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) => {
