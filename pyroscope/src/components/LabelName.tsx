@@ -13,21 +13,19 @@
 
 import { ReactElement } from 'react';
 import { Select, MenuItem } from '@mui/material';
-import { PyroscopeClient } from '../model';
-import { useLabelNames } from './utils';
+import { PyroscopeDatasourceSelector } from '../model';
+import { useLabelNames, filterLabelNamesOptions } from './utils';
 
 export interface LabelNameProps {
-  client: PyroscopeClient | undefined;
+  datasource: PyroscopeDatasourceSelector;
   value: string;
   onChange?(value: string): void;
 }
 
 export function LabelName(props: LabelNameProps): ReactElement {
-  const { client, value, onChange } = props;
+  const { datasource, value, onChange } = props;
 
-  const { data: labelNamesOptions } = useLabelNames(client);
-
-  const regex = /^__.*__$/;
+  const { data: labelNamesOptions } = useLabelNames(datasource);
 
   return (
     <Select
@@ -44,13 +42,11 @@ export function LabelName(props: LabelNameProps): ReactElement {
       }}
     >
       {labelNamesOptions?.names &&
-        labelNamesOptions?.names
-          .filter((labelName) => !regex.test(labelName) && labelName !== 'service_name')
-          .map((labelName) => (
-            <MenuItem key={labelName} value={labelName}>
-              {labelName}
-            </MenuItem>
-          ))}
+        filterLabelNamesOptions(labelNamesOptions?.names).map((labelName) => (
+          <MenuItem key={labelName} value={labelName}>
+            {labelName}
+          </MenuItem>
+        ))}
     </Select>
   );
 }

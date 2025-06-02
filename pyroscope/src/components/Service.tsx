@@ -13,20 +13,20 @@
 
 import { ReactElement } from 'react';
 import { InputLabel, Stack, useTheme, Select, MenuItem } from '@mui/material';
-import { PyroscopeClient } from '../model';
+import { PyroscopeDatasourceSelector } from '../model';
 import { useServices } from './utils';
 
 export interface ServiceProps {
-  client: PyroscopeClient | undefined;
+  datasource: PyroscopeDatasourceSelector;
   value: string;
   onChange?(value: string): void;
 }
 
 export function Service(props: ServiceProps): ReactElement {
   const theme = useTheme();
-  const { client, value, onChange } = props;
+  const { datasource, value, onChange } = props;
 
-  const { data: servicesOptions } = useServices(client);
+  const { data: servicesOptions } = useServices(datasource);
 
   return (
     <Stack position="relative" sx={{ flexGrow: 1 }}>
