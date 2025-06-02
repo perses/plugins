@@ -1,6 +1,5 @@
 {
   "name": "@perses-dev/datasource-variable-plugin",
-  "private": true,
   "version": "0.1.1",
   "scripts": {
     "dev": "rsbuild dev",
