@@ -11,31 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent, ReactElement } from 'react';
-import { Stack, TextField } from '@mui/material';
+import { ReactElement } from 'react';
+import { Stack } from '@mui/material';
 import { FlameChartOptionsEditorProps } from '../flame-chart-model';
 
 export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorProps): ReactElement {
-  const {
-    onChange,
-    value: { content },
-  } = props;
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    onChange({ content: e.target.value });
-  };
-
-  return (
-    <Stack spacing={1}>
-      <TextField
-        label="Content"
-        // Multiline
-        multiline
-        rows={5}
-        // Value
-        value={content}
-        onChange={handleChange}
-      />
-    </Stack>
-  );
+  return <Stack spacing={1}>No setting for the moment</Stack>;
 }
