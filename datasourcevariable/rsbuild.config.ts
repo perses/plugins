@@ -17,7 +17,7 @@ import { pluginReact } from '@rsbuild/plugin-react';
 
 export default defineConfig({
   server: {
-    port: 3012,
+    port: 3022,
   },
   dev: {
     assetPrefix: '/plugins/DatasourceVariable/',
