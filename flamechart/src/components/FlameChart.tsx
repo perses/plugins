@@ -154,11 +154,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     const levelOfOriginalJson = heightOfJson(data.profile.stackTrace);
 
     const option = {
-      title: [
-        {
-          show: false,
-        },
-      ],
       tooltip: {
         formatter: (params: Sample): string => generateTooltip(params, data.metadata?.units),
       },
