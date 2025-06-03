@@ -13,22 +13,11 @@
 
 import { msToPrometheusDuration, formatDuration, formatValue } from '@perses-dev/core';
 
-export function formatCount(value: number): string {
-  const formatterOptions: Intl.NumberFormatOptions = {
-    notation: 'compact',
-    compactDisplay: 'short',
-    maximumFractionDigits: 2,
-  };
-
-  const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
-}
-
 export function formatNanoDuration(value: number): string {
   // The value to format is in nanoseconds
   const nanosecondsInMillisecond = 1_000_000;
   if (value < nanosecondsInMillisecond) {
-    return formatCount(value) + ' ns';
+    return formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true }) + ' ns';
   } else {
     return formatDuration(msToPrometheusDuration(value / nanosecondsInMillisecond));
   }
@@ -38,13 +27,13 @@ export function formaItemValue(unit: string | undefined, value: number): string 
   let valueWithUnit = '';
   switch (unit) {
     case 'count':
-      valueWithUnit = formatCount(value);
+      valueWithUnit = formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true });
       break;
     case 'samples':
-      valueWithUnit = formatCount(value);
+      valueWithUnit = formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true });
       break;
     case 'objects':
-      valueWithUnit = `${formatCount(value)} objects`;
+      valueWithUnit = `${formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true })} objects`;
       break;
     case 'bytes':
       valueWithUnit = formatValue(value, { unit: 'bytes' });
