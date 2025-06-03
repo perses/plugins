@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useMemo } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { FilterItem } from './FilterItem';
@@ -51,6 +51,13 @@ export function Filters(props: FiltersProps): ReactElement {
     }
   };
 
+  const borderValue: string = useMemo(() => {
+    if (isFocused) return '2px solid ' + theme.palette.primary.main;
+
+    const borderColor = theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)';
+    return '1px solid ' + borderColor;
+  }, [theme, isFocused]);
+
   return (
     <Stack
       position="relative"
@@ -61,12 +68,8 @@ export function Filters(props: FiltersProps): ReactElement {
         rowGap: 1,
         gap: 1,
         padding: '10px',
-        border: `${isFocused ? '2px solid' + theme.palette.primary.main : '1px solid rgba(0, 0, 0, 0.23)'}`,
-        borderRadius: '5px',
-        transition: 'border-color 0.3s',
-        '&:hover': {
-          borderColor: `${!isFocused && 'black'}`,
-        },
+        border: borderValue,
+        borderRadius: `${theme.shape.borderRadius}px`,
       }}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
