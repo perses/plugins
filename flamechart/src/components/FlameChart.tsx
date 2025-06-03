@@ -64,8 +64,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const handleItemClick = (params: MouseEventsParameters<unknown>): void => {
     const data: Sample = params.data;
-    const functionName = 6;
-    setMenuTitle(data.value[functionName].toString());
+    const functionName = data.value[6];
+    setMenuTitle(functionName);
     setSelectedId(data.name);
 
     // To ensure that the cursor is positioned inside the menu when it opens,
