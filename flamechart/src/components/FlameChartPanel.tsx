@@ -25,7 +25,6 @@ export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   const { contentDimensions, queryResults } = props;
 
-  // const { content } = spec;
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
 
