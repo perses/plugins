@@ -132,7 +132,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       textContent: {
         style: {
           text: api.value(3),
-          fontFamily: 'Verdana',
           fill: '#000',
           width: width - 4,
           overflow: 'truncate',
