@@ -29,11 +29,6 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
 
-  // display a message if there is more than one query result
-  if (queryResults.length > 1) {
-    console.log('There is more than one queryResult');
-  }
-
   if (contentDimensions === undefined) return null;
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
@@ -47,7 +42,12 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
       justifyContent="center"
       alignItems="center"
     >
-      {flameChartData ? (
+      {queryResults.length > 1 ? (
+        // display a message if there is more than one query
+        <Typography sx={{ ...noDataTextStyle } as SxProps}>
+          There is more than one query. Please make sure that you provided only one query.
+        </Typography>
+      ) : flameChartData ? (
         // Convert the server response into the opentelemetry format
         <FlameChart width={contentDimensions.width} height={contentDimensions.height} data={flameChartData.data} />
       ) : (
