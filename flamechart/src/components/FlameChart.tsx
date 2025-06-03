@@ -203,7 +203,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         theme={chartsTheme.echartsTheme}
         onEvents={{
           click: handleItemClick,
-          dblclick: handleItemClick,
         }}
       />
       <Menu
