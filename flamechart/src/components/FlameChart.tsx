@@ -17,7 +17,7 @@ import {
   CustomSeriesRenderItemParams,
   CustomSeriesRenderItemReturn,
 } from 'echarts';
-import { Box, Menu, MenuItem, Divider } from '@mui/material';
+import { Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
 import { ReactElement, useState, useMemo } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
@@ -55,6 +55,8 @@ export interface Sample {
 
 export function FlameChart(props: FlameChartProps): ReactElement {
   const { width, height, data } = props;
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const chartsTheme = useChartsTheme();
   const [palette, setPalette] = useState<'package-name' | 'value'>('package-name');
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
@@ -112,8 +114,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       type: 'rect',
       transition: ['shape'],
       shape: {
-        x: (start?.[0] ?? RIGTH_SHIFT) - RIGTH_SHIFT,
-        y: (start?.[1] ?? 0) - (height ?? 0) / 2 + TOP_SHIFT,
+        x: start?.[0],
+        y: (start?.[1] ?? 0) - (height ?? 0) / 2,
         width,
         height: (height ?? ITEM_GAP) - ITEM_GAP,
         r: 0,
@@ -155,20 +157,39 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
     const option = {
       tooltip: {
+        appendToBody: true,
+        confine: true,
         formatter: (params: Sample): string => generateTooltip(params, data.metadata?.units),
+        backgroundColor: theme.palette.background.paper,
+        borderColor: theme.palette.background.paper,
+        textStyle: {
+          color: theme.palette.text.primary,
+        },
       },
       xAxis: {
         show: false,
-        max: data.profile.stackTrace.total, // todo: remove some space on the right
+        max: data.profile.stackTrace.total,
+        axisLabel: {
+          show: false,
+        },
       },
       yAxis: {
         show: false,
         max: levelOfOriginalJson,
         inverse: true, // Reverse Y axis
+        axisLabel: {
+          show: false,
+        },
       },
       axisLabel: {
         overflow: 'truncate',
         width: width / 3,
+      },
+      grid: {
+        left: 5,
+        right: 5,
+        top: 15,
+        bottom: 10,
       },
       series: [
         {
@@ -184,7 +205,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     };
 
     return option;
-  }, [data, chartsTheme, width, palette]);
+  }, [data, chartsTheme, theme, width, palette]);
 
   return (
     <Box
@@ -195,9 +216,9 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     >
       <EChart
         sx={{
-          width: '100%',
-          height: '100%',
-          padding: '5px',
+          width: width,
+          height: height,
+          padding: '5px 0',
         }}
         option={option} // even data is in this prop
         theme={chartsTheme.echartsTheme}
@@ -208,17 +229,14 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       <Menu
         sx={{
           '& .MuiPaper-root': {
-            backgroundColor: '#3b4252',
-            color: 'white',
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
             padding: '5px',
             paddingBottom: '0px',
           },
           '& .MuiMenuItem-root': {
             '&:hover': {
-              backgroundColor: '#4c566a',
-            },
-            '&.Mui-selected': {
-              backgroundColor: '#3b4252',
+              backgroundColor: theme.palette.action.hover,
             },
           },
         }}
@@ -235,7 +253,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         >
           {menuTitle}
         </Box>
-        <Divider sx={{ backgroundColor: '#4c566a', height: '2px' }} />
+        <Divider sx={{ backgroundColor: theme.palette.divider }} />
         <MenuItem onClick={handleFocusBlock}>Focus block</MenuItem>
         <MenuItem onClick={handleCopyFunctionName} disabled={isCopied}>
           {isCopied ? 'Copied' : 'Copy function name'}
