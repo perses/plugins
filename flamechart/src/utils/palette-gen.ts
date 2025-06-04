@@ -18,17 +18,17 @@ const NOT_FOUND_COLOR = '#393d47';
 
 // color palette to display flame chart by total value
 const valueColorPalette: string[] = [
-  '#d95850',
-  '#b5c334',
-  '#ffb248',
-  '#f2d643',
-  '#fcce10',
-  '#eb8146',
-  '#ebdba4',
-  '#8fd3e8',
-  '#8fd3e8',
-  '#59c0a3',
-  '#1bca93',
+  '#fff85b',
+  '#ffde4c',
+  '#f08c00',
+  '#ff8c00',
+  '#ffc252',
+  '#e67762',
+  '#ff7070',
+  '#834e56',
+  '#ff6f00',
+  '#ff004c',
+  '#ff3300',
 ];
 
 /**
@@ -46,7 +46,9 @@ export function getSpanColor(palette: string, functionName: string, value: numbe
  * Generate a consistent color for displaying flame chart by total value
  */
 export function getValuePaletteColor(value: number): string {
-  return value < 1 ? LESS_THAN_ONE_COLOR : valueColorPalette[Math.floor(value / 10)] || NOT_FOUND_COLOR;
+  return value < 1
+    ? LESS_THAN_ONE_COLOR
+    : valueColorPalette[Math.floor(value / (valueColorPalette.length - 1))] || NOT_FOUND_COLOR;
 }
 
 /**
