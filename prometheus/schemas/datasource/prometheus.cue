@@ -16,14 +16,15 @@ package model
 import (
 	"github.com/perses/perses/cue/common"
 	commonProxy "github.com/perses/perses/cue/common/proxy"
-	promCommon "github.com/perses/plugins/prometheus/schemas:common"
 )
-
-kind: "PrometheusDatasource"
+ 
+kind: #kind
 spec: close({
 	#directUrl | #proxy
-	scrapeInterval?: =~promCommon.#durationRegex
+	scrapeInterval?: =~#durationRegex
 })
+
+#kind: "PrometheusDatasource"
 
 #directUrl: {
 	directUrl: common.#url
@@ -31,4 +32,12 @@ spec: close({
 
 #proxy: {
 	proxy: commonProxy.#HTTPProxy
+}
+
+#durationRegex: "^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"
+
+#selector: common.#datasourceSelector & {
+	datasource?: {
+		kind:  #kind
+	}
 }
