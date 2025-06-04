@@ -53,7 +53,6 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
       }
     }
     query = spec.profileType + (query === '' ? '' : '{' + query + '}');
-    console.log('Query:', query);
     return query;
   };
 
