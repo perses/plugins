@@ -25,9 +25,7 @@ import { EChartsCoreOption } from 'echarts/core';
 import { heightOfJson, recursionJson } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
 
-const ITEM_GAP = 2; // vertical gap between flame chart levels (lines)
-const TOP_SHIFT = 10; // margin from the top of the flame chart container
-const RIGTH_SHIFT = 40; // margin from the rigth of the flame chart container
+const ITEM_GAP = 2; // vertical gap between flame chart items
 
 export interface FlameChartProps {
   width: number;
@@ -56,9 +54,8 @@ export interface Sample {
 export function FlameChart(props: FlameChartProps): ReactElement {
   const { width, height, data } = props;
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
   const chartsTheme = useChartsTheme();
-  const [palette, setPalette] = useState<'package-name' | 'value'>('package-name');
+  const [palette, setPalette] = useState<'package-name' | 'value'>('value');
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
