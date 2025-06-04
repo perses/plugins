@@ -107,11 +107,12 @@ function transformProfileResponse(response: SearchProfilesResponse): ProfileData
       durationDelta: 0,
     },
   };
-  const stackTraces: StackTrace[][] = [];
 
   if (!response) {
-    return {} as ProfileData;
+    return newResponse;
   }
+
+  const stackTraces: StackTrace[][] = [];
 
   // Set the stackTrace property
   for (let i = 0; i < response.flamebearer.levels.length; i++) {
