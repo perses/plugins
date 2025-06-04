@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { InputLabel, Stack, useTheme, Select, MenuItem } from '@mui/material';
+import { InputLabel, Stack, useTheme, Select, MenuItem, CircularProgress } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useProfileTypes } from './utils';
 
@@ -26,7 +26,7 @@ export function ProfileType(props: ProfileTypeProps): ReactElement {
   const theme = useTheme();
   const { datasource, value, onChange } = props;
 
-  const { data: profileTypesOptions } = useProfileTypes(datasource);
+  const { data: profileTypesOptions, isLoading: isProfileTypesOptionsLoading } = useProfileTypes(datasource);
 
   return (
     <Stack position="relative" sx={{ flexGrow: 1 }}>
@@ -45,12 +45,18 @@ export function ProfileType(props: ProfileTypeProps): ReactElement {
         Profile Type
       </InputLabel>
       <Select value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
-        {profileTypesOptions?.profileTypes &&
+        {isProfileTypesOptionsLoading ? (
+          <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+            <CircularProgress />
+          </Stack>
+        ) : (
+          profileTypesOptions?.profileTypes &&
           profileTypesOptions?.profileTypes.map((type) => (
             <MenuItem key={type.ID} value={type.ID}>
               {type.name + '/' + type.sampleType}
             </MenuItem>
-          ))}
+          ))
+        )}
       </Select>
     </Stack>
   );
