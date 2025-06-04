@@ -38,7 +38,7 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     spec.datasource ?? defaultPyroscopeDatasource
   );
 
-  const makeQuery = () => {
+  const buildQueryString = () => {
     let query: string = '';
     if (spec.service) {
       query = `service_name="${spec.service}"`;
@@ -60,7 +60,7 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     const params: SearchProfilesParameters = {
       // example of query
       // query: `process_cpu:cpu:nanoseconds:cpu:nanoseconds{service_name="pyroscope"}`,
-      query: makeQuery(),
+      query: buildQueryString(),
       // the default value is now-1h
       from: 'now-1h',
     };
