@@ -7,7 +7,7 @@ source: {
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.0.2-test" // TODO upgrade when possible
+		v:       "v0.51.0-rc.1" // TODO upgrade when possible
 		default: true
 	}
 }
