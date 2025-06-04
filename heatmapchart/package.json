@@ -3,21 +3,19 @@
   "version": "0.7.0",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "cross-env LC_ALL=C TZ=UTC jest",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {
-    "@module-federation/enhanced": "^0.8.9",
-    "@perses-dev/components": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/core": "0.0.0-snapshot-histogram-types-78c5104",
-    "@perses-dev/plugin-system": "0.0.0-snapshot-histogram-types-78c5104"
-  },
   "peerDependencies": {
-    "@perses-dev/components": "^0.51.0-beta.1",
-    "@perses-dev/core": "^0.51.0-beta.1",
-    "@perses-dev/plugin-system": "^0.51.0-beta.1",
+    "@perses-dev/components": "^0.51.0-rc.0",
+    "@perses-dev/core": "^0.51.0-rc.0",
+    "@perses-dev/plugin-system": "^0.51.0-rc.0",
     "echarts": "5.5.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2 || ^18.0.0",
@@ -25,7 +23,10 @@
     "immer": "^10.1.1"
   },
   "files": [
-    "dist"
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
   ],
   "perses": {
     "plugins": [
