@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@module-federation/enhanced": "^0.8.9"
+    "@module-federation/enhanced": "^0.8.9",
+    "@types/color-hash": "^2.0.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
