@@ -16,12 +16,17 @@ import { Sample } from '../components/FlameChart';
 import { formaItemValue } from './format';
 
 /**
- * Generates a tooltip for the flame chart samples.
+ * Generates a tooltip for the flame chart items.
  */
 export function generateTooltip(params: Sample, unit: string | undefined): string {
-  const tooltip = `${params.value[6]}<br/><br/>
-            Total: ${formaItemValue(unit, Number(params.value[8]))} (${Number(params.value[4]).toFixed(2)}%)<br/>
-            Self: ${formaItemValue(unit, Number(params.value[7]))} (${Number(params.value[5]).toFixed(2)}%)<br/>
-            Samples: ${echarts.format.addCommas(Number(params.value[8]))}`;
-  return tooltip;
+  const totalPercentage = Number(params.value[4]);
+  const selfPercentage = Number(params.value[5]);
+  const functionName = params.value[6];
+  const total = Number(params.value[8]);
+  const self = Number(params.value[7]);
+
+  return `${functionName}<br/><br/>
+            Total: ${formaItemValue(unit, total)} (${totalPercentage.toFixed(2)}%)<br/>
+            Self: ${formaItemValue(unit, self)} (${selfPercentage.toFixed(2)}%)<br/>
+            Samples: ${echarts.format.addCommas(total)}`;
 }
