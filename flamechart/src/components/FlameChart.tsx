@@ -55,7 +55,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const { width, height, data } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
-  const [palette, setPalette] = useState<'package-name' | 'value'>('value');
+  const [palette, setPalette] = useState<'package-name' | 'value'>('package-name');
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item

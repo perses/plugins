@@ -60,5 +60,5 @@ export function getPackageNamePaletteColor(functionName: string, value: number):
   // It is the substring between the last '/' and the first '.' or the end of the string
   const packageName = functionName.split('/').pop()?.split('.')[0] || functionName;
 
-  return value < 1 ? LESS_THAN_ONE_COLOR : getConsistentColor(packageName, packageName.toLowerCase().includes('error'));
+  return value < 1 ? LESS_THAN_ONE_COLOR : getConsistentColor(packageName, false);
 }
