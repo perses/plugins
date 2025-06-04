@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { InputLabel, Stack, useTheme, Select, MenuItem } from '@mui/material';
+import { InputLabel, Stack, useTheme, Select, MenuItem, CircularProgress } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useServices } from './utils';
 
@@ -26,7 +26,7 @@ export function Service(props: ServiceProps): ReactElement {
   const theme = useTheme();
   const { datasource, value, onChange } = props;
 
-  const { data: servicesOptions } = useServices(datasource);
+  const { data: servicesOptions, isLoading: isServicesOptionsLoading } = useServices(datasource);
 
   return (
     <Stack position="relative" sx={{ flexGrow: 1 }}>
@@ -45,12 +45,18 @@ export function Service(props: ServiceProps): ReactElement {
         Service
       </InputLabel>
       <Select value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
-        {servicesOptions?.names &&
+        {isServicesOptionsLoading ? (
+          <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+            <CircularProgress />
+          </Stack>
+        ) : (
+          servicesOptions?.names &&
           servicesOptions?.names.map((service) => (
             <MenuItem key={service} value={service}>
               {service}
             </MenuItem>
-          ))}
+          ))
+        )}
       </Select>
     </Stack>
   );

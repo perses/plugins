@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Select, MenuItem } from '@mui/material';
+import { Select, MenuItem, CircularProgress, Stack } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useLabelNames, filterLabelNamesOptions } from './utils';
 
@@ -25,7 +25,7 @@ export interface LabelNameProps {
 export function LabelName(props: LabelNameProps): ReactElement {
   const { datasource, value, onChange } = props;
 
-  const { data: labelNamesOptions } = useLabelNames(datasource);
+  const { data: labelNamesOptions, isLoading: isLabelNamesOptionsLoading } = useLabelNames(datasource);
 
   return (
     <Select
@@ -41,12 +41,18 @@ export function LabelName(props: LabelNameProps): ReactElement {
         return selected;
       }}
     >
-      {labelNamesOptions?.names &&
+      {isLabelNamesOptionsLoading ? (
+        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Stack>
+      ) : (
+        labelNamesOptions?.names &&
         filterLabelNamesOptions(labelNamesOptions?.names).map((labelName) => (
           <MenuItem key={labelName} value={labelName}>
             {labelName}
           </MenuItem>
-        ))}
+        ))
+      )}
     </Select>
   );
 }
