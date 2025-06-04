@@ -42,7 +42,7 @@ export function useLabelValues(
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelValues', 'datasource', datasource, labelName],
+    queryKey: ['searchLabelValues', labelName, 'datasource', datasource],
     queryFn: async () => {
       return await client!.searchLabelValues({}, { 'content-type': 'application/json' }, { name: labelName });
     },
