@@ -22,10 +22,13 @@ import { ReactElement, useState, useMemo } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import { EChartsCoreOption } from 'echarts/core';
-import { heightOfJson, recursionJson } from '../utils/data-transform';
+import { recursionJson } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
 
 const ITEM_GAP = 2; // vertical gap between flame chart items
+const Y_MIN_SMALL = 6; // min value of y axis for small containers
+const Y_MIN_LARGE = 20; // min value of y axis for large containers
+const LARGE_CONTAINER_THRESHOLD = 600;
 
 export interface FlameChartProps {
   width: number;
@@ -160,7 +163,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
 
-    const levelOfOriginalJson = heightOfJson(data.profile.stackTrace);
+    const maxDepth = Math.max(...seriesData.map((s) => s.value[0])); // maximum depth of the stack trace
+    const yAxisMax = Math.max(height > LARGE_CONTAINER_THRESHOLD ? Y_MIN_LARGE : Y_MIN_SMALL, maxDepth);
     const totalStart = seriesData[0]?.value[1]; // start value of the total function
     const totalEnd = seriesData[0]?.value[2]; // end value of the total function
     const xAxisMin = totalStart;
@@ -187,7 +191,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       },
       yAxis: {
         show: false,
-        max: levelOfOriginalJson,
+        max: yAxisMax,
         inverse: true, // Reverse Y axis
         axisLabel: {
           show: false,
@@ -217,7 +221,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     };
 
     return option;
-  }, [data, chartsTheme, theme, width, seriesData]);
+  }, [data, chartsTheme, theme, width, seriesData, height]);
 
   return (
     <Box
