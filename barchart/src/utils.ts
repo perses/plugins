@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BarChartData, SortOption } from '@perses-dev/components';
+import { SortOption } from '@perses-dev/components';
 import { DEFAULT_SORT } from './bar-chart-model';
+import { BarChartData } from './BarChartBase';
 
 export function calculatePercentages(data: BarChartData[]): Array<{ label: string; value: number }> {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);

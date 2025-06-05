@@ -36,6 +36,11 @@
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "^0.11.2",
+    "@perses-dev/components": "^0.51.0-rc.1",
+    "@perses-dev/core": "^0.51.0-rc.1",
+    "@perses-dev/dashboards": "^0.51.0-rc.1",
+    "@perses-dev/explore": "^0.51.0-rc.1",
+    "@perses-dev/plugin-system": "^0.51.0-rc.1",
     "@rsbuild/core": "^1.2.19",
     "@rsbuild/plugin-react": "^1.1.1",
     "@swc/cli": "^0.6.0",

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BarChartData } from '@perses-dev/components';
+import { BarChartData } from './BarChartBase';
 import { calculatePercentages, sortSeriesData } from './utils';
 
 const MOCK_DATA: BarChartData[] = [

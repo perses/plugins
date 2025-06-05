@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PieChartData, SortOption } from '@perses-dev/components';
+import { SortOption } from '@perses-dev/components';
 import { DEFAULT_SORT } from './pie-chart-model';
+import { PieChartData } from './PieChartBase';
 
 export function calculatePercentages(data: PieChartData[]): Array<{ name: string; value: number }> {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);

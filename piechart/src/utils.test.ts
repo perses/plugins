@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PieChartData } from '@perses-dev/components';
+import { PieChartData } from './PieChartBase';
 import { calculatePercentages, sortSeriesData } from './utils';
 
 const MOCK_DATA: PieChartData[] = [
