@@ -22,12 +22,12 @@ export const PyroscopeProfileQuery = {
     datasource?: string;
     service: string;
     profileType: string;
-    filters: Array<{ id: number; value: string }>;
+    filters: string[];
   } => ({
     maxNodes: 50,
     datasource: undefined,
     service: '',
     profileType: '',
-    filters: [{ id: Date.now(), value: '' }],
+    filters: [''],
   }),
 };

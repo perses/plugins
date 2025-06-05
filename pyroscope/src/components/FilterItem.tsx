@@ -29,33 +29,21 @@ export interface FilterItemProps {
 export function FilterItem(props: FilterItemProps): ReactElement {
   const { datasource, value, onChange, deleteItem } = props;
 
-  const getSeparator = (value: string): string | null => {
-    if (value === '') return null;
-    if (value.includes('!=')) return '!=';
-    if (value.includes('=~')) return '=~';
-    if (value.includes('!~')) return '!~';
-    if (value.includes('=')) return '=';
-    console.warn('No valid operator found in value:', value);
-    return null;
-  };
-
   const [labelName, setLabelName] = useState(() => {
-    const sep = getSeparator(value);
-    return sep ? value.split(sep)[0] : '';
+    return value.split(':')[0] || '';
   });
 
   const [operator, setOperator] = useState(() => {
-    return getSeparator(value) || '=';
+    return value.split(':')[1] || '=';
   });
 
   const [labelValue, setLabelValue] = useState(() => {
-    const sep = getSeparator(value);
-    return sep ? value.split(sep)[1].slice(1, -1) : '';
+    return value.split(':')[2] || '';
   });
 
   // update the filterItem value when one of its children changes
   const handleFilterItemValueChange = (labelName: string, operator: string, labelValue: string) => {
-    const newValue = labelName + operator + '"' + labelValue + '"';
+    const newValue = labelName + ':' + operator + ':' + labelValue;
 
     if (labelName !== '' && operator !== '' && labelValue !== '' && newValue !== value) {
       onChange?.(newValue);

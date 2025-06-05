@@ -24,9 +24,6 @@ spec: close({
 	}
 	maxNodes?: number
 	profileType: string
-	filters?: [...{ 
-		id: number
-		value: string 
-	}]
+	filters?: [...string]
 	service?: string
 })
