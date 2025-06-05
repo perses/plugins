@@ -48,26 +48,6 @@ export function filterJson(json: StackTrace, id?: number): StackTrace {
   return recur(json, id) || json;
 }
 
-/**
- * Calculate the maximum depth of the stack trace
- */
-export function heightOfJson(json: StackTrace): number {
-  const recur = (item: StackTrace): number => {
-    if ((item.children || []).length === 0) {
-      return item.level;
-    }
-
-    let maxLevel = item.level;
-    for (const child of item.children!) {
-      const tempLevel = recur(child);
-      maxLevel = Math.max(maxLevel, tempLevel);
-    }
-    return maxLevel;
-  };
-
-  return recur(json);
-}
-
 // build the name of the corresponding flamechart item
 function formatName(item: StackTrace, rootVal: number, unit: string | undefined): string {
   return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${formaItemValue(unit, item.total)})`;
