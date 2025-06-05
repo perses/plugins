@@ -38,6 +38,14 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     spec.datasource ?? defaultPyroscopeDatasource
   );
 
+  const buildFilterString = (filter: string): string => {
+    const labelName = filter.split(':')[0];
+    const operator = filter.split(':')[1];
+    const labelValue = filter.split(':')[2];
+
+    return labelName + operator + '"' + labelValue + '"';
+  };
+
   const buildQueryString = () => {
     let query: string = '';
     if (spec.service) {
@@ -45,7 +53,7 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     }
     if (spec.filters && spec.filters.length > 0) {
       // remove empty filters
-      const newFilters = spec.filters.filter((filter) => filter.value !== '').map((filter) => filter.value);
+      const newFilters = spec.filters.filter((filter) => filter !== '').map((filter) => buildFilterString(filter));
       if (query === '') {
         query = newFilters.join(',');
       } else {

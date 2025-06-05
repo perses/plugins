@@ -19,8 +19,8 @@ import { AddFilterItem } from './AddFilterItem';
 
 export interface FiltersProps {
   datasource: PyroscopeDatasourceSelector;
-  value: Array<{ id: number; value: string }>;
-  onChange?: (value: Array<{ id: number; value: string }>) => void;
+  value: string[];
+  onChange?: (value: string[]) => void;
 }
 
 export function Filters(props: FiltersProps): ReactElement {
@@ -31,13 +31,13 @@ export function Filters(props: FiltersProps): ReactElement {
   const [isFocused, setIsFocused] = useState(false);
 
   const addFilterItem = () => {
-    const updatedFilters = [...value, { id: Date.now(), value: '' }];
+    const updatedFilters = [...value, ''];
     onChange?.(updatedFilters);
   };
 
   const updateFilter = (index: number, newValue: string) => {
     const nextFilters = [...value];
-    nextFilters[index] = { id: nextFilters[index].id, value: newValue };
+    nextFilters[index] = newValue;
     onChange?.(nextFilters);
   };
 
@@ -45,7 +45,7 @@ export function Filters(props: FiltersProps): ReactElement {
     const nextFilters = [...value];
     nextFilters.splice(index, 1);
     if (nextFilters.length === 0) {
-      onChange?.([{ id: Date.now(), value: '' }]); // keep at least one empty filter
+      onChange?.(['']); // keep at least one empty filter
     } else {
       onChange?.(nextFilters);
     }
@@ -91,9 +91,9 @@ export function Filters(props: FiltersProps): ReactElement {
       </InputLabel>
       {value.map((filter, index) => (
         <FilterItem
-          key={filter.id}
+          key={filter}
           datasource={datasource}
-          value={filter.value}
+          value={filter}
           onChange={(newValue) => updateFilter(index, newValue)}
           deleteItem={() => deleteFilter(index)}
         />

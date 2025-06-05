@@ -19,6 +19,6 @@ export interface PyroscopeProfileQuerySpec {
   datasource?: PyroscopeDatasourceSelector;
   maxNodes?: number;
   profileType: string;
-  filters?: Array<{ id: number; value: string }>;
+  filters?: string[];
   service?: string;
 }

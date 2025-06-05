@@ -121,14 +121,14 @@ export function useServiceState(props: ProfileQueryEditorProps): {
  * Hook to manage `filters` state to ensure panel preview rerender when filters is changed.
  */
 export function useFiltersState(props: ProfileQueryEditorProps): {
-  filters: Array<{ id: number; value: string }>;
-  handleFiltersChange: (f: Array<{ id: number; value: string }>) => void;
+  filters: string[];
+  handleFiltersChange: (f: string[]) => void;
 } {
   const { onChange, value } = props;
 
   const [filters, setFilters] = useState(value.filters ? value.filters : []);
 
-  const handleFiltersChange = (f: Array<{ id: number; value: string }>): void => {
+  const handleFiltersChange = (f: string[]): void => {
     setFilters(f);
 
     onChange(

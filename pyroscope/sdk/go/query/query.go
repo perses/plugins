@@ -20,16 +20,11 @@ import (
 
 const PluginKind = "PyroscopeProfileQuery"
 
-type Filter struct {
-    ID    int    `json:"id" yaml:"id"`
-    Value string `json:"value" yaml:"value"`
-}
-
 type PluginSpec struct {
 	Datasource  *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	MaxNodes    *int                 `json:"maxNodes,omitempty" yaml:"maxNodes,omitempty"`
 	ProfileType string               `json:"profileType" yaml:"profileType"`
-	Filters     []Filter             `json:"filters,omitempty" yaml:"filters,omitempty"`
+	Filters     []string             `json:"filters,omitempty" yaml:"filters,omitempty"`
 	Service     *string              `json:"service,omitempty" yaml:"service,omitempty"`
 }
 
