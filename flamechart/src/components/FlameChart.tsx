@@ -60,6 +60,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
   const [isCopied, setIsCopied] = useState(false);
+  const [seriesData, setSeriesData] = useState<Sample[]>(
+    recursionJson(palette, data.metadata, data.profile.stackTrace)
+  );
+  const [isBlockFocused, setIsBlockFocused] = useState(false);
 
   const handleItemClick = (params: MouseEventsParameters<unknown>): void => {
     const data: Sample = params.data;
@@ -79,7 +83,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   const handleFocusBlock = (): void => {
-    // focus block
+    if (selectedId) {
+      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace, selectedId));
+      setIsBlockFocused(true);
+    }
     handleClose();
   };
 
@@ -91,7 +98,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   const handleResetGraph = (): void => {
-    // reset flame graph
+    if (isBlockFocused) {
+      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
+      setIsBlockFocused(false);
+    }
     handleClose();
   };
 
@@ -151,6 +161,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
 
     const levelOfOriginalJson = heightOfJson(data.profile.stackTrace);
+    const totalStart = seriesData[0]?.value[1]; // start value of the total function
+    const totalEnd = seriesData[0]?.value[2]; // end value of the total function
+    const xAxisMin = totalStart;
+    const xAxisMax = totalEnd;
 
     const option = {
       tooltip: {
@@ -165,7 +179,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       },
       xAxis: {
         show: false,
-        max: data.profile.stackTrace.total,
+        min: xAxisMin,
+        max: xAxisMax,
         axisLabel: {
           show: false,
         },
@@ -196,13 +211,13 @@ export function FlameChart(props: FlameChartProps): ReactElement {
             x: [0, 1, 2],
             y: 0,
           },
-          data: recursionJson(palette, data.metadata, data.profile.stackTrace),
+          data: seriesData,
         },
       ],
     };
 
     return option;
-  }, [data, chartsTheme, theme, width, palette]);
+  }, [data, chartsTheme, theme, width, seriesData]);
 
   return (
     <Box
