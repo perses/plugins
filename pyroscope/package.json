@@ -62,7 +62,7 @@
         "kind": "Explore",
         "spec": {
           "display": {
-            "name": "Pyroscope Profile Explorer"
+            "name": "Pyroscope Explorer"
           },
           "name": "PyroscopeExplorer"
         }
