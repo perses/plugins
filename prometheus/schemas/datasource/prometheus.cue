@@ -19,10 +19,10 @@ import (
 )
  
 kind: #kind
-spec: close({
+spec: {
 	#directUrl | #proxy
 	scrapeInterval?: =~#durationRegex
-})
+}
 
 #kind: "PrometheusDatasource"
 
