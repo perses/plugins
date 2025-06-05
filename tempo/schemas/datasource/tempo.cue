@@ -19,9 +19,9 @@ import (
 )
 
 kind: #kind
-spec: close({
+spec: {
 	#directUrl | #proxy
-})
+}
 
 #kind: "TempoDatasource"
 
