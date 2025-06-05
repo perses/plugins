@@ -185,8 +185,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       grid: {
         left: 5,
         right: 5,
-        top: 15,
-        bottom: 10,
+        top: 20,
+        bottom: 20,
       },
       series: [
         {
@@ -215,7 +215,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         sx={{
           width: width,
           height: height,
-          padding: '5px 0',
         }}
         option={option} // even data is in this prop
         theme={chartsTheme.echartsTheme}
