@@ -13,7 +13,7 @@
 
 import * as echarts from 'echarts';
 import { Sample } from '../components/FlameChart';
-import { formaItemValue } from './format';
+import { formatItemValue } from './format';
 
 /**
  * Generates a tooltip for the flame chart items.
@@ -26,7 +26,7 @@ export function generateTooltip(params: Sample, unit: string | undefined): strin
   const self = Number(params.value[7]);
 
   return `${functionName}<br/><br/>
-            Total: ${formaItemValue(unit, total)} (${totalPercentage.toFixed(2)}%)<br/>
-            Self: ${formaItemValue(unit, self)} (${selfPercentage.toFixed(2)}%)<br/>
+            Total: ${formatItemValue(unit, total)} (${totalPercentage.toFixed(2)}%)<br/>
+            Self: ${formatItemValue(unit, self)} (${selfPercentage.toFixed(2)}%)<br/>
             Samples: ${echarts.format.addCommas(total)}`;
 }

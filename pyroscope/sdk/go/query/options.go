@@ -15,16 +15,37 @@ package query
 
 import "github.com/perses/plugins/pyroscope/sdk/go/datasource"
 
-func Expr(expr string) Option {
+func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Query = expr
+		builder.Datasource = datasource.Selector(datasourceName)
 		return nil
 	}
 }
 
-func Datasource(datasourceName string) Option {
+func MaxNodes(max int) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = datasource.Selector(datasourceName)
+		builder.MaxNodes = max
+		return nil
+	}
+}
+
+func ProfileType(profileType string) Option {
+	return func(builder *Builder) error {
+		builder.ProfileType = profileType
+		return nil
+	}
+}
+
+func Filters(filters []string) Option {
+	return func(builder *Builder) error {
+		builder.Filters = filters
+		return nil
+	}
+}
+
+func Service(service string) Option {
+	return func(builder *Builder) error {
+		builder.Service = service
 		return nil
 	}
 }

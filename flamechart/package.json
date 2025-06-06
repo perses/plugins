@@ -12,9 +12,11 @@
     "test": "cross-env LC_ALL=C TZ=UTC jest",
     "type-check": "tsc --noEmit"
   },
-  "devDependencies": {
-    "@types/color-hash": "^2.0.0",
+  "dependencies": {
     "@fantasy-color/hsv-to-rgb": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/color-hash": "^2.0.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",

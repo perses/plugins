@@ -38,8 +38,19 @@ function generateColors(n: number): string[] {
 }
 
 // Palette of color to display the flame chart by value
-// Generate a palette of 11 colors
-const valueColorPalette = generateColors(11);
+const valueColorPalette: string[] = [
+  '#fff85b',
+  '#ffde4c',
+  '#f08c00',
+  '#ff8c00',
+  '#ffc252',
+  '#e67762',
+  '#ff7070',
+  '#834e56',
+  '#ff6f00',
+  '#ff004c',
+  '#ff3300',
+];
 
 /**
  * Get span color, account for whether palette is 'package-name' or 'value'
