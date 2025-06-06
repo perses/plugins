@@ -240,7 +240,7 @@ spec:
 ### Prometheus Datasource selector
 
 !!! note
-See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+    See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
 
 ```yaml
 kind: "PrometheusDatasource"
