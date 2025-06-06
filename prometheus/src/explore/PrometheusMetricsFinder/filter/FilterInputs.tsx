@@ -21,12 +21,21 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Autocomplete, CircularProgress, IconButton, InputAdornment, TextField } from '@mui/material';
-import CheckIcon from 'mdi-material-ui/Check';
+import {
+  Autocomplete,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+} from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import { DatasourceSelector } from '@perses-dev/core';
 import { Virtuoso } from 'react-virtuoso';
-import { LabelFilter } from '../types';
+import { LabelFilter, Operator } from '../types';
 import { useLabels, useLabelValues } from '../utils';
 
 export interface LabelFilterInputProps {
@@ -126,28 +135,14 @@ export function RawFilterInput({
   onChange,
   onDelete,
 }: RawFilterInputProps): ReactElement {
-  const [isEditingLabelName, setIsEditingLabelName] = useState(value.labelValues.length === 0);
-  const [labelName, setLabelName] = useState(value.label);
-
-  function handleLabelConfirmation(): void {
-    setIsEditingLabelName(false);
-    onChange({ label: labelName, labelValues: value.labelValues, operator: value.operator });
-  }
-
-  function handleKeyPress(event: { key: string }): void {
-    if (isEditingLabelName && event.key === 'Enter') {
-      handleLabelConfirmation();
-    }
-  }
-
   return (
-    <>
+    <Stack gap={0} flexDirection="row" alignItems="center">
       <Autocomplete
         freeSolo
         disableClearable
         options={labelOptions ?? []}
         value={value.label}
-        sx={{ minWidth: 250, display: isEditingLabelName ? 'block' : 'none' }}
+        sx={{ minWidth: 200 }}
         ListboxComponent={ListboxComponent}
         loading={isLabelOptionsLoading}
         renderInput={(params) => {
@@ -158,25 +153,33 @@ export function RawFilterInput({
               variant="outlined"
               fullWidth
               size="medium"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {isLabelOptionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                    <IconButton aria-label="validate label name" onClick={() => handleLabelConfirmation()} edge="end">
-                      <CheckIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
+                },
               }}
             />
           );
         }}
-        onKeyDown={handleKeyPress}
         onInputChange={(_: SyntheticEvent, newValue: string | null) => {
-          setLabelName(newValue ?? '');
+          onChange({ label: newValue ?? '', labelValues: value.labelValues, operator: value.operator });
         }}
       />
+      <Select
+        value={value.operator}
+        variant="outlined"
+        onChange={(event: SelectChangeEvent) => {
+          onChange({ label: value.label, labelValues: value.labelValues, operator: event.target.value as Operator });
+        }}
+        size="medium"
+        sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+      >
+        <MenuItem value="=">=</MenuItem>
+        <MenuItem value="!=">!=</MenuItem>
+        <MenuItem value="=~">=~</MenuItem>
+        <MenuItem value="!~">!~</MenuItem>
+      </Select>
       <Autocomplete
         freeSolo
         multiple={value.operator === '=~' || value.operator === '!~'}
@@ -185,32 +188,37 @@ export function RawFilterInput({
         options={labelValuesOptions ?? []}
         value={value.labelValues}
         ListboxComponent={ListboxComponent}
-        sx={{ minWidth: 250, display: isEditingLabelName ? 'none' : 'block' }}
+        sx={{ minWidth: 200 }}
         loading={isLabelValuesOptionsLoading}
         renderInput={(params) => {
           return (
             <TextField
               {...params}
-              label={value.label}
+              label={value.operator === '=~' || value.operator === '!~' ? 'Label Values' : 'Label Value'}
               variant="outlined"
               fullWidth
               size="medium"
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <>
-                    <InputAdornment position="start">{value.operator}</InputAdornment>
-                    {params.InputProps.startAdornment}
-                  </>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {isLabelValuesOptionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                    <IconButton aria-label="delete label filter" onClick={() => onDelete()} edge="end">
-                      <DeleteIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                },
+              }}
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  style: {
+                    maxHeight: '53.13px', // TODO: the input height is larger when a value is selected in multiple mode. Probably a bug fixed in newer version, could not replicate on their demo
+                  },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {isLabelValuesOptionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                      <IconButton aria-label="delete label filter" onClick={() => onDelete()} edge="end">
+                        <DeleteIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
           );
@@ -224,6 +232,6 @@ export function RawFilterInput({
           }
         }}
       />
-    </>
+    </Stack>
   );
 }
