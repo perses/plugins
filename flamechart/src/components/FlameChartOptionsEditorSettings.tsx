@@ -13,8 +13,7 @@
 
 import { ReactElement } from 'react';
 import { Stack } from '@mui/material';
-import { FlameChartOptionsEditorProps } from '../flame-chart-model';
 
-export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorProps): ReactElement {
+export function FlameChartOptionsEditorSettings(): ReactElement {
   return <Stack spacing={1}>No setting for the moment</Stack>;
 }
