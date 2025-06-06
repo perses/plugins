@@ -21,10 +21,14 @@ export interface FlameChartDefinition extends Definition<FlameChartOptions> {
   kind: 'FlameChart';
 }
 
-export interface FlameChartOptions {}
+export interface FlameChartOptions {
+  palette: 'package-name' | 'value';
+}
 
 export type FlameChartOptionsEditorProps = OptionsEditorProps<FlameChartOptions>;
 
 export function createInitialFlameChartOptions(): FlameChartOptions {
-  return {};
+  return {
+    palette: 'package-name',
+  };
 }

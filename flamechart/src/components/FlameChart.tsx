@@ -58,7 +58,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const { width, height, data } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
-  const [palette, setPalette] = useState<'package-name' | 'value'>('package-name');
+  const palette = 'package-name';
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
@@ -68,7 +68,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   );
   const [isBlockFocused, setIsBlockFocused] = useState(false);
 
-  const handleItemClick = (params: MouseEventsParameters<unknown>): void => {
+  const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
     const functionName = data.value[6];
     setMenuTitle(functionName);
@@ -238,7 +238,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         option={option} // even data is in this prop
         theme={chartsTheme.echartsTheme}
         onEvents={{
-          click: handleItemClick,
+          click: handleItemClick as (params: MouseEventsParameters<unknown>) => void,
         }}
       />
       <Menu
