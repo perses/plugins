@@ -25,7 +25,7 @@ const GOLDEN_RATIO_CONJUGATE = 0.618033988749895;
 function generateColors(n: number): string[] {
   const result = [];
   for (let i = 0; i < n; i++) {
-    let h = Math.random() + GOLDEN_RATIO_CONJUGATE; // nolint: gosec // We don't need a secure random number here.
+    let h = Math.random() + GOLDEN_RATIO_CONJUGATE; // We don't need a secure random number here.
     h %= 1; // Normalize the value to keep only the decimal value.
     const rgb = hsvToRgb({
       hue: h * 360, // Convert hue to degrees

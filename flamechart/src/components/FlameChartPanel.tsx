@@ -30,7 +30,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
 
   if (contentDimensions === undefined) return null;
 
-  const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
+  const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
   return (
     <Stack
@@ -43,14 +43,14 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     >
       {queryResults.length > 1 ? (
         // display a message if there is more than one query
-        <Typography sx={{ ...noDataTextStyle } as SxProps}>
+        <Typography sx={{ ...noDataTextStyle }}>
           There is more than one query. Please make sure that you provided only one query.
         </Typography>
       ) : flameChartData ? (
         // Convert the server response into the opentelemetry format
         <FlameChart width={contentDimensions.width} height={contentDimensions.height} data={flameChartData.data} />
       ) : (
-        <Typography sx={{ ...noDataTextStyle } as SxProps}>No data</Typography>
+        <Typography sx={{ ...noDataTextStyle }}>No data</Typography>
       )}
     </Stack>
   );
