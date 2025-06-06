@@ -23,7 +23,7 @@ export function formatNanoDuration(value: number): string {
   }
 }
 
-export function formaItemValue(unit: string | undefined, value: number): string {
+export function formatItemValue(unit: string | undefined, value: number): string {
   let valueWithUnit = '';
   switch (unit) {
     case 'count':
