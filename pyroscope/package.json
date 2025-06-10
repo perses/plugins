@@ -12,19 +12,19 @@
     "test": "cross-env LC_ALL=C TZ=UTC jest",
     "type-check": "tsc --noEmit"
   },
-  "devDependencies": {
+  "dependencies": {
     "@codemirror/autocomplete": "^6.18.4",
     "@lezer/highlight": "^1.2.1x",
+    "@perses-dev/components": "0.0.0-snapshot-profile-89b306f",
+    "@perses-dev/core": "0.0.0-snapshot-profile-89b306f",
+    "@perses-dev/dashboards": "0.0.0-snapshot-profile-89b306f",
+    "@perses-dev/plugin-system": "0.0.0-snapshot-profile-89b306f",
     "@perses-dev/explore": "0.0.0-snapshot-profile-89b306f"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/core": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/dashboards": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/plugin-system": "0.0.0-snapshot-profile-89b306f",
     "@tanstack/react-query": "^5.64.2",
     "@uiw/react-codemirror": "^4.19.1",
     "date-fns": "^4.1.0",
