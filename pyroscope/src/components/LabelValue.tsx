@@ -45,7 +45,7 @@ export function LabelValue(props: LabelValueProps): ReactElement {
     >
       {isLabelValuesOptionsLoading ? (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress />
+          <CircularProgress color="inherit" size={20} />
         </Stack>
       ) : (
         labelValuesOptions?.names &&

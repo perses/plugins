@@ -43,7 +43,7 @@ export function LabelName(props: LabelNameProps): ReactElement {
     >
       {isLabelNamesOptionsLoading ? (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress />
+          <CircularProgress color="inherit" size={20} />
         </Stack>
       ) : (
         labelNamesOptions?.names &&

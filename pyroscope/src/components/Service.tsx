@@ -47,7 +47,7 @@ export function Service(props: ServiceProps): ReactElement {
       <Select value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
         {isServicesOptionsLoading ? (
           <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress />
+            <CircularProgress color="inherit" size={20} />
           </Stack>
         ) : (
           servicesOptions?.names &&
