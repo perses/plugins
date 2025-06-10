@@ -17,6 +17,7 @@ import { getUnixTime } from 'date-fns';
 import { PyroscopeProfileQuerySpec, PYROSCOPE_DATASOURCE_KIND, PyroscopeDatasourceSelector } from '../../model';
 import { PyroscopeClient } from '../../model/pyroscope-client';
 import { SearchProfilesParameters, SearchProfilesResponse } from '../../model/api-types';
+import { computeFilterExpr } from '../../utils/types';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
@@ -38,29 +39,21 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     spec.datasource ?? defaultPyroscopeDatasource
   );
 
-  const buildFilterString = (filter: string): string => {
-    const labelName = filter.split(':')[0];
-    const operator = filter.split(':')[1];
-    const labelValue = filter.split(':')[2];
-
-    return labelName + operator + '"' + labelValue + '"';
-  };
-
   const buildQueryString = () => {
     let query: string = '';
     if (spec.service) {
       query = `service_name="${spec.service}"`;
     }
     if (spec.filters && spec.filters.length > 0) {
-      // remove empty filters
-      const newFilters = spec.filters.filter((filter) => filter !== '').map((filter) => buildFilterString(filter));
+      const filterExpr = computeFilterExpr(spec.filters);
       if (query === '') {
-        query = newFilters.join(',');
+        query = filterExpr;
       } else {
-        query += ',' + newFilters.join(',');
+        query += ',' + filterExpr;
       }
     }
     query = spec.profileType + (query === '' ? '' : '{' + query + '}');
+    console.log('query:', query);
     return query;
   };
 
@@ -168,6 +161,7 @@ function transformProfileResponse(response: SearchProfilesResponse): ProfileData
     durationDelta: response.timeline.durationDelta,
   };
 
+  console.log('profile data:', newResponse);
   return newResponse;
 }
 

@@ -14,13 +14,14 @@
 import { ReactElement, useState, useMemo } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
+import { LabelFilter } from '../utils/types';
 import { FilterItem } from './FilterItem';
 import { AddFilterItem } from './AddFilterItem';
 
 export interface FiltersProps {
   datasource: PyroscopeDatasourceSelector;
-  value: string[];
-  onChange?: (value: string[]) => void;
+  value: LabelFilter[];
+  onChange?: (value: LabelFilter[]) => void;
 }
 
 export function Filters(props: FiltersProps): ReactElement {
@@ -31,11 +32,12 @@ export function Filters(props: FiltersProps): ReactElement {
   const [isFocused, setIsFocused] = useState(false);
 
   const addFilterItem = () => {
-    const updatedFilters = [...value, ''];
+    const newItem: LabelFilter = { labelName: '', labelValue: '', operator: '=' };
+    const updatedFilters = [...value, newItem];
     onChange?.(updatedFilters);
   };
 
-  const updateFilter = (index: number, newValue: string) => {
+  const updateFilter = (index: number, newValue: LabelFilter) => {
     const nextFilters = [...value];
     nextFilters[index] = newValue;
     onChange?.(nextFilters);
@@ -45,7 +47,7 @@ export function Filters(props: FiltersProps): ReactElement {
     const nextFilters = [...value];
     nextFilters.splice(index, 1);
     if (nextFilters.length === 0) {
-      onChange?.(['']); // keep at least one empty filter
+      onChange?.([{ labelName: '', labelValue: '', operator: '=' }]); // keep at least one empty filter
     } else {
       onChange?.(nextFilters);
     }
@@ -91,7 +93,7 @@ export function Filters(props: FiltersProps): ReactElement {
       </InputLabel>
       {value.map((filter, index) => (
         <FilterItem
-          key={filter}
+          key={`${filter.labelName}:${filter.operator}:${filter.labelValue}`}
           datasource={datasource}
           value={filter}
           onChange={(newValue) => updateFilter(index, newValue)}

@@ -14,7 +14,7 @@
 import { ReactElement } from 'react';
 import { InputLabel, Stack, useTheme, Select, MenuItem, CircularProgress } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
-import { useProfileTypes } from './utils';
+import { useProfileTypes } from '../utils/use-query';
 
 export interface ProfileTypeProps {
   datasource: PyroscopeDatasourceSelector;

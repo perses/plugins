@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { Stack } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
+import { LabelFilter, OperatorType } from '../utils/types';
 import { LabelName } from './LabelName';
 import { Operator } from './Operator';
 import { LabelValue } from './LabelValue';
@@ -21,51 +22,24 @@ import { DeleteFilterItem } from './DeleteFilterItem';
 
 export interface FilterItemProps {
   datasource: PyroscopeDatasourceSelector;
-  value: string;
-  onChange?: (value: string) => void;
+  value: LabelFilter;
+  onChange?: (value: LabelFilter) => void;
   deleteItem?: () => void; // this function is used to delete the current filter
 }
 
 export function FilterItem(props: FilterItemProps): ReactElement {
   const { datasource, value, onChange, deleteItem } = props;
 
-  const [labelName, setLabelName] = useState(() => {
-    return value.split(':')[0] || '';
-  });
-
-  const [operator, setOperator] = useState(() => {
-    return value.split(':')[1] || '=';
-  });
-
-  const [labelValue, setLabelValue] = useState(() => {
-    return value.split(':')[2] || '';
-  });
-
-  // update the filterItem value when one of its children changes
-  const handleFilterItemValueChange = (labelName: string, operator: string, labelValue: string) => {
-    const newValue = labelName + ':' + operator + ':' + labelValue;
-
-    if (labelName !== '' && operator !== '' && labelValue !== '' && newValue !== value) {
-      onChange?.(newValue);
-    }
+  const handleLabelNameChange = (label: string) => {
+    onChange?.({ labelName: label, labelValue: '', operator: value.operator });
   };
 
-  const handleLabelNameChange = (name: string) => {
-    if (labelValue !== '') {
-      setLabelValue('');
-      onChange?.('');
-    }
-    setLabelName(name);
+  const handleOperatorChange = (op: OperatorType) => {
+    onChange?.({ labelName: value.labelName, labelValue: value.labelValue, operator: op });
   };
 
-  const handleOperatorChange = (op: string) => {
-    setOperator(op);
-    handleFilterItemValueChange(labelName, op, labelValue);
-  };
-
-  const handleLabelValueChange = (value: string) => {
-    setLabelValue(value);
-    handleFilterItemValueChange(labelName, operator, value);
+  const handleLabelValueChange = (val: string) => {
+    onChange?.({ labelName: value.labelName, labelValue: val, operator: value.operator });
   };
 
   const handleDeleteClick = () => {
@@ -74,9 +48,14 @@ export function FilterItem(props: FilterItemProps): ReactElement {
 
   return (
     <Stack direction="row" spacing={0}>
-      <LabelName datasource={datasource} value={labelName} onChange={handleLabelNameChange} />
-      <Operator value={operator} onChange={handleOperatorChange} />
-      <LabelValue datasource={datasource} value={labelValue} labelName={labelName} onChange={handleLabelValueChange} />
+      <LabelName datasource={datasource} value={value.labelName} onChange={handleLabelNameChange} />
+      <Operator value={value.operator} onChange={handleOperatorChange} />
+      <LabelValue
+        datasource={datasource}
+        value={value.labelValue}
+        labelName={value.labelName}
+        onChange={handleLabelValueChange}
+      />
       <DeleteFilterItem onClick={handleDeleteClick} />
     </Stack>
   );

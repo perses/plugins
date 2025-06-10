@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { PyroscopeProfileQuerySpec } from '../../model/profile-query-model';
+import { LabelFilter } from '../../utils/types';
 
 export type ProfileQueryEditorProps = OptionsEditorProps<PyroscopeProfileQuerySpec>;
 
@@ -121,14 +122,14 @@ export function useServiceState(props: ProfileQueryEditorProps): {
  * Hook to manage `filters` state to ensure panel preview rerender when filters is changed.
  */
 export function useFiltersState(props: ProfileQueryEditorProps): {
-  filters: string[];
-  handleFiltersChange: (f: string[]) => void;
+  filters: LabelFilter[];
+  handleFiltersChange: (f: LabelFilter[]) => void;
 } {
   const { onChange, value } = props;
 
   const [filters, setFilters] = useState(value.filters ? value.filters : []);
 
-  const handleFiltersChange = (f: string[]): void => {
+  const handleFiltersChange = (f: LabelFilter[]): void => {
     setFilters(f);
 
     onChange(

@@ -14,7 +14,7 @@
 import { ReactElement } from 'react';
 import { Select, MenuItem, CircularProgress, Stack } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
-import { useLabelNames, filterLabelNamesOptions } from './utils';
+import { useLabelNames, filterLabelNamesOptions } from '../utils/use-query';
 
 export interface LabelNameProps {
   datasource: PyroscopeDatasourceSelector;
