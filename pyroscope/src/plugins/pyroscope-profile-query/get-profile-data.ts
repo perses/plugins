@@ -53,7 +53,6 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
       }
     }
     query = spec.profileType + (query === '' ? '' : '{' + query + '}');
-    console.log('query:', query);
     return query;
   };
 
@@ -161,7 +160,6 @@ function transformProfileResponse(response: SearchProfilesResponse): ProfileData
     durationDelta: response.timeline.durationDelta,
   };
 
-  console.log('profile data:', newResponse);
   return newResponse;
 }
 
