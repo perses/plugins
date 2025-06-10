@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState, useMemo } from 'react';
+import { ReactElement } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { LabelFilter } from '../utils/types';
@@ -27,9 +27,6 @@ export interface FiltersProps {
 export function Filters(props: FiltersProps): ReactElement {
   const theme = useTheme();
   const { datasource, value, onChange } = props;
-
-  // state to manage the focus
-  const [isFocused, setIsFocused] = useState(false);
 
   const addFilterItem = () => {
     const newItem: LabelFilter = { labelName: '', labelValue: '', operator: '=' };
@@ -53,13 +50,6 @@ export function Filters(props: FiltersProps): ReactElement {
     }
   };
 
-  const borderValue: string = useMemo(() => {
-    if (isFocused) return '2px solid ' + theme.palette.primary.main;
-
-    const borderColor = theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)';
-    return '1px solid ' + borderColor;
-  }, [theme, isFocused]);
-
   return (
     <Stack
       position="relative"
@@ -70,12 +60,12 @@ export function Filters(props: FiltersProps): ReactElement {
         rowGap: 1,
         gap: 1,
         padding: '10px',
-        border: borderValue,
+        border: `1px solid ${theme.palette.action.disabled}`,
         borderRadius: `${theme.shape.borderRadius}px`,
+        '&:hover': {
+          borderColor: theme.palette.text.primary,
+        },
       }}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
-      tabIndex={0}
     >
       <InputLabel
         shrink
@@ -84,7 +74,7 @@ export function Filters(props: FiltersProps): ReactElement {
           top: '-6px',
           left: '10px',
           padding: '0 4px',
-          color: `${isFocused ? theme.palette.primary.main : theme.palette.text.primary}`,
+          color: theme.palette.text.primary,
           backgroundColor: theme.palette.background.default,
           zIndex: 1,
         }}
