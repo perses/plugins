@@ -3,7 +3,7 @@
 ```yaml
 kind: "PieChart"
 spec:
-  legend:        <Legend specification> # Optional
+  legend:        <Legend-with-values specification> # Optional
   calculation:   <Calculation specification>
   format:        <Format specification> # Optional
   sort:          <enum = "asc" | "desc"> # Optional
@@ -11,15 +11,9 @@ spec:
   radius:        <number>
 ```
 
-## Legend specification
+## Legend-with-values specification
 
-```yaml
-position: <enum = "bottom" | "right">
-mode: <enum = "list" | "table"> # Optional
-size: <enum = "small" | "medium"> # Optional
-values:
-  - <Calculation specification> # Optional
-```
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#legend-with-values-specification).
 
 ## Calculation specification
 

@@ -3,7 +3,7 @@
 ```yaml
 kind: "TimeSeriesChart"
 spec:
-  legend: <Legend specification> # Optional
+  legend: <Legend-with-values specification> # Optional
   tooltip: <Tooltip specification> # Optional
   yAxis: <YAxis specification> # Optional
   thresholds: <Thresholds specification> # Optional
@@ -12,15 +12,9 @@ spec:
   - <Query Settings specification> # Optional
 ```
 
-## Legend specification
+## Legend-with-values specification
 
-```yaml
-position: <enum = "bottom" | "right">
-mode: <enum = "list" | "table"> # Optional
-size: <enum = "small" | "medium"> # Optional
-values:
-  - <Calculation specification> # Optional
-```
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#legend-with-values-specification).
 
 ### Calculation specification
 

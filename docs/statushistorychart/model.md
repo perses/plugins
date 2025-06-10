@@ -10,11 +10,7 @@ spec:
 
 ## Legend specification
 
-```yaml
-position: <enum = "bottom" | "right">
-mode:     <enum = "list" | "table"> # Optional
-size:     <enum = "small" | "medium"> # Optional
-```
+See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#legend-specification).
 
 ## Mapping specification
 
