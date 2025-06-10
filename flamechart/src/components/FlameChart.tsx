@@ -160,6 +160,11 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     } as CustomSeriesRenderItemReturn;
   };
 
+  // update seriesData with the latest data
+  useMemo(() => {
+    setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
+  }, [data, palette]);
+
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
 
