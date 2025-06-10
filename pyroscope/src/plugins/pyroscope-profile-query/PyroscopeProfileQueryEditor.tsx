@@ -43,15 +43,18 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
   const { filters, handleFiltersChange } = useFiltersState(props);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
-    if (isPyroscopeDatasourceSelector(next)) {
-      onChange(
-        produce(value, (draft) => {
-          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-          const nextDatasource = isDefaultPyroscopeSelector(next) ? undefined : next;
-          draft.datasource = nextDatasource;
-        })
-      );
-      return;
+    // Check if the next value is a DatasourceSelector
+    if (typeof next === 'object' && 'kind' in next && 'name' in next) {
+      if (isPyroscopeDatasourceSelector(next)) {
+        onChange(
+          produce(value, (draft) => {
+            // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+            const nextDatasource = isDefaultPyroscopeSelector(next) ? undefined : next;
+            draft.datasource = nextDatasource;
+          })
+        );
+        return;
+      }
     }
 
     throw new Error('Got unexpected non-Pyroscope datasource selector');
