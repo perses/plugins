@@ -22,7 +22,7 @@ const GOLDEN_RATIO_CONJUGATE = 0.618033988749895;
 // The hue is generated using the golden ratio to have a good distribution of colors.
 // If you want to learn more about it, please read the blog:
 // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-function generateColors(n: number): string[] {
+export function generateColors(n: number): string[] {
   const result = [];
   for (let i = 0; i < n; i++) {
     let h = Math.random() + GOLDEN_RATIO_CONJUGATE; // We don't need a secure random number here.
