@@ -11,15 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LabelFilter } from '../utils/types';
-import { PyroscopeDatasourceSelector } from './pyroscope-selectors';
-/**
- * The spec/options for the PyroscopeProfileQuery plugin.
- */
-export interface PyroscopeProfileQuerySpec {
-  datasource?: PyroscopeDatasourceSelector;
-  maxNodes?: number;
-  profileType: string;
-  filters?: LabelFilter[];
-  service?: string;
+export type OperatorType = '=' | '!=' | '=~' | '!~';
+
+export interface LabelFilter {
+  labelName: string;
+  labelValue: string;
+  operator: OperatorType;
+}
+
+export function computeFilterExpr(filters: LabelFilter[]): string {
+  return `${filters
+    .filter((filter) => filter.labelName !== '' && filter.labelValue !== '')
+    .map((filter) => `${filter.labelName}${filter.operator}"${filter.labelValue}"`)
+    .join(',')}`;
 }

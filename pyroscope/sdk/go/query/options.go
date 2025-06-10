@@ -15,6 +15,12 @@ package query
 
 import "github.com/perses/plugins/pyroscope/sdk/go/datasource"
 
+type LabelFilter struct {
+    LabelName  *string
+    LabelValue *string
+    Operator   *string
+}
+
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
 		builder.Datasource = datasource.Selector(datasourceName)
@@ -36,7 +42,7 @@ func ProfileType(profileType string) Option {
 	}
 }
 
-func Filters(filters []string) Option {
+func Filters(filters []LabelFilter) Option {
 	return func(builder *Builder) error {
 		builder.Filters = filters
 		return nil

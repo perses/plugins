@@ -20,11 +20,17 @@ import (
 
 const PluginKind = "PyroscopeProfileQuery"
 
+type LabelFilter struct {
+    LabelName  *string `json:"labelName,omitempty" yaml:"labelName,omitempty"`
+    LabelValue *string `json:"labelValue,omitempty" yaml:"labelValue,omitempty"`
+    Operator   *string `json:"operator,omitempty" yaml:"operator,omitempty"`
+}
+
 type PluginSpec struct {
 	Datasource  *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	MaxNodes    *int                 `json:"maxNodes,omitempty" yaml:"maxNodes,omitempty"`
 	ProfileType string               `json:"profileType" yaml:"profileType"`
-	Filters     []string             `json:"filters,omitempty" yaml:"filters,omitempty"`
+	Filters     []LabelFilter             `json:"filters,omitempty" yaml:"filters,omitempty"`
 	Service     *string              `json:"service,omitempty" yaml:"service,omitempty"`
 }
 

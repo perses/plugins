@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LabelFilter } from '../../utils/types';
 import { getProfileData } from './get-profile-data';
 import { PyroscopeProfileQueryEditor } from './PyroscopeProfileQueryEditor';
 
@@ -22,12 +23,12 @@ export const PyroscopeProfileQuery = {
     datasource?: string;
     service: string;
     profileType: string;
-    filters: string[];
+    filters: LabelFilter[];
   } => ({
     maxNodes: 50,
     datasource: undefined,
     service: '',
     profileType: '',
-    filters: [''],
+    filters: [{ labelName: '', labelValue: '', operator: '=' }],
   }),
 };
