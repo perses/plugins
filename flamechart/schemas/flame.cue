@@ -14,4 +14,6 @@
 package model
 
 kind: "FlameChart"
-spec: close({})
+spec: close({
+    palette: "package-name" | "value"
+})
