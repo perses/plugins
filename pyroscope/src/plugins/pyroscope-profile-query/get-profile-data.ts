@@ -171,7 +171,8 @@ function addChildren(stackTraces: StackTrace[][]): void {
       for (let k = 0; k < stackTraces[i - 1].length; k++) {
         if (
           stackTraces[i][j].start >= stackTraces[i - 1][k].start &&
-          stackTraces[i][j].end <= stackTraces[i - 1][k].end
+          stackTraces[i][j].end <= stackTraces[i - 1][k].end &&
+          stackTraces[i][j].name !== 'other'
         ) {
           stackTraces[i - 1][k].children.push(stackTraces[i][j]);
           break;
