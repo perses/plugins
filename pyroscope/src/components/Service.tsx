@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { InputLabel, Stack, useTheme, Select, MenuItem, CircularProgress } from '@mui/material';
+import { Stack, TextField, MenuItem, CircularProgress } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useServices } from '../utils/use-query';
 
@@ -23,28 +23,13 @@ export interface ServiceProps {
 }
 
 export function Service(props: ServiceProps): ReactElement {
-  const theme = useTheme();
   const { datasource, value, onChange } = props;
 
   const { data: servicesOptions, isLoading: isServicesOptionsLoading } = useServices(datasource);
 
   return (
     <Stack position="relative" sx={{ flexGrow: 1 }}>
-      <InputLabel
-        shrink
-        sx={{
-          position: 'absolute',
-          top: '-6px',
-          left: '10px',
-          padding: '0 4px',
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.background.default,
-          zIndex: 1,
-        }}
-      >
-        Service
-      </InputLabel>
-      <Select value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
+      <TextField select label="Service" value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
         {isServicesOptionsLoading ? (
           <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress color="inherit" size={20} />
@@ -57,7 +42,7 @@ export function Service(props: ServiceProps): ReactElement {
             </MenuItem>
           ))
         )}
-      </Select>
+      </TextField>
     </Stack>
   );
 }
