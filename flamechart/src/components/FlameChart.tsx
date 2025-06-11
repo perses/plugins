@@ -18,7 +18,7 @@ import {
   CustomSeriesRenderItemReturn,
 } from 'echarts';
 import { Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
-import { ReactElement, useState, useMemo } from 'react';
+import { ReactElement, useState, useMemo, MouseEvent } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import { EChartsCoreOption } from 'echarts/core';
@@ -76,11 +76,11 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
     // To ensure that the cursor is positioned inside the menu when it opens,
     // we adjust the click event coordinates as follows:
-    if (params.event.event) {
-      const mouseEvent = params.event.event as MouseEvent;
+    if ('event' in params) {
+      const mouseEvent = params.event as { event: MouseEvent };
       setMenuPosition({
-        mouseX: mouseEvent.clientX - 2,
-        mouseY: mouseEvent.clientY - 4,
+        mouseX: mouseEvent.event.clientX - 2,
+        mouseY: mouseEvent.event.clientY - 4,
       });
     }
   };
