@@ -7,7 +7,7 @@ source: {
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.51.0-rc.1"
+		v:       "v0.51.1-preview" // includes transform fix https://github.com/perses/perses/pull/3012
 		default: true
 	}
 }
