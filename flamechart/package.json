@@ -13,7 +13,6 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fantasy-color/hsv-to-rgb": "^2.1.0",
     "@perses-dev/components": "0.0.0-snapshot-profile-89b306f",
     "@perses-dev/core": "0.0.0-snapshot-profile-89b306f",
     "@perses-dev/plugin-system": "0.0.0-snapshot-profile-89b306f"

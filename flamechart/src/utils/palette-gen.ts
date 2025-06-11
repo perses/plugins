@@ -11,31 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import hsvToRgb from '@fantasy-color/hsv-to-rgb';
 import { getConsistentColor } from './palette';
 
 const LESS_THAN_ONE_COLOR = '#dee2e6'; // use this color when the value is less than 1
 const NOT_FOUND_COLOR = '#393d47';
-const GOLDEN_RATIO_CONJUGATE = 0.618033988749895;
-
-// Generates n colors with a random hue and fixed saturation and value.
-// The hue is generated using the golden ratio to have a good distribution of colors.
-// If you want to learn more about it, please read the blog:
-// https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-export function generateColors(n: number): string[] {
-  const result = [];
-  for (let i = 0; i < n; i++) {
-    let h = Math.random() + GOLDEN_RATIO_CONJUGATE; // We don't need a secure random number here.
-    h %= 1; // Normalize the value to keep only the decimal value.
-    const rgb = hsvToRgb({
-      hue: h * 360, // Convert hue to degrees
-      saturation: 50,
-      value: 95,
-    });
-    result.push(`rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`);
-  }
-  return result;
-}
 
 // Palette of color to display the flame chart by value
 const valueColorPalette: string[] = [
