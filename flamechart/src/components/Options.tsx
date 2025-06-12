@@ -81,6 +81,24 @@ export function Options(props: OptionsProps): ReactElement {
           open={open}
           onClose={handleClose}
           TransitionComponent={Fade}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+          sx={{
+            mt: 1,
+            '& .MuiPaper-root': {
+              backgroundColor: theme.palette.background.paper,
+              padding: '0 5px',
+            },
+            '& .MuiMenuItem-root:hover': {
+              backgroundColor: theme.palette.action.hover,
+            },
+          }}
         >
           <MenuItem onClick={handleByPackageNameClick}>By package name</MenuItem>
           <MenuItem onClick={handleByValueClick}>By value</MenuItem>
