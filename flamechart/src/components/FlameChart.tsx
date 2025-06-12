@@ -228,13 +228,11 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     return option;
   }, [data, chartsTheme, theme, width, seriesData, height]);
 
-  return (
-    <Box
-      style={{
-        width: width,
-        height: height,
-      }}
-    >
+  // Use useMemo to memoize the flame chart component and prevent unnecessary re-renders.
+  // This ensures the chart does not re-render when the onClick event updates state variables
+  // like menuPosition or selectedId.
+  const flameChart = useMemo(
+    () => (
       <EChart
         sx={{
           width: width,
@@ -246,6 +244,18 @@ export function FlameChart(props: FlameChartProps): ReactElement {
           click: handleItemClick as (params: MouseEventsParameters<unknown>) => void,
         }}
       />
+    ),
+    [chartsTheme.echartsTheme, height, option, width]
+  );
+
+  return (
+    <Box
+      style={{
+        width: width,
+        height: height,
+      }}
+    >
+      {flameChart}
       <Menu
         sx={{
           '& .MuiPaper-root': {
