@@ -25,7 +25,7 @@ export const PyroscopeProfileQuery = {
     profileType: string;
     filters: LabelFilter[];
   } => ({
-    maxNodes: 50,
+    maxNodes: 0,
     datasource: undefined,
     service: '',
     profileType: '',
