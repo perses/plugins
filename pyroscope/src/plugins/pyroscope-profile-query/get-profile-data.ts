@@ -114,14 +114,18 @@ function transformProfileResponse(response: SearchProfilesResponse): ProfileData
 
   const stackTraces: StackTrace[][] = [];
 
-  // Set the stackTrace property
+  // stackTraces id from 1
+  let id = 1;
+  // Set the profile stackTrace property
   for (let i = 0; i < response.flamebearer.levels.length; i++) {
     let current = 0;
     const row: StackTrace[] = [];
     for (let j = 0; j < response.flamebearer.levels[i].length; j += 4) {
       const temp: StackTrace = {} as StackTrace;
-      temp.id = response.flamebearer.levels[i][j + 3]; // index in names array
-      temp.name = response.flamebearer.names[temp.id];
+      temp.id = id;
+      id += 1;
+      const indexInNamesArray = response.flamebearer.levels[i][j + 3]; // index in names array
+      temp.name = response.flamebearer.names[indexInNamesArray];
       temp.level = i;
       temp.total = response.flamebearer.levels[i][j + 1];
       temp.self = response.flamebearer.levels[i][j + 2];
@@ -171,8 +175,7 @@ function addChildren(stackTraces: StackTrace[][]): void {
       for (let k = 0; k < stackTraces[i - 1].length; k++) {
         if (
           stackTraces[i][j].start >= stackTraces[i - 1][k].start &&
-          stackTraces[i][j].end <= stackTraces[i - 1][k].end &&
-          stackTraces[i][j].name !== 'other'
+          stackTraces[i][j].end <= stackTraces[i - 1][k].end
         ) {
           stackTraces[i - 1][k].children.push(stackTraces[i][j]);
           break;

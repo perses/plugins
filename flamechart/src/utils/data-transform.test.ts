@@ -22,7 +22,7 @@ global.structuredClone = (val) => JSON.parse(JSON.stringify(val));
 describe('filterJson', () => {
   const emptyJson: StackTrace = {} as StackTrace;
   const rootJson: StackTrace = {
-    id: 0,
+    id: 1,
     name: 'total',
     level: 1,
     start: 0,
@@ -32,7 +32,7 @@ describe('filterJson', () => {
     children: [],
   };
   const firstChildJson: StackTrace = {
-    id: 1,
+    id: 2,
     name: 'first-child',
     level: 2,
     start: 0,
@@ -42,7 +42,7 @@ describe('filterJson', () => {
     children: [],
   };
   const secondChildJson: StackTrace = {
-    id: 2,
+    id: 3,
     name: 'second-child',
     level: 2,
     start: 800,
@@ -84,7 +84,7 @@ describe('filterJson', () => {
 describe('recursionJson', () => {
   const emptyJson: StackTrace = {} as StackTrace;
   const rootJson: StackTrace = {
-    id: 0,
+    id: 1,
     name: 'total',
     level: 1,
     start: 0,
@@ -94,7 +94,7 @@ describe('recursionJson', () => {
     children: [],
   };
   const firstChildJson: StackTrace = {
-    id: 1,
+    id: 2,
     name: 'first-child',
     level: 2,
     start: 0,
@@ -104,7 +104,7 @@ describe('recursionJson', () => {
     children: [],
   };
   const secondChildJson: StackTrace = {
-    id: 2,
+    id: 3,
     name: 'second-child',
     level: 2,
     start: 800,
@@ -130,21 +130,21 @@ describe('recursionJson', () => {
     rootJson.children.push(firstChildJson, secondChildJson); // root function now has two children
     const output = recursionJson(palette, metadata, rootJson);
     const expected0: Sample = {
-      name: 0,
+      name: 1,
       value: [1, 0, 1000, 'total (1.00K)', 100, 0, 'total', 0, 1000],
       itemStyle: {
         color: getSpanColor(palette, 'total', 100),
       },
     };
     const expected1: Sample = {
-      name: 1,
+      name: 2,
       value: [2, 0, 800, 'first-child (800.00)', 80, 80, 'first-child', 800, 800],
       itemStyle: {
         color: getSpanColor(palette, 'first-child', 80),
       },
     };
     const expected2: Sample = {
-      name: 2,
+      name: 3,
       value: [2, 800, 1000, 'second-child (200.00)', 20, 20, 'second-child', 200, 200],
       itemStyle: {
         color: getSpanColor(palette, 'second-child', 20),

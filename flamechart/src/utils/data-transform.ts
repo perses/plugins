@@ -93,6 +93,6 @@ export function recursionJson(
   };
 
   // check is filteredJson is not empty before call recur
-  if (filteredJson.id !== undefined) recur(filteredJson);
+  if (filteredJson.id) recur(filteredJson);
   return data;
 }
