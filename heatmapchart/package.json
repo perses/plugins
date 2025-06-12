@@ -13,9 +13,9 @@
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@perses-dev/components": "^0.51.0-rc.0",
-    "@perses-dev/core": "^0.51.0-rc.0",
-    "@perses-dev/plugin-system": "^0.51.0-rc.0",
+    "@perses-dev/components": "^0.51.0-rc.1",
+    "@perses-dev/core": "^0.51.0-rc.1",
+    "@perses-dev/plugin-system": "^0.51.0-rc.1",
     "echarts": "5.5.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2 || ^18.0.0",
