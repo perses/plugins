@@ -17,7 +17,7 @@ import { PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
 import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
-import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils/data-transform';
+import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils';
 import { HeatMapChart, HeatMapDataItem } from './HeatMapChart';
 
 const HEATMAP_MIN_HEIGHT = 200;

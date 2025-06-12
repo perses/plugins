@@ -16,8 +16,8 @@ import { FormatOptions, TimeScale } from '@perses-dev/core';
 import { EChart, getFormattedAxis, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
-import { getFormattedStatusHistoryAxisLabel } from '@perses-dev/components/dist/StatusHistoryChart/get-formatted-axis-label';
 import { useTheme } from '@mui/material';
+import { getFormattedStatusHistoryAxisLabel } from '../utils';
 import { generateTooltipHTML } from './HeatMapTooltip';
 
 use([EChartsHeatmapChart]);
