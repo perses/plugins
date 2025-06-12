@@ -11,27 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import CloseIcon from 'mdi-material-ui/Close';
-import { ToolbarIconButton } from '@perses-dev/components';
-
-export interface DeleteFilterItemProps {
-  onClick: () => void;
-}
-
-export function DeleteFilterItem(props: DeleteFilterItemProps): ReactElement {
-  const { onClick } = props;
-
-  return (
-    <ToolbarIconButton
-      sx={{
-        borderTopLeftRadius: '0',
-        borderBottomLeftRadius: '0',
-      }}
-      aria-label="delete filter"
-      onClick={onClick}
-    >
-      <CloseIcon />
-    </ToolbarIconButton>
-  );
-}
+export const TOOLTIP_TEXT = {
+  resetFlameGraph: 'Reset graph',
+  changeColorSheme: 'Change color sheme',
+  exportData: 'Export profile data',
+  showTable: 'Only show table',
+  showFlameGraph: 'Only show flame graph',
+  showBoth: 'Show both the table and flame graph',
+};

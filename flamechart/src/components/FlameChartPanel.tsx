@@ -19,6 +19,7 @@ import { ProfileData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { FlameChartOptions } from '../flame-chart-model';
 import { FlameChart } from './FlameChart';
+import { Options } from './Options';
 
 export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 
@@ -36,8 +37,6 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     <Stack
       height={contentDimensions.height}
       width={contentDimensions.width}
-      spacing="2px"
-      direction="row"
       justifyContent="center"
       alignItems="center"
     >
@@ -48,7 +47,10 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
         </Typography>
       ) : flameChartData ? (
         // Convert the server response into the opentelemetry format
-        <FlameChart width={contentDimensions.width} height={contentDimensions.height} data={flameChartData.data} />
+        <Stack sx={{ paddingTop: '50px' }}>
+          <Options onClick={() => console.log('Refresh')} />
+          <FlameChart width={contentDimensions.width} height={contentDimensions.height} data={flameChartData.data} />
+        </Stack>
       ) : (
         <Typography sx={{ ...noDataTextStyle }}>No data</Typography>
       )}
