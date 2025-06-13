@@ -14,7 +14,7 @@
 import { formatWithTimeZone } from '@perses-dev/components';
 
 // https://echarts.apache.org/en/option.html#xAxis.axisLabel.formatter
-export function getFormattedStatusHistoryAxisLabel(rangeMs: number, timezone: string) {
+export function getFormattedHeatmapAxisLabel(rangeMs: number, timezone: string) {
   return function (value: number): string {
     const dayMs = 86400000;
     const monthMs = 2629440000;

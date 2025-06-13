@@ -17,10 +17,25 @@ import { EChart, getFormattedAxis, useChartsTheme, useTimeZone } from '@perses-d
 import { use, EChartsCoreOption } from 'echarts/core';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
 import { useTheme } from '@mui/material';
-import { getFormattedStatusHistoryAxisLabel } from '../utils';
+import { getFormattedHeatmapAxisLabel } from '../utils';
 import { generateTooltipHTML } from './HeatMapTooltip';
 
 use([EChartsHeatmapChart]);
+
+// The default coloring is a blue->yellow->red gradient
+const DEFAULT_VISUAL_MAP_COLORS = [
+  '#313695',
+  '#4575b4',
+  '#74add1',
+  '#abd9e9',
+  '#e0f3f8',
+  '#ffffbf',
+  '#fee090',
+  '#fdae61',
+  '#f46d43',
+  '#d73027',
+  '#a50026',
+];
 
 export type HeatMapData = [number, number, number | undefined]; // [x, y, value]
 
@@ -88,7 +103,7 @@ export function HeatMapChart({
         data: xAxisCategories,
         axisLabel: {
           hideOverlap: true,
-          formatter: getFormattedStatusHistoryAxisLabel(timeScale?.rangeMs ?? 0, timeZone),
+          formatter: getFormattedHeatmapAxisLabel(timeScale?.rangeMs ?? 0, timeZone),
         },
       },
       yAxis: getFormattedAxis(
@@ -110,19 +125,7 @@ export function HeatMapChart({
         left: 'right',
         top: 'center',
         inRange: {
-          color: [
-            '#313695',
-            '#4575b4',
-            '#74add1',
-            '#abd9e9',
-            '#e0f3f8',
-            '#ffffbf',
-            '#fee090',
-            '#fdae61',
-            '#f46d43',
-            '#d73027',
-            '#a50026',
-          ],
+          color: DEFAULT_VISUAL_MAP_COLORS,
         },
         textStyle: {
           color: theme.palette.text.primary,
