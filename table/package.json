@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/table-plugin",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",
