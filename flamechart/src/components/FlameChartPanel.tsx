@@ -21,6 +21,8 @@ import { FlameChartOptions } from '../flame-chart-model';
 import { FlameChart } from './FlameChart';
 import { Options } from './Options';
 
+const OPTIONS_SPACE = 35; // space for options at the top of the chart
+
 export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 
 export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
@@ -47,9 +49,13 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
         </Typography>
       ) : flameChartData ? (
         // Convert the server response into the opentelemetry format
-        <Stack sx={{ paddingTop: '50px' }}>
+        <Stack sx={{ paddingTop: '10px' }}>
           <Options onClick={() => console.log('Refresh')} />
-          <FlameChart width={contentDimensions.width} height={contentDimensions.height} data={flameChartData.data} />
+          <FlameChart
+            width={contentDimensions.width}
+            height={contentDimensions.height - OPTIONS_SPACE}
+            data={flameChartData.data}
+          />
         </Stack>
       ) : (
         <Typography sx={{ ...noDataTextStyle }}>No data</Typography>
