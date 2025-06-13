@@ -13,8 +13,11 @@
 
 package model
 
+import (
+	"strings"
+)
 
 kind: "DatasourceVariable"
 spec: close({
-	datasourcePluginKind: string
+	datasourcePluginKind: strings.MinRunes(1)
 })

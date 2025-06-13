@@ -14,11 +14,12 @@
 package model
 
 import (
+	"strings"
 	tempoDs "github.com/perses/plugins/tempo/schemas/datasource:model"
 )
 
 kind: "TempoTraceQuery"
 spec: close({
 	tempoDs.#selector
-	query: string
+	query: strings.MinRunes(1)
 })

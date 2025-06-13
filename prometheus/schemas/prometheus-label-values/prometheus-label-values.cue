@@ -14,12 +14,13 @@
 package model
 
 import (
+	"strings"
 	promDs "github.com/perses/plugins/prometheus/schemas/datasource:model"
 )
 
 kind: "PrometheusLabelValuesVariable"
 spec: close({
 	promDs.#selector
-	labelName: string
+	labelName: strings.MinRunes(1)
 	matchers?: [...string]
 })

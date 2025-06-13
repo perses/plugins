@@ -13,8 +13,12 @@
 
 package model
 
-#value: string | {
-	value:  string
+import (
+	"strings"
+)
+
+#value: strings.MinRunes(1) | {
+	value:  strings.MinRunes(1)
 	label?: string
 }
 

@@ -54,7 +54,7 @@ spec: close({
 	kind: "Range"
 	spec: {
 		min?: number
-		max?: number
+		max?: number & >= min
 	}
 }
 

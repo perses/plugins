@@ -14,12 +14,13 @@
 package model
 
 import (
+	"strings"
 	promDs "github.com/perses/plugins/prometheus/schemas/datasource:model"
 )
 
 kind: "PrometheusPromQLVariable"
 spec: close({
 	promDs.#selector
-	expr:       string
+	expr:       strings.MinRunes(1)
 	labelName?: string
 })
