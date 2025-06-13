@@ -51,7 +51,7 @@ spec: close({
 	label?:  string
 	format?: common.#format
 	min?:    number
-	max?:    number
+	max?:    number & >= min
 }
 
 #querySettings: [...{

@@ -21,6 +21,6 @@ kind: "HistogramChart"
 spec: close({
 	format?:     common.#format
 	min?:        number
-	max?:        number
+	max?:        number & >= min
 	thresholds?: common.#thresholds
 })
