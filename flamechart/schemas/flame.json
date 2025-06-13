@@ -1,0 +1,6 @@
+{
+  "kind": "FlameChart",
+  "spec": {
+    "palette": "package-name"
+  }
+}
