@@ -161,15 +161,20 @@ export function HeatMapChart({
     countFormat,
   ]);
 
-  return (
-    <EChart
-      sx={{
-        width: width,
-        height: height,
-        padding: `${chartsTheme.container.padding.default}px`,
-      }}
-      option={option}
-      theme={chartsTheme.echartsTheme}
-    />
+  const chart = useMemo(
+    () => (
+      <EChart
+        sx={{
+          width: width,
+          height: height,
+          padding: `${chartsTheme.container.padding.default}px`,
+        }}
+        option={option}
+        theme={chartsTheme.echartsTheme}
+      />
+    ),
+    [chartsTheme.container.padding.default, chartsTheme.echartsTheme, height, option, width]
   );
+
+  return <>{chart}</>;
 }
