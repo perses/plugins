@@ -30,6 +30,12 @@ export function Options(props: OptionsProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
+  const customButtonStyle = {
+    fontSize: '12px',
+    padding: '2px 6px',
+    minWidth: 'auto',
+  };
+
   const handleChangeColorShemeClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -56,7 +62,7 @@ export function Options(props: OptionsProps): ReactElement {
     <Stack spacing="10px" direction="row" justifyContent="center" alignItems="center">
       <InfoTooltip description={TOOLTIP_TEXT.resetFlameGraph}>
         <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={onClick}>
-          <RefreshIcon />
+          <RefreshIcon fontSize="small" />
         </ToolbarIconButton>
       </InfoTooltip>
       <Stack>
@@ -69,7 +75,7 @@ export function Options(props: OptionsProps): ReactElement {
             aria-expanded={open ? 'true' : undefined}
             onClick={handleChangeColorShemeClick}
           >
-            <PaletteIcon />
+            <PaletteIcon fontSize="small" />
           </ToolbarIconButton>
         </InfoTooltip>
         <Menu
@@ -118,6 +124,7 @@ export function Options(props: OptionsProps): ReactElement {
             color="secondary"
             size="small"
             onClick={() => setSelectedView('table')}
+            sx={customButtonStyle}
           >
             Table
           </Button>
@@ -128,6 +135,7 @@ export function Options(props: OptionsProps): ReactElement {
             color="secondary"
             size="small"
             onClick={() => setSelectedView('flame-graph')}
+            sx={customButtonStyle}
           >
             Flame Graph
           </Button>
@@ -138,6 +146,7 @@ export function Options(props: OptionsProps): ReactElement {
             color="secondary"
             size="small"
             onClick={() => setSelectedView('both')}
+            sx={customButtonStyle}
           >
             Both
           </Button>
@@ -145,7 +154,7 @@ export function Options(props: OptionsProps): ReactElement {
       </Stack>
       <InfoTooltip description={TOOLTIP_TEXT.exportData}>
         <ToolbarIconButton aria-label={TOOLTIP_TEXT.exportData}>
-          <ExportIcon />
+          <ExportIcon fontSize="small" />
         </ToolbarIconButton>
       </InfoTooltip>
     </Stack>
