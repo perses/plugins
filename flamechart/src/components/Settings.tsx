@@ -19,14 +19,18 @@ import { Stack, Button, useTheme, MenuItem, Menu, Fade } from '@mui/material';
 import { ToolbarIconButton, InfoTooltip } from '@perses-dev/components';
 import { TOOLTIP_TEXT } from '../utils/ui-text';
 
-export interface OptionsProps {
-  onClick: () => void;
+export interface SettingsProps {
+  changePalette: (newPalette: 'package-name' | 'value') => void;
+  resetFlameGraph: () => void;
+  showOnlyTable: () => void;
+  showOnlyFlameGraph: () => void;
+  showBoth: () => void;
 }
 
-export function Options(props: OptionsProps): ReactElement {
-  const { onClick } = props;
+export function Settings(props: SettingsProps): ReactElement {
+  const { resetFlameGraph, changePalette, showOnlyTable, showOnlyFlameGraph, showBoth } = props;
   const theme = useTheme();
-  const [selectedView, setSelectedView] = useState<'table' | 'flame-graph' | 'both'>('both');
+  const [selectedView, setSelectedView] = useState<'table' | 'flame-graph' | 'both' | 'none'>('none');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -41,17 +45,36 @@ export function Options(props: OptionsProps): ReactElement {
   };
 
   const handleByPackageNameClick = () => {
-    // set color scheme to package name
+    changePalette('package-name');
     handleClose();
   };
 
   const handleByValueClick = () => {
-    // set color scheme to value
+    changePalette('value');
     handleClose();
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleResetClick = () => {
+    resetFlameGraph();
+  };
+
+  const handleTableSelected = () => {
+    setSelectedView('table');
+    showOnlyTable();
+  };
+
+  const handleFlameGraphSelected = () => {
+    setSelectedView('flame-graph');
+    showOnlyFlameGraph();
+  };
+
+  const handleBothSelected = () => {
+    setSelectedView('both');
+    showBoth();
   };
 
   const isTableSelected = () => selectedView === 'table';
@@ -61,7 +84,7 @@ export function Options(props: OptionsProps): ReactElement {
   return (
     <Stack spacing="10px" direction="row" justifyContent="center" alignItems="center">
       <InfoTooltip description={TOOLTIP_TEXT.resetFlameGraph}>
-        <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={onClick}>
+        <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={handleResetClick} color="primary">
           <RefreshIcon fontSize="small" />
         </ToolbarIconButton>
       </InfoTooltip>
@@ -74,6 +97,7 @@ export function Options(props: OptionsProps): ReactElement {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
             onClick={handleChangeColorShemeClick}
+            color="primary"
           >
             <PaletteIcon fontSize="small" />
           </ToolbarIconButton>
@@ -121,9 +145,9 @@ export function Options(props: OptionsProps): ReactElement {
         <InfoTooltip description={TOOLTIP_TEXT.showTable}>
           <Button
             variant={isTableSelected() ? 'contained' : 'text'}
-            color="secondary"
+            color="primary"
             size="small"
-            onClick={() => setSelectedView('table')}
+            onClick={handleTableSelected}
             sx={customButtonStyle}
           >
             Table
@@ -132,9 +156,9 @@ export function Options(props: OptionsProps): ReactElement {
         <InfoTooltip description={TOOLTIP_TEXT.showFlameGraph}>
           <Button
             variant={isFlameGraphSelected() ? 'contained' : 'text'}
-            color="secondary"
+            color="primary"
             size="small"
-            onClick={() => setSelectedView('flame-graph')}
+            onClick={handleFlameGraphSelected}
             sx={customButtonStyle}
           >
             Flame Graph
@@ -143,9 +167,9 @@ export function Options(props: OptionsProps): ReactElement {
         <InfoTooltip description={TOOLTIP_TEXT.showBoth}>
           <Button
             variant={isBothSelected() ? 'contained' : 'text'}
-            color="secondary"
+            color="primary"
             size="small"
-            onClick={() => setSelectedView('both')}
+            onClick={handleBothSelected}
             sx={customButtonStyle}
           >
             Both
@@ -153,7 +177,7 @@ export function Options(props: OptionsProps): ReactElement {
         </InfoTooltip>
       </Stack>
       <InfoTooltip description={TOOLTIP_TEXT.exportData}>
-        <ToolbarIconButton aria-label={TOOLTIP_TEXT.exportData}>
+        <ToolbarIconButton aria-label={TOOLTIP_TEXT.exportData} color="primary">
           <ExportIcon fontSize="small" />
         </ToolbarIconButton>
       </InfoTooltip>

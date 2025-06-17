@@ -34,6 +34,8 @@ export interface FlameChartProps {
   width: number;
   height: number;
   data: ProfileData;
+  palette: 'package-name' | 'value';
+  resetGraph: boolean;
 }
 
 export interface Sample {
@@ -55,10 +57,9 @@ export interface Sample {
 }
 
 export function FlameChart(props: FlameChartProps): ReactElement {
-  const { width, height, data } = props;
+  const { width, height, data, palette, resetGraph } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
-  const palette = 'package-name';
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
@@ -161,9 +162,14 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   // update seriesData with the latest data
+  // todo: how to change the color palette when the flame graph is zommed in?
   useMemo(() => {
     setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
-  }, [data, palette]);
+    // handle resetGraph button click
+    if (resetGraph !== undefined) {
+      setIsBlockFocused(false);
+    }
+  }, [data, palette, resetGraph]);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;

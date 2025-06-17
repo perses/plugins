@@ -23,6 +23,10 @@ export interface FlameChartDefinition extends Definition<FlameChartOptions> {
 
 export interface FlameChartOptions {
   palette: 'package-name' | 'value';
+  showSettings: boolean;
+  showSeries: boolean;
+  showTable: boolean;
+  showFlameGraph: boolean;
 }
 
 export type FlameChartOptionsEditorProps = OptionsEditorProps<FlameChartOptions>;
@@ -30,5 +34,9 @@ export type FlameChartOptionsEditorProps = OptionsEditorProps<FlameChartOptions>
 export function createInitialFlameChartOptions(): FlameChartOptions {
   return {
     palette: 'package-name',
+    showSettings: true,
+    showSeries: true,
+    showTable: true,
+    showFlameGraph: true,
   };
 }
