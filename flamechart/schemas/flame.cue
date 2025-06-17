@@ -16,4 +16,8 @@ package model
 kind: "FlameChart"
 spec: close({
     palette: "package-name" | "value"
+    showSettings: bool
+    showSeries: bool
+    showTable: bool
+    showFlameGraph: bool
 })
