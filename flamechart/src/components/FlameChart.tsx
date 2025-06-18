@@ -17,19 +17,21 @@ import {
   CustomSeriesRenderItemParams,
   CustomSeriesRenderItemReturn,
 } from 'echarts';
-import { Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
-import { ReactElement, useState, useMemo, MouseEvent } from 'react';
+import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
+import { ReactElement, useState, useMemo, MouseEvent, useRef } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import { EChartsCoreOption } from 'echarts/core';
-import { recursionJson } from '../utils/data-transform';
+import { recursionJson, changeColors, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
+import { CustumBreadcrumb } from './CustumBreadcrumb';
 
 const ITEM_GAP = 2; // vertical gap between flame chart items
 const Y_MIN_SMALL = 6; // min value of y axis for small containers
 const Y_MIN_LARGE = 20; // min value of y axis for large containers
 const LARGE_CONTAINER_THRESHOLD = 600;
 const CONTAINER_PADDING = 10;
+const BREADCRUMB_SPACE = 50;
 
 export interface FlameChartProps {
   width: number;
@@ -69,6 +71,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     recursionJson(palette, data.metadata, data.profile.stackTrace)
   );
   const [isBlockFocused, setIsBlockFocused] = useState(false);
+  const paletteRef = useRef(palette);
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
@@ -165,10 +168,15 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   // update seriesData with the latest data
   // todo: how to change the color palette when the flame graph is zommed in?
   useMemo(() => {
-    setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
-    // handle resetGraph button click
-    if (resetGraph !== undefined) {
-      setIsBlockFocused(false);
+    if (paletteRef.current !== palette) {
+      setSeriesData(changeColors(palette, seriesData));
+      paletteRef.current = palette;
+    } else {
+      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
+      // handle resetGraph button click
+      if (resetGraph !== undefined) {
+        setIsBlockFocused(false);
+      }
     }
   }, [data, palette, resetGraph]);
 
@@ -219,7 +227,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       grid: {
         left: 5,
         right: 5,
-        top: padding,
+        top: padding + 5,
         bottom: padding,
       },
       series: [
@@ -239,17 +247,25 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   }, [data, chartsTheme, theme, width, seriesData, height]);
 
   return (
-    <Box
+    <Stack
       style={{
         width: width,
         height: height,
       }}
-      sx={{ padding: '10px 0' }}
+      alignItems="center"
+      sx={{ paddingTop: '20px', paddingBottom: '10px' }}
     >
+      <CustumBreadcrumb
+        totalValue={seriesData[0]?.value[3] || ''} // name of the total function
+        totalSample={seriesData[0]?.value[8] || 0} // total sample of the total function
+        otherItemSample={findTotalSampleByName(seriesData, selectedId)} // total sample of the selected function
+        isBlockFocused={isBlockFocused}
+        resetFlameGraph={handleResetGraph}
+      />
       <EChart
         sx={{
           width: width,
-          height: height - 2 * CONTAINER_PADDING,
+          height: height - 2 * CONTAINER_PADDING - BREADCRUMB_SPACE,
         }}
         option={option} // even data is in this prop
         theme={chartsTheme.echartsTheme}
@@ -291,6 +307,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         </MenuItem>
         <MenuItem onClick={handleResetGraph}>Reset graph</MenuItem>
       </Menu>
-    </Box>
+    </Stack>
   );
 }
