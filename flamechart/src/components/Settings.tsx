@@ -11,15 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useMemo } from 'react';
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import PaletteIcon from 'mdi-material-ui/Palette';
 import ExportIcon from 'mdi-material-ui/Export';
 import { Stack, Button, useTheme, MenuItem, Menu, Fade } from '@mui/material';
 import { ToolbarIconButton, InfoTooltip } from '@perses-dev/components';
 import { TOOLTIP_TEXT } from '../utils/ui-text';
+import { FlameChartOptions } from '../flame-chart-model';
 
 export interface SettingsProps {
+  value: FlameChartOptions;
+  isZoomEnabled: boolean;
   changePalette: (newPalette: 'package-name' | 'value') => void;
   resetFlameGraph: () => void;
   showOnlyTable: () => void;
@@ -28,7 +31,7 @@ export interface SettingsProps {
 }
 
 export function Settings(props: SettingsProps): ReactElement {
-  const { resetFlameGraph, changePalette, showOnlyTable, showOnlyFlameGraph, showBoth } = props;
+  const { value, isZoomEnabled, resetFlameGraph, changePalette, showOnlyTable, showOnlyFlameGraph, showBoth } = props;
   const theme = useTheme();
   const [selectedView, setSelectedView] = useState<'table' | 'flame-graph' | 'both' | 'none'>('none');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -63,17 +66,14 @@ export function Settings(props: SettingsProps): ReactElement {
   };
 
   const handleTableSelected = () => {
-    setSelectedView('table');
     showOnlyTable();
   };
 
   const handleFlameGraphSelected = () => {
-    setSelectedView('flame-graph');
     showOnlyFlameGraph();
   };
 
   const handleBothSelected = () => {
-    setSelectedView('both');
     showBoth();
   };
 
@@ -81,13 +81,28 @@ export function Settings(props: SettingsProps): ReactElement {
   const isFlameGraphSelected = () => selectedView === 'flame-graph';
   const isBothSelected = () => selectedView === 'both';
 
+  // Update selected view based on the value of showTable and showFlameGraph
+  useMemo(() => {
+    if (!value.showTable && !value.showFlameGraph) {
+      setSelectedView('none');
+    } else if (value.showTable && value.showFlameGraph) {
+      setSelectedView('both');
+    } else if (value.showTable) {
+      setSelectedView('table');
+    } else {
+      setSelectedView('flame-graph');
+    }
+  }, [value.showTable, value.showFlameGraph]);
+
   return (
     <Stack spacing="10px" direction="row" justifyContent="center" alignItems="center">
-      <InfoTooltip description={TOOLTIP_TEXT.resetFlameGraph}>
-        <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={handleResetClick} color="primary">
-          <RefreshIcon fontSize="small" />
-        </ToolbarIconButton>
-      </InfoTooltip>
+      {isZoomEnabled && (
+        <InfoTooltip description={TOOLTIP_TEXT.resetFlameGraph}>
+          <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={handleResetClick} color="primary">
+            <RefreshIcon fontSize="small" />
+          </ToolbarIconButton>
+        </InfoTooltip>
+      )}
       <Stack>
         <InfoTooltip description={TOOLTIP_TEXT.changeColorSheme}>
           <ToolbarIconButton
@@ -130,8 +145,12 @@ export function Settings(props: SettingsProps): ReactElement {
             },
           }}
         >
-          <MenuItem onClick={handleByPackageNameClick}>By package name</MenuItem>
-          <MenuItem onClick={handleByValueClick}>By value</MenuItem>
+          <MenuItem onClick={handleByPackageNameClick} selected={value.palette === 'package-name'}>
+            By package name
+          </MenuItem>
+          <MenuItem onClick={handleByValueClick} selected={value.palette === 'value'}>
+            By value
+          </MenuItem>
         </Menu>
       </Stack>
       <Stack
