@@ -34,7 +34,7 @@ export function filterJson(json: StackTrace, id?: number): StackTrace {
       if (temp) {
         item.children = [temp];
 
-        // change the parents' values (todo : verify this)
+        // change the parents' values
         item.start = temp.start;
         item.end = temp.end;
         // item.self = temp.self;
@@ -54,6 +54,29 @@ function formatName(item: StackTrace, rootVal: number, unit: string | undefined)
 }
 
 /**
+ * Search the total value of an item corresponding to a given ID
+ */
+function getCurrentTotalValue(json: StackTrace, id: number | undefined): number {
+  if (id === undefined) return 0;
+
+  const recur = (item: StackTrace): number => {
+    if (item.id === id) {
+      return item.total;
+    }
+
+    for (const child of item.children || []) {
+      const total = recur(child);
+      if (total !== undefined) {
+        return total;
+      }
+    }
+    return 0; // If not found, return 0
+  };
+
+  return recur(json);
+}
+
+/**
  * Build series data for the flame chart option
  */
 export function recursionJson(
@@ -66,6 +89,7 @@ export function recursionJson(
   const filteredJson = filterJson(structuredClone(jsonObj), id);
 
   const rootVal = filteredJson.total; // total samples of root node
+  const currentVal = getCurrentTotalValue(filteredJson, id); // total samples of the selected item, used to generate items colors
 
   const recur = (item: StackTrace): void => {
     const temp = {
@@ -74,7 +98,7 @@ export function recursionJson(
         item.level,
         item.start,
         item.end,
-        formatName(item, rootVal, metadata?.units),
+        formatName(item, currentVal ? currentVal : rootVal, metadata?.units),
         (item.total / rootVal) * 100,
         (item.self / rootVal) * 100,
         item.name,
@@ -82,7 +106,7 @@ export function recursionJson(
         item.total,
       ],
       itemStyle: {
-        color: getSpanColor(palette, item.name, (item.total / rootVal) * 100),
+        color: getSpanColor(palette, item.name, (item.total / (currentVal ? currentVal : rootVal)) * 100),
       },
     };
     data.push(temp as Sample);
@@ -92,7 +116,31 @@ export function recursionJson(
     }
   };
 
-  // check is filteredJson is not empty before call recur
+  // check if filteredJson is not empty before call recur
   if (filteredJson.id !== undefined) recur(filteredJson);
   return data;
+}
+
+/**
+ * Update only series data colors to align with the new palette.
+ */
+export function changeColors(palette: string, seriesData: Sample[]): Sample[] {
+  return seriesData.map((item) => ({
+    ...item,
+    itemStyle: {
+      // values[6] = function name
+      // values[4] = total percentage
+      color: getSpanColor(palette, item.value[6], item.value[4]),
+    },
+  }));
+}
+
+/**
+ * Finds the total sample value of the series data item with the specified name.
+ */
+export function findTotalSampleByName(seriesData: Sample[], name: number | undefined): number {
+  if (name == undefined) return 0;
+  const item = seriesData.find((item) => item.name === name);
+  const totalSample = item?.value[8];
+  return Number(totalSample);
 }
