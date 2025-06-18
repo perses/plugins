@@ -14,7 +14,7 @@
 import { ReactElement } from 'react';
 import { Stack, Breadcrumbs } from '@mui/material';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import EyeIcon from 'mdi-material-ui/Eye';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
 import CloseIcon from 'mdi-material-ui/Close';
 import Chip from '@mui/material/Chip';
 import { emphasize, styled } from '@mui/material/styles';
@@ -65,7 +65,7 @@ export function CustumBreadcrumb(props: CustumBreadcrumbProps): ReactElement {
         {isBlockFocused && (
           <StyledBreadcrumb
             label={((otherItemSample / totalSample) * 100).toFixed(2) + '% of total'}
-            icon={<EyeIcon fontSize="small" />}
+            icon={<EyeIcon fontSize="small" color="secondary" />}
             deleteIcon={<CloseIcon fontSize="small" />}
             onDelete={handleClick}
           />

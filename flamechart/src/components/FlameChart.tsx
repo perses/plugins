@@ -21,6 +21,9 @@ import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
 import { ReactElement, useState, useMemo, MouseEvent, useRef } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
+import RefreshIcon from 'mdi-material-ui/Refresh';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
 import { recursionJson, changeColors, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
@@ -312,11 +315,18 @@ export function FlameChart(props: FlameChartProps): ReactElement {
           {menuTitle}
         </Box>
         <Divider sx={{ backgroundColor: theme.palette.divider }} />
-        <MenuItem onClick={handleFocusBlock}>Focus block</MenuItem>
+        <MenuItem onClick={handleFocusBlock}>
+          <EyeIcon fontSize="small" color="secondary" sx={{ marginRight: '10px' }} />
+          Focus block
+        </MenuItem>
         <MenuItem onClick={handleCopyFunctionName} disabled={isCopied}>
+          <ContentCopyIcon fontSize="small" color="secondary" sx={{ marginRight: '10px' }} />
           {isCopied ? 'Copied' : 'Copy function name'}
         </MenuItem>
-        <MenuItem onClick={handleResetGraph}>Reset graph</MenuItem>
+        <MenuItem onClick={handleResetGraph}>
+          <RefreshIcon fontSize="small" color="secondary" sx={{ marginRight: '10px' }} />
+          Reset graph
+        </MenuItem>
       </Menu>
     </Stack>
   );
