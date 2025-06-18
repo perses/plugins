@@ -39,6 +39,7 @@ export interface FlameChartProps {
   data: ProfileData;
   palette: 'package-name' | 'value';
   resetGraph: boolean;
+  changeResetGraph: (newVal: boolean) => void;
 }
 
 export interface Sample {
@@ -60,7 +61,7 @@ export interface Sample {
 }
 
 export function FlameChart(props: FlameChartProps): ReactElement {
-  const { width, height, data, palette, resetGraph } = props;
+  const { width, height, data, palette, resetGraph, changeResetGraph } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
@@ -71,7 +72,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     recursionJson(palette, data.metadata, data.profile.stackTrace)
   );
   const [isBlockFocused, setIsBlockFocused] = useState(false);
+
   const paletteRef = useRef(palette);
+  const dataRef = useRef(data);
+  const resetGraphRef = useRef(resetGraph);
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
@@ -107,7 +111,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const handleResetGraph = (): void => {
     if (isBlockFocused) {
-      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
       setIsBlockFocused(false);
     }
     handleClose();
@@ -165,20 +168,28 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     } as CustomSeriesRenderItemReturn;
   };
 
+  // Display/Hide Reset Graph button
+  useMemo(() => {
+    changeResetGraph(isBlockFocused);
+  }, [isBlockFocused, changeResetGraph]);
+
   // update seriesData with the latest data
-  // todo: how to change the color palette when the flame graph is zommed in?
   useMemo(() => {
     if (paletteRef.current !== palette) {
       setSeriesData(changeColors(palette, seriesData));
       paletteRef.current = palette;
-    } else {
+    } else if (dataRef.current !== data) {
       setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
-      // handle resetGraph button click
-      if (resetGraph !== undefined) {
+      dataRef.current = data;
+      setIsBlockFocused(false);
+    } else if (resetGraphRef.current !== resetGraph) {
+      if (!resetGraph) {
+        setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
         setIsBlockFocused(false);
       }
+      resetGraphRef.current = resetGraph;
     }
-  }, [data, palette, resetGraph]);
+  }, [data, palette, resetGraph, seriesData]);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
