@@ -14,7 +14,6 @@
 import { ReactElement, useState, useMemo } from 'react';
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import PaletteIcon from 'mdi-material-ui/Palette';
-import ExportIcon from 'mdi-material-ui/Export';
 import { Stack, Button, useTheme, MenuItem, Menu, Fade } from '@mui/material';
 import { ToolbarIconButton, InfoTooltip } from '@perses-dev/components';
 import { TOOLTIP_TEXT } from '../utils/ui-text';
@@ -195,11 +194,6 @@ export function Settings(props: SettingsProps): ReactElement {
           </Button>
         </InfoTooltip>
       </Stack>
-      <InfoTooltip description={TOOLTIP_TEXT.exportData}>
-        <ToolbarIconButton aria-label={TOOLTIP_TEXT.exportData} color="primary">
-          <ExportIcon fontSize="small" />
-        </ToolbarIconButton>
-      </InfoTooltip>
     </Stack>
   );
 }
