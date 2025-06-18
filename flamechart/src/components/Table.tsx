@@ -25,7 +25,7 @@ export function Table(props: TableProps): ReactElement {
   const { width, height } = props;
 
   return (
-    <Stack width={width - 10} height={height - 10} sx={{ paddingTop: '10px' }}>
+    <Stack width={width - 10} height={height - 10} sx={{ paddingTop: '20px' }}>
       <Stack width="100%" height="100%" justifyContent="center" alignItems="center" sx={{ backgroundColor: 'gray' }}>
         Table View
       </Stack>
