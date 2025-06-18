@@ -29,6 +29,7 @@ const ITEM_GAP = 2; // vertical gap between flame chart items
 const Y_MIN_SMALL = 6; // min value of y axis for small containers
 const Y_MIN_LARGE = 20; // min value of y axis for large containers
 const LARGE_CONTAINER_THRESHOLD = 600;
+const CONTAINER_PADDING = 10;
 
 export interface FlameChartProps {
   width: number;
@@ -181,6 +182,9 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     const xAxisMin = totalStart;
     const xAxisMax = totalEnd;
 
+    // compute flame chart padding top and bottom
+    const padding = (height / (yAxisMax - 1) - ITEM_GAP) / 2 + 1;
+
     const option = {
       tooltip: {
         appendToBody: true,
@@ -215,8 +219,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       grid: {
         left: 5,
         right: 5,
-        top: 20,
-        bottom: 20,
+        top: padding,
+        bottom: padding,
       },
       series: [
         {
@@ -240,11 +244,12 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         width: width,
         height: height,
       }}
+      sx={{ padding: '10px 0' }}
     >
       <EChart
         sx={{
           width: width,
-          height: height,
+          height: height - 2 * CONTAINER_PADDING,
         }}
         option={option} // even data is in this prop
         theme={chartsTheme.echartsTheme}

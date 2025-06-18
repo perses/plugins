@@ -42,7 +42,6 @@ export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorPr
           <PaletteSelector value={value.palette} onChange={handlePaletteChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
-
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Panels to display">
           <SwitchSelector label="Show Options" value={value.showSettings} onChange={handleShowSettingsChange} />
@@ -51,7 +50,6 @@ export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorPr
           <SwitchSelector label="Show Flame Graph" value={value.showFlameGraph} onChange={handleShowFlameGraphChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
-
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Reset Settings">
           <Button variant="outlined" color="secondary" onClick={() => resetSettings(props)}>
