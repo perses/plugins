@@ -155,7 +155,7 @@ export function Settings(props: SettingsProps): ReactElement {
       <Stack
         direction="row"
         sx={{
-          border: `1px solid ${theme.palette.action.disabled}`,
+          border: `1px solid ${theme.palette.primary.main}`,
           borderRadius: `${theme.shape.borderRadius}px`,
           padding: '2px',
         }}
