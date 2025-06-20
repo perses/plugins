@@ -1,0 +1,6 @@
+{
+  "kind": "PyroscopeDatasource",
+  "spec": {
+    "directUrl": "http://localhost:4040"
+  }
+}
