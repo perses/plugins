@@ -21,5 +21,6 @@ import (
 kind: "TempoTraceQuery"
 spec: close({
 	tempoDs.#selector
-	query: strings.MinRunes(1)
+	query:  strings.MinRunes(1)
+	limit?: number
 })
