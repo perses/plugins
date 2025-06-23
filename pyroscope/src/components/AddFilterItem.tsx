@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Button } from '@mui/material';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { ToolbarIconButton } from '@perses-dev/components';
 
 export interface AddFilterItemProps {
   onClick: () => void;
@@ -22,17 +23,8 @@ export function AddFilterItem(props: AddFilterItemProps): ReactElement {
   const { onClick } = props;
 
   return (
-    <Button
-      sx={{
-        width: '40px',
-        minWidth: 'unset', // Disable the default minWidth
-        fontSize: '1.3rem',
-      }}
-      variant="outlined"
-      color="secondary"
-      onClick={onClick}
-    >
-      +
-    </Button>
+    <ToolbarIconButton aria-label="add filter" onClick={onClick}>
+      <PlusIcon />
+    </ToolbarIconButton>
   );
 }

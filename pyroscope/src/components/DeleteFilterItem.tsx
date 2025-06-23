@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Button } from '@mui/material';
+import CloseIcon from 'mdi-material-ui/Close';
+import { ToolbarIconButton } from '@perses-dev/components';
 
 export interface DeleteFilterItemProps {
   onClick: () => void;
@@ -22,18 +23,15 @@ export function DeleteFilterItem(props: DeleteFilterItemProps): ReactElement {
   const { onClick } = props;
 
   return (
-    <Button
+    <ToolbarIconButton
       sx={{
-        width: '40px',
-        minWidth: 'unset', // Disable the default minWidth
         borderTopLeftRadius: '0',
         borderBottomLeftRadius: '0',
       }}
-      variant="outlined"
-      color="secondary"
+      aria-label="delete filter"
       onClick={onClick}
     >
-      ✖
-    </Button>
+      <CloseIcon />
+    </ToolbarIconButton>
   );
 }

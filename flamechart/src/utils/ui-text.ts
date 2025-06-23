@@ -11,13 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
-
-kind: "FlameChart"
-spec: close({
-    palette: "package-name" | "value"
-    showSettings: bool
-    showSeries: bool
-    showTable: bool
-    showFlameGraph: bool
-})
+export const TOOLTIP_TEXT = {
+  resetFlameGraph: 'Reset graph',
+  changeColorSheme: 'Change color sheme',
+  exportData: 'Export profile data',
+  showTable: 'Only show table',
+  showFlameGraph: 'Only show flame graph',
+  showBoth: 'Show both the table and flame graph',
+};

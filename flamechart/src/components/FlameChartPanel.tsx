@@ -14,16 +14,28 @@
 import { TitleComponentOption } from 'echarts';
 import { useChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
-import { FC } from 'react';
+import { FC, useState, useMemo } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { FlameChartOptions } from '../flame-chart-model';
 import { FlameChart } from './FlameChart';
+import { Settings } from './Settings';
+import { Table } from './Table';
 
 export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 
 export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
-  const { contentDimensions, queryResults } = props;
+  const { contentDimensions, queryResults, spec } = props;
+
+  // This spec is used to manage settings temporarily
+  const [liveSpec, setLiveSpec] = useState<FlameChartOptions>(spec);
+
+  // keep liveSpec up to date
+  useMemo(() => {
+    setLiveSpec(spec);
+  }, [spec]);
+
+  const [resetGraph, setResetGraph] = useState(false);
 
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
@@ -32,12 +44,72 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
+  const changePalette = (newPalette: 'package-name' | 'value') => {
+    setLiveSpec((prev) => {
+      const newSpec = {
+        palette: newPalette,
+        showSettings: prev.showSettings,
+        showSeries: prev.showSeries,
+        showTable: prev.showTable,
+        showFlameGraph: prev.showFlameGraph,
+      };
+
+      return newSpec;
+    });
+  };
+
+  const showOnlyTable = () => {
+    setLiveSpec((prev) => {
+      const newSpec = {
+        palette: prev.palette,
+        showSettings: prev.showSettings,
+        showSeries: prev.showSeries,
+        showTable: true,
+        showFlameGraph: false,
+      };
+
+      return newSpec;
+    });
+  };
+
+  const showOnlyFlameGraph = () => {
+    setLiveSpec((prev) => {
+      const newSpec = {
+        palette: prev.palette,
+        showSettings: prev.showSettings,
+        showSeries: prev.showSeries,
+        showTable: false,
+        showFlameGraph: true,
+      };
+
+      return newSpec;
+    });
+  };
+
+  const showBothTableAndFlameGraph = () => {
+    setLiveSpec((prev) => {
+      const newSpec = {
+        palette: prev.palette,
+        showSettings: prev.showSettings,
+        showSeries: prev.showSeries,
+        showTable: true,
+        showFlameGraph: true,
+      };
+
+      return newSpec;
+    });
+  };
+
+  const changeResetGraph = (newVal: boolean) => {
+    setResetGraph(newVal);
+  };
+
+  const OPTIONS_SPACE = liveSpec.showSettings ? 35 : 0; // space for options at the top of the chart
+
   return (
     <Stack
       height={contentDimensions.height}
       width={contentDimensions.width}
-      spacing="2px"
-      direction="row"
       justifyContent="center"
       alignItems="center"
     >
@@ -48,7 +120,38 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
         </Typography>
       ) : flameChartData ? (
         // Convert the server response into the opentelemetry format
-        <FlameChart width={contentDimensions.width} height={contentDimensions.height} data={flameChartData.data} />
+        <Stack sx={{ paddingTop: '10px' }}>
+          {liveSpec.showSettings && (
+            <Settings
+              resetFlameGraph={() => changeResetGraph(false)}
+              changePalette={changePalette}
+              showOnlyTable={showOnlyTable}
+              showOnlyFlameGraph={showOnlyFlameGraph}
+              showBoth={showBothTableAndFlameGraph}
+              value={liveSpec}
+              isZoomEnabled={resetGraph}
+            />
+          )}
+          <Stack direction="row" justifyContent="center" alignItems="top">
+            {liveSpec.showTable && (
+              <Table
+                width={liveSpec.showFlameGraph ? (1 / 3) * contentDimensions.width : contentDimensions.width}
+                height={contentDimensions.height - OPTIONS_SPACE}
+                data={flameChartData.data}
+              />
+            )}
+            {liveSpec.showFlameGraph && (
+              <FlameChart
+                width={liveSpec.showTable ? (2 / 3) * contentDimensions.width : contentDimensions.width}
+                height={contentDimensions.height - OPTIONS_SPACE}
+                data={flameChartData.data}
+                palette={liveSpec.palette}
+                resetGraph={resetGraph}
+                changeResetGraph={changeResetGraph}
+              />
+            )}
+          </Stack>
+        </Stack>
       ) : (
         <Typography sx={{ ...noDataTextStyle }}>No data</Typography>
       )}

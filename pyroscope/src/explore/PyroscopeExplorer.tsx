@@ -23,6 +23,14 @@ interface ProfilesExplorerQueryParams {
 }
 
 function FlameGraphPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
+  const initialSpec = {
+    palette: 'package-name',
+    showSettings: true,
+    showSeries: true,
+    showTable: true,
+    showFlameGraph: true,
+  };
+
   return (
     <Panel
       panelOptions={{
@@ -30,7 +38,7 @@ function FlameGraphPanel({ queries }: { queries: QueryDefinition[] }): ReactElem
       }}
       definition={{
         kind: 'Panel',
-        spec: { queries, display: { name: '' }, plugin: { kind: 'FlameChart', spec: {} } },
+        spec: { queries, display: { name: '' }, plugin: { kind: 'FlameChart', spec: initialSpec } },
       }}
     />
   );
@@ -60,7 +68,7 @@ export function PyroscopeExplorer(): ReactElement {
         queries={queries}
       />
       <DataQueriesProvider definitions={definitions}>
-        <Box height={700}>
+        <Box height={735}>
           <FlameGraphPanel queries={queries} />
         </Box>
       </DataQueriesProvider>

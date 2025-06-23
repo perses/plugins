@@ -17,23 +17,32 @@ import {
   CustomSeriesRenderItemParams,
   CustomSeriesRenderItemReturn,
 } from 'echarts';
-import { Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
-import { ReactElement, useState, useMemo, MouseEvent } from 'react';
+import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
+import { ReactElement, useState, useMemo, MouseEvent, useRef } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
+import RefreshIcon from 'mdi-material-ui/Refresh';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
-import { recursionJson } from '../utils/data-transform';
+import { recursionJson, changeColors, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
+import { CustumBreadcrumb } from './CustumBreadcrumb';
 
 const ITEM_GAP = 2; // vertical gap between flame chart items
 const Y_MIN_SMALL = 6; // min value of y axis for small containers
 const Y_MIN_LARGE = 20; // min value of y axis for large containers
 const LARGE_CONTAINER_THRESHOLD = 600;
+const CONTAINER_PADDING = 10;
+const BREADCRUMB_SPACE = 50;
 
 export interface FlameChartProps {
   width: number;
   height: number;
   data: ProfileData;
+  palette: 'package-name' | 'value';
+  resetGraph: boolean;
+  changeResetGraph: (newVal: boolean) => void;
 }
 
 export interface Sample {
@@ -55,10 +64,9 @@ export interface Sample {
 }
 
 export function FlameChart(props: FlameChartProps): ReactElement {
-  const { width, height, data } = props;
+  const { width, height, data, palette, resetGraph, changeResetGraph } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
-  const palette = 'package-name';
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [menuTitle, setMenuTitle] = useState('');
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
@@ -67,6 +75,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     recursionJson(palette, data.metadata, data.profile.stackTrace)
   );
   const [isBlockFocused, setIsBlockFocused] = useState(false);
+
+  const paletteRef = useRef(palette);
+  const dataRef = useRef(data);
+  const resetGraphRef = useRef(resetGraph);
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
@@ -102,7 +114,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const handleResetGraph = (): void => {
     if (isBlockFocused) {
-      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
       setIsBlockFocused(false);
     }
     handleClose();
@@ -160,10 +171,28 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     } as CustomSeriesRenderItemReturn;
   };
 
+  // Display/Hide Reset Graph button
+  useMemo(() => {
+    changeResetGraph(isBlockFocused);
+  }, [isBlockFocused, changeResetGraph]);
+
   // update seriesData with the latest data
   useMemo(() => {
-    setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
-  }, [data, palette]);
+    if (paletteRef.current !== palette) {
+      setSeriesData(changeColors(palette, seriesData));
+      paletteRef.current = palette;
+    } else if (dataRef.current !== data) {
+      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
+      dataRef.current = data;
+      setIsBlockFocused(false);
+    } else if (resetGraphRef.current !== resetGraph) {
+      if (!resetGraph) {
+        setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
+        setIsBlockFocused(false);
+      }
+      resetGraphRef.current = resetGraph;
+    }
+  }, [data, palette, resetGraph, seriesData]);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
@@ -174,6 +203,9 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     const totalEnd = seriesData[0]?.value[2]; // end value of the total function
     const xAxisMin = totalStart;
     const xAxisMax = totalEnd;
+
+    // compute flame chart padding top and bottom
+    const padding = (height / (yAxisMax - 1) - ITEM_GAP) / 2 + 1;
 
     const option = {
       tooltip: {
@@ -209,8 +241,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       grid: {
         left: 5,
         right: 5,
-        top: 20,
-        bottom: 20,
+        top: padding + 5,
+        bottom: padding,
       },
       series: [
         {
@@ -236,7 +268,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       <EChart
         sx={{
           width: width,
-          height: height,
+          height: height - 2 * CONTAINER_PADDING - BREADCRUMB_SPACE,
         }}
         option={option} // even data is in this prop
         theme={chartsTheme.echartsTheme}
@@ -249,12 +281,21 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   );
 
   return (
-    <Box
+    <Stack
       style={{
         width: width,
         height: height,
       }}
+      alignItems="center"
+      sx={{ paddingTop: '20px', paddingBottom: '10px' }}
     >
+      <CustumBreadcrumb
+        totalValue={seriesData[0]?.value[3] || ''} // name of the total function
+        totalSample={seriesData[0]?.value[8] || 0} // total sample of the total function
+        otherItemSample={findTotalSampleByName(seriesData, selectedId)} // total sample of the selected function
+        isBlockFocused={isBlockFocused}
+        resetFlameGraph={handleResetGraph}
+      />
       {flameChart}
       <Menu
         sx={{
@@ -284,12 +325,19 @@ export function FlameChart(props: FlameChartProps): ReactElement {
           {menuTitle}
         </Box>
         <Divider sx={{ backgroundColor: theme.palette.divider }} />
-        <MenuItem onClick={handleFocusBlock}>Focus block</MenuItem>
+        <MenuItem onClick={handleFocusBlock}>
+          <EyeIcon fontSize="small" color="secondary" sx={{ marginRight: '10px' }} />
+          Focus block
+        </MenuItem>
         <MenuItem onClick={handleCopyFunctionName} disabled={isCopied}>
+          <ContentCopyIcon fontSize="small" color="secondary" sx={{ marginRight: '10px' }} />
           {isCopied ? 'Copied' : 'Copy function name'}
         </MenuItem>
-        <MenuItem onClick={handleResetGraph}>Reset graph</MenuItem>
+        <MenuItem onClick={handleResetGraph}>
+          <RefreshIcon fontSize="small" color="secondary" sx={{ marginRight: '10px' }} />
+          Reset graph
+        </MenuItem>
       </Menu>
-    </Box>
+    </Stack>
   );
 }
