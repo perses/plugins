@@ -46,7 +46,6 @@ export interface LabelFilterInputProps {
   onDelete: () => void;
 }
 
-// TODO: fix when a filter is deleted => refresh data
 export function LabelFilterInput({
   datasource,
   value,
@@ -223,10 +222,12 @@ export function RawFilterInput({
             />
           );
         }}
-        onChange={(_, newValue) => {
-          if (typeof newValue === 'string') {
+        onInputChange={(_, newValue) => {
+          if (value.operator === '=' || value.operator === '!=') {
             onChange({ label: value.label, labelValues: [newValue], operator: value.operator });
           }
+        }}
+        onChange={(_, newValue) => {
           if (Array.isArray(newValue)) {
             onChange({ label: value.label, labelValues: newValue, operator: value.operator });
           }
