@@ -37,56 +37,26 @@ describe('FilterInputs', () => {
     );
   };
 
-  it('should set the label name with button confirmation', async () => {
+  it('should set the label name and label value', async () => {
     const onChange = jest.fn();
     renderInputs({ onChange });
 
-    const input = screen.getByRole('combobox', { name: 'Label Name' });
-    expect(input).toBeInTheDocument();
+    const nameInput = screen.getByRole('combobox', { name: 'Label Name' });
+    expect(nameInput).toBeInTheDocument();
     act(() => {
-      fireEvent.change(input, { target: { value: 'Test' } });
-    });
-
-    expect(onChange).not.toHaveBeenCalled();
-
-    const validateLabelButton = screen.getByRole('button', { name: 'validate label name' });
-    act(() => {
-      fireEvent.click(validateLabelButton);
-    });
-    expect(onChange).toHaveBeenCalledWith({ label: 'Test', labelValues: [], operator: '=~' });
-  });
-
-  it('should set the label name with key press Enter', async () => {
-    const onChange = jest.fn();
-    renderInputs({ onChange });
-
-    const input = screen.getByRole('combobox', { name: 'Label Name' });
-    expect(input).toBeInTheDocument();
-    act(() => {
-      fireEvent.change(input, { target: { value: 'Test' } });
-    });
-
-    expect(onChange).not.toHaveBeenCalled();
-
-    act(() => {
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+      fireEvent.change(nameInput, { target: { value: 'Test' } });
     });
 
     expect(onChange).toHaveBeenCalledWith({ label: 'Test', labelValues: [], operator: '=~' });
-  });
 
-  it('should set the label values', async () => {
-    const onChange = jest.fn();
-    renderInputs({ value: { label: 'MySuperLabel', labelValues: ['test1'], operator: '=~' }, onChange });
-
-    const input = screen.getByRole('combobox', { name: 'MySuperLabel' });
-    expect(input).toBeInTheDocument();
-
+    const valueInput = screen.getByRole('combobox', { name: 'Label Values' });
+    expect(valueInput).toBeInTheDocument();
     act(() => {
-      fireEvent.change(input, { target: { value: 'test2' } });
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+      fireEvent.change(valueInput, { target: { value: 'test1' } });
+      fireEvent.keyDown(valueInput, { key: 'Enter', code: 'Enter', charCode: 13 });
     });
 
-    expect(onChange).toHaveBeenCalledWith({ label: 'MySuperLabel', labelValues: ['test1', 'test2'], operator: '=~' });
+    // empty label because onChange is mocked, previous changes is not applied
+    expect(onChange).toHaveBeenCalledWith({ label: '', labelValues: ['test1'], operator: '=~' });
   });
 });

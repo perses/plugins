@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, FormControl, InputLabel, Stack, StackProps } from '@mui/material';
+import { Button, FormControl, Stack, StackProps } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import {
   DatasourceSelect,
@@ -49,13 +49,14 @@ export function FinderFilters({
 
   return (
     <Stack {...props} direction="row" alignItems="center" flexWrap="wrap" gap={1} sx={{ width: '100%' }}>
-      <FormControl>
-        <InputLabel>Prometheus Datasource</InputLabel>
+      <FormControl sx={{ width: 250 }}>
         <DatasourceSelect
+          size="medium"
           datasourcePluginKind={PROM_DATASOURCE_KIND}
           value={datasource}
           onChange={handleDatasourceChange}
           label="Prometheus Datasource"
+          fullWidth={true}
         />
       </FormControl>
       {filters.map((filter, index) => (
@@ -80,7 +81,7 @@ export function FinderFilters({
         startIcon={<PlusIcon />}
         aria-label="add filter"
         onClick={() => {
-          onFiltersChange([...filters, { label: '', labelValues: [], operator: '=~' }]);
+          onFiltersChange([...filters, { label: '', labelValues: [''], operator: '=' }]);
         }}
       >
         Add filter
