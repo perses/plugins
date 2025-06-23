@@ -23,4 +23,7 @@ spec: close({
 	min?:        number
 	max?:        number & >= min
 	thresholds?: common.#thresholds
+	exponential?: close({
+        base: number & > 0
+    })
 })

@@ -13,11 +13,17 @@
 
 import { ReactElement, useMemo } from 'react';
 import { FormatOptions, BucketTuple, ThresholdOptions } from '@perses-dev/core';
-import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
+import { EChart, getFormattedAxis, PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
 import { getColorFromThresholds } from '../utils';
+import {
+  convertLinearToExponentialBuckets,
+  Exponential,
+  ExponentialBase,
+  generateExponentialBucketsWithOffset,
+} from './exponential-utils';
 
 use([CustomChart]);
 
@@ -33,7 +39,14 @@ export interface HistogramChartProps {
   min?: number;
   max?: number;
   thresholds?: ThresholdOptions;
-  // TODO: exponential?: boolean;
+  exponential?: Exponential;
+}
+
+export interface TransformedHistogramData {
+  value: number[];
+  itemStyle: {
+    color: string | null;
+  };
 }
 
 export function HistogramChart({
@@ -44,11 +57,16 @@ export function HistogramChart({
   min,
   max,
   thresholds,
+  exponential,
 }: HistogramChartProps): ReactElement | null {
   const chartsTheme = useChartsTheme();
 
-  const transformedData = useMemo(() => {
-    return data.buckets.map(([bucket, lowerBound, upperBound, count]) => {
+  const transformDataLinear = (
+    data: HistogramChartData,
+    chartsTheme: PersesChartsTheme,
+    thresholds?: ThresholdOptions
+  ): TransformedHistogramData[] =>
+    data.buckets.map(([bucket, lowerBound, upperBound, count]) => {
       return {
         value: [parseFloat(lowerBound), parseFloat(upperBound), parseFloat(count), bucket],
         itemStyle: {
@@ -61,29 +79,55 @@ export function HistogramChart({
         },
       };
     });
-  }, [chartsTheme, data.buckets, thresholds]);
+
+  const transformDataExponential = (
+    data: HistogramChartData,
+    chartsTheme: PersesChartsTheme,
+    exponential: Exponential,
+    thresholds?: ThresholdOptions
+  ): TransformedHistogramData[] => {
+    const exponentialBuckets = generateExponentialBucketsWithOffset(data, exponential?.base as ExponentialBase);
+    convertLinearToExponentialBuckets(data, exponentialBuckets);
+    return exponentialBuckets.map(({ count, lb, ub }, index) => ({
+      value: [lb, ub, count, index],
+      itemStyle: {
+        color: getColorFromThresholds(lb, thresholds, chartsTheme, chartsTheme.echartsTheme[0] as string),
+      },
+    }));
+  };
+
+  const transformedData = useMemo(() => {
+    return !exponential?.base
+      ? transformDataLinear(data, chartsTheme, thresholds)
+      : transformDataExponential(data, chartsTheme, exponential, thresholds);
+  }, [chartsTheme, data, thresholds, exponential]);
 
   const minXAxis: number | undefined = useMemo(() => {
     if (min) {
       return min;
     }
 
-    if (transformedData && transformedData[0]) {
+    if (transformedData[0]) {
       return Math.min(0, Math.floor(transformedData[0]?.value[0] ?? 0));
     }
     return undefined;
   }, [min, transformedData]);
 
   const maxXAxis: number | undefined = useMemo(() => {
-    if (max) {
-      return max;
+    if (!exponential) {
+      if (max) {
+        return max;
+      }
+      if (transformedData[transformedData.length - 1]) {
+        return Math.ceil(transformedData[transformedData.length - 1]?.value[1] ?? 1);
+      }
+      return undefined;
     }
-    if (transformedData && transformedData[transformedData.length - 1]) {
-      return Math.ceil(transformedData[transformedData.length - 1]?.value[1] ?? 1);
-    }
-    return undefined;
-  }, [max, transformedData]);
 
+    return Math.max(...transformedData.map((d) => d.value).flat());
+  }, [max, transformedData, exponential]);
+
+  /* TODO: Are we missing the tooltip? */
   const option: EChartsCoreOption = useMemo(() => {
     if (!transformedData) return chartsTheme.noDataOption;
 

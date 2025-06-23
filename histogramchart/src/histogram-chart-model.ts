@@ -13,6 +13,7 @@
 
 import { Definition, FormatOptions, ThresholdOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Exponential } from './components/exponential-utils';
 
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 export const DEFAULT_THRESHOLDS: ThresholdOptions = { defaultColor: '#56b4e9' };
@@ -36,6 +37,7 @@ export interface HistogramChartOptions {
   min?: number;
   max?: number;
   thresholds?: ThresholdOptions;
+  exponential?: Exponential;
 }
 
 export type HistogramChartOptionsEditorProps = OptionsEditorProps<HistogramChartOptions>;
