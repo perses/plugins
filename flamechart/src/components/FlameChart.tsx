@@ -18,7 +18,7 @@ import {
   CustomSeriesRenderItemReturn,
 } from 'echarts';
 import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
-import { ReactElement, useState, useMemo, MouseEvent, useRef } from 'react';
+import { ReactElement, useState, useMemo, MouseEvent, useRef, useEffect } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import RefreshIcon from 'mdi-material-ui/Refresh';
@@ -78,7 +78,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const paletteRef = useRef(palette);
   const dataRef = useRef(data);
-  const resetGraphRef = useRef(isZoomEnabled);
+  const isZoomEnabledRef = useRef(isZoomEnabled);
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
@@ -172,12 +172,12 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   // Display/Hide Reset Graph button
-  useMemo(() => {
+  useEffect(() => {
     onResetFlameGraph(isBlockFocused);
   }, [isBlockFocused, onResetFlameGraph]);
 
   // update seriesData with the latest data
-  useMemo(() => {
+  useEffect(() => {
     if (paletteRef.current !== palette) {
       setSeriesData(changeColors(palette, seriesData));
       paletteRef.current = palette;
@@ -185,12 +185,12 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
       dataRef.current = data;
       setIsBlockFocused(false);
-    } else if (resetGraphRef.current !== isZoomEnabled) {
+    } else if (isZoomEnabledRef.current !== isZoomEnabled) {
       if (!isZoomEnabled) {
         setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
         setIsBlockFocused(false);
       }
-      resetGraphRef.current = isZoomEnabled;
+      isZoomEnabledRef.current = isZoomEnabled;
     }
   }, [data, palette, isZoomEnabled, seriesData]);
 
