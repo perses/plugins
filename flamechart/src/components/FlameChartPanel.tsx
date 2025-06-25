@@ -14,7 +14,7 @@
 import { TitleComponentOption } from 'echarts';
 import { useChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
-import { FC, useState, useMemo } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { FlameChartOptions } from '../flame-chart-model';
@@ -31,7 +31,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   const [liveSpec, setLiveSpec] = useState<FlameChartOptions>(spec);
 
   // keep liveSpec up to date
-  useMemo(() => {
+  useEffect(() => {
     setLiveSpec(spec);
   }, [spec]);
 
@@ -46,57 +46,25 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
 
   const changePalette = (newPalette: 'package-name' | 'value') => {
     setLiveSpec((prev) => {
-      const newSpec = {
-        palette: newPalette,
-        showSettings: prev.showSettings,
-        showSeries: prev.showSeries,
-        showTable: prev.showTable,
-        showFlameGraph: prev.showFlameGraph,
-      };
-
-      return newSpec;
+      return { ...prev, palette: newPalette };
     });
   };
 
   const showOnlyTable = () => {
     setLiveSpec((prev) => {
-      const newSpec = {
-        palette: prev.palette,
-        showSettings: prev.showSettings,
-        showSeries: prev.showSeries,
-        showTable: true,
-        showFlameGraph: false,
-      };
-
-      return newSpec;
+      return { ...prev, showTable: true, showFlameGraph: false };
     });
   };
 
   const showOnlyFlameGraph = () => {
     setLiveSpec((prev) => {
-      const newSpec = {
-        palette: prev.palette,
-        showSettings: prev.showSettings,
-        showSeries: prev.showSeries,
-        showTable: false,
-        showFlameGraph: true,
-      };
-
-      return newSpec;
+      return { ...prev, showTable: false, showFlameGraph: true };
     });
   };
 
   const showBothTableAndFlameGraph = () => {
     setLiveSpec((prev) => {
-      const newSpec = {
-        palette: prev.palette,
-        showSettings: prev.showSettings,
-        showSeries: prev.showSeries,
-        showTable: true,
-        showFlameGraph: true,
-      };
-
-      return newSpec;
+      return { ...prev, showTable: true, showFlameGraph: true };
     });
   };
 

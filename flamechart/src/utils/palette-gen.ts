@@ -28,8 +28,8 @@ const valueColorPalette: string[] = [
   '#ff8c00',
   '#ff6f00',
   '#ff7070',
-  '#ff004c',
   '#ff3300',
+  '#ff004c',
 ];
 
 /**
