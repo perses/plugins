@@ -99,13 +99,13 @@ export function Settings(props: SettingsProps): ReactElement {
         </InfoTooltip>
         <Menu
           id="change-color-sheme-menu"
-          MenuListProps={{
-            'aria-labelledby': 'change-color-sheme-button',
+          slotProps={{
+            list: { 'aria-labelledby': 'change-color-sheme-button' },
           }}
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
-          TransitionComponent={Fade}
+          slots={{ transition: Fade }}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'center',
