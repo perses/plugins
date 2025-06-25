@@ -25,7 +25,7 @@ export interface CustomBreadcrumbProps {
   totalSample: number;
   isBlockFocused: boolean;
   otherItemSample: number;
-  resetFlameGraph: () => void;
+  onResetFlameGraph: () => void;
 }
 
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
@@ -46,11 +46,11 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
 });
 
 export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
-  const { totalValue, totalSample, otherItemSample, isBlockFocused, resetFlameGraph } = props;
+  const { totalValue, totalSample, otherItemSample, isBlockFocused, onResetFlameGraph } = props;
 
   const handleClick = (event: React.MouseEvent<Element, MouseEvent>) => {
     event.preventDefault();
-    resetFlameGraph();
+    onResetFlameGraph();
   };
 
   const splitedValue = totalValue.split('(');

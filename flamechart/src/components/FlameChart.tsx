@@ -294,7 +294,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         totalSample={seriesData[0]?.value[8] || 0} // total sample of the total function
         otherItemSample={findTotalSampleByName(seriesData, selectedId)} // total sample of the selected function
         isBlockFocused={isBlockFocused}
-        resetFlameGraph={handleResetGraph}
+        onResetFlameGraph={handleResetGraph}
       />
       {flameChart}
       <Menu
