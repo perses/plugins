@@ -23,7 +23,7 @@ import { formatValue } from '@perses-dev/core';
 export interface CustomBreadcrumbProps {
   totalValue: string;
   totalSample: number;
-  isBlockFocused: boolean;
+  isZoomEnabled: boolean;
   otherItemSample: number;
   onResetFlameGraph: () => void;
 }
@@ -46,7 +46,7 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
 });
 
 export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
-  const { totalValue, totalSample, otherItemSample, isBlockFocused, onResetFlameGraph } = props;
+  const { totalValue, totalSample, otherItemSample, isZoomEnabled, onResetFlameGraph } = props;
 
   const handleClick = (event: React.MouseEvent<Element, MouseEvent>) => {
     event.preventDefault();
@@ -62,7 +62,7 @@ export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
     <Stack direction="row" spacing={1}>
       <Breadcrumbs separator={<ChevronRightIcon fontSize="small" />} aria-label="breadcrumb">
         <StyledBreadcrumb label={totalValueText + '  |  ' + totalLabel} />
-        {isBlockFocused && (
+        {isZoomEnabled && (
           <StyledBreadcrumb
             label={((otherItemSample / totalSample) * 100).toFixed(2) + '% of total'}
             icon={<EyeIcon fontSize="small" color="secondary" />}
