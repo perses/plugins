@@ -57,22 +57,6 @@ export function Settings(props: SettingsProps): ReactElement {
     setAnchorEl(null);
   };
 
-  const handleResetClick = () => {
-    onResetFlameGraph();
-  };
-
-  const handleTableSelected = () => {
-    onDisplayChange('table');
-  };
-
-  const handleFlameGraphSelected = () => {
-    onDisplayChange('flame-graph');
-  };
-
-  const handleBothSelected = () => {
-    onDisplayChange('both');
-  };
-
   const isTableSelected = () => selectedView === 'table';
   const isFlameGraphSelected = () => selectedView === 'flame-graph';
   const isBothSelected = () => selectedView === 'both';
@@ -94,7 +78,7 @@ export function Settings(props: SettingsProps): ReactElement {
     <Stack spacing="10px" direction="row" justifyContent="center" alignItems="center">
       {isZoomEnabled && (
         <InfoTooltip description={TOOLTIP_TEXT.resetFlameGraph}>
-          <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={handleResetClick} color="primary">
+          <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={onResetFlameGraph} color="primary">
             <RefreshIcon fontSize="small" />
           </ToolbarIconButton>
         </InfoTooltip>
@@ -162,7 +146,7 @@ export function Settings(props: SettingsProps): ReactElement {
             variant={isTableSelected() ? 'contained' : 'text'}
             color="primary"
             size="small"
-            onClick={handleTableSelected}
+            onClick={() => onDisplayChange('table')}
             sx={customButtonStyle}
           >
             Table
@@ -173,7 +157,7 @@ export function Settings(props: SettingsProps): ReactElement {
             variant={isFlameGraphSelected() ? 'contained' : 'text'}
             color="primary"
             size="small"
-            onClick={handleFlameGraphSelected}
+            onClick={() => onDisplayChange('flame-graph')}
             sx={customButtonStyle}
           >
             Flame Graph
@@ -184,7 +168,7 @@ export function Settings(props: SettingsProps): ReactElement {
             variant={isBothSelected() ? 'contained' : 'text'}
             color="primary"
             size="small"
-            onClick={handleBothSelected}
+            onClick={() => onDisplayChange('both')}
             sx={customButtonStyle}
           >
             Both
