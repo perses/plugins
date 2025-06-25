@@ -41,8 +41,8 @@ export interface FlameChartProps {
   height: number;
   data: ProfileData;
   palette: 'package-name' | 'value';
-  resetGraph: boolean;
-  changeResetGraph: (newVal: boolean) => void;
+  isZoomEnabled: boolean;
+  onResetFlameGraph: (newVal: boolean) => void;
 }
 
 export interface Sample {
@@ -64,7 +64,7 @@ export interface Sample {
 }
 
 export function FlameChart(props: FlameChartProps): ReactElement {
-  const { width, height, data, palette, resetGraph, changeResetGraph } = props;
+  const { width, height, data, palette, isZoomEnabled, onResetFlameGraph } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
@@ -78,7 +78,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const paletteRef = useRef(palette);
   const dataRef = useRef(data);
-  const resetGraphRef = useRef(resetGraph);
+  const resetGraphRef = useRef(isZoomEnabled);
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
@@ -173,8 +173,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   // Display/Hide Reset Graph button
   useMemo(() => {
-    changeResetGraph(isBlockFocused);
-  }, [isBlockFocused, changeResetGraph]);
+    onResetFlameGraph(isBlockFocused);
+  }, [isBlockFocused, onResetFlameGraph]);
 
   // update seriesData with the latest data
   useMemo(() => {
@@ -185,14 +185,14 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
       dataRef.current = data;
       setIsBlockFocused(false);
-    } else if (resetGraphRef.current !== resetGraph) {
-      if (!resetGraph) {
+    } else if (resetGraphRef.current !== isZoomEnabled) {
+      if (!isZoomEnabled) {
         setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
         setIsBlockFocused(false);
       }
-      resetGraphRef.current = resetGraph;
+      resetGraphRef.current = isZoomEnabled;
     }
-  }, [data, palette, resetGraph, seriesData]);
+  }, [data, palette, isZoomEnabled, seriesData]);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;

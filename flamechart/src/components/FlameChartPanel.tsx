@@ -35,7 +35,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     setLiveSpec(spec);
   }, [spec]);
 
-  const [resetGraph, setResetGraph] = useState(false);
+  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
 
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
@@ -64,7 +64,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   };
 
   const onResetFlameGraph = (newVal: boolean) => {
-    setResetGraph(newVal);
+    setIsZoomEnabled(newVal);
   };
 
   const OPTIONS_SPACE = liveSpec.showSettings ? 35 : 0; // space for options at the top of the chart
@@ -90,7 +90,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
               onChangePalette={onChangePalette}
               onDisplayChange={onDisplayChange}
               value={liveSpec}
-              isZoomEnabled={resetGraph}
+              isZoomEnabled={isZoomEnabled}
             />
           )}
           <Stack direction="row" justifyContent="center" alignItems="top">
@@ -107,8 +107,8 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
                 height={contentDimensions.height - OPTIONS_SPACE}
                 data={flameChartData.data}
                 palette={liveSpec.palette}
-                resetGraph={resetGraph}
-                changeResetGraph={onResetFlameGraph}
+                isZoomEnabled={isZoomEnabled}
+                onResetFlameGraph={onResetFlameGraph}
               />
             )}
           </Stack>
