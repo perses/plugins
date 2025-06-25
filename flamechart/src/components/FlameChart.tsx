@@ -27,7 +27,7 @@ import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
 import { recursionJson, changeColors, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
-import { CustumBreadcrumb } from './CustumBreadcrumb';
+import { CustomBreadcrumb } from './CustomBreadcrumb';
 
 const ITEM_GAP = 2; // vertical gap between flame chart items
 const Y_MIN_SMALL = 6; // min value of y axis for small containers
@@ -289,7 +289,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       alignItems="center"
       sx={{ paddingTop: '20px', paddingBottom: '10px' }}
     >
-      <CustumBreadcrumb
+      <CustomBreadcrumb
         totalValue={seriesData[0]?.value[3] || ''} // name of the total function
         totalSample={seriesData[0]?.value[8] || 0} // total sample of the total function
         otherItemSample={findTotalSampleByName(seriesData, selectedId)} // total sample of the selected function

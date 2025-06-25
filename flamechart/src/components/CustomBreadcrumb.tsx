@@ -20,7 +20,7 @@ import Chip from '@mui/material/Chip';
 import { emphasize, styled } from '@mui/material/styles';
 import { formatValue } from '@perses-dev/core';
 
-export interface CustumBreadcrumbProps {
+export interface CustomBreadcrumbProps {
   totalValue: string;
   totalSample: number;
   isBlockFocused: boolean;
@@ -43,9 +43,9 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
       backgroundColor: emphasize(backgroundColor, 0.12),
     },
   };
-}) as typeof Chip;
+});
 
-export function CustumBreadcrumb(props: CustumBreadcrumbProps): ReactElement {
+export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
   const { totalValue, totalSample, otherItemSample, isBlockFocused, resetFlameGraph } = props;
 
   const handleClick = (event: React.MouseEvent<Element, MouseEvent>) => {
@@ -61,7 +61,7 @@ export function CustumBreadcrumb(props: CustumBreadcrumbProps): ReactElement {
   return (
     <Stack direction="row" spacing={1}>
       <Breadcrumbs separator={<ChevronRightIcon fontSize="small" />} aria-label="breadcrumb">
-        <StyledBreadcrumb component="a" href="#" label={totalValueText + '  |  ' + totalLabel} />
+        <StyledBreadcrumb label={totalValueText + '  |  ' + totalLabel} />
         {isBlockFocused && (
           <StyledBreadcrumb
             label={((otherItemSample / totalSample) * 100).toFixed(2) + '% of total'}
