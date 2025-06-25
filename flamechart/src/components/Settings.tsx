@@ -32,7 +32,6 @@ export interface SettingsProps {
 export function Settings(props: SettingsProps): ReactElement {
   const { value, isZoomEnabled, resetFlameGraph, changePalette, showOnlyTable, showOnlyFlameGraph, showBoth } = props;
   const theme = useTheme();
-  const [selectedView, setSelectedView] = useState<'table' | 'flame-graph' | 'both' | 'none'>('none');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -81,15 +80,15 @@ export function Settings(props: SettingsProps): ReactElement {
   const isBothSelected = () => selectedView === 'both';
 
   // Update selected view based on the value of showTable and showFlameGraph
-  useMemo(() => {
+  const selectedView: 'table' | 'flame-graph' | 'both' | 'none' = useMemo(() => {
     if (!value.showTable && !value.showFlameGraph) {
-      setSelectedView('none');
+      return 'none';
     } else if (value.showTable && value.showFlameGraph) {
-      setSelectedView('both');
+      return 'both';
     } else if (value.showTable) {
-      setSelectedView('table');
+      return 'table';
     } else {
-      setSelectedView('flame-graph');
+      return 'flame-graph';
     }
   }, [value.showTable, value.showFlameGraph]);
 
