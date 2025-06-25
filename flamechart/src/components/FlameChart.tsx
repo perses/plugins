@@ -68,13 +68,12 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
-  const [menuTitle, setMenuTitle] = useState('');
-  const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // id of the selected item
+  const [selectedItem, setSelectedItem] = useState<{ id: number; name: string }>({ id: 0, name: '' });
+  const [selectedId, setSelectedId] = useState(0);
   const [isCopied, setIsCopied] = useState(false);
   const [seriesData, setSeriesData] = useState<Sample[]>(
     recursionJson(palette, data.metadata, data.profile.stackTrace)
   );
-  const [isBlockFocused, setIsBlockFocused] = useState(false);
 
   const paletteRef = useRef(palette);
   const dataRef = useRef(data);
@@ -83,8 +82,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
     const functionName = data.value[6];
-    setMenuTitle(functionName);
-    setSelectedId(data.name);
+    const functionId = data.name;
+    setSelectedItem({ id: functionId, name: functionName });
 
     // To ensure that the cursor is positioned inside the menu when it opens,
     // we adjust the click event coordinates as follows:
@@ -98,23 +97,25 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   const handleFocusBlock = (): void => {
-    if (selectedId) {
-      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace, selectedId));
-      setIsBlockFocused(true);
-    }
+    setSelectedId(selectedItem.id);
+    // Using selectedItem.id directly instead of selectedId state because state updates are asynchronous
+    // This ensures we have the most recent ID when regenerating the series data
+    setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace, selectedItem.id));
+    onResetFlameGraph(true);
+
     handleClose();
   };
 
   const handleCopyFunctionName = (): void => {
-    if ((selectedId || selectedId === 0) && menuTitle) {
-      navigator.clipboard.writeText(menuTitle);
+    if ((selectedId || selectedId === 0) && selectedItem.name) {
+      navigator.clipboard.writeText(selectedItem.name);
     }
     setIsCopied(true);
   };
 
   const handleResetGraph = (): void => {
-    if (isBlockFocused) {
-      setIsBlockFocused(false);
+    if (isZoomEnabled) {
+      onResetFlameGraph(false);
     }
     handleClose();
   };
@@ -171,11 +172,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     } as CustomSeriesRenderItemReturn;
   };
 
-  // Display/Hide Reset Graph button
-  useEffect(() => {
-    onResetFlameGraph(isBlockFocused);
-  }, [isBlockFocused, onResetFlameGraph]);
-
   // update seriesData with the latest data
   useEffect(() => {
     if (paletteRef.current !== palette) {
@@ -184,15 +180,15 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     } else if (dataRef.current !== data) {
       setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
       dataRef.current = data;
-      setIsBlockFocused(false);
+      onResetFlameGraph(false);
     } else if (isZoomEnabledRef.current !== isZoomEnabled) {
       if (!isZoomEnabled) {
         setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
-        setIsBlockFocused(false);
+        onResetFlameGraph(false);
       }
       isZoomEnabledRef.current = isZoomEnabled;
     }
-  }, [data, palette, isZoomEnabled, seriesData]);
+  }, [data, palette, isZoomEnabled, seriesData, onResetFlameGraph]);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
@@ -293,7 +289,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         totalValue={seriesData[0]?.value[3] || ''} // name of the total function
         totalSample={seriesData[0]?.value[8] || 0} // total sample of the total function
         otherItemSample={findTotalSampleByName(seriesData, selectedId)} // total sample of the selected function
-        isBlockFocused={isBlockFocused}
+        isBlockFocused={isZoomEnabled}
         onResetFlameGraph={handleResetGraph}
       />
       {flameChart}
@@ -322,7 +318,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
             paddingBottom: '8px',
           }}
         >
-          {menuTitle}
+          {selectedItem.name}
         </Box>
         <Divider sx={{ backgroundColor: theme.palette.divider }} />
         <MenuItem onClick={handleFocusBlock}>
