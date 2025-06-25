@@ -44,31 +44,26 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
-  const changePalette = (newPalette: 'package-name' | 'value') => {
+  const onChangePalette = (newPalette: 'package-name' | 'value') => {
     setLiveSpec((prev) => {
       return { ...prev, palette: newPalette };
     });
   };
 
-  const showOnlyTable = () => {
+  const onDisplayChange = (value: 'table' | 'flame-graph' | 'both' | 'none') => {
+    let showTable = true;
+    let showFlameGraph = true;
+    if (value === 'table') {
+      showFlameGraph = false;
+    } else if (value === 'flame-graph') {
+      showTable = false;
+    }
     setLiveSpec((prev) => {
-      return { ...prev, showTable: true, showFlameGraph: false };
+      return { ...prev, showTable: showTable, showFlameGraph: showFlameGraph };
     });
   };
 
-  const showOnlyFlameGraph = () => {
-    setLiveSpec((prev) => {
-      return { ...prev, showTable: false, showFlameGraph: true };
-    });
-  };
-
-  const showBothTableAndFlameGraph = () => {
-    setLiveSpec((prev) => {
-      return { ...prev, showTable: true, showFlameGraph: true };
-    });
-  };
-
-  const changeResetGraph = (newVal: boolean) => {
+  const onResetFlameGraph = (newVal: boolean) => {
     setResetGraph(newVal);
   };
 
@@ -91,11 +86,9 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
         <Stack sx={{ paddingTop: '10px' }}>
           {liveSpec.showSettings && (
             <Settings
-              resetFlameGraph={() => changeResetGraph(false)}
-              changePalette={changePalette}
-              showOnlyTable={showOnlyTable}
-              showOnlyFlameGraph={showOnlyFlameGraph}
-              showBoth={showBothTableAndFlameGraph}
+              onResetFlameGraph={() => onResetFlameGraph(false)}
+              onChangePalette={onChangePalette}
+              onDisplayChange={onDisplayChange}
               value={liveSpec}
               isZoomEnabled={resetGraph}
             />
@@ -115,7 +108,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
                 data={flameChartData.data}
                 palette={liveSpec.palette}
                 resetGraph={resetGraph}
-                changeResetGraph={changeResetGraph}
+                changeResetGraph={onResetFlameGraph}
               />
             )}
           </Stack>

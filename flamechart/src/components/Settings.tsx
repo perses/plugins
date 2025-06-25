@@ -22,15 +22,13 @@ import { FlameChartOptions } from '../flame-chart-model';
 export interface SettingsProps {
   value: FlameChartOptions;
   isZoomEnabled: boolean;
-  changePalette: (newPalette: 'package-name' | 'value') => void;
-  resetFlameGraph: () => void;
-  showOnlyTable: () => void;
-  showOnlyFlameGraph: () => void;
-  showBoth: () => void;
+  onChangePalette: (palette: 'package-name' | 'value') => void;
+  onResetFlameGraph: () => void;
+  onDisplayChange: (value: 'table' | 'flame-graph' | 'both') => void;
 }
 
 export function Settings(props: SettingsProps): ReactElement {
-  const { value, isZoomEnabled, resetFlameGraph, changePalette, showOnlyTable, showOnlyFlameGraph, showBoth } = props;
+  const { value, isZoomEnabled, onResetFlameGraph, onChangePalette, onDisplayChange } = props;
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -46,12 +44,12 @@ export function Settings(props: SettingsProps): ReactElement {
   };
 
   const handleByPackageNameClick = () => {
-    changePalette('package-name');
+    onChangePalette('package-name');
     handleClose();
   };
 
   const handleByValueClick = () => {
-    changePalette('value');
+    onChangePalette('value');
     handleClose();
   };
 
@@ -60,19 +58,19 @@ export function Settings(props: SettingsProps): ReactElement {
   };
 
   const handleResetClick = () => {
-    resetFlameGraph();
+    onResetFlameGraph();
   };
 
   const handleTableSelected = () => {
-    showOnlyTable();
+    onDisplayChange('table');
   };
 
   const handleFlameGraphSelected = () => {
-    showOnlyFlameGraph();
+    onDisplayChange('flame-graph');
   };
 
   const handleBothSelected = () => {
-    showBoth();
+    onDisplayChange('both');
   };
 
   const isTableSelected = () => selectedView === 'table';
