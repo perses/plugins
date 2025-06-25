@@ -14,19 +14,20 @@
 import { getConsistentColor } from './palette';
 
 const LESS_THAN_ONE_COLOR = '#dee2e6'; // use this color when the value is less than 1
+const MORE_THAN_HUNDRED_COLOR = '#ffbdbd'; // use this color when the value is more than 100
 const NOT_FOUND_COLOR = '#393d47';
 
 // Palette of color to display the flame chart by value
 const valueColorPalette: string[] = [
   '#fff85b',
   '#ffde4c',
-  '#f08c00',
-  '#ff8c00',
   '#ffc252',
+  '#ff8c00',
+  '#f08c00',
   '#e67762',
-  '#ff7070',
-  '#834e56',
+  '#ff8c00',
   '#ff6f00',
+  '#ff7070',
   '#ff004c',
   '#ff3300',
 ];
@@ -47,6 +48,7 @@ export function getSpanColor(palette: string, functionName: string, value: numbe
  */
 export function getColorByValue(value: number): string {
   if (value < 1) return LESS_THAN_ONE_COLOR;
+  if (value > 100) return MORE_THAN_HUNDRED_COLOR;
   return valueColorPalette[Math.floor(value / (valueColorPalette.length - 1))] || NOT_FOUND_COLOR;
 }
 
