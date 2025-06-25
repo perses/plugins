@@ -13,7 +13,8 @@
 
 import { ReactElement, useMemo } from 'react';
 import { FormatOptions, TimeScale } from '@perses-dev/core';
-import { EChart, getFormattedAxis, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { useTimeZone } from '@perses-dev/plugin-system';
+import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
 import { useTheme } from '@mui/material';
