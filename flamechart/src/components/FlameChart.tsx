@@ -43,12 +43,12 @@ export interface FlameChartProps {
   data: ProfileData;
   palette: 'package-name' | 'value';
   selectedId: number;
-  tableFilters: number[];
+  searchValue: string;
   onSelectedIdChange: (newId: number) => void;
 }
 
 export function FlameChart(props: FlameChartProps): ReactElement {
-  const { width, height, data, palette, selectedId, tableFilters, onSelectedIdChange } = props;
+  const { width, height, data, palette, selectedId, searchValue, onSelectedIdChange } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
@@ -56,8 +56,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const [isCopied, setIsCopied] = useState(false);
 
   const seriesData = useMemo(
-    () => recursionJson(palette, data.metadata, data.profile.stackTrace, tableFilters, selectedId),
-    [palette, data.metadata, data.profile.stackTrace, selectedId, tableFilters]
+    () => recursionJson(palette, data.metadata, data.profile.stackTrace, searchValue, selectedId),
+    [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue]
   );
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {

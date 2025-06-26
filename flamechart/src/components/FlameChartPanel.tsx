@@ -38,7 +38,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   // selectedId equals 0 => Flame Graph is not zoomed in
   // selectedId different from 0 => Flame Graph is zoomed in
   const [selectedId, setSelectedId] = useState(0);
-  const [tableFilters, setTableFilters] = useState<number[]>([]);
+  const [searchValue, setSearchValue] = useState('');
 
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
@@ -98,8 +98,8 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
                 width={liveSpec.showFlameGraph ? 0.4 * contentDimensions.width : contentDimensions.width}
                 height={contentDimensions.height - OPTIONS_SPACE}
                 data={flameChartData.data}
-                tableFilters={tableFilters}
-                onTableFiltersChange={setTableFilters}
+                searchValue={searchValue}
+                onSearchValueChange={setSearchValue}
               />
             )}
             {liveSpec.showFlameGraph && (
@@ -109,7 +109,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
                 data={flameChartData.data}
                 palette={liveSpec.palette}
                 selectedId={selectedId}
-                tableFilters={tableFilters}
+                searchValue={searchValue}
                 onSelectedIdChange={setSelectedId}
               />
             )}

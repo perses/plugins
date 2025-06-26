@@ -20,21 +20,23 @@ import { tableRecursionJson } from '../utils/data-transform';
 import { TableChartSample } from '../utils/data-model';
 import { ColumnSettings } from '../utils/table-model';
 import { formatItemValue } from '../utils/format';
+import { SearchBar } from './SearchBar';
 
 const LARGE_SCREEN_TRESHOLD = 600; // heigth treshold to switch to large screen mode
 const PADDING_TOP = 20; // padding top for the table
 const SCROLL_BAR_WIDTH = 15;
+const SEARCH_BAR_HEIGHT = 50;
 
 export interface TableChartProps {
   width: number;
   height: number;
   data: ProfileData;
-  tableFilters: number[];
-  onTableFiltersChange: (filters: number[]) => void;
+  searchValue: string;
+  onSearchValueChange: (value: string) => void;
 }
 
 export function TableChart(props: TableChartProps): ReactElement {
-  const { width, height, data, tableFilters, onTableFiltersChange } = props;
+  const { width, height, data, searchValue, onSearchValueChange } = props;
 
   const theme = useTheme();
 
@@ -42,10 +44,9 @@ export function TableChart(props: TableChartProps): ReactElement {
   const availableWidth = width - 10;
 
   const tableData: TableChartSample[] = useMemo(() => {
-    // when data changes, we need to set tableFilters to []
-    const tempData = tableRecursionJson(data.profile.stackTrace);
-    return tableFilters.length > 0 ? tempData.filter((item) => tableFilters.includes(item.id)) : tempData;
-  }, [data, tableFilters]);
+    // TODO: set searchValue to '' when data changes
+    return tableRecursionJson(data.profile.stackTrace, searchValue);
+  }, [data, searchValue]);
 
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
@@ -93,7 +94,7 @@ export function TableChart(props: TableChartProps): ReactElement {
                 onClick={(e) => {
                   e.preventDefault();
                   const currentSample = ctx.row.original as TableChartSample;
-                  onTableFiltersChange([currentSample.id]);
+                  onSearchValueChange(currentSample.name);
                 }}
               >
                 {cellValue}
@@ -146,7 +147,7 @@ export function TableChart(props: TableChartProps): ReactElement {
     columns.push(totalColumn);
 
     return columns;
-  }, [data.metadata?.units, availableWidth, onTableFiltersChange]);
+  }, [data.metadata?.units, availableWidth, onSearchValueChange]);
 
   const [sorting, setSorting] = useState<SortingState>([{ id: 'total', desc: true }]);
 
@@ -168,10 +169,11 @@ export function TableChart(props: TableChartProps): ReactElement {
         },
       }}
     >
+      <SearchBar searchValue={searchValue} onSearchValueChange={onSearchValueChange} />
       <Table
         data={tableData}
         columns={columns}
-        height={availableHeight - PADDING_TOP}
+        height={availableHeight - PADDING_TOP - SEARCH_BAR_HEIGHT}
         width={availableWidth}
         density={availableHeight < LARGE_SCREEN_TRESHOLD ? 'compact' : 'standard'}
         defaultColumnWidth="auto"

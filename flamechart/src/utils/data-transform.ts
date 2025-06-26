@@ -83,7 +83,7 @@ export function recursionJson(
   palette: string,
   metadata: ProfileMetaData | undefined,
   jsonObj: StackTrace,
-  tableFilters: number[],
+  searchValue: string,
   id?: number
 ): Sample[] {
   const data: Sample[] = [];
@@ -108,7 +108,7 @@ export function recursionJson(
       ],
       itemStyle: {
         color:
-          tableFilters.length > 0 && !tableFilters.includes(item.id)
+          searchValue !== '' && !item.name.toLocaleLowerCase().includes(searchValue.trim().toLocaleLowerCase())
             ? '#dee2e6'
             : getSpanColor(palette, item.name, (item.total / (currentVal ? currentVal : rootVal)) * 100),
       },
@@ -128,7 +128,7 @@ export function recursionJson(
 /**
  * Transform query results to a tabular format for the table chart
  */
-export function tableRecursionJson(jsonObj: StackTrace): TableChartSample[] {
+export function tableRecursionJson(jsonObj: StackTrace, searchValue: string): TableChartSample[] {
   const data: TableChartSample[] = [];
   const structuredJson = structuredClone(jsonObj);
 
@@ -139,7 +139,8 @@ export function tableRecursionJson(jsonObj: StackTrace): TableChartSample[] {
       self: item.self,
       total: item.total,
     };
-    data.push(temp as TableChartSample);
+    if (temp.name.toLocaleLowerCase().includes(searchValue.trim().toLocaleLowerCase()))
+      data.push(temp as TableChartSample);
 
     for (const child of item.children || []) {
       recur(child);
