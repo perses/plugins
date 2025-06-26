@@ -84,7 +84,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
         <Stack sx={{ paddingTop: '10px' }}>
           {liveSpec.showSettings && (
             <Settings
-              onSelectedIdChange={() => setSelectedId(0)}
+              onSelectedIdChange={setSelectedId}
               onChangePalette={onChangePalette}
               onDisplayChange={onDisplayChange}
               value={liveSpec}

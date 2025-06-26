@@ -23,7 +23,7 @@ export interface SettingsProps {
   value: FlameChartOptions;
   selectedId: number;
   onChangePalette: (palette: 'package-name' | 'value') => void;
-  onSelectedIdChange: () => void;
+  onSelectedIdChange: (newId: number) => void;
   onDisplayChange: (value: 'table' | 'flame-graph' | 'both') => void;
 }
 
@@ -78,7 +78,11 @@ export function Settings(props: SettingsProps): ReactElement {
     <Stack spacing="10px" direction="row" justifyContent="center" alignItems="center">
       {selectedId !== 0 && (
         <InfoTooltip description={TOOLTIP_TEXT.resetFlameGraph}>
-          <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={onSelectedIdChange} color="primary">
+          <ToolbarIconButton
+            aria-label={TOOLTIP_TEXT.resetFlameGraph}
+            onClick={() => onSelectedIdChange(0)}
+            color="primary"
+          >
             <RefreshIcon fontSize="small" />
           </ToolbarIconButton>
         </InfoTooltip>

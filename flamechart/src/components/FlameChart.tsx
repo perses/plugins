@@ -263,7 +263,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         totalValue={seriesData[0]?.value[3] || ''} // name of the total function
         totalSample={seriesData[0]?.value[8] || 0} // total sample of the total function
         otherItemSample={findTotalSampleByName(seriesData, selectedId)} // total sample of the selected function
-        onSelectedIdChange={() => onSelectedIdChange(0)}
+        onSelectedIdChange={onSelectedIdChange}
       />
       {flameChart}
       <Menu
