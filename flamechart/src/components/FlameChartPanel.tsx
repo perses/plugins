@@ -36,7 +36,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   }, [spec]);
 
   // selectedId equals 0 => Flame Graph is not zoomed in
-  // selectedId different from 0 => Flame Graph is zommed in
+  // selectedId different from 0 => Flame Graph is zoomed in
   const [selectedId, setSelectedId] = useState(0);
 
   const chartsTheme = useChartsTheme();
