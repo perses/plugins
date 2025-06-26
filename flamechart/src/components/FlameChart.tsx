@@ -18,14 +18,14 @@ import {
   CustomSeriesRenderItemReturn,
 } from 'echarts';
 import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
-import { ReactElement, useState, useMemo, MouseEvent, useRef, useEffect } from 'react';
+import { ReactElement, useState, useMemo, MouseEvent } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
-import { recursionJson, changeColors, findTotalSampleByName } from '../utils/data-transform';
+import { recursionJson, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
 import { CustomBreadcrumb } from './CustomBreadcrumb';
 
@@ -41,8 +41,8 @@ export interface FlameChartProps {
   height: number;
   data: ProfileData;
   palette: 'package-name' | 'value';
-  isZoomEnabled: boolean;
-  onResetFlameGraph: (newVal: boolean) => void;
+  selectedId: number;
+  onSelectedIdChange: (newId: number) => void;
 }
 
 export interface Sample {
@@ -64,20 +64,17 @@ export interface Sample {
 }
 
 export function FlameChart(props: FlameChartProps): ReactElement {
-  const { width, height, data, palette, isZoomEnabled, onResetFlameGraph } = props;
+  const { width, height, data, palette, selectedId, onSelectedIdChange } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const [selectedItem, setSelectedItem] = useState<{ id: number; name: string }>({ id: 0, name: '' });
-  const [selectedId, setSelectedId] = useState(0);
   const [isCopied, setIsCopied] = useState(false);
-  const [seriesData, setSeriesData] = useState<Sample[]>(
-    recursionJson(palette, data.metadata, data.profile.stackTrace)
-  );
 
-  const paletteRef = useRef(palette);
-  const dataRef = useRef(data);
-  const isZoomEnabledRef = useRef(isZoomEnabled);
+  const seriesData = useMemo(
+    () => recursionJson(palette, data.metadata, data.profile.stackTrace, selectedId),
+    [palette, data.metadata, data.profile.stackTrace, selectedId]
+  );
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
@@ -97,12 +94,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   const handleFocusBlock = (): void => {
-    setSelectedId(selectedItem.id);
-    // Using selectedItem.id directly instead of selectedId state because state updates are asynchronous
-    // This ensures we have the most recent ID when regenerating the series data
-    setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace, selectedItem.id));
-    onResetFlameGraph(true);
-
+    onSelectedIdChange(selectedItem.id);
     handleClose();
   };
 
@@ -114,8 +106,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   };
 
   const handleResetGraph = (): void => {
-    if (isZoomEnabled) {
-      onResetFlameGraph(false);
+    if (selectedId) {
+      onSelectedIdChange(0);
     }
     handleClose();
   };
@@ -171,24 +163,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
       },
     } as CustomSeriesRenderItemReturn;
   };
-
-  // update seriesData with the latest data
-  useEffect(() => {
-    if (paletteRef.current !== palette) {
-      setSeriesData(changeColors(palette, seriesData));
-      paletteRef.current = palette;
-    } else if (dataRef.current !== data) {
-      setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
-      dataRef.current = data;
-      onResetFlameGraph(false);
-    } else if (isZoomEnabledRef.current !== isZoomEnabled) {
-      if (!isZoomEnabled) {
-        setSeriesData(recursionJson(palette, data.metadata, data.profile.stackTrace));
-        onResetFlameGraph(false);
-      }
-      isZoomEnabledRef.current = isZoomEnabled;
-    }
-  }, [data, palette, isZoomEnabled, seriesData, onResetFlameGraph]);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.profile.stackTrace === undefined) return chartsTheme.noDataOption;
@@ -289,7 +263,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         totalValue={seriesData[0]?.value[3] || ''} // name of the total function
         totalSample={seriesData[0]?.value[8] || 0} // total sample of the total function
         otherItemSample={findTotalSampleByName(seriesData, selectedId)} // total sample of the selected function
-        onResetFlameGraph={handleResetGraph}
+        onSelectedIdChange={() => onSelectedIdChange(0)}
       />
       {flameChart}
       <Menu

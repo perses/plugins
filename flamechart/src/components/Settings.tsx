@@ -21,14 +21,14 @@ import { FlameChartOptions } from '../flame-chart-model';
 
 export interface SettingsProps {
   value: FlameChartOptions;
-  isZoomEnabled: boolean;
+  selectedId: number;
   onChangePalette: (palette: 'package-name' | 'value') => void;
-  onResetFlameGraph: () => void;
+  onSelectedIdChange: () => void;
   onDisplayChange: (value: 'table' | 'flame-graph' | 'both') => void;
 }
 
 export function Settings(props: SettingsProps): ReactElement {
-  const { value, isZoomEnabled, onResetFlameGraph, onChangePalette, onDisplayChange } = props;
+  const { value, selectedId, onSelectedIdChange, onChangePalette, onDisplayChange } = props;
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -76,9 +76,9 @@ export function Settings(props: SettingsProps): ReactElement {
 
   return (
     <Stack spacing="10px" direction="row" justifyContent="center" alignItems="center">
-      {isZoomEnabled && (
+      {selectedId !== 0 && (
         <InfoTooltip description={TOOLTIP_TEXT.resetFlameGraph}>
-          <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={onResetFlameGraph} color="primary">
+          <ToolbarIconButton aria-label={TOOLTIP_TEXT.resetFlameGraph} onClick={onSelectedIdChange} color="primary">
             <RefreshIcon fontSize="small" />
           </ToolbarIconButton>
         </InfoTooltip>

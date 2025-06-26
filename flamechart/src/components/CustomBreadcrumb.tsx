@@ -24,7 +24,7 @@ export interface CustomBreadcrumbProps {
   totalValue: string;
   totalSample: number;
   otherItemSample: number | undefined;
-  onResetFlameGraph: () => void;
+  onSelectedIdChange: () => void;
 }
 
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
@@ -45,11 +45,11 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
 });
 
 export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
-  const { totalValue, totalSample, otherItemSample, onResetFlameGraph } = props;
+  const { totalValue, totalSample, otherItemSample, onSelectedIdChange } = props;
 
   const handleClick = (event: React.MouseEvent<Element, MouseEvent>) => {
     event.preventDefault();
-    onResetFlameGraph();
+    onSelectedIdChange();
   };
 
   const splitedValue = totalValue.split('(');

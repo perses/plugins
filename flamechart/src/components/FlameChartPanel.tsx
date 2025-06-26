@@ -35,7 +35,9 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     setLiveSpec(spec);
   }, [spec]);
 
-  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
+  // selectedId equals 0 => Flame Graph is not zoomed in
+  // selectedId different from 0 => Flame Graph is zommed in
+  const [selectedId, setSelectedId] = useState(0);
 
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
@@ -63,10 +65,6 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     });
   };
 
-  const onResetFlameGraph = (newVal: boolean) => {
-    setIsZoomEnabled(newVal);
-  };
-
   const OPTIONS_SPACE = liveSpec.showSettings ? 35 : 0; // space for options at the top of the chart
 
   return (
@@ -86,11 +84,11 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
         <Stack sx={{ paddingTop: '10px' }}>
           {liveSpec.showSettings && (
             <Settings
-              onResetFlameGraph={() => onResetFlameGraph(false)}
+              onSelectedIdChange={() => setSelectedId(0)}
               onChangePalette={onChangePalette}
               onDisplayChange={onDisplayChange}
               value={liveSpec}
-              isZoomEnabled={isZoomEnabled}
+              selectedId={selectedId}
             />
           )}
           <Stack direction="row" justifyContent="center" alignItems="top">
@@ -107,8 +105,8 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
                 height={contentDimensions.height - OPTIONS_SPACE}
                 data={flameChartData.data}
                 palette={liveSpec.palette}
-                isZoomEnabled={isZoomEnabled}
-                onResetFlameGraph={onResetFlameGraph}
+                selectedId={selectedId}
+                onSelectedIdChange={setSelectedId}
               />
             )}
           </Stack>
