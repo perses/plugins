@@ -138,8 +138,8 @@ export function changeColors(palette: string, seriesData: Sample[]): Sample[] {
 /**
  * Finds the total sample value of the series data item with the specified name.
  */
-export function findTotalSampleByName(seriesData: Sample[], name: number | undefined): number {
-  if (name == undefined) return 0;
+export function findTotalSampleByName(seriesData: Sample[], name: number | undefined): number | undefined {
+  if (name === undefined || name === 0) return undefined;
   const item = seriesData.find((item) => item.name === name);
   const totalSample = item?.value[8];
   return Number(totalSample);
