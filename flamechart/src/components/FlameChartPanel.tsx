@@ -27,19 +27,20 @@ export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   const { contentDimensions, queryResults, spec } = props;
 
+  // selectedId equals 0 => Flame Graph is not zoomed in
+  // selectedId different from 0 => Flame Graph is zoomed in
+  const [selectedId, setSelectedId] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
+
   // This spec is used to manage settings temporarily
   const [liveSpec, setLiveSpec] = useState<FlameChartOptions>(spec);
 
   // keep liveSpec up to date
   useEffect(() => {
     setLiveSpec(spec);
+    setSelectedId(0);
+    setSearchValue('');
   }, [spec]);
-
-  // selectedId equals 0 => Flame Graph is not zoomed in
-  // selectedId different from 0 => Flame Graph is zoomed in
-  const [selectedId, setSelectedId] = useState(0);
-  const [searchValue, setSearchValue] = useState('');
-  // TODO: set selectedId to 0 and searchValue to '' when data changes
 
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
