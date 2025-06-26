@@ -44,7 +44,6 @@ export function TableChart(props: TableChartProps): ReactElement {
   const availableWidth = width - 10;
 
   const tableData: TableChartSample[] = useMemo(() => {
-    // TODO: set searchValue to '' when data changes
     return tableRecursionJson(data.profile.stackTrace, searchValue);
   }, [data, searchValue]);
 
@@ -58,7 +57,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         headerDescription: 'Function name',
         align: 'left',
         enableSorting: true,
-        width: (1 / 2) * availableWidth,
+        width: 0.5 * availableWidth,
       },
       {
         name: 'self',
@@ -66,7 +65,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         headerDescription: 'Function self samples',
         align: 'right',
         enableSorting: true,
-        width: (1 / 4) * availableWidth - SCROLL_BAR_WIDTH,
+        width: 0.25 * availableWidth - SCROLL_BAR_WIDTH,
       },
       {
         name: 'total',
@@ -74,7 +73,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         headerDescription: 'Function total samples',
         align: 'right',
         enableSorting: true,
-        width: (1 / 4) * availableWidth,
+        width: 0.25 * availableWidth,
       },
     ];
 

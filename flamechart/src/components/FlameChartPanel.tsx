@@ -39,6 +39,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   // selectedId different from 0 => Flame Graph is zoomed in
   const [selectedId, setSelectedId] = useState(0);
   const [searchValue, setSearchValue] = useState('');
+  // TODO: set selectedId to 0 and searchValue to '' when data changes
 
   const chartsTheme = useChartsTheme();
   const flameChartData = queryResults[0];
