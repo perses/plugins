@@ -17,16 +17,17 @@ import CloseIcon from 'mdi-material-ui/Close';
 
 export interface SearchBarProps {
   searchValue: string;
+  width: number;
   onSearchValueChange: (value: string) => void;
 }
 
 export function SearchBar(props: SearchBarProps): ReactElement {
-  const { searchValue, onSearchValueChange } = props;
+  const { searchValue, width, onSearchValueChange } = props;
 
   return (
     <Paper
       component="form"
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 300, marginBottom: '10px' }}
+      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 300, maxWidth: width, marginBottom: '10px' }}
     >
       <InputBase
         sx={{ ml: 1, flex: 1 }}
