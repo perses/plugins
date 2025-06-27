@@ -11,20 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginModuleResource, PluginModuleSpec } from '@perses-dev/plugin-system';
-import packageJson from '../package.json';
+import { LRLanguage } from '@codemirror/language';
+import { parser } from '@grafana/lezer-logql';
+import { Extension } from '@uiw/react-codemirror';
+import { logqlHighlight } from './logql-highlight';
 
-/**
- * Returns the plugin module information from package.json
- */
-export function getPluginModule(): PluginModuleResource {
-  const { name, version, perses } = packageJson;
-  return {
-    kind: 'PluginModule',
-    metadata: {
-      name,
-      version,
+function logqlLanguage(): LRLanguage {
+  return LRLanguage.define({
+    parser: parser.configure({
+      props: [logqlHighlight],
+    }),
+    languageData: {
+      closeBrackets: { brackets: ['(', '[', '{', "'", '"', '`'] },
+      commentTokens: { line: '#' },
     },
-    spec: perses as PluginModuleSpec,
-  };
+  });
+}
+
+export function LogQLExtension(): Array<LRLanguage | Extension> {
+  const language = logqlLanguage();
+  return [language];
 }
