@@ -1,0 +1,6 @@
+{
+  "kind": "LokiDatasource",
+  "spec": {
+    "directUrl": "http://localhost:9090"
+  }
+}
