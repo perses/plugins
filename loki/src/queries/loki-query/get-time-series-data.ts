@@ -1,13 +1,26 @@
+// Copyright 2025 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import { TimeSeries } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
+import { LokiQueryRangeResponse, LokiStreamResult } from '../../model/loki-client-types';
+import { LokiClient } from '../../model/loki-client';
 import { LokiQuerySpec } from './loki-query-types';
 import { DEFAULT_DATASOURCE } from './constants';
-import { LokiQueryRangeResponse } from '../../model/loki-client-types';
-import { LokiClient } from '../../model/loki-client';
 
 export type LokiMatrixResult = {
   metric: Record<string, string>;
-  values: [number, string][];
+  values: Array<[number, string]>;
 };
 
 export type LokiMatrixResponse = {
@@ -25,7 +38,7 @@ function convertLokiToMatrix(response: LokiQueryRangeResponse): LokiMatrixRespon
   if (response.data.resultType === 'streams') {
     // Flatten each log line into its own matrix result for table compatibility
     const flatResults: LokiMatrixResult[] = [];
-    (response.data.result as any[]).forEach((stream) => {
+    (response.data.result as LokiStreamResult[]).forEach((stream) => {
       stream.values.forEach(([timestamp, logLine]: [string, string]) => {
         flatResults.push({
           metric: stream.stream,
@@ -55,17 +68,16 @@ function matrixToTimeSeries(matrix: LokiMatrixResponse): TimeSeries[] {
       ]),
       // Optionally, add raw log lines for log-aware panels
       logLines: series.values
-        .map(([timestamp, value]) => (isNaN(Number(value)) ? { timestamp: Number(timestamp) * 1000, log: value } : undefined))
+        .map(([timestamp, value]) =>
+          isNaN(Number(value)) ? { timestamp: Number(timestamp) * 1000, log: value } : undefined
+        )
         .filter(Boolean),
       labels: series.metric,
     };
   });
 }
 
-export const getTimeSeriesData: TimeSeriesQueryPlugin<LokiQuerySpec>['getTimeSeriesData'] = async (
-  spec,
-  context
-) => {
+export const getTimeSeriesData: TimeSeriesQueryPlugin<LokiQuerySpec>['getTimeSeriesData'] = async (spec, context) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     return { series: [] };
   }

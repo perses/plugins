@@ -1,9 +1,29 @@
-import { DatasourceSelect, DatasourceSelectProps, isVariableDatasource, OptionsEditorProps, useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
+// Copyright 2025 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import {
+  DatasourceSelect,
+  DatasourceSelectProps,
+  isVariableDatasource,
+  OptionsEditorProps,
+  useDatasourceSelectValueToSelector,
+} from '@perses-dev/plugin-system';
+import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback, useRef, useState, useEffect } from 'react';
+import { LogQLEditor } from '../../components/logql-editor';
+import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { LokiQuerySpec } from './loki-query-types';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from './constants';
-import { CodeMirrorLogQLEditor } from '../../components/codemirror-logql-editor';
-import { LOKI_DATASOURCE_KIND, LokiClient, LokiDatasourceSelector } from '../../model';
 
 type LokiQueryEditorProps = OptionsEditorProps<LokiQuerySpec>;
 
@@ -17,8 +37,8 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
     LOKI_DATASOURCE_KIND
   ) as LokiDatasourceSelector;
 
-  const { data: client } = useDatasourceClient<LokiClient>(selectedDatasource);
-  const lokiURL = client?.options.datasourceUrl;
+  // const { data: client } = useDatasourceClient<LokiClient>(selectedDatasource);
+  // const lokiURL = client?.options.datasourceUrl;
 
   // Local state for editor value to prevent query_range calls on every keystroke
   const [localQuery, setLocalQuery] = useState(value.query);
@@ -39,31 +59,35 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
 
   // Debounced query change handler to prevent excessive query_range calls
   const handleQueryChange = useCallback((newQuery: string) => {
-    console.log('🔍 LokiQueryEditor: Query change called, updating local state only');
-    // Update local state immediately for editor responsiveness
     setLocalQuery(newQuery);
-    // Do NOT update the parent query to prevent excessive API calls
   }, []);
 
   // Immediate query execution on Enter or blur
-  const handleQueryExecute = useCallback((query: string) => {
-    console.log('🔍 LokiQueryEditor: Query execute called, updating parent value:', query);
-    // Clear any pending debounced update
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
+  const handleQueryExecute = useCallback(
+    (query: string) => {
+      // Clear any pending debounced update
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
 
-    // Update the parent component state (this will trigger query execution)
-    onChange({ ...value, query });
-  }, [onChange, value]);
+      onChange({ ...value, query });
+    },
+    [onChange, value]
+  );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <Stack spacing={1.5}>
       <div>
-        <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+        <InputLabel
+          sx={{
+            display: 'block',
+            marginBottom: '4px',
+            fontWeight: 500,
+          }}
+        >
           Datasource
-        </label>
+        </InputLabel>
         <DatasourceSelect
           datasourcePluginKind={DATASOURCE_KIND}
           value={selectedDatasource}
@@ -74,20 +98,29 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
       </div>
 
       <div>
-        <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+        <InputLabel
+          sx={{
+            display: 'block',
+            marginBottom: '4px',
+            fontWeight: 500,
+          }}
+        >
           LogQL Query
-        </label>
-        <CodeMirrorLogQLEditor
+        </InputLabel>
+        <LogQLEditor
           value={localQuery}
           onChange={handleQueryChange}
           onBlur={() => handleQueryExecute(localQuery)}
-          onEnter={handleQueryExecute}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+              event.preventDefault();
+              handleQueryExecute(localQuery);
+            }
+          }}
           placeholder='Enter LogQL query (e.g. {job="mysql"} |= "error")'
-          height={120}
-          lokiURL={lokiURL}
-          timeRange={(props as any).context?.timeRange}
+          // height="120px"
         />
       </div>
-    </div>
+    </Stack>
   );
 }

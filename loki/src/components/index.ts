@@ -11,4 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './loki-datasource';
+export { LogQLEditor } from './logql-editor';
+export type { LogQLEditorProps } from './logql-editor';

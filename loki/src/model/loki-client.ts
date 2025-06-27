@@ -54,11 +54,21 @@ export interface LokiClient {
   query: (params: LokiQueryParams, headers?: LokiRequestHeaders) => Promise<LokiQueryResponse>;
   queryRange: (params: LokiQueryRangeParams, headers?: LokiRequestHeaders) => Promise<LokiQueryRangeResponse>;
   labels: (start?: string, end?: string, headers?: LokiRequestHeaders) => Promise<LokiLabelsResponse>;
-  labelValues: (label: string, start?: string, end?: string, headers?: LokiRequestHeaders) => Promise<LokiLabelValuesResponse>;
+  labelValues: (
+    label: string,
+    start?: string,
+    end?: string,
+    headers?: LokiRequestHeaders
+  ) => Promise<LokiLabelValuesResponse>;
   series: (match: string[], start?: string, end?: string, headers?: LokiRequestHeaders) => Promise<LokiSeriesResponse>;
   volume: (params: LokiVolumeParams, headers?: LokiRequestHeaders) => Promise<LokiVolumeResponse>;
   volumeRange: (params: LokiVolumeParams, headers?: LokiRequestHeaders) => Promise<LokiVolumeResponse>;
-  indexStats: (query: string, start?: string, end?: string, headers?: LokiRequestHeaders) => Promise<LokiIndexStatsResponse>;
+  indexStats: (
+    query: string,
+    start?: string,
+    end?: string,
+    headers?: LokiRequestHeaders
+  ) => Promise<LokiIndexStatsResponse>;
 }
 
 export async function query(
