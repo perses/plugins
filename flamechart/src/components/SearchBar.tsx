@@ -35,6 +35,11 @@ export function SearchBar(props: SearchBarProps): ReactElement {
         inputProps={{ 'aria-label': 'search' }}
         value={searchValue}
         onChange={(event) => onSearchValueChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+          }
+        }}
       />
       {searchValue !== '' && (
         <Button
