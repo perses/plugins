@@ -27,7 +27,7 @@ export function SearchBar(props: SearchBarProps): ReactElement {
   return (
     <Paper
       component="form"
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 300, maxWidth: width, marginBottom: '10px' }}
+      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: width, marginBottom: '10px' }}
     >
       <InputBase
         sx={{ ml: 1, flex: 1 }}

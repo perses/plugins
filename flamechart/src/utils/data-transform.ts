@@ -107,10 +107,9 @@ export function recursionJson(
         item.total,
       ],
       itemStyle: {
-        color:
-          searchValue !== '' && !item.name.toLocaleLowerCase().includes(searchValue.trim().toLocaleLowerCase())
-            ? '#dee2e6'
-            : getSpanColor(palette, item.name, (item.total / (currentVal ? currentVal : rootVal)) * 100),
+        color: !isItemNameMatchesSearchFilters(item.name, searchValue)
+          ? '#dee2e6'
+          : getSpanColor(palette, item.name, (item.total / (currentVal ? currentVal : rootVal)) * 100),
       },
     };
     data.push(temp as Sample);
@@ -139,8 +138,8 @@ export function tableRecursionJson(jsonObj: StackTrace, searchValue: string): Ta
       self: item.self,
       total: item.total,
     };
-    if (temp.name.toLocaleLowerCase().includes(searchValue.trim().toLocaleLowerCase()))
-      data.push(temp as TableChartSample);
+
+    if (isItemNameMatchesSearchFilters(temp.name, searchValue)) data.push(temp as TableChartSample);
 
     for (const child of item.children || []) {
       recur(child);
@@ -150,6 +149,23 @@ export function tableRecursionJson(jsonObj: StackTrace, searchValue: string): Ta
   // check is structuredJson is not empty before call recur
   if (structuredJson.id) recur(structuredJson);
   return data;
+}
+
+// Checks if an item name matches all parts of a search value.
+function isItemNameMatchesSearchFilters(itemName: string, searchValue: string): boolean {
+  if (searchValue === '') return true;
+
+  const filters = searchValue
+    .trim()
+    .toLocaleLowerCase()
+    .split(/[^a-zA-Z0-9']+/)
+    .filter((s) => s !== '');
+
+  if (filters.length === 0) {
+    return false;
+  } else {
+    return filters.every((filter) => itemName.toLowerCase().includes(filter.trim()));
+  }
 }
 
 /**
