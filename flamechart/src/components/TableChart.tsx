@@ -21,7 +21,7 @@ import { TableChartSample } from '../utils/data-model';
 import { formatItemValue } from '../utils/format';
 import { SearchBar } from './SearchBar';
 
-const LARGE_SCREEN_TRESHOLD = 600; // heigth treshold to switch to large screen mode
+const LARGE_PANEL_TRESHOLD = 600; // heigth treshold to switch to large panel mode
 const PADDING_TOP = 20; // padding top for the table
 const SCROLL_BAR_WIDTH = 15;
 const SEARCH_BAR_HEIGHT = 50;
@@ -131,7 +131,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         columns={columns}
         height={availableHeight - PADDING_TOP - SEARCH_BAR_HEIGHT}
         width={availableWidth}
-        density={availableHeight < LARGE_SCREEN_TRESHOLD ? 'compact' : 'standard'}
+        density={availableHeight < LARGE_PANEL_TRESHOLD ? 'compact' : 'standard'}
         defaultColumnWidth="auto"
         defaultColumnHeight="auto"
         sorting={sorting}
