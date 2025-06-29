@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Paper, InputBase, Button } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Paper, TextField, InputAdornment, Chip } from '@mui/material';
+import Magnify from 'mdi-material-ui/Magnify';
 
 export interface SearchBarProps {
   searchValue: string;
@@ -25,14 +25,13 @@ export function SearchBar(props: SearchBarProps): ReactElement {
   const { searchValue, width, onSearchValueChange } = props;
 
   return (
-    <Paper
-      component="form"
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: width, marginBottom: '10px' }}
-    >
-      <InputBase
-        sx={{ ml: 1, flex: 1 }}
-        placeholder="Search"
-        inputProps={{ 'aria-label': 'search' }}
+    <Paper sx={{ width: width, marginBottom: 1 }}>
+      <TextField
+        size="small"
+        variant="outlined"
+        placeholder="Search..."
+        fullWidth
+        sx={{ justifyContent: 'flex-start' }}
         value={searchValue}
         onChange={(event) => onSearchValueChange(event.target.value)}
         onKeyDown={(event) => {
@@ -40,18 +39,21 @@ export function SearchBar(props: SearchBarProps): ReactElement {
             event.preventDefault();
           }
         }}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Magnify fontSize="small" />
+              </InputAdornment>
+            ),
+            endAdornment: searchValue !== '' && (
+              <InputAdornment position="end">
+                <Chip label="Clear" size="small" onClick={() => onSearchValueChange('')} />
+              </InputAdornment>
+            ),
+          },
+        }}
       />
-      {searchValue !== '' && (
-        <Button
-          variant="text"
-          color="primary"
-          size="small"
-          startIcon={<CloseIcon />}
-          onClick={() => onSearchValueChange('')}
-        >
-          Clear
-        </Button>
-      )}
     </Paper>
   );
 }
