@@ -18,7 +18,6 @@ import { Table, TableColumnConfig } from '@perses-dev/components';
 import { SortingState } from '@tanstack/react-table';
 import { tableRecursionJson } from '../utils/data-transform';
 import { TableChartSample } from '../utils/data-model';
-import { ColumnSettings } from '../utils/table-model';
 import { formatItemValue } from '../utils/format';
 import { SearchBar } from './SearchBar';
 
@@ -48,104 +47,61 @@ export function TableChart(props: TableChartProps): ReactElement {
   }, [data, searchValue]);
 
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
-    const columns: Array<TableColumnConfig<unknown>> = [];
+    const unit = data.metadata?.units || '';
 
-    const columnSettings: ColumnSettings[] = [
+    const columnSettings: Array<TableColumnConfig<unknown>> = [
       {
-        name: 'name',
+        accessorKey: 'name',
         header: 'Name',
         headerDescription: 'Function name',
         align: 'left',
         enableSorting: true,
         width: 0.5 * availableWidth,
+        cell: (ctx) => {
+          const cellValue = ctx.getValue();
+          return (
+            <Link
+              href="#"
+              underline="hover"
+              onClick={(e) => {
+                e.preventDefault();
+                const currentSample = ctx.row.original as TableChartSample;
+                onSearchValueChange(currentSample.name);
+              }}
+            >
+              {cellValue}
+            </Link>
+          );
+        },
+        cellDescription: () => '',
       },
       {
-        name: 'self',
+        accessorKey: 'self',
         header: 'Self',
         headerDescription: 'Function self samples',
         align: 'right',
         enableSorting: true,
         width: 0.25 * availableWidth - SCROLL_BAR_WIDTH,
+        cell: (ctx) => {
+          const cellValue = ctx.getValue();
+          return formatItemValue(unit, cellValue);
+        },
       },
       {
-        name: 'total',
+        accessorKey: 'total',
         header: 'Total',
         headerDescription: 'Function total samples',
         align: 'right',
         enableSorting: true,
         width: 0.25 * availableWidth,
+        cell: (ctx) => {
+          const cellValue = ctx.getValue();
+          return formatItemValue(unit, cellValue);
+        },
       },
     ];
 
-    const generateCellContentConfig = (
-      column: ColumnSettings,
-      unit: string
-    ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> => {
-      return {
-        cell: (ctx) => {
-          const cellValue = ctx.getValue();
-          // Add clickable link for name column
-          if (column.name === 'name') {
-            return (
-              <Link
-                href="#"
-                underline="hover"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const currentSample = ctx.row.original as TableChartSample;
-                  onSearchValueChange(currentSample.name);
-                }}
-              >
-                {cellValue}
-              </Link>
-            );
-          }
-
-          return formatItemValue(unit, cellValue);
-        },
-        cellDescription: () => '',
-      };
-    };
-
-    // Generate column config
-    // If column do not have a definition, return a default column config.
-    const generateColumnConfig = (
-      name: string,
-      columnSettings: ColumnSettings[],
-      unit: string
-    ): TableColumnConfig<unknown> => {
-      for (const column of columnSettings) {
-        if (column.name === name) {
-          return {
-            accessorKey: name,
-            header: column.header ?? name,
-            headerDescription: column.headerDescription,
-            enableSorting: column.enableSorting,
-            width: column.width,
-            align: column.align,
-            ...generateCellContentConfig(column, unit),
-          };
-        }
-      }
-
-      return {
-        accessorKey: name,
-        header: name,
-      };
-    };
-
-    const unit = data.metadata?.units || '';
-
-    const nameColumn = generateColumnConfig('name', columnSettings, unit);
-    columns.push(nameColumn);
-
-    const selfColumn = generateColumnConfig('self', columnSettings, unit);
-    columns.push(selfColumn);
-
-    const totalColumn = generateColumnConfig('total', columnSettings, unit);
-    columns.push(totalColumn);
-
-    return columns;
+    return columnSettings;
   }, [data.metadata?.units, availableWidth, onSearchValueChange]);
 
   const [sorting, setSorting] = useState<SortingState>([{ id: 'total', desc: true }]);
