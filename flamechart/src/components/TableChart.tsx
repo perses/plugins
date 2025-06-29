@@ -22,7 +22,7 @@ import { formatItemValue } from '../utils/format';
 import { SearchBar } from './SearchBar';
 
 const LARGE_PANEL_TRESHOLD = 600; // heigth treshold to switch to large panel mode
-const PADDING_TOP = 20; // padding top for the table
+const PADDING_TOP = 20;
 const SCROLL_BAR_WIDTH = 15;
 const SEARCH_BAR_HEIGHT = 50;
 
