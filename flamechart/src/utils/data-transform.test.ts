@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StackTrace } from '@perses-dev/core';
-import { Sample } from '../components/FlameChart';
+import { FlameChartSample as Sample } from './data-model';
 import { filterJson, recursionJson } from './data-transform';
 import { getSpanColor } from './palette-gen';
 
@@ -122,13 +122,13 @@ describe('recursionJson', () => {
   const palette = 'package-name';
 
   it('should return an empty array when jsonObj is empty', () => {
-    const output = recursionJson(palette, metadata, emptyJson);
+    const output = recursionJson(palette, metadata, emptyJson, '');
     expect(output).toEqual([]);
   });
 
   it('should return the right array for a given jsonObj', () => {
     rootJson.children.push(firstChildJson, secondChildJson); // root function now has two children
-    const output = recursionJson(palette, metadata, rootJson);
+    const output = recursionJson(palette, metadata, rootJson, '');
     const expected0: Sample = {
       name: 1,
       value: [1, 0, 1000, 'total (1.00K)', 100, 0, 'total', 0, 1000],

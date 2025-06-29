@@ -27,6 +27,7 @@ import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
 import { recursionJson, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
+import { FlameChartSample as Sample } from '../utils/data-model';
 import { CustomBreadcrumb } from './CustomBreadcrumb';
 
 const ITEM_GAP = 2; // vertical gap between flame chart items
@@ -42,29 +43,12 @@ export interface FlameChartProps {
   data: ProfileData;
   palette: 'package-name' | 'value';
   selectedId: number;
+  searchValue: string;
   onSelectedIdChange: (newId: number) => void;
 }
 
-export interface Sample {
-  name: number;
-  value: [
-    level: number,
-    start_val: number,
-    end_val: number,
-    name: string,
-    total_percentage: number,
-    self_percentage: number,
-    shortName: string,
-    self: number,
-    total: number,
-  ];
-  itemStyle: {
-    color: string;
-  };
-}
-
 export function FlameChart(props: FlameChartProps): ReactElement {
-  const { width, height, data, palette, selectedId, onSelectedIdChange } = props;
+  const { width, height, data, palette, selectedId, searchValue, onSelectedIdChange } = props;
   const theme = useTheme();
   const chartsTheme = useChartsTheme();
   const [menuPosition, setMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
@@ -72,8 +56,8 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const [isCopied, setIsCopied] = useState(false);
 
   const seriesData = useMemo(
-    () => recursionJson(palette, data.metadata, data.profile.stackTrace, selectedId),
-    [palette, data.metadata, data.profile.stackTrace, selectedId]
+    () => recursionJson(palette, data.metadata, data.profile.stackTrace, searchValue, selectedId),
+    [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue]
   );
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {

@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import * as echarts from 'echarts';
-import { Sample } from '../components/FlameChart';
+import { FlameChartSample } from './data-model';
 import { formatItemValue } from './format';
 
 /**
  * Generates a tooltip for the flame chart items.
  */
-export function generateTooltip(params: Sample, unit: string | undefined): string {
+export function generateTooltip(params: FlameChartSample, unit: string | undefined): string {
   const totalPercentage = Number(params.value[4]);
   const selfPercentage = Number(params.value[5]);
   const functionName = params.value[6];

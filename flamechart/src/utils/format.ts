@@ -15,11 +15,12 @@ import { msToPrometheusDuration, formatDuration, formatValue } from '@perses-dev
 
 export function formatNanoDuration(value: number): string {
   // The value to format is in nanoseconds
-  const nanosecondsInMillisecond = 1_000_000;
-  if (value < nanosecondsInMillisecond) {
-    return formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true }) + ' ns';
+  if (value < 1_000) {
+    return formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true }) + 'ns';
+  } else if (value < 1_000_000) {
+    return formatValue(value / 1_000, { unit: 'decimal', decimalPlaces: 2, shortValues: true }) + 'μs';
   } else {
-    return formatDuration(msToPrometheusDuration(value / nanosecondsInMillisecond));
+    return formatDuration(msToPrometheusDuration(value / 1_000_000));
   }
 }
 

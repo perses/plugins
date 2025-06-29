@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ProfileMetaData, StackTrace } from '@perses-dev/core';
-import { Sample } from '../components/FlameChart';
+import { FlameChartSample as Sample, TableChartSample } from './data-model';
 import { getSpanColor } from './palette-gen';
 import { formatItemValue } from './format';
 
@@ -83,6 +83,7 @@ export function recursionJson(
   palette: string,
   metadata: ProfileMetaData | undefined,
   jsonObj: StackTrace,
+  searchValue: string,
   id?: number
 ): Sample[] {
   const data: Sample[] = [];
@@ -106,7 +107,9 @@ export function recursionJson(
         item.total,
       ],
       itemStyle: {
-        color: getSpanColor(palette, item.name, (item.total / (currentVal ? currentVal : rootVal)) * 100),
+        color: !isItemNameMatchesSearchFilters(item.name, searchValue)
+          ? '#dee2e6'
+          : getSpanColor(palette, item.name, (item.total / (currentVal ? currentVal : rootVal)) * 100),
       },
     };
     data.push(temp as Sample);
@@ -122,17 +125,47 @@ export function recursionJson(
 }
 
 /**
- * Update only series data colors to align with the new palette.
+ * Transform query results to a tabular format for the table chart
  */
-export function changeColors(palette: string, seriesData: Sample[]): Sample[] {
-  return seriesData.map((item) => ({
-    ...item,
-    itemStyle: {
-      // values[6] = function name
-      // values[4] = total percentage
-      color: getSpanColor(palette, item.value[6], item.value[4]),
-    },
-  }));
+export function tableRecursionJson(jsonObj: StackTrace, searchValue: string): TableChartSample[] {
+  const data: TableChartSample[] = [];
+  const structuredJson = structuredClone(jsonObj);
+
+  const recur = (item: StackTrace): void => {
+    const temp = {
+      id: item.id,
+      name: item.name,
+      self: item.self,
+      total: item.total,
+    };
+
+    if (isItemNameMatchesSearchFilters(temp.name, searchValue)) data.push(temp as TableChartSample);
+
+    for (const child of item.children || []) {
+      recur(child);
+    }
+  };
+
+  // check is structuredJson is not empty before call recur
+  if (structuredJson.id) recur(structuredJson);
+  return data;
+}
+
+// Checks if an item name matches all parts of a search value.
+function isItemNameMatchesSearchFilters(itemName: string, searchValue: string): boolean {
+  if (searchValue === '') return true;
+
+  const filters = searchValue
+    .trim()
+    .toLocaleLowerCase()
+    .split(/[^a-zA-Z0-9']+/)
+    .filter((s) => s !== '');
+
+  if (filters.length === 0) {
+    return false;
+  } else {
+    return filters.every((filter) => itemName.toLowerCase().includes(filter.trim()));
+  }
 }
 
 /**
