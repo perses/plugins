@@ -25,7 +25,7 @@ export function SearchBar(props: SearchBarProps): ReactElement {
   const { searchValue, width, onSearchValueChange } = props;
 
   return (
-    <Paper sx={{ width: width, marginBottom: 1 }}>
+    <Paper sx={{ width: width }}>
       <TextField
         size="small"
         variant="outlined"
@@ -34,11 +34,6 @@ export function SearchBar(props: SearchBarProps): ReactElement {
         sx={{ justifyContent: 'flex-start' }}
         value={searchValue}
         onChange={(event) => onSearchValueChange(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            event.preventDefault();
-          }
-        }}
         slotProps={{
           input: {
             startAdornment: (

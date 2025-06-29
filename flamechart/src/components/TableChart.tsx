@@ -154,6 +154,7 @@ export function TableChart(props: TableChartProps): ReactElement {
     <Stack
       width={availableWidth}
       height={availableHeight}
+      gap={1}
       sx={{
         paddingTop: `${PADDING_TOP}px`,
         '& .MuiTable-root': {
