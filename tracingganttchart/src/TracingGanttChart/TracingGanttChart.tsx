@@ -23,6 +23,7 @@ import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { AttributeLinks } from './DetailPane/Attributes';
 import { getTraceModel, Span } from './trace';
+import { Toolbar } from './Toolbar/Toolbar';
 
 export interface TracingGanttChartProps {
   options: TracingGanttChartOptions;
@@ -60,32 +61,35 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   const gap = 2;
 
   return (
-    <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
-      <Stack sx={{ flexGrow: 1, gap }}>
-        <MiniGanttChart options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
-        <GanttTableProvider>
-          <GanttTable
-            options={options}
-            trace={trace}
-            viewport={viewport}
-            selectedSpan={selectedSpan}
-            onSpanClick={setSelectedSpan}
-          />
-        </GanttTableProvider>
-      </Stack>
-      {selectedSpan && (
-        <>
-          <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
-          <Box sx={{ width: `${(1 - tableWidth) * 100}%`, overflow: 'auto' }}>
-            <DetailPane
-              attributeLinks={attributeLinks}
+    <Stack ref={ganttChart} direction="column" sx={{ height: '100%', minHeight: '240px', gap }}>
+      <Toolbar trace={otlpTrace} />
+      <Stack direction="row" sx={{ flexGrow: 1, gap }}>
+        <Stack direction="column" sx={{ flexGrow: 1, gap }}>
+          <MiniGanttChart options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
+          <GanttTableProvider>
+            <GanttTable
+              options={options}
               trace={trace}
-              span={selectedSpan}
-              onCloseBtnClick={() => setSelectedSpan(undefined)}
+              viewport={viewport}
+              selectedSpan={selectedSpan}
+              onSpanClick={setSelectedSpan}
             />
-          </Box>
-        </>
-      )}
+          </GanttTableProvider>
+        </Stack>
+        {selectedSpan && (
+          <>
+            <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
+            <Box sx={{ width: `${(1 - tableWidth) * 100}%`, overflow: 'auto' }}>
+              <DetailPane
+                attributeLinks={attributeLinks}
+                trace={trace}
+                span={selectedSpan}
+                onCloseBtnClick={() => setSelectedSpan(undefined)}
+              />
+            </Box>
+          </>
+        )}
+      </Stack>
     </Stack>
   );
 }
