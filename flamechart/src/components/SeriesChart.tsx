@@ -11,21 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useState, useRef } from 'react';
-import { Stack } from '@mui/material';
+import { ReactElement, useMemo, useRef } from 'react';
+import { Stack, useTheme } from '@mui/material';
 import { ProfileData, Timeline } from '@perses-dev/core';
-import {
-  useChartsTheme,
-  EChart,
-  ZoomEventData,
-  OnEventsType,
-  enableDataZoom,
-  CursorCoordinates,
-} from '@perses-dev/components';
+import { useChartsTheme, EChart, ZoomEventData, OnEventsType, enableDataZoom } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import type { EChartsCoreOption, LineSeriesOption, TooltipComponentOption } from 'echarts';
+import type { EChartsCoreOption, LineSeriesOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatItemValue } from '../utils/format';
+
+const DEFAULT_LINE_WIDTH = 1.25;
+const DEFAULT_AREA_OPACITY = 0;
+const POINT_SIZE_OFFSET = 2;
 
 export interface SeriesChartProps {
   width: number;
@@ -42,15 +39,9 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
   const { width, height, data } = props;
 
   const chartsTheme = useChartsTheme();
-
+  const theme = useTheme();
   const { setTimeRange } = useTimeRange();
-
   const chartRef = useRef<EChartsInstance>();
-  const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
-  const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
@@ -81,7 +72,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
   const seriesData: SeriesSample[] = useMemo(() => {
     const startTime = timeLine.startTime;
     const durationDelta = timeLine.durationDelta;
-
+    console.log(timeLine.samples);
     return timeLine.samples.map((sample, index) => ({
       id: index,
       value: [(startTime + index * durationDelta) * 1000, Number(sample)],
@@ -89,19 +80,57 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
   }, [timeLine]);
 
   const option: EChartsCoreOption = useMemo(() => {
+    const seriesMapping: LineSeriesOption = {
+      type: 'line',
+      color: theme.palette.primary.main,
+      sampling: 'lttb',
+      showSymbol: true,
+      showAllSymbol: true,
+      symbolSize: DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET,
+      lineStyle: {
+        width: DEFAULT_LINE_WIDTH,
+        opacity: 0.95,
+      },
+      areaStyle: {
+        opacity: DEFAULT_AREA_OPACITY,
+      },
+      // https://echarts.apache.org/en/option.html#series-line.emphasis
+      emphasis: {
+        //   focus: 'series',
+        disabled: true,
+        //   lineStyle: {
+        //     width: DEFAULT_LINE_WIDTH + 1,
+        //     opacity: 1,
+        //   },
+      },
+      // selectedMode: 'single',
+      // select: {
+      //   itemStyle: {
+      //     borderColor: theme.palette.primary.main,
+      //     borderWidth: DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET + 0.5,
+      //   },
+      // },
+      // blur: {
+      //   lineStyle: {
+      //     width: DEFAULT_LINE_WIDTH,
+      //     opacity: BLUR_FADEOUT_OPACITY,
+      //   },
+      // },
+      data: seriesData,
+    };
+
     const option: EChartsCoreOption = {
-      series: [
-        {
-          type: 'line',
-          data: seriesData,
-        },
-      ],
+      //dataset: seriesData,
+      series: seriesMapping,
       xAxis: {
         type: 'time',
         min: timeLine.startTime * 1000,
         max: (timeLine.startTime + timeLine.samples.length * timeLine.durationDelta) * 1000,
         axisLabel: {
           hideOverlap: true,
+        },
+        axisPointer: {
+          snap: false, // important so shared crosshair does not lag
         },
       },
       yAxis: {
@@ -116,7 +145,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
       tooltip: {
         show: true,
         showContent: true,
-        trigger: 'item',
+        trigger: 'axis',
         appendToBody: true,
       },
       axisPointer: {
@@ -143,7 +172,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
     };
 
     return option;
-  }, [timeLine, seriesData, data.metadata?.units]);
+  }, [timeLine, data.metadata?.units, seriesData, theme]);
 
   const seriesChart = useMemo(
     () => (
@@ -155,62 +184,14 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
         option={option}
         theme={chartsTheme.echartsTheme}
         onEvents={handleEvents}
+        _instance={chartRef}
       />
     ),
     [chartsTheme.echartsTheme, height, option, width, handleEvents]
   );
 
   return (
-    <Stack
-      width={width}
-      height={height}
-      alignItems="center"
-      justifyContent="center"
-      onMouseDown={(e) => {
-        const { clientX } = e;
-        setIsDragging(true);
-        setStartX(clientX);
-      }}
-      onMouseMove={(e) => {
-        // Allow clicking inside tooltip to copy labels.
-        if (!(e.target instanceof HTMLCanvasElement)) {
-          return;
-        }
-        const { clientX } = e;
-        if (isDragging) {
-          const deltaX = clientX - startX;
-          if (deltaX > 0) {
-            // Hide tooltip when user drags to zoom.
-            setShowTooltip(false);
-          }
-        }
-      }}
-      onMouseUp={() => {
-        console.log('Finished dragging');
-        setIsDragging(false);
-        setStartX(0);
-        setShowTooltip(true);
-      }}
-    >
-      {showTooltip === true && (option.tooltip as TooltipComponentOption)?.showContent === false && (
-        <Stack>Tooltip here.</Stack>
-        // <SeriesChartTooltip
-        //   containerId={chartsTheme.tooltipPortalContainerId}
-        //   chartRef={chartRef}
-        //   data={data}
-        //   seriesMapping={seriesMapping}
-        //   wrapLabels={tooltipConfig.wrapLabels}
-        //   enablePinning={isPinningEnabled}
-        //   pinnedPos={tooltipPinnedCoords}
-        //   format={format}
-        //   onUnpinClick={() => {
-        //     // Unpins tooltip when clicking Pin icon in TooltipHeader.
-        //     setTooltipPinnedCoords(null);
-        //     // Clear previously set pinned crosshair.
-        //     setPinnedCrosshair(null);
-        //   }}
-        // />
-      )}
+    <Stack width={width} height={height} alignItems="center" justifyContent="center">
       {seriesChart}
     </Stack>
   );
