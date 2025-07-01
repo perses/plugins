@@ -93,15 +93,10 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
       areaStyle: {
         opacity: 0,
       },
-      emphasis: {
-        disabled: true,
-      },
-      // selectedMode: 'single',
       data: seriesData,
     };
 
     const option: EChartsCoreOption = {
-      //dataset: seriesData,
       series: seriesMapping,
       xAxis: {
         type: 'time',
@@ -132,14 +127,14 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
       axisPointer: {
         type: 'line',
         z: 0, // ensure point symbol shows on top of dashed line
-        triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
+        triggerEmphasis: true,
         triggerTooltip: false,
-        snap: false, // xAxis.axisPointer.snap takes priority
+        snap: false,
       },
       toolbox: {
         feature: {
           dataZoom: {
-            icon: null, // https://stackoverflow.com/a/67684076/17575201
+            icon: null,
             yAxisIndex: 'none',
           },
         },
