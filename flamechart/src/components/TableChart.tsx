@@ -22,7 +22,7 @@ import { formatItemValue } from '../utils/format';
 import { SearchBar } from './SearchBar';
 
 const LARGE_PANEL_TRESHOLD = 600; // heigth treshold to switch to large panel mode
-const PADDING_TOP = 20;
+const PADDING_TOP = 8;
 const SCROLL_BAR_WIDTH = 15;
 const SEARCH_BAR_HEIGHT = 50;
 
@@ -39,7 +39,7 @@ export function TableChart(props: TableChartProps): ReactElement {
 
   const theme = useTheme();
 
-  const availableHeight = height - 10;
+  const availableHeight = height;
   const availableWidth = width - 10;
 
   const tableData: TableChartSample[] = useMemo(() => {

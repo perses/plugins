@@ -21,7 +21,6 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatItemValue } from '../utils/format';
 
 const DEFAULT_LINE_WIDTH = 1.25;
-const DEFAULT_AREA_OPACITY = 0;
 const POINT_SIZE_OFFSET = 2;
 
 export interface SeriesChartProps {
@@ -80,7 +79,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
   }, [timeLine]);
 
   const option: EChartsCoreOption = useMemo(() => {
-    const seriesMapping: LineSeriesOption = {
+    const seriesMapping = {
       type: 'line',
       color: theme.palette.primary.main,
       sampling: 'lttb',
@@ -92,30 +91,12 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
         opacity: 0.95,
       },
       areaStyle: {
-        opacity: DEFAULT_AREA_OPACITY,
+        opacity: 0,
       },
-      // https://echarts.apache.org/en/option.html#series-line.emphasis
       emphasis: {
-        //   focus: 'series',
         disabled: true,
-        //   lineStyle: {
-        //     width: DEFAULT_LINE_WIDTH + 1,
-        //     opacity: 1,
-        //   },
       },
       // selectedMode: 'single',
-      // select: {
-      //   itemStyle: {
-      //     borderColor: theme.palette.primary.main,
-      //     borderWidth: DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET + 0.5,
-      //   },
-      // },
-      // blur: {
-      //   lineStyle: {
-      //     width: DEFAULT_LINE_WIDTH,
-      //     opacity: BLUR_FADEOUT_OPACITY,
-      //   },
-      // },
       data: seriesData,
     };
 

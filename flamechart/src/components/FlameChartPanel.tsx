@@ -70,7 +70,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   };
 
   const OPTIONS_SPACE = liveSpec.showSettings ? 35 : 0; // space for options at the top of the chart
-  const SERIES_CHART_HEIGHT = contentDimensions.height < 660 ? contentDimensions.height : 660;
+  const SERIES_CHART_HEIGHT = contentDimensions.height < 200 ? contentDimensions.height : 200;
 
   return (
     <Stack
