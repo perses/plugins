@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Paper, TextField, InputAdornment, Chip } from '@mui/material';
+import { TextField, InputAdornment, Chip } from '@mui/material';
 import Magnify from 'mdi-material-ui/Magnify';
 
 export interface SearchBarProps {
@@ -25,30 +25,28 @@ export function SearchBar(props: SearchBarProps): ReactElement {
   const { searchValue, width, onSearchValueChange } = props;
 
   return (
-    <Paper sx={{ width: width }}>
-      <TextField
-        size="small"
-        variant="outlined"
-        placeholder="Search..."
-        fullWidth
-        sx={{ justifyContent: 'flex-start' }}
-        value={searchValue}
-        onChange={(event) => onSearchValueChange(event.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Magnify fontSize="small" />
-              </InputAdornment>
-            ),
-            endAdornment: searchValue !== '' && (
-              <InputAdornment position="end">
-                <Chip label="Clear" size="small" onClick={() => onSearchValueChange('')} />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
-    </Paper>
+    <TextField
+      size="small"
+      variant="outlined"
+      placeholder="Search..."
+      fullWidth
+      sx={{ width: width, justifyContent: 'flex-start' }}
+      value={searchValue}
+      onChange={(event) => onSearchValueChange(event.target.value)}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <Magnify fontSize="small" />
+            </InputAdornment>
+          ),
+          endAdornment: searchValue !== '' && (
+            <InputAdornment position="end">
+              <Chip label="Clear" size="small" onClick={() => onSearchValueChange('')} />
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
   );
 }
