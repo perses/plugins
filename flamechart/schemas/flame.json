@@ -3,7 +3,7 @@
   "spec": {
     "palette": "package-name",
     "showSettings": true,
-    "showSeries": true,
+    "showSeries": false,
     "showTable": true,
     "showFlameGraph": true
   }

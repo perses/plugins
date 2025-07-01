@@ -112,7 +112,6 @@ export function TableChart(props: TableChartProps): ReactElement {
       height={availableHeight}
       gap={1}
       sx={{
-        paddingTop: `${PADDING_TOP}px`,
         '& .MuiTable-root': {
           borderCollapse: 'collapse',
         },

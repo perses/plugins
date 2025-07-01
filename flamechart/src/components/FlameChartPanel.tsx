@@ -21,6 +21,7 @@ import { FlameChartOptions } from '../flame-chart-model';
 import { FlameChart } from './FlameChart';
 import { Settings } from './Settings';
 import { TableChart } from './TableChart';
+import { SeriesChart } from './SeriesChart';
 
 export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 
@@ -69,6 +70,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   };
 
   const OPTIONS_SPACE = liveSpec.showSettings ? 35 : 0; // space for options at the top of the chart
+  const SERIES_CHART_HEIGHT = contentDimensions.height < 660 ? contentDimensions.height : 660;
 
   return (
     <Stack
@@ -84,7 +86,10 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
         </Typography>
       ) : flameChartData ? (
         // Convert the server response into the opentelemetry format
-        <Stack sx={{ paddingTop: '10px' }}>
+        <Stack gap={2} sx={{ paddingTop: liveSpec.showSeries ? 0 : '20px' }}>
+          {liveSpec.showSeries && (
+            <SeriesChart width={contentDimensions.width} height={SERIES_CHART_HEIGHT} data={flameChartData.data} />
+          )}
           {liveSpec.showSettings && (
             <Settings
               onSelectedIdChange={setSelectedId}
@@ -98,7 +103,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
             {liveSpec.showTable && (
               <TableChart
                 width={liveSpec.showFlameGraph ? 0.4 * contentDimensions.width : contentDimensions.width}
-                height={contentDimensions.height - OPTIONS_SPACE}
+                height={contentDimensions.height - OPTIONS_SPACE - (liveSpec.showSeries ? SERIES_CHART_HEIGHT : 0)}
                 data={flameChartData.data}
                 searchValue={searchValue}
                 onSearchValueChange={setSearchValue}
@@ -107,7 +112,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
             {liveSpec.showFlameGraph && (
               <FlameChart
                 width={liveSpec.showTable ? 0.6 * contentDimensions.width : contentDimensions.width}
-                height={contentDimensions.height - OPTIONS_SPACE}
+                height={contentDimensions.height - OPTIONS_SPACE - (liveSpec.showSeries ? SERIES_CHART_HEIGHT : 0)}
                 data={flameChartData.data}
                 palette={liveSpec.palette}
                 selectedId={selectedId}

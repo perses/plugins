@@ -119,7 +119,7 @@ export function resetSettings(props: FlameChartOptionsEditorProps): void {
     produce(value, (draft) => {
       draft.palette = 'package-name';
       draft.showSettings = true;
-      draft.showSeries = true;
+      draft.showSeries = false;
       draft.showTable = true;
       draft.showFlameGraph = true;
     })

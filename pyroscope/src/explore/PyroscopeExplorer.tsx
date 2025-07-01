@@ -68,7 +68,7 @@ export function PyroscopeExplorer(): ReactElement {
         queries={queries}
       />
       <DataQueriesProvider definitions={definitions}>
-        <Box height={735}>
+        <Box height={1435}>
           <FlameGraphPanel queries={queries} />
         </Box>
       </DataQueriesProvider>

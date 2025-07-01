@@ -35,7 +35,7 @@ export function createInitialFlameChartOptions(): FlameChartOptions {
   return {
     palette: 'package-name',
     showSettings: true,
-    showSeries: true,
+    showSeries: false,
     showTable: true,
     showFlameGraph: true,
   };

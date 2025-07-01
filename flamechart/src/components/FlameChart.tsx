@@ -241,7 +241,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         height: height,
       }}
       alignItems="center"
-      sx={{ paddingTop: '20px', paddingBottom: '10px' }}
+      sx={{ paddingBottom: '10px' }}
     >
       <CustomBreadcrumb
         totalValue={seriesData[0]?.value[3] || ''} // name of the total function
