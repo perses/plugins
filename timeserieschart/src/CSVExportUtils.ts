@@ -150,7 +150,11 @@ export interface ExportTimeSeriesOptions {
   projectName?: string;
 }
 
-export const exportTimeSeriesAsCSV = ({ queryResults, title, projectName }: ExportTimeSeriesOptions): Blob => {
+export const exportTimeSeriesAsCSV = ({
+  queryResults,
+  title: _title,
+  projectName: _projectName,
+}: ExportTimeSeriesOptions): Blob => {
   if (
     !queryResults ||
     !queryResults.series ||
@@ -256,5 +260,5 @@ export const exportTimeSeriesAsCSV = ({ queryResults, title, projectName }: Expo
   }
 
   // Create and return the Blob
-return new Blob([csvString], { type: 'text/csv;charset=utf-8' });	
+  return new Blob([csvString], { type: 'text/csv;charset=utf-8' });
 };
