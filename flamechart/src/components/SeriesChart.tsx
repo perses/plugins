@@ -179,7 +179,18 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
   );
 
   return (
-    <Stack width={width} height={height} alignItems="center" justifyContent="center">
+    <Stack
+      width={width}
+      height={height}
+      alignItems="center"
+      justifyContent="center"
+      onMouseEnter={() => {
+        // This is necessary to ensure that the data zoom feature is enabled after the theme is changed.
+        if (chartRef.current !== undefined) {
+          enableDataZoom(chartRef.current);
+        }
+      }}
+    >
       {seriesChart}
     </Stack>
   );
