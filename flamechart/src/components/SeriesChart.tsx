@@ -18,20 +18,18 @@ import { useChartsTheme, EChart, ZoomEventData, OnEventsType, enableDataZoom } f
 import { useTimeRange } from '@perses-dev/plugin-system';
 import type { EChartsCoreOption, LineSeriesOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
+import { CallbackDataParams } from 'echarts/types/dist/shared';
 import { formatItemValue } from '../utils/format';
+import { getSeriesTooltip } from '../utils/series-tooltip';
+import { SeriesSample } from '../utils/data-model';
 
-const DEFAULT_LINE_WIDTH = 1.25;
+const LINE_WIDTH = 1.25;
 const POINT_SIZE_OFFSET = 2;
 
 export interface SeriesChartProps {
   width: number;
   height: number;
   data: ProfileData;
-}
-
-export interface SeriesSample {
-  id: number;
-  value: [number, number];
 }
 
 export function SeriesChart(props: SeriesChartProps): ReactElement {
@@ -85,9 +83,9 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
       sampling: 'lttb',
       showSymbol: true,
       showAllSymbol: true,
-      symbolSize: DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET,
+      symbolSize: LINE_WIDTH + POINT_SIZE_OFFSET,
       lineStyle: {
-        width: DEFAULT_LINE_WIDTH,
+        width: LINE_WIDTH,
         opacity: 0.95,
       },
       areaStyle: {
@@ -123,6 +121,20 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
         showContent: true,
         trigger: 'axis',
         appendToBody: true,
+        confine: true,
+        backgroundColor: theme.palette.background.paper,
+        borderColor: theme.palette.background.paper,
+        textStyle: {
+          color: theme.palette.text.primary,
+        },
+        formatter: (params: CallbackDataParams[]) =>
+          getSeriesTooltip(
+            (params[0]?.data as SeriesSample) || {},
+            data.metadata?.units || '',
+            data.metadata?.name || '',
+            theme.palette.primary.main,
+            theme.palette.divider
+          ),
       },
       axisPointer: {
         type: 'line',
@@ -148,7 +160,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
     };
 
     return option;
-  }, [timeLine, data.metadata?.units, seriesData, theme]);
+  }, [timeLine, data.metadata, seriesData, theme]);
 
   const seriesChart = useMemo(
     () => (
