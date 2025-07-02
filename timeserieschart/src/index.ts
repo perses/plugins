@@ -20,3 +20,5 @@ export * from './YAxisOptionsEditor';
 export * from './TimeSeriesChartPanel';
 export * from './TimeSeriesChartBase';
 export * from './time-series-chart-model';
+export * from './export';
+export * from './CSVExportUtils';

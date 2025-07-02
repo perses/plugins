@@ -15,7 +15,7 @@ import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
 import { TimeSeriesChartOptionsEditorSettings } from './TimeSeriesChartOptionsEditorSettings';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
-
+import { TimeSeriesDataExporter } from './export'; 
 /**
  * The core TimeSeriesChart panel plugin for Perses.
  */
@@ -24,4 +24,7 @@ export const TimeSeriesChart: PanelPlugin<TimeSeriesChartOptions, TimeSeriesChar
   supportedQueryTypes: ['TimeSeriesQuery'],
   panelOptionsEditorComponents: [{ label: 'Settings', content: TimeSeriesChartOptionsEditorSettings }],
   createInitialOptions: createInitialTimeSeriesChartOptions,
-};
+  createDataExporter: (queryResults: any, title: string, projectName?: string) => {
+    return new TimeSeriesDataExporter(queryResults, title, projectName);
+  },
+} as any;
