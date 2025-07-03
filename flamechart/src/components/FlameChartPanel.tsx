@@ -120,6 +120,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
                 data={flameChartData.data}
                 searchValue={searchValue}
                 onSearchValueChange={setSearchValue}
+                onSelectedIdChange={setSelectedId}
               />
             )}
             {liveSpec.showFlameGraph && (

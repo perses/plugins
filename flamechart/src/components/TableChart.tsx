@@ -32,10 +32,11 @@ export interface TableChartProps {
   data: ProfileData;
   searchValue: string;
   onSearchValueChange: (value: string) => void;
+  onSelectedIdChange: (id: number) => void;
 }
 
 export function TableChart(props: TableChartProps): ReactElement {
-  const { width, height, data, searchValue, onSearchValueChange } = props;
+  const { width, height, data, searchValue, onSearchValueChange, onSelectedIdChange } = props;
 
   const theme = useTheme();
 
@@ -66,6 +67,7 @@ export function TableChart(props: TableChartProps): ReactElement {
               onClick={(e) => {
                 e.preventDefault();
                 const currentSample = ctx.row.original as TableChartSample;
+                onSelectedIdChange(currentSample.id); // focus on this item in the flame graph
                 onSearchValueChange(currentSample.name);
               }}
             >
@@ -102,7 +104,7 @@ export function TableChart(props: TableChartProps): ReactElement {
     ];
 
     return columnSettings;
-  }, [data.metadata?.units, availableWidth, onSearchValueChange]);
+  }, [data.metadata?.units, availableWidth, onSearchValueChange, onSelectedIdChange]);
 
   const [sorting, setSorting] = useState<SortingState>([{ id: 'total', desc: true }]);
 
