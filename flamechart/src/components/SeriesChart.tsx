@@ -163,7 +163,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
   const seriesChart = useMemo(
     () => (
       <EChart
-        sx={{
+        style={{
           width: width,
           height: height,
         }}
