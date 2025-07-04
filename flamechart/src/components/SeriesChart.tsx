@@ -62,19 +62,15 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
     };
   }, [setTimeRange]);
 
-  const timeLine: Timeline = useMemo(() => {
-    return data.timeline || ({} as Timeline);
-  }, [data]);
-
   const seriesData: SeriesSample[] = useMemo(() => {
+    const timeLine: Timeline = data.timeline || ({} as Timeline);
     const startTime = timeLine.startTime;
     const durationDelta = timeLine.durationDelta;
-    console.log(timeLine.samples);
     return timeLine.samples.map((sample, index) => ({
       id: index,
       value: [(startTime + index * durationDelta) * 1000, Number(sample)],
     }));
-  }, [timeLine]);
+  }, [data.timeline]);
 
   const option: EChartsCoreOption = useMemo(() => {
     const seriesMapping = {
@@ -93,6 +89,8 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
       },
       data: seriesData,
     };
+
+    const timeLine: Timeline = data.timeline || ({} as Timeline);
 
     const option: EChartsCoreOption = {
       series: seriesMapping,
@@ -160,7 +158,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
     };
 
     return option;
-  }, [timeLine, data.metadata, seriesData, theme]);
+  }, [data.timeline, data.metadata, seriesData, theme]);
 
   const seriesChart = useMemo(
     () => (

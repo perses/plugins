@@ -126,7 +126,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         },
       }}
     >
-      <SearchBar searchValue={searchValue} width={availableWidth} onSearchValueChange={onSearchValueChange} />
+      <SearchBar searchValue={searchValue} onSearchValueChange={onSearchValueChange} />
       <Table
         data={tableData}
         columns={columns}

@@ -17,12 +17,11 @@ import Magnify from 'mdi-material-ui/Magnify';
 
 export interface SearchBarProps {
   searchValue: string;
-  width: number;
   onSearchValueChange: (value: string) => void;
 }
 
 export function SearchBar(props: SearchBarProps): ReactElement {
-  const { searchValue, width, onSearchValueChange } = props;
+  const { searchValue, onSearchValueChange } = props;
 
   return (
     <TextField
@@ -30,7 +29,6 @@ export function SearchBar(props: SearchBarProps): ReactElement {
       variant="outlined"
       placeholder="Search..."
       fullWidth
-      sx={{ width: width, justifyContent: 'flex-start' }}
       value={searchValue}
       onChange={(event) => onSearchValueChange(event.target.value)}
       slotProps={{

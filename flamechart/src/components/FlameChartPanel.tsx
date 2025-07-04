@@ -91,7 +91,6 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
           There is more than one query. Please make sure that you provided only one query.
         </Typography>
       ) : flameChartData ? (
-        // Convert the server response into the opentelemetry format
         <Stack gap={2} sx={{ overflowY: 'scroll', paddingTop: liveSpec.showSeries ? 0 : '10px' }}>
           {liveSpec.showSeries && (
             <SeriesChart width={contentDimensions.width} height={SERIES_CHART_HEIGHT} data={flameChartData.data} />
