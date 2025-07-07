@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/tempo-plugin",
-  "version": "0.51.0-rc.3",
+  "version": "0.51.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
