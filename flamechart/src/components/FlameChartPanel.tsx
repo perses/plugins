@@ -72,11 +72,18 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     });
   };
 
-  const OPTIONS_SPACE = liveSpec.showSettings ? 35 : 0; // space for options at the top of the chart
-  const SERIES_CHART_HEIGHT =
-    contentDimensions.height < DEFAULT_SERIES_CHART_HEIGHT ? contentDimensions.height : DEFAULT_SERIES_CHART_HEIGHT;
-  const PADDING = 15;
-  const SCROLL_BAR_WIDTH = 10;
+  const PADDING =
+    liveSpec.showSeries && liveSpec.showSettings ? 32 : liveSpec.showSeries || liveSpec.showSettings ? 16 : 0;
+
+  const SETTINGS_HEIGHT = liveSpec.showSettings ? 30 : 0;
+  const SERIES_CHART_HEIGHT = liveSpec.showSeries
+    ? contentDimensions.height < DEFAULT_SERIES_CHART_HEIGHT
+      ? contentDimensions.height
+      : DEFAULT_SERIES_CHART_HEIGHT
+    : 0;
+  const TABLE_FLAME_CHART_HEIGHT =
+    contentDimensions.height -
+    (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0);
 
   return (
     <Stack
@@ -91,7 +98,10 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
           There is more than one query. Please make sure that you provided only one query.
         </Typography>
       ) : flameChartData ? (
-        <Stack gap={2} sx={{ overflowY: 'scroll', paddingTop: liveSpec.showSeries ? 0 : '10px' }}>
+        <Stack
+          gap={2}
+          sx={{ overflowY: 'auto', scrollbarGutter: 'stable both-edges', paddingTop: liveSpec.showSeries ? 0 : 1 }}
+        >
           {liveSpec.showSeries && (
             <SeriesChart width={contentDimensions.width} height={SERIES_CHART_HEIGHT} data={flameChartData.data} />
           )}
@@ -107,15 +117,8 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
           <Stack direction="row" justifyContent="center" alignItems="top">
             {liveSpec.showTable && (
               <TableChart
-                width={
-                  (liveSpec.showFlameGraph ? 0.4 * contentDimensions.width : contentDimensions.width) - SCROLL_BAR_WIDTH
-                }
-                height={
-                  contentDimensions.height -
-                  (contentDimensions.height > LARGE_PANEL_TRESHOLD
-                    ? OPTIONS_SPACE + PADDING + (liveSpec.showSeries ? SERIES_CHART_HEIGHT + PADDING : 0)
-                    : 0)
-                }
+                width={liveSpec.showFlameGraph ? 0.4 * contentDimensions.width : contentDimensions.width}
+                height={TABLE_FLAME_CHART_HEIGHT}
                 data={flameChartData.data}
                 searchValue={searchValue}
                 onSearchValueChange={setSearchValue}
@@ -124,15 +127,8 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
             )}
             {liveSpec.showFlameGraph && (
               <FlameChart
-                width={
-                  (liveSpec.showTable ? 0.6 * contentDimensions.width : contentDimensions.width) - SCROLL_BAR_WIDTH
-                }
-                height={
-                  contentDimensions.height -
-                  (contentDimensions.height > LARGE_PANEL_TRESHOLD
-                    ? OPTIONS_SPACE + PADDING + (liveSpec.showSeries ? SERIES_CHART_HEIGHT + PADDING : 0)
-                    : 0)
-                }
+                width={liveSpec.showTable ? 0.6 * contentDimensions.width : contentDimensions.width}
+                height={TABLE_FLAME_CHART_HEIGHT}
                 data={flameChartData.data}
                 palette={liveSpec.palette}
                 selectedId={selectedId}
