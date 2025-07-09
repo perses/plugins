@@ -17,3 +17,5 @@ spec: {
 #proxy: {
 	proxy: commonProxy.#HTTPProxy
 }
+
+#durationRegex: "^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"

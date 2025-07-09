@@ -18,8 +18,10 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { InputLabel, Stack } from '@mui/material';
+import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { ReactElement, useCallback, useRef, useState, useEffect } from 'react';
+import { OptionsEditorControl } from '@perses-dev/components';
+import { produce } from 'immer';
 import { LogQLEditor } from '../../components/logql-editor';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { LokiQuerySpec } from './loki-query-types';
@@ -31,7 +33,6 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
     LOKI_DATASOURCE_KIND
@@ -62,22 +63,23 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
     setLocalQuery(newQuery);
   }, []);
 
+  const handleLogsDirection = (_: React.MouseEvent, v: 'backward' | 'forward') =>
+    onChange(
+      produce(value, (draft: LokiQuerySpec) => {
+        draft.direction = v;
+      })
+    );
+
   // Immediate query execution on Enter or blur
   const handleQueryExecute = useCallback(
     (query: string) => {
-      // Clear any pending debounced update
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-
       onChange({ ...value, query });
     },
     [onChange, value]
   );
 
   return (
-    <Stack spacing={1.5}>
+    <Stack spacing={1.5} paddingBottom={1}>
       <div>
         <InputLabel
           sx={{
@@ -119,6 +121,27 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
           }}
           placeholder='Enter LogQL query (e.g. {job="mysql"} |= "error")'
           // height="120px"
+        />
+      </div>
+      <div>
+        <OptionsEditorControl
+          label="Order"
+          // description="Percentage means thresholds relative to min & max"
+          control={
+            <ToggleButtonGroup
+              exclusive
+              value={value?.direction ?? 'backward'}
+              onChange={handleLogsDirection}
+              sx={{ height: '36px', marginLeft: '10px', width: 'max-content' }}
+            >
+              <ToggleButton aria-label="backward" value="backward" sx={{ fontWeight: 500 }}>
+                Newest first
+              </ToggleButton>
+              <ToggleButton aria-label="forward" value="forward" sx={{ fontWeight: 500 }}>
+                Oldest first
+              </ToggleButton>
+            </ToggleButtonGroup>
+          }
         />
       </div>
     </Stack>
