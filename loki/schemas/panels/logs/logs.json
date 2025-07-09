@@ -1,0 +1,9 @@
+{
+  "kind": "Logs",
+  "spec": {
+    "direction": "backward",
+    "wrap": true,
+    "enableDetails": true,
+    "time": true
+  }
+}

@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
-import shared from '../jest.shared';
-
-const jestConfig: Config.InitialOptions = {
-  ...shared,
-
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
-};
-
-export default jestConfig;
+export * from './Logs';
+export * from './LogsComponent';
+export * from './LogsSettingsEditor';
+export * from './logs-types';

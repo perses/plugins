@@ -11,13 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
-import shared from '../jest.shared';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { LogsComponent } from './LogsComponent';
+import { LogsOptions, LogsProps } from './logs-types';
+import { LogsSettingsEditor } from './LogsSettingsEditor';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
-
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+export const Logs: PanelPlugin<LogsOptions, LogsProps> = {
+  PanelComponent: LogsComponent,
+  panelOptionsEditorComponents: [{ label: 'Settings', content: LogsSettingsEditor }],
+  supportedQueryTypes: ['TimeSeriesQuery'],
+  createInitialOptions: () => ({
+    direction: 'backward',
+    time: true,
+    wrap: true,
+    enableDetails: true,
+  }),
 };
-
-export default jestConfig;
