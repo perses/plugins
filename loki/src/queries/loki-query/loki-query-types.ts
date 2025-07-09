@@ -17,6 +17,7 @@ import { LokiQueryRangeResponse } from '../../model/loki-client-types';
 export interface LokiQuerySpec {
   query: string;
   datasource?: DatasourceSelector;
+  direction?: 'backward' | 'forward';
 }
 
 export type DatasourceQueryResponse = LokiQueryRangeResponse;

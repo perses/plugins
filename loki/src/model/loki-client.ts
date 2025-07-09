@@ -47,6 +47,11 @@ export interface LokiVolumeParams {
   limit?: number;
 }
 
+export interface LokiApiOptions {
+  datasourceUrl: string;
+  headers?: LokiRequestHeaders;
+}
+
 export interface LokiClient {
   options: {
     datasourceUrl: string;
@@ -71,10 +76,7 @@ export interface LokiClient {
   ) => Promise<LokiIndexStatsResponse>;
 }
 
-export async function query(
-  params: LokiQueryParams,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
-): Promise<LokiQueryResponse> {
+export async function query(params: LokiQueryParams, options: LokiApiOptions): Promise<LokiQueryResponse> {
   const url = buildUrl('/loki/api/v1/query', options.datasourceUrl);
   url.searchParams.append('query', params.query);
   if (params.time) url.searchParams.append('time', params.time);
@@ -125,7 +127,7 @@ export function toUnixSeconds(val: string | number | Date): string {
 
 export async function queryRange(
   params: LokiQueryRangeParams,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
+  options: LokiApiOptions
 ): Promise<LokiQueryRangeResponse> {
   const url = buildUrl('/loki/api/v1/query_range', options.datasourceUrl);
   url.searchParams.append('query', params.query);
@@ -149,7 +151,7 @@ export async function queryRange(
 export async function labels(
   start: string | undefined,
   end: string | undefined,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
+  options: LokiApiOptions
 ): Promise<LokiLabelsResponse> {
   const url = buildUrl('/loki/api/v1/labels', options.datasourceUrl);
   if (start) url.searchParams.append('start', start);
@@ -169,7 +171,7 @@ export async function labelValues(
   label: string,
   start: string | undefined,
   end: string | undefined,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
+  options: LokiApiOptions
 ): Promise<LokiLabelValuesResponse> {
   const url = buildUrl(`/loki/api/v1/label/${label}/values`, options.datasourceUrl);
   if (start) url.searchParams.append('start', start);
@@ -189,7 +191,7 @@ export async function series(
   match: string[],
   start: string | undefined,
   end: string | undefined,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
+  options: LokiApiOptions
 ): Promise<LokiSeriesResponse> {
   const url = buildUrl('/loki/api/v1/series', options.datasourceUrl);
   match.forEach((m) => url.searchParams.append('match[]', m));
@@ -206,10 +208,7 @@ export async function series(
   return response.json();
 }
 
-export async function volume(
-  params: LokiVolumeParams,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
-): Promise<LokiVolumeResponse> {
+export async function volume(params: LokiVolumeParams, options: LokiApiOptions): Promise<LokiVolumeResponse> {
   const url = buildUrl('/loki/api/v1/index/volume', options.datasourceUrl);
   url.searchParams.append('query', params.query);
   url.searchParams.append('start', params.start);
@@ -227,10 +226,7 @@ export async function volume(
   return response.json();
 }
 
-export async function volumeRange(
-  params: LokiVolumeParams,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
-): Promise<LokiVolumeResponse> {
+export async function volumeRange(params: LokiVolumeParams, options: LokiApiOptions): Promise<LokiVolumeResponse> {
   const url = buildUrl('/loki/api/v1/index/volume_range', options.datasourceUrl);
   url.searchParams.append('query', params.query);
   url.searchParams.append('start', params.start);
@@ -252,7 +248,7 @@ export async function indexStats(
   query: string,
   start: string | undefined,
   end: string | undefined,
-  options: { datasourceUrl: string; headers?: LokiRequestHeaders }
+  options: LokiApiOptions
 ): Promise<LokiIndexStatsResponse> {
   const url = buildUrl('/loki/api/v1/index/stats', options.datasourceUrl);
   url.searchParams.append('query', query);

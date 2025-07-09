@@ -1,4 +1,4 @@
-module: "github.com/loki-org/loki@v0"
+module: "github.com/perses/plugins/loki@v0"
 language: {
 	version: "v0.12.0"
 }
