@@ -34,7 +34,7 @@ export function formatItemValue(unit: string | undefined, value: number): string
       valueWithUnit = formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true });
       break;
     case 'objects':
-      valueWithUnit = `${formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true })} objects`;
+      valueWithUnit = formatValue(value, { unit: 'decimal', decimalPlaces: 2, shortValues: true });
       break;
     case 'bytes':
       valueWithUnit = formatValue(value, { unit: 'bytes' });

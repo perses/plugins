@@ -22,15 +22,15 @@ interface ProfilesExplorerQueryParams {
   queries?: QueryDefinition[];
 }
 
-function FlameGraphPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
-  const initialSpec = {
-    palette: 'package-name',
-    showSettings: true,
-    showSeries: true,
-    showTable: true,
-    showFlameGraph: true,
-  };
+const initialSpec = {
+  palette: 'package-name',
+  showSettings: true,
+  showSeries: true,
+  showTable: true,
+  showFlameGraph: true,
+};
 
+function FlameGraphPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   return (
     <Panel
       panelOptions={{
@@ -68,7 +68,7 @@ export function PyroscopeExplorer(): ReactElement {
         queries={queries}
       />
       <DataQueriesProvider definitions={definitions}>
-        <Box height={735}>
+        <Box height={980}>
           <FlameGraphPanel queries={queries} />
         </Box>
       </DataQueriesProvider>

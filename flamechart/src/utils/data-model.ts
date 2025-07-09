@@ -41,3 +41,11 @@ export interface TableChartSample {
   self: number;
   total: number;
 }
+
+/**
+ * SeriesChart datamodel
+ */
+export interface SeriesSample {
+  id: number;
+  value: [number, number];
+}

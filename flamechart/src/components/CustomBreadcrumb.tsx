@@ -58,8 +58,12 @@ export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
   const totalLabel = formatValue(totalSample, { unit: 'decimal', decimalPlaces: 2, shortValues: true }) + ' samples';
 
   return (
-    <Stack direction="row" spacing={1}>
-      <Breadcrumbs separator={<ChevronRightIcon fontSize="small" />} aria-label="breadcrumb">
+    <Stack direction="row" spacing={1} minHeight={40} alignItems="center">
+      <Breadcrumbs
+        separator={<ChevronRightIcon fontSize="small" />}
+        aria-label="breadcrumb"
+        sx={{ justifyContent: 'center' }}
+      >
         <StyledBreadcrumb label={totalValueText + '  |  ' + totalLabel} />
         {otherItemSample !== undefined && (
           <StyledBreadcrumb

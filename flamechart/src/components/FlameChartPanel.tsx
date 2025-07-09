@@ -21,6 +21,10 @@ import { FlameChartOptions } from '../flame-chart-model';
 import { FlameChart } from './FlameChart';
 import { Settings } from './Settings';
 import { TableChart } from './TableChart';
+import { SeriesChart } from './SeriesChart';
+
+const LARGE_PANEL_TRESHOLD = 600;
+const DEFAULT_SERIES_CHART_HEIGHT = 200;
 
 export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 
@@ -68,7 +72,18 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     });
   };
 
-  const OPTIONS_SPACE = liveSpec.showSettings ? 35 : 0; // space for options at the top of the chart
+  const PADDING =
+    liveSpec.showSeries && liveSpec.showSettings ? 32 : liveSpec.showSeries || liveSpec.showSettings ? 16 : 0;
+
+  const SETTINGS_HEIGHT = liveSpec.showSettings ? 30 : 0;
+  const SERIES_CHART_HEIGHT = liveSpec.showSeries
+    ? contentDimensions.height < DEFAULT_SERIES_CHART_HEIGHT
+      ? contentDimensions.height
+      : DEFAULT_SERIES_CHART_HEIGHT
+    : 0;
+  const TABLE_FLAME_CHART_HEIGHT =
+    contentDimensions.height -
+    (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0);
 
   return (
     <Stack
@@ -83,8 +98,13 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
           There is more than one query. Please make sure that you provided only one query.
         </Typography>
       ) : flameChartData ? (
-        // Convert the server response into the opentelemetry format
-        <Stack sx={{ paddingTop: '10px' }}>
+        <Stack
+          gap={2}
+          sx={{ overflowY: 'auto', scrollbarGutter: 'stable both-edges', paddingTop: liveSpec.showSeries ? 0 : 1 }}
+        >
+          {liveSpec.showSeries && (
+            <SeriesChart width={contentDimensions.width} height={SERIES_CHART_HEIGHT} data={flameChartData.data} />
+          )}
           {liveSpec.showSettings && (
             <Settings
               onSelectedIdChange={setSelectedId}
@@ -98,16 +118,17 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
             {liveSpec.showTable && (
               <TableChart
                 width={liveSpec.showFlameGraph ? 0.4 * contentDimensions.width : contentDimensions.width}
-                height={contentDimensions.height - OPTIONS_SPACE}
+                height={TABLE_FLAME_CHART_HEIGHT}
                 data={flameChartData.data}
                 searchValue={searchValue}
                 onSearchValueChange={setSearchValue}
+                onSelectedIdChange={setSelectedId}
               />
             )}
             {liveSpec.showFlameGraph && (
               <FlameChart
                 width={liveSpec.showTable ? 0.6 * contentDimensions.width : contentDimensions.width}
-                height={contentDimensions.height - OPTIONS_SPACE}
+                height={TABLE_FLAME_CHART_HEIGHT}
                 data={flameChartData.data}
                 palette={liveSpec.palette}
                 selectedId={selectedId}

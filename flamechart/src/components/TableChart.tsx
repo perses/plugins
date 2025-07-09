@@ -22,7 +22,7 @@ import { formatItemValue } from '../utils/format';
 import { SearchBar } from './SearchBar';
 
 const LARGE_PANEL_TRESHOLD = 600; // heigth treshold to switch to large panel mode
-const PADDING_TOP = 20;
+const PADDING_TOP = 8;
 const SCROLL_BAR_WIDTH = 15;
 const SEARCH_BAR_HEIGHT = 50;
 
@@ -32,14 +32,15 @@ export interface TableChartProps {
   data: ProfileData;
   searchValue: string;
   onSearchValueChange: (value: string) => void;
+  onSelectedIdChange: (id: number) => void;
 }
 
 export function TableChart(props: TableChartProps): ReactElement {
-  const { width, height, data, searchValue, onSearchValueChange } = props;
+  const { width, height, data, searchValue, onSearchValueChange, onSelectedIdChange } = props;
 
   const theme = useTheme();
 
-  const availableHeight = height - 10;
+  const availableHeight = height;
   const availableWidth = width - 10;
 
   const tableData: TableChartSample[] = useMemo(() => {
@@ -66,6 +67,7 @@ export function TableChart(props: TableChartProps): ReactElement {
               onClick={(e) => {
                 e.preventDefault();
                 const currentSample = ctx.row.original as TableChartSample;
+                onSelectedIdChange(currentSample.id); // focus on this item in the flame graph
                 onSearchValueChange(currentSample.name);
               }}
             >
@@ -102,7 +104,7 @@ export function TableChart(props: TableChartProps): ReactElement {
     ];
 
     return columnSettings;
-  }, [data.metadata?.units, availableWidth, onSearchValueChange]);
+  }, [data.metadata?.units, availableWidth, onSearchValueChange, onSelectedIdChange]);
 
   const [sorting, setSorting] = useState<SortingState>([{ id: 'total', desc: true }]);
 
@@ -112,7 +114,6 @@ export function TableChart(props: TableChartProps): ReactElement {
       height={availableHeight}
       gap={1}
       sx={{
-        paddingTop: `${PADDING_TOP}px`,
         '& .MuiTable-root': {
           borderCollapse: 'collapse',
         },
@@ -125,7 +126,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         },
       }}
     >
-      <SearchBar searchValue={searchValue} width={availableWidth} onSearchValueChange={onSearchValueChange} />
+      <SearchBar searchValue={searchValue} onSearchValueChange={onSearchValueChange} />
       <Table
         data={tableData}
         columns={columns}
