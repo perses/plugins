@@ -11,13 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
-import shared from '../jest.shared';
+import { PanelProps } from '@perses-dev/plugin-system';
+import { LokiTimeSeriesData } from '../../model/loki-data-types';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
+export type QueryData = LokiTimeSeriesData;
 
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
-};
+export type LogsProps = PanelProps<LogsOptions, QueryData>;
 
-export default jestConfig;
+export interface LogsOptions {
+  direction?: 'forward' | 'backward';
+  wrap?: boolean;
+  enableDetails?: boolean;
+  time?: boolean;
+}

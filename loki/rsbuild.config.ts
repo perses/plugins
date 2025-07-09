@@ -8,6 +8,7 @@ export const assetPrefix = '/plugins/Loki/';
 const exposedModules: ModuleFederationOptions['exposes'] = [
   { './LokiDatasource': './src/datasources/loki-datasource' },
   { './LokiQuery': './src/queries/loki-query' },
+  { './Logs': './src/panels/logs' },
 ];
 
 export default defineConfig({

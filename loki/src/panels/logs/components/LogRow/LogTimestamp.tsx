@@ -11,13 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
-import shared from '../jest.shared';
+import React from 'react';
+import { Typography, useTheme } from '@mui/material';
+import { fromUnixTime, format } from 'date-fns';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
+interface LogTimestampProps {
+  timestamp: number;
+}
 
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+export const LogTimestamp: React.FC<LogTimestampProps> = ({ timestamp }) => {
+  const theme = useTheme();
+
+  return (
+    <Typography
+      variant="caption"
+      sx={{
+        color: theme.palette.text.secondary,
+        fontSize: '12px',
+        whiteSpace: 'nowrap',
+        minWidth: '160px',
+      }}
+    >
+      {format(fromUnixTime(timestamp), 'yyyy-MM-dd HH:mm:ss')}
+    </Typography>
+  );
 };
-
-export default jestConfig;
