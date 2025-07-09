@@ -75,7 +75,7 @@ export async function query(
   params: LokiQueryParams,
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiQueryResponse> {
-  const url = new URL(`${options.datasourceUrl}/loki/api/v1/query`);
+  const url = buildUrl('/loki/api/v1/query', options.datasourceUrl);
   url.searchParams.append('query', params.query);
   if (params.time) url.searchParams.append('time', params.time);
   if (params.direction) url.searchParams.append('direction', params.direction);
@@ -91,18 +91,22 @@ export async function query(
   return response.json();
 }
 
-function buildUrl(path: string, datasourceUrl: string) {
+function buildUrl(path: string, datasourceUrl: string): URL {
   if (datasourceUrl.startsWith('http://') || datasourceUrl.startsWith('https://')) {
-    return new URL(path, datasourceUrl).toString();
+    return new URL(path, datasourceUrl);
   }
+
+  let fullPath = datasourceUrl;
   // Assume relative path, ensure no double slashes
   if (datasourceUrl.endsWith('/') && path.startsWith('/')) {
-    return datasourceUrl + path.slice(1);
+    fullPath = datasourceUrl + path.slice(1);
+  } else if (!datasourceUrl.endsWith('/') && !path.startsWith('/')) {
+    fullPath = datasourceUrl + '/' + path;
+  } else {
+    fullPath = datasourceUrl + path;
   }
-  if (!datasourceUrl.endsWith('/') && !path.startsWith('/')) {
-    return datasourceUrl + '/' + path;
-  }
-  return datasourceUrl + path;
+
+  return new URL(fullPath, window.location.origin);
 }
 
 export function toUnixSeconds(val: string | number | Date): string {
@@ -124,16 +128,15 @@ export async function queryRange(
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiQueryRangeResponse> {
   const url = buildUrl('/loki/api/v1/query_range', options.datasourceUrl);
-  const urlObj = new URL(url, window.location.origin);
-  urlObj.searchParams.append('query', params.query);
-  urlObj.searchParams.append('start', toUnixSeconds(params.start));
-  urlObj.searchParams.append('end', toUnixSeconds(params.end));
-  if (params.step) urlObj.searchParams.append('step', params.step);
-  if (params.interval) urlObj.searchParams.append('interval', params.interval);
-  if (params.direction) urlObj.searchParams.append('direction', params.direction);
-  if (params.limit) urlObj.searchParams.append('limit', params.limit.toString());
+  url.searchParams.append('query', params.query);
+  url.searchParams.append('start', toUnixSeconds(params.start));
+  url.searchParams.append('end', toUnixSeconds(params.end));
+  if (params.step) url.searchParams.append('step', params.step);
+  if (params.interval) url.searchParams.append('interval', params.interval);
+  if (params.direction) url.searchParams.append('direction', params.direction);
+  if (params.limit) url.searchParams.append('limit', params.limit.toString());
 
-  const response = await fetch(urlObj.toString(), {
+  const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -148,7 +151,7 @@ export async function labels(
   end: string | undefined,
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiLabelsResponse> {
-  const url = new URL(`${options.datasourceUrl}/loki/api/v1/labels`);
+  const url = buildUrl('/loki/api/v1/labels', options.datasourceUrl);
   if (start) url.searchParams.append('start', start);
   if (end) url.searchParams.append('end', end);
 
@@ -168,7 +171,7 @@ export async function labelValues(
   end: string | undefined,
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiLabelValuesResponse> {
-  const url = new URL(`${options.datasourceUrl}/loki/api/v1/label/${label}/values`);
+  const url = buildUrl(`/loki/api/v1/label/${label}/values`, options.datasourceUrl);
   if (start) url.searchParams.append('start', start);
   if (end) url.searchParams.append('end', end);
 
@@ -188,7 +191,7 @@ export async function series(
   end: string | undefined,
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiSeriesResponse> {
-  const url = new URL(`${options.datasourceUrl}/loki/api/v1/series`);
+  const url = buildUrl('/loki/api/v1/series', options.datasourceUrl);
   match.forEach((m) => url.searchParams.append('match[]', m));
   if (start) url.searchParams.append('start', start);
   if (end) url.searchParams.append('end', end);
@@ -207,7 +210,7 @@ export async function volume(
   params: LokiVolumeParams,
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiVolumeResponse> {
-  const url = new URL(`${options.datasourceUrl}/loki/api/v1/index/volume`);
+  const url = buildUrl('/loki/api/v1/index/volume', options.datasourceUrl);
   url.searchParams.append('query', params.query);
   url.searchParams.append('start', params.start);
   url.searchParams.append('end', params.end);
@@ -228,7 +231,7 @@ export async function volumeRange(
   params: LokiVolumeParams,
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiVolumeResponse> {
-  const url = new URL(`${options.datasourceUrl}/loki/api/v1/index/volume_range`);
+  const url = buildUrl('/loki/api/v1/index/volume_range', options.datasourceUrl);
   url.searchParams.append('query', params.query);
   url.searchParams.append('start', params.start);
   url.searchParams.append('end', params.end);
@@ -251,7 +254,7 @@ export async function indexStats(
   end: string | undefined,
   options: { datasourceUrl: string; headers?: LokiRequestHeaders }
 ): Promise<LokiIndexStatsResponse> {
-  const url = new URL(`${options.datasourceUrl}/loki/api/v1/index/stats`);
+  const url = buildUrl('/loki/api/v1/index/stats', options.datasourceUrl);
   url.searchParams.append('query', query);
   if (start) url.searchParams.append('start', start);
   if (end) url.searchParams.append('end', end);
