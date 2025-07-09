@@ -22,15 +22,15 @@ interface ProfilesExplorerQueryParams {
   queries?: QueryDefinition[];
 }
 
-function FlameGraphPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
-  const initialSpec = {
-    palette: 'package-name',
-    showSettings: true,
-    showSeries: true,
-    showTable: true,
-    showFlameGraph: true,
-  };
+const initialSpec = {
+  palette: 'package-name',
+  showSettings: true,
+  showSeries: true,
+  showTable: true,
+  showFlameGraph: true,
+};
 
+function FlameGraphPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   return (
     <Panel
       panelOptions={{
