@@ -1,5 +1,5 @@
 {
-  "name": "@loki-org/loki",
+  "name": "@perses-dev/loki-plugin",
   "version": "0.1.0",
   "scripts": {
     "dev": "rsbuild dev",
