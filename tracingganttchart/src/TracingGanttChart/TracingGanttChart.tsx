@@ -23,7 +23,6 @@ import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { AttributeLinks } from './DetailPane/Attributes';
 import { getTraceModel, Span } from './trace';
-import { Toolbar } from './Toolbar/Toolbar';
 
 export interface TracingGanttChartProps {
   options: TracingGanttChartOptions;
@@ -62,7 +61,6 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
 
   return (
     <Stack ref={ganttChart} direction="column" sx={{ height: '100%', minHeight: '240px', gap }}>
-      <Toolbar trace={otlpTrace} />
       <Stack direction="row" sx={{ flexGrow: 1, gap }}>
         <Stack direction="column" sx={{ flexGrow: 1, gap }}>
           <MiniGanttChart options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
