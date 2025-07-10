@@ -1,10 +1,10 @@
 module github.com/perses/plugins
 
-go 1.22.4
+go 1.23.0
 
 require (
-	github.com/perses/common v0.27.0
+	github.com/perses/common v0.28.0
 	github.com/sirupsen/logrus v1.9.3
 )
 
-require golang.org/x/sys v0.29.0 // indirect
+require golang.org/x/sys v0.33.0 // indirect

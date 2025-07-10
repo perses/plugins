@@ -20,7 +20,7 @@ import {
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
-import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { FormControl, Stack, TextField } from '@mui/material';
 import { ReactElement } from 'react';
 import {
   DEFAULT_PROM,
@@ -85,9 +85,6 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
-        <InputLabel id={datasourceSelectLabelID} shrink>
-          Prometheus Datasource
-        </InputLabel>
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
           value={datasourceSelectValue}

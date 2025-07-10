@@ -1,6 +1,14 @@
 {
   "name": "@perses-dev/markdown-plugin",
   "version": "0.8.0",
+  "homepage": "https://github.com/perses/plugins/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perses/plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/perses/plugins/issues"
+  },
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",
