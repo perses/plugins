@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,12 +13,10 @@
 
 import { TimeSeriesData, TimeSeries } from '@perses-dev/core';
 
-// Function to check if the data is time series data
 export const isTimeSeriesData = (data: TimeSeriesData | undefined): boolean => {
   return !!(data && data.series && Array.isArray(data.series) && data.series.length > 0);
 };
 
-// Function to format labels similar to how Perses displays them in legends
 export const formatLegendName = (series: TimeSeries, seriesIndex: number): string => {
   const seriesAny = series as TimeSeries & {
     formattedName?: string;
@@ -28,19 +26,15 @@ export const formatLegendName = (series: TimeSeries, seriesIndex: number): strin
     labels?: Record<string, string>;
   };
 
-  // First try the standard TimeSeries properties that Perses uses for legend display
   let legendName = series.formattedName || series.name;
 
-  // If we still don't have a good name, try other potential properties
   if (!legendName || legendName === `Series ${seriesIndex + 1}`) {
     legendName = seriesAny.legendName || seriesAny.displayName || seriesAny.legend || series.name || '';
   }
 
-  // If we have labels, construct a meaningful name using Perses-style formatting
   if ((!legendName || legendName === series.name) && series.labels) {
     const labels = series.labels;
 
-    // Remove __name__ from labels for cleaner display (common Prometheus practice)
     const displayLabels = { ...labels };
     const metricName = displayLabels.__name__;
     delete displayLabels.__name__;
@@ -58,12 +52,10 @@ export const formatLegendName = (series: TimeSeries, seriesIndex: number): strin
     } else if (labelPairs) {
       legendName = `{${labelPairs}}`;
     } else {
-      // Fallback to trying common labels
       legendName = labels.job || labels.instance || labels.metric || `Series ${seriesIndex + 1}`;
     }
   }
 
-  // Final fallback
   if (!legendName || legendName.trim() === '') {
     legendName = `Series ${seriesIndex + 1}`;
   }
@@ -74,39 +66,37 @@ export const formatLegendName = (series: TimeSeries, seriesIndex: number): strin
 // Function to sanitize column names for CSV (Excel/Sheets compatible)
 export const sanitizeColumnName = (name: string): string => {
   return name
-    .replace(/[,"\n\r]/g, '_') // Replace CSV-problematic characters
-    .replace(/\s+/g, '_') // Replace spaces with underscores
-    .replace(/_+/g, '_') // Collapse multiple underscores
-    .replace(/^_|_$/g, '') // Remove leading/trailing underscores
-    .substring(0, 255); // Limit length for Excel compatibility
+    .replace(/[,"\n\r]/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .substring(0, 255);
 };
 
 // Function to sanitize filename
 export const sanitizeFilename = (filename: string): string => {
   return filename
-    .replace(/[<>:"/\\|?*]/g, ' ') // Replace invalid filename characters with spaces first
-    .trim() // Remove leading/trailing whitespace
-    .split(/\s+/) // Split on any whitespace
-    .filter((word) => word.length > 0) // Remove empty strings
+    .replace(/[<>:"/\\|?*]/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0)
     .map((word, index) => {
-      // First word stays lowercase, subsequent words get capitalized
       if (index === 0) {
         return word.toLowerCase();
       }
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
-    .join(''); // Join without separators to create camelCase
+    .join('');
 };
 
 // Function to format timestamp in ISO 8601 format (Excel/Sheets compatible)
 export const formatTimestampISO = (timestamp: number | string): string => {
   let timestampMs: number;
 
-  // Handle different timestamp formats
   if (typeof timestamp === 'string') {
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) {
-      return timestamp; // Return original if can't parse
+      return timestamp;
     }
     timestampMs = date.getTime();
   } else {
@@ -116,12 +106,10 @@ export const formatTimestampISO = (timestamp: number | string): string => {
 
   const date = new Date(timestampMs);
 
-  // Check if date is valid
   if (isNaN(date.getTime())) {
     return new Date(timestampMs).toISOString();
   }
 
-  // Return ISO 8601 format which includes timezone information
   return date.toISOString();
 };
 
@@ -205,12 +193,10 @@ export const exportTimeSeriesAsCSV = ({
       const timestamp = entry[0];
       const value = entry[1];
 
-      // Skip null or undefined values but allow 0
       if (value === null || value === undefined) {
         continue;
       }
 
-      // Format timestamp in ISO 8601 format
       const dateTime = formatTimestampISO(timestamp);
 
       if (!result[dateTime]) {
@@ -221,7 +207,6 @@ export const exportTimeSeriesAsCSV = ({
     }
   }
 
-  // Check if we actually have data to export
   if (validSeriesCount === 0 || seriesInfo.length === 0) {
     console.warn('No valid data found to export to CSV.');
     return new Blob([''], { type: 'text/csv;charset=utf-8' });
@@ -233,12 +218,9 @@ export const exportTimeSeriesAsCSV = ({
     return new Blob([''], { type: 'text/csv;charset=utf-8' });
   }
 
-  // Build CSV content - SIMPLIFIED FORMAT
-  // Add column headers only
   const columnNames = seriesInfo.map((info) => info.columnName);
   csvString += `DateTime,${columnNames.join(',')}\n`;
 
-  // Add data rows - sort by timestamp
   const sortedDateTimes = Object.keys(result).sort((a, b) => {
     const dateA = new Date(a).getTime();
     const dateB = new Date(b).getTime();
@@ -259,6 +241,5 @@ export const exportTimeSeriesAsCSV = ({
     }
   }
 
-  // Create and return the Blob
   return new Blob([csvString], { type: 'text/csv;charset=utf-8' });
 };
