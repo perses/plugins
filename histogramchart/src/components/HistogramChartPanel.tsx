@@ -26,7 +26,7 @@ export type HistogramChartPanelProps = PanelProps<HistogramChartOptions, TimeSer
 
 export function HistogramChartPanel(props: HistogramChartPanelProps): ReactElement | null {
   const { spec: pluginSpec, contentDimensions, queryResults } = props;
-  const { min, max } = pluginSpec;
+  const { min, max, exponential } = pluginSpec;
 
   const chartsTheme = useChartsTheme();
   // ensures all default format properties set if undef
@@ -92,6 +92,7 @@ export function HistogramChartPanel(props: HistogramChartPanelProps): ReactEleme
               min={min}
               max={max}
               thresholds={thresholds}
+              exponential={exponential}
             />
           </Box>
         );
