@@ -23,3 +23,4 @@ Then in [`perses`](https://github.com/perses/perses) repository:
 2. Start the backend: `./scripts/api_backend_dev.sh`
 3. Login percli to the backend `percli login http://localhost:8080`
 4. Start the plugin development server: `percli plugin start /path/to/the/plugin/dir`
+<!-- Trigger snapshot build -->
