@@ -13,7 +13,7 @@
 
 import { TitleComponentOption } from 'echarts';
 import { useChartsTheme } from '@perses-dev/components';
-import { Stack, Typography, SxProps } from '@mui/material';
+import { Stack, Typography, SxProps, useMediaQuery, useTheme } from '@mui/material';
 import { FC, useState, useEffect } from 'react';
 import { ProfileData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
@@ -30,6 +30,8 @@ export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
 
 export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   const { contentDimensions, queryResults, spec } = props;
+
+  const isMobileSize = useMediaQuery(useTheme().breakpoints.down('sm'));
 
   // selectedId equals 0 => Flame Graph is not zoomed in
   // selectedId different from 0 => Flame Graph is zoomed in
@@ -85,6 +87,18 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     contentDimensions.height -
     (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0);
 
+  const TABLE_CHART_WIDTH = isMobileSize
+    ? contentDimensions.width
+    : liveSpec.showFlameGraph
+      ? 0.4 * contentDimensions.width
+      : contentDimensions.width;
+
+  const FLAME_CHART_WIDTH = isMobileSize
+    ? contentDimensions.width
+    : liveSpec.showTable
+      ? 0.6 * contentDimensions.width
+      : contentDimensions.width;
+
   return (
     <Stack
       height={contentDimensions.height}
@@ -114,10 +128,10 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
               selectedId={selectedId}
             />
           )}
-          <Stack direction="row" justifyContent="center" alignItems="top">
+          <Stack direction={isMobileSize ? 'column' : 'row'} justifyContent="center" alignItems="top">
             {liveSpec.showTable && (
               <TableChart
-                width={liveSpec.showFlameGraph ? 0.4 * contentDimensions.width : contentDimensions.width}
+                width={TABLE_CHART_WIDTH}
                 height={TABLE_FLAME_CHART_HEIGHT}
                 data={flameChartData.data}
                 searchValue={searchValue}
@@ -127,7 +141,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
             )}
             {liveSpec.showFlameGraph && (
               <FlameChart
-                width={liveSpec.showTable ? 0.6 * contentDimensions.width : contentDimensions.width}
+                width={FLAME_CHART_WIDTH}
                 height={TABLE_FLAME_CHART_HEIGHT}
                 data={flameChartData.data}
                 palette={liveSpec.palette}

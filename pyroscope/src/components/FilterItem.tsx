@@ -47,7 +47,7 @@ export function FilterItem(props: FilterItemProps): ReactElement {
   };
 
   return (
-    <Stack direction="row" spacing={0}>
+    <Stack direction="row" spacing={0} sx={{ flexWrap: 'wrap', maxWidth: '100%' }}>
       <LabelName datasource={datasource} value={value.labelName} onChange={handleLabelNameChange} />
       <Operator value={value.operator} onChange={handleOperatorChange} />
       <LabelValue

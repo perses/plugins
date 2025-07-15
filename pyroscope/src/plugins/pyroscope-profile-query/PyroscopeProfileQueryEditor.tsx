@@ -75,7 +75,15 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
           notched
         />
       </FormControl>
-      <Stack direction="row" spacing={2}>
+      <Stack
+        direction="row"
+        spacing={0}
+        sx={{
+          flexWrap: 'wrap',
+          rowGap: 1,
+          gap: 2,
+        }}
+      >
         <Service datasource={selectedDatasource} value={service} onChange={handleServiceChange} />
         <ProfileType datasource={selectedDatasource} value={profileType} onChange={handleProfileTypeChange} />
         <TextField

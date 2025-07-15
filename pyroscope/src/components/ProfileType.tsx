@@ -28,7 +28,7 @@ export function ProfileType(props: ProfileTypeProps): ReactElement {
   const { data: profileTypesOptions, isLoading: isProfileTypesOptionsLoading } = useProfileTypes(datasource);
 
   return (
-    <Stack position="relative" sx={{ flexGrow: 1 }}>
+    <Stack position="relative" sx={{ flexGrow: 1, maxWidth: '100%' }}>
       <TextField
         select
         label="Profile Type"
