@@ -72,11 +72,11 @@ describe('TempoTraceQuery', () => {
   });
 
   it('should convert base64-encoded trace IDs and span IDs in the response to hex format', async () => {
-    const results = await TempoTraceQuery.getTraceData({ query: 'fbd37845209d43cdccd418dc5f9ff021' }, stubTempoContext);
+    const results = await TempoTraceQuery.getTraceData({ query: 'FBD37845209D43CDCCD418DC5F9FF021' }, stubTempoContext);
     expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.traceId).toEqual(
-      'fbd37845209d43cdccd418dc5f9ff021'
+      'FBD37845209D43CDCCD418DC5F9FF021'
     );
-    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.spanId).toEqual('8467bca11377c166');
-    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.parentSpanId).toEqual('9c22eb77cb5c14c7');
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.spanId).toEqual('8467BCA11377C166');
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.parentSpanId).toEqual('9C22EB77CB5C14C7');
   });
 });
