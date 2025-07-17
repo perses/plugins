@@ -128,7 +128,11 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
               selectedId={selectedId}
             />
           )}
-          <Stack direction={isMobileSize ? 'column' : 'row'} justifyContent="center" alignItems="top">
+          <Stack
+            direction={isMobileSize ? 'column' : 'row'}
+            justifyContent="center"
+            alignItems={isMobileSize ? 'center' : 'top'}
+          >
             {liveSpec.showTable && (
               <TableChart
                 width={TABLE_CHART_WIDTH}
