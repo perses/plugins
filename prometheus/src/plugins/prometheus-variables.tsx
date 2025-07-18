@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { FormControl, Stack, TextField } from '@mui/material';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -61,7 +61,6 @@ export function PrometheusLabelValuesVariableEditor(
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind="PrometheusDatasource"
           value={selectedDatasource}
@@ -117,7 +116,6 @@ export function PrometheusLabelNamesVariableEditor(
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind="PrometheusDatasource"
           value={selectedDatasource}
@@ -165,7 +163,6 @@ export function PrometheusPromQLVariableEditor(
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
           value={selectedDatasource}

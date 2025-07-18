@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { FormControl, Stack, TextField } from '@mui/material';
 import { useId } from '@perses-dev/components';
 import {
   DatasourceSelect,
@@ -66,9 +66,6 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
-        <InputLabel id={datasourceSelectLabelID} shrink>
-          Tempo Datasource
-        </InputLabel>
         <DatasourceSelect
           datasourcePluginKind={TEMPO_DATASOURCE_KIND}
           value={datasourceSelectValue}

@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, IconButton, Tab, Tabs, Typography } from '@mui/material';
+import { Box, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
 import { Span, Trace } from '../trace';
-import { AttributeLinks, AttributeList } from './Attributes';
+import { AttributeLinks, TraceAttributes } from './Attributes';
 import { SpanEventList } from './SpanEvents';
 
 export interface DetailPaneProps {
@@ -53,13 +53,7 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
           {span.events.length > 0 && <Tab value="events" label="Events" />}
         </Tabs>
       </Box>
-      {tab === 'attributes' && (
-        <>
-          {span.attributes.length > 0 && <AttributeList attributeLinks={attributeLinks} attributes={span.attributes} />}
-          {span.attributes.length > 0 && <Divider />}
-          <AttributeList attributeLinks={attributeLinks} attributes={span.resource.attributes} />
-        </>
-      )}
+      {tab === 'attributes' && <TraceAttributes trace={trace} span={span} attributeLinks={attributeLinks} />}
       {tab === 'events' && <SpanEventList trace={trace} span={span} />}
     </Box>
   );
