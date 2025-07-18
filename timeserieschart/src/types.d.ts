@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { getPluginModule } from './getPluginModule';
-export * from './TimeSeriesChart';
-export * from './QuerySettingsEditor';
-export * from './TimeSeriesChartOptionsEditorSettings';
-export * from './VisualOptionsEditor';
-export * from './YAxisOptionsEditor';
-export * from './TimeSeriesChartPanel';
-export * from './TimeSeriesChartBase';
-export * from './time-series-chart-model';
-export * from './export';
-export * from './CSVExportUtils';
+import React from 'react';
+
+declare module '@perses-dev/plugin-system' {
+  interface PanelPlugin<TSpec = unknown, TPanelProps = unknown> {
+    actions?: Array<{
+      component: React.ComponentType<TPanelProps>;
+      location?: string;
+    }>;
+    spec?: TSpec;
+  }
+}
