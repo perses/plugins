@@ -64,7 +64,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
         shrink
         sx={{
           position: 'absolute',
-          top: '-8px',
+          top: '-12px',
           left: '10px',
           padding: '0 4px',
           color: theme.palette.text.primary,
