@@ -30,7 +30,7 @@ import {
   TEMPO_DATASOURCE_KIND,
 } from '../../model/tempo-selectors';
 import { AttributeFilters } from '../../components/AttributeFilters';
-import { filterToTraceQL } from '../../components/filter/traceql_from_filter';
+import { filterToTraceQL } from '../../components/filter/filter_to_traceql';
 import { traceQLToFilter } from '../../components/filter/traceql_to_filter';
 import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
 

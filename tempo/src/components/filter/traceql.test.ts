@@ -1,4 +1,4 @@
-import { filterToTraceQL } from './traceql_from_filter';
+import { filterToTraceQL } from './filter_to_traceql';
 import { traceQLToFilter } from './traceql_to_filter';
 
 describe('TraceQL query', () => {

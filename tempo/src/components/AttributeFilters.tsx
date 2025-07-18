@@ -19,7 +19,7 @@ import { useQuery } from '@tanstack/react-query';
 import CheckboxOutline from 'mdi-material-ui/CheckboxOutline';
 import CheckboxBlankOutline from 'mdi-material-ui/CheckboxBlankOutline';
 import { TempoClient } from '../model';
-import { filterToTraceQL } from './filter/traceql_from_filter';
+import { filterToTraceQL } from './filter/filter_to_traceql';
 import { traceQLToFilter } from './filter/traceql_to_filter';
 import { DurationField, Filter, splitByUnquotedWhitespace } from './filter/filter';
 
