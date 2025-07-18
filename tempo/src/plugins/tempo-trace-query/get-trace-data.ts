@@ -88,9 +88,45 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
 };
 
 function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
-  return {
+  const trace = {
     resourceSpans: response.batches,
   };
+
+  // Tempo returns Trace ID and Span ID base64-encoded.
+  // The OTLP spec defines the encoding in the hex format:
+  // Spec: https://opentelemetry.io/docs/specs/otlp/#json-protobuf-encoding
+  // Example: https://github.com/open-telemetry/opentelemetry-proto/blob/v1.7.0/examples/trace.json
+  // Therefore, let's convert it to hex encoding.
+  for (const resourceSpan of trace.resourceSpans) {
+    for (const scopeSpan of resourceSpan.scopeSpans) {
+      for (const span of scopeSpan.spans) {
+        if (span.traceId.length != 32) {
+          span.traceId = base64ToHex(span.traceId);
+        }
+
+        if (span.spanId.length != 16) {
+          span.spanId = base64ToHex(span.spanId);
+        }
+
+        if (span.parentSpanId && span.parentSpanId.length != 16) {
+          span.parentSpanId = base64ToHex(span.parentSpanId);
+        }
+      }
+    }
+  }
+
+  return trace;
+}
+
+function base64ToHex(str: string) {
+  try {
+    return atob(str)
+      .split('')
+      .map((char) => char.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase())
+      .join('');
+  } catch {
+    return str;
+  }
 }
 
 function parseSearchResponse(response: SearchResponse): TraceSearchResult[] {
