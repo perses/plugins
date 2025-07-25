@@ -19,21 +19,21 @@ import (
 
 func Expr(expr string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Expr = expr
+		builder.Expr = expr
 		return nil
 	}
 }
 
 func LabelName(labelName string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.LabelName = labelName
+		builder.LabelName = labelName
 		return nil
 	}
 }
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Datasource = promDatasource.Selector(datasourceName)
+		builder.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }
