@@ -15,7 +15,7 @@ import { Virtuoso, ListRange } from 'react-virtuoso';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
-import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
 import { Span, Trace } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
@@ -24,6 +24,7 @@ import { ResizableDivider } from './ResizableDivider';
 
 export interface GanttTableProps {
   options: TracingGanttChartOptions;
+  customLinks?: CustomLinks;
   trace: Trace;
   viewport: Viewport;
   selectedSpan?: Span;
@@ -31,7 +32,7 @@ export interface GanttTableProps {
 }
 
 export function GanttTable(props: GanttTableProps): ReactElement {
-  const { options, trace, viewport, selectedSpan, onSpanClick } = props;
+  const { options, customLinks, trace, viewport, selectedSpan, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -73,6 +74,7 @@ export function GanttTable(props: GanttTableProps): ReactElement {
         itemContent={(_, span) => (
           <GanttTableRow
             options={options}
+            customLinks={customLinks}
             span={span}
             viewport={viewport}
             selected={span === selectedSpan}
