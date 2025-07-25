@@ -34,3 +34,13 @@ checkdocs:
 fmt-docs:
 	@echo ">> format markdown document"
 	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "**/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
+
+.PHONY: golangci-lint
+golangci-lint:
+	@echo ">> Run golangci-lint on all plugins"
+	$(GO) run ./scripts/golangci-lint/golangci-lint.go
+
+.PHONY: build
+build:
+	@echo ">> Build all plugins"
+	$(GO) run ./scripts/build-plugins/build-plugins.go
