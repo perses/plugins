@@ -15,19 +15,22 @@ import { ReactElement, useMemo } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { isValidTraceId } from '@perses-dev/core';
-import { CompletionConfig, TraceQLExtension } from './TraceQLExtension';
+import { useTimeRange } from '@perses-dev/plugin-system';
+import { TempoClient } from '../model';
+import { TraceQLExtension } from './TraceQLExtension';
 
 export interface TraceQLEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {
-  completionConfig: CompletionConfig;
+  client?: TempoClient;
 }
 
-export function TraceQLEditor({ completionConfig, ...rest }: TraceQLEditorProps): ReactElement {
+export function TraceQLEditor({ client, ...rest }: TraceQLEditorProps): ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
+  const { timeRange } = useTimeRange();
   const traceQLExtension = useMemo(() => {
-    return TraceQLExtension(completionConfig);
-  }, [completionConfig]);
+    return TraceQLExtension({ client, timeRange });
+  }, [client, timeRange]);
 
   const codemirrorTheme = useMemo(() => {
     // https://github.com/mui/material-ui/blob/v5.16.7/packages/mui-material/src/OutlinedInput/OutlinedInput.js#L43
