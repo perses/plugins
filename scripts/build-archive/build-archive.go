@@ -66,7 +66,7 @@ func createArchive(pluginName string, createGroupArchive bool) error {
 }
 
 func main() {
-	createGroupArchive := false
+	var createGroupArchive bool
 	if len(os.Args) > 1 && os.Args[1] == "--group" {
 		createGroupArchive = true
 	}
