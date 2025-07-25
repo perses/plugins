@@ -39,21 +39,42 @@ export function TraceAttributes(props: TraceAttributesProps) {
       <Divider />
       {span.attributes.length > 0 && (
         <>
-          <AttributeList attributeLinks={attributeLinks} attributes={span.attributes} />
+          <AttributeList
+            attributes={span.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
+            attributeLinks={attributeLinks}
+          />
           <Divider />
         </>
       )}
-      <AttributeList attributeLinks={attributeLinks} attributes={span.resource.attributes} />
+      <AttributeList
+        attributes={span.resource.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
+        attributeLinks={attributeLinks}
+      />
     </>
   );
 }
 
 export interface AttributeListProps {
+  attributes: otlpcommonv1.KeyValue[];
+  attributeLinks?: AttributeLinks;
+}
+
+export function AttributeList(props: AttributeListProps): ReactElement {
+  const { attributes, attributeLinks } = props;
+
+  return (
+    <List>
+      <AttributeItems attributes={attributes} attributeLinks={attributeLinks} />
+    </List>
+  );
+}
+
+interface AttributeItemsProps {
   attributeLinks?: AttributeLinks;
   attributes: otlpcommonv1.KeyValue[];
 }
 
-export function AttributeList(props: AttributeListProps): ReactElement {
+export function AttributeItems(props: AttributeItemsProps): ReactElement {
   const { attributeLinks, attributes } = props;
   const attributesMap = useMemo(
     () => Object.fromEntries(attributes.map((attr) => [attr.key, attr.value])),
@@ -61,18 +82,16 @@ export function AttributeList(props: AttributeListProps): ReactElement {
   );
 
   return (
-    <List>
-      {attributes
-        .sort((a, b) => a.key.localeCompare(b.key))
-        .map((attribute, i) => (
-          <AttributeItem
-            key={i}
-            name={attribute.key}
-            value={renderAttributeValue(attribute.value)}
-            link={attributeLinks?.[attribute.key]?.(attributesMap)}
-          />
-        ))}
-    </List>
+    <>
+      {attributes.map((attribute, i) => (
+        <AttributeItem
+          key={i}
+          name={attribute.key}
+          value={renderAttributeValue(attribute.value)}
+          link={attributeLinks?.[attribute.key]?.(attributesMap)}
+        />
+      ))}
+    </>
   );
 }
 
@@ -82,7 +101,7 @@ interface AttributeItemProps {
   link?: string;
 }
 
-function AttributeItem(props: AttributeItemProps): ReactElement {
+export function AttributeItem(props: AttributeItemProps): ReactElement {
   const { name, value, link } = props;
 
   const valueComponent = link ? (
@@ -94,7 +113,7 @@ function AttributeItem(props: AttributeItemProps): ReactElement {
   );
 
   return (
-    <ListItem disablePadding>
+    <ListItem sx={{ px: 1, py: 0 }}>
       <ListItemText
         primary={name}
         secondary={valueComponent}

@@ -54,7 +54,7 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
         </Tabs>
       </Box>
       {tab === 'attributes' && <TraceAttributes trace={trace} span={span} attributeLinks={attributeLinks} />}
-      {tab === 'events' && <SpanEventList trace={trace} span={span} />}
+      {tab === 'events' && <SpanEventList trace={trace} span={span} attributeLinks={attributeLinks} />}
     </Box>
   );
 }
