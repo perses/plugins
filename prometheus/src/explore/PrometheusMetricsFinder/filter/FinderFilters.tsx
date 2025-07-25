@@ -49,7 +49,7 @@ export function FinderFilters({
 
   return (
     <Stack {...props} direction="row" alignItems="center" flexWrap="wrap" gap={1} sx={{ width: '100%' }}>
-      <FormControl sx={{ width: 250 }}>
+      <FormControl sx={{ width: 500 }}>
         <DatasourceSelect
           size="medium"
           datasourcePluginKind={PROM_DATASOURCE_KIND}
