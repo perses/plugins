@@ -67,6 +67,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
         <GanttTableProvider>
           <GanttTable
             options={options}
+            customLinks={customLinks}
             trace={trace}
             viewport={viewport}
             selectedSpan={selectedSpan}
