@@ -53,7 +53,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
     },
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b} : {c} ({d}%)',
+      formatter: '{b} : {c} ({d}%)',
     },
     axisLabel: {
       overflow: 'truncate',
@@ -61,7 +61,6 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
     },
     series: [
       {
-        name: 'Access From',
         type: 'pie',
         radius: '55%',
         label: false,
