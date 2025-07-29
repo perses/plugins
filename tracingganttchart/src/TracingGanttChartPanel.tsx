@@ -14,14 +14,14 @@
 import { PanelProps } from '@perses-dev/plugin-system';
 import { NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement } from 'react';
 import { TraceData } from '@perses-dev/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { CustomLinks, TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 
 export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChartOptions, TraceData> {
-  RouterComponent?: (props: { to?: string }) => ReactNode;
+  RouterComponent?: CustomLinks['RouterComponent'];
 }
 
 export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
