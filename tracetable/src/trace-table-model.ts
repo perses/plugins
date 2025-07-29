@@ -14,9 +14,10 @@
 /**
  * The Options object type supported by the TraceTable panel plugin.
  */
-// Note: The interface attributes must match cue/schemas/panels/trace-table/trace-table.cue
+// Note: The interface attributes must match schemas/trace-table.cue
 export interface TraceTableOptions {
   visual?: TraceTableVisualOptions;
+  links?: TraceTableCustomLinks;
 }
 
 export interface TraceTableVisualOptions {
@@ -25,6 +26,10 @@ export interface TraceTableVisualOptions {
 
 export interface TraceTablePaletteOptions {
   mode: 'auto' | 'categorical';
+}
+
+export interface TraceTableCustomLinks {
+  trace?: string;
 }
 
 /**

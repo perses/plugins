@@ -20,14 +20,14 @@ import {
   formatDuration,
   msToPrometheusDuration,
 } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
-import { Link as RouterLink } from 'react-router-dom';
+import { PanelData, useAllVariableValues } from '@perses-dev/plugin-system';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { ReactElement, useCallback, useMemo } from 'react';
+import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
+import { renderTemplate } from './utils';
 
 const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   dateStyle: 'long',
@@ -43,19 +43,19 @@ export type TraceLink = (params: { query: QueryDefinition; traceId: string }) =>
 
 export interface DataTableProps {
   options: TraceTableOptions;
+  RouterComponent: (props: { to: string }) => ReactNode;
   result: Array<PanelData<TraceData>>;
-  traceLink?: TraceLink;
 }
 
 interface Row extends TraceSearchResult {
-  id: string;
   traceLink?: string;
 }
 
 export function DataTable(props: DataTableProps): ReactElement {
-  const { options, result, traceLink } = props;
+  const { options, RouterComponent, result } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
+  const variableValues = useAllVariableValues();
 
   const paletteMode = options.visual?.palette?.mode;
   const serviceColorGenerator = useCallback(
@@ -65,11 +65,16 @@ export function DataTable(props: DataTableProps): ReactElement {
 
   const rows: Row[] = [];
   for (const query of result) {
+    const pluginSpec = query.definition.spec.plugin.spec as { datasource?: { name?: string } } | undefined;
+    const datasourceName = pluginSpec?.datasource?.name;
+
     for (const trace of query.data?.searchResult || []) {
       rows.push({
         ...trace,
-        id: trace.traceId,
-        traceLink: traceLink?.({ query: query.definition, traceId: trace.traceId }),
+        traceLink: renderTemplate(options.links?.trace, variableValues, {
+          datasourceName: datasourceName ?? '',
+          traceId: trace.traceId,
+        }),
       });
     }
   }
@@ -85,7 +90,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         valueGetter: (_, trace): string => `${trace.rootServiceName}: ${trace.rootTraceName}`,
         renderCell: ({ row }): ReactElement => (
           <Box sx={{ my: 1 }}>
-            <TraceName row={row} />
+            <TraceName RouterComponent={RouterComponent} row={row} />
             <br />
             {Object.entries(row.serviceStats).map(([serviceName, stats]) => (
               <ServiceChip
@@ -165,7 +170,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         ),
       },
     ],
-    [serviceColorGenerator]
+    [RouterComponent, serviceColorGenerator]
   );
 
   return (
@@ -173,6 +178,7 @@ export function DataTable(props: DataTableProps): ReactElement {
       sx={{ borderWidth: 0 }}
       columns={columns}
       rows={rows}
+      getRowId={(row) => row.traceId}
       getRowHeight={() => 'auto'}
       getEstimatedRowHeight={() => 66}
       disableRowSelectionOnClick={true}
@@ -185,13 +191,14 @@ export function DataTable(props: DataTableProps): ReactElement {
 }
 
 interface TraceNameProps {
+  RouterComponent: DataTableProps['RouterComponent'];
   row: Row;
 }
 
-function TraceName({ row: trace }: TraceNameProps): ReactElement {
+function TraceName({ RouterComponent, row: trace }: TraceNameProps): ReactElement {
   if (trace.traceLink) {
     return (
-      <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={trace.traceLink}>
+      <Link variant="body1" color="inherit" underline="hover" component={RouterComponent} to={trace.traceLink}>
         <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
       </Link>
     );
