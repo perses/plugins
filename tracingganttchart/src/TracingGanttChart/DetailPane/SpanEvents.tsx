@@ -17,16 +17,17 @@ import ChevronUp from 'mdi-material-ui/ChevronUp';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import { formatDuration } from '../utils';
 import { Trace, Span, Event } from '../trace';
-import { AttributeItems, AttributeItem, AttributeLinks } from './Attributes';
+import { CustomLinks } from '../../gantt-chart-model';
+import { AttributeItems, AttributeItem } from './Attributes';
 
 export interface SpanEventListProps {
+  customLinks?: CustomLinks;
   trace: Trace;
   span: Span;
-  attributeLinks?: AttributeLinks;
 }
 
 export function SpanEventList(props: SpanEventListProps): ReactElement {
-  const { trace, span, attributeLinks } = props;
+  const { customLinks, trace, span } = props;
 
   return (
     <>
@@ -35,7 +36,7 @@ export function SpanEventList(props: SpanEventListProps): ReactElement {
         .map((event, i) => (
           <Fragment key={i}>
             {i > 0 && <Divider />}
-            <SpanEventItem trace={trace} event={event} attributeLinks={attributeLinks} />
+            <SpanEventItem customLinks={customLinks} trace={trace} event={event} />
           </Fragment>
         ))}
     </>
@@ -43,13 +44,13 @@ export function SpanEventList(props: SpanEventListProps): ReactElement {
 }
 
 interface SpanEventItemProps {
+  customLinks?: CustomLinks;
   trace: Trace;
   event: Event;
-  attributeLinks?: AttributeLinks;
 }
 
 function SpanEventItem(props: SpanEventItemProps): ReactElement {
-  const { trace, event, attributeLinks } = props;
+  const { customLinks, trace, event } = props;
   const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
 
   const [open, setOpen] = useState(false);
@@ -74,7 +75,7 @@ function SpanEventItem(props: SpanEventItemProps): ReactElement {
         <List sx={{ px: 1 }}>
           <AttributeItem name="name" value={event.name} />
           <AttributeItem name="time" value={formatDuration(relativeTime)} />
-          <AttributeItems attributes={event.attributes} attributeLinks={attributeLinks} />
+          <AttributeItems customLinks={customLinks} attributes={event.attributes} />
         </List>
       </Collapse>
     </List>

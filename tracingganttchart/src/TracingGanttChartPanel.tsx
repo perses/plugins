@@ -14,25 +14,18 @@
 import { PanelProps } from '@perses-dev/plugin-system';
 import { NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { TraceData } from '@perses-dev/core';
-import { TracingGanttChartOptions } from './gantt-chart-model';
+import { Link as RouterLink } from 'react-router-dom';
+import { CustomLinks, TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
-import { AttributeLinks } from './TracingGanttChart/DetailPane/Attributes';
 
 export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChartOptions, TraceData> {
-  /**
-   * Allows custom links for each attribute in the detail pane.
-   * Example:
-   * {
-   *   'k8s.pod.name': (attrs) => `/my/console/namespace/${attrs['k8s.namespace.name']?.stringValue}/${attrs['k8s.pod.name']?.stringValue}/detail`
-   * }
-   */
-  attributeLinks?: AttributeLinks;
+  RouterComponent?: (props: { to?: string }) => ReactNode;
 }
 
 export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
-  const { spec, queryResults, attributeLinks } = props;
+  const { spec, queryResults, RouterComponent } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
 
@@ -45,9 +38,21 @@ export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): Reac
     return <NoDataOverlay resource="trace" />;
   }
 
+  const pluginSpec = queryResults[0]?.definition.spec.plugin.spec as { datasource?: { name?: string } } | undefined;
+  const datasourceName = pluginSpec?.datasource?.name;
+  const customLinks: CustomLinks | undefined = spec.links
+    ? {
+        RouterComponent: RouterComponent ?? RouterLink,
+        variables: {
+          datasourceName: datasourceName ?? '',
+        },
+        links: spec.links,
+      }
+    : undefined;
+
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <TracingGanttChart options={spec} attributeLinks={attributeLinks} trace={trace} />
+      <TracingGanttChart options={spec} customLinks={customLinks} trace={trace} />
     </Box>
   );
 }
