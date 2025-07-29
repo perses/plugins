@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { replaceVariables, VariableStateMap } from '@perses-dev/plugin-system';
 
-kind: "ScatterChart"
-spec: close({
-	sizeRange?: [number & <sizeRange[1], number]
-	link?: string
-})
+export function renderTemplate(
+  template: string,
+  variableValues: VariableStateMap,
+  extraVariables?: Record<string, string>
+): string {
+  for (const [key, value] of Object.entries(extraVariables ?? {})) {
+    variableValues[key] = { value, loading: false };
+  }
+  return replaceVariables(template, variableValues);
+}

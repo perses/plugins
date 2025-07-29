@@ -27,6 +27,34 @@ interface SearchResultsPanelProps {
   queries: QueryDefinition[];
 }
 
+const linkToTraceParams = new URLSearchParams({
+  explorer: 'Tempo-TempoExplorer',
+  data: JSON.stringify({
+    queries: [
+      {
+        kind: 'TraceQuery',
+        spec: {
+          plugin: {
+            kind: 'TempoTraceQuery',
+            spec: {
+              query: 'TRACEID',
+              datasource: {
+                kind: 'TempoDatasource',
+                name: 'DATASOURCENAME',
+              },
+            },
+          },
+        },
+      },
+    ],
+  }),
+});
+
+// add ${...} syntax after the URL is URL-encoded, because the characters ${} must not be URL-encoded
+const linkToTrace = `/explore?${linkToTraceParams}`
+  .replace('TRACEID', '${traceId}')
+  .replace('DATASOURCENAME', '${datasourceName}');
+
 function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
@@ -58,7 +86,16 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
           }}
           definition={{
             kind: 'Panel',
-            spec: { queries, display: { name: '' }, plugin: { kind: 'ScatterChart', spec: {} } },
+            spec: {
+              queries,
+              display: { name: '' },
+              plugin: {
+                kind: 'ScatterChart',
+                spec: {
+                  link: linkToTrace,
+                },
+              },
+            },
           }}
         />
       </Box>

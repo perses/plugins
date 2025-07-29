@@ -13,46 +13,27 @@
 
 import { PanelProps } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
-import { QueryDefinition, TraceData, TraceSearchResult } from '@perses-dev/core';
+import { TraceData, TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { Scatterplot } from './Scatterplot';
+import { useNavigate } from 'react-router-dom';
+import { Scatterplot, ScatterplotProps } from './Scatterplot';
 import { ScatterChartOptions } from './scatter-chart-model';
 
 export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnixMs' | 'serviceStats'> {
   name: string;
-  query: QueryDefinition;
+  linkVariables: Record<string, string>;
   startTime: Date;
   spanCount: number;
   errorCount: number;
 }
 
 export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions, TraceData> {
-  /**
-   * Custom onClick event handler.
-   * If this field is unset or undefined, a default handler which links to the Gantt chart on the explore page is configured.
-   * Set this field explicitly to null to disable handling the click event.
-   */
-  onClick?: ((data: EChartTraceValue) => void) | null;
+  navigate?: (to: string) => void;
 }
 
 /** default size range of the circles diameter */
 const DEFAULT_SIZE_RANGE: [number, number] = [6, 20];
-
-// Navigate to the Gantt Chart on the explore page by default
-function defaultClickHandler(data: EChartTraceValue): void {
-  // clone the original query spec (including the datasource) and replace the query value with the trace id
-  const query: QueryDefinition = JSON.parse(JSON.stringify(data.query));
-  query.spec.plugin.spec.query = data.traceId;
-
-  const exploreParams = new URLSearchParams({
-    explorer: 'traces',
-    data: JSON.stringify({ queries: [query] }),
-  });
-
-  // do not use react-router here, as downstream products, which embed this panel, may not have a compatible version of it
-  window.location.href = `/explore?${exploreParams}`;
-}
 
 /**
  * ScatterChartPanel receives data from the DataQueriesProvider and transforms it
@@ -70,7 +51,7 @@ function defaultClickHandler(data: EChartTraceValue): void {
  * visualization of the data.
  */
 export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement | null {
-  const { spec, contentDimensions, queryResults: traceResults, onClick } = props;
+  const { spec, contentDimensions, queryResults: traceResults, navigate: customNavigateFunction } = props;
   const chartsTheme = useChartsTheme();
   const defaultColor = chartsTheme.thresholds.defaultColor || 'blue';
   const sizeRange = spec.sizeRange || DEFAULT_SIZE_RANGE;
@@ -99,9 +80,13 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
           maxSpanCount = spanCount;
         }
 
+        const pluginSpec = result.definition.spec.plugin.spec as { datasource?: { name?: string } } | undefined;
         const newTraceValue: EChartTraceValue = {
           ...trace,
-          query: result.definition,
+          linkVariables: {
+            datasourceName: pluginSpec?.datasource?.name ?? '',
+            traceId: trace.traceId,
+          },
           name: `${trace.rootServiceName}: ${trace.rootTraceName}`,
           startTime: new Date(trace.startTimeUnixMs), // convert unix epoch time to Date
           spanCount,
@@ -168,14 +153,34 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
 
   return (
     <div data-testid="ScatterChartPanel_ScatterPlot">
-      <Scatterplot
-        width={contentDimensions.width}
-        height={contentDimensions.height}
-        options={options}
-        onClick={onClick === null ? undefined : (onClick ?? defaultClickHandler)}
-      />
+      {customNavigateFunction ? (
+        <Scatterplot
+          width={contentDimensions.width}
+          height={contentDimensions.height}
+          options={options}
+          navigate={customNavigateFunction}
+          link={spec.link}
+        />
+      ) : (
+        <ScatterplotWithDefaultRouter
+          width={contentDimensions.width}
+          height={contentDimensions.height}
+          options={options}
+          link={spec.link}
+        />
+      )}
     </div>
   );
+}
+
+/**
+ * The useNavigate() hook must only be executed if props.navigate of the Scatterplot is unset.
+ * Otherwise, if the host application uses a different routing library, calling useNavigate() would throw an error.
+ * We cannot call hooks conditionally (against React Rules of Hooks), therefore we're using this workaround of a conditionally rendered component <ScatterplotWithDefaultRouter />.
+ */
+function ScatterplotWithDefaultRouter(props: Omit<ScatterplotProps, 'navigate'>) {
+  const navigate = useNavigate();
+  return <Scatterplot {...props} navigate={navigate} />;
 }
 
 // exported for tests
