@@ -77,12 +77,23 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
 
   // Align the time range so that it's a multiple of the step
   let { start, end } = timeRange;
+
   const utcOffsetSec = new Date().getTimezoneOffset() * 60;
 
   const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
   const alignedStart = Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
   start = alignedStart;
   end = alignedEnd;
+
+  /* Ensure end is always greater than start:
+     If the step is greater than equal to the diff of end and start,
+     both start, and end will eventually be rounded to the same value,
+     Consequently, the time range will be zero, which does not return any valid value
+  */
+  if (end === start) {
+    end = start + step;
+    console.warn(`Step (${step}) was larger than the time range! end of time range was set accordingly.`);
+  }
 
   // Replace variable placeholders in PromQL query
   const intervalMs = step * 1000;
