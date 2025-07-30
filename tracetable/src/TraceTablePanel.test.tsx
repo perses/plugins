@@ -13,7 +13,7 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TraceData } from '@perses-dev/core';
-import { PanelData, TimeRangeProvider } from '@perses-dev/plugin-system';
+import { PanelData, ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VariableProvider } from '@perses-dev/dashboards';
@@ -33,13 +33,15 @@ describe('TraceTablePanel', () => {
   const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
     render(
       <MemoryRouter>
-        <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
-          <VariableProvider>
-            <ChartsProvider chartsTheme={testChartsTheme}>
-              <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
-            </ChartsProvider>
-          </VariableProvider>
-        </TimeRangeProvider>
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <ChartsProvider chartsTheme={testChartsTheme}>
+                <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
+              </ChartsProvider>
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };
