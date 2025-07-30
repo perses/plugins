@@ -20,11 +20,11 @@ import {
   formatDuration,
   msToPrometheusDuration,
 } from '@perses-dev/core';
-import { PanelData, useAllVariableValues } from '@perses-dev/plugin-system';
+import { PanelData, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
 import { renderTemplate } from './utils';
@@ -43,7 +43,6 @@ export type TraceLink = (params: { query: QueryDefinition; traceId: string }) =>
 
 export interface DataTableProps {
   options: TraceTableOptions;
-  RouterComponent: (props: { to: string }) => ReactNode;
   result: Array<PanelData<TraceData>>;
 }
 
@@ -52,7 +51,7 @@ interface Row extends TraceSearchResult {
 }
 
 export function DataTable(props: DataTableProps): ReactElement {
-  const { options, RouterComponent, result } = props;
+  const { options, result } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
   const variableValues = useAllVariableValues();
@@ -90,7 +89,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         valueGetter: (_, trace): string => `${trace.rootServiceName}: ${trace.rootTraceName}`,
         renderCell: ({ row }): ReactElement => (
           <Box sx={{ my: 1 }}>
-            <TraceName RouterComponent={RouterComponent} row={row} />
+            <TraceName row={row} />
             <br />
             {Object.entries(row.serviceStats).map(([serviceName, stats]) => (
               <ServiceChip
@@ -170,7 +169,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         ),
       },
     ],
-    [RouterComponent, serviceColorGenerator]
+    [serviceColorGenerator]
   );
 
   return (
@@ -191,11 +190,12 @@ export function DataTable(props: DataTableProps): ReactElement {
 }
 
 interface TraceNameProps {
-  RouterComponent: DataTableProps['RouterComponent'];
   row: Row;
 }
 
-function TraceName({ RouterComponent, row: trace }: TraceNameProps): ReactElement {
+function TraceName({ row: trace }: TraceNameProps): ReactElement {
+  const { RouterComponent } = useRouterContext();
+
   if (trace.traceLink) {
     return (
       <Link variant="body1" color="inherit" underline="hover" component={RouterComponent} to={trace.traceLink}>

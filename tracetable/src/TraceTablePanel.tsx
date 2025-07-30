@@ -16,16 +16,13 @@ import { Box } from '@mui/material';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { TraceData } from '@perses-dev/core';
 import { ReactElement } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import { DataTable, DataTableProps } from './DataTable';
+import { DataTable } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 
-export interface TraceTablePanelProps extends PanelProps<TraceTableOptions, TraceData> {
-  RouterComponent?: DataTableProps['RouterComponent'];
-}
+export type TraceTablePanelProps = PanelProps<TraceTableOptions, TraceData>;
 
 export function TraceTablePanel(props: TraceTablePanelProps): ReactElement {
-  const { spec, queryResults, RouterComponent } = props;
+  const { spec, queryResults } = props;
 
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
@@ -37,7 +34,7 @@ export function TraceTablePanel(props: TraceTablePanelProps): ReactElement {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'auto' }}>
-      <DataTable options={spec} RouterComponent={RouterComponent ?? RouterLink} result={queryResults} />
+      <DataTable options={spec} result={queryResults} />
     </Box>
   );
 }
