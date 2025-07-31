@@ -14,6 +14,7 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { sharedModules } from '../rsbuild.shared';
 
 export const assetPrefix = '/plugins/Prometheus/';
 
@@ -43,24 +44,7 @@ export default defineConfig({
         './PrometheusPromQLVariable': './src/plugins/PrometheusPromQLVariable.tsx',
         './PrometheusExplorer': './src/explore/PrometheusExplorer.tsx',
       },
-      shared: {
-        react: { requiredVersion: '18.2.0', singleton: true },
-        'react-dom': { requiredVersion: '18.2.0', singleton: true },
-        echarts: { singleton: true },
-        'date-fns': { singleton: true },
-        'date-fns-tz': { singleton: true },
-        lodash: { singleton: true },
-        '@perses-dev/components': { singleton: true },
-        '@perses-dev/plugin-system': { singleton: true },
-        '@perses-dev/explore': { singleton: true },
-        '@perses-dev/dashboards': { singleton: true },
-        '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
-        '@emotion/styled': { singleton: true },
-        '@hookform/resolvers': { singleton: true },
-        '@tanstack/react-query': { singleton: true },
-        'react-hook-form': { singleton: true },
-        'react-router-dom': { singleton: true },
-      },
+      shared: sharedModules,
       dts: false,
       runtime: false,
     }),
