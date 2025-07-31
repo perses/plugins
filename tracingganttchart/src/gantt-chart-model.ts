@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, MouseEvent } from 'react';
-
 /**
  * The Options object type supported by the TracingGanttChart panel plugin.
  */
@@ -41,7 +39,6 @@ export interface TracingGanttChartCustomAttributeLink {
 }
 
 export interface CustomLinks {
-  RouterComponent: (props: { to: string; onClick?: (event: MouseEvent) => void }) => ReactNode;
   variables: Record<string, string>;
   links: TracingGanttChartCustomLinks;
 }

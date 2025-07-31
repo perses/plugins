@@ -14,7 +14,7 @@
 import { ReactElement, useMemo } from 'react';
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
 import { otlpcommonv1 } from '@perses-dev/core';
-import { useAllVariableValues } from '@perses-dev/plugin-system';
+import { useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { Span, Trace } from '../trace';
 import { formatDuration, renderTemplate } from '../utils';
 import { CustomLinks } from '../../gantt-chart-model';
@@ -118,10 +118,11 @@ interface AttributeItemProps {
 
 export function AttributeItem(props: AttributeItemProps): ReactElement {
   const { customLinks, name, value, link } = props;
+  const { RouterComponent } = useRouterContext();
 
   const valueComponent =
     customLinks && link ? (
-      <Link component={customLinks.RouterComponent} to={link}>
+      <Link component={RouterComponent} to={link}>
         {value}
       </Link>
     ) : (

@@ -16,16 +16,13 @@ import { NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/componen
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
 import { TraceData } from '@perses-dev/core';
-import { Link as RouterLink } from 'react-router-dom';
 import { CustomLinks, TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 
-export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChartOptions, TraceData> {
-  RouterComponent?: CustomLinks['RouterComponent'];
-}
+export type TracingGanttChartPanelProps = PanelProps<TracingGanttChartOptions, TraceData>;
 
 export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
-  const { spec, queryResults, RouterComponent } = props;
+  const { spec, queryResults } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
 
@@ -42,7 +39,6 @@ export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): Reac
   const datasourceName = pluginSpec?.datasource?.name;
   const customLinks: CustomLinks | undefined = spec.links
     ? {
-        RouterComponent: RouterComponent ?? RouterLink,
         variables: {
           datasourceName: datasourceName ?? '',
         },

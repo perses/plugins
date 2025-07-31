@@ -15,7 +15,7 @@ import { fireEvent, screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
 import { otlptracev1 } from '@perses-dev/core';
 import { VariableProvider } from '@perses-dev/dashboards';
-import { TimeRangeProvider } from '@perses-dev/plugin-system';
+import { ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
 import { MemoryRouter } from 'react-router-dom';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
@@ -26,11 +26,13 @@ describe('SpanEvents', () => {
   const renderComponent = (props: SpanEventListProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
-          <VariableProvider>
-            <SpanEventList {...props} />
-          </VariableProvider>
-        </TimeRangeProvider>
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <SpanEventList {...props} />
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };

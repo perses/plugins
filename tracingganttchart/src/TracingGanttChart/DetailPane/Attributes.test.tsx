@@ -13,10 +13,10 @@
 
 import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { MemoryRouter, Link as RouterLink } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { otlptracev1 } from '@perses-dev/core';
 import { VariableProvider } from '@perses-dev/dashboards';
-import { TimeRangeProvider } from '@perses-dev/plugin-system';
+import { ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
 import { CustomLinks } from '../../gantt-chart-model';
@@ -27,11 +27,13 @@ describe('Attributes', () => {
   const renderTraceAttributes = (props: TraceAttributesProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
-          <VariableProvider>
-            <TraceAttributes {...props} />
-          </VariableProvider>
-        </TimeRangeProvider>
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <TraceAttributes {...props} />
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };
@@ -39,11 +41,13 @@ describe('Attributes', () => {
   const renderAttributeList = (props: AttributeListProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
-          <VariableProvider>
-            <AttributeList {...props} />
-          </VariableProvider>
-        </TimeRangeProvider>
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <AttributeList {...props} />
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };
@@ -77,7 +81,6 @@ describe('Attributes', () => {
 
   it('render an attribute with a link', () => {
     const customLinks: CustomLinks = {
-      RouterComponent: RouterLink,
       links: {
         attributes: [{ name: 'k8s.pod.name', link: '/console/ns/${k8s_namespace_name}/pod/${k8s_pod_name}/detail' }],
       },

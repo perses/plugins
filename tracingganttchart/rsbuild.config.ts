@@ -41,7 +41,6 @@ export default defineConfig({
       shared: {
         react: { requiredVersion: '18.2.0', singleton: true },
         'react-dom': { requiredVersion: '18.2.0', singleton: true },
-        'react-router-dom': { singleton: true },
         echarts: { singleton: true },
         'date-fns': { singleton: true },
         'date-fns-tz': { singleton: true },
