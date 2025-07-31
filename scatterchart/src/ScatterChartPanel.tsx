@@ -16,8 +16,7 @@ import { ReactElement, useMemo } from 'react';
 import { TraceData, TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { useNavigate } from 'react-router-dom';
-import { Scatterplot, ScatterplotProps } from './Scatterplot';
+import { Scatterplot } from './Scatterplot';
 import { ScatterChartOptions } from './scatter-chart-model';
 
 export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnixMs' | 'serviceStats'> {
@@ -28,9 +27,7 @@ export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnix
   errorCount: number;
 }
 
-export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions, TraceData> {
-  navigate?: (to: string) => void;
-}
+export type ScatterChartPanelProps = PanelProps<ScatterChartOptions, TraceData>;
 
 /** default size range of the circles diameter */
 const DEFAULT_SIZE_RANGE: [number, number] = [6, 20];
@@ -51,7 +48,7 @@ const DEFAULT_SIZE_RANGE: [number, number] = [6, 20];
  * visualization of the data.
  */
 export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement | null {
-  const { spec, contentDimensions, queryResults: traceResults, navigate: customNavigateFunction } = props;
+  const { spec, contentDimensions, queryResults: traceResults } = props;
   const chartsTheme = useChartsTheme();
   const defaultColor = chartsTheme.thresholds.defaultColor || 'blue';
   const sizeRange = spec.sizeRange || DEFAULT_SIZE_RANGE;
@@ -153,34 +150,14 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
 
   return (
     <div data-testid="ScatterChartPanel_ScatterPlot">
-      {customNavigateFunction ? (
-        <Scatterplot
-          width={contentDimensions.width}
-          height={contentDimensions.height}
-          options={options}
-          navigate={customNavigateFunction}
-          link={spec.link}
-        />
-      ) : (
-        <ScatterplotWithDefaultRouter
-          width={contentDimensions.width}
-          height={contentDimensions.height}
-          options={options}
-          link={spec.link}
-        />
-      )}
+      <Scatterplot
+        width={contentDimensions.width}
+        height={contentDimensions.height}
+        options={options}
+        link={spec.link}
+      />
     </div>
   );
-}
-
-/**
- * The useNavigate() hook must only be executed if props.navigate of the Scatterplot is unset.
- * Otherwise, if the host application uses a different routing library, calling useNavigate() would throw an error.
- * We cannot call hooks conditionally (against React Rules of Hooks), therefore we're using this workaround of a conditionally rendered component <ScatterplotWithDefaultRouter />.
- */
-function ScatterplotWithDefaultRouter(props: Omit<ScatterplotProps, 'navigate'>) {
-  const navigate = useNavigate();
-  return <Scatterplot {...props} navigate={navigate} />;
 }
 
 // exported for tests

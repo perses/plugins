@@ -26,7 +26,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption, ScatterSeriesOption } from 'echarts';
 import { formatValue } from '@perses-dev/core';
-import { useAllVariableValues } from '@perses-dev/plugin-system';
+import { useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { EChartTraceValue } from './ScatterChartPanel';
 import { renderTemplate } from './utils';
 
@@ -45,7 +45,6 @@ export interface ScatterplotProps {
   width: number;
   height: number;
   options: EChartsOption;
-  navigate: (to: string) => void;
   link?: string;
 }
 
@@ -55,9 +54,10 @@ const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
 }).format;
 
 export function Scatterplot(props: ScatterplotProps): ReactElement {
-  const { width, height, options, navigate, link: linkTemplate } = props;
+  const { width, height, options, link: linkTemplate } = props;
   const chartsTheme = useChartsTheme();
   const variableValues = useAllVariableValues();
+  const { navigate } = useRouterContext();
 
   // Apache EChart Options Docs: https://echarts.apache.org/en/option.html
   const eChartOptions: EChartsCoreOption = {
