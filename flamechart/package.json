@@ -1,0 +1,55 @@
+{
+  "name": "@perses-dev/flame-chart",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "cross-env LC_ALL=C TZ=UTC jest",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@perses-dev/components": "0.0.0-snapshot-profile-89b306f",
+    "@perses-dev/core": "0.0.0-snapshot-profile-89b306f",
+    "@perses-dev/plugin-system": "0.0.0-snapshot-profile-89b306f"
+  },
+  "devDependencies": {
+    "@types/color-hash": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@hookform/resolvers": "^3.2.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "echarts": "5.5.0",
+    "lodash": "^4.17.21",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0",
+    "use-resize-observer": "^9.0.0",
+    "immer": "^10.1.1"
+  },
+  "files": [
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
+  ],
+  "perses": {
+    "plugins": [
+      {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Flame Chart"
+          },
+          "name": "FlameChart"
+        }
+      }
+    ]
+  }
+}
