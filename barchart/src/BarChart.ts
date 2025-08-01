@@ -15,18 +15,17 @@ import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialBarChartOptions, BarChartOptions } from './bar-chart-model';
 import { BarChartOptionsEditorSettings } from './BarChartOptionsEditorSettings';
 import { BarChartPanel, BarChartPanelProps } from './BarChartPanel';
+import { BarChartExportAction } from './BarChartExportAction';
 
-/**
- * The core BarChart panel plugin for Perses.
- */
 export const BarChart: PanelPlugin<BarChartOptions, BarChartPanelProps> = {
   PanelComponent: BarChartPanel,
-  panelOptionsEditorComponents: [
+  supportedQueryTypes: ['TimeSeriesQuery'],
+  panelOptionsEditorComponents: [{ label: 'Settings', content: BarChartOptionsEditorSettings }],
+  createInitialOptions: createInitialBarChartOptions,
+  actions: [
     {
-      label: 'Settings',
-      content: BarChartOptionsEditorSettings,
+      component: BarChartExportAction,
+      location: 'header',
     },
   ],
-  supportedQueryTypes: ['TimeSeriesQuery'],
-  createInitialOptions: createInitialBarChartOptions,
 };
