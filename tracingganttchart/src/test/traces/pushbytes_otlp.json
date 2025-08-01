@@ -1,0 +1,189 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "tempo-tempo1-distributor-769466758f-fv4nr"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": ""
+            }
+          },
+          {
+            "key": "k8s.pod.ip",
+            "value": {
+              "stringValue": "10.244.0.83"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "tempo-distributor"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "modules/distributor"
+          },
+          "spans": [
+            {
+              "traceId": "JtrUoOKw3ZpEDdX/IDokpA==",
+              "spanId": "JFG7cezr4V8=",
+              "parentSpanId": "KY7X9vwp2po=",
+              "name": "distributor.PushTraces",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1744886430805185884",
+              "endTimeUnixNano": "1744886430805686610",
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "tempo-tempo1-distributor-769466758f-fv4nr"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": ""
+            }
+          },
+          {
+            "key": "k8s.pod.ip",
+            "value": {
+              "stringValue": "10.244.0.83"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "tempo-distributor"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "modules/distributor/receiver"
+          },
+          "spans": [
+            {
+              "traceId": "JtrUoOKw3ZpEDdX/IDokpA==",
+              "spanId": "KY7X9vwp2po=",
+              "name": "distributor.ConsumeTraces",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1744886430805181644",
+              "endTimeUnixNano": "1744886430805688678",
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "tempo-tempo1-distributor-769466758f-fv4nr"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": ""
+            }
+          },
+          {
+            "key": "k8s.pod.ip",
+            "value": {
+              "stringValue": "10.244.0.83"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "tempo-distributor"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc",
+            "version": "0.58.0"
+          },
+          "spans": [
+            {
+              "traceId": "JtrUoOKw3ZpEDdX/IDokpA==",
+              "spanId": "wGpR93OaMfs=",
+              "parentSpanId": "JFG7cezr4V8=",
+              "name": "tempopb.Pusher/PushBytesV2",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1744886430805293324",
+              "endTimeUnixNano": "1744886430805669175",
+              "attributes": [
+                {
+                  "key": "rpc.service",
+                  "value": {
+                    "stringValue": "tempopb.Pusher"
+                  }
+                },
+                {
+                  "key": "rpc.method",
+                  "value": {
+                    "stringValue": "PushBytesV2"
+                  }
+                },
+                {
+                  "key": "rpc.system",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "10.244.0.94"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.port",
+                  "value": {
+                    "intValue": "9095"
+                  }
+                },
+                {
+                  "key": "rpc.grpc.status_code",
+                  "value": {
+                    "intValue": "0"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

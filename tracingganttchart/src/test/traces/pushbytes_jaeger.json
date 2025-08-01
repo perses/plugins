@@ -1,0 +1,152 @@
+{
+    "data": [
+        {
+            "traceID": "26dad4a0e2b0dd9a440dd5ff203a24a4",
+            "spans": [
+                {
+                    "traceID": "26dad4a0e2b0dd9a440dd5ff203a24a4",
+                    "spanID": "2451bb71ecebe15f",
+                    "operationName": "distributor.PushTraces",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "26dad4a0e2b0dd9a440dd5ff203a24a4",
+                            "spanID": "298ed7f6fc29da9a"
+                        }
+                    ],
+                    "startTime": 1744886430805185,
+                    "duration": 500,
+                    "tags": [
+                        {
+                            "key": "otel.scope.name",
+                            "type": "string",
+                            "value": "modules/distributor"
+                        },
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "internal"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "26dad4a0e2b0dd9a440dd5ff203a24a4",
+                    "spanID": "298ed7f6fc29da9a",
+                    "operationName": "distributor.ConsumeTraces",
+                    "references": [],
+                    "startTime": 1744886430805181,
+                    "duration": 507,
+                    "tags": [
+                        {
+                            "key": "otel.scope.name",
+                            "type": "string",
+                            "value": "modules/distributor/receiver"
+                        },
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "internal"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                },
+                {
+                    "traceID": "26dad4a0e2b0dd9a440dd5ff203a24a4",
+                    "spanID": "c06a51f7739a31fb",
+                    "operationName": "tempopb.Pusher/PushBytesV2",
+                    "references": [
+                        {
+                            "refType": "CHILD_OF",
+                            "traceID": "26dad4a0e2b0dd9a440dd5ff203a24a4",
+                            "spanID": "2451bb71ecebe15f"
+                        }
+                    ],
+                    "startTime": 1744886430805293,
+                    "duration": 375,
+                    "tags": [
+                        {
+                            "key": "net.sock.peer.addr",
+                            "type": "string",
+                            "value": "10.244.0.94"
+                        },
+                        {
+                            "key": "net.sock.peer.port",
+                            "type": "int64",
+                            "value": 9095
+                        },
+                        {
+                            "key": "otel.scope.name",
+                            "type": "string",
+                            "value": "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+                        },
+                        {
+                            "key": "otel.scope.version",
+                            "type": "string",
+                            "value": "0.58.0"
+                        },
+                        {
+                            "key": "rpc.grpc.status_code",
+                            "type": "int64",
+                            "value": 0
+                        },
+                        {
+                            "key": "rpc.method",
+                            "type": "string",
+                            "value": "PushBytesV2"
+                        },
+                        {
+                            "key": "rpc.service",
+                            "type": "string",
+                            "value": "tempopb.Pusher"
+                        },
+                        {
+                            "key": "rpc.system",
+                            "type": "string",
+                            "value": "grpc"
+                        },
+                        {
+                            "key": "span.kind",
+                            "type": "string",
+                            "value": "client"
+                        }
+                    ],
+                    "logs": [],
+                    "processID": "p1",
+                    "warnings": null
+                }
+            ],
+            "processes": {
+                "p1": {
+                    "serviceName": "tempo-distributor",
+                    "tags": [
+                        {
+                            "key": "host.name",
+                            "type": "string",
+                            "value": "tempo-tempo1-distributor-769466758f-fv4nr"
+                        },
+                        {
+                            "key": "k8s.pod.ip",
+                            "type": "string",
+                            "value": "10.244.0.83"
+                        },
+                        {
+                            "key": "service.version",
+                            "type": "string",
+                            "value": ""
+                        }
+                    ]
+                }
+            },
+            "warnings": null
+        }
+    ],
+    "total": 0,
+    "limit": 0,
+    "offset": 0,
+    "errors": null
+}
