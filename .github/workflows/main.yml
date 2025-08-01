@@ -14,14 +14,12 @@ on:
       - published
 
 jobs:
-  # First job: Run snyk workflow only for snyk-* branches
   snyk:
     name: 'snyk workflow'
     if: ${{ startsWith(github.head_ref, 'snyk-') || startsWith(github.ref_name, 'snyk-') }}
     uses: ./.github/workflows/snyk.yml
     secrets: inherit
 
-  # Second job: Run docs workflow
   docs:
     name: 'docs workflow'
     needs: [snyk]
@@ -29,7 +27,6 @@ jobs:
     uses: ./.github/workflows/doc.yml
     secrets: inherit
 
-  # Third job: Run ci workflow
   ci:
     name: 'ci workflow'
     needs: [snyk]

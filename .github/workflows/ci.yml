@@ -6,7 +6,6 @@ jobs:
   build:
     name: 'build'
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -48,7 +47,6 @@ jobs:
   lint-npm:
     name: 'lint-npm'
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -62,7 +60,6 @@ jobs:
   test-npm:
     name: 'test-npm'
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -76,7 +73,6 @@ jobs:
   type-check:
     name: 'type-check'
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -90,7 +86,6 @@ jobs:
   lint-schemas:
     name: 'Validate plugin schemas'
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -115,7 +110,6 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -134,7 +128,6 @@ jobs:
   module-check:
     name: 'Check plugin modules'
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4

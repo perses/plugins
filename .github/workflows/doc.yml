@@ -6,7 +6,6 @@ jobs:
   docs-fmt:
     name: 'Check docs format'
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
