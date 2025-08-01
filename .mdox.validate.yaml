@@ -1,0 +1,9 @@
+version: 1
+timeout: '1m'
+
+# Ignore timeout on external domains
+validators:
+  - regex: 'github\.com'
+    type: 'ignore'
+  - regex: 'perses\.dev'
+    type: 'ignore'

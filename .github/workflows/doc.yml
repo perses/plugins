@@ -1,0 +1,35 @@
+name: doc
+on:
+  workflow_run:
+    workflows: ['snyk']
+    types:
+      - completed
+    branches:
+      - snyk-fix-*
+      - snyk-upgrade-*
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+  merge_group:
+
+jobs:
+  docs-fmt:
+    name: 'Check docs format'
+    runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.10.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+      - name: install mdox
+        run: go install github.com/bwplotka/mdox@latest
+      - name: check docs
+        run: make checkdocs

@@ -1,0 +1,14 @@
+---
+name: Other
+description: Other kind of issue.
+labels: [ "bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do *NOT* ask support questions in Github issues.
+
+        Even if it concerns a specific plugin, if your issue is a feature request or bug report please create it in the [perses/perses](https://github.com/perses/perses/issues) repository instead.
+  - type: textarea
+    attributes:
+      label: Description
