@@ -1,32 +1,27 @@
 name: ci
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-  merge_group:
-  release:
-    types:
-      - published
+  workflow_call:
 
 jobs:
   build:
-    name: "build"
+    name: 'build'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
+          cue_version: 'v0.12.0'
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.51.1"
+          cli-version: 'v0.51.1'
       - name: cache cue deps
         uses: actions/cache@v4
         with:
@@ -52,11 +47,13 @@ jobs:
             !node_modules
 
   lint-npm:
-    name: "lint-npm"
+    name: 'lint-npm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -65,11 +62,13 @@ jobs:
       - run: npm run lint
 
   test-npm:
-    name: "test-npm"
+    name: 'test-npm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -78,11 +77,13 @@ jobs:
       - run: npm run test
 
   type-check:
-    name: "type-check"
+    name: 'type-check'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -91,21 +92,23 @@ jobs:
       - run: npm run type-check
 
   lint-schemas:
-    name: "Validate plugin schemas"
+    name: 'Validate plugin schemas'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
+          cue_version: 'v0.12.0'
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.51.1"
+          cli-version: 'v0.51.1'
       - uses: actions/cache@v4
         id: cache
         with:
@@ -120,6 +123,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -133,17 +138,19 @@ jobs:
           version: v2.3.0
       - run: make golangci-lint
   module-check:
-    name: "Check plugin modules"
+    name: 'Check plugin modules'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
+          cue_version: 'v0.12.0'
       - uses: actions/cache@v4
         id: cache
         with:
@@ -157,8 +164,8 @@ jobs:
         run: git diff --exit-code -- */cue.mod
 
   release:
-    name: "release"
-    needs: "build"
+    name: 'release'
+    needs: 'build'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -168,14 +175,16 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
-          nvmrc_path: "./.nvmrc"
+          cue_version: 'v0.12.0'
+          nvmrc_path: './.nvmrc'
       - name: Download archive
         uses: actions/download-artifact@v4
         with:

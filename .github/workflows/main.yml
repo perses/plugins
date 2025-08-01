@@ -1,0 +1,35 @@
+name: main
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+  merge_group:
+  release:
+    types:
+      - published
+
+jobs:
+  snyk:
+    name: 'snyk workflow'
+    if: ${{ startsWith(github.head_ref, 'snyk-') || startsWith(github.ref_name, 'snyk-') }}
+    uses: ./.github/workflows/snyk.yml
+    secrets: inherit
+
+  docs:
+    name: 'docs workflow'
+    needs: [snyk]
+    if: ${{ always() && (needs.snyk.result == 'success' || needs.snyk.result == 'skipped') }}
+    uses: ./.github/workflows/doc.yml
+    secrets: inherit
+
+  ci:
+    name: 'ci workflow'
+    needs: [snyk]
+    if: ${{ always() && (needs.snyk.result == 'success' || needs.snyk.result == 'skipped') }}
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
