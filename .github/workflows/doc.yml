@@ -1,19 +1,12 @@
 name: doc
 on:
-  push:
-    branches:
-      - main
-      - release/*
-      - snapshot/*
-    tags:
-      - v*
-  pull_request:
-  merge_group:
+  workflow_call:
 
 jobs:
   docs-fmt:
-    name: "Check docs format"
+    name: 'Check docs format'
     runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'pull_request' && startsWith(github.head_ref, 'snyk-')) }}
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -25,5 +18,3 @@ jobs:
         run: go install github.com/bwplotka/mdox@latest
       - name: check docs
         run: make checkdocs
-
-

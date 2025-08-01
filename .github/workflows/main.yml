@@ -1,0 +1,38 @@
+name: main
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+  merge_group:
+  release:
+    types:
+      - published
+
+jobs:
+  # First job: Run snyk workflow only for snyk-* branches
+  snyk:
+    name: 'snyk workflow'
+    if: ${{ startsWith(github.head_ref, 'snyk-') || startsWith(github.ref_name, 'snyk-') }}
+    uses: ./.github/workflows/snyk.yml
+    secrets: inherit
+
+  # Second job: Run docs workflow
+  docs:
+    name: 'docs workflow'
+    needs: [snyk]
+    if: ${{ always() && (needs.snyk.result == 'success' || needs.snyk.result == 'skipped') }}
+    uses: ./.github/workflows/doc.yml
+    secrets: inherit
+
+  # Third job: Run ci workflow
+  ci:
+    name: 'ci workflow'
+    needs: [snyk]
+    if: ${{ always() && (needs.snyk.result == 'success' || needs.snyk.result == 'skipped') }}
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
