@@ -14,6 +14,7 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { sharedModules } from '../rsbuild.shared';
 
 const assetPrefix = '/plugins/HeatMapChart/';
 
@@ -38,16 +39,7 @@ export default defineConfig({
       exposes: {
         './HeatMapChart': './src/HeatMapChart.ts',
       },
-      shared: {
-        react: { requiredVersion: '18.2.0', singleton: true },
-        'react-dom': { requiredVersion: '18.2.0', singleton: true },
-        echarts: { singleton: true },
-        lodash: { singleton: true },
-        '@perses-dev/core': { singleton: true },
-        '@perses-dev/components': { singleton: true },
-        '@perses-dev/plugin-system': { singleton: true },
-        immer: { singleton: true },
-      },
+      shared: sharedModules,
       dts: false,
       runtime: false,
     }),
