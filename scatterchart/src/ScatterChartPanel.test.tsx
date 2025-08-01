@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelData } from '@perses-dev/plugin-system';
+import { PanelData, ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
 import { TraceData } from '@perses-dev/core';
 import { screen, render } from '@testing-library/react';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { MemoryRouter } from 'react-router-dom';
+import { VariableProvider } from '@perses-dev/dashboards';
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT, MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY } from './mock-trace-data';
 import { getSymbolSize, ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 
@@ -29,9 +31,17 @@ const TEST_SCATTER_PANEL: Omit<ScatterChartPanelProps, 'queryResults'> = {
 describe('ScatterChartPanel', (): void => {
   const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
     render(
-      <ChartsProvider chartsTheme={testChartsTheme}>
-        <ScatterChartPanel {...TEST_SCATTER_PANEL} queryResults={queryResults} />
-      </ChartsProvider>
+      <MemoryRouter>
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <ChartsProvider chartsTheme={testChartsTheme}>
+                <ScatterChartPanel {...TEST_SCATTER_PANEL} queryResults={queryResults} />
+              </ChartsProvider>
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
+      </MemoryRouter>
     );
   };
 
