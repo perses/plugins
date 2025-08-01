@@ -22,3 +22,9 @@ dist/
 
 # external CUE dependencies
 /*/cue.mod/pkg/
+
+*storybook.log
+storybook-static
+
+**/.storybook/
+**/stories/
