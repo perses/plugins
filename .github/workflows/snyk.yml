@@ -1,0 +1,51 @@
+name: snyk
+on:
+  pull_request:
+    branches:
+      - main
+  merge_group:
+
+jobs:
+  lockfile-update:
+    name: 'regenerate lockfile'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: startsWith(github.head_ref, 'snyk-')
+    outputs:
+      lockfile-updated: ${{ steps.lockfile-changes.outputs.has_changes }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+
+      - uses: perses/github-actions@v0.10.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+      - name: install dependencies
+        run: npm install
+
+      - name: check for lockfile changes
+        id: lockfile-changes
+        run: |
+          if git diff --quiet package-lock.json; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get last commit message
+        id: last-commit
+        run: |
+          echo "message=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
+
+      - uses: stefanzweifel/git-auto-commit-action@v6
+        if: steps.lockfile-changes.outputs.has_changes == 'true'
+        with:
+          commit_message: '[IGNORE] ${{ steps.last-commit.outputs.message }}'
+          file_pattern: 'package-lock.json'
+          commit_options: '--no-verify --signoff --amend'
+          push_options: '--force-with-lease'

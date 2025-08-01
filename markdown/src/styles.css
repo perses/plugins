@@ -1,0 +1,39 @@
+.perses-markdown-chart-plugin :first-of-type {
+  margin-top: 0;
+}
+
+.perses-markdown-chart-plugin h1 {
+  font-size: 2em;
+}
+
+.perses-markdown-chart-plugin code {
+  font-size: 0.85em;
+}
+
+.perses-markdown-chart-plugin :not(pre) > code {
+  padding: 0.2em 0.4em;
+  background-color: var(--perses-colors-gray-100);
+  border-radius: 4px;
+}
+
+.perses-markdown-chart-plugin pre {
+  padding: 1.2em;
+  background-color: var(--perses-colors-gray-100);
+  border-radius: 4px;
+}
+
+.perses-markdown-chart-plugin table,
+.perses-markdown-chart-plugin th,
+.perses-markdown-chart-plugin td {
+  padding: 0.6em;
+  border: 1px solid var(--perses-colors-gray-300);
+  border-collapse: collapse;
+}
+
+.perses-markdown-chart-plugin li + li {
+  margin-top: 0.25em;
+}
+
+.perses-markdown-chart-plugin a {
+  color: var(--perses-colors-primary);
+}
