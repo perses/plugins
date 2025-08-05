@@ -43,6 +43,7 @@ export interface Span {
   endTimeUnixMs: number;
   attributes: otlpcommonv1.KeyValue[];
   events: Event[];
+  links: Link[];
   status: otlptracev1.Status;
 }
 
@@ -54,6 +55,12 @@ export interface Resource {
 export interface Event {
   timeUnixMs: number;
   name: string;
+  attributes: otlpcommonv1.KeyValue[];
+}
+
+export interface Link {
+  traceId: string;
+  spanId: string;
   attributes: otlpcommonv1.KeyValue[];
 }
 
@@ -149,6 +156,7 @@ function parseSpan(span: otlptracev1.Span): Omit<Span, 'resource' | 'scope' | 'c
     endTimeUnixMs: parseInt(span.endTimeUnixNano) * 1e-6,
     attributes: span.attributes ?? [],
     events: (span.events ?? []).map(parseEvent),
+    links: (span.links ?? []).map(parseLink),
     status: span.status ?? {},
   };
 }
@@ -158,5 +166,13 @@ function parseEvent(event: otlptracev1.Event): Event {
     timeUnixMs: parseInt(event.timeUnixNano) * 1e-6, // convert to milliseconds because JS cannot handle numbers larger than 9007199254740991
     name: event.name,
     attributes: event.attributes ?? [],
+  };
+}
+
+function parseLink(link: otlptracev1.Link): Link {
+  return {
+    traceId: link.traceId,
+    spanId: link.spanId,
+    attributes: link.attributes ?? [],
   };
 }

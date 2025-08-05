@@ -14,17 +14,26 @@
 import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router-dom';
-import { otlpcommonv1, otlptracev1 } from '@perses-dev/core';
+import { otlptracev1 } from '@perses-dev/core';
+import { VariableProvider } from '@perses-dev/dashboards';
+import { ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
-import { AttributeLinks, AttributeList, AttributeListProps, TraceAttributes, TraceAttributesProps } from './Attributes';
+import { CustomLinks } from '../../gantt-chart-model';
+import { AttributeList, AttributeListProps, TraceAttributes, TraceAttributesProps } from './Attributes';
 
 describe('Attributes', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
   const renderTraceAttributes = (props: TraceAttributesProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <TraceAttributes {...props} />
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <TraceAttributes {...props} />
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };
@@ -32,7 +41,13 @@ describe('Attributes', () => {
   const renderAttributeList = (props: AttributeListProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <AttributeList {...props} />
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <AttributeList {...props} />
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };
@@ -65,17 +80,18 @@ describe('Attributes', () => {
   });
 
   it('render an attribute with a link', () => {
-    const stringValue = (val?: otlpcommonv1.AnyValue): string => (val && 'stringValue' in val ? val.stringValue : '');
-    const attributeLinks: AttributeLinks = {
-      'k8s.pod.name': (attrs) =>
-        `/console/ns/${stringValue(attrs['k8s.namespace.name'])}/pod/${stringValue(attrs['k8s.pod.name'])}/detail`,
+    const customLinks: CustomLinks = {
+      links: {
+        attributes: [{ name: 'k8s.pod.name', link: '/console/ns/${k8s_namespace_name}/pod/${k8s_pod_name}/detail' }],
+      },
+      variables: {},
     };
     const attributes = [
       { key: 'k8s.namespace.name', value: { stringValue: 'testing' } },
       { key: 'k8s.pod.name', value: { stringValue: 'hotrod' } },
     ];
 
-    renderAttributeList({ attributeLinks, attributes });
+    renderAttributeList({ customLinks, attributes });
     expect(screen.getByText('testing')).not.toHaveAttribute('href');
     expect(screen.getByRole('link', { name: 'hotrod' })).toHaveAttribute(
       'href',
