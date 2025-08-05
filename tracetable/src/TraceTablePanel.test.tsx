@@ -13,9 +13,10 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TraceData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
+import { PanelData, ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { VariableProvider } from '@perses-dev/dashboards';
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from './test/mock-trace-data';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 
@@ -32,9 +33,15 @@ describe('TraceTablePanel', () => {
   const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
     render(
       <MemoryRouter>
-        <ChartsProvider chartsTheme={testChartsTheme}>
-          <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
-        </ChartsProvider>
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <ChartsProvider chartsTheme={testChartsTheme}>
+                <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
+              </ChartsProvider>
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };
