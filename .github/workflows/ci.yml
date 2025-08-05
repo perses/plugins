@@ -26,7 +26,7 @@ jobs:
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.51.1"
+          cli-version: "v0.52.0-beta.0"
       - name: cache cue deps
         uses: actions/cache@v4
         with:
@@ -105,7 +105,7 @@ jobs:
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.51.1"
+          cli-version: "v0.52.0-beta.0"
       - uses: actions/cache@v4
         id: cache
         with:
