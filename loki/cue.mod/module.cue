@@ -1,6 +1,6 @@
 module: "github.com/perses/plugins/loki@v0"
 language: {
-	version: "v0.12.0"
+	version: "v0.13.2"
 }
 source: {
 	kind: "git"
