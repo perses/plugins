@@ -22,11 +22,11 @@ jobs:
           enable_npm: true
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
+          cue_version: "v0.14.0"
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.52.0-beta.0"
+          cli-version: "v0.52.0-beta.1"
       - name: cache cue deps
         uses: actions/cache@v4
         with:
@@ -101,11 +101,11 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
+          cue_version: "v0.14.0"
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.52.0-beta.0"
+          cli-version: "v0.52.0-beta.1"
       - uses: actions/cache@v4
         id: cache
         with:
@@ -143,7 +143,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
+          cue_version: "v0.14.0"
       - uses: actions/cache@v4
         id: cache
         with:
@@ -174,7 +174,7 @@ jobs:
           enable_npm: true
           enable_go: true
           enable_cue: true
-          cue_version: "v0.12.0"
+          cue_version: "v0.14.0"
           nvmrc_path: "./.nvmrc"
       - name: Download archive
         uses: actions/download-artifact@v4
