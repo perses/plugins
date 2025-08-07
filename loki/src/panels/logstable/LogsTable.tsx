@@ -11,7 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Logs';
-export * from './LogsComponent';
-export * from './LogsSettingsEditor';
-export * from './logs-types';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { LogsTableComponent } from './LogsTableComponent';
+import { LogsOptions, LogsProps } from './logs-types';
+import { LogsSettingsEditor } from './LogsTableSettingsEditor';
+
+export const LogsTable: PanelPlugin<LogsOptions, LogsProps> = {
+  PanelComponent: LogsTableComponent,
+  panelOptionsEditorComponents: [{ label: 'Settings', content: LogsSettingsEditor }],
+  supportedQueryTypes: ['LogQuery'],
+  createInitialOptions: () => ({
+    direction: 'backward',
+    time: true,
+    wrap: true,
+    enableDetails: true,
+  }),
+};

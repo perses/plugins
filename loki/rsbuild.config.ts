@@ -9,7 +9,7 @@ const exposedModules: ModuleFederationOptions['exposes'] = [
   { './LokiDatasource': './src/datasources/loki-datasource' },
   { './LokiTimeSeriesQuery': './src/queries/loki-time-series-query' },
   { './LokiLogQuery': './src/queries/loki-log-query' },
-  { './Logs': './src/panels/logs' },
+  { './LogsTable': './src/panels/logstable' },
 ];
 
 export default defineConfig({
