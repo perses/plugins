@@ -19,7 +19,7 @@ import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 export const LokiTimeSeriesQuery: TimeSeriesQueryPlugin<LokiTimeSeriesQuerySpec> = {
   getTimeSeriesData: getLokiTimeSeriesData,
   OptionsEditorComponent: LokiQueryEditor,
-  createInitialOptions: () => ({ query: '', direction: 'backward' }),
+  createInitialOptions: () => ({ query: '' }),
   dependsOn: (spec) => {
     const queryVariables = parseVariables(spec.query);
     const allVariables = [...new Set([...queryVariables])];

@@ -1,6 +1,6 @@
 package model
 
-kind: "Logs"
+kind: "LogsTable"
 spec: close({
     direction?:  "forward" | "backward"
     wrap?: bool

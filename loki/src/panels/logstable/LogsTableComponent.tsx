@@ -16,7 +16,7 @@ import { Typography } from '@mui/material';
 import { LogsProps } from './logs-types';
 import { LogsList } from './components/LogsList';
 
-export function LogsComponent(props: LogsProps): ReactElement | null {
+export function LogsTableComponent(props: LogsProps): ReactElement | null {
   const { queryResults, spec } = props;
 
   if (queryResults[0]?.data.logs === undefined) {
