@@ -7,7 +7,8 @@ export const assetPrefix = '/plugins/Loki/';
 // Expose the components that will be used in the UI, either Perses UI or embedded.
 const exposedModules: ModuleFederationOptions['exposes'] = [
   { './LokiDatasource': './src/datasources/loki-datasource' },
-  { './LokiQuery': './src/queries/loki-query' },
+  { './LokiTimeSeriesQuery': './src/queries/loki-time-series-query' },
+  { './LokiLogQuery': './src/queries/loki-log-query' },
   { './Logs': './src/panels/logs' },
 ];
 

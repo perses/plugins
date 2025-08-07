@@ -11,5 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const DATASOURCE_KIND = 'LokiDatasource';
-export const DEFAULT_DATASOURCE = { kind: DATASOURCE_KIND };
+import { DatasourceSelector } from '@perses-dev/core';
+import { LokiQueryRangeMatrixResponse } from '../../model/loki-client-types';
+
+export interface LokiTimeSeriesQuerySpec {
+  query: string;
+  datasource?: DatasourceSelector;
+  step?: string;
+}
+
+export type LokiTimeSeriesQueryResponse = LokiQueryRangeMatrixResponse;

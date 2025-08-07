@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './constants';
-export * from './get-loki-data';
-export * from './LokiQuery';
-export * from './LokiQueryEditor';
-export * from './loki-query-types';
+export * from './get-loki-time-series-data';
+export * from './LokiTimeSeriesQuery';
+export * from './LokiTimeSeriesQueryEditor';
+export * from './loki-time-series-query-types';

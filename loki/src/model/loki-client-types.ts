@@ -44,15 +44,25 @@ export interface LokiQueryResponse {
   };
 }
 
-export interface LokiQueryRangeResponse {
+export type LokiQueryRangeResponse = LokiQueryRangeMatrixResponse & LokiQueryRangeStreamsResponse;
+
+export interface LokiQueryRangeMatrixResponse {
   status: 'success' | 'error';
   data: {
-    resultType: 'matrix' | 'streams';
-    result: LokiMatrixResult[] | LokiStreamResult[];
+    resultType: 'matrix';
+    result: LokiMatrixResult[];
     stats?: LokiQueryStats;
   };
 }
 
+export interface LokiQueryRangeStreamsResponse {
+  status: 'success' | 'error';
+  data: {
+    resultType: 'streams';
+    result: LokiStreamResult[];
+    stats?: LokiQueryStats;
+  };
+}
 export interface LokiLabelsResponse {
   status: 'success' | 'error';
   data: string[];
