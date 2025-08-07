@@ -61,7 +61,6 @@
   ],
   "perses": {
     "moduleName": "Loki",
-    "moduleOrg": "loki-org",
     "schemasPath": "schemas",
     "plugins": [
       {
@@ -72,17 +71,26 @@
           },
           "name": "LokiDatasource"
         }
-      }
-      ,{
+      },
+      {
         "kind": "TimeSeriesQuery",
         "spec": {
           "display": {
-            "name": "Loki Query"
+            "name": "Loki Time Series Query"
           },
-          "name": "LokiQuery"
+          "name": "LokiTimeSeriesQuery"
         }
-      }
-      ,{
+      },
+      {
+        "kind": "LogQuery",
+        "spec": {
+          "display": {
+            "name": "Loki Log Query"
+          },
+          "name": "LokiLogQuery"
+        }
+      },
+      {
         "kind": "Panel",
         "spec": {
           "display": {

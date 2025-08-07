@@ -11,4 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './loki-query';
+export * from './loki-time-series-query';
+export * from './loki-log-query';

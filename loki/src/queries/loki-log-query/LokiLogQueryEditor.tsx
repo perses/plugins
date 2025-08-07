@@ -19,17 +19,17 @@ import {
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
 import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { ReactElement, useCallback, useRef, useState, useEffect } from 'react';
-import { OptionsEditorControl } from '@perses-dev/components';
+import { ReactElement, useCallback, useState, useEffect } from 'react';
 import { produce } from 'immer';
+import { OptionsEditorControl } from '@perses-dev/components';
 import { LogQLEditor } from '../../components/logql-editor';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
-import { LokiQuerySpec } from './loki-query-types';
-import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from './constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
+import { LokiLogQuerySpec } from './loki-log-query-types';
 
-type LokiQueryEditorProps = OptionsEditorProps<LokiQuerySpec>;
+type LokiQueryEditorProps = OptionsEditorProps<LokiLogQuerySpec>;
 
-export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
+export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
@@ -65,7 +65,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
 
   const handleLogsDirection = (_: React.MouseEvent, v: 'backward' | 'forward') =>
     onChange(
-      produce(value, (draft: LokiQuerySpec) => {
+      produce(value, (draft: LokiLogQuerySpec) => {
         draft.direction = v;
       })
     );
