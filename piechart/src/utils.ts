@@ -15,7 +15,7 @@ import { SortOption } from '@perses-dev/components';
 import { DEFAULT_SORT } from './pie-chart-model';
 import { PieChartData } from './PieChartBase';
 
-export function calculatePercentages(data: PieChartData[]): Array<{ name: string; value: number }> {
+export function calculatePercentages(data: PieChartData[]): Array<{ id?: string; name: string; value: number }> {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);
   return data.map((seriesData) => {
     const percentage = ((seriesData.value ?? 0) / sum) * 100;
