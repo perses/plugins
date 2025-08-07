@@ -15,11 +15,11 @@
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.4",
     "@lezer/highlight": "^1.2.1x",
-    "@perses-dev/components": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/core": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/dashboards": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/plugin-system": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/explore": "0.0.0-snapshot-profile-89b306f"
+    "@perses-dev/components": "0.52.0-beta.1",
+    "@perses-dev/core": "0.52.0-beta.1",
+    "@perses-dev/dashboards": "0.52.0-beta.1",
+    "@perses-dev/plugin-system": "0.52.0-beta.1",
+    "@perses-dev/explore": "0.52.0-beta.1"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
