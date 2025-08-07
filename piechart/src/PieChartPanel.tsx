@@ -59,7 +59,11 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
           muiPrimaryColor: muiTheme.palette.primary.main,
           seriesName: seriesData.name,
         });
+
+        const seriesId = `${chartId}${seriesData.name}${seriesIndex}`;
+
         const series = {
+          id: seriesId,
           value: calculate(seriesData.values) ?? null,
           name: seriesData.formattedName ?? '',
           itemStyle: {
@@ -68,7 +72,6 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
         };
         pieChartData.push(series);
 
-        const seriesId = chartId + seriesData.name + seriesIndex;
         legendItems.push({
           id: seriesId,
           label: series.name,
@@ -79,6 +82,37 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
     }
 
     const sortedPieChartData = sortSeriesData(pieChartData, sort);
+
+    /* USE THE FOLLOWING BLOCK OF CODE, FOR TESTING
+       TO TEST, simply concatenate them to the current label.
+       Legend Values should be placed in individual columns of the legend table       
+       Soon the multi-column table issue will be resolved by #3156 (which is larger than then scope of this task)       
+    */
+
+    // if (pieChartLegend?.values?.length && pieChartLegend?.mode === 'table') {
+    //   const { values } = pieChartLegend;
+
+    //   [...values].sort().forEach((v) => {
+    //     switch (v) {
+    //       case 'abs':
+    //         legendItems.forEach((li) => {
+    //           const { value: itemAbsoluteValue } = pieChartData.find((pd) => li.id === pd.id) || {};
+    //           if (itemAbsoluteValue) li.label += `: ${itemAbsoluteValue}`;
+    //         });
+    //         break;
+    //       case 'relative':
+    //         legendItems.forEach((li) => {
+    //           const { value: itemPercentageValue } =
+    //             calculatePercentages(sortedPieChartData).find((ppd) => li.id === ppd.id) || {};
+    //           if (itemPercentageValue) li.label += ` (${itemPercentageValue.toFixed(2)}%)`;
+    //         });
+    //         break;
+    //       default:
+    //         break;
+    //     }
+    //   });
+    // }
+
     if (mode === 'percentage') {
       return {
         pieChartData: calculatePercentages(sortedPieChartData),
@@ -114,7 +148,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
 
-  if (contentDimensions === undefined) return null;
+  if (!contentDimensions) return null;
 
   return (
     <Box sx={{ padding: `${PADDING}px` }}>
