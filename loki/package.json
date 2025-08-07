@@ -86,9 +86,9 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Logs"
+            "name": "LogsTable"
           },
-          "name": "Logs"
+          "name": "LogsTable"
         }
       }
     ]
