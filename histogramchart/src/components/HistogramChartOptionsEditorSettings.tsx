@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextField } from '@mui/material';
+import { MenuItem, Select, TextField } from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
@@ -35,6 +35,7 @@ import {
   HistogramChartOptions,
   HistogramChartOptionsEditorProps,
 } from '../histogram-chart-model';
+import { ExponentialBase } from './exponential-utils';
 
 export function HistogramChartOptionsEditorSettings(props: HistogramChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -80,6 +81,31 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
           <FormatControls value={format} onChange={handleUnitChange} />
+          <OptionsEditorControl
+            label="Exponential"
+            control={
+              <Select
+                type="text"
+                value={value.exponential?.base}
+                onChange={(e) => {
+                  const newValue = (e.target.value ? Number(e.target.value) : undefined) as ExponentialBase;
+                  onChange(
+                    produce(value, (draft: HistogramChartOptions) => {
+                      draft.exponential = newValue ? { base: newValue } : undefined;
+                    })
+                  );
+                }}
+                sx={{ width: '100%', textAlign: 'left' }}
+                defaultValue={0}
+              >
+                {[0, 2, 4, 8, 10].map((base) => (
+                  <MenuItem key={`base-${base}`} value={base}>
+                    {!base ? 'None' : base}
+                  </MenuItem>
+                ))}
+              </Select>
+            }
+          />
           <OptionsEditorControl
             label="Min"
             control={
