@@ -19,7 +19,13 @@ import (
 
 kind: "PieChart"
 spec: close({
-	legend?:        common.#legendWithValues
+	 // TODO: create a new common definition for this altered legend once perses/perses/cue/common has been moved outside of perses/perses
+	legend?:        {
+		position: "bottom" | "right"
+		mode?: "list" | "table"
+		size?: "small" | "medium"
+		values?: [..."abs" | "relative"]
+	}
 	calculation:    common.#calculation
 	format?:        common.#format
 	sort?:          "asc" | "desc"

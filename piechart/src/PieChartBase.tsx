@@ -30,6 +30,7 @@ use([EChartsPieChart, GridComponent, DatasetComponent, TitleComponent, TooltipCo
 const PIE_WIN_WIDTH = 12;
 const PIE_GAP = 4;
 export interface PieChartData {
+  id?: string;
   name: string;
   value: number | null;
 }

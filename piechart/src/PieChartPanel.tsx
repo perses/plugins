@@ -34,7 +34,7 @@ export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode },
+    spec: { calculation, sort, mode, legend: pieChartLegend },
     contentDimensions,
     queryResults,
   } = props;
@@ -59,7 +59,11 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
           muiPrimaryColor: muiTheme.palette.primary.main,
           seriesName: seriesData.name,
         });
+
+        const seriesId = chartId + seriesData.name + seriesIndex;
+
         const series = {
+          id: seriesId,
           value: calculate(seriesData.values) ?? null,
           name: seriesData.formattedName ?? '',
           itemStyle: {
@@ -68,7 +72,6 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
         };
         pieChartData.push(series);
 
-        const seriesId = chartId + seriesData.name + seriesIndex;
         legendItems.push({
           id: seriesId,
           label: series.name,
@@ -79,6 +82,36 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
     }
 
     const sortedPieChartData = sortSeriesData(pieChartData, sort);
+
+    /* TODO AND IMPORTANT 
+       Legend Values should be placed on individual columns of the legend table
+       At the moment lets simply concatenate them to the current label, if they exist. Soon with #3156 (which is larger than then scope of this task)
+       this issue will be resolved
+    */
+    if (pieChartLegend?.values?.length) {
+      const { values } = pieChartLegend;
+
+      [...values].sort().forEach((v) => {
+        switch (v) {
+          case 'abs':
+            legendItems.forEach((li) => {
+              const { value: itemAbsoluteValue } = pieChartData.find((pd) => li.id === pd.id) || {};
+              if (itemAbsoluteValue) li.label += `: ${itemAbsoluteValue}`;
+            });
+            break;
+          case 'relative':
+            legendItems.forEach((li) => {
+              const { value: itemPercentageValue } =
+                calculatePercentages(sortedPieChartData).find((ppd) => li.id === ppd.id) || {};
+              if (itemPercentageValue) li.label += ` (${itemPercentageValue.toFixed(2)}%)`;
+            });
+            break;
+          default:
+            break;
+        }
+      });
+    }
+
     if (mode === 'percentage') {
       return {
         pieChartData: calculatePercentages(sortedPieChartData),
@@ -89,7 +122,16 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
       pieChartData: sortedPieChartData,
       legendItems,
     };
-  }, [calculation, sort, mode, queryResults, categoricalPalette, muiTheme.palette.primary.main, chartId]);
+  }, [
+    calculation,
+    sort,
+    mode,
+    queryResults,
+    categoricalPalette,
+    muiTheme.palette.primary.main,
+    chartId,
+    pieChartLegend,
+  ]);
 
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
@@ -114,7 +156,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
 
-  if (contentDimensions === undefined) return null;
+  if (!contentDimensions) return null;
 
   return (
     <Box sx={{ padding: `${PADDING}px` }}>
