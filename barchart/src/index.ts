@@ -16,3 +16,4 @@ export * from './BarChart';
 export * from './BarChartOptionsEditorSettings';
 export { getPluginModule } from './getPluginModule';
 export * from './utils';
+export * from './CSVExportUtils';
