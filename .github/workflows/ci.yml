@@ -177,7 +177,7 @@ jobs:
           cue_version: "v0.14.0"
           nvmrc_path: "./.nvmrc"
       - name: Download archive
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: archives
       - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
