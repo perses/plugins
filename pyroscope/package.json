@@ -25,17 +25,17 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.4",
-    "@lezer/highlight": "^1.2.1x",
-    "@perses-dev/components": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/core": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/dashboards": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/plugin-system": "0.0.0-snapshot-profile-89b306f",
-    "@perses-dev/explore": "0.0.0-snapshot-profile-89b306f"
+    "@lezer/highlight": "^1.2.1x"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
+    "@perses-dev/components": "0.52.0-beta.3",
+    "@perses-dev/core": "0.52.0-beta.3",
+    "@perses-dev/dashboards": "0.52.0-beta.3",
+    "@perses-dev/plugin-system": "0.52.0-beta.3",
+    "@perses-dev/explore": "0.52.0-beta.3",
     "@tanstack/react-query": "^4.39.1",
     "@uiw/react-codemirror": "^4.19.1",
     "date-fns": "^4.1.0",
