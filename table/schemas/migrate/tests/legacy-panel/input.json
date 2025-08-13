@@ -1,0 +1,68 @@
+{
+  "columns": [],
+  "datasource": {
+    "type": "prometheus",
+    "uid": "$datasource"
+  },
+  "description": "This is a table panel using the legacy model",
+  "fontSize": "100%",
+  "gridPos": {
+    "h": 11,
+    "w": 12,
+    "x": 12,
+    "y": 2
+  },
+  "id": 7,
+  "links": [],
+  "showHeader": true,
+  "sort": {
+    "col": 0,
+    "desc": true
+  },
+  "styles": [
+    {
+      "$$hashKey": "object:35",
+      "alias": "Time",
+      "align": "auto",
+      "dateFormat": "YYYY-MM-DD HH:mm:ss",
+      "pattern": "Time",
+      "type": "hidden"
+    },
+    {
+      "$$hashKey": "object:282",
+      "alias": "APP Component",
+      "align": "right",
+      "colors": [
+        "rgba(245, 54, 54, 0.9)",
+        "rgba(237, 129, 40, 0.89)",
+        "rgba(50, 172, 45, 0.97)"
+      ],
+      "dateFormat": "YYYY-MM-DD HH:mm:ss",
+      "decimals": 2,
+      "mappingType": 1,
+      "pattern": "app_component",
+      "thresholds": [],
+      "type": "number",
+      "unit": "short"
+    }
+  ],
+  "targets": [
+    {
+      "datasource": {
+        "uid": "$datasource"
+      },
+      "editorMode": "code",
+      "expr": "sum by (app_component, namespace, stack) (storage_scrape_collector_success{stack=~\"muc10\"})",
+      "format": "table",
+      "hide": false,
+      "instant": true,
+      "interval": "",
+      "intervalFactor": 1,
+      "legendFormat": "{{app_component}}",
+      "refId": "A"
+    }
+  ],
+  "title": "My table-old panel",
+  "transform": "table",
+  "type": "table-old"
+}

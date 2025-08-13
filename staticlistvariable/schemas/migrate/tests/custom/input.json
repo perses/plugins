@@ -1,0 +1,33 @@
+{
+  "current": {
+    "selected": false,
+    "text": "one",
+    "value": "one"
+  },
+  "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
+  "hide": 0,
+  "includeAll": false,
+  "label": "My Custom Variable",
+  "multi": false,
+  "name": "MyCustom",
+  "options": [
+    {
+      "selected": true,
+      "text": "one",
+      "value": "one"
+    },
+    {
+      "selected": false,
+      "text": "two",
+      "value": "two"
+    },
+    {
+      "selected": false,
+      "text": "three",
+      "value": "three"
+    }
+  ],
+  "query": "one,  two  ,three : 3  ",
+  "skipUrlSync": false,
+  "type": "custom"
+}
