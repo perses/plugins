@@ -1,0 +1,94 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${datasource}"
+  },
+  "description": "Current raw capacity of DataNode in bytes",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "palette-classic"
+      },
+      "custom": {
+        "barAlignment": 0,
+        "barWidthFactor": 0.6,
+        "drawStyle": "line",
+        "fillOpacity": 10,
+        "gradientMode": "none",
+        "hideFrom": {
+          "legend": false,
+          "tooltip": false,
+          "viz": false
+        },
+        "insertNulls": false,
+        "lineInterpolation": "linear",
+        "lineWidth": 1,
+        "pointSize": 5,
+        "scaleDistribution": {
+          "type": "linear"
+        },
+        "showPoints": "never",
+        "spanNulls": false,
+        "stacking": {
+          "group": "A",
+          "mode": "none"
+        },
+        "thresholdsStyle": {
+          "mode": "off"
+        }
+      },
+      "links": [],
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      },
+      "unit": "bytes"
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 7,
+    "w": 6,
+    "x": 0,
+    "y": 0
+  },
+  "id": 27,
+  "options": {
+    "legend": {
+      "calcs": [],
+      "displayMode": "list",
+      "placement": "bottom",
+      "showLegend": true
+    },
+    "tooltip": {
+      "mode": "multi",
+      "sort": "desc"
+    }
+  },
+  "pluginVersion": "11.3.0-pre",
+  "targets": [
+    {
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "editorMode": "code",
+      "expr": "avg without (instance) (hadoop_hdfs_datanode_capacity{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
+      "interval": "",
+      "legendFormat": "{{_target}}",
+      "range": true,
+      "refId": "A"
+    }
+  ],
+  "title": "datanode_capacity",
+  "type": "timeseries"
+}

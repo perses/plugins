@@ -1,0 +1,27 @@
+{
+  "current": {
+    "selected": false,
+    "text": "prd1",
+    "value": "prd1"
+  },
+  "datasource": {
+    "type": "prometheus",
+    "uid": "$datasource"
+  },
+  "definition": "",
+  "hide": 0,
+  "includeAll": false,
+  "label": "Paas",
+  "multi": true,
+  "name": "cluster",
+  "options": [],
+  "query": "query_result(max by (cluster) (thanos_build_info{prometheus=\"app\",federation=\"\"}) or ( label_replace(vector(1), \"cluster\", \"EU\", \"\", \"\") ) )",
+  "refresh": 2,
+  "regex": ".*cluster=\"([^\"]*)\".*",
+  "skipUrlSync": false,
+  "sort": 1,
+  "tagValuesQuery": "",
+  "tagsQuery": "",
+  "type": "query",
+  "useTags": false
+}

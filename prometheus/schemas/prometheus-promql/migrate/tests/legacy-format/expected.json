@@ -1,0 +1,7 @@
+{
+  "kind": "PrometheusPromQLVariable",
+  "spec": {
+    "expr": "max by (cluster) (thanos_build_info{prometheus=\"app\",federation=\"\"}) or ( label_replace(vector(1), \"cluster\", \"EU\", \"\", \"\") ) ",
+    "labelName": "cluster"
+  }
+}

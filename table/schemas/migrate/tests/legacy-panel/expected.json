@@ -1,0 +1,17 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "header": "Time",
+        "hide": true,
+        "name": "Time"
+      },
+      {
+        "align": "right",
+        "header": "APP Component",
+        "name": "app_component"
+      }
+    ]
+  }
+}

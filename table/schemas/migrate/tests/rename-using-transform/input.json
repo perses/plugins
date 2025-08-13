@@ -1,0 +1,86 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DATASOURCE}"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "custom": {
+        "align": "auto",
+        "cellOptions": {
+          "type": "auto"
+        },
+        "inspect": false
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 12,
+    "y": 0
+  },
+  "id": 2,
+  "options": {
+    "cellHeight": "sm",
+    "footer": {
+      "countRows": false,
+      "fields": "",
+      "reducer": [
+        "sum"
+      ],
+      "show": false
+    },
+    "showHeader": true
+  },
+  "pluginVersion": "10.1.8",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DATASOURCE}"
+      },
+      "editorMode": "code",
+      "exemplar": false,
+      "expr": "sum by (job) (up{$filter})",
+      "format": "table",
+      "instant": true,
+      "legendFormat": "__auto",
+      "range": false,
+      "refId": "A"
+    }
+  ],
+  "title": "Rename using Transform > Organize fields",
+  "transformations": [
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {},
+        "indexByName": {},
+        "renameByName": {
+          "Value": "bonjour",
+          "job": "family"
+        }
+      }
+    }
+  ],
+  "type": "table"
+}

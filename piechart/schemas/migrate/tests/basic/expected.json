@@ -1,0 +1,11 @@
+{
+  "kind": "PieChart",
+  "spec": {
+    "calculation": "last-number",
+    "legend": {
+      "mode": "list",
+      "position": "bottom"
+    },
+    "radius": 50
+  }
+}

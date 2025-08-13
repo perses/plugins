@@ -1,0 +1,25 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "my-ds"
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 1
+  },
+  "id": 3,
+  "options": {
+    "code": {
+      "language": "plaintext",
+      "showLineNumbers": false,
+      "showMiniMap": false
+    },
+    "content": "This dashboard does have some purpose, let me remind... uuuuh...",
+    "mode": "html"
+  },
+  "pluginVersion": "10.1.8",
+  "title": "Purpose of the Dashboard",
+  "type": "text"
+}

@@ -1,0 +1,31 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "mode": "list",
+      "position": "bottom",
+      "values": [
+        "min",
+        "max",
+        "first",
+        "first-number",
+        "last",
+        "last-number",
+        "mean",
+        "sum"
+      ]
+    },
+    "visual": {
+      "areaOpacity": 0,
+      "connectNulls": true,
+      "display": "line",
+      "lineWidth": 1
+    },
+    "yAxis": {
+      "format": {
+        "decimalPlaces": 3,
+        "unit": "decimal"
+      }
+    }
+  }
+}

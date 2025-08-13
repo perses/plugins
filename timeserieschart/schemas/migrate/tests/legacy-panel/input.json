@@ -1,0 +1,138 @@
+{
+  "aliasColors": {},
+  "bars": false,
+  "dashLength": 10,
+  "dashes": false,
+  "datasource": {
+    "type": "prometheus",
+    "uid": "$datasource"
+  },
+  "description": "Messages Enqueued-Dequeued per second.\n\n - Queueing rate: Rate of messages enqueued (no instance ready)\n - Dequeueing rate (negative): Rate of messages dequeued (an instance became available)",
+  "fieldConfig": {
+    "defaults": {
+      "unit": "msg/s"
+    },
+    "overrides": []
+  },
+  "fill": 0,
+  "fillGradient": 0,
+  "gridPos": {
+    "h": 10,
+    "w": 12,
+    "x": 0,
+    "y": 2
+  },
+  "hiddenSeries": false,
+  "id": 6,
+  "legend": {
+    "alignAsTable": true,
+    "avg": true,
+    "current": false,
+    "max": true,
+    "min": true,
+    "rightSide": false,
+    "show": true,
+    "sort": "avg",
+    "sortDesc": true,
+    "total": false,
+    "values": true
+  },
+  "lines": true,
+  "linewidth": 1,
+  "links": [],
+  "nullPointMode": "null",
+  "options": {
+    "alertThreshold": true
+  },
+  "paceLength": 10,
+  "percentage": false,
+  "pluginVersion": "10.1.8",
+  "pointradius": 5,
+  "points": false,
+  "renderer": "flot",
+  "seriesOverrides": [
+    {
+      "$$hashKey": "object:62",
+      "alias": "Queueing rate",
+      "color": "#F2CC0C",
+      "fill": 1,
+      "zindex": "-1"
+    },
+    {
+      "$$hashKey": "object:63",
+      "alias": "Dequeueing rate (negative)",
+      "color": "#56A64B",
+      "fill": 1,
+      "zindex": "0"
+    },
+    {
+      "$$hashKey": "object:64",
+      "alias": "Queue growing rate",
+      "color": "#FF780A",
+      "fill": 1,
+      "zindex": "1"
+    }
+  ],
+  "spaceLength": 10,
+  "stack": false,
+  "steppedLine": false,
+  "targets": [
+    {
+      "datasource": {
+        "uid": "$datasource"
+      },
+      "editorMode": "code",
+      "exemplar": false,
+      "expr": "sum (rate(queue_be_messages_enqueued_total[$__rate_interval]))",
+      "format": "time_series",
+      "hide": false,
+      "instant": false,
+      "interval": "2m",
+      "intervalFactor": 1,
+      "legendFormat": "Queueing rate",
+      "refId": "queue"
+    }
+  ],
+  "thresholds": [],
+  "timeRegions": [],
+  "title": "Queueing rate",
+  "tooltip": {
+    "msResolution": true,
+    "shared": true,
+    "sort": 2,
+    "value_type": "individual"
+  },
+  "transformations": [
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {},
+        "indexByName": {},
+        "renameByName": {}
+      }
+    }
+  ],
+  "type": "graph",
+  "xaxis": {
+    "mode": "time",
+    "show": true,
+    "values": []
+  },
+  "yaxes": [
+    {
+      "$$hashKey": "object:95",
+      "format": "msg/s",
+      "logBase": 1,
+      "show": true
+    },
+    {
+      "$$hashKey": "object:96",
+      "format": "short",
+      "logBase": 1,
+      "show": false
+    }
+  ],
+  "yaxis": {
+    "align": false
+  }
+}

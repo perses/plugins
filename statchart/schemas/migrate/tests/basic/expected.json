@@ -1,0 +1,24 @@
+{
+  "kind": "StatChart",
+  "spec": {
+    "calculation": "last-number",
+    "format": {
+      "decimalPlaces": 2,
+      "unit": "bytes/sec"
+    },
+    "metricLabel": "",
+    "sparkline": {},
+    "thresholds": {
+      "steps": [
+        {
+          "color": "green",
+          "value": 0
+        },
+        {
+          "color": "red",
+          "value": 5
+        }
+      ]
+    }
+  }
+}

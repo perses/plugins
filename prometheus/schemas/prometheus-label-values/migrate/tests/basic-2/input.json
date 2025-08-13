@@ -1,0 +1,25 @@
+
+{
+  "current": {},
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "definition": "label_values(thanos_build_info, stack)",
+  "description": "Label values, 2nd flavor",
+  "hide": 0,
+  "includeAll": true,
+  "label": "Stack with Metric",
+  "multi": false,
+  "name": "lv2",
+  "options": [],
+  "query": {
+    "query": "label_values(thanos_build_info, stack)",
+    "refId": "StandardVariableQuery"
+  },
+  "refresh": 1,
+  "regex": "",
+  "skipUrlSync": false,
+  "sort": 0,
+  "type": "query"
+}

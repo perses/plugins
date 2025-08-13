@@ -1,0 +1,9 @@
+{
+  "kind": "PrometheusLabelValuesVariable",
+  "spec": {
+    "labelName": "stack",
+    "matchers": [
+      "thanos_build_info{stack=~\"erd.+\"}"
+    ]
+  }
+}

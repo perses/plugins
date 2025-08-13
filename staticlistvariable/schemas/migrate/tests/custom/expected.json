@@ -1,0 +1,13 @@
+{
+  "kind": "StaticListVariable",
+  "spec": {
+    "values": [
+      "one",
+      "two",
+      {
+        "label": "three",
+        "value": "3"
+      }
+    ]
+  }
+}

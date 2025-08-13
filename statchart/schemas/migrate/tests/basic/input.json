@@ -1,0 +1,68 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "description": "a stat chart that is basically showing stats as a chart",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 5
+          }
+        ]
+      },
+      "unit": "Bps",
+      "decimal": 2
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 0
+  },
+  "id": 13,
+  "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "justifyMode": "auto",
+    "orientation": "auto",
+    "reduceOptions": {
+      "calcs": [
+        "lastNotNull"
+      ],
+      "fields": "",
+      "values": false
+    },
+    "textMode": "auto"
+  },
+  "pluginVersion": "10.1.8",
+  "targets": [
+    {
+      "editorMode": "code",
+      "expr": "vector(4)",
+      "legendFormat": "__auto",
+      "range": true,
+      "refId": "A",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      }
+    }
+  ],
+  "title": "My Stat chart",
+  "type": "stat"
+}

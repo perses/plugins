@@ -1,0 +1,10 @@
+{
+  "kind": "BarChart",
+  "spec": {
+    "calculation": "last-number",
+    "format": {
+      "decimalPlaces": 2,
+      "unit": "percent"
+    }
+  }
+}

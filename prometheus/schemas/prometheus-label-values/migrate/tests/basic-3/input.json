@@ -1,0 +1,25 @@
+
+{
+  "current": {},
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "definition": "label_values(thanos_build_info{stack=~\"erd.+\"}, stack)",
+  "description": "Label values, 3rd flavor",
+  "hide": 0,
+  "includeAll": true,
+  "label": "Stack with Timeserie",
+  "multi": false,
+  "name": "lv3",
+  "options": [],
+  "query": {
+    "query": "label_values(thanos_build_info{stack=~\"erd.+\"}, stack)",
+    "refId": "StandardVariableQuery"
+  },
+  "refresh": 1,
+  "regex": "",
+  "skipUrlSync": false,
+  "sort": 1,
+  "type": "query"
+}

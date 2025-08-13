@@ -1,0 +1,7 @@
+{
+  "kind": "PrometheusPromQLVariable",
+  "spec": {
+    "expr": "group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"node-exporter\", prometheus=~\"system\"}[$__range]))",
+    "labelName": "type"
+  }
+}
