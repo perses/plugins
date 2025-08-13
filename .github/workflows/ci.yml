@@ -90,7 +90,7 @@ jobs:
       - run: npm ci
       - run: npm run type-check
 
-  lint-schemas:
+  validate-schemas:
     name: "Validate plugin schemas"
     runs-on: ubuntu-latest
     steps:
@@ -105,7 +105,7 @@ jobs:
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.52.0-beta.1"
+          cli-version: "v0.52.0-beta.3"
       - uses: actions/cache@v4
         id: cache
         with:
@@ -114,6 +114,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cue-
       - run: make lint-plugins
+      - run: make test-schemas-plugins
   golangci:
     name: lint
     runs-on: ubuntu-latest
