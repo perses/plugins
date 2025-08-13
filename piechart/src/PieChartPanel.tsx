@@ -18,11 +18,12 @@ import {
   LegendItem,
   LegendProps,
   SelectedLegendItemState,
+  TableColumnConfig,
   useChartsTheme,
   useId,
 } from '@perses-dev/components';
 import { CalculationType, CalculationsMap, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
-import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
+import { comparisonLegends, ComparisonValues, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { getSeriesColor } from './palette-gen';
@@ -34,7 +35,7 @@ export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode },
+    spec: { calculation, sort, mode, legend: pieChartLegend },
     contentDimensions,
     queryResults,
   } = props;
@@ -44,10 +45,11 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const chartId = useId('time-series-panel');
   const categoricalPalette = chartsTheme.echartsTheme.color;
 
-  const { pieChartData, legendItems } = useMemo(() => {
+  const { pieChartData, legendItems, legendColumns } = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];
     const pieChartData: PieChartData[] = [];
     const legendItems: LegendItem[] = [];
+    const legendColumns: Array<TableColumnConfig<LegendItem>> = [];
 
     for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
       const result = queryResults[queryIndex];
@@ -76,6 +78,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
           id: seriesId,
           label: series.name,
           color: seriesColor,
+          data: {},
         });
         seriesIndex++;
       }
@@ -83,47 +86,59 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
 
     const sortedPieChartData = sortSeriesData(pieChartData, sort);
 
-    /* USE THE FOLLOWING BLOCK OF CODE, FOR TESTING
-       TO TEST, simply concatenate them to the current label.
-       Legend Values should be placed in individual columns of the legend table       
-       Soon the multi-column table issue will be resolved by #3156 (which is larger than then scope of this task)       
-    */
-
-    // if (pieChartLegend?.values?.length && pieChartLegend?.mode === 'table') {
-    //   const { values } = pieChartLegend;
-
-    //   [...values].sort().forEach((v) => {
-    //     switch (v) {
-    //       case 'abs':
-    //         legendItems.forEach((li) => {
-    //           const { value: itemAbsoluteValue } = pieChartData.find((pd) => li.id === pd.id) || {};
-    //           if (itemAbsoluteValue) li.label += `: ${itemAbsoluteValue}`;
-    //         });
-    //         break;
-    //       case 'relative':
-    //         legendItems.forEach((li) => {
-    //           const { value: itemPercentageValue } =
-    //             calculatePercentages(sortedPieChartData).find((ppd) => li.id === ppd.id) || {};
-    //           if (itemPercentageValue) li.label += ` (${itemPercentageValue.toFixed(2)}%)`;
-    //         });
-    //         break;
-    //       default:
-    //         break;
-    //     }
-    //   });
-    // }
-
-    if (mode === 'percentage') {
-      return {
-        pieChartData: calculatePercentages(sortedPieChartData),
-        legendItems,
-      };
+    if (pieChartLegend?.values?.length && pieChartLegend?.mode === 'table') {
+      const { values } = pieChartLegend;
+      [...values].sort().forEach((v) => {
+        /* First, create a column for the current legend value */
+        legendColumns.push({
+          accessorKey: `data.${v}`,
+          header: comparisonLegends[v as ComparisonValues]?.label || v,
+          headerDescription: comparisonLegends[v as ComparisonValues]?.description,
+          width: 90,
+          align: 'right',
+          cellDescription: true,
+          enableSorting: true,
+        });
+        /* Then, settle the legend items related to this legend value */
+        switch (v) {
+          case 'abs':
+            legendItems.forEach((li) => {
+              const { value: itemAbsoluteValue } = pieChartData.find((pd) => li.id === pd.id) || {};
+              if (typeof itemAbsoluteValue === 'number' && li.data) {
+                li.data['abs'] = itemAbsoluteValue;
+              }
+            });
+            break;
+          case 'relative':
+            legendItems.forEach((li) => {
+              const { value: itemPercentageValue } =
+                calculatePercentages(sortedPieChartData).find((ppd) => li.id === ppd.id) || {};
+              if (typeof itemPercentageValue === 'number' && li.data) {
+                li.data['relative'] = `${itemPercentageValue.toFixed(2)}%`;
+              }
+            });
+            break;
+          default:
+            break;
+        }
+      });
     }
+
     return {
-      pieChartData: sortedPieChartData,
+      pieChartData: mode === 'percentage' ? calculatePercentages(sortedPieChartData) : sortedPieChartData,
       legendItems,
+      legendColumns,
     };
-  }, [calculation, sort, mode, queryResults, categoricalPalette, muiTheme.palette.primary.main, chartId]);
+  }, [
+    calculation,
+    sort,
+    mode,
+    queryResults,
+    categoricalPalette,
+    muiTheme.palette.primary.main,
+    chartId,
+    pieChartLegend,
+  ]);
 
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
@@ -166,7 +181,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
             selectedItems: selectedLegendItems,
             onSelectedItemsChange: setSelectedLegendItems,
             tableProps: {
-              columns: [],
+              columns: legendColumns,
               sorting: legendSorting,
               onSortingChange: setLegendSorting,
             },
