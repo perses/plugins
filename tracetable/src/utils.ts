@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,22 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { replaceVariables, VariableStateMap } from '@perses-dev/plugin-system';
 
-#palette: {
-	mode: "auto" | "categorical"
+export function renderTemplate(
+  template: string | undefined,
+  variableValues: VariableStateMap,
+  extraVariables?: Record<string, string>
+): string | undefined {
+  if (!template) return undefined;
+  for (const [key, value] of Object.entries(extraVariables ?? {})) {
+    variableValues[key] = { value, loading: false };
+  }
+  return replaceVariables(template, variableValues);
 }
-
-#visual: {
-	palette?: #palette
-}
-
-#links: {
-	trace?: string
-}
-
-kind: "TraceTable"
-spec: close({
-	visual?: #visual
-	links?:  #links
-})

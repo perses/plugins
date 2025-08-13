@@ -1,4 +1,13 @@
 {
   "kind": "TraceTable",
-  "spec": {}
+  "spec": {
+    "visual": {
+      "palette": {
+        "mode": "auto"
+      }
+    },
+    "links": {
+      "trace": "/datasource/${datasourceName}/trace/${traceId}"
+    }
+  }
 }
