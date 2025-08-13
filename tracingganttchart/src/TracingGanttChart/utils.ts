@@ -14,6 +14,7 @@
 import { PersesChartsTheme } from '@perses-dev/components';
 import { Theme } from '@mui/material';
 import { otlptracev1 } from '@perses-dev/core';
+import { replaceVariables, VariableStateMap } from '@perses-dev/plugin-system';
 import { getConsistentCategoricalColor, getConsistentColor } from './palette';
 import { Span } from './trace';
 
@@ -67,4 +68,16 @@ export function formatDuration(timeMs: number): string {
     return `${+timeMs.toFixed(2)}ms`;
   }
   return `${+(timeMs / 1000).toFixed(2)}s`;
+}
+
+export function renderTemplate(
+  template: string | undefined,
+  variableValues: VariableStateMap,
+  extraVariables?: Record<string, string>
+): string | undefined {
+  if (!template) return undefined;
+  for (const [key, value] of Object.entries(extraVariables ?? {})) {
+    variableValues[key] = { value, loading: false };
+  }
+  return replaceVariables(template, variableValues);
 }
