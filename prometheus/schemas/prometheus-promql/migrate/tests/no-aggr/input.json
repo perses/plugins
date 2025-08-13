@@ -5,7 +5,7 @@
     "type": "prometheus",
     "uid": "${DS_PROM}"
   },
-  "definition": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
+  "definition": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"node-exporter\", prometheus=~\"system\"}[$__range]))",
   "description": "query result var with no <aggr> by clause",
   "hide": 0,
   "includeAll": false,
@@ -13,7 +13,7 @@
   "name": "queryResVarOther",
   "options": [],
   "query": {
-    "query": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
+    "query": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"node-exporter\", prometheus=~\"system\"}[$__range]))",
     "refId": "StandardVariableQuery"
   },
   "refresh": 1,
