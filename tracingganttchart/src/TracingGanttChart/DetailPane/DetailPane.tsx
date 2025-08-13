@@ -15,11 +15,13 @@ import { Box, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
 import { Span, Trace } from '../trace';
-import { AttributeLinks, TraceAttributes } from './Attributes';
+import { CustomLinks } from '../../gantt-chart-model';
+import { TraceAttributes } from './Attributes';
 import { SpanEventList } from './SpanEvents';
+import { SpanLinkList } from './SpanLinks';
 
 export interface DetailPaneProps {
-  attributeLinks?: AttributeLinks;
+  customLinks?: CustomLinks;
   trace: Trace;
   span: Span;
   onCloseBtnClick: () => void;
@@ -29,12 +31,16 @@ export interface DetailPaneProps {
  * DetailPane renders a sidebar showing the span attributes etc.
  */
 export function DetailPane(props: DetailPaneProps): ReactElement {
-  const { attributeLinks, trace, span, onCloseBtnClick } = props;
-  const [tab, setTab] = useState<'attributes' | 'events'>('attributes');
+  const { customLinks, trace, span, onCloseBtnClick } = props;
+  const [tab, setTab] = useState<'attributes' | 'events' | 'links'>('attributes');
 
   // if the events tab is selected, and then a span without events is clicked,
   // we need to switch the current selected tab back to the attributes tab.
   if (tab === 'events' && span.events.length === 0) {
+    setTab('attributes');
+  }
+  // same as above, but for span links
+  if (tab === 'links' && span.links.length === 0) {
     setTab('attributes');
   }
 
@@ -51,10 +57,12 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
         <Tabs value={tab} onChange={(_, tab) => setTab(tab)}>
           <Tab sx={{ p: 0 }} value="attributes" label="Attributes" />
           {span.events.length > 0 && <Tab value="events" label="Events" />}
+          {span.links.length > 0 && <Tab value="links" label="Links" />}
         </Tabs>
       </Box>
-      {tab === 'attributes' && <TraceAttributes trace={trace} span={span} attributeLinks={attributeLinks} />}
-      {tab === 'events' && <SpanEventList trace={trace} span={span} attributeLinks={attributeLinks} />}
+      {tab === 'attributes' && <TraceAttributes customLinks={customLinks} trace={trace} span={span} />}
+      {tab === 'events' && <SpanEventList customLinks={customLinks} trace={trace} span={span} />}
+      {tab === 'links' && <SpanLinkList customLinks={customLinks} span={span} />}
     </Box>
   );
 }

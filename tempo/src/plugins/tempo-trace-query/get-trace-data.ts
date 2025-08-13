@@ -103,13 +103,20 @@ function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
         if (span.traceId.length != 32) {
           span.traceId = base64ToHex(span.traceId);
         }
-
         if (span.spanId.length != 16) {
           span.spanId = base64ToHex(span.spanId);
         }
-
         if (span.parentSpanId && span.parentSpanId.length != 16) {
           span.parentSpanId = base64ToHex(span.parentSpanId);
+        }
+
+        for (const link of span.links ?? []) {
+          if (link.traceId.length != 32) {
+            link.traceId = base64ToHex(link.traceId);
+          }
+          if (link.spanId.length != 16) {
+            link.spanId = base64ToHex(link.spanId);
+          }
         }
       }
     }
