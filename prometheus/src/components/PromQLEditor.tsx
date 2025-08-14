@@ -73,7 +73,9 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
       >
         PromQL Expression
       </InputLabel>
+      {/* TODO: We need to wait for this to be merged, then we need to add proper e2e for some scenarios */}
       <CodeMirror
+        data-testid="promql_expression_editor"
         {...rest}
         style={{ border: `1px solid ${theme.palette.divider}` }}
         theme={isDarkMode ? 'dark' : 'light'}

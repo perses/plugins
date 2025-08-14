@@ -21,7 +21,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { FormControl, Stack, TextField } from '@mui/material';
-import { ReactElement } from 'react';
+import { ReactElement, useCallback } from 'react';
 import {
   DEFAULT_PROM,
   DurationString,
@@ -44,8 +44,13 @@ import {
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
  */
 export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps): ReactElement {
-  const { onChange, value } = props;
-  const { datasource } = value;
+  const {
+    onChange,
+    value,
+    value: { query, datasource },
+    queryHandlerSettings,
+  } = props;
+
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
 
   const datasourceSelectLabelID = useId('prom-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
@@ -82,6 +87,16 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
 
+  const handlePromQlEditorChanges = useCallback(
+    (e: string) => {
+      handleQueryChange(e);
+      if (queryHandlerSettings?.watchQueryChanges) {
+        queryHandlerSettings?.watchQueryChanges(e);
+      }
+    },
+    [queryHandlerSettings, handleQueryChange]
+  );
+
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
@@ -96,10 +111,10 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
-        value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
+        value={query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
         datasource={selectedDatasource}
-        onChange={handleQueryChange}
-        onBlur={handleQueryBlur}
+        onChange={handlePromQlEditorChanges}
+        onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
       />
       <Stack direction="row" spacing={2}>
         <TextField

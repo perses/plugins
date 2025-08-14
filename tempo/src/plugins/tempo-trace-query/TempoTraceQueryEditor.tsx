@@ -20,7 +20,7 @@ import {
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { TraceQLEditor } from '../../components';
 import { TempoClient } from '../../model/tempo-client';
 import {
@@ -35,8 +35,13 @@ import { traceQLToFilter } from '../../components/filter/traceql_to_filter';
 import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
-  const { onChange, value } = props;
-  const { datasource, limit } = value;
+  const {
+    onChange,
+    value,
+    value: { datasource, limit },
+    queryHandlerSettings,
+  } = props;
+
   const datasourceSelectValue = datasource ?? DEFAULT_TEMPO;
   const selectedDatasource = useDatasourceSelectValueToSelector(datasourceSelectValue, TEMPO_DATASOURCE_KIND);
   const datasourceSelectLabelID = useId('tempo-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
@@ -61,12 +66,25 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   };
 
   const runQuery = (newQuery: string) => {
+    if (queryHandlerSettings?.watchQueryChanges) {
+      queryHandlerSettings.watchQueryChanges(newQuery);
+    }
     onChange(
       produce(value, (draft) => {
         draft.query = newQuery;
       })
     );
   };
+
+  const handleTraceQueryChange = useCallback(
+    (e: string) => {
+      handleQueryChange(e);
+      if (queryHandlerSettings?.watchQueryChanges) {
+        queryHandlerSettings.watchQueryChanges(e);
+      }
+    },
+    [handleQueryChange, queryHandlerSettings]
+  );
 
   return (
     <Stack spacing={2}>
@@ -84,7 +102,12 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
         {showAttributeFilters ? (
           <AttributeFilters client={client} query={query} setQuery={runQuery} />
         ) : (
-          <TraceQLEditor client={client} value={query} onChange={handleQueryChange} onBlur={handleQueryBlur} />
+          <TraceQLEditor
+            client={client}
+            value={query}
+            onChange={handleTraceQueryChange}
+            onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
+          />
         )}
         <Button onClick={() => setShowAttributeFilters(!showAttributeFilters)}>
           {showAttributeFilters ? 'Show query' : 'Hide query'}
