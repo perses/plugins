@@ -20,4 +20,8 @@ export interface TempoTraceQuerySpec {
   query: string;
   limit?: number;
   datasource?: DatasourceSelectValue<TempoDatasourceSelector>;
+  queryHandlerSettings?: {
+    runWithOnBlur: boolean;
+    watchQueryChanges: (query: string) => void;
+  };
 }

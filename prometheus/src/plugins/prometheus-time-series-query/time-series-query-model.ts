@@ -24,4 +24,8 @@ export interface PrometheusTimeSeriesQuerySpec {
   minStep?: DurationString;
   resolution?: number;
   datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
+  queryHandlerSettings?: {
+    runWithOnBlur: boolean;
+    watchQueryChanges: (query: string) => void;
+  };
 }
