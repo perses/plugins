@@ -21,7 +21,7 @@ import {
   useTimeRange,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { TraceQLEditor } from '../../components';
 import { TempoClient } from '../../model/tempo-client';
 import {
@@ -33,8 +33,12 @@ import {
 import { TraceQueryEditorProps, useLimitState, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
-  const { onChange, value } = props;
-  const { datasource } = value;
+  const {
+    onChange,
+    value,
+    value: { datasource, queryHandlerSettings },
+  } = props;
+
   const datasourceSelectValue = datasource ?? DEFAULT_TEMPO;
   const selectedDatasource = useDatasourceSelectValueToSelector(datasourceSelectValue, TEMPO_DATASOURCE_KIND);
   const datasourceSelectLabelID = useId('tempo-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
@@ -63,6 +67,16 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     throw new Error('Got unexpected non-Tempo datasource selector');
   };
 
+  const handleTraceQueryChange = useCallback(
+    (e: string) => {
+      handleQueryChange(e);
+      if (queryHandlerSettings?.watchQueryChanges) {
+        queryHandlerSettings.watchQueryChanges(e);
+      }
+    },
+    [handleQueryChange, queryHandlerSettings]
+  );
+
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
@@ -79,8 +93,8 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
         <TraceQLEditor
           completionConfig={completionConfig}
           value={query}
-          onChange={handleQueryChange}
-          onBlur={handleQueryBlur}
+          onChange={handleTraceQueryChange}
+          onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
         />
         <TextField
           size="small"
