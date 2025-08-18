@@ -1,4 +1,4 @@
-module github.com/perses/plugins/prometheus
+module github.com/perses/plugins/loki
 
 go 1.23.4
 
