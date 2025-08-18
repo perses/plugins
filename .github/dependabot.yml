@@ -8,6 +8,10 @@ updates:
   open-pull-requests-limit: 10
   schedule:
     interval: "weekly"
+  groups:
+    perses:
+      patterns:
+        - "github.com/perses/*"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
