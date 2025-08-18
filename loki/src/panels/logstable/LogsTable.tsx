@@ -21,7 +21,6 @@ export const LogsTable: PanelPlugin<LogsOptions, LogsProps> = {
   panelOptionsEditorComponents: [{ label: 'Settings', content: LogsSettingsEditor }],
   supportedQueryTypes: ['LogQuery'],
   createInitialOptions: () => ({
-    direction: 'backward',
     time: true,
     wrap: true,
     enableDetails: true,

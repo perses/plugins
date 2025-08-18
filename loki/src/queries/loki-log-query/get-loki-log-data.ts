@@ -47,7 +47,7 @@ export const getLokiLogData: LogQueryPlugin<LokiLogQuerySpec>['getLogData'] = as
     query,
     start: start.getTime().toString(),
     end: end.getTime().toString(),
-    direction: 'backward',
+    direction: spec.direction,
   });
 
   if (response.data.resultType === 'streams') {
