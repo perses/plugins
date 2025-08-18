@@ -2,7 +2,7 @@ module github.com/perses/plugins/scatterchart
 
 go 1.24.0
 
-require github.com/perses/perses v0.52.0-beta.1
+require github.com/perses/perses v0.52.0-beta.3
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
