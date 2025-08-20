@@ -20,28 +20,28 @@ import (
 
 func LabelName(labelName string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.LabelName = labelName
+		builder.LabelName = labelName
 		return nil
 	}
 }
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Datasource = promDatasource.Selector(datasourceName)
+		builder.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }
 
 func Matchers(matchers ...string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Matchers = matchers
+		builder.Matchers = matchers
 		return nil
 	}
 }
 
 func AddMatchers(matcher string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Matchers = append(builder.PluginSpec.Matchers, matcher)
+		builder.Matchers = append(builder.Matchers, matcher)
 		return nil
 	}
 }

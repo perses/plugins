@@ -1,0 +1,25 @@
+
+{
+  "current": {},
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "definition": "query_result(group by(type) (up{osname=~\".*Linux.*\", job=~\"node-exporter.*\", prometheus=~\"system\"}))",
+  "description": "variable using query_result clause",
+  "hide": 0,
+  "includeAll": false,
+  "label": "Query Result Variable",
+  "multi": false,
+  "name": "queryResVar",
+  "options": [],
+  "query": {
+    "query": "query_result(group by(type) (up{osname=~\".*Linux.*\", job=~\"node-exporter.*\", prometheus=~\"system\"}))",
+    "refId": "StandardVariableQuery"
+  },
+  "refresh": 1,
+  "regex": ".*type=\\\"(.*)\\\".*",
+  "skipUrlSync": false,
+  "sort": 5,
+  "type": "query"
+}

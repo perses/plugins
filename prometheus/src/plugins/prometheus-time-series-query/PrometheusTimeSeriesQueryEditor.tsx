@@ -115,8 +115,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           label="Min Step"
           placeholder={minStepPlaceholder}
           helperText="Lower bound for the step. If not provided, the scrape interval of the datasource is used."
-          value={minStep}
-          onChange={(e) => handleMinStepChange(e.target.value as DurationString)}
+          value={minStep ?? ''}
+          onChange={(e) => handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined)}
           onBlur={handleMinStepBlur}
           sx={{ width: '250px' }}
         />

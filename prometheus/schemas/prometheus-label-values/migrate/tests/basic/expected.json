@@ -1,0 +1,7 @@
+{
+  "kind": "PrometheusLabelValuesVariable",
+  "spec": {
+    "labelName": "stack",
+    "matchers": []
+  }
+}

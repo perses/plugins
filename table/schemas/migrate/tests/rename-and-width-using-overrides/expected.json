@@ -1,0 +1,18 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "header": "family",
+        "name": "job",
+        "width": 100
+      },
+      {
+        "header": "bonjour",
+        "name": "value",
+        "width": 100
+      }
+    ],
+    "density": "compact"
+  }
+}
