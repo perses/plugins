@@ -1,0 +1,6 @@
+{
+  "kind": "PrometheusTimeSeriesQuery",
+  "spec": {
+    "query": "up{env=\"demo\",instance=~\"demo.do.prometheus.io.*\"}"
+  }
+}

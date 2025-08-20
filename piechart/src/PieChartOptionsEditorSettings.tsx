@@ -87,7 +87,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <LegendOptionsEditor value={value.legend} onChange={handleLegendChange} />
+        <LegendOptionsEditor calculation="comparison" value={value.legend} onChange={handleLegendChange} />
         <OptionsEditorGroup title="Misc">
           <FormatControls value={format} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />

@@ -79,7 +79,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <LegendOptionsEditor value={value.legend} onChange={handleLegendChange} />
+        <LegendOptionsEditor calculation="aggregation" value={value.legend} onChange={handleLegendChange} />
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>

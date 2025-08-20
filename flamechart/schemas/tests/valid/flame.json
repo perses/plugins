@@ -1,0 +1,10 @@
+{
+  "kind": "FlameChart",
+  "spec": {
+    "palette": "package-name",
+    "showSettings": true,
+    "showSeries": false,
+    "showTable": true,
+    "showFlameGraph": true
+  }
+}

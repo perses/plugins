@@ -19,6 +19,11 @@ lint-plugins:
 	@echo ">> Lint all plugins"
 	$(GO) run ./scripts/lint-plugins/lint-plugins.go
 
+.PHONY: test-schemas-plugins
+test-schemas-plugins:
+	@echo ">> Test schemas of all plugins"
+	$(GO) run ./scripts/test-schemas-plugins/test-schemas-plugins.go
+
 .PHONY: tidy-modules
 tidy-modules:
 	@echo ">> Tidy CUE module for all plugins"

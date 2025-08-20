@@ -1,0 +1,23 @@
+
+{
+  "current": {},
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "definition": "label_names()",
+  "hide": 0,
+  "includeAll": false,
+  "multi": false,
+  "name": "LabelNamesTest",
+  "options": [],
+  "query": {
+    "query": "label_names()",
+    "refId": "StandardVariableQuery"
+  },
+  "refresh": 1,
+  "regex": "",
+  "skipUrlSync": false,
+  "sort": 0,
+  "type": "query"
+}
