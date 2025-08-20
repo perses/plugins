@@ -14,7 +14,7 @@
 import { ReactElement, useMemo } from 'react';
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
 import { otlpcommonv1 } from '@perses-dev/core';
-import { useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { RouterContextType, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { Span, Trace } from '../trace';
 import { formatDuration, renderTemplate } from '../utils';
 import { CustomLinks } from '../../gantt-chart-model';
@@ -116,7 +116,8 @@ interface AttributeItemProps {
 
 export function AttributeItem(props: AttributeItemProps): ReactElement {
   const { name, value, link } = props;
-  const { RouterComponent } = useRouterContext();
+  // Remove the casting once https://github.com/perses/perses/pull/3208 is merged
+  const { RouterComponent } = useRouterContext() as { RouterComponent?: RouterContextType['RouterComponent'] };
 
   const valueComponent =
     RouterComponent && link ? (
