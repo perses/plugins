@@ -117,7 +117,7 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
       handlers.click = (params): void => {
         const linkVariables = params.data.linkVariables as Record<string, string> | undefined;
         const link = renderTemplate(linkTemplate, variableValues, linkVariables);
-        navigate(link);
+        navigate?.(link);
       };
     }
     return handlers;
