@@ -99,7 +99,6 @@ export function AttributeItems(props: AttributeItemsProps): ReactElement {
       {attributes.map((attribute, i) => (
         <AttributeItem
           key={i}
-          customLinks={customLinks}
           name={attribute.key}
           value={renderAttributeValue(attribute.value)}
           link={renderTemplate(attributeLinks[attribute.key], variableValues, extraVariables)}
@@ -110,18 +109,17 @@ export function AttributeItems(props: AttributeItemsProps): ReactElement {
 }
 
 interface AttributeItemProps {
-  customLinks?: CustomLinks;
   name: string;
   value: string;
   link?: string;
 }
 
 export function AttributeItem(props: AttributeItemProps): ReactElement {
-  const { customLinks, name, value, link } = props;
+  const { name, value, link } = props;
   const { RouterComponent } = useRouterContext();
 
   const valueComponent =
-    customLinks && link ? (
+    RouterComponent && link ? (
       <Link component={RouterComponent} to={link}>
         {value}
       </Link>
