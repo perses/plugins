@@ -14,9 +14,11 @@
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTracingGanttChartOptions, TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChartPanel, TracingGanttChartPanelProps } from './TracingGanttChartPanel';
+import { DownloadTraceAction } from './PanelActions';
 
 export const TracingGanttChart: PanelPlugin<TracingGanttChartOptions, TracingGanttChartPanelProps> = {
   PanelComponent: TracingGanttChartPanel,
   supportedQueryTypes: ['TraceQuery'],
   createInitialOptions: createInitialTracingGanttChartOptions,
+  actions: [{ component: DownloadTraceAction }],
 };
