@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
 import { useId } from '@perses-dev/components';
 import {
   DatasourceSelect,
@@ -119,23 +119,26 @@ interface LimitSelectProps {
 export function LimitSelect(props: LimitSelectProps) {
   const { value, setValue } = props;
 
+  // the outer <Box> is required, because <FormControl> has display: inline-flex, which doesn't work with the parent <Stack> of the query editor
   return (
-    <FormControl size="small">
-      <InputLabel id="max-traces-label">Max Traces</InputLabel>
-      <Select
-        labelId="max-traces-label"
-        id="max-traces-select"
-        value={value}
-        label="Max Traces"
-        onChange={(e) => setValue(typeof e.target.value === 'number' ? e.target.value : parseInt(e.target.value))}
-        sx={{ width: 110 }}
-      >
-        {limitOptions.map((option) => (
-          <MenuItem key={option} value={option}>
-            {option}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Box>
+      <FormControl size="small">
+        <InputLabel id="max-traces-label">Max Traces</InputLabel>
+        <Select
+          labelId="max-traces-label"
+          id="max-traces-select"
+          value={value}
+          label="Max Traces"
+          onChange={(e) => setValue(typeof e.target.value === 'number' ? e.target.value : parseInt(e.target.value))}
+          sx={{ width: 110 }}
+        >
+          {limitOptions.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
   );
 }
