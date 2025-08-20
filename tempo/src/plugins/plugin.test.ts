@@ -70,4 +70,13 @@ describe('TempoTraceQuery', () => {
     );
     expect(results).toEqual(MOCK_TRACE_DATA_SEARCHRESULT);
   });
+
+  it('should convert base64-encoded trace IDs and span IDs in the response to hex format', async () => {
+    const results = await TempoTraceQuery.getTraceData({ query: 'FBD37845209D43CDCCD418DC5F9FF021' }, stubTempoContext);
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.traceId).toEqual(
+      'FBD37845209D43CDCCD418DC5F9FF021'
+    );
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.spanId).toEqual('8467BCA11377C166');
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.parentSpanId).toEqual('9C22EB77CB5C14C7');
+  });
 });

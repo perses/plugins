@@ -20,21 +20,21 @@ import (
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Datasource = promDatasource.Selector(datasourceName)
+		builder.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }
 
 func Matchers(matchers ...string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Matchers = matchers
+		builder.Matchers = matchers
 		return nil
 	}
 }
 
 func AddMatcher(matcher string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Matchers = append(builder.PluginSpec.Matchers, matcher)
+		builder.Matchers = append(builder.Matchers, matcher)
 		return nil
 	}
 }

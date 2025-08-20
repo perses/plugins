@@ -2,12 +2,8 @@
   "kind": "PieChart",
   "spec": {
     "legend": {
-      "position": "bottom"
-    },
-    "visual": {
-      "display": "line",
-      "lineWidth": 2,
-      "pointRadius": 3
+      "position": "bottom",
+      "values": ["relative"]
     },
     "calculation": "last-number",
     "format": {

@@ -36,10 +36,10 @@ func create(options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
-
+	unit := common.DecimalUnit
 	defaults := []Option{
-		YAxisFormat(common.Format{Unit: common.DecimalUnit, DecimalPlaces: 2}),
-		CountFormat(common.Format{Unit: common.DecimalUnit, DecimalPlaces: 2}),
+		YAxisFormat(common.Format{Unit: &unit, DecimalPlaces: 2}),
+		CountFormat(common.Format{Unit: &unit, DecimalPlaces: 2}),
 		ShowVisualMap(true),
 	}
 

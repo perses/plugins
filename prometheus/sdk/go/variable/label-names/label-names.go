@@ -73,10 +73,10 @@ func (b *Builder) ApplyFilters() error {
 		filters = append(filters, fmt.Sprintf("%s=~\"$%s\"", variables.Metadata.Name, variables.Metadata.Name))
 	}
 
-	for index, matcher := range b.PluginSpec.Matchers {
-		// Add filter if matcher do not already have metric filter
+	for index, matcher := range b.Matchers {
+		// Add filter if matcher does not already have a metric filter
 		if !strings.Contains(matcher, "{") {
-			b.PluginSpec.Matchers[index] = fmt.Sprintf("%s{%s}", matcher, strings.Join(filters, ","))
+			b.Matchers[index] = fmt.Sprintf("%s{%s}", matcher, strings.Join(filters, ","))
 		}
 	}
 	return nil

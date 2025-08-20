@@ -37,7 +37,7 @@ spec: {
 #durationRegex: "^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"
 
 #selector: common.#datasourceSelector & {
-	datasource?: {
-		kind:  #kind
+	datasource?: =~common.#variableSyntaxRegex | {
+		kind: #kind
 	}
 }

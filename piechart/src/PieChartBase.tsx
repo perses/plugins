@@ -30,6 +30,7 @@ use([EChartsPieChart, GridComponent, DatasetComponent, TitleComponent, TooltipCo
 const PIE_WIN_WIDTH = 12;
 const PIE_GAP = 4;
 export interface PieChartData {
+  id?: string;
   name: string;
   value: number | null;
 }
@@ -53,7 +54,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
     },
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b} : {c} ({d}%)',
+      formatter: '{b} : {c} ({d}%)',
     },
     axisLabel: {
       overflow: 'truncate',
@@ -61,7 +62,6 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
     },
     series: [
       {
-        name: 'Access From',
         type: 'pie',
         radius: '55%',
         label: false,

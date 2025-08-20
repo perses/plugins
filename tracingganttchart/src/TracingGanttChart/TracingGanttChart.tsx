@@ -14,19 +14,19 @@
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, Stack, useTheme } from '@mui/material';
 import { otlptracev1 } from '@perses-dev/core';
-import { TracingGanttChartOptions } from '../gantt-chart-model';
+import { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';
 import { Viewport } from './utils';
 import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
-import { AttributeLinks } from './DetailPane/Attributes';
 import { getTraceModel, Span } from './trace';
+import { TraceDetails } from './TraceDetails';
 
 export interface TracingGanttChartProps {
   options: TracingGanttChartOptions;
-  attributeLinks?: AttributeLinks;
+  customLinks?: CustomLinks;
   trace: otlptracev1.TracesData;
 }
 
@@ -37,7 +37,7 @@ export interface TracingGanttChartProps {
  * https://github.com/jaegertracing/jaeger-ui
  */
 export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
-  const { options, attributeLinks, trace: otlpTrace } = props;
+  const { options, customLinks, trace: otlpTrace } = props;
 
   const theme = useTheme();
   const trace = useMemo(() => {
@@ -62,6 +62,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   return (
     <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
       <Stack sx={{ flexGrow: 1, gap }}>
+        <TraceDetails trace={trace} />
         <MiniGanttChart options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
         <GanttTableProvider>
           <GanttTable
@@ -78,7 +79,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
           <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
           <Box sx={{ width: `${(1 - tableWidth) * 100}%`, overflow: 'auto' }}>
             <DetailPane
-              attributeLinks={attributeLinks}
+              customLinks={customLinks}
               trace={trace}
               span={selectedSpan}
               onCloseBtnClick={() => setSelectedSpan(undefined)}

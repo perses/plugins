@@ -383,7 +383,7 @@ function QueryStatus({
       <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
         {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
         &nbsp;&nbsp;–&nbsp;&nbsp;
-        {responseTime}ms
+        {responseTime ? `${Math.round(responseTime)}ms` : '? ms'}
         {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–</>}
       </Typography>
       {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (

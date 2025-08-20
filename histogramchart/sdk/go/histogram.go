@@ -37,9 +37,9 @@ func create(options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
-
+	unit := common.DecimalUnit
 	defaults := []Option{
-		Format(common.Format{Unit: common.DecimalUnit, DecimalPlaces: 2}),
+		Format(common.Format{Unit: &unit, DecimalPlaces: 2}),
 	}
 
 	for _, opt := range append(defaults, options...) {

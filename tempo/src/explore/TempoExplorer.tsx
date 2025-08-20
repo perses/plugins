@@ -18,6 +18,7 @@ import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+import { TempoTraceQuerySpec } from '../model';
 
 interface TracesExplorerQueryParams {
   queries?: QueryDefinition[];
@@ -26,6 +27,34 @@ interface TracesExplorerQueryParams {
 interface SearchResultsPanelProps {
   queries: QueryDefinition[];
 }
+
+const linkToTraceParams = new URLSearchParams({
+  explorer: 'Tempo-TempoExplorer',
+  data: JSON.stringify({
+    queries: [
+      {
+        kind: 'TraceQuery',
+        spec: {
+          plugin: {
+            kind: 'TempoTraceQuery',
+            spec: {
+              query: 'TRACEID',
+              datasource: {
+                kind: 'TempoDatasource',
+                name: 'DATASOURCENAME',
+              },
+            },
+          },
+        },
+      },
+    ],
+  }),
+});
+
+// add ${...} syntax after the URL is URL-encoded, because the characters ${} must not be URL-encoded
+const linkToTrace = `/explore?${linkToTraceParams}`
+  .replace('TRACEID', '${traceId}')
+  .replace('DATASOURCENAME', '${datasourceName}');
 
 function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -77,14 +106,24 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
 }
 
 function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
+  const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
+
   return (
     <Panel
-      panelOptions={{
-        hideHeader: true,
-      }}
       definition={{
         kind: 'Panel',
-        spec: { queries, display: { name: '' }, plugin: { kind: 'TracingGanttChart', spec: {} } },
+        spec: {
+          queries,
+          display: { name: `Trace ${firstQuery}` },
+          plugin: {
+            kind: 'TracingGanttChart',
+            spec: {
+              links: {
+                trace: linkToTrace,
+              },
+            },
+          },
+        },
       }}
     />
   );
@@ -106,12 +145,8 @@ export function TempoExplorer(): ReactElement {
       })
     : [];
 
-  // Cannot cast to TempoTraceQuerySpec because 'tempo-plugin' types are not accessible in @perses-dev/explore
-  const isSingleTrace =
-    queries.length === 1 &&
-    queries[0]?.kind === 'TraceQuery' &&
-    queries[0]?.spec.plugin.kind === 'TempoTraceQuery' &&
-    isValidTraceId((queries[0]?.spec.plugin.spec as any).query ?? ''); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
+  const isSingleTrace = isValidTraceId(firstQuery ?? '');
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>

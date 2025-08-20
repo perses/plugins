@@ -24,6 +24,7 @@ import {
   TimeSeries,
   TimeSeriesValueTuple,
   TimeSeriesData,
+  CalculationType,
 } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
@@ -192,7 +193,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           // when there are multiple on the page.
           const seriesId = chartId + timeSeries.name + seriesIndex;
 
-          const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
+          const legendCalculations = legend?.values
+            ? getCalculations(timeSeries.values, legend.values as CalculationType[])
+            : undefined;
 
           // When we initially load the chart, we want to show all series, but
           // DO NOT want to visualy highlight all the items in the legend.

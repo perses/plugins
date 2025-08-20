@@ -1,0 +1,66 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "description": "my second panel is a gauge",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      },
+      "unit": "h",
+      "decimal": 1
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 12,
+    "y": 0
+  },
+  "id": 5,
+  "options": {
+    "orientation": "auto",
+    "reduceOptions": {
+      "calcs": [
+        "lastNotNull"
+      ],
+      "fields": "",
+      "values": false
+    },
+    "showThresholdLabels": false,
+    "showThresholdMarkers": true
+  },
+  "pluginVersion": "10.1.8",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "editorMode": "code",
+      "expr": "vector(2)",
+      "legendFormat": "__auto",
+      "range": true,
+      "refId": "A"
+    }
+  ],
+  "title": "My 2nd panel",
+  "type": "gauge"
+}

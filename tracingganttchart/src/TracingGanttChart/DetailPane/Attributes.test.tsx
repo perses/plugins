@@ -14,34 +14,60 @@
 import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router-dom';
-import { otlpcommonv1 } from '@perses-dev/core';
-import { AttributeLinks, AttributeList, AttributeListProps } from './Attributes';
+import { otlptracev1 } from '@perses-dev/core';
+import { VariableProvider } from '@perses-dev/dashboards';
+import { ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
+import * as exampleTrace from '../../test/traces/example_otlp.json';
+import { getTraceModel } from '../trace';
+import { CustomLinks } from '../../gantt-chart-model';
+import { AttributeList, AttributeListProps, TraceAttributes, TraceAttributesProps } from './Attributes';
 
 describe('Attributes', () => {
-  const renderComponent = (props: AttributeListProps): RenderResult => {
+  const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
+  const renderTraceAttributes = (props: TraceAttributesProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <AttributeList {...props} />
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <TraceAttributes {...props} />
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
+      </MemoryRouter>
+    );
+  };
+
+  const renderAttributeList = (props: AttributeListProps): RenderResult => {
+    return render(
+      <MemoryRouter>
+        <ReactRouterProvider>
+          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <AttributeList {...props} />
+            </VariableProvider>
+          </TimeRangeProvider>
+        </ReactRouterProvider>
       </MemoryRouter>
     );
   };
 
   it('render stringValues', () => {
     const attributes = [{ key: 'attrkey', value: { stringValue: 'str' } }];
-    renderComponent({ attributes });
+    renderAttributeList({ attributes });
     expect(screen.getByText('attrkey')).toBeInTheDocument();
     expect(screen.getByText('str')).toBeInTheDocument();
   });
 
   it('render intValue', () => {
     const attributes = [{ key: 'attrkey', value: { intValue: '123' } }];
-    renderComponent({ attributes });
+    renderAttributeList({ attributes });
     expect(screen.getByText('123')).toBeInTheDocument();
   });
 
   it('render boolValue', () => {
     const attributes = [{ key: 'attrkey', value: { boolValue: false } }];
-    renderComponent({ attributes });
+    renderAttributeList({ attributes });
     expect(screen.getByText('false')).toBeInTheDocument();
   });
 
@@ -49,26 +75,34 @@ describe('Attributes', () => {
     const attributes = [
       { key: 'attrkey', value: { arrayValue: { values: [{ stringValue: 'abc' }, { boolValue: true }] } } },
     ];
-    renderComponent({ attributes });
+    renderAttributeList({ attributes });
     expect(screen.getByText('abc, true')).toBeInTheDocument();
   });
 
   it('render an attribute with a link', () => {
-    const stringValue = (val?: otlpcommonv1.AnyValue): string => (val && 'stringValue' in val ? val.stringValue : '');
-    const attributeLinks: AttributeLinks = {
-      'k8s.pod.name': (attrs) =>
-        `/console/ns/${stringValue(attrs['k8s.namespace.name'])}/pod/${stringValue(attrs['k8s.pod.name'])}/detail`,
+    const customLinks: CustomLinks = {
+      links: {
+        attributes: [{ name: 'k8s.pod.name', link: '/console/ns/${k8s_namespace_name}/pod/${k8s_pod_name}/detail' }],
+      },
+      variables: {},
     };
     const attributes = [
       { key: 'k8s.namespace.name', value: { stringValue: 'testing' } },
       { key: 'k8s.pod.name', value: { stringValue: 'hotrod' } },
     ];
 
-    renderComponent({ attributeLinks, attributes });
+    renderAttributeList({ customLinks, attributes });
     expect(screen.getByText('testing')).not.toHaveAttribute('href');
     expect(screen.getByRole('link', { name: 'hotrod' })).toHaveAttribute(
       'href',
       '/console/ns/testing/pod/hotrod/detail'
     );
+  });
+
+  it('render span id and duration', () => {
+    renderTraceAttributes({ trace, span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]! });
+    expect(screen.getByText('sid3')).toBeInTheDocument();
+    expect(screen.getByText('300ms')).toBeInTheDocument(); // start
+    expect(screen.getByText('150ms')).toBeInTheDocument(); // duration
   });
 });

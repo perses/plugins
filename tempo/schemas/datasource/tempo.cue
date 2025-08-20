@@ -34,7 +34,7 @@ spec: {
 }
 
 #selector: common.#datasourceSelector & {
-	datasource?: {
+	datasource?: =~common.#variableSyntaxRegex | {
 		kind: #kind
 	}
 }

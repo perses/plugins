@@ -21,7 +21,18 @@ package model
 	palette?: #palette
 }
 
+#links: {
+	trace?: string
+	attributes?: [...#attributeLink]
+}
+
+#attributeLink: {
+	name: string
+	link: string
+}
+
 kind: "TracingGanttChart"
 spec: close({
 	visual?: #visual
+	links?:  #links
 })

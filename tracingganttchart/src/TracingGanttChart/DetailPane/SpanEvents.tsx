@@ -11,50 +11,73 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
-import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
-import { ReactElement } from 'react';
+import { Collapse, Divider, List, ListItemButton, ListItemText } from '@mui/material';
+import { Fragment, ReactElement, useState } from 'react';
+import ChevronUp from 'mdi-material-ui/ChevronUp';
+import ChevronDown from 'mdi-material-ui/ChevronDown';
 import { formatDuration } from '../utils';
 import { Trace, Span, Event } from '../trace';
-import { AttributeList } from './Attributes';
+import { CustomLinks } from '../../gantt-chart-model';
+import { AttributeItems, AttributeItem } from './Attributes';
 
 export interface SpanEventListProps {
+  customLinks?: CustomLinks;
   trace: Trace;
   span: Span;
 }
 
 export function SpanEventList(props: SpanEventListProps): ReactElement {
-  const { trace, span } = props;
+  const { customLinks, trace, span } = props;
 
   return (
     <>
       {span.events
         .sort((a, b) => a.timeUnixMs - b.timeUnixMs)
         .map((event, i) => (
-          <SpanEventItem key={i} trace={trace} event={event} />
+          <Fragment key={i}>
+            {i > 0 && <Divider />}
+            <SpanEventItem customLinks={customLinks} trace={trace} event={event} />
+          </Fragment>
         ))}
     </>
   );
 }
 
 interface SpanEventItemProps {
+  customLinks?: CustomLinks;
   trace: Trace;
   event: Event;
 }
 
 function SpanEventItem(props: SpanEventItemProps): ReactElement {
-  const { trace, event } = props;
+  const { customLinks, trace, event } = props;
   const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
 
+  const [open, setOpen] = useState(false);
+  const handleClick = () => {
+    setOpen(!open);
+  };
+
   return (
-    <Accordion disableGutters>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>{formatDuration(relativeTime)}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Typography variant="subtitle1">{event.name}</Typography>
-        <AttributeList attributes={event.attributes} />
-      </AccordionDetails>
-    </Accordion>
+    <List>
+      <ListItemButton onClick={handleClick} sx={{ px: 1 }}>
+        <ListItemText
+          primary={
+            <>
+              <strong>{formatDuration(relativeTime)}:</strong> {event.name}
+            </>
+          }
+          slotProps={{ primary: { noWrap: true } }}
+        />
+        {open ? <ChevronUp /> : <ChevronDown />}
+      </ListItemButton>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <List sx={{ px: 1 }}>
+          <AttributeItem name="name" value={event.name} />
+          <AttributeItem name="time" value={formatDuration(relativeTime)} />
+          <AttributeItems customLinks={customLinks} attributes={event.attributes} />
+        </List>
+      </Collapse>
+    </List>
   );
 }

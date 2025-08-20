@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, IconButton, Tab, Tabs, Typography } from '@mui/material';
+import { Box, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
 import { Span, Trace } from '../trace';
-import { AttributeLinks, AttributeList } from './Attributes';
+import { CustomLinks } from '../../gantt-chart-model';
+import { TraceAttributes } from './Attributes';
 import { SpanEventList } from './SpanEvents';
 
 export interface DetailPaneProps {
-  attributeLinks?: AttributeLinks;
+  customLinks?: CustomLinks;
   trace: Trace;
   span: Span;
   onCloseBtnClick: () => void;
@@ -29,7 +30,7 @@ export interface DetailPaneProps {
  * DetailPane renders a sidebar showing the span attributes etc.
  */
 export function DetailPane(props: DetailPaneProps): ReactElement {
-  const { attributeLinks, trace, span, onCloseBtnClick } = props;
+  const { customLinks, trace, span, onCloseBtnClick } = props;
   const [tab, setTab] = useState<'attributes' | 'events'>('attributes');
 
   // if the events tab is selected, and then a span without events is clicked,
@@ -53,14 +54,8 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
           {span.events.length > 0 && <Tab value="events" label="Events" />}
         </Tabs>
       </Box>
-      {tab === 'attributes' && (
-        <>
-          {span.attributes.length > 0 && <AttributeList attributeLinks={attributeLinks} attributes={span.attributes} />}
-          {span.attributes.length > 0 && <Divider />}
-          <AttributeList attributeLinks={attributeLinks} attributes={span.resource.attributes} />
-        </>
-      )}
-      {tab === 'events' && <SpanEventList trace={trace} span={span} />}
+      {tab === 'attributes' && <TraceAttributes customLinks={customLinks} trace={trace} span={span} />}
+      {tab === 'events' && <SpanEventList customLinks={customLinks} trace={trace} span={span} />}
     </Box>
   );
 }
