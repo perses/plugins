@@ -14,9 +14,10 @@
 /**
  * The Options object type supported by the TracingGanttChart panel plugin.
  */
-// Note: The interface attributes must match cue/schemas/panels/tracing-gantt-chart/tracing-gantt-chart.cue
+// Note: The interface attributes must match schemas/tracing-gantt-chart.cue
 export interface TracingGanttChartOptions {
   visual?: TracingGanttChartVisualOptions;
+  links?: TracingGanttChartCustomLinks;
 }
 
 export interface TracingGanttChartVisualOptions {
@@ -25,6 +26,21 @@ export interface TracingGanttChartVisualOptions {
 
 export interface TracingGanttChartPaletteOptions {
   mode: 'auto' | 'categorical';
+}
+
+export interface TracingGanttChartCustomLinks {
+  trace?: string;
+  attributes?: TracingGanttChartCustomAttributeLink[];
+}
+
+export interface TracingGanttChartCustomAttributeLink {
+  name: string;
+  link: string;
+}
+
+export interface CustomLinks {
+  variables: Record<string, string>;
+  links: TracingGanttChartCustomLinks;
 }
 
 /**

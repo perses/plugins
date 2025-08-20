@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,28 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { otlptracev1 } from '@perses-dev/core';
+import * as otlpTrace from './test/traces/example_otlp.json';
+import { getFilename } from './PanelActions';
 
-#palette: {
-	mode: "auto" | "categorical"
-}
-
-#visual: {
-	palette?: #palette
-}
-
-#links: {
-	trace?: string
-	attributes?: [...#attributeLink]
-}
-
-#attributeLink: {
-	name: string
-	link: string
-}
-
-kind: "TracingGanttChart"
-spec: close({
-	visual?: #visual
-	links?:  #links
-})
+describe('PanelActions', () => {
+  it('renders trace filename', () => {
+    expect(getFilename(otlpTrace as otlptracev1.TracesData)).toEqual('5B8EFFF798038103D269B633813FC60C.json');
+  });
+});
