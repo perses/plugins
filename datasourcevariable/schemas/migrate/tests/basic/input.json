@@ -1,0 +1,18 @@
+{
+  "current": {
+    "selected": true,
+    "text": "My Datasource",
+    "value": "my-ds"
+  },
+  "hide": 0,
+  "includeAll": false,
+  "multi": false,
+  "name": "datasource",
+  "options": [],
+  "query": "prometheus",
+  "queryValue": "",
+  "refresh": 1,
+  "regex": "my-ds",
+  "skipUrlSync": false,
+  "type": "datasource"
+}

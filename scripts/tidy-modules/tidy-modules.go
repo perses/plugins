@@ -21,20 +21,23 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// tidyModule runs "cue mod tidy" in the given workspace
-func tidyModule(workspace string) error {
-	logrus.Infof("Tidying module in workspace %s..", workspace)
-
-	cmd := exec.Command("cue", "mod", "tidy")
+func executeCMD(workspace string, cmd *exec.Cmd) error {
 	cmd.Dir = workspace
-
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to tidy CUE module in workspace %s: %w\nOutput: %s", workspace, err, string(output))
+		return fmt.Errorf("failed to tidy module in workspace %s: %w\nOutput: %s", workspace, err, string(output))
 	}
-
-	logrus.Infof("Successfully tidied module in workspace %s", workspace)
 	return nil
+}
+
+// tidyCueModule runs "cue mod tidy" in the given workspace
+func tidyCueModule(workspace string) error {
+	return executeCMD(workspace, exec.Command("cue", "mod", "tidy"))
+}
+
+// tidyGoModule runs "cue mod tidy" in the given workspace
+func tidyGoModule(workspace string) error {
+	return executeCMD(workspace, exec.Command("go", "mod", "tidy"))
 }
 
 func main() {
@@ -43,8 +46,15 @@ func main() {
 		logrus.WithError(err).Fatal("unable to get the list of workspaces")
 	}
 	for _, workspace := range workspaces {
-		if retrieveDepErr := tidyModule(workspace); retrieveDepErr != nil {
+		logrus.Infof("Tidying module in workspace %s..", workspace)
+		if retrieveDepErr := tidyCueModule(workspace); retrieveDepErr != nil {
 			logrus.WithError(retrieveDepErr).Fatalf("unable to resolve the module dependencies for plugin %s", workspace)
+			continue
+		}
+		if retrieveDepErr := tidyGoModule(workspace); retrieveDepErr != nil {
+			logrus.WithError(retrieveDepErr).Fatalf("unable to resolve the module dependencies for plugin %s", workspace)
+		} else {
+			logrus.Infof("Successfully tidied module in workspace %s", workspace)
 		}
 	}
 }

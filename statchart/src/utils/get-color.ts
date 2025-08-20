@@ -27,7 +27,7 @@ export function getStatChartColor(
   // Determine the default color from thresholds or theme
   const defaultColor = thresholds?.defaultColor ?? chartsTheme.thresholds.defaultColor;
 
-  if (!value || (!thresholds?.steps && !mappings)) {
+  if (value === undefined || value === null || value === '' || (!thresholds?.steps && !mappings)) {
     return defaultColor;
   }
 
@@ -52,7 +52,7 @@ export function getStatChartColor(
 }
 
 function getColorFromMappings(value: StatChartValue, mappings: ValueMapping[]): string | null {
-  if (mappings?.length && value) {
+  if (mappings?.length && value !== undefined && value !== null) {
     const { color } = applyValueMapping(value, mappings);
     return color || null;
   }
