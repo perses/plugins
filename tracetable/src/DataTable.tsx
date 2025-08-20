@@ -196,7 +196,7 @@ interface TraceNameProps {
 function TraceName({ row: trace }: TraceNameProps): ReactElement {
   const { RouterComponent } = useRouterContext();
 
-  if (trace.traceLink) {
+  if (RouterComponent && trace.traceLink) {
     return (
       <Link variant="body1" color="inherit" underline="hover" component={RouterComponent} to={trace.traceLink}>
         <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
