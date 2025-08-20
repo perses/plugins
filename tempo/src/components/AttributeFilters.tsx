@@ -132,7 +132,11 @@ function StringAttributeFilter(props: StringAttributeFilterProps) {
         );
       }}
       renderInput={(params) => <TextField {...params} label={label} />}
-      sx={{ width: width ?? 250 }}
+      // Reduce the size of the chips to make space for the <input> element, the +X text and the X button to avoid a line break.
+      // See https://github.com/mui/material-ui/issues/38835 for more details.
+      slotProps={{ chip: { sx: { maxWidth: 'calc(100% - 45px) !important' } } }}
+      // Reduce the size of the <input> field
+      sx={{ width: width ?? 250, '& input': { minWidth: '5px !important' } }}
     />
   );
 }
