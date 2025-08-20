@@ -1,4 +1,16 @@
 {
   "kind": "TracingGanttChart",
-  "spec": {}
+  "spec": {
+    "visual": {
+      "palette": {
+        "mode": "auto"
+      }
+    },
+    "links": {
+      "trace": "/datasource/${datasourceName}/trace/${traceId}",
+      "attributes": [
+        { "name": "k8s.pod.name", "link": "/namespace/${k8s_namespace_name}/pod/${k8s_pod_name}" }
+      ]
+    }
+  }
 }

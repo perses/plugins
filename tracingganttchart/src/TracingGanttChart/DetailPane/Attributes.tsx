@@ -13,21 +13,20 @@
 
 import { ReactElement, useMemo } from 'react';
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
 import { otlpcommonv1 } from '@perses-dev/core';
+import { RouterContextType, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { Span, Trace } from '../trace';
-import { formatDuration } from '../utils';
-
-export type AttributeLinks = Record<string, (attributes: Record<string, otlpcommonv1.AnyValue>) => string>;
+import { formatDuration, renderTemplate } from '../utils';
+import { CustomLinks } from '../../gantt-chart-model';
 
 export interface TraceAttributesProps {
+  customLinks?: CustomLinks;
   trace: Trace;
   span: Span;
-  attributeLinks?: AttributeLinks;
 }
 
 export function TraceAttributes(props: TraceAttributesProps) {
-  const { trace, span, attributeLinks } = props;
+  const { customLinks, trace, span } = props;
 
   return (
     <>
@@ -40,46 +39,60 @@ export function TraceAttributes(props: TraceAttributesProps) {
       {span.attributes.length > 0 && (
         <>
           <AttributeList
+            customLinks={customLinks}
             attributes={span.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
-            attributeLinks={attributeLinks}
           />
           <Divider />
         </>
       )}
       <AttributeList
+        customLinks={customLinks}
         attributes={span.resource.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
-        attributeLinks={attributeLinks}
       />
     </>
   );
 }
 
 export interface AttributeListProps {
+  customLinks?: CustomLinks;
   attributes: otlpcommonv1.KeyValue[];
-  attributeLinks?: AttributeLinks;
 }
 
 export function AttributeList(props: AttributeListProps): ReactElement {
-  const { attributes, attributeLinks } = props;
+  const { customLinks, attributes } = props;
 
   return (
     <List>
-      <AttributeItems attributes={attributes} attributeLinks={attributeLinks} />
+      <AttributeItems customLinks={customLinks} attributes={attributes} />
     </List>
   );
 }
 
 interface AttributeItemsProps {
-  attributeLinks?: AttributeLinks;
+  customLinks?: CustomLinks;
   attributes: otlpcommonv1.KeyValue[];
 }
 
 export function AttributeItems(props: AttributeItemsProps): ReactElement {
-  const { attributeLinks, attributes } = props;
-  const attributesMap = useMemo(
-    () => Object.fromEntries(attributes.map((attr) => [attr.key, attr.value])),
-    [attributes]
-  );
+  const { customLinks, attributes } = props;
+  const variableValues = useAllVariableValues();
+
+  // turn array into map for fast access
+  const attributeLinks = useMemo(() => {
+    const attrs = (customLinks?.links.attributes ?? []).map((a) => [a.name, a.link]);
+    return Object.fromEntries(attrs);
+  }, [customLinks]);
+
+  // some links require access to other attributes, for example a pod link "/namespace/${k8s_namespace_name}/pod/${k8s_pod_name}"
+  const extraVariables = useMemo(() => {
+    // replace dot with underscore in attribute name, because dot is not allowed in variable names
+    const stringAttrs = attributes.map((attr) => [attr.key.replaceAll('.', '_'), renderAttributeValue(attr.value)]);
+
+    return {
+      ...customLinks?.variables,
+      ...Object.fromEntries(stringAttrs),
+    };
+  }, [customLinks, attributes]);
 
   return (
     <>
@@ -88,7 +101,7 @@ export function AttributeItems(props: AttributeItemsProps): ReactElement {
           key={i}
           name={attribute.key}
           value={renderAttributeValue(attribute.value)}
-          link={attributeLinks?.[attribute.key]?.(attributesMap)}
+          link={renderTemplate(attributeLinks[attribute.key], variableValues, extraVariables)}
         />
       ))}
     </>
@@ -103,14 +116,17 @@ interface AttributeItemProps {
 
 export function AttributeItem(props: AttributeItemProps): ReactElement {
   const { name, value, link } = props;
+  // Remove the casting once https://github.com/perses/perses/pull/3208 is merged
+  const { RouterComponent } = useRouterContext() as { RouterComponent?: RouterContextType['RouterComponent'] };
 
-  const valueComponent = link ? (
-    <Link component={RouterLink} to={link}>
-      {value}
-    </Link>
-  ) : (
-    value
-  );
+  const valueComponent =
+    RouterComponent && link ? (
+      <Link component={RouterComponent} to={link}>
+        {value}
+      </Link>
+    ) : (
+      value
+    );
 
   return (
     <ListItem sx={{ px: 1, py: 0 }}>

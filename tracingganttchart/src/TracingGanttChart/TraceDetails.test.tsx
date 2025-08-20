@@ -32,6 +32,6 @@ describe('TraceDetails', () => {
   it('render trace details', () => {
     renderComponent({ trace });
     expect(screen.getByRole('heading', { name: 'shop-backend: testRootSpan (1s)' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /Trace ID: tid1/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Trace ID: 5B8EFFF798038103D269B633813FC60C/ })).toBeInTheDocument();
   });
 });
