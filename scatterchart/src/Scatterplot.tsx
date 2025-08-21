@@ -26,9 +26,8 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption, ScatterSeriesOption } from 'echarts';
 import { formatValue } from '@perses-dev/core';
-import { useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { EChartTraceValue } from './ScatterChartPanel';
-import { renderTemplate } from './utils';
 
 use([
   DatasetComponent,
@@ -113,10 +112,10 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
 
   const handleEvents: OnEventsType<ScatterSeriesOption['data'] | unknown> = useMemo(() => {
     const handlers: OnEventsType<ScatterSeriesOption['data'] | unknown> = {};
-    if (linkTemplate && navigate) {
+    if (navigate && linkTemplate) {
       handlers.click = (params): void => {
         const linkVariables = params.data.linkVariables as Record<string, string> | undefined;
-        const link = renderTemplate(linkTemplate, variableValues, linkVariables);
+        const link = replaceVariablesInString(linkTemplate, variableValues, linkVariables);
         navigate(link);
       };
     }
