@@ -21,15 +21,18 @@ import (
 )
 
 func Run(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
+	cmd := Create(name, args...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
-
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run %s %v: %w\nstderr: %s", name, args, err, stderr.String())
 	}
 	return nil
+}
+
+func Create(name string, args ...string) *exec.Cmd {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd
 }
