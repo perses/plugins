@@ -14,6 +14,7 @@
 import { fetch, fetchJson, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
 import {
+  FlagsResponse,
   InstantQueryRequestParameters,
   InstantQueryResponse,
   LabelNamesRequestParameters,
@@ -45,6 +46,7 @@ export interface PrometheusClient extends DatasourceClient {
   metricMetadata(params: MetricMetadataRequestParameters, headers?: RequestHeaders): Promise<MetricMetadataResponse>;
   series(params: SeriesRequestParameters, headers?: RequestHeaders): Promise<SeriesResponse>;
   parseQuery(params: ParseQueryRequestParameters, headers?: RequestHeaders): Promise<ParseQueryResponse>;
+  flags(headers?: RequestHeaders): Promise<FlagsResponse>;
 }
 
 export interface QueryOptions {
@@ -147,6 +149,10 @@ export function parseQuery(
 ): Promise<ParseQueryResponse> {
   const apiURI = `/api/v1/parse_query`;
   return fetchWithPost<ParseQueryRequestParameters, ParseQueryResponse>(apiURI, params, queryOptions);
+}
+
+export function flags(queryOptions: QueryOptions): Promise<FlagsResponse> {
+  return fetchWithGet('/api/v1/status/flags', {}, queryOptions);
 }
 
 function fetchWithGet<T extends RequestParams<T>, TResponse>(
