@@ -120,20 +120,47 @@ function transformProfileResponse(response: SearchProfilesResponse): ProfileData
   for (let i = 0; i < response.flamebearer.levels.length; i++) {
     let current = 0;
     const row: StackTrace[] = [];
-    for (let j = 0; j < response.flamebearer.levels[i].length; j += 4) {
+
+    const level = response.flamebearer.levels[i];
+
+    if (!level) {
+      continue;
+    }
+
+    for (let j = 0; j < level.length; j += 4) {
       const temp: StackTrace = {} as StackTrace;
       temp.id = id;
       id += 1;
-      const indexInNamesArray = response.flamebearer.levels[i][j + 3]; // index in names array
-      temp.name = response.flamebearer.names[indexInNamesArray];
+      const indexInNamesArray = level[j + 3]; // index in names array
+      if (indexInNamesArray !== undefined) {
+        const name = response.flamebearer.names[indexInNamesArray];
+
+        if (name) {
+          temp.name = name;
+        }
+      }
       temp.level = i;
-      temp.total = response.flamebearer.levels[i][j + 1];
-      temp.self = response.flamebearer.levels[i][j + 2];
+
+      const total = level[j + 1];
+      if (total !== undefined) {
+        temp.total = total;
+      }
+
+      const self = level[j + 2];
+
+      if (self !== undefined) {
+        temp.self = self;
+      }
 
       // start and end
-      current += response.flamebearer.levels[i][j]; // current += offset
+      const offset = level[j];
+      if (offset !== undefined) {
+        current += offset; // current += offset
+      }
       temp.start = current;
-      current += response.flamebearer.levels[i][j + 1]; // current += total
+      if (total !== undefined) {
+        current += total; // current += total
+      }
       temp.end = current;
 
       temp.children = [];
@@ -145,7 +172,9 @@ function transformProfileResponse(response: SearchProfilesResponse): ProfileData
   }
 
   addChildren(stackTraces); // adding children to nodes
-  newResponse.profile.stackTrace = stackTraces[0][0];
+  if (stackTraces[0]?.[0]) {
+    newResponse.profile.stackTrace = stackTraces[0][0];
+  }
 
   // Set other properties
   newResponse.numTicks = response.flamebearer.numTicks;
@@ -171,13 +200,27 @@ function transformProfileResponse(response: SearchProfilesResponse): ProfileData
 function addChildren(stackTraces: StackTrace[][]): void {
   // for (let i = stackTraces.length - 1; i > 0; i--) {
   for (let i = 1; i < stackTraces.length; i++) {
-    for (let j = 0; j < stackTraces[i].length; j++) {
-      for (let k = 0; k < stackTraces[i - 1].length; k++) {
-        if (
-          stackTraces[i][j].start >= stackTraces[i - 1][k].start &&
-          stackTraces[i][j].end <= stackTraces[i - 1][k].end
-        ) {
-          stackTraces[i - 1][k].children.push(stackTraces[i][j]);
+    const currentLevel = stackTraces[i];
+    const parentLevel = stackTraces[i - 1];
+
+    if (!currentLevel || !parentLevel) {
+      continue;
+    }
+
+    for (let j = 0; j < currentLevel.length; j++) {
+      const currentStack = currentLevel[j];
+      if (!currentStack) {
+        continue;
+      }
+
+      for (let k = 0; k < parentLevel.length; k++) {
+        const parentStack = parentLevel[k];
+        if (!parentStack) {
+          continue;
+        }
+
+        if (currentStack.start >= parentStack.start && currentStack.end <= parentStack.end) {
+          parentStack.children.push(currentStack);
           break;
         }
       }

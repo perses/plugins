@@ -22,7 +22,7 @@ import {
   isPyroscopeDatasourceSelector,
   PYROSCOPE_DATASOURCE_KIND,
 } from '../../model/pyroscope-selectors';
-import { ProfileType, Service, Filters } from '../../components';
+import { ProfileTypeSelector, Service, Filters } from '../../components';
 import {
   ProfileQueryEditorProps,
   useMaxNodesState,
@@ -85,7 +85,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
         }}
       >
         <Service datasource={selectedDatasource} value={service} onChange={handleServiceChange} />
-        <ProfileType datasource={selectedDatasource} value={profileType} onChange={handleProfileTypeChange} />
+        <ProfileTypeSelector datasource={selectedDatasource} value={profileType} onChange={handleProfileTypeChange} />
         <TextField
           size="small"
           label="Max Nodes"

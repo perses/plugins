@@ -16,13 +16,13 @@ import { Stack, TextField, MenuItem, CircularProgress } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useProfileTypes } from '../utils/use-query';
 
-export interface ProfileTypeProps {
+export interface ProfileTypeSelectorProps {
   datasource: PyroscopeDatasourceSelector;
   value: string;
   onChange?(value: string): void;
 }
 
-export function ProfileType(props: ProfileTypeProps): ReactElement {
+export function ProfileTypeSelector(props: ProfileTypeSelectorProps): ReactElement {
   const { datasource, value, onChange } = props;
 
   const { data: profileTypesOptions, isLoading: isProfileTypesOptionsLoading } = useProfileTypes(datasource);

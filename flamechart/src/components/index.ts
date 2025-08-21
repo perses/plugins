@@ -11,5 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './components';
-export { getPluginModule } from './getPluginModule';
+export * from './CustomBreadcrumb';
+export * from './FlameChart';
+export * from './FlameChartOptionsEditorSettings';
+export * from './FlameChartPanel';
+export * from './PaletteSelector';
+export * from './SearchBar';
+export * from './SeriesChart';
+export * from './Settings';
+export * from './SwitchSelector';
+export * from './TableChart';

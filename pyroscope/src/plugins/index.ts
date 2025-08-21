@@ -11,5 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './components';
-export { getPluginModule } from './getPluginModule';
+export * from './pyroscope-profile-query';
+export * from './pyroscope-datasource-types';
+export * from './pyroscope-datasource';
+export * from './PyroscopeDatasourceEditor';

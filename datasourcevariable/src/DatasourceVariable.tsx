@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,7 +21,7 @@ type StaticListVariableOptions = {
 
 const EMPTY_SELECTED_KIND = { label: '', value: '' };
 
-const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticListVariableOptions>) => {
+export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticListVariableOptions>) => {
   const { onChange, value } = props;
   const { datasourcePluginKind } = value;
   const { data: datasourcePlugins } = useListPluginMetadata(['Datasource']);
