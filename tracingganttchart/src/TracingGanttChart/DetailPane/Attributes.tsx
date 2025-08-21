@@ -14,9 +14,9 @@
 import { ReactElement, useMemo } from 'react';
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
 import { otlpcommonv1 } from '@perses-dev/core';
-import { RouterContextType, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { Span, Trace } from '../trace';
-import { formatDuration, renderTemplate } from '../utils';
+import { formatDuration } from '../utils';
 import { CustomLinks } from '../../gantt-chart-model';
 
 export interface TraceAttributesProps {
@@ -101,7 +101,11 @@ export function AttributeItems(props: AttributeItemsProps): ReactElement {
           key={i}
           name={attribute.key}
           value={renderAttributeValue(attribute.value)}
-          link={renderTemplate(attributeLinks[attribute.key], variableValues, extraVariables)}
+          link={
+            attributeLinks[attribute.key]
+              ? replaceVariablesInString(attributeLinks[attribute.key], variableValues, extraVariables)
+              : undefined
+          }
         />
       ))}
     </>
@@ -116,8 +120,7 @@ interface AttributeItemProps {
 
 export function AttributeItem(props: AttributeItemProps): ReactElement {
   const { name, value, link } = props;
-  // Remove the casting once https://github.com/perses/perses/pull/3208 is merged
-  const { RouterComponent } = useRouterContext() as { RouterComponent?: RouterContextType['RouterComponent'] };
+  const { RouterComponent } = useRouterContext();
 
   const valueComponent =
     RouterComponent && link ? (

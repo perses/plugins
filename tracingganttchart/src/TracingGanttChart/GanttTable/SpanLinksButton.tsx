@@ -15,10 +15,9 @@ import { IconButton, Menu, MenuItem } from '@mui/material';
 import { MouseEvent, useState } from 'react';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { InfoTooltip } from '@perses-dev/components';
-import { useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { Span } from '../trace';
 import { CustomLinks } from '../../gantt-chart-model';
-import { renderTemplate } from '../utils';
 
 export interface SpanLinksButtonProps {
   customLinks: CustomLinks;
@@ -44,13 +43,11 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
         <IconButton
           size="small"
           component={RouterComponent}
-          to={
-            renderTemplate(customLinks.links.trace, variableValues, {
-              ...customLinks.variables,
-              traceId: link.traceId,
-              spanId: link.spanId,
-            }) as string
-          }
+          to={replaceVariablesInString(customLinks.links.trace, variableValues, {
+            ...customLinks.variables,
+            traceId: link.traceId,
+            spanId: link.spanId,
+          })}
         >
           <LaunchIcon fontSize="inherit" />
         </IconButton>
@@ -92,13 +89,11 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
             key={link.spanId}
             component={RouterComponent}
             onClick={handleClose}
-            to={
-              renderTemplate(customLinks.links.trace, variableValues, {
-                ...customLinks.variables,
-                traceId: link.traceId,
-                spanId: link.spanId,
-              }) as string
-            }
+            to={replaceVariablesInString(customLinks.links.trace!, variableValues, {
+              ...customLinks.variables,
+              traceId: link.traceId,
+              spanId: link.spanId,
+            })}
           >
             Open linked span {link.spanId}
           </MenuItem>

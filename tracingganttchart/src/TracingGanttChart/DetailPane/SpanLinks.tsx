@@ -13,10 +13,9 @@
 
 import { Divider, List } from '@mui/material';
 import { Fragment, ReactElement } from 'react';
-import { useAllVariableValues } from '@perses-dev/plugin-system';
+import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
 import { Span, Link } from '../trace';
 import { CustomLinks } from '../../gantt-chart-model';
-import { renderTemplate } from '../utils';
 import { AttributeItem, AttributeItems } from './Attributes';
 
 export interface SpanLinkListProps {
@@ -47,11 +46,13 @@ interface SpanLinkItemProps {
 function SpanLinkItem(props: SpanLinkItemProps): ReactElement {
   const { customLinks, link } = props;
   const variableValues = useAllVariableValues();
-  const spanLink = renderTemplate(customLinks?.links.trace, variableValues, {
-    ...customLinks?.variables,
-    traceId: link.traceId,
-    spanId: link.spanId,
-  });
+  const spanLink = customLinks?.links.trace
+    ? replaceVariablesInString(customLinks.links.trace, variableValues, {
+        ...customLinks?.variables,
+        traceId: link.traceId,
+        spanId: link.spanId,
+      })
+    : undefined;
 
   return (
     <List>

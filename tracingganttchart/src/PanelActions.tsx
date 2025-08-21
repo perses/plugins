@@ -15,14 +15,8 @@ import { InfoTooltip } from '@perses-dev/components';
 import { otlptracev1 } from '@perses-dev/core';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
 import { useCallback } from 'react';
-import { IconButton, styled } from '@mui/material';
+import { HeaderIconButton } from '@perses-dev/dashboards';
 import { TracingGanttChartPanelProps } from './TracingGanttChartPanel';
-
-// TODO: use this button from @perses-dev/components once https://github.com/perses/perses/pull/3207 is merged
-const HeaderIconButton = styled(IconButton)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: '4px',
-}));
 
 export function DownloadTraceAction(props: TracingGanttChartPanelProps) {
   const { queryResults } = props;
