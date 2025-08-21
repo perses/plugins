@@ -20,14 +20,13 @@ import {
   formatDuration,
   msToPrometheusDuration,
 } from '@perses-dev/core';
-import { PanelData, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { ReactElement, useCallback, useMemo } from 'react';
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
-import { renderTemplate } from './utils';
 
 const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   dateStyle: 'long',
@@ -68,12 +67,15 @@ export function DataTable(props: DataTableProps): ReactElement {
     const datasourceName = pluginSpec?.datasource?.name;
 
     for (const trace of query.data?.searchResult || []) {
+      const traceLink = options.links?.trace
+        ? replaceVariablesInString(options.links.trace, variableValues, {
+            datasourceName: datasourceName ?? '',
+            traceId: trace.traceId,
+          })
+        : undefined;
       rows.push({
         ...trace,
-        traceLink: renderTemplate(options.links?.trace, variableValues, {
-          datasourceName: datasourceName ?? '',
-          traceId: trace.traceId,
-        }),
+        traceLink,
       });
     }
   }
