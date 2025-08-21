@@ -75,6 +75,20 @@
                       "stringValue": "PUT"
                     }
                   }
+                ],
+                "links": [
+                  {
+                    "traceId": "tid1",
+                    "spanId": "sid1",
+                    "attributes": [
+                      {
+                        "key": "link-key1",
+                        "value": {
+                          "stringValue": "link-value1"
+                        }
+                      }
+                    ]
+                  }
                 ]
               }
             ]
