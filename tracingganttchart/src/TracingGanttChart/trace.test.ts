@@ -80,6 +80,20 @@ const spanTree = {
           endTimeUnixMs: 1450,
           attributes: [{ key: 'http.method', value: { stringValue: 'PUT' } }],
           events: [],
+          links: [
+            {
+              traceId: 'tid1',
+              spanId: 'sid1',
+              attributes: [
+                {
+                  key: 'link-key1',
+                  value: {
+                    stringValue: 'link-value1',
+                  },
+                },
+              ],
+            },
+          ],
           status: {},
         },
       ],
@@ -98,6 +112,7 @@ const spanTree = {
           attributes: [{ key: 'event1_key', value: { stringValue: 'event1_value' } }],
         },
       ],
+      links: [],
       status: { message: 'Forbidden', code: 'STATUS_CODE_ERROR' as const },
     },
   ],
@@ -109,6 +124,7 @@ const spanTree = {
   endTimeUnixMs: 2000,
   attributes: [],
   events: [],
+  links: [],
   status: {},
 };
 

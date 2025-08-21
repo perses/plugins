@@ -11,17 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, Stack, TextField } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
 import { useId } from '@perses-dev/components';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
   useDatasourceClient,
   useDatasourceSelectValueToSelector,
-  useTimeRange,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useState } from 'react';
 import { TraceQLEditor } from '../../components';
 import { TempoClient } from '../../model/tempo-client';
 import {
@@ -30,23 +29,21 @@ import {
   isTempoDatasourceSelector,
   TEMPO_DATASOURCE_KIND,
 } from '../../model/tempo-selectors';
-import { TraceQueryEditorProps, useLimitState, useQueryState } from './query-editor-model';
+import { AttributeFilters } from '../../components/AttributeFilters';
+import { filterToTraceQL } from '../../components/filter/filter_to_traceql';
+import { traceQLToFilter } from '../../components/filter/traceql_to_filter';
+import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
   const { onChange, value } = props;
-  const { datasource } = value;
+  const { datasource, limit } = value;
   const datasourceSelectValue = datasource ?? DEFAULT_TEMPO;
   const selectedDatasource = useDatasourceSelectValueToSelector(datasourceSelectValue, TEMPO_DATASOURCE_KIND);
   const datasourceSelectLabelID = useId('tempo-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
 
   const { data: client } = useDatasourceClient<TempoClient>(selectedDatasource);
-  const { timeRange } = useTimeRange();
-  const completionConfig = useMemo(() => {
-    return { client, timeRange };
-  }, [client, timeRange]);
-
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
-  const { limit, handleLimitChange, handleLimitBlur, limitHasError } = useLimitState(props);
+  const [showAttributeFilters, setShowAttributeFilters] = useState(() => isSimpleTraceQLQuery(query));
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isTempoDatasourceSelector(next)) {
@@ -63,6 +60,14 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     throw new Error('Got unexpected non-Tempo datasource selector');
   };
 
+  const runQuery = (newQuery: string) => {
+    onChange(
+      produce(value, (draft) => {
+        draft.query = newQuery;
+      })
+    );
+  };
+
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
@@ -75,23 +80,65 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
           notched
         />
       </FormControl>
-      <Stack direction="row" spacing={2}>
-        <TraceQLEditor
-          completionConfig={completionConfig}
-          value={query}
-          onChange={handleQueryChange}
-          onBlur={handleQueryBlur}
-        />
-        <TextField
-          size="small"
-          label="Max Traces"
-          value={limit}
-          error={limitHasError}
-          onChange={(e) => handleLimitChange(e.target.value)}
-          onBlur={handleLimitBlur}
-          sx={{ width: '110px' }}
+      <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
+        {showAttributeFilters ? (
+          <AttributeFilters client={client} query={query} setQuery={runQuery} />
+        ) : (
+          <TraceQLEditor client={client} value={query} onChange={handleQueryChange} onBlur={handleQueryBlur} />
+        )}
+        <Button onClick={() => setShowAttributeFilters(!showAttributeFilters)}>
+          {showAttributeFilters ? 'Show query' : 'Hide query'}
+        </Button>
+        <LimitSelect
+          value={limit ?? 20}
+          setValue={(newLimit: number) =>
+            onChange(
+              produce(value, (draft) => {
+                draft.limit = newLimit;
+              })
+            )
+          }
         />
       </Stack>
     </Stack>
+  );
+}
+
+function isSimpleTraceQLQuery(query: string) {
+  // if a query can be transformed to a filter and back to the original query, we can show the attribute filter toolbar
+  return query == '' || filterToTraceQL(traceQLToFilter(query)) === query;
+}
+
+const limitOptions = [20, 50, 100, 500, 1000, 5000];
+
+interface LimitSelectProps {
+  value: number;
+  setValue: (x: number) => void;
+}
+
+export function LimitSelect(props: LimitSelectProps) {
+  const { value, setValue } = props;
+
+  // the outer <Box> is required, because <FormControl> has display: inline-flex, which doesn't work with the parent <Stack> of the query editor
+  return (
+    <Box>
+      <FormControl size="small">
+        <InputLabel id="max-traces-label">Max Traces</InputLabel>
+        <Select
+          labelId="max-traces-label"
+          id="max-traces-select"
+          value={value}
+          label="Max Traces"
+          onChange={(e) => setValue(typeof e.target.value === 'number' ? e.target.value : parseInt(e.target.value))}
+          sx={{ width: 110 }}
+        >
+          {limitOptions.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
   );
 }

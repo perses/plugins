@@ -16,9 +16,12 @@ import AlertIcon from 'mdi-material-ui/AlertCircleOutline';
 import { ReactElement } from 'react';
 import { spanHasError } from '../utils';
 import { Span } from '../trace';
+import { CustomLinks } from '../../gantt-chart-model';
 import { SpanIndents } from './SpanIndents';
+import { SpanLinksButton } from './SpanLinksButton';
 
 export interface SpanNameProps {
+  customLinks?: CustomLinks;
   span: Span;
   nameColumnWidth: number;
 }
@@ -27,7 +30,7 @@ export interface SpanNameProps {
  * SpanName renders the entire left column of a SpanRow, i.e. the hierarchy and the service and span name
  */
 export function SpanName(props: SpanNameProps): ReactElement {
-  const { span, nameColumnWidth } = props;
+  const { customLinks, span, nameColumnWidth } = props;
 
   return (
     <Stack direction="row" sx={{ alignItems: 'center' }} style={{ width: `${nameColumnWidth * 100}%` }}>
@@ -36,6 +39,11 @@ export function SpanName(props: SpanNameProps): ReactElement {
       <Box sx={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         <strong>{span.resource.serviceName}:</strong> {span.name}
       </Box>
+      {customLinks && customLinks.links.trace && span.links.length > 0 && (
+        <Box sx={{ marginLeft: 'auto', px: 1 }}>
+          <SpanLinksButton customLinks={customLinks} span={span} />
+        </Box>
+      )}
     </Stack>
   );
 }
