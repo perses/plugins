@@ -97,6 +97,24 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     [queryHandlerSettings, handleQueryChange]
   );
 
+  const handleLegendSpecChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      handleFormatChange(e.target.value);
+      if (queryHandlerSettings?.setWatchOtherSpecs)
+        queryHandlerSettings.setWatchOtherSpecs({ ...value, seriesNameFormat: e.target.value });
+    },
+    [queryHandlerSettings, handleFormatChange, value]
+  );
+
+  const handleMinStepSpecChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined);
+      if (queryHandlerSettings?.setWatchOtherSpecs)
+        queryHandlerSettings.setWatchOtherSpecs({ ...value, minStep: e.target.value });
+    },
+    [queryHandlerSettings, handleMinStepChange, value]
+  );
+
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
@@ -123,16 +141,16 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           placeholder="Example: '{{instance}}' will generate series names like 'webserver-123', 'webserver-456'..."
           helperText="Text to be displayed in the legend and the tooltip. Use {{label_name}} to interpolate label values."
           value={format ?? ''}
-          onChange={(e) => handleFormatChange(e.target.value)}
-          onBlur={handleFormatBlur}
+          onChange={handleLegendSpecChange}
+          onBlur={queryHandlerSettings?.runWithOnBlur ? handleFormatBlur : undefined}
         />
         <TextField
           label="Min Step"
           placeholder={minStepPlaceholder}
           helperText="Lower bound for the step. If not provided, the scrape interval of the datasource is used."
           value={minStep ?? ''}
-          onChange={(e) => handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined)}
-          onBlur={handleMinStepBlur}
+          onChange={handleMinStepSpecChange}
+          onBlur={queryHandlerSettings?.runWithOnBlur ? handleMinStepBlur : undefined}
           sx={{ width: '250px' }}
         />
       </Stack>
