@@ -17,6 +17,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 
 	"github.com/perses/plugins/scripts/command"
@@ -41,13 +42,14 @@ func bumpGoDep(workspace, version string) {
 }
 
 func bumpPackage(path string, version string) {
-	data, err := os.ReadFile(path)
+	pkgPath := filepath.Join(path, "package.json")
+	data, err := os.ReadFile(pkgPath)
 	if err != nil {
-		logrus.WithError(err).Fatalf("unable to read the %s/package.json", path)
+		logrus.WithError(err).Fatalf("unable to read the file %s", pkgPath)
 	}
 	newDate := bumpNPMDeps.ReplaceAll(data, []byte(fmt.Sprintf(`"@perses-dev/$1": "^%s"`, version)))
-	if writeErr := os.WriteFile(fmt.Sprintf("%s/package.json", path), newDate, 0644); writeErr != nil {
-		logrus.WithError(writeErr).Fatalf("unable to write the %s/package.json", path)
+	if writeErr := os.WriteFile(pkgPath, newDate, 0644); writeErr != nil {
+		logrus.WithError(writeErr).Fatalf("unable to write the file %s", pkgPath)
 	}
 	logrus.Infof("successfully bumped npm dependencies for %s to version %s", path, version)
 }
