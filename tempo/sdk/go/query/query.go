@@ -23,6 +23,7 @@ const PluginKind = "TempoTraceQuery"
 type PluginSpec struct {
 	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	Query      string               `json:"query" yaml:"query"`
+	Limit      *int                 `json:"limit,omitempty" yaml:"limit,omitempty"`
 }
 
 type Option func(plugin *Builder) error

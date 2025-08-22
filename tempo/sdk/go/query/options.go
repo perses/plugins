@@ -28,3 +28,10 @@ func Datasource(datasourceName string) Option {
 		return nil
 	}
 }
+
+func Limit(limit int) Option {
+	return func(builder *Builder) error {
+		builder.Limit = &limit
+		return nil
+	}
+}
