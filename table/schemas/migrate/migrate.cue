@@ -85,7 +85,8 @@ if (*#panel.type | null) == "table" {
 							header: property.value
 						}
 						if property.id == "custom.width" {
-							width: property.value
+							#width: *property.value | "auto"
+							width: #width
 						}
 					}
 				},
