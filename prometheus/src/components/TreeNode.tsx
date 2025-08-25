@@ -412,11 +412,22 @@ function QueryStatus({
                             ? theme.palette.warning.dark
                             : theme.palette.warning.main,
                         fontFamily: 'monospace',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        flexGrow: 1,
                       }}
                     >
                       {escapeString(value)}
                     </Typography>
-                    <Typography variant="body2" component="span">
+                    <Typography
+                      variant="body2"
+                      component="span"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                      }}
+                    >
                       ({count}x)
                     </Typography>
                   </ListItem>
