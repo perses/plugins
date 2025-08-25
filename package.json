@@ -12,10 +12,12 @@
   },
   "workspaces": [
     "barchart",
+    "datasourcevariable",
     "flamechart",
     "gaugechart",
     "heatmapchart",
     "histogramchart",
+    "loki",
     "markdown",
     "piechart",
     "prometheus",
@@ -29,8 +31,7 @@
     "timeserieschart",
     "timeseriestable",
     "tracetable",
-    "tracingganttchart",
-    "datasourcevariable"
+    "tracingganttchart"
   ],
   "peerDependencies": {
     "@types/react-dom": "^18.3.0",
