@@ -25,7 +25,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var bumpNPMDeps = regexp.MustCompile(`"@perses-dev/([a-zA-Z-]+)":\s*"(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`)
+var (
+	bumpNPMDeps = regexp.MustCompile(`"@perses-dev/([a-zA-Z-]+)":\s*"(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`)
+	bumpCueDeps = regexp.MustCompile(`v:(\s*)"v(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`)
+)
 
 func bumpGoDep(workspace, version string) {
 	goGetCMD := command.Create("go", "get", fmt.Sprintf("github.com/perses/perses@v%s", version))
@@ -41,17 +44,38 @@ func bumpGoDep(workspace, version string) {
 	logrus.Infof("successfully bumped go dependencies for %s to version %s", workspace, version)
 }
 
-func bumpPackage(path string, version string) {
-	pkgPath := filepath.Join(path, "package.json")
+func replaceCuePackage(data []byte, version string) []byte {
+	return bumpCueDeps.ReplaceAll(data, []byte(fmt.Sprintf(`v:$1"v%s"`, version)))
+}
+
+func bumpCueDep(workspace, version string) {
+	cueModPath := filepath.Join(workspace, "cue.mod", "module.cue")
+	data, err := os.ReadFile(cueModPath)
+	if err != nil {
+		logrus.WithError(err).Fatalf("unable to read the file %s", cueModPath)
+	}
+	newData := replaceCuePackage(data, version)
+	if writeErr := os.WriteFile(cueModPath, newData, 0644); writeErr != nil {
+		logrus.WithError(writeErr).Fatalf("unable to write the file %s", cueModPath)
+	}
+	logrus.Infof("successfully bumped cue dependencies for %s to version %s", workspace, version)
+}
+
+func replaceNPMPackage(data []byte, version string) []byte {
+	return bumpNPMDeps.ReplaceAll(data, []byte(fmt.Sprintf(`"@perses-dev/$1": "^%s"`, version)))
+}
+
+func bumpPackage(workspace string, version string) {
+	pkgPath := filepath.Join(workspace, "package.json")
 	data, err := os.ReadFile(pkgPath)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to read the file %s", pkgPath)
 	}
-	newDate := bumpNPMDeps.ReplaceAll(data, []byte(fmt.Sprintf(`"@perses-dev/$1": "^%s"`, version)))
-	if writeErr := os.WriteFile(pkgPath, newDate, 0644); writeErr != nil {
+	newData := replaceNPMPackage(data, version)
+	if writeErr := os.WriteFile(pkgPath, newData, 0644); writeErr != nil {
 		logrus.WithError(writeErr).Fatalf("unable to write the file %s", pkgPath)
 	}
-	logrus.Infof("successfully bumped npm dependencies for %s to version %s", path, version)
+	logrus.Infof("successfully bumped npm dependencies for %s to version %s", workspace, version)
 }
 
 // This script bumps all perse-dev dependencies for go and npm packages to the provided version.
@@ -72,6 +96,7 @@ func main() {
 	for _, workspace := range workspaces {
 		bumpGoDep(workspace, *version)
 		bumpPackage(workspace, *version)
+		bumpCueDep(workspace, *version)
 	}
 	if npmErr := command.Run("npm", "install"); npmErr != nil {
 		logrus.WithError(npmErr).Fatal("unable to run npm install")

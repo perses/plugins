@@ -49,3 +49,8 @@ golangci-lint:
 build:
 	@echo ">> Build all plugins"
 	$(GO) run ./scripts/build-plugins/build-plugins.go
+
+.PHONY: test
+test:
+	@echo ">> running all tests"
+	$(GO) test -count=1 -v ./...
