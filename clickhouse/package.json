@@ -1,5 +1,5 @@
 {
-  "name": "@perses-dev/clickhouse",
+  "name": "@perses-dev/clickhouse-plugin",
   "version": "0.1.0",
   "scripts": {
     "dev": "rsbuild dev",

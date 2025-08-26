@@ -71,11 +71,12 @@ function convertStreamsToLogs(streams: LogEntry[]): LogsData {
 
     const line = Object.entries(sortedEntry)
       .filter(([key]) => key !== 'Timestamp')
-      .map(([key, value]) => `${key}: ${value ?? '--'}`)
-      .join(' | ');
+      .map(([key, value]) => `<${key}> ${value === '' || value === null || value === undefined ? '--' : value}`)
+      .join(' ');
 
     return {
-      ...sortedEntry,
+      timestamp: sortedEntry?.Timestamp,
+      labels: sortedEntry,
       line,
     } as LogEntry;
   });

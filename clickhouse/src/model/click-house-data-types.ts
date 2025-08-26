@@ -13,8 +13,13 @@
 
 import { TimeSeriesData } from '@perses-dev/core';
 
-export interface LogEntry {
+export interface LogLabels {
   [key: string]: any;
+}
+
+export interface LogEntry {
+  timestamp: number;
+  labels: LogLabels;
   line?: string;
 }
 

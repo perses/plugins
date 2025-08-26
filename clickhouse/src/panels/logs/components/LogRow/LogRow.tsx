@@ -33,7 +33,6 @@ export const LogRow: React.FC<LogRowProps> = memo(
   ({ log, isExpanded, index, onToggle, isExpandable = true, time = false, wrap = false }) => {
     const theme = useTheme();
     const severityColor = theme.palette.text.secondary;
-    const isDarkMode = theme.palette.mode === 'dark';
 
     const handleToggle = useCallback(() => {
       if (isExpandable) {
@@ -61,7 +60,7 @@ export const LogRow: React.FC<LogRowProps> = memo(
             </Box>
           )}
 
-          <LogTimestamp timestamp={log?.Timestamp} />
+          <LogTimestamp timestamp={log?.timestamp} />
 
           <Box
             sx={{
@@ -92,7 +91,7 @@ export const LogRow: React.FC<LogRowProps> = memo(
                 </>
               )}
               <Box>
-                <LogDetailsTable log={log} />
+                <LogDetailsTable log={log.labels} />
               </Box>
             </Box>
           </Box>

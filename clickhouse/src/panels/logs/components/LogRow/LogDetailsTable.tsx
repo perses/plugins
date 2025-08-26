@@ -13,10 +13,10 @@
 
 import React from 'react';
 import { Table, TableBody, TableRow, TableCell, useTheme, alpha } from '@mui/material';
-import { LogEntry } from '../../../../model/click-house-data-types';
+import { LogLabels } from '../../../../model/click-house-data-types';
 
 interface LogDetailsTableProps {
-  log: LogEntry;
+  log: LogLabels;
 }
 
 export const LogDetailsTable: React.FC<LogDetailsTableProps> = ({ log }) => {
