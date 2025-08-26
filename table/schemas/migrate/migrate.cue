@@ -46,20 +46,20 @@ if (*#panel.type | null) == "table" {
 
 		columnSettings: list.Concat([
 			for transformation in (*#panel.transformations | [])
-				// In Grafana, when ordering column at least one column, it will give an index to all columns (in indexByName map).
-				// And Perses, columns are sorted by their index in the array of columnSettings.
-				// However, if indexByName map is empty, we can just iterate over renameByName and excludeByName maps "randomly".
-				if transformation.id == "organize" && len((*transformation.options.indexByName | {})) == 0 {
-					list.Concat([
-						[for columnName, displayName in (*transformation.options.renameByName | {}) {
-							name: {_nameBuilder & {#var: columnName}}.output
-							header: displayName
-						}],
-						[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
-							name: {_nameBuilder & {#var: columnName}}.output
-							hide: isExcluded
-						}],
-					])
+			// In Grafana, when ordering column at least one column, it will give an index to all columns (in indexByName map).
+			// And Perses, columns are sorted by their index in the array of columnSettings.
+			// However, if indexByName map is empty, we can just iterate over renameByName and excludeByName maps "randomly".
+			if transformation.id == "organize" && len((*transformation.options.indexByName | {})) == 0 {
+				list.Concat([
+					[for columnName, displayName in (*transformation.options.renameByName | {}) {
+						name: {_nameBuilder & {#var: columnName}}.output
+						header: displayName
+					}],
+					[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
+						name: {_nameBuilder & {#var: columnName}}.output
+						hide: isExcluded
+					}],
+				])
 			},
 			// If indexByName map is not empty, we need can reorder columns based on the index correctly.
 			[for transformation in (*#panel.transformations | [])
@@ -97,68 +97,67 @@ if (*#panel.type | null) == "table" {
 		// Using flatten to get rid of the nested array for "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
 		#cellSettings: list.FlattenN([
-				for mapping in (*#panel.fieldConfig.defaults.mappings | []) {
-					if mapping.type == "value" {
-						[for key, option in mapping.options {
-							condition: {
-								kind: "Value"
-								spec: {
-									value: key
-								}
+			for mapping in (*#panel.fieldConfig.defaults.mappings | []) {
+				if mapping.type == "value" {
+					[for key, option in mapping.options {
+						condition: {
+							kind: "Value"
+							spec: {
+								value: key
 							}
-							if option.text != _|_ {
-								text: option.text
-							}
-							if option.color != _|_ {
-								backgroundColor: *commonMigrate.#mapping.color[option.color] | option.color
-							}
-						}]
-					}
-					if mapping.type != "value" {
-						condition: [//switch
-							if mapping.type == "range" {
-								kind: "Range"
-								spec: {
-									if mapping.options.from != _|_ {
-										min: mapping.options.from
-									}
-									if mapping.options.to != _|_ {
-										max: mapping.options.to
-									}
-								}
-							},
-							if mapping.type == "regex" {
-								kind: "Regex"
-								spec: {
-									expr: mapping.options.pattern
-								}
-							},
-							if mapping.type == "special" {
-								kind: "Misc"
-								spec: {
-									value: [//switch
-										if mapping.options.match == "nan" {"NaN"},
-										if mapping.options.match == "null+nan" {"null"},
-										mapping.options.match,
-									][0]
-								}
-							},
-						][0]
-						if mapping.options.result.text != _|_ {
-							text: mapping.options.result.text
 						}
-						if mapping.options.result.color != _|_ {
-							backgroundColor: *commonMigrate.#mapping.color[mapping.options.result.color] | mapping.options.result.color
+						if option.text != _|_ {
+							text: option.text
 						}
+						if option.color != _|_ {
+							backgroundColor: *commonMigrate.#mapping.color[option.color] | option.color
+						}
+					}]
+				}
+				if mapping.type != "value" { // else
+					condition: [//switch
+						if mapping.type == "range" {
+							kind: "Range"
+							spec: {
+								if mapping.options.from != _|_ {
+									min: mapping.options.from
+								}
+								if mapping.options.to != _|_ {
+									max: mapping.options.to
+								}
+							}
+						},
+						if mapping.type == "regex" {
+							kind: "Regex"
+							spec: {
+								expr: mapping.options.pattern
+							}
+						},
+						if mapping.type == "special" {
+							kind: "Misc"
+							spec: {
+								value: [//switch
+									if mapping.options.match == "nan" {"NaN"},
+									if mapping.options.match == "null+nan" {"null"},
+									mapping.options.match,
+								][0]
+							}
+						},
+					][0]
+					if mapping.options.result.text != _|_ {
+						text: mapping.options.result.text
 					}
-				},
-			], 1),
+					if mapping.options.result.color != _|_ {
+						backgroundColor: *commonMigrate.#mapping.color[mapping.options.result.color] | mapping.options.result.color
+					}
+				}
+			},
+		], 1),
 		if len(#cellSettings) != 0 {
 			cellSettings: #cellSettings
 		}
 
 		// Logic to build transforms:
-
 		if #panel.transformations != _|_ {
 			#transforms: [
 				for transformation in #panel.transformations if transformation.id == "merge" || transformation.id == "joinByField" {

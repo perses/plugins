@@ -137,16 +137,19 @@ spec: {
 	}
 
 	// migrate byName-based fixedColor overrides to querySettings when applicable
-	querySettings: [
+	#querySettings: [
 		for override in (*#panel.fieldConfig.overrides | [])
-			if override.matcher.id == "byName" && override.matcher.options != _|_
-				for property in override.properties
-					if (*property.value.fixedColor | null) != null
-						for i, target in (*#panel.targets | [])
-							if target.legendFormat == override.matcher.options {
-								queryIndex: i
-								colorMode: "fixed"
-								colorValue: property.value.fixedColor
-							}
+		if override.matcher.id == "byName" && override.matcher.options != _|_
+		for property in override.properties
+		if (*property.value.fixedColor | null) != null
+		for i, target in (*#panel.targets | [])
+		if target.legendFormat == override.matcher.options {
+			queryIndex: i
+			colorMode: "fixed"
+			colorValue: property.value.fixedColor
+		}
 	]
+	if len(#querySettings) != 0 {
+		querySettings: #querySettings
+	}
 }

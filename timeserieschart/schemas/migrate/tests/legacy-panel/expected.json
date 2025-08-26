@@ -1,6 +1,4 @@
 {
   "kind": "TimeSeriesChart",
-  "spec": {
-    "querySettings": []
-  }
+  "spec": {}
 }
