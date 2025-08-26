@@ -1,0 +1,50 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "mode": "list",
+      "position": "bottom",
+      "values": []
+    },
+    "querySettings": [
+      {
+        "queryIndex": 2,
+        "colorMode": "fixed",
+        "colorValue": "#890F02"
+      },
+      {
+        "queryIndex": 5,
+        "colorMode": "fixed",
+        "colorValue": "#052B51"
+      },
+      {
+        "queryIndex": 0,
+        "colorMode": "fixed",
+        "colorValue": "#EAB839"
+      },
+      {
+        "queryIndex": 1,
+        "colorMode": "fixed",
+        "colorValue": "#0A437C"
+      },
+      {
+        "queryIndex": 4,
+        "colorMode": "fixed",
+        "colorValue": "#6D1F62"
+      }
+    ],
+    "visual": {
+      "areaOpacity": 0.4,
+      "connectNulls": false,
+      "display": "line",
+      "lineWidth": 1,
+      "stack": "all"
+    },
+    "yAxis": {
+      "format": {
+        "unit": "percent-decimal"
+      },
+      "min": 0
+    }
+  }
+}

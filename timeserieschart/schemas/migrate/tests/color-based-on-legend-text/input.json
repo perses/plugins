@@ -1,0 +1,227 @@
+{
+  "id": 77,
+  "type": "timeseries",
+  "title": "CPU Basic",
+  "description": "CPU time spent busy vs idle, split by activity type",
+  "gridPos": {
+    "x": 0,
+    "y": 6,
+    "h": 7,
+    "w": 12
+  },
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "drawStyle": "line",
+        "lineInterpolation": "smooth",
+        "barAlignment": 0,
+        "barWidthFactor": 0.6,
+        "lineWidth": 1,
+        "fillOpacity": 40,
+        "gradientMode": "none",
+        "spanNulls": false,
+        "insertNulls": false,
+        "showPoints": "never",
+        "pointSize": 5,
+        "stacking": {
+          "mode": "percent",
+          "group": "A"
+        },
+        "axisPlacement": "auto",
+        "axisLabel": "",
+        "axisColorMode": "text",
+        "axisBorderShow": false,
+        "scaleDistribution": {
+          "type": "linear"
+        },
+        "axisCenteredZero": false,
+        "hideFrom": {
+          "tooltip": false,
+          "viz": false,
+          "legend": false
+        },
+        "thresholdsStyle": {
+          "mode": "off"
+        }
+      },
+      "color": {
+        "mode": "palette-classic"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
+      },
+      "links": [],
+      "min": 0,
+      "unit": "percentunit"
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Busy Iowait"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#890F02",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Idle"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#052B51",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Busy System"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#EAB839",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Busy User"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#0A437C",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Busy Other"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#6D1F62",
+              "mode": "fixed"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "pluginVersion": "11.6.3",
+  "targets": [
+    {
+      "editorMode": "code",
+      "exemplar": false,
+      "expr": "sum(irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\", mode=\"system\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)))",
+      "format": "time_series",
+      "hide": false,
+      "instant": false,
+      "intervalFactor": 1,
+      "legendFormat": "Busy System",
+      "range": true,
+      "refId": "A",
+      "step": 240
+    },
+    {
+      "editorMode": "code",
+      "expr": "sum(irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\", mode=\"user\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)))",
+      "format": "time_series",
+      "hide": false,
+      "intervalFactor": 1,
+      "legendFormat": "Busy User",
+      "range": true,
+      "refId": "B",
+      "step": 240
+    },
+    {
+      "editorMode": "code",
+      "expr": "sum(irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\", mode=\"iowait\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)))",
+      "format": "time_series",
+      "intervalFactor": 1,
+      "legendFormat": "Busy Iowait",
+      "range": true,
+      "refId": "C",
+      "step": 240
+    },
+    {
+      "editorMode": "code",
+      "expr": "sum(irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\", mode=~\".*irq\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)))",
+      "format": "time_series",
+      "intervalFactor": 1,
+      "legendFormat": "Busy IRQs",
+      "range": true,
+      "refId": "D",
+      "step": 240
+    },
+    {
+      "editorMode": "code",
+      "expr": "sum(irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\",  mode!='idle',mode!='user',mode!='system',mode!='iowait',mode!='irq',mode!='softirq'}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)))",
+      "format": "time_series",
+      "intervalFactor": 1,
+      "legendFormat": "Busy Other",
+      "range": true,
+      "refId": "E",
+      "step": 240
+    },
+    {
+      "editorMode": "code",
+      "expr": "sum(irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\", mode=\"idle\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}) by (cpu)))",
+      "format": "time_series",
+      "intervalFactor": 1,
+      "legendFormat": "Idle",
+      "range": true,
+      "refId": "F",
+      "step": 240
+    }
+  ],
+  "datasource": {
+    "type": "prometheus",
+    "uid": "argos-world"
+  },
+  "options": {
+    "tooltip": {
+      "mode": "multi",
+      "sort": "desc",
+      "hideZeros": false
+    },
+    "legend": {
+      "showLegend": true,
+      "displayMode": "list",
+      "placement": "bottom",
+      "calcs": [],
+      "width": 250
+    }
+  }
+}
