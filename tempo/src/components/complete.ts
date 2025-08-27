@@ -252,6 +252,17 @@ async function completeTagName(
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
 }
 
+export function escapeTraceQLString(input: string, quoteChar = '"') {
+  let escaped = input;
+
+  escaped = escaped.replaceAll('\\', '\\\\');
+  if (quoteChar == '"') {
+    escaped = escaped.replaceAll('"', '\\"');
+  }
+
+  return escaped;
+}
+
 /**
  * Add quotes to the completion text in case quotes are not present already.
  * This handles the following cases:
@@ -267,7 +278,7 @@ export function applyQuotedCompletion(view: EditorView, completion: Completion, 
     quoteChar = view.state.sliceDoc(to, to + 1);
   }
 
-  let insertText = quoteChar == '"' ? completion.label.replaceAll('"', '\\"') : completion.label;
+  let insertText = escapeTraceQLString(completion.label, quoteChar);
 
   if (view.state.sliceDoc(from - 1, from) !== quoteChar) {
     insertText = quoteChar + insertText;

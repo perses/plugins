@@ -206,6 +206,8 @@ describe('complete', () => {
     { doc: '{ .http.method="', completion: 'GET', from: 15, expected: '{ .http.method="GET"' },
     { doc: '{ .http.method=""', completion: 'GET', from: 16, expected: '{ .http.method="GET"' },
     { doc: '{ .http.method=', completion: 'GE"T', from: 15, expected: '{ .http.method="GE\\"T"' },
+    { doc: '{ .http.method=', completion: 'GE\\T', from: 15, expected: '{ .http.method="GE\\\\T"' },
+    { doc: '{ .http.method=', completion: 'GE \\ " T', from: 15, expected: '{ .http.method="GE \\\\ \\" T"' },
 
     { doc: '{ .http.method=GE', completion: 'GET', from: 15, to: 17, expected: '{ .http.method="GET"' },
     { doc: '{ .http.method="GE"', completion: 'GET', from: 16, to: 18, expected: '{ .http.method="GET"' },
