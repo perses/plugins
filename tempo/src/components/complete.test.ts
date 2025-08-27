@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EditorState } from '@uiw/react-codemirror';
+import { EditorState, EditorView } from '@uiw/react-codemirror';
 import { parser } from '@grafana/lezer-traceql';
 import { LRLanguage, ensureSyntaxTree } from '@codemirror/language';
-import { Completions, identifyCompletions } from './complete';
+import { identifyCompletions, applyQuotedCompletion } from './complete';
 
 const traceQLExtension = LRLanguage.define({ parser: parser });
 
 describe('complete', () => {
-  const tests: Array<{ expr: string; pos?: number; expected: Completions | undefined }> = [
+  it.each([
     // start
     {
       expr: '',
@@ -188,9 +188,7 @@ describe('complete', () => {
       expr: '{ status=e',
       expected: { scopes: [{ kind: 'TagValue', tag: 'status' }], from: 9 },
     },
-  ];
-
-  it.each(tests)('retrieve completions for $expr', ({ expr, pos, expected }) => {
+  ])('retrieve completions for $expr', ({ expr, pos, expected }) => {
     if (pos === undefined) pos = expr.length;
     if (pos < 0) pos = expr.length + pos;
 
@@ -199,5 +197,27 @@ describe('complete', () => {
     expect(tree).not.toBeNull();
     const completions = identifyCompletions(state, pos, tree!);
     expect(completions).toEqual(expected);
+  });
+
+  it.each([
+    { doc: '{ .http.method=', completion: 'GET', from: 15, expected: '{ .http.method="GET"' },
+    { doc: '{ .http.method="', completion: 'GET', from: 16, expected: '{ .http.method="GET"' },
+    // cursor before "
+    { doc: '{ .http.method="', completion: 'GET', from: 15, expected: '{ .http.method="GET"' },
+    { doc: '{ .http.method=""', completion: 'GET', from: 16, expected: '{ .http.method="GET"' },
+    { doc: '{ .http.method=', completion: 'GE"T', from: 15, expected: '{ .http.method="GE\\"T"' },
+
+    { doc: '{ .http.method=GE', completion: 'GET', from: 15, to: 17, expected: '{ .http.method="GET"' },
+    { doc: '{ .http.method="GE"', completion: 'GET', from: 16, to: 18, expected: '{ .http.method="GET"' },
+
+    { doc: '{ .http.method=`', completion: 'GET', from: 16, expected: '{ .http.method=`GET`' },
+    // cursor before `
+    { doc: '{ .http.method=`', completion: 'GET', from: 15, expected: '{ .http.method=`GET`' },
+    { doc: '{ .http.method=`', completion: 'GE"T', from: 16, expected: '{ .http.method=`GE"T`' },
+  ])('quote completion $completion at $doc pos $pos', ({ doc, completion, from, to, expected }) => {
+    const state = EditorState.create({ doc });
+    const view = new EditorView({ state });
+    applyQuotedCompletion(view, { label: completion }, from, to ?? from);
+    expect(view.state.doc.toString()).toBe(expected);
   });
 });

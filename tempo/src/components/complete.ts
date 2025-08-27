@@ -45,6 +45,9 @@ export interface Completions {
   to?: number;
 }
 
+const quoteChars = ['"', '`'];
+const defaultQuoteChar = '"';
+
 export async function complete(
   completionCfg: CompletionConfig,
   { state, pos }: CompletionContext
@@ -179,7 +182,7 @@ export function identifyCompletions(state: EditorState, pos: number, tree: Tree)
         const fieldExpr = node.parent.firstChild;
         const attribute = state.sliceDoc(fieldExpr.from, fieldExpr.to);
         // ignore leading " in { name="HT
-        const from = state.sliceDoc(node.from, node.from + 1) === '"' ? node.from + 1 : node.from;
+        const from = quoteChars.includes(state.sliceDoc(node.from, node.from + 1)) ? node.from + 1 : node.from;
         return { scopes: [{ kind: 'TagValue', tag: attribute }], from };
       }
 
@@ -256,13 +259,21 @@ async function completeTagName(
  * { name="x
  * { name="x" where cursor is after the 'x'
  */
-function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number): void {
-  let insertText = completion.label;
-  if (view.state.sliceDoc(from - 1, from) !== '"') {
-    insertText = '"' + insertText;
+export function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number): void {
+  let quoteChar = defaultQuoteChar;
+  if (quoteChars.includes(view.state.sliceDoc(from - 1, from))) {
+    quoteChar = view.state.sliceDoc(from - 1, from);
+  } else if (quoteChars.includes(view.state.sliceDoc(to, to + 1))) {
+    quoteChar = view.state.sliceDoc(to, to + 1);
   }
-  if (view.state.sliceDoc(to, to + 1) !== '"') {
-    insertText = insertText + '"';
+
+  let insertText = quoteChar == '"' ? completion.label.replaceAll('"', '\\"') : completion.label;
+
+  if (view.state.sliceDoc(from - 1, from) !== quoteChar) {
+    insertText = quoteChar + insertText;
+  }
+  if (view.state.sliceDoc(to, to + 1) !== quoteChar) {
+    insertText = insertText + quoteChar;
   }
   view.dispatch(insertCompletionText(view.state, insertText, from, to));
 }
