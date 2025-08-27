@@ -252,7 +252,7 @@ async function completeTagName(
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
 }
 
-function escapeTraceQLString(input: string, quoteChar = '"') {
+function escapeString(input: string, quoteChar: string) {
   let escaped = input;
   escaped = escaped.replaceAll('\\', '\\\\');
   if (quoteChar == '"') {
@@ -276,7 +276,7 @@ export function applyQuotedCompletion(view: EditorView, completion: Completion, 
     quoteChar = view.state.sliceDoc(to, to + 1);
   }
 
-  let insertText = escapeTraceQLString(completion.label, quoteChar);
+  let insertText = escapeString(completion.label, quoteChar);
 
   if (view.state.sliceDoc(from - 1, from) !== quoteChar) {
     insertText = quoteChar + insertText;
