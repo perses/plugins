@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './complete';
 export * from './filter';
 export * from './TraceQLEditor';
 export * from './TraceQLExtension';

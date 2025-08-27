@@ -252,14 +252,12 @@ async function completeTagName(
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
 }
 
-export function escapeTraceQLString(input: string, quoteChar = '"') {
+function escapeTraceQLString(input: string, quoteChar = '"') {
   let escaped = input;
-
   escaped = escaped.replaceAll('\\', '\\\\');
   if (quoteChar == '"') {
     escaped = escaped.replaceAll('"', '\\"');
   }
-
   return escaped;
 }
 
