@@ -65,7 +65,7 @@ function parseQuery(query: string) {
 }
 
 function unescape(q: string) {
-  return q.replace(/\\"/g, '"');
+  return q.replaceAll('\\"', '"').replaceAll('\\\\', '\\');
 }
 
 function reverseStringMatcher(matches?: Matcher[]) {
