@@ -1,0 +1,19 @@
+{
+  "kind": "StaticListVariable",
+  "spec": {
+    "values": [
+      {
+        "label": "All",
+        "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info)))"
+      },
+      {
+        "label": "stopped",
+        "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"non_running\"}>0)))"
+      },
+      {
+        "label": "starting",
+        "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"starting\"} > 0)))"
+      }
+    ]
+  }
+}

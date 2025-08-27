@@ -1,0 +1,33 @@
+{
+  "current": {
+    "selected": false,
+    "text": "one",
+    "value": "one"
+  },
+  "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
+  "hide": 0,
+  "includeAll": false,
+  "label": "My Custom Variable",
+  "multi": false,
+  "name": "MyCustom",
+  "options": [
+    {
+      "selected": true,
+      "text": "All",
+      "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info)))"
+    },
+    {
+      "selected": false,
+      "text": "stopped",
+      "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"non_running\"}>0)))"
+    },
+    {
+      "selected": false,
+      "text": "starting",
+      "value": "on(cluster,name,namespace) group_left()(0*(sum by(cluster,namespace,name)(kubevirt_vm_info{status_group=\"starting\"} > 0)))"
+    }
+  ],
+  "query": "All : on(cluster\\,name\\,namespace) group_left()(0*(sum by(cluster\\,namespace\\,name)(kubevirt_vm_info))), stopped : on(cluster\\,name\\,namespace) group_left()(0*(sum by(cluster\\,namespace\\,name)(kubevirt_vm_info{status_group=\"non_running\"}>0))), starting : on(cluster\\,name\\,namespace) group_left()(0*(sum by(cluster\\,namespace\\,name)(kubevirt_vm_info{status_group=\"starting\"} > 0)))",
+  "skipUrlSync": false,
+  "type": "custom"
+}

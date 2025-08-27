@@ -24,7 +24,7 @@
     {
       "selected": false,
       "text": "three",
-      "value": "three"
+      "value": "3"
     }
   ],
   "query": "one,  two  ,three : 3  ",

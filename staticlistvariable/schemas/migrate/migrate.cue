@@ -14,7 +14,6 @@
 package migrate
 
 import (
-	"regexp"
 	"strings"
 )
 
@@ -23,16 +22,16 @@ import (
 if #var.type == "custom" || #var.type == "interval" {
 	kind: "StaticListVariable"
 	spec: {
-		_valuesArray:        strings.Split(#var.query, ",")
-		_aliasedValueRegexp: "^(.*) : (.*)$"
-		values: [for val in _valuesArray {
-			[// switch
-				if val =~ _aliasedValueRegexp {
-					label: strings.TrimSpace(regexp.FindSubmatch(_aliasedValueRegexp, val)[1])
-					value: strings.TrimSpace(regexp.FindSubmatch(_aliasedValueRegexp, val)[2])
-				},
-				strings.TrimSpace(val),
-			][0]
-		}]
+		if #var.options != _|_ {
+			values: [for option in #var.options {
+				[// switch
+					if option.text != option.value {
+						label: strings.TrimSpace(option.text)
+						value: strings.TrimSpace(option.value)
+					},
+					strings.TrimSpace(option.value),
+				][0]
+			}]
+		}
 	}
 }
