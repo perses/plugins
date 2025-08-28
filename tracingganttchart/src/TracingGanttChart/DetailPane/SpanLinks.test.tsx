@@ -51,6 +51,7 @@ describe('SpanLinks', () => {
     const customLinks: CustomLinks = {
       links: {
         trace: '/datasource/${datasourceName}/trace/${traceId}',
+        span: '/datasource/${datasourceName}/trace/${traceId}?span=${spanId}',
       },
       variables: {
         datasourceName: 'tempods',
@@ -59,6 +60,9 @@ describe('SpanLinks', () => {
 
     renderComponent({ customLinks, span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]! });
     expect(screen.getByRole('link', { name: 'tid1' })).toHaveAttribute('href', '/datasource/tempods/trace/tid1');
-    expect(screen.getByRole('link', { name: 'sid1' })).toHaveAttribute('href', '/datasource/tempods/trace/tid1');
+    expect(screen.getByRole('link', { name: 'sid1' })).toHaveAttribute(
+      'href',
+      '/datasource/tempods/trace/tid1?span=sid1'
+    );
   });
 });
