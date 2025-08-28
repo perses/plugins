@@ -45,7 +45,7 @@ func bumpGoDep(workspace, version string) {
 }
 
 func replaceCuePackage(data []byte, version string) []byte {
-	return bumpCueDeps.ReplaceAll(data, []byte(fmt.Sprintf(`v:$1"v%s"`, version)))
+	return bumpCueDeps.ReplaceAll(data, fmt.Appendf(nil, `v:$1"v%s"`, version))
 }
 
 func bumpCueDep(workspace, version string) {
@@ -62,7 +62,7 @@ func bumpCueDep(workspace, version string) {
 }
 
 func replaceNPMPackage(data []byte, version string) []byte {
-	return bumpNPMDeps.ReplaceAll(data, []byte(fmt.Sprintf(`"@perses-dev/$1": "^%s"`, version)))
+	return bumpNPMDeps.ReplaceAll(data, fmt.Appendf(nil, `"@perses-dev/$1": "^%s"`, version))
 }
 
 func bumpPackage(workspace string, version string) {
