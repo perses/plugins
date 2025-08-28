@@ -12,6 +12,7 @@
   },
   "workspaces": [
     "barchart",
+    "clickhouse",
     "flamechart",
     "gaugechart",
     "heatmapchart",
