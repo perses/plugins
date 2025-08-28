@@ -23,7 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func release(pluginName string, optionalReleaseMessage string) {
+func release(pluginName string) {
 	version, err := npm.GetVersion(pluginName)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to get the version of the plugin %s", pluginName)
@@ -36,7 +36,7 @@ func release(pluginName string, optionalReleaseMessage string) {
 		return
 	}
 	// create the GitHub release
-	if execErr := command.Run("gh", "release", "create", releaseName, "-t", releaseName, "-n", optionalReleaseMessage); execErr != nil {
+	if execErr := command.Run("gh", "release", "create", releaseName, "-t", releaseName, "-n", generateChangelog(pluginName)); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to create the release %s", releaseName)
 	}
 }
@@ -57,15 +57,10 @@ func release(pluginName string, optionalReleaseMessage string) {
 //
 //	go run ./scripts/release/release.go --name=tempo
 //
-// To add a release message that will appear in every release:
-//
-//	go run ./scripts/release/release.go --all --message="Release message"
-//
 // NB: this script doesn't handle the plugin archive creation, a CI task achieves this.
 func main() {
 	releaseAll := flag.Bool("all", false, "release all the plugins")
 	releaseSingleName := flag.String("name", "", "release a single plugin")
-	optionalReleaseMessage := flag.String("message", "", "release message")
 	flag.Parse()
 	// get all tags locally
 	if err := exec.Command("git", "fetch", "--tags").Run(); err != nil {
@@ -73,7 +68,7 @@ func main() {
 	}
 	if !*releaseAll {
 		logrus.Infof("releasing %s", *releaseSingleName)
-		release(*releaseSingleName, *optionalReleaseMessage)
+		release(*releaseSingleName)
 		return
 	}
 	workspaces, err := npm.GetWorkspaces()
@@ -82,6 +77,6 @@ func main() {
 	}
 	for _, workspace := range workspaces {
 		logrus.Infof("releasing %s", workspace)
-		release(workspace, *optionalReleaseMessage)
+		release(workspace)
 	}
 }
