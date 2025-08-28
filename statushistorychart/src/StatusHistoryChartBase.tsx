@@ -26,7 +26,8 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { TimeScale } from '@perses-dev/core';
 import { EChartsCoreOption } from 'echarts';
 import { FC } from 'react';
-import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { useTimeZone } from '@perses-dev/plugin-system';
+import { EChart, useChartsTheme } from '@perses-dev/components';
 import { getFormattedStatusHistoryAxisLabel } from './utils/get-formatted-axis-label';
 import { generateTooltipHTML } from './StatusHistoryTooltip';
 
