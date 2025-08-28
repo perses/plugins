@@ -6,7 +6,6 @@
       "decimalPlaces": 2,
       "unit": "bytes/sec"
     },
-    "metricLabel": "",
     "sparkline": {},
     "thresholds": {
       "steps": [

@@ -1,6 +1,6 @@
 {
   "datasource": "$datasource",
-  "description": "Just displaying some metrics with Stat panel",
+  "description": "Test the migration of Grafana mappings to Perses mappings",
   "fieldConfig": {
     "defaults": {
       "mappings": [

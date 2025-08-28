@@ -1,0 +1,60 @@
+{
+  "kind": "StatChart",
+  "spec": {
+    "calculation": "mean",
+    "format": {
+      "unit": "decimal"
+    },
+    "mappings": [
+      {
+        "kind": "Value",
+        "spec": {
+          "result": {
+            "value": "DOWN"
+          },
+          "value": "0"
+        }
+      },
+      {
+        "kind": "Value",
+        "spec": {
+          "result": {
+            "value": "UP"
+          },
+          "value": "1"
+        }
+      },
+      {
+        "kind": "Value",
+        "spec": {
+          "result": {
+            "value": "INVICIBLE"
+          },
+          "value": "5"
+        }
+      },
+      {
+        "kind": "Range",
+        "spec": {
+          "result": {
+            "value": "VERY UP"
+          },
+          "from": 2,
+          "to": 4
+        }
+      }
+    ],
+    "thresholds": {
+      "steps": [
+        {
+          "color": "red",
+          "value": 0
+        },
+        {
+          "color": "green",
+          "value": 1
+        }
+      ]
+    }
+  }
+}
