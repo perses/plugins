@@ -158,7 +158,7 @@ spec: {
 							kind: "Value"
 							spec: {
 								result: value: oV.text
-								value: "\(oK)"
+								value: oK
 							}
 						}]
 					}
