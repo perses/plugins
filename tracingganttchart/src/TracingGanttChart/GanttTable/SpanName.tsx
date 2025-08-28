@@ -39,7 +39,7 @@ export function SpanName(props: SpanNameProps): ReactElement {
       <Box sx={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         <strong>{span.resource.serviceName}:</strong> {span.name}
       </Box>
-      {customLinks && customLinks.links.trace && span.links.length > 0 && (
+      {customLinks && customLinks.links.span && span.links.length > 0 && (
         <Box sx={{ marginLeft: 'auto', px: 1 }}>
           <SpanLinksButton customLinks={customLinks} span={span} />
         </Box>

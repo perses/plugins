@@ -46,6 +46,17 @@ export function GanttTable(props: GanttTableProps): ReactElement {
     return rows;
   }, [trace.rootSpans, collapsedSpans]);
 
+  const selectedSpanIndex = useMemo(() => {
+    if (!selectedSpan) return undefined;
+
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i]?.spanId === selectedSpan.spanId) {
+        return i;
+      }
+    }
+    return undefined;
+  }, [rows, selectedSpan]);
+
   const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
 
   // update currently visible spans
@@ -71,6 +82,7 @@ export function GanttTable(props: GanttTableProps): ReactElement {
       <GanttTableHeader trace={trace} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
       <Virtuoso
         data={rows}
+        initialTopMostItemIndex={selectedSpanIndex ?? 0}
         itemContent={(_, span) => (
           <GanttTableRow
             options={options}

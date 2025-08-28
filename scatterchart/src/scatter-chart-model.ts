@@ -26,7 +26,10 @@ export interface ScatterChartOptions {
   /** range of the circles diameter */
   sizeRange?: [number, number];
 
-  /** where to navigate after clicking on a bubble */
+  /**
+   * Where to navigate after clicking on a bubble.
+   * Supported variables: datasourceName, traceId
+   */
   link?: string;
 }
 

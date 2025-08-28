@@ -23,6 +23,7 @@ export interface Trace {
    * this branch of the span tree will be appended to the root
    */
   rootSpans: Span[];
+  spanById: Map<string, Span>;
   startTimeUnixMs: number;
   endTimeUnixMs: number;
 }
@@ -71,7 +72,7 @@ export interface Link {
  */
 export function getTraceModel(trace: otlptracev1.TracesData): Trace {
   // first pass: build lookup table <spanId, Span> and compute min/max
-  const lookup = new Map<string, Span>();
+  const spanById = new Map<string, Span>();
   const rootSpans: Span[] = [];
   let startTimeUnixMs: number = 0;
   let endTimeUnixMs: number = 0;
@@ -88,7 +89,7 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
           childSpans: [],
           ...parseSpan(otelSpan),
         };
-        lookup.set(otelSpan.spanId, span);
+        spanById.set(otelSpan.spanId, span);
 
         if (startTimeUnixMs === 0 || span.startTimeUnixMs < startTimeUnixMs) {
           startTimeUnixMs = span.startTimeUnixMs;
@@ -101,13 +102,13 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
   }
 
   // second pass: build tree based on parentSpanId property
-  for (const [, span] of lookup) {
+  for (const [, span] of spanById) {
     if (!span.parentSpanId) {
       rootSpans.push(span);
       continue;
     }
 
-    const parent = lookup.get(span.parentSpanId);
+    const parent = spanById.get(span.parentSpanId);
     if (!parent) {
       console.trace(`span ${span.spanId} has parent ${span.parentSpanId} which has not been received yet`);
       rootSpans.push(span);
@@ -119,7 +120,7 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
     parent.childSpans.splice(insertChildSpanAt, 0, span);
   }
 
-  return { trace, rootSpans, startTimeUnixMs, endTimeUnixMs };
+  return { trace, rootSpans, spanById, startTimeUnixMs, endTimeUnixMs };
 }
 
 function parseResource(resource?: otlpresourcev1.Resource): Resource {

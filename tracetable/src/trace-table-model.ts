@@ -29,6 +29,10 @@ export interface TraceTablePaletteOptions {
 }
 
 export interface TraceTableCustomLinks {
+  /**
+   * Link to a trace.
+   * Supported variables: datasourceName, traceId
+   */
   trace?: string;
 }
 

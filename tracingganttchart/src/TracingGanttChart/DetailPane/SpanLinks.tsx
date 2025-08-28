@@ -46,8 +46,14 @@ interface SpanLinkItemProps {
 function SpanLinkItem(props: SpanLinkItemProps): ReactElement {
   const { customLinks, link } = props;
   const variableValues = useAllVariableValues();
-  const spanLink = customLinks?.links.trace
+  const traceLink = customLinks?.links.trace
     ? replaceVariablesInString(customLinks.links.trace, variableValues, {
+        ...customLinks?.variables,
+        traceId: link.traceId,
+      })
+    : undefined;
+  const spanLink = customLinks?.links.span
+    ? replaceVariablesInString(customLinks.links.span, variableValues, {
         ...customLinks?.variables,
         traceId: link.traceId,
         spanId: link.spanId,
@@ -56,7 +62,7 @@ function SpanLinkItem(props: SpanLinkItemProps): ReactElement {
 
   return (
     <List>
-      <AttributeItem name="trace ID" value={link.traceId} link={spanLink} />
+      <AttributeItem name="trace ID" value={link.traceId} link={traceLink} />
       <AttributeItem name="span ID" value={link.spanId} link={spanLink} />
       <AttributeItems customLinks={customLinks} attributes={link.attributes} />
     </List>

@@ -51,7 +51,9 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
     startTimeUnixMs: trace.startTimeUnixMs,
     endTimeUnixMs: trace.endTimeUnixMs,
   });
-  const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);
+  const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(() =>
+    options.selectedSpanId ? trace.spanById.get(options.selectedSpanId) : undefined
+  );
 
   const ganttChart = useRef<HTMLDivElement>(null);
   // tableWidth only comes to effect if the detail pane is visible.

@@ -31,7 +31,7 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
 
-  if (!RouterComponent || !customLinks.links.trace) {
+  if (!RouterComponent || !customLinks.links.span) {
     return;
   }
 
@@ -43,7 +43,7 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
         <IconButton
           size="small"
           component={RouterComponent}
-          to={replaceVariablesInString(customLinks.links.trace, variableValues, {
+          to={replaceVariablesInString(customLinks.links.span, variableValues, {
             ...customLinks.variables,
             traceId: link.traceId,
             spanId: link.spanId,
@@ -89,7 +89,7 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
             key={link.spanId}
             component={RouterComponent}
             onClick={handleClose}
-            to={replaceVariablesInString(customLinks.links.trace!, variableValues, {
+            to={replaceVariablesInString(customLinks.links.span!, variableValues, {
               ...customLinks.variables,
               traceId: link.traceId,
               spanId: link.spanId,

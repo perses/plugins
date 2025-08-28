@@ -19,42 +19,16 @@ import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 import { TempoTraceQuerySpec } from '../model';
+import { linkToSpan, linkToTrace } from './links';
 
 interface TracesExplorerQueryParams {
   queries?: QueryDefinition[];
+  spanId?: string;
 }
 
 interface SearchResultsPanelProps {
   queries: QueryDefinition[];
 }
-
-const linkToTraceParams = new URLSearchParams({
-  explorer: 'Tempo-TempoExplorer',
-  data: JSON.stringify({
-    queries: [
-      {
-        kind: 'TraceQuery',
-        spec: {
-          plugin: {
-            kind: 'TempoTraceQuery',
-            spec: {
-              query: 'TRACEID',
-              datasource: {
-                kind: 'TempoDatasource',
-                name: 'DATASOURCENAME',
-              },
-            },
-          },
-        },
-      },
-    ],
-  }),
-});
-
-// add ${...} syntax after the URL is URL-encoded, because the characters ${} must not be URL-encoded
-const linkToTrace = `/explore?${linkToTraceParams}`
-  .replace('TRACEID', '${traceId}')
-  .replace('DATASOURCENAME', '${datasourceName}');
 
 function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -125,7 +99,13 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
   );
 }
 
-function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
+interface TracingGanttChartPanelProps {
+  queries: QueryDefinition[];
+  selectedSpanId?: string;
+}
+
+function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
+  const { queries, selectedSpanId } = props;
   const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
 
   return (
@@ -140,7 +120,9 @@ function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): Re
             spec: {
               links: {
                 trace: linkToTrace,
+                span: linkToSpan,
               },
+              selectedSpanId,
             },
           },
         },
@@ -151,7 +133,7 @@ function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): Re
 
 export function TempoExplorer(): ReactElement {
   const {
-    data: { queries = [] },
+    data: { queries = [], spanId: selectedSpanId },
     setData,
   } = useExplorerManagerContext<TracesExplorerQueryParams>();
 
@@ -179,7 +161,11 @@ export function TempoExplorer(): ReactElement {
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
         <DataQueriesProvider definitions={definitions}>
           <Box height={700}>
-            {isSingleTrace ? <TracingGanttChartPanel queries={queries} /> : <SearchResultsPanel queries={queries} />}
+            {isSingleTrace ? (
+              <TracingGanttChartPanel queries={queries} selectedSpanId={selectedSpanId} />
+            ) : (
+              <SearchResultsPanel queries={queries} />
+            )}
           </Box>
         </DataQueriesProvider>
       </ErrorBoundary>
