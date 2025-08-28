@@ -35,11 +35,11 @@ export function LokiDatasourceEditor(props: LokiDatasourceEditorProps): ReactEle
         allowedEndpoints: [
           {
             endpointPattern: '/loki/api/v1/query',
-            method: 'POST',
+            method: 'GET',
           },
           {
             endpointPattern: '/loki/api/v1/query_range',
-            method: 'POST',
+            method: 'GET',
           },
           {
             endpointPattern: '/loki/api/v1/labels',
