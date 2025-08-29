@@ -36,13 +36,20 @@ kind: "StatChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
-    if (*#panel.options.textMode | null) == "name" {
+	// metricLabel
+	#textMode: *#panel.options.textMode | null
+    if #textMode == "name" && (*#panel.targets[0].legendFormat | null) != null {
 		// /!\ best effort logic
 		// - if legendFormat contains a more complex expression than {{label}}, the result will be broken (but manually fixable afterwards still)
 		// - Perses's metricLabel is a single setting at panel level, hence the [0], so the result wont fit in case of multiple queries using different legendFormat
         metricLabel: strings.Trim(#panel.targets[0].legendFormat, "{}")
     }
+	// /!\ here too using [0] thus not perfect, even though the field getting remapped is unique to the whole panel in that case
+	if #textMode == "auto" && (*#panel.targets[0].format | null) == "table" && (*#panel.options.reduceOptions.fields | null) != null {
+		metricLabel: strings.Trim(#panel.options.reduceOptions.fields, "/^$")
+	}
 
+	// format
 	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | null
 	if #unit != null {
 		format: unit: #unit
@@ -57,11 +64,13 @@ spec: {
 		}
 	}
 
+	// valueFontSize
 	#fontsize: *#panel.options.text.valueSize | null
-		if #fontsize != null {
-			valueFontSize: #fontsize
-		}
+	if #fontsize != null {
+		valueFontSize: #fontsize
+	}
 
+	// thresholds
 	#steps: *#panel.fieldConfig.defaults.thresholds.steps | null
 	if #steps != null {
 		thresholds: {
@@ -76,11 +85,13 @@ spec: {
 		}
 	}
 
+	// sparkline
 	#sparkline: *#panel.options.graphMode | "none"
 	if #sparkline == "area" {
 		sparkline: {}
 	}
 
+	// mappings
 	#mappings: list.Concat([
 		// Using flatten to get rid of the nested array for "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)

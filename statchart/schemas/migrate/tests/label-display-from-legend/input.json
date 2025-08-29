@@ -1,7 +1,7 @@
 {
   "id": 9,
   "type": "stat",
-  "title": "Exporter version [$type - $phase - $serversite - $owner - $application - $componentname - $partition - $role - $nodename]",
+  "title": "Exporter version [$application - $environment - $nodename]",
   "description": " - {{version}}: Node Exporter version used",
   "gridPos": {
     "x": 6,
@@ -24,7 +24,7 @@
   "targets": [
     {
       "exemplar": false,
-      "expr": "node_exporter_build_info{osname=~\".*Linux.*\", prometheus=~\"system\", type=~\"$type\", phase=~\"$phase\", stack=~\"$stack\", serversite=~\"$serversite\", owner=~\"$owner\", application=~\"$application\", componentname=~\"$componentname\", partition=~\"$partition\", role=~\"$role\", nodename=~\"$nodename\", instance=~\".*:50700\"}",
+      "expr": "node_exporter_build_info{osname=~\".*Linux.*\", application=~\"$application\", environment=~\"$environment\", nodename=~\"$nodename\", instance=~\".*:50700\"}",
       "format": "time_series",
       "hide": false,
       "instant": true,
