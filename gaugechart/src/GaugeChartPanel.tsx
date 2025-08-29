@@ -35,47 +35,49 @@ export type GaugeChartPanelProps = PanelProps<GaugeChartOptions, TimeSeriesData>
 
 export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | null {
   const { spec: pluginSpec, contentDimensions, queryResults } = props;
-  const { calculation, max } = pluginSpec;
+  const { calculation, max, legend } = pluginSpec;
 
   const { thresholds: thresholdsColors } = useChartsTheme();
+
+  /* Legend setting just added to the cue schema
+     This line assures that if legend setting doesn't exist (for old gauge setting records),
+     The legend shows normally as before. If it exists, then it checks the show property.
+  */
+  const showLegend = legend?.show ?? true;
 
   // ensures all default format properties set if undef
   const format = merge({}, DEFAULT_FORMAT, pluginSpec.format);
 
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
-  const gaugeData: GaugeSeries[] = useMemo(() => {
-    if (queryResults[0]?.data === undefined) {
-      return [];
+  const gaugeData = useMemo((): GaugeSeries[] => {
+    const seriesData: GaugeSeries[] = [];
+
+    if (!queryResults[0]?.data?.series?.length) {
+      return seriesData;
     }
 
-    if (CalculationsMap[calculation] === undefined) {
+    if (!CalculationsMap[calculation]) {
       console.warn(`Invalid GaugeChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
     }
 
     const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
 
-    const seriesData: GaugeSeries[] = [];
     for (const timeSeries of queryResults[0].data.series) {
-      const series = {
+      seriesData.push({
         value: calculate(timeSeries.values),
-        label: timeSeries.formattedName ?? '',
-      };
-      seriesData.push(series);
+        label: showLegend ? (timeSeries.formattedName ?? '') : '',
+      });
     }
     return seriesData;
-  }, [queryResults, calculation]);
+  }, [queryResults, calculation, showLegend]);
 
-  if (contentDimensions === undefined) return null;
+  if (!contentDimensions) return null;
 
   // needed for end value of last threshold color segment
   let thresholdMax = max;
   if (thresholdMax === undefined) {
-    if (format.unit === 'percent') {
-      thresholdMax = DEFAULT_MAX_PERCENT;
-    } else {
-      thresholdMax = DEFAULT_MAX_PERCENT_DECIMAL;
-    }
+    thresholdMax = format.unit === 'percent' ? DEFAULT_MAX_PERCENT : DEFAULT_MAX_PERCENT_DECIMAL;
   }
   const axisLineColors = convertThresholds(thresholds, format, thresholdMax, thresholdsColors);
 
@@ -88,7 +90,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
   };
 
   // no data message handled inside chart component
-  if (gaugeData.length === 0) {
+  if (!gaugeData.length) {
     return (
       <GaugeChartBase
         width={contentDimensions.width}
@@ -140,7 +142,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
 }
 
 export function GaugeChartLoading({ contentDimensions }: GaugeChartPanelProps): React.ReactElement | null {
-  if (contentDimensions === undefined) return null;
+  if (!contentDimensions) return null;
   return (
     <Skeleton
       sx={{ margin: '0 auto' }}

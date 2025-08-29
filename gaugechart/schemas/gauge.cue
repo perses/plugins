@@ -23,4 +23,9 @@ spec: close({
 	format?:     common.#format
 	thresholds?: common.#thresholds
 	max?:        number // determines end value of last threshold color segment when unit is not a percent
+	legend?: #legend
 })
+
+#legend: {
+	show?: bool | *true
+}

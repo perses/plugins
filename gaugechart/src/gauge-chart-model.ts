@@ -33,6 +33,7 @@ export interface GaugeChartOptions {
   format?: FormatOptions;
   thresholds?: ThresholdOptions;
   max?: number;
+  legend?: { show?: boolean };
 }
 
 export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>;

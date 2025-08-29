@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextField } from '@mui/material';
+import { Switch, TextField } from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
@@ -36,6 +36,10 @@ import {
 
 export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
+  /* If legend setting doesn't exist (because it is optional), the legend should show by default 
+     This is for the records before the legend option was added
+  */
+  const showLegend = value?.legend?.show ?? true;
 
   const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation) => {
     onChange(
@@ -101,6 +105,21 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <ThresholdsEditor thresholds={value.thresholds} onChange={handleThresholdsChange} />
+        <OptionsEditorControl
+          label="Show legend"
+          control={
+            <Switch
+              onChange={(): void => {
+                onChange(
+                  produce(value, (draft: GaugeChartOptions) => {
+                    draft.legend = { ...draft.legend, show: !showLegend };
+                  })
+                );
+              }}
+              checked={showLegend}
+            />
+          }
+        />
       </OptionsEditorColumn>
     </OptionsEditorGrid>
   );
