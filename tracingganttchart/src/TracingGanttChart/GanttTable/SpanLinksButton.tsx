@@ -32,7 +32,7 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
   const isOpen = Boolean(anchorEl);
 
   if (!RouterComponent || !customLinks.links.span) {
-    return;
+    return null;
   }
 
   // if there is a single span link, render the button directly without a menu
