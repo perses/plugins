@@ -4,9 +4,9 @@ go 1.24.0
 
 require (
 	github.com/perses/common v0.28.0
-	github.com/perses/perses v0.52.0-beta.5.0.20250828084758-e2476d31d114
+	github.com/perses/perses v0.52.0-rc.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
