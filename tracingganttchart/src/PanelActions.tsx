@@ -31,7 +31,7 @@ export function DownloadTraceAction(props: TracingGanttChartPanelProps) {
   }, [trace]);
 
   if (!trace) {
-    return;
+    return null;
   }
 
   return (
