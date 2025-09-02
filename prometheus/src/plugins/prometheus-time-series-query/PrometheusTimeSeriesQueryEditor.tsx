@@ -74,6 +74,10 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {
+      /* Good to know: The usage of onchange here causes an immediate spec update which eventually updates the panel
+         This was probably intentional to allow for quick switching between datasources.
+         Could have been triggered only with Run Query button as well.
+      */
       onChange(
         produce(value, (draft) => {
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
@@ -81,6 +85,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           draft.datasource = nextDatasource;
         })
       );
+      if (queryHandlerSettings?.setWatchOtherSpecs)
+        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
       return;
     }
 
