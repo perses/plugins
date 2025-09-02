@@ -59,6 +59,8 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
           draft.datasource = nextDatasource;
         })
       );
+      if (queryHandlerSettings?.setWatchOtherSpecs)
+        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
       return;
     }
 
