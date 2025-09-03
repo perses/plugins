@@ -13,11 +13,20 @@
 
 package migrate
 
-#var:       _
+#var: _
+
+// TODO migrate to perses common package
+// key = Grafana kind, value = Perses kind
+#kindMapping: {
+	"loki":                         "LokiDatasource"
+	"prometheus":                   "PrometheusDatasource"
+	"grafana-pyroscope-datasource": "PyroscopeDatasource"
+	"tempo":                        "TempoDatasource"
+}
 
 if #var.type == "datasource" {
-  kind: "DatasourceVariable",
-  spec: {
-    datasourcePluginKind: #var.query
-  }
+	kind: "DatasourceVariable"
+	spec: {
+		datasourcePluginKind: *#kindMapping[#var.query] | "not-supported-\(#var.query)"
+	}
 }

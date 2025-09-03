@@ -1,6 +1,6 @@
 {
   "kind": "DatasourceVariable",
   "spec": {
-    "datasourcePluginKind": "prometheus"
+    "datasourcePluginKind": "PrometheusDatasource"
   }
 }
