@@ -85,7 +85,7 @@
         "kind": "Variable",
         "spec": {
           "display": {
-            "name": "Prometheus Label Variable"
+            "name": "Prometheus Label Values Variable"
           },
           "name": "PrometheusLabelValuesVariable"
         }
@@ -94,7 +94,7 @@
         "kind": "Variable",
         "spec": {
           "display": {
-            "name": "Prometheus Names Variable"
+            "name": "Prometheus Label Names Variable"
           },
           "name": "PrometheusLabelNamesVariable"
         }
