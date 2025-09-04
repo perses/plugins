@@ -261,6 +261,7 @@ export function PrometheusPromQLVariableEditor(
       />
       <TextField
         label="Label Name"
+        required
         value={props.value.labelName}
         InputProps={{
           readOnly: props.isReadonly,

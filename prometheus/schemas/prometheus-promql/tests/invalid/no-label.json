@@ -2,6 +2,6 @@
   "kind": "PrometheusPromQLVariable",
   "spec": {
     "expr": "up",
-    "labelName": "instance"
+    "labelName": ""
   }
 }

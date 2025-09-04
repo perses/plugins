@@ -21,6 +21,6 @@ import (
 kind: "PrometheusPromQLVariable"
 spec: close({
 	promDs.#selector
-	expr:       strings.MinRunes(1)
-	labelName?: string
+	expr:      strings.MinRunes(1)
+	labelName: strings.MinRunes(1)
 })
