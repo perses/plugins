@@ -253,11 +253,15 @@ async function completeTagName(
 }
 
 function escapeString(input: string, quoteChar: string) {
-  let escaped = input;
-  escaped = escaped.replaceAll('\\', '\\\\');
-  if (quoteChar == '"') {
-    escaped = escaped.replaceAll('"', '\\"');
+  // do not escape raw strings (when using backticks)
+  if (quoteChar === '`') {
+    return input;
   }
+
+  let escaped = input;
+  // escape sequences: https://grafana.com/docs/tempo/v2.8.x/traceql/construct-traceql-queries/#quoted-attribute-names
+  escaped = escaped.replaceAll('\\', '\\\\');
+  escaped = escaped.replaceAll('"', '\\"');
   return escaped;
 }
 
