@@ -186,6 +186,9 @@ export function DataTable(props: DataTableProps): ReactElement {
       pageSizeOptions={[10, 20, 50, 100]}
       initialState={{
         pagination: { paginationModel: { pageSize: 20 } },
+        sorting: {
+          sortModel: [{ field: 'startTimeUnixMs', sort: 'desc' }],
+        },
       }}
     />
   );
