@@ -276,18 +276,20 @@ export function applyQuotedCompletion(view: EditorView, completion: Completion, 
   let quoteChar = defaultQuoteChar;
   if (quoteChars.includes(view.state.sliceDoc(from - 1, from))) {
     quoteChar = view.state.sliceDoc(from - 1, from);
-  } else if (quoteChars.includes(view.state.sliceDoc(to, to + 1))) {
+    from--;
+  }
+  if (quoteChars.includes(view.state.sliceDoc(to, to + 1))) {
     quoteChar = view.state.sliceDoc(to, to + 1);
+    to++;
   }
 
-  let insertText = escapeString(completion.label, quoteChar);
+  // When using raw strings (`), we cannot escape a backtick.
+  // Therefore, switch the quote character.
+  if (completion.label.includes('`')) {
+    quoteChar = '"';
+  }
 
-  if (view.state.sliceDoc(from - 1, from) !== quoteChar) {
-    insertText = quoteChar + insertText;
-  }
-  if (view.state.sliceDoc(to, to + 1) !== quoteChar) {
-    insertText = insertText + quoteChar;
-  }
+  const insertText = quoteChar + escapeString(completion.label, quoteChar) + quoteChar;
   view.dispatch(insertCompletionText(view.state, insertText, from, to));
 }
 
