@@ -45,7 +45,7 @@ Executes the provided PromQL query and returns the results. This plugin relies o
 The Prometheus package provide several built-in variables that can be used within your PromQL queries:
 
 - **`$__interval`**: Current dashboard interval. For dynamic queries that adapt across different time ranges, use `$__interval` instead of hardcoded intervals. It represents the actual spacing between data points: it’s calculated based on the current time range and the panel pixel width (taking the "Min step" as a lower bound).
- -**`__interval_ms`**: Same as `$__interval` but in milliseconds.
+- **`__interval_ms`**: Same as `$__interval` but in milliseconds.
 - **`$__rate_interval`**: Use this one rather than `$__interval` as the range parameter of promQL functions like `rate()`, `increase()`, etc. With such function it is advised to choose a range that is at least 4x the scrape interval (this is to allow for various races, and to be resilient to a failed scrape). `$__rate_interval` provides that, as it is defined as `max($__interval + Min Step, 4 * Min Step)`, where the Min Step value should represent the scrape interval of the metrics.
 
 ### Variable Syntax
