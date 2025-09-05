@@ -124,9 +124,9 @@ spec:
 
 - See [Prometheus Datasource selector](#prometheus-datasource-selector)
 
-### Example
+#### Example
 
-A simple Prometheus LabelNames variable would be
+A simple Prometheus LabelNames variable defined in a project would look like:
 
 ```yaml
 kind: "Variable"
@@ -177,15 +177,14 @@ spec:
 
 - See [Prometheus Datasource selector](#prometheus-datasource-selector)
 
-### Example
+#### Example
 
-A simple Prometheus LabelValues variable would be
+A simple Prometheus LabelValues variable defined in the global scope would look like:
 
 ```yaml
-kind: "Variable"
+kind: "GlobalVariable"
 metadata:
   name: "job"
-  project: "perses"
 spec:
   kind: "ListVariable"
   spec:
@@ -200,10 +199,9 @@ spec:
 A more complex one
 
 ```yaml
-kind: "Variable"
+kind: "GlobalVariable"
 metadata:
   name: "instance"
-  project: "perses"
 spec:
   kind: "ListVariable"
   spec:
@@ -230,10 +228,27 @@ spec:
   datasource: <Prometheus Datasource selector> # Optional
   # The promql expression
   expr: <string>
-  labelName: <string> # Optional
+  labelName: <string>
 ```
 
 - See [Prometheus Datasource selector](#prometheus-datasource-selector)
+
+#### Example
+
+A simple Prometheus PromQL variable defined in a dashboard would look like:
+
+```yaml
+kind: "ListVariable"
+spec:
+  name: "job"
+  allowMultiple: false
+  allowAllValue: false
+  plugin:
+    kind: "PrometheusPromQLVariable"
+    spec:
+      expr: "group by (job) (up)",
+      labelName: "job"
+```
 
 ## Shared definitions
 
