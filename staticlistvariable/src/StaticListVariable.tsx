@@ -8,7 +8,7 @@ type StaticListVariableOptions = {
 };
 
 function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVariableOptions>) {
-  const value = props.value.values.map((v) => {
+  const value = (props.value.values || []).map((v) => {
     if (typeof v === 'string') {
       return v;
     } else {
