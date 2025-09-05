@@ -9,6 +9,7 @@ The Prometheus data source is the base building block that enables the connectio
 It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature of Perses that allows to restrict the access to your data source.
 
 See also technical docs related to this plugin:
+
 - [Data model](./model.md#datasource)
 - [Dashboard-as-Code Go lib](./go-sdk/datasource.md)
 
@@ -25,6 +26,7 @@ Perses offers three specialized variable plugins for Prometheus:
 Returns a list of label values for a specific label across all metrics or within a specific metric. This plugin relies on the Prometheus `/api/v1/label/{label}/values` API endpoint. You can use it e.g to filter dashboards by environment, region, or service.
 
 See also technical docs related to this plugin:
+
 - [Data model](./model.md#prometheuslabelvaluesvariable)
 - [Dashboard-as-Code Go lib](./go-sdk/variable/label-values.md)
 - [Dashboard-as-Code CUE lib](./cue-sdk/variable/label-values.md)
@@ -34,6 +36,7 @@ See also technical docs related to this plugin:
 Returns a list of all available label names, optionally filtered by a metric regex. This plugin relies on the Prometheus `/api/v1/labels` API endpoint. You can use it e.g to discover available labels for exploration or build dynamic queries based on available dimensions.
 
 See also technical docs related to this plugin:
+
 - [Data model](./model.md#prometheuslabelnamesvariable)
 - [Dashboard-as-Code Go lib](./go-sdk/variable/label-names.md)
 - [Dashboard-as-Code CUE lib](./cue-sdk/variable/label-names.md)
@@ -43,6 +46,7 @@ See also technical docs related to this plugin:
 Executes the provided PromQL query and returns the results. This plugin relies on the Prometheus `/api/v1/query` API endpoint. You can use it e.g to create variables based on complex query results or generate dynamic lists using functions like `topk()` or `max_over_time()`.
 
 See also technical docs related to this plugin:
+
 - [Data model](./model.md#prometheuspromqlvariable)
 - [Dashboard-as-Code Go lib](./go-sdk/variable/promql.md)
 - [Dashboard-as-Code CUE lib](./cue-sdk/variable/promql.md)
