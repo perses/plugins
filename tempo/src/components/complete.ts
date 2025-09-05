@@ -289,7 +289,7 @@ export function applyQuotedCompletion(view: EditorView, completion: Completion, 
     quoteChar = '"';
   }
 
-  const insertText = quoteChar + escapeString(completion.label, quoteChar) + quoteChar;
+  const insertText = `${quoteChar}${escapeString(completion.label, quoteChar)}${quoteChar}`;
   view.dispatch(insertCompletionText(view.state, insertText, from, to));
 }
 
