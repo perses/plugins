@@ -12,8 +12,13 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { OptionsEditorGroup, OptionsEditorGrid, OptionsEditorColumn } from '@perses-dev/components';
-import { Button } from '@mui/material';
+import {
+  OptionsEditorGroup,
+  OptionsEditorGrid,
+  OptionsEditorColumn,
+  OptionsEditorControl,
+} from '@perses-dev/components';
+import { Button, TextField } from '@mui/material';
 import { FlameChartOptionsEditorProps } from '../flame-chart-model';
 import {
   usePaletteState,
@@ -22,6 +27,7 @@ import {
   useShowTableState,
   useShowFlameGraphState,
   resetSettings,
+  useTraceHeightState,
 } from '../utils/utils';
 import { PaletteSelector } from './PaletteSelector';
 import { SwitchSelector } from './SwitchSelector';
@@ -34,12 +40,26 @@ export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorPr
   const { handleShowSeriesChange } = useShowSeriesState(props);
   const { handleShowTableChange } = useShowTableState(props);
   const { handleShowFlameGraphChange } = useShowFlameGraphState(props);
+  const { handleTraceHeightChange } = useTraceHeightState(props);
 
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
           <PaletteSelector value={value.palette} onChange={handlePaletteChange} />
+          <OptionsEditorControl
+            label="Trace Height"
+            control={
+              <TextField
+                type="number"
+                value={value.traceHeight ?? ''}
+                slotProps={{ htmlInput: { min: 0, step: 1 } }}
+                onChange={(e) =>
+                  e.target.value ? handleTraceHeightChange(Number(e.target.value)) : handleTraceHeightChange(undefined)
+                }
+              />
+            }
+          />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

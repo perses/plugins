@@ -20,4 +20,5 @@ spec: close({
     showSeries: bool
     showTable: bool
     showFlameGraph: bool
+    traceHeight?: int & >=0
 })

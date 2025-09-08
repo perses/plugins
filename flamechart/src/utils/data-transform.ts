@@ -19,33 +19,33 @@ import { formatItemValue } from './format';
 /**
  * Filter the global stacktrace by a function ID to focus on that function and display its corresponding flame chart
  */
-export function filterJson(json: StackTrace, id?: number): StackTrace {
-  if (id === null) {
-    return json;
+export function filterStackTraceById(trace: StackTrace, id: number | undefined): StackTrace {
+  if (id === undefined) {
+    return trace;
   }
 
-  const recur = (item: StackTrace, id?: number): StackTrace | undefined => {
-    if (item.id === id) {
-      return item;
+  const recur = (trace: StackTrace, id: number | undefined): StackTrace | undefined => {
+    if (trace.id === id) {
+      return trace;
     }
 
-    for (const child of item.children || []) {
+    for (const child of trace.children ?? []) {
       const temp = recur(child, id);
       if (temp) {
-        item.children = [temp];
+        trace = { ...trace }; // Create a shallow copy of the trace to avoid mutating the original object
+        // Override parents' values
+        trace.children = [temp];
+        trace.start = temp.start;
+        trace.end = temp.end;
 
-        // change the parents' values
-        item.start = temp.start;
-        item.end = temp.end;
-        // item.self = temp.self;
-        // item.total = temp.total;
-
-        return item;
+        return trace;
       }
     }
+
+    return undefined;
   };
 
-  return recur(json, id) || json;
+  return recur(trace, id) ?? trace;
 }
 
 // build the name of the corresponding flamechart item
@@ -79,15 +79,15 @@ function getCurrentTotalValue(json: StackTrace, id: number | undefined): number 
 /**
  * Build series data for the flame chart option
  */
-export function recursionJson(
+export function buildSamples(
   palette: string,
   metadata: ProfileMetaData | undefined,
-  jsonObj: StackTrace,
+  traces: StackTrace,
   searchValue: string,
   id?: number
 ): Sample[] {
   const data: Sample[] = [];
-  const filteredJson = filterJson(structuredClone(jsonObj), id);
+  const filteredJson = filterStackTraceById(traces, id);
 
   const rootVal = filteredJson.total; // total samples of root node
   const currentVal = getCurrentTotalValue(filteredJson, id); // total samples of the selected item, used to generate items colors
@@ -176,4 +176,14 @@ export function findTotalSampleByName(seriesData: Sample[], name: number | undef
   const item = seriesData.find((item) => item.name === name);
   const totalSample = item?.value[8];
   return Number(totalSample);
+}
+
+/*
+ * Calculate the maximum depth of the stack trace
+ */
+export function getMaxDepth(trace: StackTrace): number {
+  if (!trace.children || trace.children.length === 0) {
+    return 1;
+  }
+  return 1 + Math.max(...trace.children.map(getMaxDepth));
 }

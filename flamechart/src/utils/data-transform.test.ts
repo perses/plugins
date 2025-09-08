@@ -13,13 +13,13 @@
 
 import { StackTrace } from '@perses-dev/core';
 import { FlameChartSample as Sample } from './data-model';
-import { filterJson, recursionJson } from './data-transform';
+import { filterStackTraceById, buildSamples } from './data-transform';
 import { getSpanColor } from './palette-gen';
 
 // define the structuredClone function
 global.structuredClone = (val) => JSON.parse(JSON.stringify(val));
 
-describe('filterJson', () => {
+describe('filterStackTraceById', () => {
   const emptyJson: StackTrace = {} as StackTrace;
   const rootJson: StackTrace = {
     id: 1,
@@ -54,34 +54,34 @@ describe('filterJson', () => {
 
   // json is empty
   it('should return an empty stacktrace when json is empty', () => {
-    const output1 = filterJson(emptyJson);
-    const output2 = filterJson(emptyJson, 3);
+    const output1 = filterStackTraceById(emptyJson, undefined);
+    const output2 = filterStackTraceById(emptyJson, 3);
     expect(output1).toEqual(emptyJson);
     expect(output2).toEqual(emptyJson);
   });
 
   // id not provided
   it('should return the same stacktrace when id is not provided', () => {
-    const output = filterJson(rootJson);
+    const output = filterStackTraceById(rootJson, undefined);
     expect(output).toEqual(rootJson);
   });
 
   // id provided
   it('should return the right stacktrace for a given stacktrace and id', () => {
     rootJson.children.push(firstChildJson, secondChildJson); // root function now has two children
-    const output = filterJson(rootJson, 1);
+    const output = filterStackTraceById(rootJson, 1);
     rootJson.children.pop();
     expect(output).toEqual(rootJson); // expected = rootJson with only the first child
   });
 
   it('should return the same stacktrace when the id not existed', () => {
     rootJson.children.push(firstChildJson, secondChildJson);
-    const output = filterJson(rootJson, 5); // no function has this id
+    const output = filterStackTraceById(rootJson, 5); // no function has this id
     expect(output).toEqual(rootJson);
   });
 });
 
-describe('recursionJson', () => {
+describe('buildSamples', () => {
   const emptyJson: StackTrace = {} as StackTrace;
   const rootJson: StackTrace = {
     id: 1,
@@ -122,13 +122,13 @@ describe('recursionJson', () => {
   const palette = 'package-name';
 
   it('should return an empty array when jsonObj is empty', () => {
-    const output = recursionJson(palette, metadata, emptyJson, '');
+    const output = buildSamples(palette, metadata, emptyJson, '');
     expect(output).toEqual([]);
   });
 
   it('should return the right array for a given jsonObj', () => {
     rootJson.children.push(firstChildJson, secondChildJson); // root function now has two children
-    const output = recursionJson(palette, metadata, rootJson, '');
+    const output = buildSamples(palette, metadata, rootJson, '');
     const expected0: Sample = {
       name: 1,
       value: [1, 0, 1000, 'total (1.00K)', 100, 0, 'total', 0, 1000],

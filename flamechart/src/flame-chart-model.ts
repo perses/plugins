@@ -27,6 +27,7 @@ export interface FlameChartOptions {
   showSeries: boolean;
   showTable: boolean;
   showFlameGraph: boolean;
+  traceHeight?: number;
 }
 
 export type FlameChartOptionsEditorProps = OptionsEditorProps<FlameChartOptions>;

@@ -34,6 +34,25 @@ export function usePaletteState(props: FlameChartOptionsEditorProps): {
 }
 
 /**
+ * Hook to manage `traceHeight` state.
+ */
+export function useTraceHeightState(props: FlameChartOptionsEditorProps): {
+  handleTraceHeightChange: (newHeight: number | undefined) => void;
+} {
+  const { onChange, value } = props;
+
+  const handleTraceHeightChange = (newHeight: number | undefined): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.traceHeight = newHeight;
+      })
+    );
+  };
+
+  return { handleTraceHeightChange };
+}
+
+/**
  * Hook to manage `showSettings` state.
  */
 export function useShowSettingsState(props: FlameChartOptionsEditorProps): {

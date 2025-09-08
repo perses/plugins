@@ -25,7 +25,7 @@ import RefreshIcon from 'mdi-material-ui/Refresh';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
-import { recursionJson, findTotalSampleByName } from '../utils/data-transform';
+import { buildSamples, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
 import { FlameChartSample as Sample } from '../utils/data-model';
 import { CustomBreadcrumb } from './CustomBreadcrumb';
@@ -56,7 +56,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const [isCopied, setIsCopied] = useState(false);
 
   const seriesData = useMemo(
-    () => recursionJson(palette, data.metadata, data.profile.stackTrace, searchValue, selectedId),
+    () => buildSamples(palette, data.metadata, data.profile.stackTrace, searchValue, selectedId),
     [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue]
   );
 

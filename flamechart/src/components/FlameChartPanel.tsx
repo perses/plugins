@@ -14,10 +14,11 @@
 import { TitleComponentOption } from 'echarts';
 import { useChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps, useMediaQuery, useTheme } from '@mui/material';
-import { FC, useState, useEffect } from 'react';
-import { ProfileData } from '@perses-dev/core';
+import { FC, useState, useEffect, useMemo } from 'react';
+import { ProfileData, StackTrace } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { FlameChartOptions } from '../flame-chart-model';
+import { filterStackTraceById, getMaxDepth } from '../utils/data-transform';
 import { FlameChart } from './FlameChart';
 import { Settings } from './Settings';
 import { TableChart } from './TableChart';
@@ -49,9 +50,22 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   }, [spec]);
 
   const chartsTheme = useChartsTheme();
-  const flameChartData = queryResults[0];
+  const flameChartData = useMemo(() => {
+    return queryResults[0];
+  }, [queryResults]);
 
-  if (contentDimensions === undefined) return null;
+  const selectedStackTrace: StackTrace | undefined = useMemo(() => {
+    if (flameChartData === undefined) return undefined;
+    if (selectedId === 0) return flameChartData.data.profile.stackTrace;
+
+    return filterStackTraceById(flameChartData.data.profile.stackTrace, selectedId);
+  }, [flameChartData, selectedId]);
+
+  const maxDepth: number = useMemo(() => {
+    if (!selectedStackTrace) return 0;
+
+    return getMaxDepth(selectedStackTrace);
+  }, [selectedStackTrace]);
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
@@ -74,18 +88,27 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     });
   };
 
+  if (contentDimensions === undefined) return null;
+
   const PADDING =
     liveSpec.showSeries && liveSpec.showSettings ? 32 : liveSpec.showSeries || liveSpec.showSettings ? 16 : 0;
 
   const SETTINGS_HEIGHT = liveSpec.showSettings ? 30 : 0;
+
   const SERIES_CHART_HEIGHT = liveSpec.showSeries
     ? contentDimensions.height < DEFAULT_SERIES_CHART_HEIGHT
       ? contentDimensions.height
       : DEFAULT_SERIES_CHART_HEIGHT
     : 0;
-  const TABLE_FLAME_CHART_HEIGHT =
-    contentDimensions.height -
-    (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0);
+
+  const TABLE_FLAME_CHART_HEIGHT = liveSpec.traceHeight
+    ? Math.max(
+        contentDimensions.height -
+          (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0),
+        maxDepth * liveSpec.traceHeight
+      )
+    : contentDimensions.height -
+      (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0);
 
   const TABLE_CHART_WIDTH = isMobileSize
     ? contentDimensions.width
@@ -99,6 +122,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
       ? 0.6 * contentDimensions.width
       : contentDimensions.width;
 
+  // TODO (gladorme): allow users to override height (useful for explorer for stack traces with high depth)
   return (
     <Stack
       height={contentDimensions.height}
@@ -114,7 +138,11 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
       ) : flameChartData ? (
         <Stack
           gap={2}
-          sx={{ overflowY: 'auto', scrollbarGutter: 'stable both-edges', paddingTop: liveSpec.showSeries ? 0 : 1 }}
+          sx={{
+            overflowY: 'auto',
+            scrollbarGutter: 'stable both-edges',
+            paddingTop: liveSpec.showSettings || liveSpec.showSeries ? 1 : 0,
+          }}
         >
           {liveSpec.showSeries && (
             <SeriesChart width={contentDimensions.width} height={SERIES_CHART_HEIGHT} data={flameChartData.data} />
