@@ -51,11 +51,11 @@ func release(pluginName string) {
 //
 // This will release every plugin not yet released:
 //
-//	go run ./scripts/release/release.go --all
+//	go run ./scripts/release --all
 //
 // This will release only the tempo plugin (note that the `--name` flag is set with the folder name not the plugin name):
 //
-//	go run ./scripts/release/release.go --name=tempo
+//	go run ./scripts/release --name=tempo
 //
 // NB: this script doesn't handle the plugin archive creation, a CI task achieves this.
 func main() {

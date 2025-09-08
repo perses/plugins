@@ -24,15 +24,11 @@ import (
 
 func getPreviousTag(pluginName string) string {
 	pluginName = strings.ToLower(pluginName)
-	data, err := exec.Command("git", "tag", "--list", fmt.Sprintf("%s/v*", pluginName)).Output()
+	data, err := exec.Command("git", "describe", "--tags", "--match", fmt.Sprintf("%s/v*", pluginName)).Output()
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	tags := strings.Split(strings.TrimSpace(string(data)), "\n")
-	if len(tags) == 0 {
-		return ""
-	}
-	return tags[len(tags)-1]
+	return string(data)
 }
 
 func generateChangelog(pluginName string) string {
