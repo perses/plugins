@@ -15,6 +15,7 @@ package migrate
 
 import (
 	commonMigrate "github.com/perses/perses/cue/common/migrate"
+	"strings"
 )
 
 #grafanaType: "timeseries" | "graph"
@@ -136,14 +137,14 @@ spec: {
 		visual: stack: "all"
 	}
 
-	// migrate byName-based fixedColor overrides to querySettings when applicable
+	// migrate fixedColor overrides to querySettings when applicable
 	#querySettings: [
 		for override in (*#panel.fieldConfig.overrides | [])
-		if override.matcher.id == "byName" && override.matcher.options != _|_
+		if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && override.matcher.options != _|_
 		for property in override.properties
 		if (*property.value.fixedColor | null) != null
 		for i, target in (*#panel.targets | [])
-		if target.legendFormat == override.matcher.options {
+		if target.legendFormat == override.matcher.options || target.legendFormat =~ strings.Trim(override.matcher.options, "/") {
 			queryIndex: i
 			colorMode: "fixed"
 			colorValue: property.value.fixedColor

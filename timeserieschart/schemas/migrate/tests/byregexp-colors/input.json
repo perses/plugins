@@ -1,0 +1,184 @@
+{
+  "id": 7,
+  "type": "timeseries",
+  "title": "Memory ($memory) [$cluster - $pod - $container]",
+  "description": "$memory memory for selected containers\n- Lt: memory limit (if set)\n- Rq: memory request (if set)\n\nMemory types to display:\n- <b>rss</b><br/>Resident set size in bytes (RSS).\n- <b>working_set_bytes</b><br/>Working set in bytes (WSS).\n- <b>usage_bytes</b><br/>Total memory usage in bytes (including cache).\n- <b>cache</b><br/>Number of bytes of page cache memory.\n- <b>swap</b><br/>Container swap usage in bytes. ",
+  "gridPos": {
+    "x": 0,
+    "y": 2,
+    "h": 9,
+    "w": 24
+  },
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "drawStyle": "line",
+        "lineInterpolation": "linear",
+        "barAlignment": 0,
+        "barWidthFactor": 0.6,
+        "lineWidth": 2,
+        "fillOpacity": 10,
+        "gradientMode": "none",
+        "spanNulls": false,
+        "insertNulls": false,
+        "showPoints": "never",
+        "pointSize": 5,
+        "stacking": {
+          "mode": "none",
+          "group": "A"
+        },
+        "axisPlacement": "auto",
+        "axisLabel": "Memory",
+        "axisColorMode": "text",
+        "axisBorderShow": false,
+        "scaleDistribution": {
+          "type": "linear"
+        },
+        "axisCenteredZero": false,
+        "hideFrom": {
+          "tooltip": false,
+          "viz": false,
+          "legend": false
+        },
+        "thresholdsStyle": {
+          "mode": "off"
+        },
+        "axisSoftMin": 0
+      },
+      "color": {
+        "mode": "palette-classic"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": []
+      },
+      "unit": "bytes"
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byRegexp",
+          "options": "/^(Rq|Lt): .+$/"
+        },
+        "properties": [
+          {
+            "id": "custom.fillOpacity",
+            "value": 0
+          },
+          {
+            "id": "custom.lineWidth",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byRegexp",
+          "options": "/^Lt: .+$/"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#F2495C",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byRegexp",
+          "options": "/^Rq: .+$/"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#5794F2",
+              "mode": "fixed"
+            }
+          },
+          {
+            "id": "custom.lineStyle",
+            "value": {
+              "dash": [
+                8,
+                10
+              ],
+              "fill": "dash"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "pluginVersion": "11.6.3",
+  "targets": [
+    {
+      "exemplar": false,
+      "expr": "max by (cluster,pod,container) (container_memory_$memory{cluster=~\"$cluster\",pod=~\"$pod\",container=~\"$container\"})",
+      "format": "time_series",
+      "hide": false,
+      "instant": false,
+      "interval": "$sampling",
+      "intervalFactor": 1,
+      "legendFormat": "{{container_name}} - {{pod_name}} - {{cluster}}",
+      "refId": "memory_a",
+      "datasource": {
+        "uid": "$datasource"
+      }
+    },
+    {
+      "exemplar": false,
+      "expr": "max by (cluster,pod,container) (kube_pod_container_resource_requests{cluster=~\"$cluster\",pod=~\"$pod\",container=~\"$container\",resource=\"memory\"})",
+      "format": "time_series",
+      "hide": false,
+      "instant": false,
+      "interval": "$sampling",
+      "intervalFactor": 1,
+      "legendFormat": "Rq: {{container}} - {{pod}} - {{cluster}}",
+      "refId": "memory_c",
+      "datasource": {
+        "uid": "$datasource"
+      }
+    },
+    {
+      "exemplar": false,
+      "expr": "max by (cluster,pod,container) (kube_pod_container_resource_limits{cluster=~\"$cluster\",pod=~\"$pod\",container=~\"$container\",resource=\"memory\"})",
+      "format": "time_series",
+      "hide": false,
+      "instant": false,
+      "interval": "$sampling",
+      "intervalFactor": 1,
+      "legendFormat": "Lt: {{container}} - {{pod}} - {{cluster}}",
+      "refId": "memory_d",
+      "datasource": {
+        "uid": "$datasource"
+      }
+    }
+  ],
+  "datasource": {
+    "uid": "$datasource"
+  },
+  "options": {
+    "tooltip": {
+      "mode": "multi",
+      "sort": "desc",
+      "hideZeros": false
+    },
+    "legend": {
+      "showLegend": true,
+      "displayMode": "table",
+      "placement": "right",
+      "calcs": [
+        "min",
+        "max",
+        "mean"
+      ],
+      "sortBy": "Max",
+      "sortDesc": true
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "position": "right",
+      "mode": "table",
+      "values": [
+        "min",
+        "max",
+        "mean"
+      ]
+    },
+    "yAxis": {
+      "format": {
+        "unit": "bytes"
+      }
+    },
+    "visual": {
+      "lineWidth": 2,
+      "areaOpacity": 0.1,
+      "connectNulls": false,
+      "display": "line"
+    },
+    "querySettings": [
+      {
+        "queryIndex": 2,
+        "colorMode": "fixed",
+        "colorValue": "#F2495C"
+      },
+      {
+        "queryIndex": 1,
+        "colorMode": "fixed",
+        "colorValue": "#5794F2"
+      }
+    ]
+  }
+}
