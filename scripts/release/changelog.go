@@ -14,6 +14,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -28,7 +29,7 @@ func getPreviousTag(pluginName string) string {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	return string(data)
+	return string(bytes.ReplaceAll(data, []byte("\n"), []byte("")))
 }
 
 func generateChangelog(pluginName string) string {
