@@ -24,7 +24,7 @@ import { Settings } from './Settings';
 import { TableChart } from './TableChart';
 import { SeriesChart } from './SeriesChart';
 
-const LARGE_PANEL_TRESHOLD = 600;
+const LARGE_PANEL_THRESHOLD = 600;
 const DEFAULT_SERIES_CHART_HEIGHT = 200;
 
 export type FlameChartPanelProps = PanelProps<FlameChartOptions, ProfileData>;
@@ -55,17 +55,16 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   }, [queryResults]);
 
   const selectedStackTrace: StackTrace | undefined = useMemo(() => {
-    if (flameChartData === undefined) return undefined;
-    if (selectedId === 0) return flameChartData.data.profile.stackTrace;
+    if (!flameChartData) return undefined;
+    if (!selectedId) return flameChartData.data.profile.stackTrace;
 
     return filterStackTraceById(flameChartData.data.profile.stackTrace, selectedId);
   }, [flameChartData, selectedId]);
 
-  const maxDepth: number = useMemo(() => {
-    if (!selectedStackTrace) return 0;
-
-    return getMaxDepth(selectedStackTrace);
-  }, [selectedStackTrace]);
+  const maxDepth: number = useMemo(
+    () => (selectedStackTrace ? getMaxDepth(selectedStackTrace) : 0),
+    [selectedStackTrace]
+  );
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
@@ -88,7 +87,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     });
   };
 
-  if (contentDimensions === undefined) return null;
+  if (!contentDimensions) return null;
 
   const PADDING =
     liveSpec.showSeries && liveSpec.showSettings ? 32 : liveSpec.showSeries || liveSpec.showSettings ? 16 : 0;
@@ -104,11 +103,11 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   const TABLE_FLAME_CHART_HEIGHT = liveSpec.traceHeight
     ? Math.max(
         contentDimensions.height -
-          (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0),
+          (contentDimensions.height > LARGE_PANEL_THRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0),
         maxDepth * liveSpec.traceHeight
       )
     : contentDimensions.height -
-      (contentDimensions.height > LARGE_PANEL_TRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0);
+      (contentDimensions.height > LARGE_PANEL_THRESHOLD ? SERIES_CHART_HEIGHT + SETTINGS_HEIGHT + PADDING : 0);
 
   const TABLE_CHART_WIDTH = isMobileSize
     ? contentDimensions.width

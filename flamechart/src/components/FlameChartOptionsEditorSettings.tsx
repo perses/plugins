@@ -54,9 +54,7 @@ export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorPr
                 type="number"
                 value={value.traceHeight ?? ''}
                 slotProps={{ htmlInput: { min: 0, step: 1 } }}
-                onChange={(e) =>
-                  e.target.value ? handleTraceHeightChange(Number(e.target.value)) : handleTraceHeightChange(undefined)
-                }
+                onChange={handleTraceHeightChange}
               />
             }
           />

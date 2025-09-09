@@ -182,7 +182,7 @@ export function findTotalSampleByName(seriesData: Sample[], name: number | undef
  * Calculate the maximum depth of the stack trace
  */
 export function getMaxDepth(trace: StackTrace): number {
-  if (!trace.children || trace.children.length === 0) {
+  if (!trace.children?.length) {
     return 1;
   }
   return 1 + Math.max(...trace.children.map(getMaxDepth));

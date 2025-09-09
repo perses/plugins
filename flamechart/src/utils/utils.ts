@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
+import { ChangeEventHandler } from 'react';
 import { FlameChartOptionsEditorProps } from '../flame-chart-model';
 
 /**
@@ -37,14 +38,14 @@ export function usePaletteState(props: FlameChartOptionsEditorProps): {
  * Hook to manage `traceHeight` state.
  */
 export function useTraceHeightState(props: FlameChartOptionsEditorProps): {
-  handleTraceHeightChange: (newHeight: number | undefined) => void;
+  handleTraceHeightChange: ChangeEventHandler<HTMLInputElement>;
 } {
   const { onChange, value } = props;
 
-  const handleTraceHeightChange = (newHeight: number | undefined): void => {
+  const handleTraceHeightChange: ChangeEventHandler<HTMLInputElement> = (event): void => {
     onChange(
       produce(value, (draft) => {
-        draft.traceHeight = newHeight;
+        draft.traceHeight = event.target.value ? Number(event.target.value) : undefined;
       })
     );
   };
