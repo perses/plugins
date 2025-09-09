@@ -16,7 +16,8 @@
       "format": {
         "unit": "bytes"
       },
-      "label": "Amount of endpoints succesfully monitored"
+      "label": "Amount of endpoints succesfully monitored",
+      "min": 0
     }
   }
 }

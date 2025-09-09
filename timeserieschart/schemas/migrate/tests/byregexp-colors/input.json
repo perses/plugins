@@ -11,6 +11,7 @@
   },
   "fieldConfig": {
     "defaults": {
+      "min": 0,
       "custom": {
         "drawStyle": "line",
         "lineInterpolation": "linear",
@@ -43,7 +44,7 @@
         "thresholdsStyle": {
           "mode": "off"
         },
-        "axisSoftMin": 0
+        "axisSoftMin": -123
       },
       "color": {
         "mode": "palette-classic"
