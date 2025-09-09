@@ -49,6 +49,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     value,
     value: { query, datasource },
     queryHandlerSettings,
+    isReadonly,
   } = props;
 
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
@@ -131,6 +132,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           labelId={datasourceSelectLabelID}
           label="Prometheus Datasource"
           notched
+          readOnly={isReadonly}
         />
       </FormControl>
       <PromQLEditor
@@ -139,6 +141,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         datasource={selectedDatasource}
         onChange={handlePromQlEditorChanges}
         onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
+        isReadOnly={isReadonly}
       />
       <Stack direction="row" spacing={2}>
         <TextField
@@ -149,6 +152,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           value={format ?? ''}
           onChange={handleLegendSpecChange}
           onBlur={queryHandlerSettings?.runWithOnBlur ? handleFormatBlur : undefined}
+          disabled={isReadonly}
         />
         <TextField
           label="Min Step"
@@ -158,6 +162,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           onChange={handleMinStepSpecChange}
           onBlur={queryHandlerSettings?.runWithOnBlur ? handleMinStepBlur : undefined}
           sx={{ width: '250px' }}
+          disabled={isReadonly}
         />
       </Stack>
     </Stack>
