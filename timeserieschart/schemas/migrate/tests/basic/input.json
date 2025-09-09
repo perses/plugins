@@ -10,6 +10,7 @@
         "mode": "palette-classic"
       },
       "custom": {
+        "axisLabel": "Amount of endpoints succesfully monitored",
         "barAlignment": 0,
         "barWidthFactor": 0.6,
         "drawStyle": "line",

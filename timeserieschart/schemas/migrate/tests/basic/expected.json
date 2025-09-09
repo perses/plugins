@@ -15,7 +15,8 @@
     "yAxis": {
       "format": {
         "unit": "bytes"
-      }
+      },
+      "label": "Amount of endpoints succesfully monitored"
     }
   }
 }

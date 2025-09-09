@@ -13,7 +13,8 @@
     "yAxis": {
       "format": {
         "unit": "bytes"
-      }
+      },
+      "label": "Memory"
     },
     "visual": {
       "lineWidth": 2,

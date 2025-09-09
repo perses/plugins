@@ -82,6 +82,11 @@ spec: {
 		yAxis: max: #max
 	}
 
+	#yAxisLabel: *#panel.fieldConfig.defaults.custom.axisLabel | null
+	if #yAxisLabel != null if len(#yAxisLabel) > 0 {
+		yAxis: label: #yAxisLabel
+	}
+
 	// thresholds
 	// -> migrate thresholds only if they are visible
 	#steps: *#panel.fieldConfig.defaults.thresholds.steps | null
