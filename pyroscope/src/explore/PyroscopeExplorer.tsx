@@ -28,6 +28,7 @@ const initialSpec = {
   showSeries: true,
   showTable: true,
   showFlameGraph: true,
+  traceHeight: 25,
 };
 
 function FlameGraphPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
