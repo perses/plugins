@@ -54,7 +54,7 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
         {span.name}
       </Typography>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tab} onChange={(_, tab) => setTab(tab)}>
+        <Tabs value={tab} onChange={(_, tab) => setTab(tab)} variant="scrollable">
           <Tab sx={{ p: 0 }} value="attributes" label="Attributes" />
           {span.events.length > 0 && (
             <Tab
