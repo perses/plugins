@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, IconButton, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Chip, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
 import { Span, Trace } from '../trace';
@@ -56,8 +56,24 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tab} onChange={(_, tab) => setTab(tab)}>
           <Tab sx={{ p: 0 }} value="attributes" label="Attributes" />
-          {span.events.length > 0 && <Tab value="events" label="Events" />}
-          {span.links.length > 0 && <Tab value="links" label="Links" />}
+          {span.events.length > 0 && (
+            <Tab
+              value="events"
+              label="Events"
+              icon={<Chip label={span.events.length} />}
+              iconPosition="end"
+              sx={{ minHeight: 48, height: 48 }} // MUI Tabs with icon are bigger than those without by default
+            />
+          )}
+          {span.links.length > 0 && (
+            <Tab
+              value="links"
+              label="Links"
+              icon={<Chip label={span.links.length} />}
+              iconPosition="end"
+              sx={{ minHeight: 48, height: 48 }} // MUI Tabs with icon are bigger than those without by default
+            />
+          )}
         </Tabs>
       </Box>
       {tab === 'attributes' && <TraceAttributes customLinks={customLinks} trace={trace} span={span} />}
