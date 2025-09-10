@@ -128,12 +128,14 @@ export function MetricNameExplorer({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search metric name..."
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Magnify />
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Magnify />
+              </InputAdornment>
+            ),
+          },
         }}
       />
       <MetricList
@@ -186,7 +188,7 @@ export function PrometheusMetricsFinder({
 
   // Remove duplicated filters and filters without label or labelValues
   const filteredFilters: LabelFilter[] = useMemo(() => {
-    return filters.filter((filter) => filter.label && filter.labelValues.length > 0);
+    return filters.filter((filter) => filter.label && filter.labelValues.length > 0 && filter.labelValues[0]);
   }, [filters]);
 
   const searchParams = useExplorerQueryParams({

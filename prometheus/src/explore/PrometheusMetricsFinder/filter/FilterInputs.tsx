@@ -169,6 +169,20 @@ export function RawFilterInput({
         value={value.operator}
         variant="outlined"
         onChange={(event: SelectChangeEvent) => {
+          if (value.operator === '=' || value.operator === '!=') {
+            // switch from single to multiple
+            return onChange({ label: value.label, labelValues: [], operator: event.target.value as Operator });
+          }
+
+          if (value.operator === '=~' || value.operator === '!~') {
+            // switch from multiple to single, keep the first value if exists
+            return onChange({
+              label: value.label,
+              labelValues: value.labelValues.slice(0, 1),
+              operator: event.target.value as Operator,
+            });
+          }
+
           onChange({ label: value.label, labelValues: value.labelValues, operator: event.target.value as Operator });
         }}
         size="medium"
