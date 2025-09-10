@@ -137,8 +137,13 @@ export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: 
       </Stack>
 
       <Stack sx={{ width: '100%' }} gap={0.5}>
-        <Stack direction="row" gap={2}>
+        <Stack direction="row" gap={0.5}>
           <Typography variant="subtitle1">{valueCounters.length} values</Typography>
+          {valueCounters.length > 5 && (
+            <Button variant="text" size="small" sx={{ padding: 0 }} onClick={() => setShowAllValues((prev) => !prev)}>
+              {showAllValues ? '[-]' : '[+]'}
+            </Button>
+          )}
         </Stack>
 
         <Stack sx={{ overflow: isMobileSize ? 'auto' : 'unset' }}>
