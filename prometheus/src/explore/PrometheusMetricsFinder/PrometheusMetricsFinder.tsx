@@ -188,7 +188,7 @@ export function PrometheusMetricsFinder({
 
   // Remove duplicated filters and filters without label or labelValues
   const filteredFilters: LabelFilter[] = useMemo(() => {
-    return filters.filter((filter) => filter.label && filter.labelValues.length > 0 && filter.labelValues[0]);
+    return filters.filter(({ label, labelValues }) => label && labelValues?.[0]);
   }, [filters]);
 
   const searchParams = useExplorerQueryParams({
