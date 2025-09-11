@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import { Stack, TextField, MenuItem, CircularProgress, useTheme } from '@mui/material';
+import { ReactElement, SyntheticEvent } from 'react';
+import { Stack, TextField, Autocomplete } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useServices } from '../utils/use-query';
 
@@ -27,31 +27,29 @@ export function Service(props: ServiceProps): ReactElement {
 
   const { data: servicesOptions, isLoading: isServicesOptionsLoading } = useServices(datasource);
 
+  function handleServiceChange(_event: SyntheticEvent, newValue: string | null): void {
+    if (newValue !== null) {
+      onChange?.(newValue);
+    }
+  }
+
   return (
     <Stack
       position="relative"
       sx={{
-        flexGrow: 1,
-        maxWidth: '100%',
-        [useTheme().breakpoints.down('sm')]: {
-          width: '100%',
-        },
+        width: '100%',
       }}
     >
-      <TextField select label="Service" value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
-        {isServicesOptionsLoading ? (
-          <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress color="inherit" size={20} />
-          </Stack>
-        ) : (
-          servicesOptions?.names &&
-          servicesOptions?.names.map((service) => (
-            <MenuItem key={service} value={service}>
-              {service}
-            </MenuItem>
-          ))
-        )}
-      </TextField>
+      <Autocomplete
+        options={servicesOptions?.names ?? []}
+        value={value}
+        sx={{ minWidth: 200 }}
+        loading={isServicesOptionsLoading}
+        renderInput={(params) => {
+          return <TextField {...params} label="Service" size="small" />;
+        }}
+        onChange={handleServiceChange}
+      />
     </Stack>
   );
 }

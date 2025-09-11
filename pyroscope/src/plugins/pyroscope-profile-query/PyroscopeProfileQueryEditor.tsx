@@ -14,14 +14,14 @@
 import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { produce } from 'immer';
-import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { FormControl, InputLabel, Stack, TextField, useTheme } from '@mui/material';
 import { ReactElement } from 'react';
 import {
   DEFAULT_PYROSCOPE,
   isDefaultPyroscopeSelector,
   isPyroscopeDatasourceSelector,
   PYROSCOPE_DATASOURCE_KIND,
-} from '../../model/pyroscope-selectors';
+} from '../../model';
 import { ProfileTypeSelector, Service, Filters } from '../../components';
 import {
   ProfileQueryEditorProps,
@@ -49,8 +49,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
         onChange(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-            const nextDatasource = isDefaultPyroscopeSelector(next) ? undefined : next;
-            draft.datasource = nextDatasource;
+            draft.datasource = isDefaultPyroscopeSelector(next) ? undefined : next;
           })
         );
         return;
@@ -77,22 +76,25 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
       </FormControl>
       <Stack
         direction="row"
-        spacing={0}
         sx={{
-          flexWrap: 'wrap',
-          rowGap: 1,
+          [useTheme().breakpoints.down('sm')]: {
+            flexWrap: 'wrap',
+          },
           gap: 2,
+          rowGap: 1,
         }}
       >
         <Service datasource={selectedDatasource} value={service} onChange={handleServiceChange} />
         <ProfileTypeSelector datasource={selectedDatasource} value={profileType} onChange={handleProfileTypeChange} />
         <TextField
+          type="number"
           size="small"
           label="Max Nodes"
           value={maxNodes}
           error={maxNodesHasError}
           onChange={(e) => handleMaxNodesChange(e.target.value)}
-          sx={{ width: '110px' }}
+          sx={(theme) => ({ width: 250, [theme.breakpoints.down('sm')]: { width: '100%' } })}
+          slotProps={{ htmlInput: { step: 1 } }}
         />
       </Stack>
       <Filters datasource={selectedDatasource} value={filters} onChange={handleFiltersChange} />

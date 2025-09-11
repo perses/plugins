@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Select, MenuItem, CircularProgress, Stack } from '@mui/material';
+import { TextField, Autocomplete } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useLabelValues } from '../utils/use-query';
 
@@ -29,32 +29,30 @@ export function LabelValue(props: LabelValueProps): ReactElement {
   const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useLabelValues(datasource, labelName);
 
   return (
-    <Select
-      sx={{ borderRadius: '0' }}
+    <Autocomplete
+      freeSolo
+      disableClearable
+      options={labelValuesOptions?.names ?? []}
       value={value}
-      size="small"
-      onChange={(event) => onChange?.(event.target.value)}
-      displayEmpty
-      disabled={!labelName || labelName === ''} // Disabled if labelName is not defined yet
-      renderValue={(selected) => {
-        if (selected === '') {
-          return 'Select label value';
-        }
-        return selected;
+      sx={(theme) => ({
+        width: '100%',
+        '& .MuiOutlinedInput-root': {
+          borderRadius: 0,
+          width: '100%',
+          [theme.breakpoints.down('sm')]: {
+            borderBottomLeftRadius: 4,
+          },
+        },
+      })}
+      loading={isLabelValuesOptionsLoading}
+      renderInput={(params) => {
+        return <TextField {...params} placeholder="Select label value" size="small" />;
       }}
-    >
-      {isLabelValuesOptionsLoading ? (
-        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress color="inherit" size={20} />
-        </Stack>
-      ) : (
-        labelValuesOptions?.names &&
-        labelValuesOptions?.names.map((labelValue) => (
-          <MenuItem key={labelValue} value={labelValue}>
-            {labelValue}
-          </MenuItem>
-        ))
-      )}
-    </Select>
+      onChange={(_event, newInputValue) => {
+        if (newInputValue !== null) {
+          onChange?.(newInputValue);
+        }
+      }}
+    />
   );
 }

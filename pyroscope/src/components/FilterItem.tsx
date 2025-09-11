@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Stack } from '@mui/material';
+import { Grid2 as Grid, Stack } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { LabelFilter, OperatorType } from '../utils/types';
 import { LabelName } from './LabelName';
@@ -47,16 +47,30 @@ export function FilterItem(props: FilterItemProps): ReactElement {
   };
 
   return (
-    <Stack direction="row" spacing={0} sx={{ flexWrap: 'wrap', maxWidth: '100%' }}>
-      <LabelName datasource={datasource} value={value.labelName} onChange={handleLabelNameChange} />
-      <Operator value={value.operator} onChange={handleOperatorChange} />
-      <LabelValue
-        datasource={datasource}
-        value={value.labelValue}
-        labelName={value.labelName}
-        onChange={handleLabelValueChange}
-      />
-      <DeleteFilterItem onClick={handleDeleteClick} />
+    <Stack
+      direction="row"
+      spacing={0}
+      sx={(theme) => ({ flexWrap: 'wrap', width: 500, [theme.breakpoints.down('sm')]: { width: '100%' } })}
+    >
+      <Grid container sx={{ width: '100%' }}>
+        <Grid size={{ xs: 9.5, md: 4.5 }}>
+          <LabelName datasource={datasource} value={value.labelName} onChange={handleLabelNameChange} />
+        </Grid>
+        <Grid size={{ xs: 2.5, md: 1.5 }}>
+          <Operator value={value.operator} onChange={handleOperatorChange} />
+        </Grid>
+        <Grid size={{ xs: 10, md: 5 }}>
+          <LabelValue
+            datasource={datasource}
+            value={value.labelValue}
+            labelName={value.labelName}
+            onChange={handleLabelValueChange}
+          />
+        </Grid>
+        <Grid size={{ xs: 2, md: 1 }}>
+          <DeleteFilterItem onClick={handleDeleteClick} />
+        </Grid>
+      </Grid>
     </Stack>
   );
 }

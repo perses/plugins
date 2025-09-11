@@ -25,7 +25,18 @@ export function Operator(props: OperatorProps): ReactElement {
   const operators = ['=', '!=', '=~', '!~'];
 
   return (
-    <Select sx={{ borderRadius: '0' }} value={value} size="small" onChange={(event) => onChange?.(event.target.value)}>
+    <Select
+      sx={(theme) => ({
+        borderRadius: 0,
+        width: '100%',
+        [theme.breakpoints.down('sm')]: {
+          borderTopRightRadius: 4,
+        },
+      })}
+      value={value}
+      size="small"
+      onChange={(event) => onChange?.(event.target.value)}
+    >
       {operators.map((op) => (
         <MenuItem key={op} value={op}>
           {op}

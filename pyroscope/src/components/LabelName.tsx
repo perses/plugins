@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import { Select, MenuItem, CircularProgress, Stack } from '@mui/material';
+import { ReactElement, useMemo } from 'react';
+import { TextField, Autocomplete } from '@mui/material';
 import { PyroscopeDatasourceSelector } from '../model';
 import { useLabelNames, filterLabelNamesOptions } from '../utils/use-query';
 
@@ -27,32 +27,35 @@ export function LabelName(props: LabelNameProps): ReactElement {
 
   const { data: labelNamesOptions, isLoading: isLabelNamesOptionsLoading } = useLabelNames(datasource);
 
+  const filteredLabelNamesOptions = useMemo(
+    () => filterLabelNamesOptions(labelNamesOptions?.names ?? []),
+    [labelNamesOptions]
+  );
+
   return (
-    <Select
-      sx={{ borderTopRightRadius: '0', borderBottomRightRadius: '0' }}
+    <Autocomplete
+      disableClearable
+      options={filteredLabelNamesOptions}
       value={value}
-      size="small"
-      onChange={(event) => onChange?.(event.target.value)}
-      displayEmpty
-      renderValue={(selected) => {
-        if (selected === '') {
-          return 'Select label name';
-        }
-        return selected;
+      sx={(theme) => ({
+        width: '100%',
+        '& .MuiOutlinedInput-root': {
+          borderTopRightRadius: 0,
+          borderBottomRightRadius: 0,
+          [theme.breakpoints.down('sm')]: {
+            borderBottomLeftRadius: 0,
+          },
+        },
+      })}
+      loading={isLabelNamesOptionsLoading}
+      renderInput={(params) => {
+        return <TextField {...params} placeholder="Select label name" size="small" />;
       }}
-    >
-      {isLabelNamesOptionsLoading ? (
-        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress color="inherit" size={20} />
-        </Stack>
-      ) : (
-        labelNamesOptions?.names &&
-        filterLabelNamesOptions(labelNamesOptions?.names).map((labelName) => (
-          <MenuItem key={labelName} value={labelName}>
-            {labelName}
-          </MenuItem>
-        ))
-      )}
-    </Select>
+      onChange={(_event, newValue) => {
+        if (newValue !== null) {
+          onChange?.(newValue);
+        }
+      }}
+    />
   );
 }

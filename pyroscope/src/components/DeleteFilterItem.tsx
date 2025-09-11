@@ -24,10 +24,15 @@ export function DeleteFilterItem(props: DeleteFilterItemProps): ReactElement {
 
   return (
     <ToolbarIconButton
-      sx={{
-        borderTopLeftRadius: '0',
-        borderBottomLeftRadius: '0',
-      }}
+      sx={(theme) => ({
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        width: '100%',
+        height: '100%',
+        [theme.breakpoints.down('sm')]: {
+          borderTopRightRadius: 0,
+        },
+      })}
       aria-label="delete filter"
       onClick={onClick}
     >
