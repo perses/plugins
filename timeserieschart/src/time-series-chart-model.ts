@@ -60,6 +60,7 @@ export interface TimeSeriesChartPaletteOptions {
 export type TimeSeriesChartVisualOptions = {
   display?: 'line' | 'bar';
   lineWidth?: number;
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
   areaOpacity?: number;
   showPoints?: 'auto' | 'always';
   palette?: TimeSeriesChartPaletteOptions;
@@ -89,17 +90,19 @@ export const Y_AXIS_CONFIG = {
   max: { label: 'Max' },
 };
 
+export const DEFAULT_DISPLAY = 'line';
 export const DEFAULT_LINE_WIDTH = 1.25;
+export const DEFAULT_LINE_STYLE = 'solid';
 export const DEFAULT_AREA_OPACITY = 0;
-
 // How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.
 export const POINT_SIZE_OFFSET = 1.5;
 export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
-
 export const DEFAULT_CONNECT_NULLS = false;
 
 export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
+  display: DEFAULT_DISPLAY,
   lineWidth: DEFAULT_LINE_WIDTH,
+  lineStyle: DEFAULT_LINE_STYLE,
   areaOpacity: DEFAULT_AREA_OPACITY,
   pointRadius: DEFAULT_POINT_RADIUS,
   connectNulls: DEFAULT_CONNECT_NULLS,
@@ -116,6 +119,9 @@ export const VISUAL_CONFIG = {
     min: 0.25,
     max: 3,
     step: 0.25,
+  },
+  lineStyle: {
+    label: 'Line Style',
   },
   pointRadius: {
     label: 'Point Radius',
@@ -152,6 +158,21 @@ export const STACK_CONFIG = {
 export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {
   return {
     id: id as StackOptions,
+    ...config,
+  };
+});
+
+export type LineStyleOptions = 'solid' | 'dashed' | 'dotted';
+
+export const LINE_STYLE_CONFIG = {
+  solid: { label: 'Solid' },
+  dashed: { label: 'Dashed' },
+  dotted: { label: 'Dotted' },
+};
+
+export const LINE_STYLE_OPTIONS = Object.entries(LINE_STYLE_CONFIG).map(([id, config]) => {
+  return {
+    id: id as LineStyleOptions,
     ...config,
   };
 });
