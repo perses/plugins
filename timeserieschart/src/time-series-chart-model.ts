@@ -162,20 +162,11 @@ export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => 
   };
 });
 
-export type LineStyleOptions = 'solid' | 'dashed' | 'dotted';
-
 export const LINE_STYLE_CONFIG = {
   solid: { label: 'Solid' },
   dashed: { label: 'Dashes' },
   dotted: { label: 'Dots' },
 };
-
-export const LINE_STYLE_OPTIONS = Object.entries(LINE_STYLE_CONFIG).map(([id, config]) => {
-  return {
-    id: id as LineStyleOptions,
-    ...config,
-  };
-});
 
 // Both of these constants help produce a value that is LESS THAN the initial value.
 // For positive values, we multiply by a number less than 1 to get this outcome.
