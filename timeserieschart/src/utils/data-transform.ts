@@ -174,6 +174,7 @@ export function getTimeSeries(
     lineStyle: {
       width: lineWidth,
       opacity: 0.95,
+      type: visual.lineStyle,
     },
     areaStyle: {
       opacity: visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
@@ -185,6 +186,7 @@ export function getTimeSeries(
       lineStyle: {
         width: lineWidth + 1,
         opacity: 1,
+        type: visual.lineStyle,
       },
     },
     selectedMode: 'single',
@@ -198,6 +200,7 @@ export function getTimeSeries(
       lineStyle: {
         width: lineWidth,
         opacity: BLUR_FADEOUT_OPACITY,
+        type: visual.lineStyle,
       },
     },
   };

@@ -19,13 +19,16 @@ import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
+  DEFAULT_LINE_STYLE,
   DEFAULT_POINT_RADIUS,
   POINT_SIZE_OFFSET,
   STACK_CONFIG,
   StackOptions,
   STACK_OPTIONS,
+  LINE_STYLE_CONFIG,
   VISUAL_CONFIG,
   TimeSeriesChartVisualOptions,
+  DEFAULT_DISPLAY,
 } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
@@ -90,7 +93,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
           <ToggleButtonGroup
             color="primary"
             exclusive
-            value={value.display}
+            value={value.display ?? DEFAULT_DISPLAY}
             onChange={(__, newValue) => {
               onChange({
                 ...value,
@@ -126,6 +129,28 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
                 max={VISUAL_CONFIG.lineWidth.max}
                 onChange={handleLineWidthChange}
               />
+            }
+          />
+          <OptionsEditorControl
+            label={VISUAL_CONFIG.lineStyle.label}
+            control={
+              <ToggleButtonGroup
+                color="primary"
+                exclusive
+                value={value.lineStyle ?? DEFAULT_LINE_STYLE}
+                onChange={(__, newValue) => {
+                  onChange({
+                    ...value,
+                    lineStyle: newValue,
+                  });
+                }}
+              >
+                {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
+                  <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
+                    {config.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
             }
           />
           <OptionsEditorControl
