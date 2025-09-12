@@ -166,8 +166,8 @@ export type LineStyleOptions = 'solid' | 'dashed' | 'dotted';
 
 export const LINE_STYLE_CONFIG = {
   solid: { label: 'Solid' },
-  dashed: { label: 'Dashed' },
-  dotted: { label: 'Dotted' },
+  dashed: { label: 'Dashes' },
+  dotted: { label: 'Dots' },
 };
 
 export const LINE_STYLE_OPTIONS = Object.entries(LINE_STYLE_CONFIG).map(([id, config]) => {

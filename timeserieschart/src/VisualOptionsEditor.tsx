@@ -26,7 +26,6 @@ import {
   StackOptions,
   STACK_OPTIONS,
   LINE_STYLE_CONFIG,
-  LINE_STYLE_OPTIONS,
   VISUAL_CONFIG,
   TimeSeriesChartVisualOptions,
   DEFAULT_DISPLAY,
@@ -135,21 +134,23 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
           <OptionsEditorControl
             label={VISUAL_CONFIG.lineStyle.label}
             control={
-              <SettingsAutocomplete
-                value={{
-                  ...LINE_STYLE_CONFIG[value.lineStyle ?? DEFAULT_LINE_STYLE],
-                  id: value.lineStyle ?? DEFAULT_LINE_STYLE,
-                }}
-                options={LINE_STYLE_OPTIONS}
+              <ToggleButtonGroup
+                color="primary"
+                exclusive
+                value={value.lineStyle ?? DEFAULT_LINE_STYLE}
                 onChange={(__, newValue) => {
                   onChange({
                     ...value,
-                    lineStyle: newValue.id === DEFAULT_LINE_STYLE ? undefined : newValue.id,
+                    lineStyle: newValue,
                   });
                 }}
-                disabled={value === undefined}
-                disableClearable
-              />
+              >
+                {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
+                  <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
+                    {config.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
             }
           />
           <OptionsEditorControl
