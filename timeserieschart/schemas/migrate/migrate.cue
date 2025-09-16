@@ -81,9 +81,6 @@ spec: {
 		},
 		null,
 	][0]
-	if #min != null {
-		yAxis: min: #min
-	}
 
 	#max: [// switch
 		if (*#panel.fieldConfig.defaults.max | null) != null {
@@ -94,8 +91,21 @@ spec: {
 		},
 		null,
 	][0]
-	if #max != null {
-		yAxis: max: #max
+
+	// Handle yAxis min/max together to ensure schema constraints are met
+	if #min != null || #max != null {
+		yAxis: {
+			if #min != null {
+				min: #min
+			}
+			if #max != null {
+				max: #max
+				// If max is set but min is not, provide a default min value of 0. otherwise, Perses schema validation will fail.
+				if #min == null {
+					min: 0
+				}
+			}
+		}
 	}
 
 	#yAxisLabel: *#panel.fieldConfig.defaults.custom.axisLabel | null
