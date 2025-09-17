@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/datasource-variable-plugin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -16,6 +16,9 @@
     "test": "cross-env LC_ALL=C TZ=UTC jest --passWithNoTests",
     "type-check": "tsc --noEmit"
   },
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
@@ -32,7 +35,10 @@
     "use-resize-observer": "^9.0.0"
   },
   "files": [
-    "dist"
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
   ],
   "perses": {
     "plugins": [
