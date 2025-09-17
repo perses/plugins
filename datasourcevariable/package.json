@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/datasource-variable-plugin",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -11,7 +11,11 @@
   },
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "cross-env LC_ALL=C TZ=UTC jest --passWithNoTests",
     "type-check": "tsc --noEmit"
