@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { InfoTooltip, OptionsEditorGrid, OptionsEditorColumn, OptionsColorPicker } from '@perses-dev/components';
+import { Box, IconButton, MenuItem, Slider, Stack, TextField, Typography } from '@mui/material';
+import { InfoTooltip, OptionsColorPicker } from '@perses-dev/components';
 import { ReactElement, RefObject, useEffect, useMemo, useRef } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -22,6 +22,8 @@ import {
   TimeSeriesChartOptions,
   TimeSeriesChartOptionsEditorProps,
   QuerySettingsOptions,
+  DEFAULT_AREA_OPACITY,
+  OPACITY_CONFIG,
 } from './time-series-chart-model';
 
 const DEFAULT_COLOR_MODE = 'fixed';
@@ -91,6 +93,22 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
     }
   };
 
+  const handleAreaOpacityChange = (_: Event, sliderValue: number | number[], i: number): void => {
+    const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          if (draft !== undefined) {
+            const querySettings = draft[i];
+            if (querySettings) {
+              querySettings.areaOpacity = newValue;
+            }
+          }
+        })
+      );
+    }
+  };
+
   const deleteQuerySettingsInput = (i: number): void => {
     if (querySettingsList !== undefined) {
       const updatedQuerySettingsList = produce(querySettingsList, (draft) => {
@@ -118,6 +136,7 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
     queryIndex: firstAvailableQueryIndex,
     colorMode: DEFAULT_COLOR_MODE,
     colorValue: DEFAULT_COLOR_VALUE,
+    areaOpacity: DEFAULT_AREA_OPACITY,
   };
 
   const addQuerySettingsInput = (): void => {
@@ -134,43 +153,40 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
   };
 
   return (
-    <OptionsEditorGrid>
-      <OptionsEditorColumn>
-        <>
-          {queryCount > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
-            <InfoTooltip description="Add query settings">
-              <IconButton size="small" aria-label="add query settings" onClick={addQuerySettingsInput}>
-                <PlusIcon />
-              </IconButton>
-            </InfoTooltip>
-          )}
-          {queryCount === 0 ? (
-            <Typography mb={2} fontStyle="italic">
-              No query defined
-            </Typography>
-          ) : (
-            querySettingsList &&
-            querySettingsList.length > 0 &&
-            querySettingsList.map((querySettings, i) => (
-              <QuerySettingsInput
-                inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
-                key={i}
-                querySettings={querySettings}
-                availableQueryIndexes={availableQueryIndexes}
-                onQueryIndexChange={(e) => {
-                  handleQueryIndexChange(e, i);
-                }}
-                onColorModeChange={(e) => handleColorModeChange(e, i)}
-                onColorValueChange={(color) => handleColorValueChange(color, i)}
-                onDelete={() => {
-                  deleteQuerySettingsInput(i);
-                }}
-              />
-            ))
-          )}
-        </>
-      </OptionsEditorColumn>
-    </OptionsEditorGrid>
+    <Stack spacing={2}>
+      {queryCount === 0 ? (
+        <Typography mb={2} fontStyle="italic">
+          No query defined
+        </Typography>
+      ) : (
+        querySettingsList &&
+        querySettingsList.length > 0 &&
+        querySettingsList.map((querySettings, i) => (
+          <QuerySettingsInput
+            inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
+            key={i}
+            querySettings={querySettings}
+            availableQueryIndexes={availableQueryIndexes}
+            onQueryIndexChange={(e) => {
+              handleQueryIndexChange(e, i);
+            }}
+            onColorModeChange={(e) => handleColorModeChange(e, i)}
+            onColorValueChange={(color) => handleColorValueChange(color, i)}
+            onAreaOpacityChange={(event, value) => handleAreaOpacityChange(event, value, i)}
+            onDelete={() => {
+              deleteQuerySettingsInput(i);
+            }}
+          />
+        ))
+      )}
+      {queryCount > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
+        <InfoTooltip description="Add query settings">
+          <IconButton size="small" aria-label="add query settings" onClick={addQuerySettingsInput}>
+            <PlusIcon />
+          </IconButton>
+        </InfoTooltip>
+      )}
+    </Stack>
   );
 }
 
@@ -180,16 +196,18 @@ interface QuerySettingsInputProps {
   onQueryIndexChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorModeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorValueChange: (colorValue: string) => void;
+  onAreaOpacityChange: (event: Event, value: number | number[]) => void;
   onDelete: () => void;
   inputRef?: RefObject<HTMLInputElement | null>;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue },
+  querySettings: { queryIndex, colorMode, colorValue, areaOpacity = DEFAULT_AREA_OPACITY },
   availableQueryIndexes,
   onQueryIndexChange,
   onColorModeChange,
   onColorValueChange,
+  onAreaOpacityChange,
   onDelete,
   inputRef,
 }: QuerySettingsInputProps): ReactElement {
@@ -197,7 +215,7 @@ function QuerySettingsInput({
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
 
   return (
-    <Stack flex={1} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ marginBottom: 2, width: '100%' }}>
       <TextField
         select
         inputRef={inputRef}
@@ -216,7 +234,22 @@ function QuerySettingsInput({
         <MenuItem value="fixed-single">Fixed (single)</MenuItem>
         <MenuItem value="fixed">Fixed</MenuItem>
       </TextField>
-      <OptionsColorPicker label={'Query n°' + queryIndex} color={colorValue} onColorChange={onColorValueChange} />
+      <Box>
+        <OptionsColorPicker label={'Query n°' + queryIndex} color={colorValue} onColorChange={onColorValueChange} />
+      </Box>
+      <Stack direction="row" alignItems="center" spacing={2}>
+        <Typography variant="body2">Opacity:</Typography>
+        <Slider
+          value={areaOpacity}
+          valueLabelDisplay="auto"
+          step={OPACITY_CONFIG.step}
+          marks
+          min={OPACITY_CONFIG.min}
+          max={OPACITY_CONFIG.max}
+          onChange={onAreaOpacityChange}
+          sx={{ flex: 1, minWidth: '180px' }}
+        />
+      </Stack>
       <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} size="small" onClick={onDelete}>
         <DeleteIcon />
       </IconButton>

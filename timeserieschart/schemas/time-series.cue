@@ -56,7 +56,8 @@ spec: close({
 }
 
 #querySettings: [...{
-	queryIndex: int & >=0
-	colorMode:  "fixed" | "fixed-single"       // NB: "palette" could be added later
-	colorValue: =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
+	queryIndex:   int & >=0
+	colorMode:    "fixed" | "fixed-single"       // NB: "palette" could be added later
+	colorValue:   =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
+	areaOpacity?: number & >=0 & <=1             // transparency level from 0 (transparent) to 1 (opaque)
 }]

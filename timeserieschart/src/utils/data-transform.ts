@@ -72,7 +72,8 @@ export function getTimeSeries(
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
-  paletteColor: string
+  paletteColor: string,
+  querySettings?: { areaOpacity?: number }
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -115,11 +116,10 @@ export function getTimeSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.95,
       type: visual.lineStyle,
     },
     areaStyle: {
-      opacity: visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
+      opacity: querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {

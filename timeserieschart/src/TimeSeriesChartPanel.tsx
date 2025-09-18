@@ -212,7 +212,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
             // Each series is stored as a separate dataset source.
             // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
             timeSeriesMapping.push(
-              getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor)
+              getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor, querySettings)
             );
 
             timeChartData.push({
