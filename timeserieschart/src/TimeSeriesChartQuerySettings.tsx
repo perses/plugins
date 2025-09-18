@@ -12,24 +12,33 @@
 // limitations under the License.
 
 import { IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { InfoTooltip, OptionsEditorGroup, OptionsColorPicker } from '@perses-dev/components';
+import { InfoTooltip, OptionsEditorGrid, OptionsEditorColumn, OptionsColorPicker } from '@perses-dev/components';
 import { ReactElement, RefObject, useEffect, useMemo, useRef } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { produce } from 'immer';
 import { useQueryCountContext } from '@perses-dev/plugin-system';
-import { QuerySettingsOptions } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  TimeSeriesChartOptionsEditorProps,
+  QuerySettingsOptions,
+} from './time-series-chart-model';
 
 const DEFAULT_COLOR_MODE = 'fixed';
 const DEFAULT_COLOR_VALUE = '#555';
 const NO_INDEX_AVAILABLE = -1; // invalid array index value used to represent the fact that no query index is available
 
-export interface QuerySettingsEditorProps {
-  querySettingsList?: QuerySettingsOptions[];
-  onChange: (querySettingsList: QuerySettingsOptions[]) => void;
-}
+export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditorProps): ReactElement {
+  const { onChange, value } = props;
+  const querySettingsList = value.querySettings;
 
-export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettingsEditorProps): ReactElement {
+  const handleQuerySettingsChange = (newQuerySettings: QuerySettingsOptions[]) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.querySettings = newQuerySettings;
+      })
+    );
+  };
   // Every time a new query settings input is added, we want to focus the recently added input
   const recentlyAddedInputRef = useRef<HTMLInputElement | null>(null);
   const focusRef = useRef(false);
@@ -41,7 +50,7 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
 
   const handleQueryIndexChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {
-      onChange(
+      handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           const querySettings = draft?.[i];
           if (querySettings) {
@@ -54,7 +63,7 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
 
   const handleColorModeChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {
-      onChange(
+      handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           if (draft !== undefined) {
             const querySettings = draft[i];
@@ -69,7 +78,7 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
 
   const handleColorValueChange = (colorValue: string, i: number): void => {
     if (querySettingsList !== undefined) {
-      onChange(
+      handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           if (draft !== undefined) {
             const querySettings = draft[i];
@@ -87,7 +96,7 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
       const updatedQuerySettingsList = produce(querySettingsList, (draft) => {
         draft.splice(i, 1);
       });
-      onChange(updatedQuerySettingsList);
+      handleQuerySettingsChange(updatedQuerySettingsList);
     }
   };
 
@@ -114,9 +123,9 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
   const addQuerySettingsInput = (): void => {
     focusRef.current = true;
     if (querySettingsList === undefined) {
-      onChange([defaultQuerySettings]);
+      handleQuerySettingsChange([defaultQuerySettings]);
     } else {
-      onChange(
+      handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           draft.push(defaultQuerySettings);
         })
@@ -125,45 +134,47 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
   };
 
   return (
-    <OptionsEditorGroup
-      title="Query settings"
-      icon={
-        firstAvailableQueryIndex !== NO_INDEX_AVAILABLE ? (
-          <InfoTooltip description="Add query settings">
-            <IconButton size="small" aria-label="add query settings" onClick={addQuerySettingsInput}>
-              <PlusIcon />
-            </IconButton>
-          </InfoTooltip>
-        ) : null
-      }
-    >
-      {querySettingsList && querySettingsList.length > 0 ? (
-        querySettingsList.map((querySettings, i) => (
-          <QuerySettingsInput
-            inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
-            key={i}
-            querySettings={querySettings}
-            availableQueryIndexes={availableQueryIndexes}
-            onQueryIndexChange={(e) => {
-              handleQueryIndexChange(e, i);
-            }}
-            onColorModeChange={(e) => handleColorModeChange(e, i)}
-            onColorValueChange={(color) => handleColorValueChange(color, i)}
-            onDelete={() => {
-              deleteQuerySettingsInput(i);
-            }}
-          />
-        ))
-      ) : (
-        <Typography mb={2} fontStyle="italic">
-          No query settings defined
-        </Typography>
-      )}
-    </OptionsEditorGroup>
+    <OptionsEditorGrid>
+      <OptionsEditorColumn>
+        <>
+          {queryCount > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
+            <InfoTooltip description="Add query settings">
+              <IconButton size="small" aria-label="add query settings" onClick={addQuerySettingsInput}>
+                <PlusIcon />
+              </IconButton>
+            </InfoTooltip>
+          )}
+          {queryCount === 0 ? (
+            <Typography mb={2} fontStyle="italic">
+              No query defined
+            </Typography>
+          ) : (
+            querySettingsList &&
+            querySettingsList.length > 0 &&
+            querySettingsList.map((querySettings, i) => (
+              <QuerySettingsInput
+                inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
+                key={i}
+                querySettings={querySettings}
+                availableQueryIndexes={availableQueryIndexes}
+                onQueryIndexChange={(e) => {
+                  handleQueryIndexChange(e, i);
+                }}
+                onColorModeChange={(e) => handleColorModeChange(e, i)}
+                onColorValueChange={(color) => handleColorValueChange(color, i)}
+                onDelete={() => {
+                  deleteQuerySettingsInput(i);
+                }}
+              />
+            ))
+          )}
+        </>
+      </OptionsEditorColumn>
+    </OptionsEditorGrid>
   );
 }
 
-export interface QuerySettingsInputProps {
+interface QuerySettingsInputProps {
   querySettings: QuerySettingsOptions;
   availableQueryIndexes: number[];
   onQueryIndexChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -173,7 +184,7 @@ export interface QuerySettingsInputProps {
   inputRef?: RefObject<HTMLInputElement | null>;
 }
 
-export function QuerySettingsInput({
+function QuerySettingsInput({
   querySettings: { queryIndex, colorMode, colorValue },
   availableQueryIndexes,
   onQueryIndexChange,
