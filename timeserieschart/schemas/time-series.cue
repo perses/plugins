@@ -52,7 +52,10 @@ spec: close({
 	label?:  string
 	format?: common.#format
 	min?:    number
-	max?:    number & >= min
+	max?:    number
+	if min != _|_ && max != _|_ {
+		max: >=min
+	}
 }
 
 #querySettings: [...{

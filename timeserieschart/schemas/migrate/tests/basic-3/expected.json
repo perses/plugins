@@ -16,7 +16,6 @@
       "format": {
         "unit": "decimal"
       },
-      "min": 0,
       "max": 1
     }
   }
