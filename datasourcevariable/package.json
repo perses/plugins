@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/datasource-variable-plugin",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -11,18 +11,25 @@
   },
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "cross-env LC_ALL=C TZ=UTC jest --passWithNoTests",
     "type-check": "tsc --noEmit"
   },
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.52.0-beta.5",
-    "@perses-dev/core": "^0.52.0-beta.5",
-    "@perses-dev/plugin-system": "^0.52.0-beta.5",
+    "@perses-dev/components": "^0.52.0",
+    "@perses-dev/core": "^0.52.0",
+    "@perses-dev/plugin-system": "^0.52.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
@@ -32,7 +39,10 @@
     "use-resize-observer": "^9.0.0"
   },
   "files": [
-    "dist"
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
   ],
   "perses": {
     "plugins": [

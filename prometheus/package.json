@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/prometheus-plugin",
-  "version": "0.53.2",
+  "version": "0.53.3",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@nexucis/fuzzy": "^0.5.1",
-    "@prometheus-io/codemirror-promql": "^0.45.6",
+    "@prometheus-io/codemirror-promql": "^0.304.2",
     "color-hash": "^2.0.2",
     "qs": "^6.13.0",
     "react-virtuoso": "^4.12.2"
@@ -34,11 +34,11 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.52.0-beta.5",
-    "@perses-dev/core": "^0.52.0-beta.5",
-    "@perses-dev/dashboards": "^0.52.0-beta.5",
-    "@perses-dev/explore": "^0.52.0-beta.5",
-    "@perses-dev/plugin-system": "^0.52.0-beta.5",
+    "@perses-dev/components": "^0.52.0",
+    "@perses-dev/core": "^0.52.0",
+    "@perses-dev/dashboards": "^0.52.0",
+    "@perses-dev/explore": "^0.52.0",
+    "@perses-dev/plugin-system": "^0.52.0",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

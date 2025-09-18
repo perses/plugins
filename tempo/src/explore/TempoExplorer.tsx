@@ -110,6 +110,7 @@ function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElemen
 
   return (
     <Panel
+      panelOptions={{ showIcons: 'always' }}
       definition={{
         kind: 'Panel',
         spec: {

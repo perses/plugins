@@ -152,7 +152,10 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           value={format ?? ''}
           onChange={handleLegendSpecChange}
           onBlur={queryHandlerSettings?.runWithOnBlur ? handleFormatBlur : undefined}
-          disabled={isReadonly}
+          slotProps={{
+            inputLabel: { shrink: isReadonly ? true : undefined },
+            input: { readOnly: isReadonly },
+          }}
         />
         <TextField
           label="Min Step"
@@ -162,7 +165,10 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           onChange={handleMinStepSpecChange}
           onBlur={queryHandlerSettings?.runWithOnBlur ? handleMinStepBlur : undefined}
           sx={{ width: '250px' }}
-          disabled={isReadonly}
+          slotProps={{
+            inputLabel: { shrink: isReadonly ? true : undefined },
+            input: { readOnly: isReadonly },
+          }}
         />
       </Stack>
     </Stack>

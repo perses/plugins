@@ -40,10 +40,13 @@ export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticL
 
   // If there is no selected kind and there are available options, select the first one
   useEffect(() => {
-    if (selectedKind.value === EMPTY_SELECTED_KIND.value && datasourcePluginKindSet.size > 0) {
-      onChange({
-        datasourcePluginKind: Array.from(datasourcePluginKindSet)[0],
-      });
+    const datasourcePluginKindArray = Array.from(datasourcePluginKindSet);
+    if (
+      selectedKind.value === EMPTY_SELECTED_KIND.value &&
+      datasourcePluginKindArray.length > 0 &&
+      datasourcePluginKindArray[0]
+    ) {
+      onChange({ datasourcePluginKind: datasourcePluginKindArray[0] });
     }
   }, [selectedKind, datasourcePluginKind, onChange, datasourcePluginKindSet]);
 

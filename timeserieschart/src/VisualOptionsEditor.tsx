@@ -19,13 +19,16 @@ import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
+  DEFAULT_LINE_STYLE,
   DEFAULT_POINT_RADIUS,
   POINT_SIZE_OFFSET,
   STACK_CONFIG,
   StackOptions,
   STACK_OPTIONS,
+  LINE_STYLE_CONFIG,
   VISUAL_CONFIG,
   TimeSeriesChartVisualOptions,
+  DEFAULT_DISPLAY,
 } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
@@ -60,65 +63,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
   return (
     <OptionsEditorGroup title="Visual">
       <OptionsEditorControl
-        label="Display"
-        control={
-          <ToggleButtonGroup
-            color="primary"
-            exclusive
-            value={value.display}
-            onChange={(__, newValue) => {
-              onChange({
-                ...value,
-                display: newValue,
-              });
-            }}
-          >
-            <ToggleButton
-              value="line"
-              selected={value.display === undefined || value.display === 'line'}
-              aria-label="display line series"
-            >
-              Line
-            </ToggleButton>
-            <ToggleButton value="bar" aria-label="display bar series">
-              Bar
-            </ToggleButton>
-          </ToggleButtonGroup>
-        }
-      />
-      <OptionsEditorControl
-        label={VISUAL_CONFIG.lineWidth.label}
-        control={
-          <Slider
-            data-testid={VISUAL_CONFIG.lineWidth.testId}
-            value={value.lineWidth ?? DEFAULT_LINE_WIDTH}
-            valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.lineWidth.step}
-            marks
-            min={VISUAL_CONFIG.lineWidth.min}
-            max={VISUAL_CONFIG.lineWidth.max}
-            disabled={value.display === 'bar'}
-            onChange={handleLineWidthChange}
-          />
-        }
-      />
-      <OptionsEditorControl
-        label={VISUAL_CONFIG.areaOpacity.label}
-        control={
-          <Slider
-            data-testid={VISUAL_CONFIG.areaOpacity.testId}
-            value={value.areaOpacity ?? DEFAULT_AREA_OPACITY}
-            valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.areaOpacity.step}
-            marks
-            min={VISUAL_CONFIG.areaOpacity.min}
-            max={VISUAL_CONFIG.areaOpacity.max}
-            disabled={value.display === 'bar'}
-            onChange={handleAreaOpacityChange}
-          />
-        }
-      />
-      <OptionsEditorControl
         label={VISUAL_CONFIG.stack.label}
         control={
           <SettingsAutocomplete
@@ -144,20 +88,102 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         }
       />
       <OptionsEditorControl
-        label={VISUAL_CONFIG.connectNulls.label}
+        label="Display"
         control={
-          <Switch
-            checked={value.connectNulls ?? DEFAULT_CONNECT_NULLS}
-            disabled={value.display === 'bar'}
-            onChange={(e) => {
+          <ToggleButtonGroup
+            color="primary"
+            exclusive
+            value={value.display ?? DEFAULT_DISPLAY}
+            onChange={(__, newValue) => {
               onChange({
                 ...value,
-                connectNulls: e.target.checked,
+                display: newValue,
               });
             }}
-          />
+          >
+            <ToggleButton
+              value="line"
+              selected={value.display === undefined || value.display === 'line'}
+              aria-label="display line series"
+            >
+              Line
+            </ToggleButton>
+            <ToggleButton value="bar" aria-label="display bar series">
+              Bar
+            </ToggleButton>
+          </ToggleButtonGroup>
         }
       />
+      {value.display === 'line' && (
+        <>
+          <OptionsEditorControl
+            label={VISUAL_CONFIG.lineWidth.label}
+            control={
+              <Slider
+                data-testid={VISUAL_CONFIG.lineWidth.testId}
+                value={value.lineWidth ?? DEFAULT_LINE_WIDTH}
+                valueLabelDisplay="auto"
+                step={VISUAL_CONFIG.lineWidth.step}
+                marks
+                min={VISUAL_CONFIG.lineWidth.min}
+                max={VISUAL_CONFIG.lineWidth.max}
+                onChange={handleLineWidthChange}
+              />
+            }
+          />
+          <OptionsEditorControl
+            label={VISUAL_CONFIG.lineStyle.label}
+            control={
+              <ToggleButtonGroup
+                color="primary"
+                exclusive
+                value={value.lineStyle ?? DEFAULT_LINE_STYLE}
+                onChange={(__, newValue) => {
+                  onChange({
+                    ...value,
+                    lineStyle: newValue,
+                  });
+                }}
+              >
+                {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
+                  <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
+                    {config.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            }
+          />
+          <OptionsEditorControl
+            label={VISUAL_CONFIG.areaOpacity.label}
+            control={
+              <Slider
+                data-testid={VISUAL_CONFIG.areaOpacity.testId}
+                value={value.areaOpacity ?? DEFAULT_AREA_OPACITY}
+                valueLabelDisplay="auto"
+                step={VISUAL_CONFIG.areaOpacity.step}
+                marks
+                min={VISUAL_CONFIG.areaOpacity.min}
+                max={VISUAL_CONFIG.areaOpacity.max}
+                onChange={handleAreaOpacityChange}
+              />
+            }
+          />
+          <OptionsEditorControl
+            label={VISUAL_CONFIG.connectNulls.label}
+            control={
+              <Switch
+                checked={value.connectNulls ?? DEFAULT_CONNECT_NULLS}
+                onChange={(e) => {
+                  onChange({
+                    ...value,
+                    connectNulls: e.target.checked,
+                  });
+                }}
+              />
+            }
+          />
+        </>
+      )}
     </OptionsEditorGroup>
   );
 }

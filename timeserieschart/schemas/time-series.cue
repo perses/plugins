@@ -38,6 +38,7 @@ spec: close({
 #visual: {
 	display?:      "line" | "bar"
 	lineWidth?:    number & >=0.25 & <=3
+	lineStyle?:    "solid" | "dashed" | "dotted"
 	areaOpacity?:  number & >=0 & <=1
 	showPoints?:   "auto" | "always"
 	palette?:      #palette

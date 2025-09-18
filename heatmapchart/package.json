@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/heatmap-chart-plugin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -20,10 +20,13 @@
     "test": "cross-env LC_ALL=C TZ=UTC jest",
     "type-check": "tsc --noEmit"
   },
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "peerDependencies": {
-    "@perses-dev/components": "^0.52.0-beta.5",
-    "@perses-dev/core": "^0.52.0-beta.5",
-    "@perses-dev/plugin-system": "^0.52.0-beta.5",
+    "@perses-dev/components": "^0.52.0",
+    "@perses-dev/core": "^0.52.0",
+    "@perses-dev/plugin-system": "^0.52.0",
     "echarts": "5.5.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2 || ^18.0.0",

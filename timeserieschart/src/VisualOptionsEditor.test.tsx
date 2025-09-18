@@ -26,7 +26,7 @@ describe('VisualOptionsEditor', () => {
 
   it('can update the line width visual option', () => {
     const onChange = jest.fn();
-    renderVisualOptionsEditor({ lineWidth: 3, pointRadius: 2 }, onChange);
+    renderVisualOptionsEditor({ display: 'line', lineWidth: 3, pointRadius: 2 }, onChange);
 
     expect(screen.getByText(VISUAL_CONFIG.lineWidth.label)).toBeInTheDocument();
 
@@ -50,6 +50,19 @@ describe('VisualOptionsEditor', () => {
 
     // to move slider and update visual options
     fireEvent.mouseDown(sliderInput, { clientX: 220, clientY: 100 });
-    expect(onChange).toHaveBeenCalledWith({ lineWidth: 1.25, pointRadius: 2.75 });
+    expect(onChange).toHaveBeenCalledWith({ display: 'line', lineWidth: 1.25, pointRadius: 2.75 });
+  });
+
+  it('hides line-specific controls when display is bar', () => {
+    renderVisualOptionsEditor({ display: 'bar', lineWidth: 3, pointRadius: 2 });
+
+    // Line width control should not be present
+    expect(screen.queryByText(VISUAL_CONFIG.lineWidth.label)).not.toBeInTheDocument();
+
+    // Area opacity control should not be present
+    expect(screen.queryByText(VISUAL_CONFIG.areaOpacity.label)).not.toBeInTheDocument();
+
+    // Connect nulls control should not be present
+    expect(screen.queryByText(VISUAL_CONFIG.connectNulls.label)).not.toBeInTheDocument();
   });
 });
