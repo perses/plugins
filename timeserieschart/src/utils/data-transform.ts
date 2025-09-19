@@ -73,7 +73,7 @@ export function getTimeSeries(
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
   paletteColor: string,
-  querySettings?: { areaOpacity?: number }
+  querySettings?: { lineStyle?: string; areaOpacity?: number }
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -116,7 +116,7 @@ export function getTimeSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      type: visual.lineStyle,
+      type: (querySettings?.lineStyle ?? visual.lineStyle) as 'solid' | 'dashed' | 'dotted',
     },
     areaStyle: {
       opacity: querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY,

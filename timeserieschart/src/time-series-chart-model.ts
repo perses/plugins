@@ -37,6 +37,7 @@ export interface QuerySettingsOptions {
   queryIndex: number;
   colorMode: 'fixed' | 'fixed-single';
   colorValue: string;
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
   areaOpacity?: number;
 }
 

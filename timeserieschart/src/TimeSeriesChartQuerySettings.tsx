@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, IconButton, MenuItem, Slider, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  MenuItem,
+  Slider,
+  Stack,
+  TextField,
+  Typography,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material';
 import { InfoTooltip, OptionsColorPicker } from '@perses-dev/components';
 import { ReactElement, RefObject, useEffect, useMemo, useRef } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -24,6 +34,7 @@ import {
   QuerySettingsOptions,
   DEFAULT_AREA_OPACITY,
   OPACITY_CONFIG,
+  LINE_STYLE_CONFIG,
 } from './time-series-chart-model';
 
 const DEFAULT_COLOR_MODE = 'fixed';
@@ -86,6 +97,21 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
             const querySettings = draft[i];
             if (querySettings) {
               querySettings.colorValue = colorValue;
+            }
+          }
+        })
+      );
+    }
+  };
+
+  const handleLineStyleChange = (lineStyle: string, i: number): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          if (draft !== undefined) {
+            const querySettings = draft[i];
+            if (querySettings) {
+              querySettings.lineStyle = lineStyle as QuerySettingsOptions['lineStyle'];
             }
           }
         })
@@ -172,6 +198,7 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
             }}
             onColorModeChange={(e) => handleColorModeChange(e, i)}
             onColorValueChange={(color) => handleColorValueChange(color, i)}
+            onLineStyleChange={(lineStyle) => handleLineStyleChange(lineStyle, i)}
             onAreaOpacityChange={(event, value) => handleAreaOpacityChange(event, value, i)}
             onDelete={() => {
               deleteQuerySettingsInput(i);
@@ -196,17 +223,19 @@ interface QuerySettingsInputProps {
   onQueryIndexChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorModeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorValueChange: (colorValue: string) => void;
+  onLineStyleChange: (lineStyle: string) => void;
   onAreaOpacityChange: (event: Event, value: number | number[]) => void;
   onDelete: () => void;
   inputRef?: RefObject<HTMLInputElement | null>;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, areaOpacity = DEFAULT_AREA_OPACITY },
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity = DEFAULT_AREA_OPACITY },
   availableQueryIndexes,
   onQueryIndexChange,
   onColorModeChange,
   onColorValueChange,
+  onLineStyleChange,
   onAreaOpacityChange,
   onDelete,
   inputRef,
@@ -237,6 +266,23 @@ function QuerySettingsInput({
       <Box>
         <OptionsColorPicker label={'Query n°' + queryIndex} color={colorValue} onColorChange={onColorValueChange} />
       </Box>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: '240px' }}>
+        <Typography variant="body2">Style:</Typography>
+        <ToggleButtonGroup
+          color="primary"
+          exclusive
+          value={lineStyle}
+          onChange={(__, newValue) => {
+            onLineStyleChange(newValue);
+          }}
+        >
+          {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
+            <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
+              {config.label}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Stack>
       <Stack direction="row" alignItems="center" spacing={2}>
         <Typography variant="body2">Opacity:</Typography>
         <Slider
