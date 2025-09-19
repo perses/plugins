@@ -85,12 +85,11 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
             onClick={() => {
               onChange(
                 produce(value, (draft: TimeSeriesChartOptions) => {
-                  // reset button removes all optional panel options except querySettings
+                  // reset button removes all general panel options
                   draft.yAxis = undefined;
                   draft.legend = undefined;
                   draft.visual = undefined;
                   draft.thresholds = undefined;
-                  // Note: We don't reset querySettings here since it's in a separate tab
                 })
               );
             }}

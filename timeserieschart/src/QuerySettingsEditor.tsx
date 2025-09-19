@@ -44,7 +44,7 @@ import {
 const DEFAULT_COLOR_VALUE = '#555';
 const NO_INDEX_AVAILABLE = -1; // invalid array index value used to represent the fact that no query index is available
 
-export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditorProps): ReactElement {
+export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
   const querySettingsList = value.querySettings;
 
@@ -153,8 +153,7 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
     }
   };
 
-  // Functions to add/remove optional settings
-  const addColorOverride = (i: number): void => {
+  const addColor = (i: number): void => {
     if (querySettingsList !== undefined) {
       handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
@@ -168,7 +167,7 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
     }
   };
 
-  const removeColorOverride = (i: number): void => {
+  const removeColor = (i: number): void => {
     if (querySettingsList !== undefined) {
       handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
@@ -290,8 +289,8 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
             onDelete={() => {
               deleteQuerySettingsInput(i);
             }}
-            onAddColorOverride={() => addColorOverride(i)}
-            onRemoveColorOverride={() => removeColorOverride(i)}
+            onAddColor={() => addColor(i)}
+            onRemoveColor={() => removeColor(i)}
             onAddLineStyle={() => addLineStyle(i)}
             onRemoveLineStyle={() => removeLineStyle(i)}
             onAddAreaOpacity={() => addAreaOpacity(i)}
@@ -319,8 +318,8 @@ interface QuerySettingsInputProps {
   onDelete: () => void;
   inputRef?: React.RefObject<HTMLInputElement | null>;
   // Optional control handlers
-  onAddColorOverride: () => void;
-  onRemoveColorOverride: () => void;
+  onAddColor: () => void;
+  onRemoveColor: () => void;
   onAddLineStyle: () => void;
   onRemoveLineStyle: () => void;
   onAddAreaOpacity: () => void;
@@ -337,8 +336,8 @@ function QuerySettingsInput({
   onAreaOpacityChange,
   onDelete,
   inputRef,
-  onAddColorOverride,
-  onRemoveColorOverride,
+  onAddColor: onAddColor,
+  onRemoveColor: onRemoveColor,
   onAddLineStyle,
   onRemoveLineStyle,
   onAddAreaOpacity,
@@ -353,11 +352,11 @@ function QuerySettingsInput({
   // Calculate available options
   const availableOptions = useMemo(() => {
     const options = [];
-    if (!colorMode) options.push({ key: 'color', label: 'Color', action: onAddColorOverride });
+    if (!colorMode) options.push({ key: 'color', label: 'Color', action: onAddColor });
     if (!lineStyle) options.push({ key: 'lineStyle', label: 'Line Style', action: onAddLineStyle });
     if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
     return options;
-  }, [colorMode, lineStyle, areaOpacity, onAddColorOverride, onAddLineStyle, onAddAreaOpacity]);
+  }, [colorMode, lineStyle, areaOpacity, onAddColor, onAddLineStyle, onAddAreaOpacity]);
 
   const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     if (availableOptions.length === 1 && availableOptions[0]) {
@@ -380,7 +379,6 @@ function QuerySettingsInput({
 
   return (
     <Stack spacing={2} sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-      {/* Single row with Query Selection, Optional Controls, and Delete Button */}
       <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
         {/* Query Index Selection */}
         <TextField
@@ -398,9 +396,9 @@ function QuerySettingsInput({
           ))}
         </TextField>
 
-        {/* Color Override Section */}
+        {/* Color section */}
         {colorMode && (
-          <SettingsSection label="Color" onRemove={onRemoveColorOverride}>
+          <SettingsSection label="Color" onRemove={onRemoveColor}>
             <TextField select value={colorMode} onChange={onColorModeChange} size="small" sx={{ flexGrow: 1 }}>
               <MenuItem value="fixed-single">Fixed (single)</MenuItem>
               <MenuItem value="fixed">Fixed</MenuItem>
@@ -413,7 +411,7 @@ function QuerySettingsInput({
           </SettingsSection>
         )}
 
-        {/* Line Style Section */}
+        {/* Line Style section */}
         {lineStyle && (
           <SettingsSection label="Line Style" onRemove={onRemoveLineStyle}>
             <ToggleButtonGroup
@@ -438,10 +436,11 @@ function QuerySettingsInput({
           </SettingsSection>
         )}
 
-        {/* Area Opacity Section */}
+        {/* Area Opacity section */}
         {areaOpacity !== undefined && (
           <SettingsSection label="Opacity" onRemove={onRemoveAreaOpacity}>
-            <Box /> {/* Spacer */}
+            {/* Spacer as I don't want to add a prop to SettingsSection for left-padding just for that case.. */}
+            <Box />
             <Slider
               value={areaOpacity}
               valueLabelDisplay="auto"
@@ -489,7 +488,7 @@ function QuerySettingsInput({
         {/* Spacer to push delete button to the right */}
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Delete Button for entire query settings - at the very right */}
+        {/* Delete Button for this query settings */}
         <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
           <DeleteIcon />
         </IconButton>

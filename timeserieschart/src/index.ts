@@ -13,8 +13,8 @@
 
 export { getPluginModule } from './getPluginModule';
 export * from './TimeSeriesChart';
-export * from './TimeSeriesChartGeneralSettings';
-export * from './TimeSeriesChartQuerySettings';
+export * from './GeneralSettingsEditor';
+export * from './QuerySettingsEditor';
 export * from './VisualOptionsEditor';
 export * from './YAxisOptionsEditor';
 export * from './TimeSeriesChartPanel';
