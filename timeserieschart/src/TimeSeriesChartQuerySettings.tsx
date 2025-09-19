@@ -37,7 +37,6 @@ import {
   LINE_STYLE_CONFIG,
 } from './time-series-chart-model';
 
-const DEFAULT_COLOR_MODE = 'fixed';
 const DEFAULT_COLOR_VALUE = '#555';
 const NO_INDEX_AVAILABLE = -1; // invalid array index value used to represent the fact that no query index is available
 
@@ -81,7 +80,13 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
           if (draft !== undefined) {
             const querySettings = draft[i];
             if (querySettings) {
-              querySettings.colorMode = e.target.value as QuerySettingsOptions['colorMode'];
+              const newColorMode = e.target.value;
+              if (!newColorMode) {
+                querySettings.colorMode = undefined;
+                querySettings.colorValue = undefined;
+              } else {
+                querySettings.colorMode = newColorMode as QuerySettingsOptions['colorMode'];
+              }
             }
           }
         })
@@ -160,9 +165,7 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
 
   const defaultQuerySettings: QuerySettingsOptions = {
     queryIndex: firstAvailableQueryIndex,
-    colorMode: DEFAULT_COLOR_MODE,
-    colorValue: DEFAULT_COLOR_VALUE,
-    areaOpacity: DEFAULT_AREA_OPACITY,
+    areaOpacity: DEFAULT_AREA_OPACITY, // TODO remove
   };
 
   const addQuerySettingsInput = (): void => {
@@ -259,12 +262,24 @@ function QuerySettingsInput({
           </MenuItem>
         ))}
       </TextField>
-      <TextField select value={colorMode} fullWidth label="Color mode" onChange={onColorModeChange}>
+      <TextField
+        select
+        value={colorMode || ''}
+        fullWidth
+        label="Color mode"
+        onChange={onColorModeChange}
+        placeholder="No override"
+      >
+        <MenuItem value="">No override</MenuItem>
         <MenuItem value="fixed-single">Fixed (single)</MenuItem>
         <MenuItem value="fixed">Fixed</MenuItem>
       </TextField>
       <Box>
-        <OptionsColorPicker label={'Query n°' + queryIndex} color={colorValue} onColorChange={onColorValueChange} />
+        <OptionsColorPicker
+          label={'Query n°' + queryIndex}
+          color={colorValue || DEFAULT_COLOR_VALUE}
+          onColorChange={onColorValueChange}
+        />
       </Box>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: '240px' }}>
         <Typography variant="body2">Style:</Typography>
