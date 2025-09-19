@@ -35,8 +35,10 @@ export interface TimeSeriesChartOptions {
 
 export interface QuerySettingsOptions {
   queryIndex: number;
-  colorMode: 'fixed' | 'fixed-single';
-  colorValue: string;
+  colorMode?: 'fixed' | 'fixed-single';
+  colorValue?: string;
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
+  areaOpacity?: number;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -166,6 +168,14 @@ export const LINE_STYLE_CONFIG = {
   solid: { label: 'Solid' },
   dashed: { label: 'Dashes' },
   dotted: { label: 'Dots' },
+};
+
+export const OPACITY_CONFIG = {
+  label: 'Opacity',
+  testId: 'slider-opacity',
+  min: 0,
+  max: 1,
+  step: 0.05,
 };
 
 // Both of these constants help produce a value that is LESS THAN the initial value.

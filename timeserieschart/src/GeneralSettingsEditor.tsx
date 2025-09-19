@@ -30,9 +30,8 @@ import {
 } from './time-series-chart-model';
 import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
 import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEditor';
-import { QuerySettingsEditor, QuerySettingsEditorProps } from './QuerySettingsEditor';
 
-export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptionsEditorProps): ReactElement {
+export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
 
   const handleLegendChange: LegendOptionsEditorProps['onChange'] = (newLegend) => {
@@ -60,14 +59,6 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     );
   };
 
-  const handleQuerySettingsChange: QuerySettingsEditorProps['onChange'] = (newQuerySettings) => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.querySettings = newQuerySettings;
-      })
-    );
-  };
-
   const handleThresholdsChange: ThresholdsEditorProps['onChange'] = (thresholds) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -87,7 +78,6 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={handleThresholdsChange} />
-        <QuerySettingsEditor querySettingsList={value.querySettings} onChange={handleQuerySettingsChange} />
         <OptionsEditorGroup title="Reset Settings">
           <Button
             variant="outlined"
@@ -95,12 +85,11 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
             onClick={() => {
               onChange(
                 produce(value, (draft: TimeSeriesChartOptions) => {
-                  // reset button removes all optional panel options
+                  // reset button removes all general panel options
                   draft.yAxis = undefined;
                   draft.legend = undefined;
                   draft.visual = undefined;
                   draft.thresholds = undefined;
-                  draft.querySettings = undefined;
                 })
               );
             }}
