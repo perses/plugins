@@ -40,9 +40,9 @@ export function getSeriesColor(props: SeriesColorProps): string {
 
   // Use color overrides defined in query settings in priority, if applicable
   if (querySettings) {
-    if (querySettings.colorMode === 'fixed') {
+    if (querySettings.colorMode === 'fixed' && querySettings.colorValue) {
       return querySettings.colorValue;
-    } else if (querySettings.colorMode === 'fixed-single' && !queryHasMultipleResults) {
+    } else if (querySettings.colorMode === 'fixed-single' && !queryHasMultipleResults && querySettings.colorValue) {
       return querySettings.colorValue;
     }
   }

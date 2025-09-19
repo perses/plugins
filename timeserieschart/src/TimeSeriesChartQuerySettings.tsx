@@ -13,6 +13,7 @@
 
 import {
   Box,
+  Button,
   IconButton,
   MenuItem,
   Slider,
@@ -22,10 +23,11 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-import { InfoTooltip, OptionsColorPicker } from '@perses-dev/components';
-import { ReactElement, RefObject, useEffect, useMemo, useRef } from 'react';
+import { OptionsColorPicker } from '@perses-dev/components';
+import { ReactElement, useEffect, useMemo, useRef } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import PlusIcon from 'mdi-material-ui/Plus';
+import AddIcon from 'mdi-material-ui/Plus';
+import CloseIcon from 'mdi-material-ui/Close';
 import { produce } from 'immer';
 import { useQueryCountContext } from '@perses-dev/plugin-system';
 import {
@@ -149,6 +151,87 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
     }
   };
 
+  // Functions to add/remove optional settings
+  const addColorOverride = (i: number): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          const qs = draft[i];
+          if (qs) {
+            qs.colorMode = 'fixed-single';
+            qs.colorValue = DEFAULT_COLOR_VALUE;
+          }
+        })
+      );
+    }
+  };
+
+  const removeColorOverride = (i: number): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          const qs = draft[i];
+          if (qs) {
+            qs.colorMode = undefined;
+            qs.colorValue = undefined;
+          }
+        })
+      );
+    }
+  };
+
+  const addLineStyle = (i: number): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          const qs = draft[i];
+          if (qs) {
+            qs.lineStyle = 'solid';
+          }
+        })
+      );
+    }
+  };
+
+  const removeLineStyle = (i: number): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          const qs = draft[i];
+          if (qs) {
+            qs.lineStyle = undefined;
+          }
+        })
+      );
+    }
+  };
+
+  const addAreaOpacity = (i: number): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          const qs = draft[i];
+          if (qs) {
+            qs.areaOpacity = DEFAULT_AREA_OPACITY;
+          }
+        })
+      );
+    }
+  };
+
+  const removeAreaOpacity = (i: number): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          const qs = draft[i];
+          if (qs) {
+            qs.areaOpacity = undefined;
+          }
+        })
+      );
+    }
+  };
+
   const queryCount = useQueryCountContext();
 
   // Compute the list of query indexes for which query settings are not already defined.
@@ -165,7 +248,6 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
 
   const defaultQuerySettings: QuerySettingsOptions = {
     queryIndex: firstAvailableQueryIndex,
-    areaOpacity: DEFAULT_AREA_OPACITY, // TODO remove
   };
 
   const addQuerySettingsInput = (): void => {
@@ -182,7 +264,7 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
   };
 
   return (
-    <Stack spacing={2}>
+    <Stack>
       {queryCount === 0 ? (
         <Typography mb={2} fontStyle="italic">
           No query defined
@@ -206,15 +288,19 @@ export function TimeSeriesChartQuerySettings(props: TimeSeriesChartOptionsEditor
             onDelete={() => {
               deleteQuerySettingsInput(i);
             }}
+            onAddColorOverride={() => addColorOverride(i)}
+            onRemoveColorOverride={() => removeColorOverride(i)}
+            onAddLineStyle={() => addLineStyle(i)}
+            onRemoveLineStyle={() => removeLineStyle(i)}
+            onAddAreaOpacity={() => addAreaOpacity(i)}
+            onRemoveAreaOpacity={() => removeAreaOpacity(i)}
           />
         ))
       )}
       {queryCount > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
-        <InfoTooltip description="Add query settings">
-          <IconButton size="small" aria-label="add query settings" onClick={addQuerySettingsInput}>
-            <PlusIcon />
-          </IconButton>
-        </InfoTooltip>
+        <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={addQuerySettingsInput}>
+          Add Query Settings
+        </Button>
       )}
     </Stack>
   );
@@ -229,11 +315,18 @@ interface QuerySettingsInputProps {
   onLineStyleChange: (lineStyle: string) => void;
   onAreaOpacityChange: (event: Event, value: number | number[]) => void;
   onDelete: () => void;
-  inputRef?: RefObject<HTMLInputElement | null>;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
+  // Optional control handlers
+  onAddColorOverride: () => void;
+  onRemoveColorOverride: () => void;
+  onAddLineStyle: () => void;
+  onRemoveLineStyle: () => void;
+  onAddAreaOpacity: () => void;
+  onRemoveAreaOpacity: () => void;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity = DEFAULT_AREA_OPACITY },
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity },
   availableQueryIndexes,
   onQueryIndexChange,
   onColorModeChange,
@@ -242,78 +335,154 @@ function QuerySettingsInput({
   onAreaOpacityChange,
   onDelete,
   inputRef,
+  onAddColorOverride,
+  onRemoveColorOverride,
+  onAddLineStyle,
+  onRemoveLineStyle,
+  onAddAreaOpacity,
+  onRemoveAreaOpacity,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ marginBottom: 2, width: '100%' }}>
-      <TextField
-        select
-        inputRef={inputRef}
-        value={queryIndex}
-        label="Query"
-        onChange={onQueryIndexChange}
-        sx={{ minWidth: '75px' }} // instead of `fullWidth` otherwise it's taking too much space
-      >
-        {selectableQueryIndexes.map((queryIndex) => (
-          <MenuItem key={`query-${queryIndex}`} value={queryIndex}>
-            #{queryIndex + 1}
-          </MenuItem>
-        ))}
-      </TextField>
-      <TextField
-        select
-        value={colorMode || ''}
-        fullWidth
-        label="Color mode"
-        onChange={onColorModeChange}
-        placeholder="No override"
-      >
-        <MenuItem value="">No override</MenuItem>
-        <MenuItem value="fixed-single">Fixed (single)</MenuItem>
-        <MenuItem value="fixed">Fixed</MenuItem>
-      </TextField>
-      <Box>
-        <OptionsColorPicker
-          label={'Query n°' + queryIndex}
-          color={colorValue || DEFAULT_COLOR_VALUE}
-          onColorChange={onColorValueChange}
-        />
-      </Box>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: '240px' }}>
-        <Typography variant="body2">Style:</Typography>
-        <ToggleButtonGroup
-          color="primary"
-          exclusive
-          value={lineStyle}
-          onChange={(__, newValue) => {
-            onLineStyleChange(newValue);
-          }}
+    <Stack spacing={2} sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+      {/* Single row with Query Selection, Optional Controls, and Delete Button */}
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+        {/* Query Index Selection */}
+        <TextField
+          select
+          inputRef={inputRef}
+          value={queryIndex}
+          label="Query"
+          onChange={onQueryIndexChange}
+          sx={{ minWidth: '75px' }}
         >
-          {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
-            <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
-              {config.label}
-            </ToggleButton>
+          {selectableQueryIndexes.map((qi) => (
+            <MenuItem key={`query-${qi}`} value={qi}>
+              #{qi + 1}
+            </MenuItem>
           ))}
-        </ToggleButtonGroup>
+        </TextField>
+
+        {/* Color Override Section */}
+        {colorMode ? (
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
+          >
+            <Typography variant="body2">Color:</Typography>
+            <TextField select value={colorMode} onChange={onColorModeChange} sx={{ minWidth: '150px' }} size="small">
+              <MenuItem value="fixed-single">Fixed (single)</MenuItem>
+              <MenuItem value="fixed">Fixed</MenuItem>
+            </TextField>
+            <OptionsColorPicker
+              label={`Query n°${queryIndex + 1}`}
+              color={colorValue || DEFAULT_COLOR_VALUE}
+              onColorChange={onColorValueChange}
+            />
+            <IconButton size="small" onClick={onRemoveColorOverride} aria-label="Remove color override">
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        ) : (
+          <Button
+            onClick={onAddColorOverride}
+            startIcon={<AddIcon />}
+            variant="outlined"
+            size="small"
+            sx={{ flexShrink: 0 }}
+          >
+            Color
+          </Button>
+        )}
+
+        {/* Line Style Section */}
+        {lineStyle ? (
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
+          >
+            <Typography variant="body2">Style:</Typography>
+            <ToggleButtonGroup
+              color="primary"
+              exclusive
+              value={lineStyle}
+              onChange={(__, newValue) => {
+                if (newValue !== null) {
+                  onLineStyleChange(newValue);
+                }
+              }}
+              size="small"
+            >
+              {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
+                <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
+                  {config.label}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+            <IconButton size="small" onClick={onRemoveLineStyle} aria-label="Remove line style">
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        ) : (
+          <Button
+            onClick={onAddLineStyle}
+            startIcon={<AddIcon />}
+            variant="outlined"
+            size="small"
+            sx={{ flexShrink: 0 }}
+          >
+            Line Style
+          </Button>
+        )}
+
+        {/* Area Opacity Section */}
+        {areaOpacity !== undefined ? (
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1, minWidth: '240px' }}
+          >
+            <Typography variant="body2">Opacity:</Typography>
+            <Slider
+              value={areaOpacity}
+              valueLabelDisplay="auto"
+              step={OPACITY_CONFIG.step}
+              marks
+              min={OPACITY_CONFIG.min}
+              max={OPACITY_CONFIG.max}
+              onChange={onAreaOpacityChange}
+              sx={{ flex: 1, minWidth: '140px' }}
+            />
+            <IconButton size="small" onClick={onRemoveAreaOpacity} aria-label="Remove opacity">
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        ) : (
+          <Button
+            onClick={onAddAreaOpacity}
+            startIcon={<AddIcon />}
+            variant="outlined"
+            size="small"
+            sx={{ flexShrink: 0 }}
+          >
+            Opacity
+          </Button>
+        )}
+
+        {/* Delete Button for entire query settings - at the very right */}
+        <Box sx={{ ml: 'auto' }}>
+          <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} size="small" onClick={onDelete}>
+            <DeleteIcon />
+          </IconButton>
+        </Box>
       </Stack>
-      <Stack direction="row" alignItems="center" spacing={2}>
-        <Typography variant="body2">Opacity:</Typography>
-        <Slider
-          value={areaOpacity}
-          valueLabelDisplay="auto"
-          step={OPACITY_CONFIG.step}
-          marks
-          min={OPACITY_CONFIG.min}
-          max={OPACITY_CONFIG.max}
-          onChange={onAreaOpacityChange}
-          sx={{ flex: 1, minWidth: '180px' }}
-        />
-      </Stack>
-      <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} size="small" onClick={onDelete}>
-        <DeleteIcon />
-      </IconButton>
     </Stack>
   );
 }
