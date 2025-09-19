@@ -48,13 +48,20 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
       datasourceUrl,
     },
     healthCheck: healthCheck({ datasourceUrl, headers: specHeaders }),
-    instantQuery: (params, headers) => instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    rangeQuery: (params, headers) => rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelNames: (params, headers) => labelNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    metricMetadata: (params, headers) => metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    series: (params, headers) => series(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    parseQuery: (params, headers) => parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    instantQuery: (params, headers, abortSignal) =>
+      instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+    rangeQuery: (params, headers, abortSignal) =>
+      rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+    labelNames: (params, headers, abortSignal) =>
+      labelNames(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+    labelValues: (params, headers, abortSignal) =>
+      labelValues(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+    metricMetadata: (params, headers, abortSignal) =>
+      metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+    series: (params, headers, abortSignal) =>
+      series(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+    parseQuery: (params, headers, abortSignal) =>
+      parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
   };
 };
 
