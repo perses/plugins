@@ -378,19 +378,6 @@ function QuerySettingsInput({
     handleMenuClose();
   };
 
-  const theme = useTheme();
-
-  // Shared styles for floating labels
-  const floatingLabelSx = {
-    position: 'absolute',
-    top: -8,
-    left: 12,
-    backgroundColor: theme.palette.background.code,
-    px: 0.5,
-    color: 'text.secondary',
-    zIndex: 1,
-  };
-
   return (
     <Stack spacing={2} sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
       {/* Single row with Query Selection, Optional Controls, and Delete Button */}
@@ -413,97 +400,59 @@ function QuerySettingsInput({
 
         {/* Color Override Section */}
         {colorMode && (
-          <Box sx={{ position: 'relative', minWidth: '250px' }}>
-            <Typography variant="caption" sx={floatingLabelSx}>
-              Color
-            </Typography>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1}
-              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
-            >
-              <TextField select value={colorMode} onChange={onColorModeChange} size="small" sx={{ flexGrow: 1 }}>
-                <MenuItem value="fixed-single">Fixed (single)</MenuItem>
-                <MenuItem value="fixed">Fixed</MenuItem>
-              </TextField>
-              <OptionsColorPicker
-                label={`Query n°${queryIndex + 1}`}
-                color={colorValue || DEFAULT_COLOR_VALUE}
-                onColorChange={onColorValueChange}
-              />
-              <IconButton size="small" onClick={onRemoveColorOverride} aria-label="Remove color override">
-                <CloseIcon />
-              </IconButton>
-            </Stack>
-          </Box>
+          <SettingsSection label="Color" onRemove={onRemoveColorOverride}>
+            <TextField select value={colorMode} onChange={onColorModeChange} size="small" sx={{ flexGrow: 1 }}>
+              <MenuItem value="fixed-single">Fixed (single)</MenuItem>
+              <MenuItem value="fixed">Fixed</MenuItem>
+            </TextField>
+            <OptionsColorPicker
+              label={`Query n°${queryIndex + 1}`}
+              color={colorValue || DEFAULT_COLOR_VALUE}
+              onColorChange={onColorValueChange}
+            />
+          </SettingsSection>
         )}
 
         {/* Line Style Section */}
         {lineStyle && (
-          <Box sx={{ position: 'relative', minWidth: '250px' }}>
-            <Typography variant="caption" sx={floatingLabelSx}>
-              Style
-            </Typography>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1}
-              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
+          <SettingsSection label="Line Style" onRemove={onRemoveLineStyle}>
+            <ToggleButtonGroup
+              color="primary"
+              exclusive
+              value={lineStyle}
+              onChange={(__, newValue) => {
+                if (newValue !== null) {
+                  onLineStyleChange(newValue);
+                }
+              }}
+              size="small"
             >
-              <ToggleButtonGroup
-                color="primary"
-                exclusive
-                value={lineStyle}
-                onChange={(__, newValue) => {
-                  if (newValue !== null) {
-                    onLineStyleChange(newValue);
-                  }
-                }}
-                size="small"
-              >
-                {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
-                  <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
-                    {config.label}
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-              {/* Spacer to push delete button to the right */}
-              <Box sx={{ flexGrow: 1 }} />
-              <IconButton size="small" onClick={onRemoveLineStyle} aria-label="Remove line style">
-                <CloseIcon />
-              </IconButton>
-            </Stack>
-          </Box>
+              {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
+                <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
+                  {config.label}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+            {/* Spacer to push delete button to the right */}
+            <Box sx={{ flexGrow: 1 }} />
+          </SettingsSection>
         )}
 
         {/* Area Opacity Section */}
         {areaOpacity !== undefined && (
-          <Box sx={{ position: 'relative', minWidth: '250px' }}>
-            <Typography variant="caption" sx={floatingLabelSx}>
-              Opacity
-            </Typography>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={2}
-              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1, paddingLeft: 2 }}
-            >
-              <Slider
-                value={areaOpacity}
-                valueLabelDisplay="auto"
-                step={OPACITY_CONFIG.step}
-                marks
-                min={OPACITY_CONFIG.min}
-                max={OPACITY_CONFIG.max}
-                onChange={onAreaOpacityChange}
-                sx={{ flexGrow: 1 }}
-              />
-              <IconButton size="small" onClick={onRemoveAreaOpacity} aria-label="Remove opacity">
-                <CloseIcon />
-              </IconButton>
-            </Stack>
-          </Box>
+          <SettingsSection label="Opacity" onRemove={onRemoveAreaOpacity}>
+            <Box /> {/* Spacer */}
+            <Slider
+              value={areaOpacity}
+              valueLabelDisplay="auto"
+              step={OPACITY_CONFIG.step}
+              marks
+              min={OPACITY_CONFIG.min}
+              max={OPACITY_CONFIG.max}
+              onChange={onAreaOpacityChange}
+              sx={{ flexGrow: 1 }}
+            />
+          </SettingsSection>
         )}
 
         {/* Add Options Button - only show if there are available options */}
@@ -546,5 +495,52 @@ function QuerySettingsInput({
         </IconButton>
       </Stack>
     </Stack>
+  );
+}
+
+interface SettingsSectionProps {
+  label: string;
+  children: React.ReactNode;
+  onRemove: () => void;
+}
+
+// Reusable section component
+function SettingsSection(props: SettingsSectionProps): ReactElement {
+  const { label, children, onRemove } = props;
+  const theme = useTheme();
+
+  return (
+    <Box sx={{ position: 'relative', minWidth: '250px' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          position: 'absolute',
+          top: -8,
+          left: 12,
+          backgroundColor: theme.palette.background.code,
+          px: 0.5,
+          color: 'text.secondary',
+          zIndex: 1,
+        }}
+      >
+        {label}
+      </Typography>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        sx={{
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 1,
+          p: 1,
+        }}
+      >
+        {children}
+        <IconButton size="small" onClick={onRemove} aria-label={`Remove ${label}`}>
+          <CloseIcon />
+        </IconButton>
+      </Stack>
+    </Box>
   );
 }
