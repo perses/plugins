@@ -38,18 +38,43 @@ interface PrometheusClientOptions {
 
 export interface PrometheusClient extends DatasourceClient {
   options: PrometheusClientOptions;
-  instantQuery(params: InstantQueryRequestParameters, headers?: RequestHeaders): Promise<InstantQueryResponse>;
-  rangeQuery(params: RangeQueryRequestParameters, headers?: RequestHeaders): Promise<RangeQueryResponse>;
-  labelNames(params: LabelNamesRequestParameters, headers?: RequestHeaders): Promise<LabelNamesResponse>;
-  labelValues(params: LabelValuesRequestParameters, headers?: RequestHeaders): Promise<LabelValuesResponse>;
-  metricMetadata(params: MetricMetadataRequestParameters, headers?: RequestHeaders): Promise<MetricMetadataResponse>;
-  series(params: SeriesRequestParameters, headers?: RequestHeaders): Promise<SeriesResponse>;
-  parseQuery(params: ParseQueryRequestParameters, headers?: RequestHeaders): Promise<ParseQueryResponse>;
+  instantQuery(
+    params: InstantQueryRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<InstantQueryResponse>;
+  rangeQuery(
+    params: RangeQueryRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<RangeQueryResponse>;
+  labelNames(
+    params: LabelNamesRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<LabelNamesResponse>;
+  labelValues(
+    params: LabelValuesRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<LabelValuesResponse>;
+  metricMetadata(
+    params: MetricMetadataRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<MetricMetadataResponse>;
+  series(params: SeriesRequestParameters, headers?: RequestHeaders, signal?: AbortSignal): Promise<SeriesResponse>;
+  parseQuery(
+    params: ParseQueryRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<ParseQueryResponse>;
 }
 
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -60,7 +85,7 @@ export function healthCheck(queryOptions: QueryOptions) {
     const url = `${queryOptions.datasourceUrl}/-/healthy`;
 
     try {
-      const resp = await fetch(url, { headers: queryOptions.headers });
+      const resp = await fetch(url, { headers: queryOptions.headers, signal: queryOptions.abortSignal });
       return resp.status === 200;
     } catch {
       return false;
@@ -155,7 +180,6 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   queryOptions: QueryOptions
 ): Promise<TResponse> {
   const { datasourceUrl, headers } = queryOptions;
-
   let url = `${datasourceUrl}${apiURI}`;
   const urlParams = createSearchParams(params).toString();
   if (urlParams !== '') {
@@ -169,8 +193,7 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers } = queryOptions;
-
+  const { datasourceUrl, headers, abortSignal: signal } = queryOptions;
   const url = `${datasourceUrl}${apiURI}`;
   const init = {
     method: 'POST',
@@ -178,6 +201,7 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
       'Content-Type': 'application/x-www-form-urlencoded',
       ...headers,
     },
+    signal,
     body: createSearchParams(params),
   };
   return fetchResults<TResponse>(url, init);

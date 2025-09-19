@@ -41,7 +41,8 @@ import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
+  abortSignal
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     // Do not make a request to the backend, instead return an empty TimeSeriesData
@@ -111,22 +112,31 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(selectedDatasource);
 
   // Make the request to Prom
+
   let response;
   switch (context.mode) {
     case 'instant':
-      response = await client.instantQuery({
-        query,
-        time: end,
-      });
+      response = await client.instantQuery(
+        {
+          query,
+          time: end,
+        },
+        undefined,
+        abortSignal
+      );
       break;
     case 'range':
     default:
-      response = await client.rangeQuery({
-        query,
-        start,
-        end,
-        step,
-      });
+      response = await client.rangeQuery(
+        {
+          query,
+          start,
+          end,
+          step,
+        },
+        undefined,
+        abortSignal
+      );
       break;
   }
 
