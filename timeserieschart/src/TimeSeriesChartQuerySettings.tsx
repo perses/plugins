@@ -15,16 +15,18 @@ import {
   Box,
   Button,
   IconButton,
+  Menu,
   MenuItem,
   Slider,
   Stack,
   TextField,
-  Typography,
   ToggleButton,
   ToggleButtonGroup,
+  Typography,
+  useTheme,
 } from '@mui/material';
 import { OptionsColorPicker } from '@perses-dev/components';
-import { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import CloseIcon from 'mdi-material-ui/Close';
@@ -345,6 +347,50 @@ function QuerySettingsInput({
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
 
+  // State for dropdown menu
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  // Calculate available options
+  const availableOptions = useMemo(() => {
+    const options = [];
+    if (!colorMode) options.push({ key: 'color', label: 'Color', action: onAddColorOverride });
+    if (!lineStyle) options.push({ key: 'lineStyle', label: 'Line Style', action: onAddLineStyle });
+    if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
+    return options;
+  }, [colorMode, lineStyle, areaOpacity, onAddColorOverride, onAddLineStyle, onAddAreaOpacity]);
+
+  const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (availableOptions.length === 1 && availableOptions[0]) {
+      // If only one option left, add it directly
+      availableOptions[0].action();
+    } else {
+      // Show dropdown
+      setAnchorEl(event.currentTarget);
+    }
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (action: () => void) => {
+    action();
+    handleMenuClose();
+  };
+
+  const theme = useTheme();
+
+  // Shared styles for floating labels
+  const floatingLabelSx = {
+    position: 'absolute',
+    top: -8,
+    left: 12,
+    backgroundColor: theme.palette.background.code,
+    px: 0.5,
+    color: 'text.secondary',
+    zIndex: 1,
+  };
+
   return (
     <Stack spacing={2} sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
       {/* Single row with Query Selection, Optional Controls, and Delete Button */}
@@ -366,122 +412,138 @@ function QuerySettingsInput({
         </TextField>
 
         {/* Color Override Section */}
-        {colorMode ? (
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={1}
-            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
-          >
-            <Typography variant="body2">Color:</Typography>
-            <TextField select value={colorMode} onChange={onColorModeChange} sx={{ minWidth: '150px' }} size="small">
-              <MenuItem value="fixed-single">Fixed (single)</MenuItem>
-              <MenuItem value="fixed">Fixed</MenuItem>
-            </TextField>
-            <OptionsColorPicker
-              label={`Query n°${queryIndex + 1}`}
-              color={colorValue || DEFAULT_COLOR_VALUE}
-              onColorChange={onColorValueChange}
-            />
-            <IconButton size="small" onClick={onRemoveColorOverride} aria-label="Remove color override">
-              <CloseIcon />
-            </IconButton>
-          </Stack>
-        ) : (
-          <Button
-            onClick={onAddColorOverride}
-            startIcon={<AddIcon />}
-            variant="outlined"
-            size="small"
-            sx={{ flexShrink: 0 }}
-          >
-            Color
-          </Button>
+        {colorMode && (
+          <Box sx={{ position: 'relative', minWidth: '250px' }}>
+            <Typography variant="caption" sx={floatingLabelSx}>
+              Color
+            </Typography>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
+            >
+              <TextField select value={colorMode} onChange={onColorModeChange} size="small" sx={{ flexGrow: 1 }}>
+                <MenuItem value="fixed-single">Fixed (single)</MenuItem>
+                <MenuItem value="fixed">Fixed</MenuItem>
+              </TextField>
+              <OptionsColorPicker
+                label={`Query n°${queryIndex + 1}`}
+                color={colorValue || DEFAULT_COLOR_VALUE}
+                onColorChange={onColorValueChange}
+              />
+              <IconButton size="small" onClick={onRemoveColorOverride} aria-label="Remove color override">
+                <CloseIcon />
+              </IconButton>
+            </Stack>
+          </Box>
         )}
 
         {/* Line Style Section */}
-        {lineStyle ? (
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={1}
-            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
-          >
-            <Typography variant="body2">Style:</Typography>
-            <ToggleButtonGroup
-              color="primary"
-              exclusive
-              value={lineStyle}
-              onChange={(__, newValue) => {
-                if (newValue !== null) {
-                  onLineStyleChange(newValue);
-                }
-              }}
-              size="small"
+        {lineStyle && (
+          <Box sx={{ position: 'relative', minWidth: '250px' }}>
+            <Typography variant="caption" sx={floatingLabelSx}>
+              Style
+            </Typography>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1 }}
             >
-              {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
-                <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
-                  {config.label}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-            <IconButton size="small" onClick={onRemoveLineStyle} aria-label="Remove line style">
-              <CloseIcon />
-            </IconButton>
-          </Stack>
-        ) : (
-          <Button
-            onClick={onAddLineStyle}
-            startIcon={<AddIcon />}
-            variant="outlined"
-            size="small"
-            sx={{ flexShrink: 0 }}
-          >
-            Line Style
-          </Button>
+              <ToggleButtonGroup
+                color="primary"
+                exclusive
+                value={lineStyle}
+                onChange={(__, newValue) => {
+                  if (newValue !== null) {
+                    onLineStyleChange(newValue);
+                  }
+                }}
+                size="small"
+              >
+                {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
+                  <ToggleButton key={styleValue} value={styleValue} aria-label={`${styleValue} line style`}>
+                    {config.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+              {/* Spacer to push delete button to the right */}
+              <Box sx={{ flexGrow: 1 }} />
+              <IconButton size="small" onClick={onRemoveLineStyle} aria-label="Remove line style">
+                <CloseIcon />
+              </IconButton>
+            </Stack>
+          </Box>
         )}
 
         {/* Area Opacity Section */}
-        {areaOpacity !== undefined ? (
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1, minWidth: '240px' }}
-          >
-            <Typography variant="body2">Opacity:</Typography>
-            <Slider
-              value={areaOpacity}
-              valueLabelDisplay="auto"
-              step={OPACITY_CONFIG.step}
-              marks
-              min={OPACITY_CONFIG.min}
-              max={OPACITY_CONFIG.max}
-              onChange={onAreaOpacityChange}
-              sx={{ flex: 1, minWidth: '140px' }}
-            />
-            <IconButton size="small" onClick={onRemoveAreaOpacity} aria-label="Remove opacity">
-              <CloseIcon />
-            </IconButton>
-          </Stack>
-        ) : (
-          <Button
-            onClick={onAddAreaOpacity}
-            startIcon={<AddIcon />}
-            variant="outlined"
-            size="small"
-            sx={{ flexShrink: 0 }}
-          >
-            Opacity
-          </Button>
+        {areaOpacity !== undefined && (
+          <Box sx={{ position: 'relative', minWidth: '250px' }}>
+            <Typography variant="caption" sx={floatingLabelSx}>
+              Opacity
+            </Typography>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={2}
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 1, paddingLeft: 2 }}
+            >
+              <Slider
+                value={areaOpacity}
+                valueLabelDisplay="auto"
+                step={OPACITY_CONFIG.step}
+                marks
+                min={OPACITY_CONFIG.min}
+                max={OPACITY_CONFIG.max}
+                onChange={onAreaOpacityChange}
+                sx={{ flexGrow: 1 }}
+              />
+              <IconButton size="small" onClick={onRemoveAreaOpacity} aria-label="Remove opacity">
+                <CloseIcon />
+              </IconButton>
+            </Stack>
+          </Box>
         )}
 
+        {/* Add Options Button - only show if there are available options */}
+        {availableOptions.length > 0 && (
+          <>
+            <IconButton onClick={handleAddMenuClick} aria-label="Add option">
+              <AddIcon />
+            </IconButton>
+
+            {/* Dropdown Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+            >
+              {availableOptions.map((option) => (
+                <MenuItem
+                  key={option.key}
+                  onClick={() => handleMenuItemClick(option.action)}
+                  sx={{ minWidth: '120px' }}
+                >
+                  <AddIcon sx={{ mr: 1, fontSize: '1rem' }} />
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
+        )}
+
+        {/* Spacer to push delete button to the right */}
+        <Box sx={{ flexGrow: 1 }} />
+
         {/* Delete Button for entire query settings - at the very right */}
-        <Box sx={{ ml: 'auto' }}>
-          <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} size="small" onClick={onDelete}>
-            <DeleteIcon />
-          </IconButton>
-        </Box>
+        <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
+          <DeleteIcon />
+        </IconButton>
       </Stack>
     </Stack>
   );
