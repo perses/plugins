@@ -7,3 +7,6 @@ validators:
     type: 'ignore'
   - regex: 'perses\.dev'
     type: 'ignore'
+  # getting 403 forbidden in the CI
+  - regex: 'npmjs\.com'
+    type: 'ignore'
