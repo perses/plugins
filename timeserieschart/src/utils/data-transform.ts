@@ -39,6 +39,7 @@ import {
   NEGATIVE_MIN_VALUE_MULTIPLIER,
   TimeSeriesChartVisualOptions,
   TimeSeriesChartYAxisOptions,
+  LineStyleType,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -73,7 +74,7 @@ export function getTimeSeries(
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
   paletteColor: string,
-  querySettings?: { lineStyle?: string; areaOpacity?: number }
+  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number }
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -116,7 +117,7 @@ export function getTimeSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      type: (querySettings?.lineStyle ?? visual.lineStyle) as 'solid' | 'dashed' | 'dotted',
+      type: (querySettings?.lineStyle ?? visual.lineStyle) as LineStyleType,
     },
     areaStyle: {
       opacity: querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY,

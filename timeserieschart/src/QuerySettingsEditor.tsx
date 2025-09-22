@@ -144,6 +144,20 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     }
   };
 
+  // Helper function to update query settings at a specific index
+  const updateQuerySettings = (i: number, updater: (qs: QuerySettingsOptions) => void): void => {
+    if (querySettingsList !== undefined) {
+      handleQuerySettingsChange(
+        produce(querySettingsList, (draft) => {
+          const qs = draft[i];
+          if (qs) {
+            updater(qs);
+          }
+        })
+      );
+    }
+  };
+
   const deleteQuerySettingsInput = (i: number): void => {
     if (querySettingsList !== undefined) {
       const updatedQuerySettingsList = produce(querySettingsList, (draft) => {
@@ -154,83 +168,41 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
   };
 
   const addColor = (i: number): void => {
-    if (querySettingsList !== undefined) {
-      handleQuerySettingsChange(
-        produce(querySettingsList, (draft) => {
-          const qs = draft[i];
-          if (qs) {
-            qs.colorMode = 'fixed-single';
-            qs.colorValue = DEFAULT_COLOR_VALUE;
-          }
-        })
-      );
-    }
+    updateQuerySettings(i, (qs) => {
+      qs.colorMode = 'fixed-single';
+      qs.colorValue = DEFAULT_COLOR_VALUE;
+    });
   };
 
   const removeColor = (i: number): void => {
-    if (querySettingsList !== undefined) {
-      handleQuerySettingsChange(
-        produce(querySettingsList, (draft) => {
-          const qs = draft[i];
-          if (qs) {
-            qs.colorMode = undefined;
-            qs.colorValue = undefined;
-          }
-        })
-      );
-    }
+    updateQuerySettings(i, (qs) => {
+      qs.colorMode = undefined;
+      qs.colorValue = undefined;
+    });
   };
 
   const addLineStyle = (i: number): void => {
-    if (querySettingsList !== undefined) {
-      handleQuerySettingsChange(
-        produce(querySettingsList, (draft) => {
-          const qs = draft[i];
-          if (qs) {
-            qs.lineStyle = 'solid';
-          }
-        })
-      );
-    }
+    updateQuerySettings(i, (qs) => {
+      qs.lineStyle = 'solid';
+    });
   };
 
   const removeLineStyle = (i: number): void => {
-    if (querySettingsList !== undefined) {
-      handleQuerySettingsChange(
-        produce(querySettingsList, (draft) => {
-          const qs = draft[i];
-          if (qs) {
-            qs.lineStyle = undefined;
-          }
-        })
-      );
-    }
+    updateQuerySettings(i, (qs) => {
+      qs.lineStyle = undefined;
+    });
   };
 
   const addAreaOpacity = (i: number): void => {
-    if (querySettingsList !== undefined) {
-      handleQuerySettingsChange(
-        produce(querySettingsList, (draft) => {
-          const qs = draft[i];
-          if (qs) {
-            qs.areaOpacity = DEFAULT_AREA_OPACITY;
-          }
-        })
-      );
-    }
+    updateQuerySettings(i, (qs) => {
+      qs.areaOpacity = DEFAULT_AREA_OPACITY;
+    });
   };
 
   const removeAreaOpacity = (i: number): void => {
-    if (querySettingsList !== undefined) {
-      handleQuerySettingsChange(
-        produce(querySettingsList, (draft) => {
-          const qs = draft[i];
-          if (qs) {
-            qs.areaOpacity = undefined;
-          }
-        })
-      );
-    }
+    updateQuerySettings(i, (qs) => {
+      qs.areaOpacity = undefined;
+    });
   };
 
   const queryCount = useQueryCountContext();
@@ -271,8 +243,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           No query defined
         </Typography>
       ) : (
-        querySettingsList &&
-        querySettingsList.length > 0 &&
+        querySettingsList?.length &&
         querySettingsList.map((querySettings, i) => (
           <QuerySettingsInput
             inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
