@@ -10,7 +10,8 @@
       "areaOpacity": 0.1,
       "connectNulls": false,
       "display": "line",
-      "lineWidth": 1
+      "lineWidth": 1,
+      "lineStyle": "dotted"
     },
     "yAxis": {
       "format": {

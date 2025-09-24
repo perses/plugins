@@ -21,6 +21,13 @@ import (
 #grafanaType: "timeseries" | "graph"
 #panel:       _
 
+// key: grafana line style, value: perses line style
+#lineStyleMapping: {
+	solid:  "solid"
+	dash: "dashed"
+	dot: "dotted"
+}
+
 kind: "TimeSeriesChart"
 spec: {
 	// legend
@@ -132,6 +139,11 @@ spec: {
 		if #lineWidth >= 0.25 && #lineWidth <= 3 {
 			visual: lineWidth: #lineWidth
 		}
+	}
+
+	#lineStyle: *#panel.fieldConfig.defaults.custom.lineStyle.fill | null
+	if #lineStyle != null {
+		visual: lineStyle: #lineStyleMapping[#lineStyle]
 	}
 
 	#fillOpacity: *#panel.fieldConfig.defaults.custom.fillOpacity | null
