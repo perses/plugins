@@ -182,8 +182,8 @@ spec: {
 					colorMode: "fixed"
 					colorValue: property.value.fixedColor
 				}
-				if property.id == "custom.lineStyle" if (*property.value.dash | null) != null {
-					lineStyle: "dashed"
+				if property.id == "custom.lineStyle" if (*property.value.fill | null) != null {
+					lineStyle: #lineStyleMapping[property.value.fill]
 				}
 				if property.id == "custom.fillOpacity" {
 					areaOpacity: property.value
