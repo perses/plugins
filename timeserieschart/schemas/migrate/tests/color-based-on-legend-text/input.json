@@ -74,6 +74,10 @@
               "fixedColor": "#890F02",
               "mode": "fixed"
             }
+          },
+          {
+            "id": "custom.fillOpacity",
+            "value": 100
           }
         ]
       },

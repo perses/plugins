@@ -186,7 +186,7 @@ spec: {
 					lineStyle: #lineStyleMapping[property.value.fill]
 				}
 				if property.id == "custom.fillOpacity" {
-					areaOpacity: property.value
+					areaOpacity: property.value / 100
 				}
 			}
 		}

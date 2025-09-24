@@ -20,7 +20,8 @@
       {
         "queryIndex": 2,
         "colorMode": "fixed",
-        "colorValue": "#890F02"
+        "colorValue": "#890F02",
+        "areaOpacity": 1
       },
       {
         "queryIndex": 4,
