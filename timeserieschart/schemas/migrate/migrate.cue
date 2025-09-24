@@ -160,18 +160,28 @@ spec: {
 
 	// migrate fixedColor overrides to querySettings when applicable
 	#querySettings: [
-		for override in (*#panel.fieldConfig.overrides | [])
-		if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && override.matcher.options != _|_
-		for property in override.properties
-		if (*property.value.fixedColor | null) != null
-		for i, target in (*#panel.targets | [])
-		if target.legendFormat == override.matcher.options || target.legendFormat =~ strings.Trim(override.matcher.options, "/") {
+		for i, target in (*#panel.targets | []) {
 			queryIndex: i
-			colorMode: "fixed"
-			colorValue: property.value.fixedColor
+			for override in (*#panel.fieldConfig.overrides | [])
+			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && override.matcher.options != _|_
+			for property in override.properties
+			if target.legendFormat == override.matcher.options || target.legendFormat =~ strings.Trim(override.matcher.options, "/") {
+				if property.id == "color" if (*property.value.fixedColor | null) != null {
+					colorMode: "fixed"
+					colorValue: property.value.fixedColor
+				}
+				if property.id == "custom.lineStyle" if (*property.value.dash | null) != null {
+					lineStyle: "dashed"
+				}
+				if property.id == "custom.fillOpacity" {
+					areaOpacity: property.value
+				}
+			}
 		}
 	]
-	if len(#querySettings) != 0 {
-		querySettings: #querySettings
+	// don't keep elements that just define the queryIndex
+	#querySettingsFiltered: [for qs in #querySettings if len(qs) > 1 { qs }]
+	if len(#querySettingsFiltered) != 0 {
+		querySettings: #querySettingsFiltered
 	}
 }
