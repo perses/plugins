@@ -27,6 +27,12 @@ func getPreviousTag(pluginName string) string {
 	pluginName = strings.ToLower(pluginName)
 	data, err := exec.Command("git", "describe", "--tags", "--abbrev=0", "--match", fmt.Sprintf("%s/v*", pluginName)).Output()
 	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			if exitError.ExitCode() == 128 {
+				return ""
+			}
+		}
+
 		logrus.Fatal(err)
 	}
 	return string(bytes.ReplaceAll(data, []byte("\n"), []byte("")))
