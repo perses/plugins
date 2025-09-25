@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/prometheus-plugin",
-  "version": "0.53.3",
+  "version": "0.53.4",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
