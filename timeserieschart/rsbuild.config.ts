@@ -11,56 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { createConfigForPlugin } from '../rsbuild.shared';
 
-const assetPrefix = '/plugins/TimeSeriesChart/';
-
-export default defineConfig({
-  server: { port: 3016 },
-  dev: { assetPrefix },
-  source: {
-    entry: {
-      main: './src/index-federation.ts',
-    },
+export default createConfigForPlugin({
+  name: 'TimeSeriesChart',
+  rsbuildConfig: {
+    server: { port: 3016 },
+    plugins: [pluginReact()],
   },
-  output: {
-    assetPrefix,
-    copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
-    distPath: {
-      root: 'dist',
-      js: '__mf/js',
-      css: '__mf/css',
-      font: '__mf/font',
+  moduleFederation: {
+    exposes: {
+      './TimeSeriesChart': './src/TimeSeriesChart.ts',
     },
-  },
-  plugins: [
-    pluginReact(),
-    pluginModuleFederation({
-      name: 'TimeSeriesChart',
-      exposes: {
-        './TimeSeriesChart': './src/TimeSeriesChart.ts',
-      },
-      shared: {
-        react: { requiredVersion: '18.2.0', singleton: true },
-        'react-dom': { requiredVersion: '18.2.0', singleton: true },
-        echarts: { singleton: true },
-        'date-fns': { singleton: true },
-        'date-fns-tz': { singleton: true },
-        lodash: { singleton: true },
-        '@perses-dev/components': { singleton: true },
-        '@perses-dev/plugin-system': { singleton: true },
-        '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
-        '@emotion/styled': { singleton: true },
-        '@hookform/resolvers': { singleton: true },
-      },
-      dts: false,
-      runtime: false,
-      getPublicPath: `function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || ""; return prefix + "${assetPrefix}"; }`,
-    }),
-  ],
-  tools: {
-    htmlPlugin: false,
+    shared: {
+      react: { requiredVersion: '18.2.0', singleton: true },
+      'react-dom': { requiredVersion: '18.2.0', singleton: true },
+      echarts: { singleton: true },
+      'date-fns': { singleton: true },
+      'date-fns-tz': { singleton: true },
+      lodash: { singleton: true },
+      '@perses-dev/components': { singleton: true },
+      '@perses-dev/plugin-system': { singleton: true },
+      '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
+      '@emotion/styled': { singleton: true },
+      '@hookform/resolvers': { singleton: true },
+    },
   },
 });
