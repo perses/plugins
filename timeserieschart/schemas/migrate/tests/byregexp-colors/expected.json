@@ -25,14 +25,17 @@
     },
     "querySettings": [
       {
-        "queryIndex": 2,
-        "colorMode": "fixed",
-        "colorValue": "#F2495C"
-      },
-      {
         "queryIndex": 1,
         "colorMode": "fixed",
-        "colorValue": "#5794F2"
+        "colorValue": "#5794F2",
+        "lineStyle": "dashed",
+        "areaOpacity": 0
+      },
+      {
+        "queryIndex": 2,
+        "colorMode": "fixed",
+        "colorValue": "#F2495C",
+        "areaOpacity": 0
       }
     ]
   }

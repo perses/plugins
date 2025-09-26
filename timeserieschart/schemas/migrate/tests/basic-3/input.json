@@ -41,6 +41,13 @@
         },
         "thresholdsStyle": {
           "mode": "off"
+        },
+        "lineStyle": {
+          "fill": "dot",
+          "dash": [
+            0,
+            10
+          ]
         }
       },
       "color": {

@@ -24,6 +24,9 @@
         "insertNulls": false,
         "lineInterpolation": "linear",
         "lineWidth": 1,
+        "lineStyle": {
+          "fill": "solid"
+        },
         "pointSize": 5,
         "scaleDistribution": {
           "type": "linear"

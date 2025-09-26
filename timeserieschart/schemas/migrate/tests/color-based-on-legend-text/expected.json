@@ -8,16 +8,6 @@
     },
     "querySettings": [
       {
-        "queryIndex": 2,
-        "colorMode": "fixed",
-        "colorValue": "#890F02"
-      },
-      {
-        "queryIndex": 5,
-        "colorMode": "fixed",
-        "colorValue": "#052B51"
-      },
-      {
         "queryIndex": 0,
         "colorMode": "fixed",
         "colorValue": "#EAB839"
@@ -28,9 +18,20 @@
         "colorValue": "#0A437C"
       },
       {
+        "queryIndex": 2,
+        "colorMode": "fixed",
+        "colorValue": "#890F02",
+        "areaOpacity": 1
+      },
+      {
         "queryIndex": 4,
         "colorMode": "fixed",
         "colorValue": "#6D1F62"
+      },
+      {
+        "queryIndex": 5,
+        "colorMode": "fixed",
+        "colorValue": "#052B51"
       }
     ],
     "visual": {
