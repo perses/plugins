@@ -33,5 +33,10 @@ if #var.type == "custom" || #var.type == "interval" {
 				][0]
 			}]
 		}
+		if #var.options == _|_ && #var.query != _|_ {
+			values: [for interval in strings.Split(#var.query, ",") {
+				strings.TrimSpace(interval)
+			}]
+		}
 	}
 }
