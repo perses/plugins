@@ -20,6 +20,7 @@ const assetPrefix = '/plugins/ScatterChart/';
 export default defineConfig({
   server: { port: 3010 },
   dev: { assetPrefix },
+  source: { entry: { main: './src/index-federation.ts' } },
   output: {
     assetPrefix,
     copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
