@@ -31,7 +31,7 @@ export default defineConfig({
   source: { entry: { main: './src/index-federation.ts' } },
   output: {
     assetPrefix,
-    copy: [{ from: 'package.json' }, { from: 'README.md' }],
+    copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
     distPath: {
       root: 'dist',
       js: '__mf/js',
