@@ -50,6 +50,7 @@ export default defineConfig({
       },
       dts: false,
       runtime: false,
+      getPublicPath: `function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || ""; return prefix + "${assetPrefix}"; }`,
     }),
   ],
   tools: {
