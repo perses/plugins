@@ -11,13 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { LogsTableComponent } from './LogsTableComponent';
+import { LogsTableOptions, LogsTableProps } from './model';
+import { LogsTableSettingsEditor } from './LogsTableSettingsEditor';
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
-}
-
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
-}
+export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
+  PanelComponent: LogsTableComponent,
+  panelOptionsEditorComponents: [{ label: 'Settings', content: LogsTableSettingsEditor }],
+  supportedQueryTypes: ['LogQuery'],
+  createInitialOptions: () => ({
+    time: true,
+    wrap: true,
+    enableDetails: true,
+  }),
+};
