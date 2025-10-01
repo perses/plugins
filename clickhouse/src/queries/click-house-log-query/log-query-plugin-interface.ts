@@ -1,9 +1,9 @@
 import { AbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
 import { DatasourceStore, Plugin, VariableStateMap } from '@perses-dev/plugin-system';
-import { LogsData } from '../../model/click-house-data-types';
+import { LogData } from '@perses-dev/core';
 
 export interface LogQueryResult {
-  logs: LogsData;
+  logs: LogData;
   timeRange: AbsoluteTimeRange;
   metadata?: {
     executedQueryString: string;

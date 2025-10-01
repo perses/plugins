@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+import type { Config } from '@jest/types';
+import shared from '../jest.shared';
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
-}
+const jestConfig: Config.InitialOptions = {
+  ...shared,
 
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
-}
+  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+};
+
+export default jestConfig;

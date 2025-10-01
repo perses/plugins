@@ -11,13 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
-}
-
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
-}
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(<React.StrictMode></React.StrictMode>);

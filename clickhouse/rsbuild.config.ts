@@ -25,7 +25,6 @@ export default createConfigForPlugin({
       './ClickHouseDatasource': './src/datasources/click-house-datasource',
       './ClickHouseTimeSeriesQuery': './src/queries/click-house-time-series-query',
       './ClickHouseLogQuery': './src/queries/click-house-log-query',
-      './Logs': './src/panels/logs',
     },
     shared: {
       react: { requiredVersion: '18.2.0', singleton: true },

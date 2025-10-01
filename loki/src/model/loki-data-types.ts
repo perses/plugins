@@ -11,22 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeSeries, TimeSeriesData, TimeSeriesMetadata } from '@perses-dev/core';
-
-export interface LogEntry {
-  timestamp: number;
-  line: string;
-  labels: Record<string, string>;
-}
-
-export interface LogsData {
-  entries: LogEntry[];
-  totalCount: number;
-  hasMore?: boolean;
-}
+import { LogData, AbsoluteTimeRange, TimeSeries, TimeSeriesData, TimeSeriesMetadata } from '@perses-dev/core';
 
 export interface LokiTimeSeriesData extends TimeSeriesData {
-  logs?: LogsData;
+  logs?: LogData;
   resultType?: 'matrix' | 'streams';
 }
 
@@ -34,7 +22,7 @@ export interface LokiQueryResult {
   timeRange?: AbsoluteTimeRange;
   stepMs?: number;
   series: TimeSeries[];
-  logs?: LogsData;
+  logs?: LogData;
   resultType: 'matrix' | 'streams';
   metadata?: TimeSeriesMetadata;
 }

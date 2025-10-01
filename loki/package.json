@@ -73,15 +73,6 @@
           },
           "name": "LokiLogQuery"
         }
-      },
-      {
-        "kind": "Panel",
-        "spec": {
-          "display": {
-            "name": "LogsTable"
-          },
-          "name": "LogsTable"
-        }
       }
     ]
   }

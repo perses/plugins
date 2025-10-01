@@ -11,13 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+package logstable
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
+func AllowWrap(allowWrap bool) Option {
+	return func(builder *Builder) error {
+		builder.AllowWrap = &allowWrap
+		return nil
+	}
 }
 
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
+func EnableDetails(enable bool) Option {
+	return func(builder *Builder) error {
+		builder.EnableDetails = &enable
+		return nil
+	}
+}
+
+func ShowTime(showTime bool) Option {
+	return func(builder *Builder) error {
+		builder.ShowTime = &showTime
+		return nil
+	}
 }

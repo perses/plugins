@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+import '@testing-library/jest-dom';
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
-}
-
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
-}
+// Always mock e-charts during tests since we don't have a proper canvas in jsdom
+jest.mock('echarts/core');

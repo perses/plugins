@@ -11,13 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+import { LogData, ThresholdOptions } from '@perses-dev/core';
+import { PanelProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
+export type LogsTableProps = PanelProps<LogsTableOptions, LogsQueryData>;
+
+export interface LogsQueryData {
   logs?: LogData;
 }
 
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
+export interface LogsTableOptions {
+  legend?: LegendSpecOptions;
+  thresholds?: ThresholdOptions;
+  allowWrap?: boolean;
+  enableDetails?: boolean;
+  showTime?: boolean;
+  showAll?: boolean;
 }

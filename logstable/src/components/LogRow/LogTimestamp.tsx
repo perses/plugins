@@ -11,13 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+import React from 'react';
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
+interface LogTimestampProps {
+  timestamp: number;
 }
 
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
-}
+export const LogTimestamp: React.FC<LogTimestampProps> = ({ timestamp }) => {
+  const date = new Date(timestamp * 1000);
+  return (
+    <time
+      style={{
+        fontSize: '12px',
+        whiteSpace: 'nowrap',
+        minWidth: 'max-content',
+      }}
+      dateTime={date.toISOString()}
+    >
+      {date.toISOString()}
+    </time>
+  );
+};

@@ -11,13 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
-
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
-}
-
-export interface TimeSeriesEntry {
-  time: string;
-  log_count: number | string;
-}
+/// <reference types="@rsbuild/core/types" />
