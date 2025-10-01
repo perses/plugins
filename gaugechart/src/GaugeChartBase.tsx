@@ -21,8 +21,6 @@ import { ReactElement } from 'react';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
-const PROGRESS_WIDTH = 16;
-
 // adjusts when to show pointer icon
 const GAUGE_SMALL_BREAKPOINT = 170;
 
@@ -51,6 +49,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
     if (data.value === undefined) return chartsTheme.noDataOption;
 
     const fontSize = getResponsiveFontSize(data.value, format, width, height);
+    const progressWidth = getResponsiveProgressWidth(width, height);
 
     return {
       title: {
@@ -60,6 +59,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         show: false,
       },
       series: [
+        // Inner gauge (= progress)
         {
           type: 'gauge',
           center: ['50%', '65%'],
@@ -71,7 +71,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
           silent: true,
           progress: {
             show: true,
-            width: PROGRESS_WIDTH,
+            width: progressWidth,
             itemStyle: {
               color: 'auto',
             },
@@ -82,7 +82,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
           axisLine: {
             lineStyle: {
               color: [[1, 'rgba(127,127,127,0.35)']], // TODO (sjcobb): use future chart theme colors
-              width: PROGRESS_WIDTH,
+              width: progressWidth,
             },
           },
           axisTick: {
@@ -113,6 +113,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
             },
           ],
         },
+        // Outer gauge (= scale)
         {
           type: 'gauge',
           center: ['50%', '65%'],
@@ -192,6 +193,17 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
       theme={chartsTheme.echartsTheme}
     />
   );
+}
+
+/**
+ * Calculate responsive progress width based on panel dimensions
+ */
+function getResponsiveProgressWidth(width: number, height: number): number {
+  const MIN_WIDTH = 8;
+  const MAX_WIDTH = 48;
+  const minSize = Math.min(width, height);
+  // Use 5% of the smaller dimension as base, with reasonable min/max bounds
+  return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(minSize * 0.05)));
 }
 
 /**
