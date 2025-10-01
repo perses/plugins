@@ -50,8 +50,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
   const option: EChartsCoreOption = useDeepMemo(() => {
     if (data.value === undefined) return chartsTheme.noDataOption;
 
-    // adjusts fontSize depending on number of characters
-    const valueSizeClamp = getResponsiveValueSize(data.value, format, width, height);
+    const fontSize = getResponsiveFontSize(data.value, format, width, height);
 
     return {
       title: {
@@ -149,7 +148,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
             color: 'inherit', // allows value color to match active threshold color
-            fontSize: valueSizeClamp,
+            fontSize: fontSize,
             formatter:
               data.value === null
                 ? // We use a different function when we *know* the value is null
@@ -196,20 +195,32 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
 }
 
 /**
- * Responsive font size depending on number of characters, clamp used
- * to ensure size stays within given range
+ * Responsive font size depending on number of characters and panel dimensions.
+ * Uses clamp to ensure the text never overflows and scales appropriately with panel size.
  */
-export function getResponsiveValueSize(
+export function getResponsiveFontSize(
   value: number | null,
   format: FormatOptions,
   width: number,
   height: number
 ): string {
-  const MIN_SIZE = 3;
-  const MAX_SIZE = 24;
-  const SIZE_MULTIPLIER = 0.7;
+  const MIN_SIZE = 2;
   const formattedValue = typeof value === 'number' ? formatValue(value, format) : `${value}`;
   const valueCharacters = formattedValue.length ?? 2;
-  const valueSize = (Math.min(width, height) / valueCharacters) * SIZE_MULTIPLIER;
-  return `clamp(${MIN_SIZE}px, ${valueSize}px, ${MAX_SIZE}px)`;
+
+  // Calculate the available space for text within the gauge
+  // The gauge occupies roughly 60% width of the detail area based on the configuration
+  const availableWidth = width * 0.6;
+
+  // Estimate character width (approximately 0.6 of font size for most fonts)
+  const charWidthRatio = 0.6;
+
+  // Calculate ideal font size based on available width and character count
+  const idealFontSize = availableWidth / valueCharacters / charWidthRatio;
+
+  // Scale with panel size but ensure it never overflows
+  // Use a dynamic max size that grows with panel size but has reasonable limits
+  const dynamicMaxSize = Math.max(24, Math.min(width * 0.15, height * 0.2));
+
+  return `clamp(${MIN_SIZE}px, ${idealFontSize}px, ${dynamicMaxSize}px)`;
 }
