@@ -1,9 +1,8 @@
-import { AbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
+import { LogData, AbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
 import { DatasourceStore, Plugin, VariableStateMap } from '@perses-dev/plugin-system';
-import { LogsData } from '../../model/loki-data-types';
 
 export interface LogQueryResult {
-  logs: LogsData;
+  logs: LogData;
   timeRange: AbsoluteTimeRange;
   metadata?: {
     executedQueryString: string;
