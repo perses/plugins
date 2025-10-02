@@ -38,7 +38,7 @@
           "mode": "none"
         },
         "thresholdsStyle": {
-          "mode": "off"
+          "mode": "line"
         }
       },
       "links": [],
@@ -52,7 +52,7 @@
             "value": null
           },
           {
-            "color": "red",
+            "color": "semi-dark-yellow",
             "value": 80
           }
         ]

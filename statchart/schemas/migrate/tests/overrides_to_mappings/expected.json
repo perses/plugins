@@ -47,11 +47,11 @@
     "thresholds": {
       "steps": [
         {
-          "color": "red",
+          "color": "#f2495c",
           "value": 0
         },
         {
-          "color": "green",
+          "color": "#73bf69",
           "value": 1
         }
       ]

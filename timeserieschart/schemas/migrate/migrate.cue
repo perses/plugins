@@ -122,7 +122,7 @@ spec: {
 					if step.value == null {0},
 					step.value,
 				][0]
-				color: step.color // TODO how to manage the overrides part?
+				color: *commonMigrate.#mapping.color[step.color] | step.color // TODO how to manage the overrides part?
 			}]
 		}
 	}

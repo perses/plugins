@@ -47,7 +47,7 @@ spec: {
 					if step.value == null {0},
 					step.value,
 				][0]
-				color: step.color
+				color: *commonMigrate.#mapping.color[step.color] | step.color
 			}]
 		}
 	}

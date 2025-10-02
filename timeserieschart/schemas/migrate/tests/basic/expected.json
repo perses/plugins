@@ -19,6 +19,18 @@
       },
       "label": "Amount of endpoints succesfully monitored",
       "min": 0
+    },
+    "thresholds": {
+      "steps": [
+        {
+          "color": "#73bf69",
+          "value": 0
+        },
+        {
+          "color": "#f2cc0c",
+          "value": 80
+        }
+      ]
     }
   }
 }

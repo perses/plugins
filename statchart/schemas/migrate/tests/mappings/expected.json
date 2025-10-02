@@ -55,7 +55,7 @@
     "thresholds": {
       "steps": [
         {
-          "color": "blue",
+          "color": "#5794f2",
           "value": 0
         }
       ]
