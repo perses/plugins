@@ -51,6 +51,33 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
     const fontSize = getResponsiveFontSize(data.value, format, width, height);
     const progressWidth = getResponsiveProgressWidth(width, height);
 
+    // Base configuration shared by both series (= progress & scale)
+    const baseGaugeConfig = {
+      type: 'gauge' as const,
+      center: ['50%', '65%'] as [string, string],
+      startAngle: 200,
+      endAngle: -20,
+      min: 0,
+      max,
+      axisTick: {
+        show: false,
+      },
+      splitLine: {
+        show: false,
+      },
+      axisLabel: {
+        show: false,
+        distance: -18,
+        color: '#999',
+        fontSize: 12,
+      },
+      data: [
+        {
+          value: data.value,
+        },
+      ],
+    };
+
     return {
       title: {
         show: false,
@@ -59,15 +86,10 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         show: false,
       },
       series: [
-        // Inner gauge (= progress)
+        // Inner gauge (progress)
         {
-          type: 'gauge',
-          center: ['50%', '65%'],
+          ...baseGaugeConfig,
           radius: '86%',
-          startAngle: 200,
-          endAngle: -20,
-          min: 0,
-          max,
           silent: true,
           progress: {
             show: true,
@@ -85,19 +107,6 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
               width: progressWidth,
             },
           },
-          axisTick: {
-            show: false,
-            distance: 0,
-          },
-          splitLine: {
-            show: false,
-          },
-          axisLabel: {
-            show: false,
-            distance: -18,
-            color: '#999',
-            fontSize: 12,
-          },
           anchor: {
             show: false,
           },
@@ -107,21 +116,11 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
           detail: {
             show: false,
           },
-          data: [
-            {
-              value: data.value,
-            },
-          ],
         },
-        // Outer gauge (= scale)
+        // Outer gauge (scale & display)
         {
-          type: 'gauge',
-          center: ['50%', '65%'],
+          ...baseGaugeConfig,
           radius: '100%',
-          startAngle: 200,
-          endAngle: -20,
-          min: 0,
-          max,
           pointer: {
             show: true,
             // pointer hidden for small panels, path taken from ex: https://echarts.apache.org/examples/en/editor.html?c=gauge-grade
@@ -134,15 +133,6 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
             },
           },
           axisLine,
-          axisTick: {
-            show: false,
-          },
-          splitLine: {
-            show: false,
-          },
-          axisLabel: {
-            show: false,
-          },
           detail: {
             show: true,
             width: '60%',
