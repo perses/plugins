@@ -11,62 +11,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { createConfigForPlugin } from '../rsbuild.shared';
 
-const assetPrefix = '/plugins/Prometheus/';
-
-export default defineConfig({
-  server: { port: 3009 },
-  dev: { assetPrefix },
-  source: { entry: { main: './src/index-federation.ts' } },
-  output: {
-    assetPrefix,
-    copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
-    distPath: {
-      root: 'dist',
-      js: '__mf/js',
-      css: '__mf/css',
-      font: '__mf/font',
-    },
+export default createConfigForPlugin({
+  name: 'Prometheus',
+  rsbuildConfig: {
+    server: { port: 3009 },
+    plugins: [pluginReact()],
   },
-  plugins: [
-    pluginReact(),
-    pluginModuleFederation({
-      name: 'Prometheus',
-      exposes: {
-        './PrometheusDatasource': './src/plugins/prometheus-datasource.tsx',
-        './PrometheusTimeSeriesQuery': './src/plugins/prometheus-time-series-query/PrometheusTimeSeriesQuery.ts',
-        './PrometheusLabelValuesVariable': './src/plugins/PrometheusLabelValuesVariable.tsx',
-        './PrometheusLabelNamesVariable': './src/plugins/PrometheusLabelNamesVariable.tsx',
-        './PrometheusPromQLVariable': './src/plugins/PrometheusPromQLVariable.tsx',
-        './PrometheusExplorer': './src/explore/PrometheusExplorer.tsx',
-      },
-      shared: {
-        react: { requiredVersion: '18.2.0', singleton: true },
-        'react-dom': { requiredVersion: '18.2.0', singleton: true },
-        echarts: { singleton: true },
-        'date-fns': { singleton: true },
-        'date-fns-tz': { singleton: true },
-        lodash: { singleton: true },
-        '@perses-dev/components': { singleton: true },
-        '@perses-dev/plugin-system': { singleton: true },
-        '@perses-dev/explore': { singleton: true },
-        '@perses-dev/dashboards': { singleton: true },
-        '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
-        '@emotion/styled': { singleton: true },
-        '@hookform/resolvers': { singleton: true },
-        '@tanstack/react-query': { singleton: true },
-        'react-hook-form': { singleton: true },
-        'react-router-dom': { singleton: true },
-      },
-      dts: false,
-      runtime: false,
-      getPublicPath: `function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || ""; return prefix + "${assetPrefix}"; }`,
-    }),
-  ],
-  tools: {
-    htmlPlugin: false,
+  moduleFederation: {
+    exposes: {
+      './PrometheusDatasource': './src/plugins/prometheus-datasource.tsx',
+      './PrometheusTimeSeriesQuery': './src/plugins/prometheus-time-series-query/PrometheusTimeSeriesQuery.ts',
+      './PrometheusLabelValuesVariable': './src/plugins/PrometheusLabelValuesVariable.tsx',
+      './PrometheusLabelNamesVariable': './src/plugins/PrometheusLabelNamesVariable.tsx',
+      './PrometheusPromQLVariable': './src/plugins/PrometheusPromQLVariable.tsx',
+      './PrometheusExplorer': './src/explore/PrometheusExplorer.tsx',
+    },
+    shared: {
+      react: { requiredVersion: '18.2.0', singleton: true },
+      'react-dom': { requiredVersion: '18.2.0', singleton: true },
+      echarts: { singleton: true },
+      'date-fns': { singleton: true },
+      'date-fns-tz': { singleton: true },
+      lodash: { singleton: true },
+      '@perses-dev/components': { singleton: true },
+      '@perses-dev/plugin-system': { singleton: true },
+      '@perses-dev/explore': { singleton: true },
+      '@perses-dev/dashboards': { singleton: true },
+      '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
+      '@emotion/styled': { singleton: true },
+      '@hookform/resolvers': { singleton: true },
+      '@tanstack/react-query': { singleton: true },
+      'react-hook-form': { singleton: true },
+      'react-router-dom': { singleton: true },
+    },
   },
 });
