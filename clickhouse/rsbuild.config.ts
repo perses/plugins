@@ -22,7 +22,6 @@ const exposedModules: ModuleFederationOptions['exposes'] = [
   { './ClickHouseDatasource': './src/datasources/click-house-datasource' },
   { './ClickHouseTimeSeriesQuery': './src/queries/click-house-time-series-query' },
   { './ClickHouseLogQuery': './src/queries/click-house-log-query' },
-  { './Logs': './src/panels/logs' },
 ];
 
 export default defineConfig({

@@ -70,15 +70,6 @@
           },
           "name": "ClickHouseLogQuery"
         }
-      },
-      {
-        "kind": "Panel",
-        "spec": {
-          "display": {
-            "name": "ClickHouse Logs"
-          },
-          "name": "Logs"
-        }
       }
     ]
   }
