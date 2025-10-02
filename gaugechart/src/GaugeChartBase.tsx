@@ -58,7 +58,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
       startAngle: 200,
       endAngle: -20,
       min: 0,
-      max,
+      max: max,
       axisTick: {
         show: false,
       },
@@ -67,9 +67,6 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
       },
       axisLabel: {
         show: false,
-        distance: -18,
-        color: '#999',
-        fontSize: 12,
       },
       data: [
         {
@@ -89,7 +86,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         // Inner gauge (progress)
         {
           ...baseGaugeConfig,
-          radius: '86%',
+          radius: '95%',
           silent: true,
           progress: {
             show: true,
@@ -98,14 +95,14 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
               color: 'auto',
             },
           },
-          pointer: {
-            show: false,
-          },
           axisLine: {
             lineStyle: {
               color: [[1, 'rgba(127,127,127,0.35)']], // TODO (sjcobb): use future chart theme colors
               width: progressWidth,
             },
+          },
+          pointer: {
+            show: false,
           },
           anchor: {
             show: false,
@@ -132,7 +129,8 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
               color: 'auto',
             },
           },
-          axisLine,
+          axisLine: axisLine,
+          // `detail` is the text displayed in the middle
           detail: {
             show: true,
             width: '60%',
@@ -162,7 +160,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
                 color: chartsTheme.echartsTheme.textStyle?.color ?? 'inherit', // series name font color
                 offsetCenter: [0, '55%'],
                 overflow: 'truncate',
-                fontSize: 12,
+                fontSize: 12, // TODO make responsive
                 width: width * 0.8,
               },
             },
