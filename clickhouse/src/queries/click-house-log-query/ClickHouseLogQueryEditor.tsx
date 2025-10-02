@@ -17,43 +17,59 @@ import {
   isVariableDatasource,
   OptionsEditorProps,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback } from 'react';
+import { produce } from 'immer';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { ClickQLEditor } from '../../components';
 import { Stack } from '@mui/material';
 import { queryExample } from '../../components/constants';
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
+import { useQueryState } from '../query-editor-model';
 
 type ClickHouseQueryEditorProps = OptionsEditorProps<ClickHouseLogQuerySpec>;
 
 export function ClickHouseLogQueryEditor(props: ClickHouseQueryEditorProps): ReactElement {
-  const { onChange, value } = props;
+  const { onChange, value, queryHandlerSettings } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_DATASOURCE;
-  const [localQuery, setLocalQuery] = useState(value.query || '');
+  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
     if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
-      onChange({ ...value, datasource: newDatasourceSelection });
+      onChange(
+        produce(value, (draft) => {
+          draft.datasource = newDatasourceSelection;
+        })
+      );
+
+      if (queryHandlerSettings?.setWatchOtherSpecs)
+        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: newDatasourceSelection });
       return;
     }
     throw new Error('Got unexpected non ClickHouse datasource selection');
   };
 
-  const handleQueryChange = useCallback((newQuery: string) => {
-    setLocalQuery(newQuery);
-  }, []);
+  // Immediate query execution on Enter or blur
+  const handleQueryExecute = (query: string) => {
+    if (queryHandlerSettings?.watchQueryChanges) {
+      queryHandlerSettings.watchQueryChanges(query);
+    }
+    onChange(
+      produce(value, (draft) => {
+        draft.query = query;
+      })
+    );
+  };
 
-  const handleQueryExecute = useCallback(
-    (query: string) => {
-      onChange({ ...value, query });
+  const handleClickHouseQueryChange = useCallback(
+    (e: string) => {
+      handleQueryChange(e);
+      if (queryHandlerSettings?.watchQueryChanges) {
+        queryHandlerSettings.watchQueryChanges(e);
+      }
     },
-    [onChange, value]
+    [handleQueryChange, queryHandlerSettings]
   );
-
-  useEffect(() => {
-    setLocalQuery(value.query || '');
-  }, [value.query]);
 
   const examplesStyle: React.CSSProperties = {
     fontSize: '11px',
@@ -76,13 +92,13 @@ export function ClickHouseLogQueryEditor(props: ClickHouseQueryEditorProps): Rea
         notched
       />
       <ClickQLEditor
-        value={localQuery}
-        onChange={handleQueryChange}
-        onBlur={() => handleQueryExecute(localQuery)}
+        value={query}
+        onChange={handleClickHouseQueryChange}
+        onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
             event.preventDefault();
-            handleQueryExecute(localQuery);
+            handleQueryExecute(query);
           }
         }}
         placeholder="Enter ClickHouse SQL query"
