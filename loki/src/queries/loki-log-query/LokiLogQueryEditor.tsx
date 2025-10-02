@@ -23,45 +23,40 @@ import { ReactElement, useCallback, useState, useEffect } from 'react';
 import { produce } from 'immer';
 import { OptionsEditorControl } from '@perses-dev/components';
 import { LogQLEditor } from '../../components/logql-editor';
-import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
+import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { LokiLogQuerySpec } from './loki-log-query-types';
+import { useQueryState } from '../query-editor-model';
 
 type LokiQueryEditorProps = OptionsEditorProps<LokiLogQuerySpec>;
 
 export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
-  const { onChange, value } = props;
+  const { onChange, value, queryHandlerSettings } = props;
   const { datasource } = value;
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
     LOKI_DATASOURCE_KIND
   ) as LokiDatasourceSelector;
-
-  // const { data: client } = useDatasourceClient<LokiClient>(selectedDatasource);
-  // const lokiURL = client?.options.datasourceUrl;
-
-  // Local state for editor value to prevent query_range calls on every keystroke
-  const [localQuery, setLocalQuery] = useState(value.query);
-
-  // Update local state when prop changes
-  useEffect(() => {
-    setLocalQuery(value.query);
-  }, [value.query]);
+  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
     if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
-      onChange({ ...value, datasource: newDatasourceSelection });
+      onChange(
+        produce(value, (draft) => {
+          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+          const nextDatasource = isDefaultLokiSelector(newDatasourceSelection) ? undefined : newDatasourceSelection;
+          draft.datasource = nextDatasource;
+        })
+      );
+
+      if (queryHandlerSettings?.setWatchOtherSpecs)
+        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: newDatasourceSelection });
       return;
     }
 
     throw new Error('Got unexpected non LokiQuery datasource selection');
   };
-
-  // Debounced query change handler to prevent excessive query_range calls
-  const handleQueryChange = useCallback((newQuery: string) => {
-    setLocalQuery(newQuery);
-  }, []);
 
   const handleLogsDirection = (_: React.MouseEvent, v: 'backward' | 'forward') =>
     onChange(
@@ -71,11 +66,25 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     );
 
   // Immediate query execution on Enter or blur
-  const handleQueryExecute = useCallback(
-    (query: string) => {
-      onChange({ ...value, query });
+  const handleQueryExecute = (query: string) => {
+    if (queryHandlerSettings?.watchQueryChanges) {
+      queryHandlerSettings.watchQueryChanges(query);
+    }
+    onChange(
+      produce(value, (draft) => {
+        draft.query = query;
+      })
+    );
+  };
+
+  const handleLogsQueryChange = useCallback(
+    (e: string) => {
+      handleQueryChange(e);
+      if (queryHandlerSettings?.watchQueryChanges) {
+        queryHandlerSettings.watchQueryChanges(e);
+      }
     },
-    [onChange, value]
+    [handleQueryChange, queryHandlerSettings]
   );
 
   return (
@@ -110,13 +119,13 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
           LogQL Query
         </InputLabel>
         <LogQLEditor
-          value={localQuery}
-          onChange={handleQueryChange}
-          onBlur={() => handleQueryExecute(localQuery)}
+          value={query}
+          onChange={handleLogsQueryChange}
+          onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
               event.preventDefault();
-              handleQueryExecute(localQuery);
+              handleQueryExecute(query);
             }
           }}
           placeholder='Enter LogQL query (e.g. {job="mysql"} |= "error")'
