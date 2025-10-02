@@ -9,6 +9,10 @@
       {
         "label": "Ten minutes",
         "value": "10m"
+      },
+      {
+        "label": "auto",
+        "value": ""
       }
     ]
   }

@@ -18,7 +18,7 @@ import (
 )
 
 #value: strings.MinRunes(1) | {
-	value:  strings.MinRunes(1)
+	value:  string
 	label?: string
 }
 
