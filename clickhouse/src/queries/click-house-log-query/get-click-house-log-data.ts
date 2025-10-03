@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { replaceVariables } from '@perses-dev/plugin-system';
-import { LogEntry, LogsData } from '../../model/click-house-data-types';
+import { LogEntry, LogData } from '@perses-dev/core';
 import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 import { DEFAULT_DATASOURCE } from '../constants';
@@ -35,7 +35,7 @@ function flattenObject(
   return result;
 }
 
-function convertStreamsToLogs(streams: LogEntry[]): LogsData {
+function convertStreamsToLogs(streams: LogEntry[]): LogData {
   const entries: LogEntry[] = streams.map((entry) => {
     const flattened = flattenObject(entry);
 

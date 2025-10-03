@@ -1,18 +1,24 @@
-import { ModuleFederationOptions, pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+// Copyright 2024 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 
-export const assetPrefix = '/plugins/Loki/';
-
-// Expose the components that will be used in the UI, either Perses UI or embedded.
-const exposedModules: ModuleFederationOptions['exposes'] = [
-  { './LokiDatasource': './src/datasources/loki-datasource' },
-  { './LokiTimeSeriesQuery': './src/queries/loki-time-series-query' },
-  { './LokiLogQuery': './src/queries/loki-log-query' },
-];
+const assetPrefix = '/plugins/LogsTable/';
 
 export default defineConfig({
-  server: { port: 3119 },
+  server: { port: 3017 },
   dev: { assetPrefix },
   source: { entry: { main: './src/index-federation.ts' } },
   output: {
@@ -28,8 +34,10 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginModuleFederation({
-      name: 'Loki',
-      exposes: exposedModules,
+      name: 'LogsTable',
+      exposes: {
+        './LogsTable': './src/LogsTable.ts',
+      },
       shared: {
         react: { requiredVersion: '18.2.0', singleton: true },
         'react-dom': { requiredVersion: '18.2.0', singleton: true },
@@ -37,20 +45,17 @@ export default defineConfig({
         'date-fns': { singleton: true },
         'date-fns-tz': { singleton: true },
         lodash: { singleton: true },
+        '@perses-dev/core': { singleton: true },
         '@perses-dev/components': { singleton: true },
-        '@perses-dev/plugin-system': { singleton: true },
-        '@perses-dev/explore': { singleton: true },
         '@perses-dev/dashboards': { singleton: true },
+        '@perses-dev/plugin-system': { singleton: true },
         '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
         '@emotion/styled': { singleton: true },
         '@hookform/resolvers': { singleton: true },
-        '@tanstack/react-query': { singleton: true },
-        'react-hook-form': { singleton: true },
-        'react-router-dom': { singleton: true },
+        'use-resize-observer': { requiredVersion: '^9.1.0', singleton: true },
       },
       dts: false,
       runtime: false,
-      getPublicPath: `function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || ""; return prefix + "${assetPrefix}"; }`,
     }),
   ],
   tools: {
