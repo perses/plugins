@@ -13,7 +13,7 @@
 
 import { Box, Skeleton, Stack } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
-import { CalculationsMap, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
+import { CalculationsMap, DEFAULT_CALCULATION, FormatOptions, formatValue, TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
@@ -30,6 +30,58 @@ import { GaugeChartBase, GaugeSeries } from './GaugeChartBase';
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };
 const GAUGE_MIN_WIDTH = 90;
 const PANEL_PADDING_OFFSET = 20;
+
+/**
+ * Calculate responsive progress width based on panel dimensions
+ */
+function getResponsiveProgressWidth(width: number, height: number): number {
+  const MIN_WIDTH = 10;
+  const MAX_WIDTH = 48;
+  const minSize = Math.min(width, height);
+  // Use 5% of the smaller dimension as base, with reasonable min/max bounds
+  return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(minSize * 0.05)));
+}
+
+/**
+ * Responsive font size depending on number of characters and panel dimensions.
+ * Uses clamp to ensure the text never overflows and scales appropriately with panel size.
+ */
+function getResponsiveFontSize(value: number | null, format: FormatOptions, width: number, height: number): string {
+  const MIN_SIZE = 2;
+  const formattedValue = typeof value === 'number' ? formatValue(value, format) : `${value}`;
+  const valueCharacters = formattedValue.length ?? 2;
+
+  // Calculate the available space for text within the gauge
+  // The gauge occupies roughly 60% width of the detail area based on the configuration
+  const availableWidth = width * 0.6;
+
+  // Estimate character width (approximately 0.6 of font size for most fonts)
+  const charWidthRatio = 0.6;
+
+  // Calculate ideal font size based on available width and character count
+  const idealFontSize = availableWidth / valueCharacters / charWidthRatio;
+
+  // Scale with panel size but ensure it never overflows
+  // Use a dynamic max size that grows with panel size but has reasonable limits
+  const dynamicMaxSize = Math.max(24, Math.min(width * 0.15, height * 0.2));
+
+  return `clamp(${MIN_SIZE}px, ${idealFontSize}px, ${dynamicMaxSize}px)`;
+}
+
+/**
+ * Calculate responsive title font size based on panel dimensions
+ */
+function getResponsiveTitleFontSize(width: number, height: number): number {
+  const MIN_SIZE = 10;
+  const MAX_SIZE = 16;
+  const minSize = Math.min(width, height);
+
+  // Scale between 8px and 16px based on panel size
+  // Use 6% of the smaller dimension as base
+  const calculatedSize = Math.round(minSize * 0.06);
+
+  return Math.max(MIN_SIZE, Math.min(MAX_SIZE, calculatedSize));
+}
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions, TimeSeriesData>;
 
@@ -81,16 +133,32 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
   }
   const axisLineColors = convertThresholds(thresholds, format, thresholdMax, thresholdsColors);
 
+  // accounts for showing a separate chart for each time series
+  let chartWidth = contentDimensions.width / gaugeData.length - PANEL_PADDING_OFFSET;
+  if (chartWidth < GAUGE_MIN_WIDTH && gaugeData.length > 1) {
+    // enables horizontal scroll when charts overflow outside of panel
+    chartWidth = GAUGE_MIN_WIDTH;
+  }
+
+  // Calculate responsive values based on chart dimensions
+  const progressWidth = getResponsiveProgressWidth(chartWidth, contentDimensions.height);
+  const axisLineWidth = Math.round(progressWidth * 0.2); // Axis line width is 20% of progress width
+  const titleFontSize = getResponsiveTitleFontSize(chartWidth, contentDimensions.height);
+
   const axisLine: GaugeSeriesOption['axisLine'] = {
     show: true,
     lineStyle: {
-      width: 5,
+      width: axisLineWidth,
       color: axisLineColors,
     },
   };
 
   // no data message handled inside chart component
   if (!gaugeData.length) {
+    const emptyFontSize = getResponsiveFontSize(null, format, contentDimensions.width, contentDimensions.height);
+    const emptyProgressWidth = getResponsiveProgressWidth(contentDimensions.width, contentDimensions.height);
+    const emptyTitleFontSize = getResponsiveTitleFontSize(contentDimensions.width, contentDimensions.height);
+
     return (
       <GaugeChartBase
         width={contentDimensions.width}
@@ -99,15 +167,11 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
         format={format}
         axisLine={axisLine}
         max={thresholdMax}
+        fontSize={emptyFontSize}
+        progressWidth={emptyProgressWidth}
+        titleFontSize={emptyTitleFontSize}
       />
     );
-  }
-
-  // accounts for showing a separate chart for each time series
-  let chartWidth = contentDimensions.width / gaugeData.length - PANEL_PADDING_OFFSET;
-  if (chartWidth < GAUGE_MIN_WIDTH && gaugeData.length > 1) {
-    // enables horizontal scroll when charts overflow outside of panel
-    chartWidth = GAUGE_MIN_WIDTH;
   }
 
   const hasMultipleCharts = gaugeData.length > 1;
@@ -124,6 +188,8 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
       }}
     >
       {gaugeData.map((series, seriesIndex) => {
+        const fontSize = getResponsiveFontSize(series.value ?? null, format, chartWidth, contentDimensions.height);
+
         return (
           <Box key={`gauge-series-${seriesIndex}`}>
             <GaugeChartBase
@@ -133,6 +199,9 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
               format={format}
               axisLine={axisLine}
               max={thresholdMax}
+              fontSize={fontSize}
+              progressWidth={progressWidth}
+              titleFontSize={titleFontSize}
             />
           </Box>
         );

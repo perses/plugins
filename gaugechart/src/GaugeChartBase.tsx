@@ -38,18 +38,18 @@ export interface GaugeChartBaseProps {
   format: FormatOptions;
   axisLine: GaugeSeriesOption['axisLine'];
   max?: number;
+  fontSize: string;
+  progressWidth: number;
+  titleFontSize: number;
 }
 
 export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
-  const { width, height, data, format, axisLine, max } = props;
+  const { width, height, data, format, axisLine, max, fontSize, progressWidth, titleFontSize } = props;
   const chartsTheme = useChartsTheme();
 
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
   const option: EChartsCoreOption = useDeepMemo(() => {
     if (data.value === undefined) return chartsTheme.noDataOption;
-
-    const fontSize = getResponsiveFontSize(data.value, format, width, height);
-    const progressWidth = getResponsiveProgressWidth(width, height);
 
     // Base configuration shared by both series (= progress & scale)
     const baseGaugeConfig = {
@@ -160,7 +160,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
                 color: chartsTheme.echartsTheme.textStyle?.color ?? 'inherit', // series name font color
                 offsetCenter: [0, '55%'],
                 overflow: 'truncate',
-                fontSize: 12, // TODO make responsive
+                fontSize: titleFontSize,
                 width: width * 0.8,
               },
             },
@@ -168,7 +168,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         },
       ],
     };
-  }, [data, width, height, chartsTheme, format, axisLine, max]);
+  }, [data, width, height, chartsTheme, format, axisLine, max, fontSize, progressWidth, titleFontSize]);
 
   return (
     <EChart
@@ -181,46 +181,4 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
       theme={chartsTheme.echartsTheme}
     />
   );
-}
-
-/**
- * Calculate responsive progress width based on panel dimensions
- */
-function getResponsiveProgressWidth(width: number, height: number): number {
-  const MIN_WIDTH = 8;
-  const MAX_WIDTH = 48;
-  const minSize = Math.min(width, height);
-  // Use 5% of the smaller dimension as base, with reasonable min/max bounds
-  return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(minSize * 0.05)));
-}
-
-/**
- * Responsive font size depending on number of characters and panel dimensions.
- * Uses clamp to ensure the text never overflows and scales appropriately with panel size.
- */
-export function getResponsiveFontSize(
-  value: number | null,
-  format: FormatOptions,
-  width: number,
-  height: number
-): string {
-  const MIN_SIZE = 2;
-  const formattedValue = typeof value === 'number' ? formatValue(value, format) : `${value}`;
-  const valueCharacters = formattedValue.length ?? 2;
-
-  // Calculate the available space for text within the gauge
-  // The gauge occupies roughly 60% width of the detail area based on the configuration
-  const availableWidth = width * 0.6;
-
-  // Estimate character width (approximately 0.6 of font size for most fonts)
-  const charWidthRatio = 0.6;
-
-  // Calculate ideal font size based on available width and character count
-  const idealFontSize = availableWidth / valueCharacters / charWidthRatio;
-
-  // Scale with panel size but ensure it never overflows
-  // Use a dynamic max size that grows with panel size but has reasonable limits
-  const dynamicMaxSize = Math.max(24, Math.min(width * 0.15, height * 0.2));
-
-  return `clamp(${MIN_SIZE}px, ${idealFontSize}px, ${dynamicMaxSize}px)`;
 }
