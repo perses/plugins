@@ -56,24 +56,13 @@ function getResponsiveValueFontSize(
   height: number
 ): string {
   const MIN_SIZE = 8;
+  const MAX_SIZE = 64;
   const formattedValue = typeof value === 'number' ? formatValue(value, format) : `${value}`;
-  const valueCharacters = formattedValue.length ?? 2;
+  const valueTextLength = Math.max(formattedValue.length, 6); // Ensure a minimum length to avoid overly large text for short values
+  const availableSpace = Math.min(width, height);
+  const idealFontSize = availableSpace / valueTextLength;
 
-  // Calculate the available space for text within the gauge
-  // The gauge occupies roughly 60% width of the detail area based on the configuration
-  const availableWidth = width * 0.6;
-
-  // Estimate character width (approximately 0.6 of font size for most fonts)
-  const charWidthRatio = 0.6;
-
-  // Calculate ideal font size based on available width and character count
-  const idealFontSize = availableWidth / valueCharacters / charWidthRatio;
-
-  // Scale with panel size but ensure it never overflows
-  // Use a dynamic max size that grows with panel size but has reasonable limits
-  const dynamicMaxSize = Math.max(24, Math.min(width * 0.15, height * 0.2));
-
-  return `clamp(${MIN_SIZE}px, ${idealFontSize}px, ${dynamicMaxSize}px)`;
+  return `clamp(${MIN_SIZE}px, ${idealFontSize}px, ${MAX_SIZE}px)`;
 }
 
 /**
