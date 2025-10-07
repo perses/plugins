@@ -38,16 +38,16 @@ function getResponsiveProgressWidth(width: number, height: number): number {
   const MIN_WIDTH = 10;
   const MAX_WIDTH = 48;
   const RATIO = 0.1; // 10% of the smaller dimension
+
   const minSize = Math.min(width, height);
-  // Use RATIO% of the smaller dimension as base, with reasonable min/max bounds
+  // Use RATIO of the smaller dimension as base, with reasonable min/max bounds
   return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(minSize * RATIO)));
 }
 
 /**
  * Responsive font size depending on number of characters and panel dimensions.
  * Uses clamp to ensure the text never overflows and scales appropriately with panel size.
- * (Value here refers to the main number value displayed inside the gauge)
- * TODO simplify
+ * (Value refers to the main number value displayed inside the gauge)
  */
 function getResponsiveValueFontSize(
   value: number | null,
@@ -58,27 +58,26 @@ function getResponsiveValueFontSize(
   const MIN_SIZE = 8;
   const MAX_SIZE = 64;
   const formattedValue = typeof value === 'number' ? formatValue(value, format) : `${value}`;
+
   const valueTextLength = Math.max(formattedValue.length, 6); // Ensure a minimum length to avoid overly large text for short values
   const availableSpace = Math.min(width, height);
-  const idealFontSize = availableSpace / valueTextLength;
+  const fontSize = availableSpace / valueTextLength;
 
-  return `clamp(${MIN_SIZE}px, ${idealFontSize}px, ${MAX_SIZE}px)`;
+  return `clamp(${MIN_SIZE}px, ${fontSize}px, ${MAX_SIZE}px)`;
 }
 
 /**
  * Calculate responsive title font size based on panel dimensions
- * (title is the text displayed below the gauge as a legend)
+ * (Title refers to the text displayed below the gauge as a legend)
  */
 function getResponsiveTitleFontSize(width: number, height: number): number {
   const MIN_SIZE = 10;
   const MAX_SIZE = 16;
-  const minSize = Math.min(width, height);
+  const RATIO = 0.06; // Use 6% of the smaller dimension as base
 
-  // Scale between MIN_SIZE and MAX_SIZE based on panel size
-  // Use 6% of the smaller dimension as base
-  const calculatedSize = Math.round(minSize * 0.06);
-
-  return Math.max(MIN_SIZE, Math.min(MAX_SIZE, calculatedSize));
+  const size = Math.round(Math.min(width, height) * RATIO);
+  // Scale based on panel size, with reasonable min/max bounds
+  return Math.max(MIN_SIZE, Math.min(MAX_SIZE, size));
 }
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions, TimeSeriesData>;
