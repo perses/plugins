@@ -46,10 +46,16 @@ function getResponsiveProgressWidth(width: number, height: number): number {
 /**
  * Responsive font size depending on number of characters and panel dimensions.
  * Uses clamp to ensure the text never overflows and scales appropriately with panel size.
+ * (Value here refers to the main number value displayed inside the gauge)
  * TODO simplify
  */
-function getResponsiveFontSize(value: number | null, format: FormatOptions, width: number, height: number): string {
-  const MIN_SIZE = 2;
+function getResponsiveValueFontSize(
+  value: number | null,
+  format: FormatOptions,
+  width: number,
+  height: number
+): string {
+  const MIN_SIZE = 8;
   const formattedValue = typeof value === 'number' ? formatValue(value, format) : `${value}`;
   const valueCharacters = formattedValue.length ?? 2;
 
@@ -72,13 +78,14 @@ function getResponsiveFontSize(value: number | null, format: FormatOptions, widt
 
 /**
  * Calculate responsive title font size based on panel dimensions
+ * (title is the text displayed below the gauge as a legend)
  */
 function getResponsiveTitleFontSize(width: number, height: number): number {
   const MIN_SIZE = 10;
   const MAX_SIZE = 16;
   const minSize = Math.min(width, height);
 
-  // Scale between 8px and 16px based on panel size
+  // Scale between MIN_SIZE and MAX_SIZE based on panel size
   // Use 6% of the smaller dimension as base
   const calculatedSize = Math.round(minSize * 0.06);
 
@@ -157,7 +164,12 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
 
   // no data message handled inside chart component
   if (!gaugeData.length) {
-    const emptyFontSize = getResponsiveFontSize(null, format, contentDimensions.width, contentDimensions.height);
+    const emptyValueFontSize = getResponsiveValueFontSize(
+      null,
+      format,
+      contentDimensions.width,
+      contentDimensions.height
+    );
     const emptyProgressWidth = getResponsiveProgressWidth(contentDimensions.width, contentDimensions.height);
     const emptyTitleFontSize = getResponsiveTitleFontSize(contentDimensions.width, contentDimensions.height);
 
@@ -169,7 +181,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
         format={format}
         axisLine={axisLine}
         max={thresholdMax}
-        fontSize={emptyFontSize}
+        valueFontSize={emptyValueFontSize}
         progressWidth={emptyProgressWidth}
         titleFontSize={emptyTitleFontSize}
       />
@@ -190,7 +202,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
       }}
     >
       {gaugeData.map((series, seriesIndex) => {
-        const fontSize = getResponsiveFontSize(series.value ?? null, format, chartWidth, contentDimensions.height);
+        const fontSize = getResponsiveValueFontSize(series.value ?? null, format, chartWidth, contentDimensions.height);
 
         return (
           <Box key={`gauge-series-${seriesIndex}`}>
@@ -201,7 +213,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
               format={format}
               axisLine={axisLine}
               max={thresholdMax}
-              fontSize={fontSize}
+              valueFontSize={fontSize}
               progressWidth={progressWidth}
               titleFontSize={titleFontSize}
             />

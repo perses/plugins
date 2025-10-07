@@ -38,13 +38,13 @@ export interface GaugeChartBaseProps {
   format: FormatOptions;
   axisLine: GaugeSeriesOption['axisLine'];
   max?: number;
-  fontSize: string;
+  valueFontSize: string;
   progressWidth: number;
   titleFontSize: number;
 }
 
 export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
-  const { width, height, data, format, axisLine, max, fontSize, progressWidth, titleFontSize } = props;
+  const { width, height, data, format, axisLine, max, valueFontSize, progressWidth, titleFontSize } = props;
   const chartsTheme = useChartsTheme();
 
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
@@ -137,7 +137,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
             borderRadius: 8,
             offsetCenter: [0, '-9%'],
             color: 'inherit', // allows value color to match active threshold color
-            fontSize: fontSize,
+            fontSize: valueFontSize,
             formatter:
               data.value === null
                 ? // We use a different function when we *know* the value is null
@@ -168,7 +168,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         },
       ],
     };
-  }, [data, width, height, chartsTheme, format, axisLine, max, fontSize, progressWidth, titleFontSize]);
+  }, [data, width, height, chartsTheme, format, axisLine, max, valueFontSize, progressWidth, titleFontSize]);
 
   return (
     <EChart
