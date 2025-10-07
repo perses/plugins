@@ -86,7 +86,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         // Inner gauge (progress)
         {
           ...baseGaugeConfig,
-          radius: '95%',
+          radius: '90%',
           silent: true,
           progress: {
             show: true,

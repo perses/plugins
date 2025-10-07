@@ -37,14 +37,16 @@ const PANEL_PADDING_OFFSET = 20;
 function getResponsiveProgressWidth(width: number, height: number): number {
   const MIN_WIDTH = 10;
   const MAX_WIDTH = 48;
+  const RATIO = 0.1; // 10% of the smaller dimension
   const minSize = Math.min(width, height);
-  // Use 5% of the smaller dimension as base, with reasonable min/max bounds
-  return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(minSize * 0.05)));
+  // Use RATIO% of the smaller dimension as base, with reasonable min/max bounds
+  return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(minSize * RATIO)));
 }
 
 /**
  * Responsive font size depending on number of characters and panel dimensions.
  * Uses clamp to ensure the text never overflows and scales appropriately with panel size.
+ * TODO simplify
  */
 function getResponsiveFontSize(value: number | null, format: FormatOptions, width: number, height: number): string {
   const MIN_SIZE = 2;
