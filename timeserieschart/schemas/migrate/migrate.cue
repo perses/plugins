@@ -128,7 +128,12 @@ spec: {
 	}
 
 	// visual
-	#lineWidth: *#panel.fieldConfig.defaults.custom.lineWidth | null
+	#lineWidthRaw: *#panel.fieldConfig.defaults.custom.lineWidth | null
+	#lineWidth: [
+		if (#lineWidthRaw & string) != _|_ { strconv.Atoi(#lineWidthRaw) },
+		if (#lineWidthRaw & number) != _|_ { #lineWidthRaw },
+		null,
+	][0]
 	if #lineWidth != null {
 		if #lineWidth > 3 {
 			visual: lineWidth: 3 // line width can't go beyond 3 in Perses
