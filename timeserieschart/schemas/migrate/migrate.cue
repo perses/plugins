@@ -132,8 +132,7 @@ spec: {
 	#lineWidthRaw: *#panel.fieldConfig.defaults.custom.lineWidth | null
 	#lineWidth: [
 		if (#lineWidthRaw & string) != _|_ { strconv.Atoi(#lineWidthRaw) },
-		if (#lineWidthRaw & number) != _|_ { #lineWidthRaw },
-		null,
+		#lineWidthRaw,
 	][0]
 	if #lineWidth != null {
 		visual: lineWidth: [
