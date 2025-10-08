@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/tracing-gantt-chart-plugin",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
