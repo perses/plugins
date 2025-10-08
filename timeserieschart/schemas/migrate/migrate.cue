@@ -16,6 +16,7 @@ package migrate
 import (
 	commonMigrate "github.com/perses/perses/cue/common/migrate"
 	"strings"
+	"strconv"
 )
 
 #grafanaType: "timeseries" | "graph"
