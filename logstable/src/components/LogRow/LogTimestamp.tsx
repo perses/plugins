@@ -14,11 +14,15 @@
 import React from 'react';
 
 interface LogTimestampProps {
-  timestamp: number;
+  timestamp: number | string;
 }
 
+const dateFromStr = (timestamp: string): Date => {
+  return /^\d+$/.test(timestamp) ? new Date(parseInt(timestamp) * 1000) : new Date(Date.parse(timestamp));
+};
+
 export const LogTimestamp: React.FC<LogTimestampProps> = ({ timestamp }) => {
-  const date = new Date(timestamp * 1000);
+  const date = typeof timestamp === 'number' ? new Date(timestamp * 1000) : dateFromStr(timestamp);
   return (
     <time
       style={{
