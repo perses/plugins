@@ -16,8 +16,6 @@ import { Autocomplete, Checkbox, Stack, TextField, TextFieldProps } from '@mui/m
 import { isAbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
-import CheckboxOutline from 'mdi-material-ui/CheckboxOutline';
-import CheckboxBlankOutline from 'mdi-material-ui/CheckboxBlankOutline';
 import { TempoClient } from '../model';
 import { filterToTraceQL } from './filter/filter_to_traceql';
 import { traceQLToFilter } from './filter/traceql_to_filter';
@@ -102,9 +100,6 @@ interface StringAttributeFilterProps {
   setValue: (value: string[]) => void;
 }
 
-const checkboxBlankIcon = <CheckboxBlankOutline fontSize="small" />;
-const checkedMarkedIcon = <CheckboxOutline fontSize="small" />;
-
 function StringAttributeFilter(props: StringAttributeFilterProps) {
   const { label, width, options, value, setValue } = props;
 
@@ -121,12 +116,7 @@ function StringAttributeFilter(props: StringAttributeFilterProps) {
         const { key, ...optionProps } = props;
         return (
           <li key={key} {...optionProps}>
-            <Checkbox
-              icon={checkboxBlankIcon}
-              checkedIcon={checkedMarkedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
-            />
+            <Checkbox style={{ marginRight: 8 }} checked={selected} />
             {option}
           </li>
         );
