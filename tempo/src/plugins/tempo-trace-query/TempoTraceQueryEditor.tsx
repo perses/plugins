@@ -21,17 +21,15 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, useState } from 'react';
-import { TraceQLEditor } from '../../components';
-import { TempoClient } from '../../model/tempo-client';
+import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
 import {
+  TempoClient,
   DEFAULT_TEMPO,
   isDefaultTempoSelector,
   isTempoDatasourceSelector,
   TEMPO_DATASOURCE_KIND,
-} from '../../model/tempo-selectors';
+} from '../../model';
 import { AttributeFilters } from '../../components/AttributeFilters';
-import { filterToTraceQL } from '../../components/filter/filter_to_traceql';
-import { traceQLToFilter } from '../../components/filter/traceql_to_filter';
 import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
@@ -67,7 +65,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     throw new Error('Got unexpected non-Tempo datasource selector');
   };
 
-  const runQuery = (newQuery: string) => {
+  const runQuery = (newQuery: string): void => {
     if (queryHandlerSettings?.watchQueryChanges) {
       queryHandlerSettings.watchQueryChanges(newQuery);
     }
@@ -129,9 +127,9 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   );
 }
 
-function isSimpleTraceQLQuery(query: string) {
+function isSimpleTraceQLQuery(query: string): boolean {
   // if a query can be transformed to a filter and back to the original query, we can show the attribute filter toolbar
-  return query == '' || filterToTraceQL(traceQLToFilter(query)) === query;
+  return query === '' || filterToTraceQL(traceQLToFilter(query)) === query;
 }
 
 const limitOptions = [20, 50, 100, 500, 1000, 5000];
@@ -141,7 +139,7 @@ interface LimitSelectProps {
   setValue: (x: number) => void;
 }
 
-export function LimitSelect(props: LimitSelectProps) {
+export function LimitSelect(props: LimitSelectProps): ReactElement {
   const { value, setValue } = props;
 
   // the outer <Box> is required, because <FormControl> has display: inline-flex, which doesn't work with the parent <Stack> of the query editor

@@ -23,6 +23,7 @@ import { EChart, FontSizeOption, GraphSeries, useChartsTheme } from '@perses-dev
 import { useOptimalFontSize } from './utils/calculate-font-size';
 import { formatStatChartValue } from './utils/format-stat-chart-value';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 const LINE_HEIGHT = 1.2;

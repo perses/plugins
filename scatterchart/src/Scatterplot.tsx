@@ -29,6 +29,7 @@ import { formatValue } from '@perses-dev/core';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { EChartTraceValue } from './ScatterChartPanel';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([
   DatasetComponent,
   DataZoomComponent,
@@ -124,7 +125,7 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
 
   return (
     <EChart
-      sx={{
+      style={{
         width: width,
         height: height,
       }}

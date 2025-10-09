@@ -20,6 +20,7 @@ import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } fro
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box } from '@mui/material';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 const BAR_WIN_WIDTH = 14;
@@ -120,7 +121,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
       sx={{ overflow: 'auto' }}
     >
       <EChart
-        sx={{
+        style={{
           minHeight: height,
           height: data ? data.length * (BAR_WIN_WIDTH + BAR_GAP) : '100%',
         }}

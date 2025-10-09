@@ -28,19 +28,19 @@ export function Filters(props: FiltersProps): ReactElement {
   const theme = useTheme();
   const { datasource, value, onChange } = props;
 
-  const addFilterItem = () => {
+  const addFilterItem = (): void => {
     const newItem: LabelFilter = { labelName: '', labelValue: '', operator: '=' };
     const updatedFilters = [...value, newItem];
     onChange?.(updatedFilters);
   };
 
-  const updateFilter = (index: number, newValue: LabelFilter) => {
+  const updateFilter = (index: number, newValue: LabelFilter): void => {
     const nextFilters = [...value];
     nextFilters[index] = newValue;
     onChange?.(nextFilters);
   };
 
-  const deleteFilter = (index: number) => {
+  const deleteFilter = (index: number): void => {
     const nextFilters = [...value];
     nextFilters.splice(index, 1);
     if (nextFilters.length === 0) {

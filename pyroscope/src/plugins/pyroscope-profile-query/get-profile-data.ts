@@ -14,9 +14,14 @@
 import { ProfileQueryPlugin } from '@perses-dev/plugin-system';
 import { AbsoluteTimeRange, StackTrace, ProfileData } from '@perses-dev/core';
 import { getUnixTime } from 'date-fns';
-import { PyroscopeProfileQuerySpec, PYROSCOPE_DATASOURCE_KIND, PyroscopeDatasourceSelector } from '../../model';
-import { PyroscopeClient } from '../../model/pyroscope-client';
-import { SearchProfilesParameters, SearchProfilesResponse } from '../../model/api-types';
+import {
+  PyroscopeProfileQuerySpec,
+  PYROSCOPE_DATASOURCE_KIND,
+  PyroscopeDatasourceSelector,
+  SearchProfilesParameters,
+  SearchProfilesResponse,
+  PyroscopeClient,
+} from '../../model';
 import { computeFilterExpr } from '../../utils/types';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
@@ -30,7 +35,7 @@ export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number;
 export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getProfileData'] = async (
   spec,
   context
-) => {
+): Promise<ProfileData> => {
   const defaultPyroscopeDatasource: PyroscopeDatasourceSelector = {
     kind: PYROSCOPE_DATASOURCE_KIND,
   };
@@ -39,7 +44,7 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     spec.datasource ?? defaultPyroscopeDatasource
   );
 
-  const buildQueryString = () => {
+  const buildQueryString = (): string => {
     let query: string = '';
     if (spec.service) {
       query = `service_name="${spec.service}"`;

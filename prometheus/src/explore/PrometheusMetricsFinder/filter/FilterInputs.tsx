@@ -102,7 +102,12 @@ export const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTML
         {...rest}
       >
         <Virtuoso
-          style={{ height: localRef.current, padding: '10px 0' }}
+          style={{
+            // TODO: improve the logic for removing eslint-disable-next-line
+            // eslint-disable-next-line react-hooks/refs
+            height: localRef.current,
+            padding: '10px 0',
+          }}
           data={data}
           totalListHeightChanged={setHeight}
           itemContent={(index, child) => {

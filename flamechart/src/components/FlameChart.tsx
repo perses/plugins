@@ -220,7 +220,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const flameChart = useMemo(
     () => (
       <EChart
-        sx={{
+        style={{
           width: width,
           height: height - 2 * CONTAINER_PADDING - BREADCRUMB_SPACE,
         }}

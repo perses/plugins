@@ -166,6 +166,8 @@ export default function TreeNode({
     const parentRect = parentEl.getBoundingClientRect();
     const nodeRect = nodeEl.getBoundingClientRect();
     if (reverse) {
+      // TODO: improve this logic to avoid useState in useEffect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConnectorStyle((prevStyle) => ({
         ...prevStyle,
         top: 'calc(50% - 1px)',
@@ -230,6 +232,8 @@ export default function TreeNode({
         .map(([lv, cnt]) => ({ value: lv, count: cnt }));
     });
 
+    // TODO: improve this logic to avoid useState in useEffect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResultStats({
       numSeries: resultSeries,
       sortedLabelCards: Object.entries(labelCardinalities).sort((a, b) => b[1] - a[1]),

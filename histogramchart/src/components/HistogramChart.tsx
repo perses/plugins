@@ -19,6 +19,7 @@ import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts
 import { CustomChart } from 'echarts/charts';
 import { getColorFromThresholds } from '../utils';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([CustomChart]);
 
 export interface HistogramChartData {
@@ -101,7 +102,7 @@ export function HistogramChart({
       series: [
         {
           type: 'custom',
-          renderItem: function (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) {
+          renderItem: function (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI): unknown {
             const yValue = api.value(2);
             const start = api.coord([api.value(0), yValue]);
             const size = api.size?.([(api.value(1) as number) - (api.value(0) as number), yValue]) as number[];
@@ -136,9 +137,11 @@ export function HistogramChart({
 
   return (
     <EChart
-      sx={{
+      style={{
         width: width,
         height: height,
+      }}
+      sx={{
         padding: `${chartsTheme.container.padding.default}px`,
       }}
       option={option}

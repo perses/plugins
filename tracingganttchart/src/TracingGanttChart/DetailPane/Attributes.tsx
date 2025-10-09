@@ -25,7 +25,7 @@ export interface TraceAttributesProps {
   span: Span;
 }
 
-export function TraceAttributes(props: TraceAttributesProps) {
+export function TraceAttributes(props: TraceAttributesProps): ReactElement {
   const { customLinks, trace, span } = props;
 
   return (

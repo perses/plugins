@@ -252,7 +252,7 @@ async function completeTagName(
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
 }
 
-function escapeString(input: string, quoteChar: string) {
+function escapeString(input: string, quoteChar: string): string {
   // do not escape raw strings (when using backticks)
   if (quoteChar === '`') {
     return input;

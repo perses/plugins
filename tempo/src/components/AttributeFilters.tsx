@@ -15,7 +15,7 @@ import { ReactElement, SyntheticEvent, useCallback, useEffect, useState } from '
 import { Autocomplete, Checkbox, Stack, TextField, TextFieldProps } from '@mui/material';
 import { isAbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import CheckboxOutline from 'mdi-material-ui/CheckboxOutline';
 import CheckboxBlankOutline from 'mdi-material-ui/CheckboxBlankOutline';
 import { TempoClient } from '../model';
@@ -35,7 +35,7 @@ export function AttributeFilters(props: AttributeFiltersProps): ReactElement {
   const { client, query, setQuery } = props;
 
   const filter = traceQLToFilter(query);
-  const setFilter = (filter: Filter) => {
+  const setFilter = (filter: Filter): void => {
     setQuery(filterToTraceQL(filter));
   };
 
@@ -105,7 +105,7 @@ interface StringAttributeFilterProps {
 const checkboxBlankIcon = <CheckboxBlankOutline fontSize="small" />;
 const checkedMarkedIcon = <CheckboxOutline fontSize="small" />;
 
-function StringAttributeFilter(props: StringAttributeFilterProps) {
+function StringAttributeFilter(props: StringAttributeFilterProps): ReactElement {
   const { label, width, options, value, setValue } = props;
 
   return (
@@ -117,10 +117,9 @@ function StringAttributeFilter(props: StringAttributeFilterProps) {
       value={value}
       onChange={(_event: SyntheticEvent, newValue: string[]) => setValue(newValue)}
       options={options}
-      renderOption={(props, option, { selected }) => {
-        const { key, ...optionProps } = props;
+      renderOption={({ key, ...props }, option, { selected }) => {
         return (
-          <li key={key} {...optionProps}>
+          <li key={key} {...props}>
             <Checkbox
               icon={checkboxBlankIcon}
               checkedIcon={checkedMarkedIcon}
@@ -147,7 +146,7 @@ interface DurationAttributeFilterProps {
   setValue: (value: DurationField) => void;
 }
 
-function DurationAttributeFilter(props: DurationAttributeFilterProps) {
+function DurationAttributeFilter(props: DurationAttributeFilterProps): ReactElement {
   const { label, value, setValue } = props;
   const { min, max } = value;
 
@@ -167,7 +166,7 @@ interface DurationTextInputProps {
   setValue: (value: string) => void;
 }
 
-function DurationTextInput(props: DurationTextInputProps) {
+function DurationTextInput(props: DurationTextInputProps): ReactElement {
   const { label, value, setValue } = props;
 
   return (
@@ -189,7 +188,7 @@ interface CustomAttributesFilterProps {
   setValue: (value: string[]) => void;
 }
 
-function CustomAttributesFilter(props: CustomAttributesFilterProps) {
+function CustomAttributesFilter(props: CustomAttributesFilterProps): ReactElement {
   const { label, value, setValue } = props;
 
   return (
@@ -212,12 +211,14 @@ interface LazyTextInputProps extends Omit<TextFieldProps, 'variant'> {
 }
 
 /** A <TextField> which calls props.setValue when the input field is blurred and the validation passes. */
-function LazyTextInput(props: LazyTextInputProps) {
+function LazyTextInput(props: LazyTextInputProps): ReactElement {
   const { validationRegex, validationFailedMessage, value, setValue, ...otherProps } = props;
   const [draftValue, setDraftValue] = useState(value);
-  const isValidInput = draftValue == '' || validationRegex == undefined || validationRegex.test(draftValue);
+  const isValidInput = draftValue === '' || validationRegex === undefined || validationRegex.test(draftValue);
 
   useEffect(() => {
+    // TODO: improve logic here to not have setState in useEffect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraftValue(value);
   }, [value, setDraftValue]);
 
@@ -243,7 +244,13 @@ function LazyTextInput(props: LazyTextInputProps) {
   );
 }
 
-function useTagValues(client: TempoClient | undefined, tag: string, query: string, start?: number, end?: number) {
+function useTagValues(
+  client: TempoClient | undefined,
+  tag: string,
+  query: string,
+  start?: number,
+  end?: number
+): UseQueryResult<string[] | undefined> {
   return useQuery({
     queryKey: ['useTagValues', client, tag, query, start, end],
     enabled: !!client,

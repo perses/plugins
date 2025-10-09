@@ -30,6 +30,7 @@ import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { getFormattedStatusHistoryAxisLabel } from './utils/get-formatted-axis-label';
 import { generateTooltipHTML } from './StatusHistoryTooltip';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([
   EChartsHeatmapChart,
   VisualMapComponent,
@@ -148,7 +149,7 @@ export const StatusHistoryChartBase: FC<StatusHistoryChartBaseProps> = (props) =
   return (
     <Box style={{ height: height }} sx={{ overflow: 'auto' }}>
       <EChart
-        sx={{
+        style={{
           width: '100%',
           height: height,
         }}

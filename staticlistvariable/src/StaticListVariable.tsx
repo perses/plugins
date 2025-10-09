@@ -1,5 +1,6 @@
 import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Autocomplete, TextField } from '@mui/material';
+import { ReactElement } from 'react';
 
 type StaticListOption = string | VariableOption;
 
@@ -7,8 +8,8 @@ type StaticListVariableOptions = {
   values: StaticListOption[];
 };
 
-function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVariableOptions>) {
-  const value = (props.value.values || []).map((v) => {
+function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVariableOptions>): ReactElement {
+  const value = (props.value.values || []).map((v): string => {
     if (typeof v === 'string') {
       return v;
     } else {
@@ -16,7 +17,7 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
     }
   });
 
-  const onChange = (__: unknown, value: string[]) => {
+  const onChange = (__: unknown, value: string[]): void => {
     props.onChange({
       values: value.map((v) => {
         return { value: v, label: v };
