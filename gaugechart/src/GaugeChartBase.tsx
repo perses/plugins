@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { EChart, useChartsTheme } from '@perses-dev/components';
-import { formatValue, useDeepMemo, FormatOptions } from '@perses-dev/core';
+import { formatValue, FormatOptions } from '@perses-dev/core';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 // adjusts when to show pointer icon
@@ -48,7 +49,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
   const chartsTheme = useChartsTheme();
 
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
-  const option: EChartsCoreOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useMemo(() => {
     if (data.value === undefined) return chartsTheme.noDataOption;
 
     // Base configuration shared by both series (= progress & scale)
@@ -168,13 +169,27 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         },
       ],
     };
-  }, [data, width, height, chartsTheme, format, axisLine, max, valueFontSize, progressWidth, titleFontSize]);
+  }, [
+    axisLine,
+    chartsTheme.echartsTheme.textStyle?.color,
+    chartsTheme.noDataOption,
+    data.label,
+    data.value,
+    format,
+    max,
+    progressWidth,
+    titleFontSize,
+    valueFontSize,
+    width,
+  ]);
 
   return (
     <EChart
-      sx={{
+      style={{
         width: width,
         height: height,
+      }}
+      sx={{
         padding: `${chartsTheme.container.padding.default}px`,
       }}
       option={option}

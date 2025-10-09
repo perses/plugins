@@ -25,6 +25,7 @@ import { Box } from '@mui/material';
 import { ReactElement } from 'react';
 import { EChart, useChartsTheme } from '@perses-dev/components';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([EChartsPieChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 const PIE_WIN_WIDTH = 12;
@@ -91,7 +92,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
       sx={{ overflow: 'auto' }}
     >
       <EChart
-        sx={{
+        style={{
           minHeight: height,
           height: data ? data.length * (PIE_WIN_WIDTH + PIE_GAP) : '100%',
         }}

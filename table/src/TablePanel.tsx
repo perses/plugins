@@ -25,17 +25,17 @@ function generateCellContentConfig(
   const plugin = column.plugin;
   if (plugin !== undefined) {
     return {
-      cell: (ctx) => {
+      cell: (ctx): ReactElement => {
         const panelData: PanelData<QueryDataType> | undefined = ctx.getValue();
         if (!panelData) return <></>;
         return <EmbeddedPanel kind={plugin.kind} spec={plugin.spec} queryResults={[panelData]} />;
       },
-      cellDescription: column.cellDescription ? () => `${column.cellDescription}` : () => '', // disable hover text
+      cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : (): string => '', // disable hover text
     };
   }
 
   return {
-    cell: (ctx) => {
+    cell: (ctx): unknown => {
       const cellValue = ctx.getValue();
       return typeof cellValue === 'number' && column.format ? formatValue(cellValue, column.format) : cellValue;
     },
@@ -277,6 +277,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   useEffect(() => {
     // If the pagination setting changes from no pagination to pagination, but the pagination state is undefined, update the pagination state
     if (spec.pagination && !pagination) {
+      // TODO: improve this logic to avoid useState in useEffect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPagination({ pageIndex: 0, pageSize: 10 });
     } else if (!spec.pagination && pagination) {
       setPagination(undefined);

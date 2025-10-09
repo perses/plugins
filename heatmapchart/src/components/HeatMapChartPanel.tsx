@@ -59,8 +59,8 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     }
 
     if (
-      queryResults.length != 1 ||
-      queryResults[0]!.data.series.length != 1 ||
+      queryResults.length !== 1 ||
+      queryResults[0]!.data.series.length !== 1 ||
       queryResults[0]!.data.series[0]!.histograms === undefined
     ) {
       return {

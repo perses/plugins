@@ -62,7 +62,10 @@ export interface Timeline {
 /**
  * Request parameters of Pyroscope HTTP API endpoint POST /querier.v1.QuerierService/ProfileTypes
  */
-export type SearchProfileTypesParameters = Record<string, never>;
+export type SearchProfileTypesParameters = {
+  start?: number;
+  end?: number;
+};
 
 /**
  * Response of Pyroscope HTTP API endpoint POST /querier.v1.QuerierService/ProfileTypes
@@ -83,7 +86,7 @@ export interface ProfileType {
 /**
  * Request parameters of Pyroscope HTTP API endpoint POST /querier.v1.QuerierService/LabelNames
  */
-export type SearchLabelNamesParameters = Record<string, never>;
+export type SearchLabelNamesParameters = Record<string, unknown>;
 
 /**
  * Response of Pyroscope HTTP API endpoint POST /querier.v1.QuerierService/LabelNames
@@ -95,7 +98,7 @@ export interface SearchLabelNamesResponse {
 /**
  * Request parameters of Pyroscope HTTP API endpoint POST /querier.v1.QuerierService/LabelValues
  */
-export type SearchLabelValuesParameters = Record<string, never>;
+export type SearchLabelValuesParameters = Record<string, unknown>;
 
 /**
  * Response of Pyroscope HTTP API endpoint POST /querier.v1.QuerierService/LabelValues

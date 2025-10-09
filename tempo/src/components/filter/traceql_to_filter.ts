@@ -28,7 +28,7 @@ export function traceQLToFilter(query: string): Filter {
   };
 }
 
-function parseQuery(query: string) {
+function parseQuery(query: string): Record<string, Matcher[]> {
   const matchers: Record<string, Matcher[]> = {};
   let attribute = '';
   let operator = '';
@@ -64,46 +64,46 @@ function parseQuery(query: string) {
   return matchers;
 }
 
-function unescape(q: string) {
+function unescape(q: string): string {
   return q.replaceAll('\\"', '"').replaceAll('\\\\', '\\');
 }
 
-function reverseStringMatcher(matches?: Matcher[]) {
+function reverseStringMatcher(matches?: Matcher[]): string[] {
   const values: string[] = [];
   for (const { operator, value } of matches ?? []) {
     const unescaped = unescape(value.slice(1, -1));
-    if (operator == '=') {
+    if (operator === '=') {
       values.push(unescaped);
-    } else if (operator == '=~') {
+    } else if (operator === '=~') {
       values.push(...unescaped.split('|'));
     }
   }
   return values;
 }
 
-function reverseIntrinsicMatcher(matches?: Matcher[]) {
+function reverseIntrinsicMatcher(matches?: Matcher[]): string[] {
   const values: string[] = [];
   for (const { operator, value } of matches ?? []) {
-    if (operator == '=') {
+    if (operator === '=') {
       values.push(value);
     }
   }
   return values;
 }
 
-function reverseDurationMatcher(matches?: Matcher[]) {
+function reverseDurationMatcher(matches?: Matcher[]): DurationField {
   const duration: DurationField = {};
   for (const { operator, value } of matches ?? []) {
-    if (operator == '>=') {
+    if (operator === '>=') {
       duration.min = value;
-    } else if (operator == '<=') {
+    } else if (operator === '<=') {
       duration.max = value;
     }
   }
   return duration;
 }
 
-function reverseCustomMatcher(matchers: Record<string, Matcher[]>, skipAttrs: Set<string>) {
+function reverseCustomMatcher(matchers: Record<string, Matcher[]>, skipAttrs: Set<string>): string[] {
   const customMatchers: string[] = [];
   for (const [attribute, matches] of Object.entries(matchers)) {
     if (skipAttrs.has(attribute)) {

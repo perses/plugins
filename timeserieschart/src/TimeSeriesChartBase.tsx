@@ -62,6 +62,7 @@ import {
 } from '@perses-dev/components';
 import { DatasetOption } from 'echarts/types/dist/shared';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([
   EChartsLineChart,
   EChartsBarChart,

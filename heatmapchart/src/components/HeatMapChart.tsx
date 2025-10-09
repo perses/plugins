@@ -20,6 +20,7 @@ import { useTheme } from '@mui/material';
 import { getFormattedHeatmapAxisLabel } from '../utils';
 import { generateTooltipHTML } from './HeatMapTooltip';
 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([EChartsHeatmapChart]);
 
 // The default coloring is a blue->yellow->red gradient
@@ -85,7 +86,7 @@ export function HeatMapChart({
     return {
       tooltip: {
         appendToBody: true,
-        formatter: (params: { data: HeatMapDataItem; marker: string }) => {
+        formatter: (params: { data: HeatMapDataItem; marker: string }): string => {
           return generateTooltipHTML({
             data: params.data.value,
             label: params.data.label,
@@ -167,9 +168,11 @@ export function HeatMapChart({
   const chart = useMemo(
     () => (
       <EChart
-        sx={{
+        style={{
           width: width,
           height: height,
+        }}
+        sx={{
           padding: `${chartsTheme.container.padding.default}px`,
         }}
         option={option}
