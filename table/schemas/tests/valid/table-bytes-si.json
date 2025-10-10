@@ -1,0 +1,19 @@
+{
+  "kind": "Table",
+  "spec": {
+    "density": "standard",
+    "columnSettings": [
+      {
+        "name": "disk_usage",
+        "header": "Disk Usage",
+        "format": {
+          "unit": "decbytes",
+          "decimalPlaces": 1,
+          "shortValues": true
+        },
+        "align": "right",
+        "enableSorting": true
+      }
+    ]
+  }
+}
