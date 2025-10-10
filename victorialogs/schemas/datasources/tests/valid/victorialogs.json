@@ -1,0 +1,6 @@
+{
+  "kind": "VictoriaLogsDatasource",
+  "spec": {
+    "directUrl": "http://localhost:9428"
+  }
+}

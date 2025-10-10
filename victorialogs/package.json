@@ -1,0 +1,97 @@
+{
+  "name": "@perses-dev/victorialogs-plugin",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
+    "test": "cross-env LC_ALL=C TZ=UTC jest",
+    "type-check": "tsc --noEmit"
+  },
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@grafana/lezer-logql": "^0.2.8"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@hookform/resolvers": "^3.2.0",
+    "@perses-dev/components": "^0.53.0-beta.0",
+    "@perses-dev/core": "^0.53.0-beta.0",
+    "@perses-dev/dashboards": "^0.53.0-beta.0",
+    "@perses-dev/explore": "^0.53.0-beta.0",
+    "@perses-dev/plugin-system": "^0.53.0-beta.0",
+    "@tanstack/react-query": "^4.39.1",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "echarts": "5.5.0",
+    "immer": "^10.1.1",
+    "lodash": "^4.17.21",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0",
+    "react-hook-form": "^7.52.2",
+    "use-resize-observer": "^9.0.0"
+  },
+  "files": [
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
+  ],
+  "perses": {
+    "moduleName": "VictoriaLogs",
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "VictoriaLogs Datasource"
+          },
+          "name": "VictoriaLogsDatasource"
+        }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "display": {
+            "name": "VictoriaLogs Time Series Query"
+          },
+          "name": "VictoriaLogsTimeSeriesQuery"
+        }
+      },
+      {
+        "kind": "LogQuery",
+        "spec": {
+          "display": {
+            "name": "VictoriaLogs Log Query"
+          },
+          "name": "VictoriaLogsLogQuery"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "VictoriaLogs Field Values Variable"
+          },
+          "name": "VictoriaLogsFieldValuesVariable"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "VictoriaLogs Field Names Variable"
+          },
+          "name": "VictoriaLogsFieldNamesVariable"
+        }
+      }
+    ]
+  }
+}
