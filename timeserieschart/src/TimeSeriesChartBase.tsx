@@ -57,9 +57,9 @@ import {
   TimeChartTooltip,
   TooltipConfig,
   useChartsContext,
-  useTimeZone,
   ZoomEventData,
 } from '@perses-dev/components';
+import { useTimeZone } from '@perses-dev/plugin-system';
 import { DatasetOption } from 'echarts/types/dist/shared';
 
 use([
