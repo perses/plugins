@@ -1,0 +1,19 @@
+{
+  "kind": "Table",
+  "spec": {
+    "density": "compact",
+    "columnSettings": [
+      {
+        "name": "memory_usage",
+        "header": "Memory Usage",
+        "format": {
+          "unit": "bytes",
+          "decimalPlaces": 2,
+          "shortValues": true
+        },
+        "align": "right",
+        "enableSorting": true
+      }
+    ]
+  }
+}
