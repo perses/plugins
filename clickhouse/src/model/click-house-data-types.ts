@@ -11,26 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesData } from '@perses-dev/core';
-
-export interface LogLabels {
-  [key: string]: any;
-}
-
-export interface LogEntry {
-  timestamp: number;
-  labels: LogLabels;
-  line?: string;
-}
-
-export interface LogsData {
-  entries: LogEntry[];
-  totalCount: number;
-  hasMore?: boolean;
-}
+import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
 
 export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogsData;
+  logs?: LogData;
 }
 
 export interface TimeSeriesEntry {

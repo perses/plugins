@@ -1,12 +1,12 @@
 import { replaceVariables } from '@perses-dev/plugin-system';
 import { LokiStreamResult } from '../../model/loki-client-types';
 import { LokiClient } from '../../model/loki-client';
-import { LogEntry, LogsData } from '../../model/loki-data-types';
+import { LogEntry, LogData } from '@perses-dev/core';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { LokiLogQuerySpec, LokiLogQueryResponse } from './loki-log-query-types';
 import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
 
-function convertStreamsToLogs(streams: LokiStreamResult[]): LogsData {
+function convertStreamsToLogs(streams: LokiStreamResult[]): LogData {
   const entries: LogEntry[] = [];
 
   streams.forEach((stream) => {

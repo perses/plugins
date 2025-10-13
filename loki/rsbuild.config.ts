@@ -12,7 +12,6 @@ export default createConfigForPlugin({
       './LokiDatasource': './src/datasources/loki-datasource',
       './LokiTimeSeriesQuery': './src/queries/loki-time-series-query',
       './LokiLogQuery': './src/queries/loki-log-query',
-      './LogsTable': './src/panels/logstable',
     },
     shared: {
       react: { requiredVersion: '18.2.0', singleton: true },
