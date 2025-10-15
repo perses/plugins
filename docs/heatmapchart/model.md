@@ -1,0 +1,3 @@
+# HeatMapChart model
+
+TODO

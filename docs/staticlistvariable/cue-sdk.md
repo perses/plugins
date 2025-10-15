@@ -1,6 +1,6 @@
-# Static List Variable builder
+# StaticListVariable builder
 
-The Static List Variable builder helps creating static list variables in the format expected by Perses.
+The StaticListVariable builder helps creating static list variables in the format expected by Perses.
 
 ## Usage
 

@@ -1,4 +1,4 @@
-# ScatterChart Panel Model
+# ScatterChart model
 
 ```yaml
 kind: "ScatterChart"

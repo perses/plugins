@@ -1,4 +1,4 @@
-# BarChart Panel Model
+# BarChart model
 
 ```yaml
 kind: "BarChart"

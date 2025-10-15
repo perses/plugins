@@ -1,4 +1,4 @@
-# TimeSeries Panel Builder
+# TimeSeriesChart builder
 
 ## Constructor
 

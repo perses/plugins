@@ -1,0 +1,2 @@
+# VictoriaLogs plugin models
+TODO

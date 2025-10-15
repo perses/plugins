@@ -1,4 +1,4 @@
-# GaugeChart Panel Model
+# GaugeChart model
 
 ```yaml
 kind: "GaugeChart"

@@ -1,4 +1,4 @@
-# Static List Variable Builder
+# StaticListVariable builder
 
 ## Example
 

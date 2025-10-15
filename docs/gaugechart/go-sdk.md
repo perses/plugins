@@ -1,4 +1,4 @@
-# Gauge Panel Builder
+# GaugeChart builder
 
 ## Constructor
 

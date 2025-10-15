@@ -1,0 +1,3 @@
+# HistogramChart model
+
+TODO

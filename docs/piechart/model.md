@@ -1,4 +1,4 @@
-# PieChart Panel Model
+# PieChart model
 
 ```yaml
 kind: "PieChart"

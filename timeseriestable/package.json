@@ -51,7 +51,7 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "TimeSeries Table"
+            "name": "Time Series Table"
           },
           "name": "TimeSeriesTable"
         }

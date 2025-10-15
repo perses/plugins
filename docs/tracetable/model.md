@@ -1,4 +1,4 @@
-# TraceTable Panel Model
+# TraceTable model
 
 ```yaml
 kind: "TraceTable"

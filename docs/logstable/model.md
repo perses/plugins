@@ -1,0 +1,3 @@
+# LogsTable model
+
+TODO

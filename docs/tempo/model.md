@@ -1,4 +1,4 @@
-# Tempo-related plugins
+# Tempo plugin models
 
 This documentation provides the definition of the different plugins related to Tempo.
 

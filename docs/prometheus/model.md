@@ -1,4 +1,4 @@
-# Prometheus-related plugins
+# Prometheus plugin models
 
 This documentation provides the definition of the different plugins related to Prometheus.
 

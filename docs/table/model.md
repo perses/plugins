@@ -1,4 +1,4 @@
-# Table Panel Model
+# Table model
 
 ```yaml
 kind: "Table"
