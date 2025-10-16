@@ -1,4 +1,4 @@
-# GaugeChart builder
+# GaugeChart Go SDK
 
 ## Constructor
 

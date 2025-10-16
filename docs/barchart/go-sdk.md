@@ -1,4 +1,4 @@
-# BarChart builder
+# BarChart Go SDK
 
 ## Constructor
 

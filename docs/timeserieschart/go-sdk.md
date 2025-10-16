@@ -1,4 +1,4 @@
-# TimeSeriesChart builder
+# TimeSeriesChart Go SDK
 
 ## Constructor
 

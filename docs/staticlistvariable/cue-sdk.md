@@ -1,6 +1,6 @@
-# StaticListVariable builder
+# StaticListVariable CUE SDK
 
-The StaticListVariable builder helps creating static list variables in the format expected by Perses.
+The StaticListVariable CUE SDK helps creating static list variables in the format expected by Perses.
 
 ## Usage
 
