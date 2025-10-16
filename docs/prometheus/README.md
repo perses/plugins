@@ -51,9 +51,6 @@ See also technical docs related to this plugin:
 - [Dashboard-as-Code Go lib](./go-sdk/variable/promql.md)
 - [Dashboard-as-Code CUE lib](./cue-sdk/variable/promql.md)
 
-
-- note about regex migration?
-
 ### Built-in Variables
 
 The Prometheus package provide several built-in variables that can be used within your PromQL queries:

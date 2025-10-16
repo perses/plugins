@@ -25,7 +25,7 @@ import "github.com/perses/plugins/prometheus/sdk/go/datasource"
 datasource.DirectURL("https://prometheus.demo.do.prometheus.io")
 ```
 
-Set Prometheus plugin for the datasource with a direct URL.
+Configure the access to the Prometheus datasource with a direct URL.
 
 #### Proxy
 
@@ -35,7 +35,7 @@ import "github.com/perses/plugins/prometheus/sdk/go/datasource"
 datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 ```
 
-Set Prometheus plugin for the datasource with a proxy URL, useful for bypassing. More info at [HTTP Proxy](https://perses.dev/perses/docs/dac/go/helper/http-proxy).
+Configure the access to the Prometheus datasource with a proxy URL. More info at [HTTP Proxy](https://perses.dev/perses/docs/dac/go/helper/http-proxy).
 
 ## Example
 
