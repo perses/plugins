@@ -24,6 +24,16 @@
         }
       },
       {
+        "kind": "Value",
+        "spec": {
+          "result": {
+            "color": "#8f3bb8",
+            "value": ""
+          },
+          "value": "2"
+        }
+      },
+      {
         "kind": "Range",
         "spec": {
           "from": 10,

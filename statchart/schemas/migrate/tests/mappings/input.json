@@ -16,6 +16,10 @@
               "color": "light-green",
               "index": 1,
               "text": "Up"
+            },
+            "2": {
+              "color": "dark-purple",
+              "index": 2
             }
           }
         },
