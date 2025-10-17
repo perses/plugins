@@ -1,4 +1,4 @@
-# Prometheus PromQL Variable Builder
+# Prometheus PromQL Variable CUE SDK
 
 This library helps creating prometheus promQL variables in the format expected by Perses.
 

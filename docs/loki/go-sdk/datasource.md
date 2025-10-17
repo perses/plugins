@@ -1,107 +1,56 @@
-# Loki Datasource Go SDK
+# Loki Datasource Builder
 
-This document describes how to use the Go library to create `LokiDatasource` configurations programmatically.
+## Constructor
 
-## Import
-
-```go
+```golang
 import "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
+
+var options []datasource.Option
+datasource.Loki(options...)
 ```
 
-## Builder
+Need a list of options. At least direct URL or proxy URL, in order to work.
 
-### New
+## Default options
 
-`New() *Builder`
+- None
 
-Creates a new `LokiDatasource` configuration builder.
+## Available options
 
-Example:
+#### Direct URL
 
-```go
-ds := datasource.New().
-	DirectURL("http://loki.example.com:3100").
-	Build()
+```golang
+import "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
+
+datasource.DirectURL("http://loki.example.com:3100")
 ```
 
-### Methods
+Configure the access to the Loki datasource with a direct URL.
 
-#### DirectURL
+#### Proxy
 
-`DirectURL(url string) *Builder`
+```golang
+import "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
 
-Sets the direct URL to the Loki instance.
-
-Parameters:
-
-* `url` - The URL to the Loki instance (e.g., "http://loki.example.com:3100")
-
-Example:
-
-```go
-ds := datasource.New().
-	DirectURL("http://loki.example.com:3100").
-	Build()
+datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 ```
 
-#### ProxyURL
+Configure the access to the Loki datasource with a proxy URL. More info at [HTTP Proxy](https://perses.dev/perses/docs/dac/go/helper/http-proxy).
 
-`ProxyURL(url string) *Builder`
+## Example
 
-Sets a proxy URL for accessing the Loki instance through the Perses proxy feature.
-
-Parameters:
-
-* `url` - The proxy URL path (e.g., "/proxy/loki")
-
-Example:
-
-```go
-ds := datasource.New().
-	ProxyURL("/proxy/loki").
-	Build()
-```
-
-#### Build
-
-`Build() *DatasourceResource`
-
-Builds and returns the final `LokiDatasource` configuration.
-
-Returns a pointer to `DatasourceResource` that can be used in dashboard configurations.
-
-## Complete Example
-
-```go
+```golang
 package main
 
 import (
-	"github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
 	"github.com/perses/perses/go-sdk/dashboard"
-	"github.com/perses/perses/go-sdk/project"
+	
+	lokiDs "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
 )
 
 func main() {
-	// Create Loki datasource
-	lokiDatasource := datasource.New().
-		DirectURL("http://loki.example.com:3100").
-		Build()
-
-	// Create dashboard with Loki datasource
-	dashboard.New("log-analysis").
-		AddDatasource("loki", lokiDatasource).
-		Build()
+	dashboard.New("Loki Dashboard",
+		dashboard.AddDatasource("lokiMain", lokiDs.Loki(lokiDs.DirectURL("http://loki.example.com:3100"))),
+	)
 }
 ```
-
-## Proxy Configuration
-
-When using the proxy feature, configure your Loki datasource to route through Perses:
-
-```go
-lokiDatasource := datasource.New().
-	ProxyURL("/proxy/loki").
-	Build()
-```
-
-This enables Perses to control access to your Loki instance according to your security policies.
