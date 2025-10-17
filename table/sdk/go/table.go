@@ -150,10 +150,14 @@ type CellSettings struct {
 }
 
 type PluginSpec struct {
-	Density        Density            `json:"density,omitempty" yaml:"density,omitempty"`
-	ColumnSettings []ColumnSettings   `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
-	CellSettings   []CellSettings     `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
-	Transforms     []common.Transform `json:"transforms,omitempty" yaml:"transforms,omitempty"`
+	Density             Density            `json:"density,omitempty" yaml:"density,omitempty"`
+	DefaultColumnWidth  int                `json:"defaultColumnWidth,omitempty" yaml:"defaultColumnWidth,omitempty"`
+	DefaultColumnHeight int                `json:"defaultColumnHeight,omitempty" yaml:"defaultColumnHeight,omitempty"`
+	DefaultColumnHidden bool               `json:"defaultColumnHidden,omitempty" yaml:"defaultColumnHidden,omitempty"`
+	Pagination          bool               `json:"pagination,omitempty" yaml:"pagination,omitempty"`
+	ColumnSettings      []ColumnSettings   `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
+	CellSettings        []CellSettings     `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Transforms          []common.Transform `json:"transforms,omitempty" yaml:"transforms,omitempty"`
 }
 
 type Option func(plugin *Builder) error

@@ -23,7 +23,7 @@ import {
   TableDensity,
 } from '@perses-dev/components';
 import { ChangeEvent, ReactElement } from 'react';
-import { TableSettingsEditorProps } from './table-model';
+import { TableSettingsEditorProps } from '../models';
 
 interface DefaultColumnsDimensionsControlProps {
   label: string;
@@ -58,7 +58,7 @@ function DefaultColumnsDimensionsControl({
             <TextField
               type="number"
               value={value ?? defaultValue}
-              InputProps={{ inputProps: { min: 1, step: 1 } }}
+              slotProps={{ input: { inputProps: { min: 1, step: 1 } } }}
               onChange={(e) => onChange(parseInt(e.target.value))}
             />
           }
@@ -77,6 +77,10 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
     onChange({ ...value, pagination: newValue });
   }
 
+  function handleDefaultColumnHiddenChange(_event: ChangeEvent, newValue: boolean): void {
+    onChange({ ...value, defaultColumnHidden: newValue });
+  }
+
   function handleAutoWidthChange(newValue: 'auto' | number): void {
     onChange({ ...value, defaultColumnWidth: newValue });
   }
@@ -93,6 +97,10 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
           <OptionsEditorControl
             label="Pagination"
             control={<Switch checked={!!value.pagination} onChange={handlePaginationChange} />}
+          />
+          <OptionsEditorControl
+            label="Columns Hidden by Default"
+            control={<Switch checked={!!value.defaultColumnHidden} onChange={handleDefaultColumnHiddenChange} />}
           />
           <DefaultColumnsDimensionsControl
             label="Width"

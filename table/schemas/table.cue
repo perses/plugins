@@ -24,6 +24,7 @@ spec: close({
 	density?:             "compact" | "standard" | "comfortable"
 	defaultColumnWidth?:  "auto" | number
 	defaultColumnHeight?: "auto" | number
+	defaultColumnHidden?: bool
 	pagination?:          bool
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]

@@ -15,7 +15,7 @@ import { Button, Divider, Stack, Typography, Grid2 as Grid } from '@mui/material
 
 import AddIcon from 'mdi-material-ui/Plus';
 import { ReactElement } from 'react';
-import { CellSettings } from '../table-model';
+import { CellSettings } from '../../models';
 import { CellEditor } from './CellEditor';
 
 export interface CellsEditorProps {

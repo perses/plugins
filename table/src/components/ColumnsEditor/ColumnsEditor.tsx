@@ -15,7 +15,7 @@ import { Button, Stack } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import { handleMoveDown, handleMoveUp, useDragAndDropMonitor } from '@perses-dev/components';
-import { ColumnSettings } from '../table-model';
+import { ColumnSettings } from '../../models';
 import { ColumnEditorContainer } from './ColumnEditorContainer';
 
 export interface ColumnsEditorProps {

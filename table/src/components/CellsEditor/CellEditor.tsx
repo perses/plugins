@@ -26,7 +26,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { OptionsColorPicker } from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement } from 'react';
-import { CellSettings, Condition } from '../table-model';
+import { CellSettings, Condition } from '../../models';
 
 interface ConditionEditorProps extends Omit<StackProps, 'onChange'> {
   condition: Condition;

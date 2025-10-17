@@ -14,9 +14,9 @@
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
 import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
+import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
 import { PaginationState, SortingState } from '@tanstack/react-table';
-import { CellSettings, ColumnSettings, TableOptions } from './table-model';
+import { CellSettings, ColumnSettings, TableOptions } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -177,7 +177,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [queryResults, queryMode, spec.columnSettings]);
 
   // Transform will be applied by their orders on the original data
-  const data = useTransformData(rawData, spec.transforms ?? []);
+  const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
@@ -207,15 +207,18 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         columns.push(columnConfig);
       }
     }
-    for (const key of defaultColumns) {
-      const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
-      if (columnConfig !== undefined) {
-        columns.push(columnConfig);
+
+    if (!spec.defaultColumnHidden) {
+      for (const key of defaultColumns) {
+        const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
+        if (columnConfig !== undefined) {
+          columns.push(columnConfig);
+        }
       }
     }
 
     return columns;
-  }, [keys, spec.columnSettings]);
+  }, [keys, spec.columnSettings, spec.defaultColumnHidden]);
 
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {

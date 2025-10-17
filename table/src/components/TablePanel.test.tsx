@@ -22,15 +22,14 @@ import {
   PluginRegistry,
 } from '@perses-dev/plugin-system';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as packagejson from '../package.json';
-import { TimeSeriesTableProps } from './model';
-import { TableOptions } from './table-model';
-import { TablePanel } from './TablePanel';
+import * as packagejson from '../../package.json';
+import { TimeSeriesTableProps, TableOptions } from '../models';
 import {
   MOCK_TIME_SERIES_DATA_MULTIVALUE,
   MOCK_TIME_SERIES_DATA_SINGLEVALUE,
   MOCK_TIME_SERIES_QUERY_DEFINITION,
-} from './test/mock-query-results';
+} from '../test/mock-query-results';
+import { TablePanel } from './TablePanel';
 
 const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> = {
   contentDimensions: {
@@ -139,7 +138,7 @@ describe('TablePanel', () => {
       },
     };
     const testPluginLoader: PluginLoader = dynamicImportPluginLoader([
-      { resource: pluginResource as PluginModuleResource, importPlugin: () => import('./Table') },
+      { resource: pluginResource as PluginModuleResource, importPlugin: () => import('../Table') },
     ]);
 
     render(
