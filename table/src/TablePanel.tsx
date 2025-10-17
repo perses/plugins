@@ -14,7 +14,7 @@
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
 import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
+import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 import { EmbeddedPanel } from './EmbeddedPanel';
@@ -177,7 +177,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [queryResults, queryMode, spec.columnSettings]);
 
   // Transform will be applied by their orders on the original data
-  const data = useTransformData(rawData, spec.transforms ?? []);
+  const data = transformData(rawData, spec.transforms ?? []);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
