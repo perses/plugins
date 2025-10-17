@@ -4,6 +4,8 @@ The Status History Chart plugin displays the status history of services or compo
 
 This panel can be customized to show different statuses, such as up, down, warning, or any other user-defined states, and it supports various visualization options to enhance the readability of the data.
 
+![img.png](https://raw.githubusercontent.com/perses/website/refs/heads/main/docs/assets/images/blog/v050/status-history-panel.png)
+
 See also technical docs related to this plugin:
 
 - [Data model](./model.md)
