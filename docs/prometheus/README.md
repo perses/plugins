@@ -64,7 +64,7 @@ The Prometheus package provide several built-in variables that can be used withi
 The syntax to use is the [standard variable syntax of Perses](https://perses.dev/perses/docs/concepts/variable/#using-variables).
 
 !!! warning
-When using multi-value variables, ensure you use the regex operator `=~` instead of exact match `=` since Perses automatically converts multiple values to regex-compatible strings.
+    When using multi-value variables, ensure you use the regex operator `=~` instead of exact match `=` since Perses automatically converts multiple values to regex-compatible strings.
 
 ## Time series query (`PrometheusTimeSeriesQuery`)
 
