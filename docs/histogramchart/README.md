@@ -5,7 +5,7 @@ The Histogram Chart plugin displays data as histograms in Perses dashboards. Thi
 This plugin allows you to visualize Prometheus Native Histograms, providing a clear and concise way to understand the distribution of your histogram buckets.
 
 !!! warning
-	This panel plugin is only compatible with Prometheus native histograms data for the moment.
+This panel plugin is only compatible with Prometheus native histograms data for the moment.
 
 This panel is supporting thresholds, which allow you to colorize the chart based on specific values, making it easier to understand your data.
 

@@ -16,7 +16,7 @@ Need a list of options.
 ## Default options
 
 - YAxisFormat: `{Unit: DecimalUnit, DecimalPlaces: 2}`
-- CountFormat: `{Unit: DecimalUnit, DecimalPlaces: 2}` 
+- CountFormat: `{Unit: DecimalUnit, DecimalPlaces: 2}`
 - ShowVisualMap: `true`
 
 ## Available options
@@ -87,4 +87,5 @@ func main() {
 			),
 		),
 	)
-}
+}```
+```

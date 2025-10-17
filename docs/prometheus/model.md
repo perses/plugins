@@ -2,7 +2,7 @@
 
 This documentation provides the definition of the different plugins related to Prometheus.
 
-## Datasource
+## PrometheusDatasource
 
 Prometheus as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
@@ -73,7 +73,7 @@ spec:
           secret: "prometheus_secret_config"
 ```
 
-## Query
+## PrometheusTimeSeriesQuery
 
 Perses currently supports only one kind of query for Prometheus: `PrometheusTimeSeriesQuery`. Others will come in the future.
 
@@ -108,9 +108,7 @@ spec:
       query: "rate(caddy_http_response_duration_seconds_sum[$interval])"
 ```
 
-## Variable
-
-### PrometheusLabelNamesVariable
+## PrometheusLabelNamesVariable
 
 ```yaml
 kind: "PrometheusLabelNamesVariable"
@@ -124,7 +122,7 @@ spec:
 
 - See [Prometheus Datasource selector](#prometheus-datasource-selector)
 
-#### Example
+### Example
 
 A simple Prometheus LabelNames variable defined in a project would look like:
 
@@ -162,7 +160,7 @@ spec:
           - "up"
 ```
 
-### PrometheusLabelValuesVariable
+## PrometheusLabelValuesVariable
 
 ```yaml
 kind: "PrometheusLabelValuesVariable"
@@ -177,7 +175,7 @@ spec:
 
 - See [Prometheus Datasource selector](#prometheus-datasource-selector)
 
-#### Example
+### Example
 
 A simple Prometheus LabelValues variable defined in the global scope would look like:
 
@@ -218,7 +216,7 @@ spec:
         - "up{job=~\"$job\"}"
 ```
 
-### PrometheusPromQLVariable
+## PrometheusPromQLVariable
 
 ```yaml
 kind: "PrometheusPromQLVariable"
@@ -233,7 +231,7 @@ spec:
 
 - See [Prometheus Datasource selector](#prometheus-datasource-selector)
 
-#### Example
+### Example
 
 A simple Prometheus PromQL variable defined in a dashboard would look like:
 
@@ -255,7 +253,7 @@ spec:
 ### Prometheus Datasource selector
 
 !!! note
-    See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
 
 ```yaml
 kind: "PrometheusDatasource"

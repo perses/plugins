@@ -10,7 +10,7 @@ It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature 
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#datasource)
+- [Data model](./model.md#tempodatasource)
 - [Dashboard-as-Code Go lib](./go-sdk/datasource.md)
 
 ## Query (`TempoTraceQuery`)

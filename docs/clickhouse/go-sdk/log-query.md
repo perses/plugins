@@ -1,4 +1,4 @@
-# ClickHouse Log Query Builder
+# ClickHouse Log Query Go SDK
 
 ## Constructor
 
@@ -82,4 +82,5 @@ func main() {
 			),
 		),
 	)
-}
+}```
+```

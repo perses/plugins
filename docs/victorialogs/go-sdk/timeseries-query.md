@@ -1,4 +1,4 @@
-# VictoriaLogs Time Series Query Builder
+# VictoriaLogs Time Series Query Go SDK
 
 ## Constructor
 

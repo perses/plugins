@@ -1,6 +1,6 @@
-# StaticListVariable CUE SDK
+# Static List Variable CUE SDK
 
-The StaticListVariable CUE SDK helps creating static list variables in the format expected by Perses.
+This library helps creating static list variables in the format expected by Perses.
 
 ## Usage
 

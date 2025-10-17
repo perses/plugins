@@ -1,4 +1,4 @@
-# Label Values Variable Builder
+# Prometheus Label Values Variable Go SDK
 
 ## Constructor
 

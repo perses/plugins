@@ -1,4 +1,4 @@
-# Pyroscope Profile Query Builder
+# Pyroscope Query Go SDK
 
 ## Constructor
 

@@ -1,4 +1,4 @@
-# VictoriaLogs Field Values Variable Builder
+# VictoriaLogs Field Values Variable Go SDK
 
 ## Constructor
 

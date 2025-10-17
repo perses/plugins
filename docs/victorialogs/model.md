@@ -2,7 +2,7 @@
 
 This documentation provides the definition of the different plugins related to VictoriaLogs.
 
-## Datasource
+## VictoriaLogsDatasource
 
 VictoriaLogs as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
@@ -65,7 +65,7 @@ spec:
           secret: "victorialogs_secret_config"
 ```
 
-## Time Series Query
+## VictoriaLogsTimeSeriesQuery
 
 Perses supports time series queries for VictoriaLogs: `VictoriaLogsTimeSeriesQuery`.
 
@@ -95,7 +95,7 @@ spec:
       query: '_stream:{job="nginx"} | stats count() by (_time:1m)'
 ```
 
-## Log Query
+## VictoriaLogsLogQuery
 
 Perses supports log queries for VictoriaLogs: `VictoriaLogsLogQuery`.
 
@@ -125,9 +125,7 @@ spec:
       query: '_stream:{job="nginx"} AND error'
 ```
 
-## Variables
-
-### VictoriaLogsFieldValuesVariable
+## VictoriaLogsFieldValuesVariable
 
 ```yaml
 kind: "VictoriaLogsFieldValuesVariable"
@@ -145,22 +143,7 @@ spec:
 
 - See [VictoriaLogs Datasource selector](#victorialogs-datasource-selector)
 
-### VictoriaLogsFieldNamesVariable
-
-```yaml
-kind: "VictoriaLogsFieldNamesVariable"
-spec:
-  # `datasource` is a datasource selector. If not provided, the default VictoriaLogsDatasource is used.
-  # See the documentation about the datasources to understand how it is selected.
-  datasource: <VictoriaLogs Datasource selector> # Optional
-
-  # Optional LogsQL query to filter the results
-  query: <string> # Optional
-```
-
-- See [VictoriaLogs Datasource selector](#victorialogs-datasource-selector)
-
-### Examples
+### Example
 
 A simple VictoriaLogs field values variable defined in a project would look like:
 
@@ -178,21 +161,7 @@ spec:
         fieldName: "job"
 ```
 
-A simple field names variable:
-
-```yaml
-kind: "Variable"
-metadata:
-  name: "available_fields"
-  project: "logging"
-spec:
-  kind: "ListVariable"
-  spec:
-    plugin:
-      kind: "VictoriaLogsFieldNamesVariable"
-```
-
-More complex examples:
+A more complex one:
 
 ```yaml
 kind: "Variable"
@@ -214,12 +183,43 @@ spec:
         query: '_stream:{environment="production"}'
 ```
 
+## VictoriaLogsFieldNamesVariable
+
+```yaml
+kind: "VictoriaLogsFieldNamesVariable"
+spec:
+  # `datasource` is a datasource selector. If not provided, the default VictoriaLogsDatasource is used.
+  # See the documentation about the datasources to understand how it is selected.
+  datasource: <VictoriaLogs Datasource selector> # Optional
+
+  # Optional LogsQL query to filter the results
+  query: <string> # Optional
+```
+
+- See [VictoriaLogs Datasource selector](#victorialogs-datasource-selector)
+
+### Example
+
+A simple VictoriaLogs field names variable defined in a project would look like:
+
+```yaml
+kind: "Variable"
+metadata:
+  name: "available_fields"
+  project: "logging"
+spec:
+  kind: "ListVariable"
+  spec:
+    plugin:
+      kind: "VictoriaLogsFieldNamesVariable"
+```
+
 ## Shared definitions
 
 ### VictoriaLogs Datasource selector
 
 !!! note
-    See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
 
 ```yaml
 kind: "VictoriaLogsDatasource"

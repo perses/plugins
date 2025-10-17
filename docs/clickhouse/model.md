@@ -2,7 +2,7 @@
 
 This documentation provides the definition of the different plugins related to ClickHouse.
 
-## Datasource
+## ClickHouseDatasource
 
 ClickHouse as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
@@ -63,7 +63,7 @@ spec:
           secret: "clickhouse_secret_config"
 ```
 
-## Time Series Query
+## ClickHouseTimeSeriesQuery
 
 Perses supports time series queries for ClickHouse: `ClickHouseTimeSeriesQuery`.
 
@@ -96,7 +96,7 @@ spec:
       query: "SELECT toStartOfMinute(timestamp) as time, count() as requests FROM http_logs WHERE timestamp >= now() - INTERVAL 1 HOUR GROUP BY time ORDER BY time"
 ```
 
-## Log Query
+## ClickHouseLogQuery
 
 Perses supports log queries for ClickHouse: `ClickHouseLogQuery`.
 
@@ -134,7 +134,7 @@ spec:
 ### ClickHouse Datasource selector
 
 !!! note
-    See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
 
 ```yaml
 kind: "ClickHouseDatasource"

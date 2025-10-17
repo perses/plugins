@@ -10,7 +10,7 @@ It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature 
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#datasource)
+- [Data model](./model.md#victorialogsdatasource)
 - [Dashboard-as-Code Go lib](./go-sdk/datasource.md)
 
 ## Time Series Query (`VictoriaLogsTimeSeriesQuery`)
@@ -19,7 +19,7 @@ The VictoriaLogs time series query plugin enables querying time series data from
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#time-series-query)
+- [Data model](./model.md#victorialogstimeseriesquery)
 - [Dashboard-as-Code Go lib](./go-sdk/timeseries-query.md)
 
 ## Log Query (`VictoriaLogsLogQuery`)
@@ -28,7 +28,7 @@ The VictoriaLogs log query plugin enables querying log data from your VictoriaLo
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#log-query)
+- [Data model](./model.md#victorialogslogquery)
 - [Dashboard-as-Code Go lib](./go-sdk/log-query.md)
 
 ## Variables
@@ -39,7 +39,7 @@ The VictoriaLogs field values variable plugin enables dynamic variable creation 
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#victorialogsfield-values-variable)
+- [Data model](./model.md#victorialogsfieldvaluesvariable)
 - [Dashboard-as-Code Go lib](./go-sdk/variable/field-values.md)
 
 ### Field Names Variable (`VictoriaLogsFieldNamesVariable`)
@@ -48,5 +48,5 @@ The VictoriaLogs field names variable plugin enables dynamic variable creation f
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#victorialogsfield-names-variable)
+- [Data model](./model.md#victorialogsfieldnamesvariable)
 - [Dashboard-as-Code Go lib](./go-sdk/variable/field-names.md)

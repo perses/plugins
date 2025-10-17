@@ -20,8 +20,8 @@ Example:
 
 ```go
 ds := datasource.New().
-    DirectURL("http://loki.example.com:3100").
-    Build()
+	DirectURL("http://loki.example.com:3100").
+	Build()
 ```
 
 ### Methods
@@ -40,8 +40,8 @@ Example:
 
 ```go
 ds := datasource.New().
-    DirectURL("http://loki.example.com:3100").
-    Build()
+	DirectURL("http://loki.example.com:3100").
+	Build()
 ```
 
 #### ProxyURL
@@ -58,8 +58,8 @@ Example:
 
 ```go
 ds := datasource.New().
-    ProxyURL("/proxy/loki").
-    Build()
+	ProxyURL("/proxy/loki").
+	Build()
 ```
 
 #### Build
@@ -76,21 +76,21 @@ Returns a pointer to `DatasourceResource` that can be used in dashboard configur
 package main
 
 import (
-    "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
-    "github.com/perses/perses/go-sdk/dashboard"
-    "github.com/perses/perses/go-sdk/project"
+	"github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/project"
 )
 
 func main() {
-    // Create Loki datasource
-    lokiDatasource := datasource.New().
-        DirectURL("http://loki.example.com:3100").
-        Build()
+	// Create Loki datasource
+	lokiDatasource := datasource.New().
+		DirectURL("http://loki.example.com:3100").
+		Build()
 
-    // Create dashboard with Loki datasource
-    dashboard.New("log-analysis").
-        AddDatasource("loki", lokiDatasource).
-        Build()
+	// Create dashboard with Loki datasource
+	dashboard.New("log-analysis").
+		AddDatasource("loki", lokiDatasource).
+		Build()
 }
 ```
 
@@ -100,8 +100,8 @@ When using the proxy feature, configure your Loki datasource to route through Pe
 
 ```go
 lokiDatasource := datasource.New().
-    ProxyURL("/proxy/loki").
-    Build()
+	ProxyURL("/proxy/loki").
+	Build()
 ```
 
 This enables Perses to control access to your Loki instance according to your security policies.

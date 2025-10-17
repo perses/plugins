@@ -1,4 +1,4 @@
-# VictoriaLogs Log Query Builder
+# VictoriaLogs Log Query Go SDK
 
 ## Constructor
 

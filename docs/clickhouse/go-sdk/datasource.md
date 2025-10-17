@@ -1,4 +1,4 @@
-# ClickHouse Datasource Builder
+# ClickHouse Datasource Go SDK
 
 ## Constructor
 

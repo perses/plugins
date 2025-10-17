@@ -4,5 +4,5 @@ The Trace Table plugin displays trace data in a tabular format for Perses dashbo
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md)  
+- [Data model](./model.md)
 - [Dashboard-as-Code Go lib](./go-sdk.md)

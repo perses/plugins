@@ -1,6 +1,6 @@
-# Label Names Variable Builder
+# Prometheus Label Names Variable CUE SDK
 
-The Label Names Variable builder helps creating prometheus label names variables in the format expected by Perses.
+This library helps creating prometheus label names variables in the format expected by Perses.
 
 ## Usage
 

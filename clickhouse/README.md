@@ -1,4 +1,4 @@
-# Plugin Module: click-house 
+# Plugin Module: click-house
 
 ### How to install
 

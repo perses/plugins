@@ -2,7 +2,7 @@
 
 This documentation provides the definition of the different plugins related to Pyroscope.
 
-## Datasource
+## PyroscopeDatasource
 
 Pyroscope as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
@@ -65,7 +65,7 @@ spec:
           secret: "pyroscope_secret_config"
 ```
 
-## Profile Query
+## PyroscopeProfileQuery
 
 Perses supports profile queries for Pyroscope: `PyroscopeProfileQuery`.
 
@@ -104,7 +104,7 @@ spec:
 ### Pyroscope Datasource selector
 
 !!! note
-    See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
 
 ```yaml
 kind: "PyroscopeDatasource"

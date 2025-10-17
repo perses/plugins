@@ -2,7 +2,7 @@
 
 This documentation provides the definition of the different plugins related to Loki.
 
-## Datasource
+## LokiDatasource
 
 Loki as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
@@ -67,7 +67,7 @@ spec:
           secret: "loki_secret_config"
 ```
 
-## Time Series Query
+## LokiTimeSeriesQuery
 
 Perses supports time series queries for Loki: `LokiTimeSeriesQuery`.
 
@@ -87,7 +87,7 @@ spec:
 
 - See [Loki Datasource selector](#loki-datasource-selector)
 
-## Log Query
+## LokiLogQuery
 
 Perses supports log queries for Loki: `LokiLogQuery`.
 
@@ -129,13 +129,14 @@ spec:
     kind: "LokiTimeSeriesQuery"
     spec:
       query: 'rate({job="nginx"}[5m])'
+```
 
 ## Shared definitions
 
 ### Loki Datasource selector
 
 !!! note
-    See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
 
 ```yaml
 kind: "LokiDatasource"

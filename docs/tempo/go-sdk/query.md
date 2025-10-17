@@ -20,8 +20,8 @@ Example:
 
 ```go
 query := query.New().
-    TraceID("abc123def456").
-    Build()
+	TraceID("abc123def456").
+	Build()
 ```
 
 ### Methods
@@ -40,8 +40,8 @@ Example:
 
 ```go
 query := query.New().
-    TraceID("abc123def456789").
-    Build()
+	TraceID("abc123def456789").
+	Build()
 ```
 
 #### Build
@@ -58,26 +58,26 @@ Returns a pointer to `QueryResource` that can be used in panel configurations.
 package main
 
 import (
-    "github.com/perses/perses-plugins/tempo/sdk/go/v1/query"
-    "github.com/perses/perses/go-sdk/dashboard"
-    "github.com/perses/perses/go-sdk/panels/tracetable"
+	"github.com/perses/perses-plugins/tempo/sdk/go/v1/query"
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/panels/tracetable"
 )
 
 func main() {
-    // Create Tempo trace query
-    tempoQuery := query.New().
-        TraceID("abc123def456789").
-        Build()
+	// Create Tempo trace query
+	tempoQuery := query.New().
+		TraceID("abc123def456789").
+		Build()
 
-    // Create trace table panel with Tempo query
-    panel := tracetable.New("Trace Details").
-        AddQuery(tempoQuery).
-        Build()
+	// Create trace table panel with Tempo query
+	panel := tracetable.New("Trace Details").
+		AddQuery(tempoQuery).
+		Build()
 
-    // Create dashboard
-    dashboard.New("tempo-dashboard").
-        AddPanel(panel).
-        Build()
+	// Create dashboard
+	dashboard.New("tempo-dashboard").
+		AddPanel(panel).
+		Build()
 }
 ```
 

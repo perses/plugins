@@ -1,4 +1,4 @@
-# Loki Log Query Builder
+# Loki Log Query Go SDK
 
 ## Constructor
 

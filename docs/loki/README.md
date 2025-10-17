@@ -10,7 +10,7 @@ It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature 
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#datasource)
+- [Data model](./model.md#lokidatasource)
 - [Dashboard-as-Code Go lib](./go-sdk/datasource.md)
 
 ## Time Series Query (`LokiTimeSeriesQuery`)
@@ -19,7 +19,7 @@ The Loki time series query plugin enables querying metric data from your Loki in
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#time-series-query)
+- [Data model](./model.md#lokitimeseriesquery)
 - [Dashboard-as-Code Go lib](./go-sdk/timeseries-query.md)
 
 ## Log Query (`LokiLogQuery`)
@@ -28,5 +28,5 @@ The Loki log query plugin enables querying log data from your Loki instance usin
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#log-query)
+- [Data model](./model.md#lokilogquery)
 - [Dashboard-as-Code Go lib](./go-sdk/log-query.md)

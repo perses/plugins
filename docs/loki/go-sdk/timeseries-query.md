@@ -1,4 +1,4 @@
-# Loki Time Series Query Builder
+# Loki Time Series Query Go SDK
 
 ## Constructor
 

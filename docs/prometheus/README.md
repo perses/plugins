@@ -10,7 +10,7 @@ It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature 
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#datasource)
+- [Data model](./model.md#prometheusdatasource)
 - [Dashboard-as-Code Go lib](./go-sdk/datasource.md)
 
 ## Variables
@@ -64,14 +64,14 @@ The Prometheus package provide several built-in variables that can be used withi
 The syntax to use is the [standard variable syntax of Perses](https://perses.dev/perses/docs/concepts/variable/#using-variables).
 
 !!! warning
-	When using multi-value variables, ensure you use the regex operator `=~` instead of exact match `=` since Perses automatically converts multiple values to regex-compatible strings.
+When using multi-value variables, ensure you use the regex operator `=~` instead of exact match `=` since Perses automatically converts multiple values to regex-compatible strings.
 
 ## Time series query (`PrometheusTimeSeriesQuery`)
 
 The Time series query plugin to be used in panels compatible with metrics display. It comes with neat features like auto-completion and a PromQL debugger that mirror Prometheus's native UI experience.
 
 See also technical docs related to this plugin:
-- [Data model](./model.md#query)
+- [Data model](./model.md#prometheustimeseriesquery)
 - [Dashboard-as-Code Go lib](./go-sdk/query.md)
 
 ## Explore (`PrometheusExplorer`)

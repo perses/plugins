@@ -1,4 +1,4 @@
-# Prometheus Query Builder
+# Prometheus Query Go SDK
 
 ## Constructor
 

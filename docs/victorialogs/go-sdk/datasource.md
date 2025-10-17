@@ -1,4 +1,4 @@
-# VictoriaLogs Datasource Builder
+# VictoriaLogs Datasource Go SDK
 
 ## Constructor
 

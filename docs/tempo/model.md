@@ -2,7 +2,7 @@
 
 This document describes the data models used by Tempo plugins in Perses.
 
-## Datasource
+## TempoDatasource
 
 The `TempoDatasource` plugin provides configuration for connecting to Grafana Tempo distributed tracing instances.
 
@@ -23,37 +23,7 @@ spec:
 
 See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#http-proxy-specification).
 
-## Query
-
-Perses currently supports one kind of query for Tempo: `TempoTraceQuery`. Others may come in the future.
-
-### TempoTraceQuery
-
-```yaml
-kind: "TempoTraceQuery"
-spec:
-  # TraceQL expression for querying traces
-  query: <string>
-  
-  # Optional datasource selector. If not provided, the default TempoDatasource is used
-  # See the documentation about datasources to understand selection
-  datasource: <Tempo Datasource selector> # Optional
-```
-
-### Tempo Datasource selector
-
-!!! note
-    See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
-
-```yaml
-kind: "TempoDatasource"
-# The name of the datasource regardless its level
-name: <string> # Optional
-```
-
-## Usage Examples
-
-### Complete Datasource Configuration
+### Example
 
 ```yaml
 apiVersion: v1
@@ -69,7 +39,22 @@ spec:
       directUrl: "http://tempo.example.com:3200"
 ```
 
-### Complete Query Configuration
+## TempoTraceQuery
+
+Perses currently supports one kind of query for Tempo: `TempoTraceQuery`. Others may come in the future.
+
+```yaml
+kind: "TempoTraceQuery"
+spec:
+  # TraceQL expression for querying traces
+  query: <string>
+  
+  # Optional datasource selector. If not provided, the default TempoDatasource is used
+  # See the documentation about datasources to understand selection
+  datasource: <Tempo Datasource selector> # Optional
+```
+
+### Example
 
 ```yaml
 kind: TempoTraceQuery
@@ -81,3 +66,14 @@ spec:
 ```
 
 This query searches for traces from the "frontend" service with duration greater than 100ms using TraceQL syntax.
+
+## Tempo Datasource selector
+
+!!! note
+See [Selecting / Referencing a Datasource](https://github.com/perses/perses/blob/main/docs/api/datasource.md#selecting--referencing-a-datasource)
+
+```yaml
+kind: "TempoDatasource"
+# The name of the datasource regardless its level
+name: <string> # Optional
+```

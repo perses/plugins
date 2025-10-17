@@ -1,4 +1,4 @@
-# Tempo Datasource Builder
+# Tempo Datasource Go SDK
 
 ## Constructor
 

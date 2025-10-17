@@ -1,6 +1,6 @@
-# Label Values Variable Builder
+# Prometheus Label Values Variable CUE SDK
 
-The Label Values Variable builder helps creating prometheus label values variables in the format expected by Perses.
+This library helps creating prometheus label values variables in the format expected by Perses.
 
 ## Usage
 

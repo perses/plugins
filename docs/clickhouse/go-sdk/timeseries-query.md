@@ -1,4 +1,4 @@
-# ClickHouse Time Series Query Builder
+# ClickHouse Time Series Query Go SDK
 
 ## Constructor
 
@@ -79,4 +79,5 @@ func main() {
 			),
 		),
 	)
-}
+}```
+```

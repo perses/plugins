@@ -1,4 +1,4 @@
-# Prometheus Datasource Builder
+# Prometheus Datasource Go SDK
 
 ## Constructor
 

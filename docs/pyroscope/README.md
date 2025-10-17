@@ -10,7 +10,7 @@ It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature 
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#datasource)
+- [Data model](./model.md#pyroscopedatasource)
 - [Dashboard-as-Code Go lib](./go-sdk/datasource.md)
 
 ## Profile Query (`PyroscopeProfileQuery`)
@@ -19,8 +19,8 @@ The Pyroscope profile query plugin enables querying profiling data from your Pyr
 
 See also technical docs related to this plugin:
 
-- [Data model](./model.md#profile-query)
-- [Dashboard-as-Code Go lib](./go-sdk/profile-query.md)
+- [Data model](./model.md#pyroscopeprofilequery)
+- [Dashboard-as-Code Go lib](./go-sdk/query.md)
 
 ## Explorer (`PyroscopeExplorer`)
 

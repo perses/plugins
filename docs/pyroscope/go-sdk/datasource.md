@@ -1,4 +1,4 @@
-# Pyroscope Datasource Builder
+# Pyroscope Datasource Go SDK
 
 ## Constructor
 
