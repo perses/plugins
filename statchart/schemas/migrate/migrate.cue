@@ -104,9 +104,7 @@ spec: {
 							spec: {
 								value: key
 								result: {
-									if option.text != _|_ {
-										value: option.text
-									}
+									value: *option.text | ""
 									if option.color != _|_ {
 										color: *commonMigrate.#mapping.color[option.color] | option.color
 									}
