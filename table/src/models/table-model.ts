@@ -99,6 +99,8 @@ export type Condition = ValueCondition | RangeCondition | RegexCondition | MiscC
 export interface CellSettings {
   condition: Condition;
   text?: string;
+  prefix?: string;
+  suffix?: string;
   textColor?: `#${string}`;
   backgroundColor?: `#${string}`;
 }

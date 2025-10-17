@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, Divider, MenuItem, Stack, StackProps, Switch, TextField, Typography, Grid2 as Grid } from '@mui/material';
+import { Button, ButtonGroup, Divider, IconButton, MenuItem, Stack, StackProps, Switch, TextField, Typography, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import {
   AlignSelector,
   FormatControls,
+  OptionsColorPicker,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
@@ -198,7 +199,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             />
           )}
           <OptionsEditorControl
-            label="Conditional formatting"
+            label="Conditional Format"
             control={
               <Switch
                 checked={column.conditionalFormatting ?? false}
@@ -208,7 +209,6 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           />
           {column.conditionalFormatting && (
             <Stack spacing={2}>
-              <Typography variant="subtitle2">Cell Formatting Rules</Typography>
               <Stack spacing={2}>
                 {(column.cellSettings ?? [{ condition: { kind: 'Value', spec: { value: '' } } }]).map((cell, i) => (
                   <Stack key={i} spacing={1} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
@@ -305,36 +305,102 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                           size="small"
                           fullWidth
                         />
+                        <Stack direction="row" spacing={1}>
+                          <TextField
+                            label="Prefix"
+                            placeholder="$"
+                            value={cell.prefix ?? ''}
+                            onChange={(e) => {
+                              const updatedCell = { ...cell, prefix: e.target.value };
+                              const updatedCells = [...(column.cellSettings ?? [])];
+                              updatedCells[i] = updatedCell;
+                              onChange({ ...column, cellSettings: updatedCells });
+                            }}
+                            size="small"
+                            helperText="Text shown before the value"
+                          />
+                          <TextField
+                            label="Suffix"
+                            placeholder="%"
+                            value={cell.suffix ?? ''}
+                            onChange={(e) => {
+                              const updatedCell = { ...cell, suffix: e.target.value };
+                              const updatedCells = [...(column.cellSettings ?? [])];
+                              updatedCells[i] = updatedCell;
+                              onChange({ ...column, cellSettings: updatedCells });
+                            }}
+                            size="small"
+                            helperText="Text shown after the value"
+                          />
+                        </Stack>
                       </Stack>
                       
                       {/* Colors Section */}
                       <Stack spacing={1}>
                         <Typography variant="body2" fontWeight="medium">Colors</Typography>
-                        <Stack direction="row" spacing={1}>
-                          <TextField
-                            label="Text Color"
-                            value={cell.textColor ?? ''}
-                            onChange={(e) => {
-                              const updatedCell = { ...cell, textColor: e.target.value as `#${string}` };
-                              const updatedCells = [...(column.cellSettings ?? [])];
-                              updatedCells[i] = updatedCell;
-                              onChange({ ...column, cellSettings: updatedCells });
-                            }}
-                            size="small"
-                            placeholder="#000000"
-                          />
-                          <TextField
-                            label="Background Color"
-                            value={cell.backgroundColor ?? ''}
-                            onChange={(e) => {
-                              const updatedCell = { ...cell, backgroundColor: e.target.value as `#${string}` };
-                              const updatedCells = [...(column.cellSettings ?? [])];
-                              updatedCells[i] = updatedCell;
-                              onChange({ ...column, cellSettings: updatedCells });
-                            }}
-                            size="small"
-                            placeholder="#ffffff"
-                          />
+                        <Stack direction="row" spacing={1} justifyContent="center">
+                          {cell.textColor ? (
+                            <OptionsColorPicker
+                              label="Text Color"
+                              color={cell.textColor ?? '#000'}
+                              onColorChange={(color) => {
+                                const updatedCell = { ...cell, textColor: color as `#${string}` };
+                                const updatedCells = [...(column.cellSettings ?? [])];
+                                updatedCells[i] = updatedCell;
+                                onChange({ ...column, cellSettings: updatedCells });
+                              }}
+                              onClear={() => {
+                                const updatedCell = { ...cell, textColor: undefined };
+                                const updatedCells = [...(column.cellSettings ?? [])];
+                                updatedCells[i] = updatedCell;
+                                onChange({ ...column, cellSettings: updatedCells });
+                              }}
+                            />
+                          ) : (
+                            <IconButton 
+                              size="small"
+                              onClick={() => {
+                                const updatedCell = { ...cell, textColor: '#000000' as `#${string}` };
+                                const updatedCells = [...(column.cellSettings ?? [])];
+                                updatedCells[i] = updatedCell;
+                                onChange({ ...column, cellSettings: updatedCells });
+                              }}
+                              title="Add text color"
+                            >
+                              <AddIcon />
+                            </IconButton>
+                          )}
+                          {cell.backgroundColor ? (
+                            <OptionsColorPicker
+                              label="Background Color"
+                              color={cell.backgroundColor ?? '#fff'}
+                              onColorChange={(color) => {
+                                const updatedCell = { ...cell, backgroundColor: color as `#${string}` };
+                                const updatedCells = [...(column.cellSettings ?? [])];
+                                updatedCells[i] = updatedCell;
+                                onChange({ ...column, cellSettings: updatedCells });
+                              }}
+                              onClear={() => {
+                                const updatedCell = { ...cell, backgroundColor: undefined };
+                                const updatedCells = [...(column.cellSettings ?? [])];
+                                updatedCells[i] = updatedCell;
+                                onChange({ ...column, cellSettings: updatedCells });
+                              }}
+                            />
+                          ) : (
+                            <IconButton 
+                              size="small"
+                              onClick={() => {
+                                const updatedCell = { ...cell, backgroundColor: '#ffffff' as `#${string}` };
+                                const updatedCells = [...(column.cellSettings ?? [])];
+                                updatedCells[i] = updatedCell;
+                                onChange({ ...column, cellSettings: updatedCells });
+                              }}
+                              title="Add background color"
+                            >
+                              <AddIcon />
+                            </IconButton>
+                          )}
                         </Stack>
                       </Stack>
                     </Stack>

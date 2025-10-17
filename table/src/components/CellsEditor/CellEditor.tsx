@@ -184,12 +184,31 @@ export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorPro
         </Stack>
       </Grid>
       <Grid size={{ xs: 4 }}>
-        <TextField
-          label="Display text"
-          value={cell.text}
-          onChange={(e) => onChange({ ...cell, text: e.target.value })}
-          fullWidth
-        />
+        <Stack spacing={1}>
+          <TextField
+            label="Display text"
+            value={cell.text}
+            onChange={(e) => onChange({ ...cell, text: e.target.value })}
+            fullWidth
+            size="small"
+          />
+          <Stack direction="row" spacing={1}>
+            <TextField
+              label="Prefix"
+              placeholder="$"
+              value={cell.prefix ?? ''}
+              onChange={(e) => onChange({ ...cell, prefix: e.target.value })}
+              size="small"
+            />
+            <TextField
+              label="Suffix"
+              placeholder="%"
+              value={cell.suffix ?? ''}
+              onChange={(e) => onChange({ ...cell, suffix: e.target.value })}
+              size="small"
+            />
+          </Stack>
+        </Stack>
       </Grid>
       <Grid size={{ xs: 1 }}>
         <Stack direction="row" justifyContent="center" gap={1}>

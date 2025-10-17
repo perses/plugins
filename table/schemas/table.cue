@@ -82,6 +82,8 @@ spec: close({
 #cellSettings: {
 	condition:        #condition
 	text?:            string
+	prefix?:          string
+	suffix?:          string
 	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }
