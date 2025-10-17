@@ -222,8 +222,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {
-    // If there is no cell settings, return an empty array
-    if (spec.cellSettings === undefined) {
+    // If there are no cell settings globally or per column, return an empty object
+    if (spec.cellSettings === undefined && !spec.columnSettings?.some(col => col.cellSettings !== undefined)) {
       return {};
     }
 
@@ -247,7 +247,19 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       };
 
       for (const [key, value] of Object.entries(extendRow)) {
-        const cellConfig = generateCellConfig(value, spec.cellSettings ?? []);
+        // First, try to get cell config from global cell settings
+        let cellConfig = generateCellConfig(value, spec.cellSettings ?? []);
+        
+        // Then, try to get cell config from column-specific cell settings if conditional formatting is enabled
+        const columnSetting = spec.columnSettings?.find(col => col.name === key);
+        if (columnSetting?.conditionalFormatting && columnSetting.cellSettings) {
+          const columnCellConfig = generateCellConfig(value, columnSetting.cellSettings);
+          // Column-specific settings take precedence over global settings
+          if (columnCellConfig) {
+            cellConfig = columnCellConfig;
+          }
+        }
+        
         if (cellConfig) {
           result[`${index}_${key}`] = cellConfig;
         }
@@ -256,7 +268,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return result;
-  }, [data, keys, spec.cellSettings]);
+  }, [data, keys, spec.cellSettings, spec.columnSettings]);
 
   function generateDefaultSortingState(): SortingState {
     return (
