@@ -76,7 +76,15 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
 function generateCellConfig(value: unknown, settings: CellSettings[]): TableCellConfig | undefined {
   for (const setting of settings) {
     if (setting.condition.kind === 'Value' && setting.condition.spec?.value === String(value)) {
-      return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      // Use custom text if provided, otherwise use the original value
+      const baseText = setting.text || String(value);
+      // Always apply prefix and suffix around the base text
+      const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+      return { 
+        text: displayText, 
+        textColor: setting.textColor, 
+        backgroundColor: setting.backgroundColor 
+      };
     }
 
     if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
@@ -87,40 +95,94 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
         numericValue >= +setting.condition.spec?.min &&
         numericValue <= +setting.condition.spec?.max
       ) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || String(value);
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
 
       if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || String(value);
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
 
       if (setting.condition.spec?.max !== undefined && numericValue <= +setting.condition.spec?.max) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || String(value);
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
     }
 
     if (setting.condition.kind === 'Regex' && setting.condition.spec?.expr) {
       const regex = new RegExp(setting.condition.spec?.expr);
       if (regex.test(String(value))) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || String(value);
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
     }
 
     if (setting.condition.kind === 'Misc' && setting.condition.spec?.value) {
       if (setting.condition.spec?.value === 'empty' && value === '') {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || String(value);
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
       if (setting.condition.spec?.value === 'null' && (value === null || value === undefined)) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || 'null';
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
       if (setting.condition.spec?.value === 'NaN' && Number.isNaN(value)) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || 'NaN';
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
       if (setting.condition.spec?.value === 'true' && value === true) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || String(value);
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
       if (setting.condition.spec?.value === 'false' && value === false) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        const baseText = setting.text || String(value);
+        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
+        return { 
+          text: displayText, 
+          textColor: setting.textColor, 
+          backgroundColor: setting.backgroundColor 
+        };
       }
     }
   }
@@ -177,7 +239,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [queryResults, queryMode, spec.columnSettings]);
 
   // Transform will be applied by their orders on the original data
-  const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);
+  const data = transformData(rawData, spec.transforms ?? []);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
