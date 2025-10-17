@@ -15,7 +15,7 @@ import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-traceql';
 import { CompletionContext } from '@codemirror/autocomplete';
 import { Extension } from '@uiw/react-codemirror';
-import { TimeRangeValue } from '@perses-dev/core';
+import { AbsoluteTimeRange } from '@perses-dev/core';
 import { TempoClient } from '../model/tempo-client';
 import { traceQLHighlight } from './highlight';
 import { complete } from './complete';
@@ -37,7 +37,7 @@ export interface CompletionConfig {
   client?: TempoClient;
 
   /** search for tag values in a given time range */
-  timeRange?: TimeRangeValue;
+  timeRange?: AbsoluteTimeRange;
 
   /** limit number of returned tag values */
   limit?: number;
