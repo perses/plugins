@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, StackProps, Switch, TextField } from '@mui/material';
+import { Button, ButtonGroup, Divider, MenuItem, Stack, StackProps, Switch, TextField, Typography, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useState } from 'react';
+import AddIcon from 'mdi-material-ui/Plus';
 import {
   AlignSelector,
   FormatControls,
@@ -24,7 +25,7 @@ import {
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
-import { ColumnSettings } from '../../models';
+import { ColumnSettings, CellSettings, Condition, ValueCondition, RangeCondition, RegexCondition, MiscCondition } from '../../models';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
@@ -196,8 +197,167 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               }
             />
           )}
+          <OptionsEditorControl
+            label="Conditional formatting"
+            control={
+              <Switch
+                checked={column.conditionalFormatting ?? false}
+                onChange={(e) => onChange({ ...column, conditionalFormatting: e.target.checked })}
+              />
+            }
+          />
+          {column.conditionalFormatting && (
+            <Stack spacing={2}>
+              <Typography variant="subtitle2">Cell Formatting Rules</Typography>
+              <Stack spacing={2}>
+                {(column.cellSettings ?? [{ condition: { kind: 'Value', spec: { value: '' } } }]).map((cell, i) => (
+                  <Stack key={i} spacing={1} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="caption" color="text.secondary">Rule {i + 1}</Typography>
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          const updatedCells = [...(column.cellSettings ?? [])];
+                          updatedCells.splice(i, 1);
+                          onChange({ ...column, cellSettings: updatedCells.length > 0 ? updatedCells : undefined });
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </Stack>
+                    
+                    {/* Vertical layout for narrow column */}
+                    <Stack spacing={2}>
+                      {/* Condition Section */}
+                      <Stack spacing={1}>
+                        <Typography variant="body2" fontWeight="medium">Condition</Typography>
+                        <Stack direction="row" spacing={1}>
+                          <TextField
+                            select
+                            label="Type"
+                            value={cell.condition.kind}
+                            onChange={(e) => {
+                              const kind = e.target.value as 'Value' | 'Range' | 'Regex' | 'Misc';
+                              let newCondition: Condition;
+                              switch (kind) {
+                                case 'Value':
+                                  newCondition = { kind: 'Value', spec: { value: '' } } as ValueCondition;
+                                  break;
+                                case 'Range':
+                                  newCondition = { kind: 'Range', spec: { min: 0, max: 100 } } as RangeCondition;
+                                  break;
+                                case 'Regex':
+                                  newCondition = { kind: 'Regex', spec: { expr: '' } } as RegexCondition;
+                                  break;
+                                case 'Misc':
+                                  newCondition = { kind: 'Misc', spec: { value: 'empty' } } as MiscCondition;
+                                  break;
+                                default:
+                                  newCondition = { kind: 'Value', spec: { value: '' } } as ValueCondition;
+                              }
+                              const updatedCell: CellSettings = { ...cell, condition: newCondition };
+                              const updatedCells = [...(column.cellSettings ?? [])];
+                              updatedCells[i] = updatedCell;
+                              onChange({ ...column, cellSettings: updatedCells });
+                            }}
+                            size="small"
+                            sx={{ minWidth: 120 }}
+                          >
+                            <MenuItem value="Value">Value</MenuItem>
+                            <MenuItem value="Range">Range</MenuItem>
+                            <MenuItem value="Regex">Regex</MenuItem>
+                            <MenuItem value="Misc">Misc</MenuItem>
+                          </TextField>
+                          {/* Add condition-specific input based on type */}
+                          {cell.condition.kind === 'Value' && (
+                            <TextField
+                              label="Value"
+                              value={cell.condition.spec?.value ?? ''}
+                              onChange={(e) => {
+                                const updatedCell: CellSettings = { 
+                                  ...cell, 
+                                  condition: { kind: 'Value', spec: { value: e.target.value } } as ValueCondition
+                                };
+                                const updatedCells = [...(column.cellSettings ?? [])];
+                                updatedCells[i] = updatedCell;
+                                onChange({ ...column, cellSettings: updatedCells });
+                              }}
+                              size="small"
+                              fullWidth
+                            />
+                          )}
+                        </Stack>
+                      </Stack>
+                      
+                      {/* Display Text Section */}
+                      <Stack spacing={1}>
+                        <Typography variant="body2" fontWeight="medium">Display Text</Typography>
+                        <TextField
+                          label="Text to display"
+                          value={cell.text ?? ''}
+                          onChange={(e) => {
+                            const updatedCell = { ...cell, text: e.target.value };
+                            const updatedCells = [...(column.cellSettings ?? [])];
+                            updatedCells[i] = updatedCell;
+                            onChange({ ...column, cellSettings: updatedCells });
+                          }}
+                          size="small"
+                          fullWidth
+                        />
+                      </Stack>
+                      
+                      {/* Colors Section */}
+                      <Stack spacing={1}>
+                        <Typography variant="body2" fontWeight="medium">Colors</Typography>
+                        <Stack direction="row" spacing={1}>
+                          <TextField
+                            label="Text Color"
+                            value={cell.textColor ?? ''}
+                            onChange={(e) => {
+                              const updatedCell = { ...cell, textColor: e.target.value as `#${string}` };
+                              const updatedCells = [...(column.cellSettings ?? [])];
+                              updatedCells[i] = updatedCell;
+                              onChange({ ...column, cellSettings: updatedCells });
+                            }}
+                            size="small"
+                            placeholder="#000000"
+                          />
+                          <TextField
+                            label="Background Color"
+                            value={cell.backgroundColor ?? ''}
+                            onChange={(e) => {
+                              const updatedCell = { ...cell, backgroundColor: e.target.value as `#${string}` };
+                              const updatedCells = [...(column.cellSettings ?? [])];
+                              updatedCells[i] = updatedCell;
+                              onChange({ ...column, cellSettings: updatedCells });
+                            }}
+                            size="small"
+                            placeholder="#ffffff"
+                          />
+                        </Stack>
+                      </Stack>
+                    </Stack>
+                  </Stack>
+                ))}
+                <Button 
+                  variant="outlined" 
+                  startIcon={<AddIcon />} 
+                  size="small"
+                  onClick={() => {
+                    const updatedCells = [...(column.cellSettings ?? [])];
+                    updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
+                    onChange({ ...column, cellSettings: updatedCells });
+                  }}
+                >
+                  Add Rule
+                </Button>
+              </Stack>
+            </Stack>
+          )}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
+   
     </OptionsEditorGrid>
   );
 }

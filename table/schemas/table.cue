@@ -43,6 +43,7 @@ spec: close({
 	sort?:              "asc" | "desc"
 	width?:             number | "auto"
 	hide?:              bool
+	cellSettings?:      [...#cellSettings]
 }
 
 #valueCondition: {

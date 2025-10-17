@@ -59,6 +59,10 @@ export interface ColumnSettings {
   width?: number | 'auto';
   // When `true`, the column will not be displayed.
   hide?: boolean;
+  // When `true`, enables conditional formatting for this column.
+  conditionalFormatting?: boolean;
+  // Customize cell display based on their value for this specific column.
+  cellSettings?: CellSettings[];
 }
 
 export interface ValueCondition {
