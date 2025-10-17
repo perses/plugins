@@ -118,6 +118,8 @@ export interface TableOptions {
   // When set to 'auto', the table will calculate the cell height based on the line height of the theme and the density setting of the table.
   // Only for column without custom height specified in columnSettings.
   defaultColumnHeight?: 'auto' | number;
+  // When true, columns are hidden by default unless specified in columnSettings.
+  defaultColumnHidden?: boolean;
   // Enable pagination.
   pagination?: boolean;
   // Customize column display and order them by their index in the array.

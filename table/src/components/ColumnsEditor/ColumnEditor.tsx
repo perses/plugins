@@ -24,7 +24,7 @@ import {
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
-import { ColumnSettings } from '../table-model';
+import { ColumnSettings } from '../../models';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',

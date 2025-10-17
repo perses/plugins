@@ -24,6 +24,34 @@ func WithDensity(density Density) Option {
 	}
 }
 
+func WithDefaultColumWidth(width int) Option {
+	return func(builder *Builder) error {
+		builder.DefaultColumnWidth = width
+		return nil
+	}
+}
+
+func WithDefaultColumHeight(height int) Option {
+	return func(builder *Builder) error {
+		builder.DefaultColumnHeight = height
+		return nil
+	}
+}
+
+func WithDefaultColumnHidden(hidden bool) Option {
+	return func(builder *Builder) error {
+		builder.DefaultColumnHidden = hidden
+		return nil
+	}
+}
+
+func WithDefaultPagination(enabled bool) Option {
+	return func(builder *Builder) error {
+		builder.Pagination = enabled
+		return nil
+	}
+}
+
 func WithColumnSettings(settings []ColumnSettings) Option {
 	return func(builder *Builder) error {
 		builder.ColumnSettings = settings
