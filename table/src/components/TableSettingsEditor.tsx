@@ -89,6 +89,10 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
     onChange({ ...value, defaultColumnHeight: newValue });
   }
 
+  function handleEnableFilteringChange(_event: ChangeEvent, checked: boolean): void {
+    onChange({ ...value, enableFiltering: checked });
+  }
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -102,6 +106,11 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
             label="Columns Hidden by Default"
             control={<Switch checked={!!value.defaultColumnHidden} onChange={handleDefaultColumnHiddenChange} />}
           />
+          <OptionsEditorControl
+            label="Enable Column Filtering"
+            control={<Switch checked={!!value.enableFiltering} onChange={handleEnableFilteringChange} />}
+          />
+
           <DefaultColumnsDimensionsControl
             label="Width"
             defaultValue={DEFAULT_COLUMN_WIDTH}
