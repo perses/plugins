@@ -128,6 +128,8 @@ export interface TableOptions {
   defaultColumnHidden?: boolean;
   // Enable pagination.
   pagination?: boolean;
+  // Enable filtering for individual columns.
+  enableFiltering?: boolean;
   // Customize column display and order them by their index in the array.
   columnSettings?: ColumnSettings[];
   // Customize cell display based on their value.
@@ -142,6 +144,7 @@ export interface TableOptions {
 export function createInitialTableOptions(): TableOptions {
   return {
     density: 'standard',
+    enableFiltering: true,
   };
 }
 
