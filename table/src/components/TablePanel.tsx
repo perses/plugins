@@ -13,11 +13,11 @@
 
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
 import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { ReactElement, useEffect, useMemo, useState, useCallback } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
 import { CellSettings, ColumnSettings, TableOptions } from '../models';
 import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
-import { useTheme } from '@mui/material';
+import { useTheme, Theme } from '@mui/material';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -45,44 +45,49 @@ function generateCellContentConfig(
 }
 
 interface ColumnFilterDropdownProps {
-  allValues: (string | number)[];
-  selectedValues: (string | number)[];
-  onFilterChange: (values: (string | number)[]) => void;
-  theme: any;
+  allValues: Array<string | number>;
+  selectedValues: Array<string | number>;
+  onFilterChange: (values: Array<string | number>) => void;
+  theme: Theme;
 }
 
-function ColumnFilterDropdown({allValues, selectedValues, onFilterChange, theme }: ColumnFilterDropdownProps): ReactElement {
-  const values = [...new Set(allValues)].filter(v => v != null).sort();
+function ColumnFilterDropdown({
+  allValues,
+  selectedValues,
+  onFilterChange,
+  theme,
+}: ColumnFilterDropdownProps): ReactElement {
+  const values = [...new Set(allValues)].filter((v) => v != null).sort();
   if (values.length === 0) {
     return (
-      <div 
+      <div
         data-filter-dropdown
-        style={{ 
-          width: 200, 
-          padding: 10, 
+        style={{
+          width: 200,
+          padding: 10,
           backgroundColor: theme.palette.background.paper,
           border: `1px solid ${theme.palette.divider}`,
           borderRadius: 4,
-          boxShadow: theme.shadows[4]
+          boxShadow: theme.shadows[4],
         }}
       >
         <div style={{ color: theme.palette.text.secondary, fontSize: 14 }}>No values found</div>
       </div>
     );
   }
-  
+
   return (
-    <div 
+    <div
       data-filter-dropdown
-      style={{ 
-        width: 200, 
-        padding: 10, 
+      style={{
+        width: 200,
+        padding: 10,
         backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: 4,
         boxShadow: theme.shadows[4],
         maxHeight: 250,
-        overflowY: 'auto'
+        overflowY: 'auto',
       }}
     >
       <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 'bold' }}>
@@ -96,26 +101,29 @@ function ColumnFilterDropdown({allValues, selectedValues, onFilterChange, theme 
           <span style={{ color: theme.palette.text.primary }}>Select All ({values.length})</span>
         </label>
       </div>
-      <hr style={{ 
-        margin: '8px 0', 
-        border: 'none', 
-        borderTop: `1px solid ${theme.palette.divider}` 
-      }} />
+      <hr
+        style={{
+          margin: '8px 0',
+          border: 'none',
+          borderTop: `1px solid ${theme.palette.divider}`,
+        }}
+      />
       {values.map((value, index) => (
         <div key={`value-${index}`} style={{ marginBottom: 4 }}>
-          <label style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            cursor: 'pointer',
-            padding: '2px 0',
-            borderRadius: 2
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.palette.action.hover;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              padding: '2px 0',
+              borderRadius: 2,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.palette.action.hover;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
             <input
               type="checkbox"
@@ -124,15 +132,17 @@ function ColumnFilterDropdown({allValues, selectedValues, onFilterChange, theme 
                 if (e.target.checked) {
                   onFilterChange([...selectedValues, value]);
                 } else {
-                  onFilterChange(selectedValues.filter(v => v !== value));
+                  onFilterChange(selectedValues.filter((v) => v !== value));
                 }
               }}
               style={{ marginRight: 8 }}
             />
-            <span style={{ 
-              fontSize: 14, 
-              color: theme.palette.text.primary 
-            }}>
+            <span
+              style={{
+                fontSize: 14,
+                color: theme.palette.text.primary,
+              }}
+            >
               {value === null || value === undefined || value === '' ? '(empty)' : String(value)}
             </span>
           </label>
@@ -179,10 +189,10 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
       const baseText = setting.text || String(value);
       // Always apply prefix and suffix around the base text
       const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-      return { 
-        text: displayText, 
-        textColor: setting.textColor, 
-        backgroundColor: setting.backgroundColor 
+      return {
+        text: displayText,
+        textColor: setting.textColor,
+        backgroundColor: setting.backgroundColor,
       };
     }
 
@@ -196,30 +206,30 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
       ) {
         const baseText = setting.text || String(value);
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
 
       if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
         const baseText = setting.text || String(value);
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
 
       if (setting.condition.spec?.max !== undefined && numericValue <= +setting.condition.spec?.max) {
         const baseText = setting.text || String(value);
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
     }
@@ -229,10 +239,10 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
       if (regex.test(String(value))) {
         const baseText = setting.text || String(value);
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
     }
@@ -241,46 +251,46 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
       if (setting.condition.spec?.value === 'empty' && value === '') {
         const baseText = setting.text || String(value);
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
       if (setting.condition.spec?.value === 'null' && (value === null || value === undefined)) {
         const baseText = setting.text || 'null';
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
       if (setting.condition.spec?.value === 'NaN' && Number.isNaN(value)) {
         const baseText = setting.text || 'NaN';
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
       if (setting.condition.spec?.value === 'true' && value === true) {
         const baseText = setting.text || String(value);
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
       if (setting.condition.spec?.value === 'false' && value === false) {
         const baseText = setting.text || String(value);
         const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return { 
-          text: displayText, 
-          textColor: setting.textColor, 
-          backgroundColor: setting.backgroundColor 
+        return {
+          text: displayText,
+          textColor: setting.textColor,
+          backgroundColor: setting.backgroundColor,
         };
       }
     }
@@ -299,7 +309,7 @@ export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
 
 export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
   const theme = useTheme();
-  
+
   // TODO: handle other query types
   const queryMode = getTablePanelQueryOptions(spec).mode;
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
@@ -358,11 +368,11 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   // fetch unique values for each column of filtering
   const columnUniqueValues = useMemo(() => {
-    const uniqueValues: Record<string, (string | number)[]> = {};
-    
+    const uniqueValues: Record<string, Array<string | number>> = {};
+
     keys.forEach((key) => {
-      const values = data.map(row => row[key]).filter(val => val !== null && val !== undefined && val !== '');
-      uniqueValues[key] = Array.from(new Set(values as (string | number)[]));
+      const values = data.map((row) => row[key]).filter((val) => val !== null && val !== undefined && val !== '');
+      uniqueValues[key] = Array.from(new Set(values as Array<string | number>));
     });
 
     return uniqueValues;
@@ -398,7 +408,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {
     // If there are no cell settings globally or per column, return an empty object
-    if (spec.cellSettings === undefined && !spec.columnSettings?.some(col => col.cellSettings !== undefined)) {
+    if (spec.cellSettings === undefined && !spec.columnSettings?.some((col) => col.cellSettings !== undefined)) {
       return {};
     }
 
@@ -424,9 +434,9 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       for (const [key, value] of Object.entries(extendRow)) {
         // First, try to get cell config from global cell settings
         let cellConfig = generateCellConfig(value, spec.cellSettings ?? []);
-        
+
         // Then, try to get cell config from column-specific cell settings if conditional formatting is enabled
-        const columnSetting = spec.columnSettings?.find(col => col.name === key);
+        const columnSetting = spec.columnSettings?.find((col) => col.name === key);
         if (columnSetting?.conditionalFormatting && columnSetting.cellSettings) {
           const columnCellConfig = generateCellConfig(value, columnSetting.cellSettings);
           // Column-specific settings take precedence over global settings
@@ -434,7 +444,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
             cellConfig = columnCellConfig;
           }
         }
-        
+
         if (cellConfig) {
           result[`${index}_${key}`] = cellConfig;
         }
@@ -466,14 +476,14 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   const [openFilterColumn, setOpenFilterColumn] = useState<string | null>(null);
 
   // get selected values for a column
-  const getSelectedFilterValues = (columnId: string): (string | number)[] => {
-    const filter = columnFilters.find(f => f.id === columnId);
-    return filter ? (filter.value as (string | number)[]) : [];
+  const getSelectedFilterValues = (columnId: string): Array<string | number> => {
+    const filter = columnFilters.find((f) => f.id === columnId);
+    return filter ? (filter.value as Array<string | number>) : [];
   };
 
   // update column filter
-  const updateColumnFilter = (columnId: string, values: (string | number)[]) => {
-    const newFilters = columnFilters.filter(f => f.id !== columnId);
+  const updateColumnFilter = (columnId: string, values: Array<string | number>) => {
+    const newFilters = columnFilters.filter((f) => f.id !== columnId);
     if (values.length > 0) {
       newFilters.push({ id: columnId, value: values });
     }
@@ -496,7 +506,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   // Close filter when clicking outside
   useEffect(() => {
     if (!openFilterColumn) return;
-    
+
     const handleClick = (e: MouseEvent) => {
       const target = e.target as Element;
       if (!target.closest('[data-filter-dropdown]') && !target.closest('button')) {
@@ -507,7 +517,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     const timer = setTimeout(() => {
       document.addEventListener('click', handleClick);
     }, 100);
-    
+
     return () => {
       clearTimeout(timer);
       document.removeEventListener('click', handleClick);
@@ -523,10 +533,10 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       filtered = filtered.filter((row) => {
         return columnFilters.every((filter) => {
           const value = row[filter.id];
-          const filterValues = filter.value as (string | number)[];
-          
+          const filterValues = filter.value as Array<string | number>;
+
           if (!filterValues || filterValues.length === 0) return true; // No filter values means no filtering
-          
+
           // Check if the row value is in the selected filter values
           return filterValues.includes(value as string | number);
         });
@@ -556,20 +566,22 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   return (
     <div>
       {spec.enableFiltering && (
-        <div style={{ 
-          display: 'flex', 
-          background: theme.palette.background.default, 
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          width: contentDimensions.width,
-          boxSizing: 'border-box'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            background: theme.palette.background.default,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            width: contentDimensions.width,
+            boxSizing: 'border-box',
+          }}
+        >
           {columns.map((column, idx) => {
             const filters = getSelectedFilterValues(column.accessorKey as string);
             const columnWidth = column.width || spec.defaultColumnWidth;
             return (
-              <div 
+              <div
                 key={`filter-${idx}`}
-                style={{ 
+                style={{
                   padding: '8px',
                   borderRight: idx < columns.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
                   width: columnWidth,
@@ -579,18 +591,20 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
                   alignItems: 'center',
                   position: 'relative',
                   boxSizing: 'border-box',
-                  flex: typeof columnWidth === 'number' ? 'none' : '1 1 auto'
+                  flex: typeof columnWidth === 'number' ? 'none' : '1 1 auto',
                 }}
               >
-                <span style={{ 
-                  marginRight: 8, 
-                  fontSize: '12px', 
-                  color: theme.palette.text.secondary,
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
+                <span
+                  style={{
+                    marginRight: 8,
+                    fontSize: '12px',
+                    color: theme.palette.text.secondary,
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {filters.length ? `${filters.length} items` : 'All'}
                 </span>
                 <button
@@ -608,7 +622,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
                     minWidth: '20px',
                     height: '24px',
                     flexShrink: 0,
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = theme.palette.action.hover;
@@ -620,15 +634,17 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
                 >
                   ▼
                 </button>
-                
+
                 {openFilterColumn === column.accessorKey && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    zIndex: 1000,
-                    marginTop: 4
-                  }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      zIndex: 1000,
+                      marginTop: 4,
+                    }}
+                  >
                     <ColumnFilterDropdown
                       allValues={columnUniqueValues[column.accessorKey as string] || []}
                       selectedValues={filters}
@@ -642,7 +658,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
           })}
         </div>
       )}
-      
+
       <Table
         data={filteredData}
         columns={columns}
