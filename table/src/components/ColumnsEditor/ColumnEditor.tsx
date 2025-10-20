@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, Divider, IconButton, MenuItem, Stack, StackProps, Switch, TextField, Typography, Grid2 as Grid } from '@mui/material';
+import {
+  Button,
+  ButtonGroup,
+  IconButton,
+  MenuItem,
+  Stack,
+  StackProps,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import {
@@ -26,7 +36,15 @@ import {
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
-import { ColumnSettings, CellSettings, Condition, ValueCondition, RangeCondition, RegexCondition, MiscCondition } from '../../models';
+import {
+  ColumnSettings,
+  CellSettings,
+  Condition,
+  ValueCondition,
+  RangeCondition,
+  RegexCondition,
+  MiscCondition,
+} from '../../models';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
@@ -211,9 +229,15 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             <Stack spacing={2}>
               <Stack spacing={2}>
                 {(column.cellSettings ?? [{ condition: { kind: 'Value', spec: { value: '' } } }]).map((cell, i) => (
-                  <Stack key={i} spacing={1} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                  <Stack
+                    key={i}
+                    spacing={1}
+                    sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+                  >
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography variant="caption" color="text.secondary">Rule {i + 1}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Rule {i + 1}
+                      </Typography>
                       <Button
                         size="small"
                         color="error"
@@ -226,12 +250,14 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                         Remove
                       </Button>
                     </Stack>
-                    
+
                     {/* Vertical layout for narrow column */}
                     <Stack spacing={2}>
                       {/* Condition Section */}
                       <Stack spacing={1}>
-                        <Typography variant="body2" fontWeight="medium">Condition</Typography>
+                        <Typography variant="body2" fontWeight="medium">
+                          Condition
+                        </Typography>
                         <Stack direction="row" spacing={1}>
                           <TextField
                             select
@@ -275,9 +301,9 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                               label="Value"
                               value={cell.condition.spec?.value ?? ''}
                               onChange={(e) => {
-                                const updatedCell: CellSettings = { 
-                                  ...cell, 
-                                  condition: { kind: 'Value', spec: { value: e.target.value } } as ValueCondition
+                                const updatedCell: CellSettings = {
+                                  ...cell,
+                                  condition: { kind: 'Value', spec: { value: e.target.value } } as ValueCondition,
                                 };
                                 const updatedCells = [...(column.cellSettings ?? [])];
                                 updatedCells[i] = updatedCell;
@@ -289,10 +315,12 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                           )}
                         </Stack>
                       </Stack>
-                      
+
                       {/* Display Text Section */}
                       <Stack spacing={1}>
-                        <Typography variant="body2" fontWeight="medium">Display Text</Typography>
+                        <Typography variant="body2" fontWeight="medium">
+                          Display Text
+                        </Typography>
                         <TextField
                           label="Text to display"
                           value={cell.text ?? ''}
@@ -334,10 +362,12 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                           />
                         </Stack>
                       </Stack>
-                      
+
                       {/* Colors Section */}
                       <Stack spacing={1}>
-                        <Typography variant="body2" fontWeight="medium">Colors</Typography>
+                        <Typography variant="body2" fontWeight="medium">
+                          Colors
+                        </Typography>
                         <Stack direction="row" spacing={1} justifyContent="center">
                           {cell.textColor ? (
                             <OptionsColorPicker
@@ -357,7 +387,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                               }}
                             />
                           ) : (
-                            <IconButton 
+                            <IconButton
                               size="small"
                               onClick={() => {
                                 const updatedCell = { ...cell, textColor: '#000000' as `#${string}` };
@@ -388,7 +418,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                               }}
                             />
                           ) : (
-                            <IconButton 
+                            <IconButton
                               size="small"
                               onClick={() => {
                                 const updatedCell = { ...cell, backgroundColor: '#ffffff' as `#${string}` };
@@ -406,9 +436,9 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                     </Stack>
                   </Stack>
                 ))}
-                <Button 
-                  variant="outlined" 
-                  startIcon={<AddIcon />} 
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
                   size="small"
                   onClick={() => {
                     const updatedCells = [...(column.cellSettings ?? [])];
@@ -423,7 +453,6 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           )}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
-   
     </OptionsEditorGrid>
   );
 }
