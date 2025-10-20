@@ -89,7 +89,7 @@ type Visual struct {
 	LineWidth    float64          `json:"lineWidth,omitempty" yaml:"lineWidth,omitempty"`
 	AreaOpacity  float64          `json:"areaOpacity,omitempty" yaml:"areaOpacity,omitempty"`
 	ShowPoints   VisualShowPoints `json:"showPoints,omitempty" yaml:"showPoints,omitempty"`
-	Palette      Palette          `json:"palette,omitempty" yaml:"palette,omitempty"`
+	Palette      *Palette         `json:"palette,omitempty" yaml:"palette,omitempty"`
 	PointRadius  float64          `json:"pointRadius,omitempty" yaml:"pointRadius,omitempty"`
 	Stack        VisualStack      `json:"stack,omitempty" yaml:"stack,omitempty"`
 	ConnectNulls bool             `json:"connectNulls,omitempty" yaml:"connectNulls,omitempty"`
