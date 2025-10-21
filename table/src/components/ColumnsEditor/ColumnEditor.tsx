@@ -70,159 +70,165 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
   return (
     <Stack {...others} spacing={2}>
       <OptionsEditorGrid>
-      <OptionsEditorColumn>
-        <OptionsEditorGroup title="Column">
-          <OptionsEditorControl
-            label="Name*"
-            control={
-              <TextField value={column.name} onChange={(e) => onChange({ ...column, name: e.target.value })} required />
-            }
-          />
-          <OptionsEditorControl
-            label="Header"
-            control={
-              <TextField
-                value={column.header ?? ''}
-                onChange={(e) => onChange({ ...column, header: e.target.value ? e.target.value : undefined })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Header Tooltip"
-            control={
-              <TextField
-                value={column.headerDescription ?? ''}
-                onChange={(e) =>
-                  onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })
-                }
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Cell Tooltip"
-            control={
-              <TextField
-                value={column.cellDescription ?? ''}
-                onChange={(e) => onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Enable sorting"
-            control={
-              <Switch
-                checked={column.enableSorting ?? false}
-                onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
-              />
-            }
-          />
-          {column.enableSorting && (
+        <OptionsEditorColumn>
+          <OptionsEditorGroup title="Column">
             <OptionsEditorControl
-              label="Default Sort"
-              control={
-                <SortSelectorButtons
-                  size="medium"
-                  value={column.sort}
-                  sx={{
-                    margin: 0.5,
-                  }}
-                  onChange={(sort) => onChange({ ...column, sort: sort })}
-                />
-              }
-            />
-          )}
-        </OptionsEditorGroup>
-      </OptionsEditorColumn>
-
-      <OptionsEditorColumn>
-        <OptionsEditorGroup title="Visual">
-          <OptionsEditorControl
-            label="Show column"
-            control={
-              <Switch
-                checked={!(column.hide ?? false)}
-                onChange={(e) => onChange({ ...column, hide: !e.target.checked })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Display"
-            control={
-              <ButtonGroup aria-label="Display" size="small">
-                <Button
-                  variant={!column.plugin ? 'contained' : 'outlined'}
-                  onClick={() => onChange({ ...column, plugin: undefined })}
-                >
-                  Text
-                </Button>
-                <Button
-                  variant={column.plugin ? 'contained' : 'outlined'}
-                  onClick={() => onChange({ ...column, plugin: { kind: 'StatChart', spec: {} } })}
-                >
-                  Embedded Panel
-                </Button>
-              </ButtonGroup>
-            }
-          />
-          {column.plugin ? (
-            <OptionsEditorControl
-              label="Panel Type"
-              control={
-                <PluginKindSelect
-                  pluginTypes={['Panel']}
-                  value={{ type: 'Panel', kind: column.plugin.kind }}
-                  onChange={(event) => onChange({ ...column, plugin: { kind: event.kind, spec: {} } })}
-                />
-              }
-            />
-          ) : (
-            <FormatControls
-              value={column.format ?? DEFAULT_FORMAT}
-              onChange={(newFormat): void =>
-                onChange({
-                  ...column,
-                  format: newFormat,
-                })
-              }
-            />
-          )}
-          <OptionsEditorControl
-            label="Alignment"
-            control={
-              <AlignSelector
-                size="small"
-                value={column.align ?? 'left'}
-                onChange={(align) => onChange({ ...column, align: align })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Custom width"
-            control={
-              <Switch
-                checked={column.width !== undefined && column.width !== 'auto'}
-                onChange={(e) => onChange({ ...column, width: e.target.checked ? width : 'auto' })}
-              />
-            }
-          />
-          {column.width !== undefined && column.width !== 'auto' && (
-            <OptionsEditorControl
-              label="Width"
+              label="Name*"
               control={
                 <TextField
-                  type="number"
-                  value={width}
-                  slotProps={{ htmlInput: { min: 1 } }}
-                  onChange={(e) => {
-                    setWidth(+e.target.value);
-                    onChange({ ...column, width: +e.target.value });
-                  }}
+                  value={column.name}
+                  onChange={(e) => onChange({ ...column, name: e.target.value })}
+                  required
                 />
               }
             />
-          )}
-        </OptionsEditorGroup>
-      </OptionsEditorColumn>
+            <OptionsEditorControl
+              label="Header"
+              control={
+                <TextField
+                  value={column.header ?? ''}
+                  onChange={(e) => onChange({ ...column, header: e.target.value ? e.target.value : undefined })}
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Header Tooltip"
+              control={
+                <TextField
+                  value={column.headerDescription ?? ''}
+                  onChange={(e) =>
+                    onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })
+                  }
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Cell Tooltip"
+              control={
+                <TextField
+                  value={column.cellDescription ?? ''}
+                  onChange={(e) =>
+                    onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })
+                  }
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Enable sorting"
+              control={
+                <Switch
+                  checked={column.enableSorting ?? false}
+                  onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
+                />
+              }
+            />
+            {column.enableSorting && (
+              <OptionsEditorControl
+                label="Default Sort"
+                control={
+                  <SortSelectorButtons
+                    size="medium"
+                    value={column.sort}
+                    sx={{
+                      margin: 0.5,
+                    }}
+                    onChange={(sort) => onChange({ ...column, sort: sort })}
+                  />
+                }
+              />
+            )}
+          </OptionsEditorGroup>
+        </OptionsEditorColumn>
+
+        <OptionsEditorColumn>
+          <OptionsEditorGroup title="Visual">
+            <OptionsEditorControl
+              label="Show column"
+              control={
+                <Switch
+                  checked={!(column.hide ?? false)}
+                  onChange={(e) => onChange({ ...column, hide: !e.target.checked })}
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Display"
+              control={
+                <ButtonGroup aria-label="Display" size="small">
+                  <Button
+                    variant={!column.plugin ? 'contained' : 'outlined'}
+                    onClick={() => onChange({ ...column, plugin: undefined })}
+                  >
+                    Text
+                  </Button>
+                  <Button
+                    variant={column.plugin ? 'contained' : 'outlined'}
+                    onClick={() => onChange({ ...column, plugin: { kind: 'StatChart', spec: {} } })}
+                  >
+                    Embedded Panel
+                  </Button>
+                </ButtonGroup>
+              }
+            />
+            {column.plugin ? (
+              <OptionsEditorControl
+                label="Panel Type"
+                control={
+                  <PluginKindSelect
+                    pluginTypes={['Panel']}
+                    value={{ type: 'Panel', kind: column.plugin.kind }}
+                    onChange={(event) => onChange({ ...column, plugin: { kind: event.kind, spec: {} } })}
+                  />
+                }
+              />
+            ) : (
+              <FormatControls
+                value={column.format ?? DEFAULT_FORMAT}
+                onChange={(newFormat): void =>
+                  onChange({
+                    ...column,
+                    format: newFormat,
+                  })
+                }
+              />
+            )}
+            <OptionsEditorControl
+              label="Alignment"
+              control={
+                <AlignSelector
+                  size="small"
+                  value={column.align ?? 'left'}
+                  onChange={(align) => onChange({ ...column, align: align })}
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Custom width"
+              control={
+                <Switch
+                  checked={column.width !== undefined && column.width !== 'auto'}
+                  onChange={(e) => onChange({ ...column, width: e.target.checked ? width : 'auto' })}
+                />
+              }
+            />
+            {column.width !== undefined && column.width !== 'auto' && (
+              <OptionsEditorControl
+                label="Width"
+                control={
+                  <TextField
+                    type="number"
+                    value={width}
+                    slotProps={{ htmlInput: { min: 1 } }}
+                    onChange={(e) => {
+                      setWidth(+e.target.value);
+                      onChange({ ...column, width: +e.target.value });
+                    }}
+                  />
+                }
+              />
+            )}
+          </OptionsEditorGroup>
+        </OptionsEditorColumn>
       </OptionsEditorGrid>
 
       <Stack sx={{ px: 8 }}>
@@ -236,56 +242,56 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
-        {column.conditionalFormatting && (
-          <Stack spacing={3} sx={{ mt: 2 }}>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 5 }}>
-                <Typography variant="subtitle1">Condition</Typography>
+          {column.conditionalFormatting && (
+            <Stack spacing={3} sx={{ mt: 2 }}>
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 5 }}>
+                  <Typography variant="subtitle1">Condition</Typography>
+                </Grid>
+                <Grid size={{ xs: 4 }}>
+                  <Typography variant="subtitle1">Display Text</Typography>
+                </Grid>
+                <Grid size={{ xs: 1 }} textAlign="center">
+                  <Typography variant="subtitle1">Color</Typography>
+                </Grid>
+                <Grid size={{ xs: 1 }} textAlign="center">
+                  <Typography variant="subtitle1">Background</Typography>
+                </Grid>
+                <Grid size={{ xs: 1 }}></Grid>
               </Grid>
-              <Grid size={{ xs: 4 }}>
-                <Typography variant="subtitle1">Display Text</Typography>
-              </Grid>
-              <Grid size={{ xs: 1 }} textAlign="center">
-                <Typography variant="subtitle1">Color</Typography>
-              </Grid>
-              <Grid size={{ xs: 1 }} textAlign="center">
-                <Typography variant="subtitle1">Background</Typography>
-              </Grid>
-              <Grid size={{ xs: 1 }}></Grid>
-            </Grid>
-            <Stack gap={1.5} divider={<Divider flexItem orientation="horizontal" />}>
-              {(column.cellSettings ?? []).map((cell, i) => (
-                <ConditionalFormatRule
-                  key={i}
-                  cell={cell}
-                  onChange={(updatedCell: CellSettings) => {
-                    const updatedCells = [...(column.cellSettings ?? [])];
-                    updatedCells[i] = updatedCell;
-                    onChange({ ...column, cellSettings: updatedCells });
-                  }}
-                  onDelete={() => {
-                    const updatedCells = [...(column.cellSettings ?? [])];
-                    updatedCells.splice(i, 1);
-                    onChange({ ...column, cellSettings: updatedCells.length > 0 ? updatedCells : undefined });
-                  }}
-                />
-              ))}
-            </Stack>
+              <Stack gap={1.5} divider={<Divider flexItem orientation="horizontal" />}>
+                {(column.cellSettings ?? []).map((cell, i) => (
+                  <ConditionalFormatRule
+                    key={i}
+                    cell={cell}
+                    onChange={(updatedCell: CellSettings) => {
+                      const updatedCells = [...(column.cellSettings ?? [])];
+                      updatedCells[i] = updatedCell;
+                      onChange({ ...column, cellSettings: updatedCells });
+                    }}
+                    onDelete={() => {
+                      const updatedCells = [...(column.cellSettings ?? [])];
+                      updatedCells.splice(i, 1);
+                      onChange({ ...column, cellSettings: updatedCells.length > 0 ? updatedCells : undefined });
+                    }}
+                  />
+                ))}
+              </Stack>
 
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              sx={{ marginTop: 1 }}
-              onClick={() => {
-                const updatedCells = [...(column.cellSettings ?? [])];
-                updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
-                onChange({ ...column, cellSettings: updatedCells });
-              }}
-            >
-              Add Conditional Column Settings
-            </Button>
-          </Stack>
-        )}
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                sx={{ marginTop: 1 }}
+                onClick={() => {
+                  const updatedCells = [...(column.cellSettings ?? [])];
+                  updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
+                  onChange({ ...column, cellSettings: updatedCells });
+                }}
+              >
+                Add Conditional Column Settings
+              </Button>
+            </Stack>
+          )}
         </OptionsEditorGroup>
       </Stack>
     </Stack>
