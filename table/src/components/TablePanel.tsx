@@ -15,9 +15,9 @@ import { PanelData, PanelProps } from '@perses-dev/plugin-system';
 import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { CellSettings, ColumnSettings, TableOptions } from '../models';
 import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
 import { useTheme, Theme } from '@mui/material';
+import { CellSettings, ColumnSettings, TableOptions } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
