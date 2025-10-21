@@ -14,14 +14,18 @@
 import {
   Button,
   ButtonGroup,
+  Divider,
   IconButton,
   MenuItem,
   Stack,
   StackProps,
   Switch,
   TextField,
+  Tooltip,
   Typography,
+  Grid2 as Grid,
 } from '@mui/material';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import {
@@ -64,7 +68,8 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
   );
 
   return (
-    <OptionsEditorGrid {...others}>
+    <Stack {...others} spacing={2}>
+      <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Column">
           <OptionsEditorControl
@@ -216,8 +221,14 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               }
             />
           )}
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      </OptionsEditorGrid>
+
+      <Stack sx={{ px: 8 }}>
+        <OptionsEditorGroup title="Conditional Format">
           <OptionsEditorControl
-            label="Conditional Format"
+            label="Enable Conditional Formatting"
             control={
               <Switch
                 checked={column.conditionalFormatting ?? false}
@@ -225,234 +236,307 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
-          {column.conditionalFormatting && (
-            <Stack spacing={2}>
-              <Stack spacing={2}>
-                {(column.cellSettings ?? [{ condition: { kind: 'Value', spec: { value: '' } } }]).map((cell, i) => (
-                  <Stack
-                    key={i}
-                    spacing={1}
-                    sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
-                  >
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography variant="caption" color="text.secondary">
-                        Rule {i + 1}
-                      </Typography>
-                      <Button
-                        size="small"
-                        color="error"
-                        onClick={() => {
-                          const updatedCells = [...(column.cellSettings ?? [])];
-                          updatedCells.splice(i, 1);
-                          onChange({ ...column, cellSettings: updatedCells.length > 0 ? updatedCells : undefined });
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </Stack>
-
-                    {/* Vertical layout for narrow column */}
-                    <Stack spacing={2}>
-                      {/* Condition Section */}
-                      <Stack spacing={1}>
-                        <Typography variant="body2" fontWeight="medium">
-                          Condition
-                        </Typography>
-                        <Stack direction="row" spacing={1}>
-                          <TextField
-                            select
-                            label="Type"
-                            value={cell.condition.kind}
-                            onChange={(e) => {
-                              const kind = e.target.value as 'Value' | 'Range' | 'Regex' | 'Misc';
-                              let newCondition: Condition;
-                              switch (kind) {
-                                case 'Value':
-                                  newCondition = { kind: 'Value', spec: { value: '' } } as ValueCondition;
-                                  break;
-                                case 'Range':
-                                  newCondition = { kind: 'Range', spec: { min: 0, max: 100 } } as RangeCondition;
-                                  break;
-                                case 'Regex':
-                                  newCondition = { kind: 'Regex', spec: { expr: '' } } as RegexCondition;
-                                  break;
-                                case 'Misc':
-                                  newCondition = { kind: 'Misc', spec: { value: 'empty' } } as MiscCondition;
-                                  break;
-                                default:
-                                  newCondition = { kind: 'Value', spec: { value: '' } } as ValueCondition;
-                              }
-                              const updatedCell: CellSettings = { ...cell, condition: newCondition };
-                              const updatedCells = [...(column.cellSettings ?? [])];
-                              updatedCells[i] = updatedCell;
-                              onChange({ ...column, cellSettings: updatedCells });
-                            }}
-                            size="small"
-                            sx={{ minWidth: 120 }}
-                          >
-                            <MenuItem value="Value">Value</MenuItem>
-                            <MenuItem value="Range">Range</MenuItem>
-                            <MenuItem value="Regex">Regex</MenuItem>
-                            <MenuItem value="Misc">Misc</MenuItem>
-                          </TextField>
-                          {/* Add condition-specific input based on type */}
-                          {cell.condition.kind === 'Value' && (
-                            <TextField
-                              label="Value"
-                              value={cell.condition.spec?.value ?? ''}
-                              onChange={(e) => {
-                                const updatedCell: CellSettings = {
-                                  ...cell,
-                                  condition: { kind: 'Value', spec: { value: e.target.value } } as ValueCondition,
-                                };
-                                const updatedCells = [...(column.cellSettings ?? [])];
-                                updatedCells[i] = updatedCell;
-                                onChange({ ...column, cellSettings: updatedCells });
-                              }}
-                              size="small"
-                              fullWidth
-                            />
-                          )}
-                        </Stack>
-                      </Stack>
-
-                      {/* Display Text Section */}
-                      <Stack spacing={1}>
-                        <Typography variant="body2" fontWeight="medium">
-                          Display Text
-                        </Typography>
-                        <TextField
-                          label="Text to display"
-                          value={cell.text ?? ''}
-                          onChange={(e) => {
-                            const updatedCell = { ...cell, text: e.target.value };
-                            const updatedCells = [...(column.cellSettings ?? [])];
-                            updatedCells[i] = updatedCell;
-                            onChange({ ...column, cellSettings: updatedCells });
-                          }}
-                          size="small"
-                          fullWidth
-                        />
-                        <Stack direction="row" spacing={1}>
-                          <TextField
-                            label="Prefix"
-                            placeholder="$"
-                            value={cell.prefix ?? ''}
-                            onChange={(e) => {
-                              const updatedCell = { ...cell, prefix: e.target.value };
-                              const updatedCells = [...(column.cellSettings ?? [])];
-                              updatedCells[i] = updatedCell;
-                              onChange({ ...column, cellSettings: updatedCells });
-                            }}
-                            size="small"
-                            helperText="Text shown before the value"
-                          />
-                          <TextField
-                            label="Suffix"
-                            placeholder="%"
-                            value={cell.suffix ?? ''}
-                            onChange={(e) => {
-                              const updatedCell = { ...cell, suffix: e.target.value };
-                              const updatedCells = [...(column.cellSettings ?? [])];
-                              updatedCells[i] = updatedCell;
-                              onChange({ ...column, cellSettings: updatedCells });
-                            }}
-                            size="small"
-                            helperText="Text shown after the value"
-                          />
-                        </Stack>
-                      </Stack>
-
-                      {/* Colors Section */}
-                      <Stack spacing={1}>
-                        <Typography variant="body2" fontWeight="medium">
-                          Colors
-                        </Typography>
-                        <Stack direction="row" spacing={1} justifyContent="center">
-                          {cell.textColor ? (
-                            <OptionsColorPicker
-                              label="Text Color"
-                              color={cell.textColor ?? '#000'}
-                              onColorChange={(color) => {
-                                const updatedCell = { ...cell, textColor: color as `#${string}` };
-                                const updatedCells = [...(column.cellSettings ?? [])];
-                                updatedCells[i] = updatedCell;
-                                onChange({ ...column, cellSettings: updatedCells });
-                              }}
-                              onClear={() => {
-                                const updatedCell = { ...cell, textColor: undefined };
-                                const updatedCells = [...(column.cellSettings ?? [])];
-                                updatedCells[i] = updatedCell;
-                                onChange({ ...column, cellSettings: updatedCells });
-                              }}
-                            />
-                          ) : (
-                            <IconButton
-                              size="small"
-                              onClick={() => {
-                                const updatedCell = { ...cell, textColor: '#000000' as `#${string}` };
-                                const updatedCells = [...(column.cellSettings ?? [])];
-                                updatedCells[i] = updatedCell;
-                                onChange({ ...column, cellSettings: updatedCells });
-                              }}
-                              title="Add text color"
-                            >
-                              <AddIcon />
-                            </IconButton>
-                          )}
-                          {cell.backgroundColor ? (
-                            <OptionsColorPicker
-                              label="Background Color"
-                              color={cell.backgroundColor ?? '#fff'}
-                              onColorChange={(color) => {
-                                const updatedCell = { ...cell, backgroundColor: color as `#${string}` };
-                                const updatedCells = [...(column.cellSettings ?? [])];
-                                updatedCells[i] = updatedCell;
-                                onChange({ ...column, cellSettings: updatedCells });
-                              }}
-                              onClear={() => {
-                                const updatedCell = { ...cell, backgroundColor: undefined };
-                                const updatedCells = [...(column.cellSettings ?? [])];
-                                updatedCells[i] = updatedCell;
-                                onChange({ ...column, cellSettings: updatedCells });
-                              }}
-                            />
-                          ) : (
-                            <IconButton
-                              size="small"
-                              onClick={() => {
-                                const updatedCell = { ...cell, backgroundColor: '#ffffff' as `#${string}` };
-                                const updatedCells = [...(column.cellSettings ?? [])];
-                                updatedCells[i] = updatedCell;
-                                onChange({ ...column, cellSettings: updatedCells });
-                              }}
-                              title="Add background color"
-                            >
-                              <AddIcon />
-                            </IconButton>
-                          )}
-                        </Stack>
-                      </Stack>
-                    </Stack>
-                  </Stack>
-                ))}
-                <Button
-                  variant="outlined"
-                  startIcon={<AddIcon />}
-                  size="small"
-                  onClick={() => {
+        {column.conditionalFormatting && (
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 5 }}>
+                <Typography variant="subtitle1">Condition</Typography>
+              </Grid>
+              <Grid size={{ xs: 4 }}>
+                <Typography variant="subtitle1">Display Text</Typography>
+              </Grid>
+              <Grid size={{ xs: 1 }} textAlign="center">
+                <Typography variant="subtitle1">Color</Typography>
+              </Grid>
+              <Grid size={{ xs: 1 }} textAlign="center">
+                <Typography variant="subtitle1">Background</Typography>
+              </Grid>
+              <Grid size={{ xs: 1 }}></Grid>
+            </Grid>
+            <Stack gap={1.5} divider={<Divider flexItem orientation="horizontal" />}>
+              {(column.cellSettings ?? []).map((cell, i) => (
+                <ConditionalFormatRule
+                  key={i}
+                  cell={cell}
+                  onChange={(updatedCell: CellSettings) => {
                     const updatedCells = [...(column.cellSettings ?? [])];
-                    updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
+                    updatedCells[i] = updatedCell;
                     onChange({ ...column, cellSettings: updatedCells });
                   }}
-                >
-                  Add Rule
-                </Button>
-              </Stack>
+                  onDelete={() => {
+                    const updatedCells = [...(column.cellSettings ?? [])];
+                    updatedCells.splice(i, 1);
+                    onChange({ ...column, cellSettings: updatedCells.length > 0 ? updatedCells : undefined });
+                  }}
+                />
+              ))}
             </Stack>
-          )}
+
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{ marginTop: 1 }}
+              onClick={() => {
+                const updatedCells = [...(column.cellSettings ?? [])];
+                updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
+                onChange({ ...column, cellSettings: updatedCells });
+              }}
+            >
+              Add Conditional Column Settings
+            </Button>
+          </Stack>
+        )}
         </OptionsEditorGroup>
-      </OptionsEditorColumn>
-    </OptionsEditorGrid>
+      </Stack>
+    </Stack>
+  );
+}
+
+interface ConditionalFormatRuleProps {
+  cell: CellSettings;
+  onChange: (cell: CellSettings) => void;
+  onDelete: () => void;
+}
+
+function ConditionalFormatRule({ cell, onChange, onDelete }: ConditionalFormatRuleProps): ReactElement {
+  function ConditionEditor({
+    condition,
+    onChange: onConditionChange,
+  }: {
+    condition: Condition;
+    onChange: (condition: Condition) => void;
+  }): ReactElement | null {
+    if (condition.kind === 'Value') {
+      return (
+        <TextField
+          label="Value"
+          placeholder="Exact value"
+          value={condition.spec?.value ?? ''}
+          onChange={(e) => onConditionChange({ ...condition, spec: { value: e.target.value } } as Condition)}
+          fullWidth
+          size="small"
+        />
+      );
+    } else if (condition.kind === 'Range') {
+      return (
+        <Stack gap={1} direction="row">
+          <TextField
+            label="From"
+            placeholder="Start of range"
+            value={condition.spec?.min ?? ''}
+            onChange={(e) =>
+              onConditionChange({ ...condition, spec: { ...condition.spec, min: +e.target.value } } as Condition)
+            }
+            fullWidth
+            size="small"
+          />
+          <TextField
+            label="To"
+            placeholder="End of range (inclusive)"
+            value={condition.spec?.max ?? ''}
+            onChange={(e) =>
+              onConditionChange({ ...condition, spec: { ...condition.spec, max: +e.target.value } } as Condition)
+            }
+            fullWidth
+            size="small"
+          />
+        </Stack>
+      );
+    } else if (condition.kind === 'Regex') {
+      return (
+        <TextField
+          label="Regular Expression"
+          placeholder="JavaScript regular expression"
+          value={condition.spec?.expr ?? ''}
+          onChange={(e) => onConditionChange({ ...condition, spec: { expr: e.target.value } } as Condition)}
+          fullWidth
+          size="small"
+        />
+      );
+    } else if (condition.kind === 'Misc') {
+      return (
+        <TextField
+          select
+          label="Value"
+          value={condition.spec?.value ?? ''}
+          onChange={(e) => onConditionChange({ ...condition, spec: { value: e.target.value } } as Condition)}
+          fullWidth
+          size="small"
+        >
+          <MenuItem value="empty">
+            <Stack>
+              <Typography>Empty</Typography>
+              <Typography variant="caption">Matches empty string</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="null">
+            <Stack>
+              <Typography>Null</Typography>
+              <Typography variant="caption">Matches null or undefined</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="NaN">
+            <Stack>
+              <Typography>NaN</Typography>
+              <Typography variant="caption">Matches Not a Number value</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="true">
+            <Stack>
+              <Typography>True</Typography>
+              <Typography variant="caption">Matches true boolean</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="false">
+            <Stack>
+              <Typography>False</Typography>
+              <Typography variant="caption">Matches false boolean</Typography>
+            </Stack>
+          </MenuItem>
+        </TextField>
+      );
+    }
+    return null;
+  }
+
+  return (
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 5 }}>
+        <Stack direction="row" gap={1} width="100%">
+          <TextField
+            select
+            label="Type"
+            value={cell.condition.kind}
+            onChange={(e) => {
+              const kind = e.target.value as 'Value' | 'Range' | 'Regex' | 'Misc';
+              let newCondition: Condition;
+              switch (kind) {
+                case 'Value':
+                  newCondition = { kind: 'Value', spec: { value: '' } } as ValueCondition;
+                  break;
+                case 'Range':
+                  newCondition = { kind: 'Range', spec: { min: 0, max: 100 } } as RangeCondition;
+                  break;
+                case 'Regex':
+                  newCondition = { kind: 'Regex', spec: { expr: '' } } as RegexCondition;
+                  break;
+                case 'Misc':
+                  newCondition = { kind: 'Misc', spec: { value: 'empty' } } as MiscCondition;
+                  break;
+                default:
+                  newCondition = { kind: 'Value', spec: { value: '' } } as ValueCondition;
+              }
+              onChange({ ...cell, condition: newCondition });
+            }}
+            required
+            sx={{ width: '120px' }}
+            size="small"
+          >
+            <MenuItem value="Value">
+              <Stack>
+                <Typography>Value</Typography>
+                {cell.condition.kind !== 'Value' && (
+                  <Typography variant="caption">Matches an exact text value</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+            <MenuItem value="Range">
+              <Stack>
+                <Typography>Range</Typography>
+                {cell.condition.kind !== 'Range' && (
+                  <Typography variant="caption">Matches against a numerical range</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+            <MenuItem value="Regex">
+              <Stack>
+                <Typography>Regex</Typography>
+                {cell.condition.kind !== 'Regex' && (
+                  <Typography variant="caption">Matches against a regular expression</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+            <MenuItem value="Misc">
+              <Stack>
+                <Typography>Misc</Typography>
+                {cell.condition.kind !== 'Misc' && (
+                  <Typography variant="caption">Matches against empty, null and NaN values</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+          </TextField>
+          <ConditionEditor
+            condition={cell.condition}
+            onChange={(updatedCondition) => onChange({ ...cell, condition: updatedCondition })}
+          />
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 4 }}>
+        <Stack spacing={1}>
+          <TextField
+            label="Display text"
+            value={cell.text ?? ''}
+            onChange={(e) => onChange({ ...cell, text: e.target.value })}
+            fullWidth
+            size="small"
+          />
+          <Stack direction="row" spacing={1}>
+            <TextField
+              label="Prefix"
+              placeholder="$"
+              value={cell.prefix ?? ''}
+              onChange={(e) => onChange({ ...cell, prefix: e.target.value })}
+              size="small"
+            />
+            <TextField
+              label="Suffix"
+              placeholder="%"
+              value={cell.suffix ?? ''}
+              onChange={(e) => onChange({ ...cell, suffix: e.target.value })}
+              size="small"
+            />
+          </Stack>
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 1 }}>
+        <Stack direction="row" justifyContent="center" gap={1}>
+          {cell.textColor ? (
+            <OptionsColorPicker
+              label="Text Color"
+              color={cell.textColor ?? '#000'}
+              onColorChange={(color) => onChange({ ...cell, textColor: color } as CellSettings)}
+              onClear={() => onChange({ ...cell, textColor: undefined } as CellSettings)}
+            />
+          ) : (
+            <IconButton onClick={() => onChange({ ...cell, textColor: '#000000' as `#${string}` })}>
+              <AddIcon />
+            </IconButton>
+          )}
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 1 }}>
+        <Stack direction="row" justifyContent="center">
+          {cell.backgroundColor ? (
+            <OptionsColorPicker
+              label="Background Color"
+              color={cell.backgroundColor ?? '#fff'}
+              onColorChange={(color) => onChange({ ...cell, backgroundColor: color } as CellSettings)}
+              onClear={() => onChange({ ...cell, backgroundColor: undefined } as CellSettings)}
+            />
+          ) : (
+            <IconButton onClick={() => onChange({ ...cell, backgroundColor: '#ffffff' as `#${string}` })}>
+              <AddIcon />
+            </IconButton>
+          )}
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 1 }} textAlign="end">
+        <Tooltip title="Remove conditional format rule" placement="top">
+          <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      </Grid>
+    </Grid>
   );
 }
