@@ -17,26 +17,35 @@ import (
 	"strings"
 )
 
-#var: _
+#grafanaVar: {
+	type: "custom" | "interval"
+	{
+		options : [...{
+			text: string
+			value: string
+		}]
+	} | {
+		query: string
+	}
+	...
+}
 
-if #var.type == "custom" || #var.type == "interval" {
-	kind: "StaticListVariable"
-	spec: {
-		if #var.options != _|_ {
-			values: [for option in #var.options {
-				[// switch
-					if option.text != option.value {
-						label: strings.TrimSpace(option.text)
-						value: strings.TrimSpace(option.value)
-					},
-					strings.TrimSpace(option.value),
-				][0]
-			}]
-		}
-		if #var.options == _|_ && #var.query != _|_ {
-			values: [for interval in strings.Split(#var.query, ",") {
-				strings.TrimSpace(interval)
-			}]
-		}
+kind: "StaticListVariable"
+spec: {
+	if #grafanaVar.options != _|_ {
+		values: [for option in #grafanaVar.options {
+			[// switch
+				if option.text != option.value {
+					label: strings.TrimSpace(option.text)
+					value: strings.TrimSpace(option.value)
+				},
+				strings.TrimSpace(option.value),
+			][0]
+		}]
+	}
+	if #grafanaVar.options == _|_ && #grafanaVar.query != _|_ {
+		values: [for interval in strings.Split(#grafanaVar.query, ",") {
+			strings.TrimSpace(interval)
+		}]
 	}
 }
