@@ -47,18 +47,17 @@ const (
 )
 
 type ColumnSettings struct {
-	Name                  string         `json:"name" yaml:"name"`
-	Header                string         `json:"header,omitempty" yaml:"header,omitempty"`
-	HeaderDescription     string         `json:"headerDescription,omitempty" yaml:"headerDescription,omitempty"`
-	CellDescription       string         `json:"cellDescription,omitempty" yaml:"cellDescription,omitempty"`
-	Format                *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
-	Align                 Align          `json:"align,omitempty" yaml:"align,omitempty"`
-	EnableSorting         bool           `json:"enableSorting,omitempty" yaml:"enableSorting,omitempty"`
-	Sort                  Sort           `json:"sort,omitempty" yaml:"sort,omitempty"`
-	Width                 float64        `json:"width,omitempty" yaml:"width,omitempty"`
-	Hide                  bool           `json:"hide,omitempty" yaml:"hide,omitempty"`
-	ConditionalFormatting bool           `json:"conditionalFormatting,omitempty" yaml:"conditionalFormatting,omitempty"`
-	CellSettings          []CellSettings `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Name              string         `json:"name" yaml:"name"`
+	Header            string         `json:"header,omitempty" yaml:"header,omitempty"`
+	HeaderDescription string         `json:"headerDescription,omitempty" yaml:"headerDescription,omitempty"`
+	CellDescription   string         `json:"cellDescription,omitempty" yaml:"cellDescription,omitempty"`
+	Format            *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
+	Align             Align          `json:"align,omitempty" yaml:"align,omitempty"`
+	EnableSorting     bool           `json:"enableSorting,omitempty" yaml:"enableSorting,omitempty"`
+	Sort              Sort           `json:"sort,omitempty" yaml:"sort,omitempty"`
+	Width             float64        `json:"width,omitempty" yaml:"width,omitempty"`
+	Hide              bool           `json:"hide,omitempty" yaml:"hide,omitempty"`
+	CellSettings      []CellSettings `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
 }
 
 type ValueConditionSpec struct {
