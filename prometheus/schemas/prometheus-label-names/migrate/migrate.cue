@@ -13,12 +13,12 @@
 
 package migrate
 
-#labelNamesRegex: =~ "^label_names\\(\\)$"
+#labelNamesRegexp: =~ "^label_names\\(\\)$"
 
 #grafanaVar: {
 	type: "query"
-	query: #labelNamesRegex | {
-		query: #labelNamesRegex
+	query: #labelNamesRegexp | {
+		query: #labelNamesRegexp
 		...
 	}
 	...

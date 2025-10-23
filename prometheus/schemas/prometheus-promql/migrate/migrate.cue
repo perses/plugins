@@ -17,10 +17,12 @@ import (
 	"regexp"
 )
 
+#promQLRegexp: =~ "^label_values\\(.*\\)$"
+
 #grafanaVar: {
 	type: "query"
-	query: =~ "^query_result" | {
-		query: =~ "^query_result"
+	query: #promQLRegexp | {
+		query: #promQLRegexp
 		...
 	}
 	...
