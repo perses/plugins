@@ -65,6 +65,12 @@ describe('Attributes', () => {
     expect(screen.getByText('123')).toBeInTheDocument();
   });
 
+  it('render doubleValue', () => {
+    const attributes = [{ key: 'attrkey', value: { doubleValue: 1.1 } }];
+    renderAttributeList({ attributes });
+    expect(screen.getByText('1.1')).toBeInTheDocument();
+  });
+
   it('render boolValue', () => {
     const attributes = [{ key: 'attrkey', value: { boolValue: false } }];
     renderAttributeList({ attributes });
