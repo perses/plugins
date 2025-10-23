@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
-import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
 import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
 import { useTheme, Theme } from '@mui/material';
-import { CellSettings, ColumnSettings, TableOptions } from '../models';
+import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -182,122 +182,6 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
   };
 }
 
-function generateCellConfig(value: unknown, settings: CellSettings[]): TableCellConfig | undefined {
-  for (const setting of settings) {
-    if (setting.condition.kind === 'Value' && setting.condition.spec?.value === String(value)) {
-      // Use custom text if provided, otherwise use the original value
-      const baseText = setting.text || String(value);
-      // Always apply prefix and suffix around the base text
-      const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-      return {
-        text: displayText,
-        textColor: setting.textColor,
-        backgroundColor: setting.backgroundColor,
-      };
-    }
-
-    if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
-      const numericValue = Number(value);
-      if (
-        setting.condition.spec?.min !== undefined &&
-        setting.condition.spec?.max !== undefined &&
-        numericValue >= +setting.condition.spec?.min &&
-        numericValue <= +setting.condition.spec?.max
-      ) {
-        const baseText = setting.text || String(value);
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-
-      if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
-        const baseText = setting.text || String(value);
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-
-      if (setting.condition.spec?.max !== undefined && numericValue <= +setting.condition.spec?.max) {
-        const baseText = setting.text || String(value);
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-    }
-
-    if (setting.condition.kind === 'Regex' && setting.condition.spec?.expr) {
-      const regex = new RegExp(setting.condition.spec?.expr);
-      if (regex.test(String(value))) {
-        const baseText = setting.text || String(value);
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-    }
-
-    if (setting.condition.kind === 'Misc' && setting.condition.spec?.value) {
-      if (setting.condition.spec?.value === 'empty' && value === '') {
-        const baseText = setting.text || String(value);
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-      if (setting.condition.spec?.value === 'null' && (value === null || value === undefined)) {
-        const baseText = setting.text || 'null';
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-      if (setting.condition.spec?.value === 'NaN' && Number.isNaN(value)) {
-        const baseText = setting.text || 'NaN';
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-      if (setting.condition.spec?.value === 'true' && value === true) {
-        const baseText = setting.text || String(value);
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-      if (setting.condition.spec?.value === 'false' && value === false) {
-        const baseText = setting.text || String(value);
-        const displayText = `${setting.prefix || ''}${baseText}${setting.suffix || ''}`;
-        return {
-          text: displayText,
-          textColor: setting.textColor,
-          backgroundColor: setting.backgroundColor,
-        };
-      }
-    }
-  }
-  return undefined;
-}
-
 export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant' | 'range' } {
   // if any cell renders a panel plugin, perform a range query instead of an instant query
   return {
@@ -433,12 +317,12 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
       for (const [key, value] of Object.entries(extendRow)) {
         // First, try to get cell config from global cell settings
-        let cellConfig = generateCellConfig(value, spec.cellSettings ?? []);
+        let cellConfig = evaluateConditionalFormatting(value, spec.cellSettings ?? []);
 
         // Then, try to get cell config from column-specific cell settings if conditional formatting is enabled
         const columnSetting = spec.columnSettings?.find((col) => col.name === key);
-        if (columnSetting?.conditionalFormatting && columnSetting.cellSettings) {
-          const columnCellConfig = generateCellConfig(value, columnSetting.cellSettings);
+        if (columnSetting?.cellSettings?.length) {
+          const columnCellConfig = evaluateConditionalFormatting(value, columnSetting.cellSettings);
           // Column-specific settings take precedence over global settings
           if (columnCellConfig) {
             cellConfig = columnCellConfig;
