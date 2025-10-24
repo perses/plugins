@@ -25,7 +25,7 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.4",
-    "@lezer/highlight": "^1.2.1x",
+    "@lezer/highlight": "^1.2.1",
     "@grafana/lezer-traceql": "^0.0.25"
   },
   "peerDependencies": {
