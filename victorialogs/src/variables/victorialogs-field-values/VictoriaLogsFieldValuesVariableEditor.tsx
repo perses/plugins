@@ -15,6 +15,8 @@ import {
   DatasourceSelect,
   DatasourceSelectProps,
   OptionsEditorProps,
+  isVariableDatasource,
+  useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, useState, useMemo, SyntheticEvent } from 'react';
@@ -24,6 +26,7 @@ import {
   isVictoriaLogsDatasourceSelector,
   VICTORIALOGS_DATASOURCE_KIND,
   VictoriaLogsClient,
+  VictoriaLogsDatasourceSelector,
 } from '../../model';
 import {
   VictoriaLogsFieldValuesVariableOptions,
@@ -39,15 +42,19 @@ export function VictoriaLogsFieldValuesVariableEditor(
     value: { datasource, query, field },
     queryHandlerSettings,
   } = props;
-  const selectedDatasource = datasource ?? DEFAULT_VICTORIALOGS;
+  const datasourceSelectValue = datasource ?? DEFAULT_VICTORIALOGS;
+  const selectedDatasource = useDatasourceSelectValueToSelector(
+    datasourceSelectValue,
+    VICTORIALOGS_DATASOURCE_KIND
+  ) as VictoriaLogsDatasourceSelector;
   const { data: fieldNames, isLoading: isFieldNamesOptionsLoading } = useFieldNames(query, selectedDatasource);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
-      if (isVictoriaLogsDatasourceSelector(next)) {
+      if (isVariableDatasource(next) || isVictoriaLogsDatasourceSelector(next)) {
         onChange(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-            draft.datasource = isDefaultVictoriaLogsSelector(next) ? undefined : next;
+            draft.datasource = !isVariableDatasource(next) && isDefaultVictoriaLogsSelector(next) ? undefined : next;
           })
         );
         if (queryHandlerSettings?.setWatchOtherSpecs)
@@ -97,7 +104,7 @@ export function VictoriaLogsFieldValuesVariableEditor(
       <FormControl margin="dense">
         <DatasourceSelect
           datasourcePluginKind="VictoriaLogsDatasource"
-          value={selectedDatasource}
+          value={datasourceSelectValue}
           onChange={handleDatasourceChange}
           readOnly={props.isReadonly}
           labelId="victorialogs-datasource-field"

@@ -1,7 +1,8 @@
+import { DatasourceSelectValue } from '@perses-dev/plugin-system';
 import { VictoriaLogsDatasourceSelector } from "../model";
 
 export interface VictoriaLogsVariableOptionsBase {
-  datasource?: VictoriaLogsDatasourceSelector;
+  datasource?: DatasourceSelectValue<VictoriaLogsDatasourceSelector>;
 }
 
 export type VictoriaLogsFieldNamesVariableOptions = VictoriaLogsVariableOptionsBase & {

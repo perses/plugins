@@ -15,6 +15,8 @@ import {
   DatasourceSelect,
   DatasourceSelectProps,
   OptionsEditorProps,
+  isVariableDatasource,
+  useDatasourceSelectValueToSelector
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, useState } from 'react';
@@ -24,6 +26,7 @@ import {
   isVictoriaLogsDatasourceSelector,
   VICTORIALOGS_DATASOURCE_KIND,
   VictoriaLogsClient,
+  VictoriaLogsDatasourceSelector,
 } from '../../model';
 import {
   VictoriaLogsFieldNamesVariableOptions,
@@ -39,13 +42,17 @@ export function VictoriaLogsFieldNamesVariableEditor(
     queryHandlerSettings,
   } = props;
 
-  const selectedDatasource = datasource ?? DEFAULT_VICTORIALOGS;
+  const datasourceSelectValue = datasource ?? DEFAULT_VICTORIALOGS;
+  const selectedDatasource = useDatasourceSelectValueToSelector(
+    datasourceSelectValue,
+    VICTORIALOGS_DATASOURCE_KIND
+  ) as VictoriaLogsDatasourceSelector;
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
-      if (isVictoriaLogsDatasourceSelector(next)) {
+      if (isVariableDatasource(next) || isVictoriaLogsDatasourceSelector(next)) {
         onChange(
           produce(value, (draft) => {
-            draft.datasource = isDefaultVictoriaLogsSelector(next) ? undefined : next;
+            draft.datasource = !isVariableDatasource(next) && isDefaultVictoriaLogsSelector(next) ? undefined : next;
           })
         );
         if (queryHandlerSettings?.setWatchOtherSpecs)
