@@ -25,7 +25,6 @@ export function CellsEditor({ cellSettings, onChange }: CellsEditorProps): React
     <ConditionalPanel
       cellSettings={cellSettings}
       onChange={(updatedCellSettings) => onChange(updatedCellSettings || [])}
-      addButtonText="Add Cell Settings"
     />
   );
 }
