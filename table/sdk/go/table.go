@@ -57,6 +57,7 @@ type ColumnSettings struct {
 	Sort              Sort           `json:"sort,omitempty" yaml:"sort,omitempty"`
 	Width             float64        `json:"width,omitempty" yaml:"width,omitempty"`
 	Hide              bool           `json:"hide,omitempty" yaml:"hide,omitempty"`
+	CellSettings      []CellSettings `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
 }
 
 type ValueConditionSpec struct {
@@ -145,6 +146,8 @@ func (c *Condition) unmarshal(unmarshal func(interface{}) error, staticMarshal f
 type CellSettings struct {
 	Condition       Condition `json:"condition" yaml:"condition"`
 	Text            string    `json:"text,omitempty" yaml:"text,omitempty"`
+	Prefix          string    `json:"prefix,omitempty" yaml:"prefix,omitempty"`
+	Suffix          string    `json:"suffix,omitempty" yaml:"suffix,omitempty"`
 	TextColor       string    `json:"textColor,omitempty" yaml:"textColor,omitempty"`
 	BackgroundColor string    `json:"backgroundColor,omitempty" yaml:"backgroundColor,omitempty"`
 }

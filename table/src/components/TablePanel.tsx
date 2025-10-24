@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { PanelData, PanelProps } from '@perses-dev/plugin-system';
-import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { PaginationState, SortingState } from '@tanstack/react-table';
-import { CellSettings, ColumnSettings, TableOptions } from '../models';
+import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
+import { useTheme, Theme } from '@mui/material';
+import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -41,6 +42,114 @@ function generateCellContentConfig(
     },
     cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
   };
+}
+
+interface ColumnFilterDropdownProps {
+  allValues: Array<string | number>;
+  selectedValues: Array<string | number>;
+  onFilterChange: (values: Array<string | number>) => void;
+  theme: Theme;
+}
+
+function ColumnFilterDropdown({
+  allValues,
+  selectedValues,
+  onFilterChange,
+  theme,
+}: ColumnFilterDropdownProps): ReactElement {
+  const values = [...new Set(allValues)].filter((v) => v != null).sort();
+  if (values.length === 0) {
+    return (
+      <div
+        data-filter-dropdown
+        style={{
+          width: 200,
+          padding: 10,
+          backgroundColor: theme.palette.background.paper,
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 4,
+          boxShadow: theme.shadows[4],
+        }}
+      >
+        <div style={{ color: theme.palette.text.secondary, fontSize: 14 }}>No values found</div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      data-filter-dropdown
+      style={{
+        width: 200,
+        padding: 10,
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: 4,
+        boxShadow: theme.shadows[4],
+        maxHeight: 250,
+        overflowY: 'auto',
+      }}
+    >
+      <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 'bold' }}>
+        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={selectedValues.length === values.length && values.length > 0}
+            onChange={(e) => onFilterChange(e.target.checked ? values : [])}
+            style={{ marginRight: 8 }}
+          />
+          <span style={{ color: theme.palette.text.primary }}>Select All ({values.length})</span>
+        </label>
+      </div>
+      <hr
+        style={{
+          margin: '8px 0',
+          border: 'none',
+          borderTop: `1px solid ${theme.palette.divider}`,
+        }}
+      />
+      {values.map((value, index) => (
+        <div key={`value-${index}`} style={{ marginBottom: 4 }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              padding: '2px 0',
+              borderRadius: 2,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.palette.action.hover;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={selectedValues.includes(value)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  onFilterChange([...selectedValues, value]);
+                } else {
+                  onFilterChange(selectedValues.filter((v) => v !== value));
+                }
+              }}
+              style={{ marginRight: 8 }}
+            />
+            <span
+              style={{
+                fontSize: 14,
+                color: theme.palette.text.primary,
+              }}
+            >
+              {value === null || value === undefined || value === '' ? '(empty)' : String(value)}
+            </span>
+          </label>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 /*
@@ -73,60 +182,6 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
   };
 }
 
-function generateCellConfig(value: unknown, settings: CellSettings[]): TableCellConfig | undefined {
-  for (const setting of settings) {
-    if (setting.condition.kind === 'Value' && setting.condition.spec?.value === String(value)) {
-      return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-    }
-
-    if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
-      const numericValue = Number(value);
-      if (
-        setting.condition.spec?.min !== undefined &&
-        setting.condition.spec?.max !== undefined &&
-        numericValue >= +setting.condition.spec?.min &&
-        numericValue <= +setting.condition.spec?.max
-      ) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-
-      if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-
-      if (setting.condition.spec?.max !== undefined && numericValue <= +setting.condition.spec?.max) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-    }
-
-    if (setting.condition.kind === 'Regex' && setting.condition.spec?.expr) {
-      const regex = new RegExp(setting.condition.spec?.expr);
-      if (regex.test(String(value))) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-    }
-
-    if (setting.condition.kind === 'Misc' && setting.condition.spec?.value) {
-      if (setting.condition.spec?.value === 'empty' && value === '') {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-      if (setting.condition.spec?.value === 'null' && (value === null || value === undefined)) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-      if (setting.condition.spec?.value === 'NaN' && Number.isNaN(value)) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-      if (setting.condition.spec?.value === 'true' && value === true) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-      if (setting.condition.spec?.value === 'false' && value === false) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
-      }
-    }
-  }
-  return undefined;
-}
-
 export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant' | 'range' } {
   // if any cell renders a panel plugin, perform a range query instead of an instant query
   return {
@@ -137,6 +192,8 @@ export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant'
 export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
 
 export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
+  const theme = useTheme();
+
   // TODO: handle other query types
   const queryMode = getTablePanelQueryOptions(spec).mode;
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
@@ -177,7 +234,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [queryResults, queryMode, spec.columnSettings]);
 
   // Transform will be applied by their orders on the original data
-  const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);
+  const data = transformData(rawData, spec.transforms ?? []);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
@@ -192,6 +249,18 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
     return result;
   }, [data]);
+
+  // fetch unique values for each column of filtering
+  const columnUniqueValues = useMemo(() => {
+    const uniqueValues: Record<string, Array<string | number>> = {};
+
+    keys.forEach((key) => {
+      const values = data.map((row) => row[key]).filter((val) => val !== null && val !== undefined && val !== '');
+      uniqueValues[key] = Array.from(new Set(values as Array<string | number>));
+    });
+
+    return uniqueValues;
+  }, [data, keys]);
 
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
@@ -222,8 +291,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {
-    // If there is no cell settings, return an empty array
-    if (spec.cellSettings === undefined) {
+    // If there are no cell settings globally or per column, return an empty object
+    if (spec.cellSettings === undefined && !spec.columnSettings?.some((col) => col.cellSettings !== undefined)) {
       return {};
     }
 
@@ -247,7 +316,19 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       };
 
       for (const [key, value] of Object.entries(extendRow)) {
-        const cellConfig = generateCellConfig(value, spec.cellSettings ?? []);
+        // First, try to get cell config from global cell settings
+        let cellConfig = evaluateConditionalFormatting(value, spec.cellSettings ?? []);
+
+        // Then, try to get cell config from column-specific cell settings if conditional formatting is enabled
+        const columnSetting = spec.columnSettings?.find((col) => col.name === key);
+        if (columnSetting?.cellSettings?.length) {
+          const columnCellConfig = evaluateConditionalFormatting(value, columnSetting.cellSettings);
+          // Column-specific settings take precedence over global settings
+          if (columnCellConfig) {
+            cellConfig = columnCellConfig;
+          }
+        }
+
         if (cellConfig) {
           result[`${index}_${key}`] = cellConfig;
         }
@@ -256,7 +337,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return result;
-  }, [data, keys, spec.cellSettings]);
+  }, [data, keys, spec.cellSettings, spec.columnSettings]);
 
   function generateDefaultSortingState(): SortingState {
     return (
@@ -272,6 +353,82 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }
 
   const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
+
+  // Filtering state
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
+  const [openFilterColumn, setOpenFilterColumn] = useState<string | null>(null);
+
+  // get selected values for a column
+  const getSelectedFilterValues = (columnId: string): Array<string | number> => {
+    const filter = columnFilters.find((f) => f.id === columnId);
+    return filter ? (filter.value as Array<string | number>) : [];
+  };
+
+  // update column filter
+  const updateColumnFilter = (columnId: string, values: Array<string | number>) => {
+    const newFilters = columnFilters.filter((f) => f.id !== columnId);
+    if (values.length > 0) {
+      newFilters.push({ id: columnId, value: values });
+    }
+    setColumnFilters(newFilters);
+  };
+
+  // Handle filter clicks
+  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setFilterAnchorEl({ ...filterAnchorEl, [columnId]: event.currentTarget });
+    setOpenFilterColumn(columnId);
+  };
+
+  const handleFilterClose = () => {
+    setFilterAnchorEl({});
+    setOpenFilterColumn(null);
+  };
+
+  // Close filter when clicking outside
+  useEffect(() => {
+    if (!openFilterColumn) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (!target.closest('[data-filter-dropdown]') && !target.closest('button')) {
+        handleFilterClose();
+      }
+    };
+
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClick);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClick);
+    };
+  }, [openFilterColumn]);
+
+  // filter data based on the current filters
+  const filteredData = useMemo(() => {
+    let filtered = [...data];
+
+    // apply column filters if enabled
+    if (spec.enableFiltering && columnFilters.length > 0) {
+      filtered = filtered.filter((row) => {
+        return columnFilters.every((filter) => {
+          const value = row[filter.id];
+          const filterValues = filter.value as Array<string | number>;
+
+          if (!filterValues || filterValues.length === 0) return true; // No filter values means no filtering
+
+          // Check if the row value is in the selected filter values
+          return filterValues.includes(value as string | number);
+        });
+      });
+    }
+
+    return filtered;
+  }, [data, columnFilters, spec.enableFiltering]);
 
   const [pagination, setPagination] = useState<PaginationState | undefined>(
     spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
@@ -291,19 +448,115 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }
 
   return (
-    <Table
-      data={data}
-      columns={columns}
-      cellConfigs={cellConfigs}
-      height={contentDimensions.height}
-      width={contentDimensions.width}
-      density={spec.density}
-      defaultColumnWidth={spec.defaultColumnWidth}
-      defaultColumnHeight={spec.defaultColumnHeight}
-      sorting={sorting}
-      onSortingChange={setSorting}
-      pagination={pagination}
-      onPaginationChange={setPagination}
-    />
+    <div>
+      {spec.enableFiltering && (
+        <div
+          style={{
+            display: 'flex',
+            background: theme.palette.background.default,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            width: contentDimensions.width,
+            boxSizing: 'border-box',
+          }}
+        >
+          {columns.map((column, idx) => {
+            const filters = getSelectedFilterValues(column.accessorKey as string);
+            const columnWidth = column.width || spec.defaultColumnWidth;
+            return (
+              <div
+                key={`filter-${idx}`}
+                style={{
+                  padding: '8px',
+                  borderRight: idx < columns.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
+                  width: columnWidth,
+                  minWidth: columnWidth,
+                  maxWidth: columnWidth,
+                  display: 'flex',
+                  alignItems: 'center',
+                  position: 'relative',
+                  boxSizing: 'border-box',
+                  flex: typeof columnWidth === 'number' ? 'none' : '1 1 auto',
+                }}
+              >
+                <span
+                  style={{
+                    marginRight: 8,
+                    fontSize: '12px',
+                    color: theme.palette.text.secondary,
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {filters.length ? `${filters.length} items` : 'All'}
+                </span>
+                <button
+                  onClick={(e) => {
+                    handleFilterClick(e, column.accessorKey as string);
+                  }}
+                  style={{
+                    border: `1px solid ${theme.palette.divider}`,
+                    background: theme.palette.background.paper,
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    color: filters.length ? theme.palette.primary.main : theme.palette.text.secondary,
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    minWidth: '20px',
+                    height: '24px',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = theme.palette.action.hover;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = theme.palette.background.paper;
+                  }}
+                  type="button"
+                >
+                  ▼
+                </button>
+
+                {openFilterColumn === column.accessorKey && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      zIndex: 1000,
+                      marginTop: 4,
+                    }}
+                  >
+                    <ColumnFilterDropdown
+                      allValues={columnUniqueValues[column.accessorKey as string] || []}
+                      selectedValues={filters}
+                      onFilterChange={(values) => updateColumnFilter(column.accessorKey as string, values)}
+                      theme={theme}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Table
+        data={filteredData}
+        columns={columns}
+        cellConfigs={cellConfigs}
+        height={spec.enableFiltering ? contentDimensions.height - 40 : contentDimensions.height}
+        width={contentDimensions.width}
+        density={spec.density}
+        defaultColumnWidth={spec.defaultColumnWidth}
+        defaultColumnHeight={spec.defaultColumnHeight}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+      />
+    </div>
   );
 }
