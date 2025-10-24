@@ -14,8 +14,10 @@ import { FormControl, Stack, TextField } from '@mui/material';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
+  isVariableDatasource,
   OptionsEditorProps,
   useDatasourceClient,
+  useDatasourceSelectValueToSelector,
   VariableOption,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
@@ -28,6 +30,7 @@ import {
   MatrixData,
   PROM_DATASOURCE_KIND,
   PrometheusClient,
+  PrometheusDatasourceSelector,
   VectorData,
 } from '../model';
 import { MatcherEditor } from './MatcherEditor';
@@ -59,11 +62,11 @@ export function PrometheusLabelValuesVariableEditor(
   const [matchersValues, setMatchersValues] = useState(props.value.matchers ?? []);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
-      if (isPrometheusDatasourceSelector(next)) {
+      if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
         onChange(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-            draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+            draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
           })
         );
         if (queryHandlerSettings?.setWatchOtherSpecs)
@@ -133,11 +136,11 @@ export function PrometheusLabelNamesVariableEditor(
   const [matchersValues, setMatchersValues] = useState(props.value.matchers ?? []);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
-      if (isPrometheusDatasourceSelector(next)) {
+      if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
         onChange(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-            draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+            draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
           })
         );
         if (queryHandlerSettings?.setWatchOtherSpecs)
@@ -186,18 +189,22 @@ export function PrometheusPromQLVariableEditor(
     value: { datasource },
     queryHandlerSettings,
   } = props;
-  const selectedDatasource = datasource ?? DEFAULT_PROM;
+  const datasourceSelectValue = datasource ?? DEFAULT_PROM;
+  const selectedDatasource = useDatasourceSelectValueToSelector(
+    datasourceSelectValue,
+    PROM_DATASOURCE_KIND
+  ) as PrometheusDatasourceSelector;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
   const [labelValue, setLableValue] = useState(props.value.labelName);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
-      if (isPrometheusDatasourceSelector(next)) {
+      if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
         onChange(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-            draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+            draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
           })
         );
         if (queryHandlerSettings?.setWatchOtherSpecs)
@@ -239,7 +246,7 @@ export function PrometheusPromQLVariableEditor(
       <FormControl margin="dense">
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
-          value={selectedDatasource}
+          value={datasourceSelectValue}
           onChange={handleDatasourceChange}
           labelId="prom-datasource-label"
           label="Prometheus Datasource"

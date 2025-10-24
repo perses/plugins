@@ -1,11 +1,24 @@
-import { VariablePlugin, GetVariableOptionsContext, replaceVariables, parseVariables } from '@perses-dev/plugin-system';
-import { PrometheusClient, DEFAULT_PROM, getPrometheusTimeRange } from '../model';
+import {
+  VariablePlugin,
+  GetVariableOptionsContext,
+  replaceVariables,
+  parseVariables,
+  datasourceSelectValueToSelector,
+  isVariableDatasource,
+} from '@perses-dev/plugin-system';
+import { PrometheusClient, DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
 import { stringArrayToVariableOptions, PrometheusLabelNamesVariableEditor } from './prometheus-variables';
 import { PrometheusLabelNamesVariableOptions } from './types';
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec: PrometheusLabelNamesVariableOptions, ctx: GetVariableOptionsContext) => {
-    const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
+    const datasourceSelector =
+      datasourceSelectValueToSelector(
+        spec.datasource ?? DEFAULT_PROM,
+        ctx.variables,
+        await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND)
+      ) ?? DEFAULT_PROM;
+    const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(datasourceSelector);
     const match = spec.matchers ? spec.matchers.map((m) => replaceVariables(m, ctx.variables)) : undefined;
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
 
@@ -15,7 +28,10 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
     };
   },
   dependsOn: (spec: PrometheusLabelNamesVariableOptions) => {
-    return { variables: spec.matchers?.map((m) => parseVariables(m)).flat() || [] };
+    const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
+    const datasourceVariables =
+      spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];
+    return { variables: [...matcherVariables, ...datasourceVariables] };
   },
   OptionsEditorComponent: PrometheusLabelNamesVariableEditor,
   createInitialOptions: () => ({}),
