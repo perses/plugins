@@ -140,8 +140,7 @@ export function PrometheusLabelNamesVariableEditor(
         onChange(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-            draft.datasource =
-              !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
+            draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
           })
         );
         if (queryHandlerSettings?.setWatchOtherSpecs)
