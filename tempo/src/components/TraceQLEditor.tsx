@@ -27,10 +27,10 @@ export function TraceQLEditor({ client, ...rest }: TraceQLEditorProps): ReactEle
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
-  const { timeRange } = useTimeRange();
+  const { absoluteTimeRange } = useTimeRange();
   const traceQLExtension = useMemo(() => {
-    return TraceQLExtension({ client, timeRange });
-  }, [client, timeRange]);
+    return TraceQLExtension({ client, timeRange: absoluteTimeRange });
+  }, [client, absoluteTimeRange]);
 
   const codemirrorTheme = useMemo(() => {
     // https://github.com/mui/material-ui/blob/v5.16.7/packages/mui-material/src/OutlinedInput/OutlinedInput.js#L43

@@ -26,7 +26,7 @@ import {
   FieldOp,
 } from '@grafana/lezer-traceql';
 import { EditorView } from '@uiw/react-codemirror';
-import { isAbsoluteTimeRange, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
+import { getUnixTimeRange } from '../plugins/tempo-trace-query';
 import { CompletionConfig } from './TraceQLExtension';
 
 /** CompletionScope specifies the completion kind, e.g. whether to complete tag names or values etc. */
@@ -226,17 +226,6 @@ async function retrieveOptions(completionCfg: CompletionConfig, completions: Com
   return options.flat();
 }
 
-function getUnixTimeRange(timeRange?: TimeRangeValue): { start?: number; end?: number } {
-  if (!timeRange) {
-    return {};
-  }
-
-  const absTimeRange = !isAbsoluteTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-  const start = Math.round(absTimeRange.start.getTime() / 1000);
-  const end = Math.round(absTimeRange.end.getTime() / 1000);
-  return { start, end };
-}
-
 async function completeTagName(
   completionCfg: CompletionConfig,
   scope: 'resource' | 'span' | 'intrinsic'
@@ -245,7 +234,7 @@ async function completeTagName(
     return [];
   }
 
-  const { start, end } = getUnixTimeRange(completionCfg.timeRange);
+  const { start, end } = completionCfg.timeRange ? getUnixTimeRange(completionCfg.timeRange) : {};
   const { limit, maxStaleValues } = completionCfg;
 
   const response = await completionCfg.client.searchTags({ scope, start, end, limit, maxStaleValues });
@@ -298,7 +287,7 @@ async function completeTagValue(completionCfg: CompletionConfig, tag: string): P
     return [];
   }
 
-  const { start, end } = getUnixTimeRange(completionCfg.timeRange);
+  const { start, end } = completionCfg.timeRange ? getUnixTimeRange(completionCfg.timeRange) : {};
   const { limit, maxStaleValues } = completionCfg;
 
   const response = await completionCfg.client.searchTagValues({ tag, start, end, limit, maxStaleValues });
