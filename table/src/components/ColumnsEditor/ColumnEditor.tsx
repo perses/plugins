@@ -45,7 +45,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
   );
 
   return (
-    <Stack {...others} spacing={2}>
+    <Stack {...others}>
       <OptionsEditorGrid>
         <OptionsEditorColumn>
           <OptionsEditorGroup title="Column">

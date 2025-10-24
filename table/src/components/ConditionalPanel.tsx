@@ -156,7 +156,7 @@ export interface ConditionalPanelProps {
 export function ConditionalPanel({
   cellSettings = [],
   onChange,
-  addButtonText = 'Add Cell Settings',
+  addButtonText = 'Add Conditional Format',
 }: ConditionalPanelProps) {
   const handleCellChange = (index: number, updatedCell: CellSettings) => {
     const updatedCells = [...cellSettings];
@@ -203,7 +203,7 @@ export function ConditionalPanel({
           />
         ))}
       </Stack>
-      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleAddCell}>
+      <Button variant="outlined" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleAddCell}>
         {addButtonText}
       </Button>
     </Stack>
