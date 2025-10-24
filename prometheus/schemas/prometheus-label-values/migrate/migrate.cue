@@ -17,24 +17,31 @@ import (
 	"regexp"
 )
 
-#var: _
+#labelValuesRegexp: =~ "^label_values\\(.*\\)$"
 
-// NB we would need `if` to support short-circuit in order to avoid code duplication here.
-//    See https://github.com/cue-lang/cue/issues/2232
+#grafanaVar: {
+	type: "query"
+	query: #labelValuesRegexp | {
+		query: #labelValuesRegexp
+		...
+	}
+	...
+}
 
-if #var.type == "query" if (#var.query & string) != _|_ if #var.query =~ "^label_values\\(.*\\)$" {
+_outputLabelValuesVar: {
+	#query: string
+
 	kind: "PrometheusLabelValuesVariable"
 	spec: {
-		#matches:  regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #var.query)
+		#matches:  regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #query)
 		labelName: #matches[3]
 		matchers: [if #matches[2] != "" {#matches[2]}]
 	}
 }
-if #var.type == "query" if (#var.query & {}) != _|_ if #var.query.query =~ "^label_values\\(.*\\)$" {
-	kind: "PrometheusLabelValuesVariable"
-	spec: {
-		#matches:  regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #var.query.query)
-		labelName: #matches[3]
-		matchers: [if #matches[2] != "" {#matches[2]}]
-	}
+
+if (#grafanaVar.query & string) != _|_ {
+	_outputLabelValuesVar & {#query: #grafanaVar.query}
+}
+if (#grafanaVar.query & {}) != _|_ {
+	_outputLabelValuesVar & {#query: #grafanaVar.query.query}
 }
