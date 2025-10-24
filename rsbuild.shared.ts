@@ -115,7 +115,6 @@ function getRsbuildConfig(name: string): RsbuildConfig {
     dev: { assetPrefix },
     source: { entry: { main: './src/index-federation.ts' } },
     output: {
-      assetPrefix,
       copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
       distPath: {
         root: 'dist',
@@ -126,6 +125,12 @@ function getRsbuildConfig(name: string): RsbuildConfig {
     },
     tools: {
       htmlPlugin: false,
+      rspack: (config) => {
+        config.output = config.output || {};
+        // Set to 'auto' to allow runtime override via __webpack_public_path__
+        config.output.publicPath = 'auto';
+        return config;
+      },
     },
   };
 }
