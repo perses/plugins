@@ -12,6 +12,8 @@
     },
     "sort": "desc",
     "mode": "value",
-    "radius": 50
+    "radius": 50,
+    "color": "",
+    "showLabel": true
   }
 }
