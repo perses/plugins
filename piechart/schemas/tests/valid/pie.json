@@ -14,6 +14,6 @@
     "mode": "value",
     "radius": 50,
     "color": "",
-    "showLabel": true
+    "showLabels": true
   }
 }
