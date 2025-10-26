@@ -32,7 +32,7 @@ export function sortSeriesData(data: PieChartData[], sortOrder: SortOption = DEF
     if (a.value === null && b.value === null) return 0;
     if (a.value === null) return 1;
     if (b.value === null) return -1;
-    
+
     // Sort by value
     const diff = (a.value ?? 0) - (b.value ?? 0);
     return sortOrder === 'asc' ? diff : -diff;

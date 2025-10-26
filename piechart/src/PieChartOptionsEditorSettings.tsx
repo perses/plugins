@@ -35,7 +35,18 @@ import {
   OptionsEditorControl,
 } from '@perses-dev/components';
 import { CalculationType, isPercentUnit, FormatOptions } from '@perses-dev/core';
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack, Switch, SwitchProps, Typography, useTheme } from '@mui/material';
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Switch,
+  SwitchProps,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { ReactElement, useMemo } from 'react';
 import { PieChartOptions, PieChartOptionsEditorProps, DEFAULT_FORMAT } from './pie-chart-model';
 
@@ -113,12 +124,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
         <OptionsEditorGroup title="Misc">
           <OptionsEditorControl
             label="Show Labels"
-            control={
-              <Switch
-                checked={Boolean(value.showLabels)}
-                onChange={handleShowLabelsChange}
-              />
-            }
+            control={<Switch checked={Boolean(value.showLabels)} onChange={handleShowLabelsChange} />}
           />
           <FormatControls value={format} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
@@ -128,7 +134,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Colors">
-          <Stack spacing={2}>            
+          <Stack spacing={2}>
             <Stack direction="row" spacing={2} alignItems="center">
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Color Scheme</InputLabel>
@@ -147,19 +153,12 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                   <MenuItem value="custom">Custom Color</MenuItem>
                 </Select>
               </FormControl>
-              
-              {color !== '' && (
-                <OptionsColorPicker
-                  label="Color"
-                  color={color}
-                  onColorChange={handleColorChange}
-                />
-              )}
+              {color !== '' && <OptionsColorPicker label="Color" color={color} onColorChange={handleColorChange} />}
             </Stack>
 
             {color === '' && (
               <Typography variant="body2" color="text.secondary">
-                Colors will be automatically assigned using the current theme's color palette.
+                Colors will be automatically assigned using the current theme color palette.
               </Typography>
             )}
 

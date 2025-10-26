@@ -50,15 +50,11 @@ export function generateGradientColor(baseColor: string, factor: number): string
  * Generates a list of color strings for a given number of series using a categorical palette.
  * When the number of series exceeds the palette size, it cycles through the palette
  * and applies gradients to create visual distinction.
- * 
  * @param totalSeries - The total number of series that need colors
  * @param colorPalette - Array of color strings to use as the base palette
  * @returns Array of color strings, one for each series
  */
-export function getSeriesColor(
-  totalSeries: number,
-  colorPalette: string[]
-): string[] {
+export function getSeriesColor(totalSeries: number, colorPalette: string[]): string[] {
   if (totalSeries <= 0) {
     return [];
   }
@@ -66,24 +62,24 @@ export function getSeriesColor(
   const colors: string[] = [];
 
   // Special case: single color palette - generate gradients from that color
-  if (colorPalette.length === 1 || !colorPalette || colorPalette.length === 0 ) {
+  if (colorPalette.length === 1 || !colorPalette || colorPalette.length === 0) {
     const baseColor = colorPalette[0] ?? '#555555';
     for (let i = 0; i < totalSeries; i++) {
       if (i === 0) {
         colors.push(baseColor);
       } else {
-        const gradientFactor = 1 * ((totalSeries - i)/totalSeries);
+        const gradientFactor = 1 * ((totalSeries - i) / totalSeries);
         colors.push(generateGradientColor(baseColor, gradientFactor));
       }
     }
     return colors.sort(() => Math.random() - 0.5);
   }
-  
+
   for (let i = 0; i < totalSeries; i++) {
     const color = getColor(colorPalette, i);
     colors.push(color);
   }
-  
+
   return colors.sort(() => Math.random() - 0.5);
 }
 
@@ -96,20 +92,20 @@ export function getColor(palette: string[], seriesIndex: number): string {
   if (!palette || palette.length === 0) {
     return '#555555';
   }
-  
+
   const paletteTotalColors = palette.length;
   const paletteIndex = seriesIndex % paletteTotalColors;
   const baseColor = palette[paletteIndex] ?? '#555555';
-  
+
   // If we haven't exhausted the palette yet, use the original color
   if (seriesIndex < paletteTotalColors) {
     return baseColor;
   }
-  
+
   // Calculate which "cycle" we're in (0 = first repeat, 1 = second repeat, etc.)
   const cycleNumber = Math.floor(seriesIndex / paletteTotalColors);
-  
+
   // Apply gradient based on cycle number to create visual distinction
-  const gradientFactor = Math.min(1 - (cycleNumber * 0.2), 1);
+  const gradientFactor = Math.min(1 - cycleNumber * 0.2, 1);
   return generateGradientColor(baseColor, gradientFactor);
 }

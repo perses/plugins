@@ -45,10 +45,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
 
   // Memoize the total series count so it doesn't recompute on resize
   const totalSeriesCount = useMemo(() => {
-    return queryResults.reduce(
-      (count, result) => count + (result?.data.series?.length || 0),
-      0
-    );
+    return queryResults.reduce((count, result) => count + (result?.data.series?.length || 0), 0);
   }, [queryResults]);
 
   // Memoize the color list so it only regenerates when color/palette/series count changes
@@ -63,14 +60,13 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
     const legendItems: LegendItem[] = [];
     const legendColumns: Array<TableColumnConfig<LegendItem>> = [];
 
-
     queryResults.forEach((result, queryIndex) => {
       const series = result?.data.series ?? [];
-      
+
       series.forEach((seriesData, seriesIndex) => {
         const seriesId = `${chartId}${seriesData.name}${seriesIndex}${queryIndex}`;
-        const seriesColor = colorList[(queryIndex * series.length) + seriesIndex] ?? '#555555';
-        
+        const seriesColor = colorList[queryIndex * series.length + seriesIndex] ?? '#555555';
+
         const seriesItem = {
           id: seriesId,
           value: calculate(seriesData.values) ?? null,
@@ -143,15 +139,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
       legendItems,
       legendColumns,
     };
-  }, [
-    calculation,
-    sort,
-    mode,
-    queryResults,
-    colorList,
-    chartId,
-    pieChartLegend,
-  ]);
+  }, [calculation, sort, mode, queryResults, colorList, chartId, pieChartLegend]);
 
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions

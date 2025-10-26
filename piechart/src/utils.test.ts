@@ -13,7 +13,6 @@
 
 import { PieChartData } from './PieChartBase';
 import { calculatePercentages, sortSeriesData } from './utils';
-import { getColor, getSeriesColor, generateGradientColor } from './colors'
 
 const MOCK_DATA: PieChartData[] = [
   {
