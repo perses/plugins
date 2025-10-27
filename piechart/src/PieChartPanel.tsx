@@ -35,7 +35,7 @@ export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode, legend: pieChartLegend, color },
+    spec: { calculation, sort, mode, legend: pieChartLegend, gradientColor: gradientColor },
     contentDimensions,
     queryResults,
   } = props;
@@ -50,9 +50,9 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
 
   // Memoize the color list so it only regenerates when color/palette/series count changes
   const colorList = useMemo(() => {
-    const palette = color && color !== undefined ? [color] : (colorPalette as string[]);
+    const palette = gradientColor && gradientColor !== undefined ? [gradientColor] : (colorPalette as string[]);
     return getSeriesColor(totalSeriesCount, palette);
-  }, [color, colorPalette, totalSeriesCount]);
+  }, [gradientColor, colorPalette, totalSeriesCount]);
 
   const { pieChartData, legendItems, legendColumns } = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];

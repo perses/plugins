@@ -102,14 +102,14 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     );
   };
 
-  const color: string | undefined = useMemo(() => {
-    return value.color || undefined;
-  }, [value.color]);
+  const gradientColor: string | undefined = useMemo(() => {
+    return value.gradientColor || undefined;
+  }, [value.gradientColor]);
 
   const handleColorChange = (color?: string) => {
     onChange(
       produce(value, (draft: PieChartOptions) => {
-        draft.color = color;
+        draft.gradientColor = color;
       })
     );
   };
@@ -139,13 +139,13 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Color Scheme</InputLabel>
                 <Select
-                  value={color === undefined || '' ? 'theme' : 'custom'}
+                  value={gradientColor === undefined || '' ? 'theme' : 'custom'}
                   label="Color Scheme"
                   onChange={(e) => {
                     if (e.target.value === 'theme') {
                       handleColorChange();
                     } else {
-                      handleColorChange(color || muiTheme.palette.primary.main);
+                      handleColorChange(gradientColor || muiTheme.palette.primary.main);
                     }
                   }}
                 >
@@ -153,18 +153,18 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                   <MenuItem value="custom">Custom Color</MenuItem>
                 </Select>
               </FormControl>
-              {color !== undefined && (
-                <OptionsColorPicker label="Color" color={color} onColorChange={handleColorChange} />
+              {gradientColor !== undefined && (
+                <OptionsColorPicker label="Color" color={gradientColor} onColorChange={handleColorChange} />
               )}
             </Stack>
 
-            {color === undefined && (
+            {gradientColor === undefined && (
               <Typography variant="body2" color="text.secondary">
                 Colors will be automatically assigned using the current theme color palette.
               </Typography>
             )}
 
-            {color !== undefined && (
+            {gradientColor !== undefined && (
               <Typography variant="body2" color="text.secondary">
                 All series will use a gradient based on the selected color.
               </Typography>
@@ -180,7 +180,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                 produce(value, (draft: PieChartOptions) => {
                   // reset button removes all optional panel options
                   draft.legend = undefined;
-                  draft.color = undefined;
+                  draft.gradientColor = undefined;
                 })
               );
             }}
