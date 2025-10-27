@@ -26,7 +26,7 @@ export interface BarChartDefinition extends Definition<PieChartOptions> {
 export interface PieChartOptions {
   calculation: CalculationType;
   format?: FormatOptions;
-  gradientColor?: string;
+  colorPalette?: string[];
   legend?: LegendSpecOptions;
   mode?: ModeOption;
   radius: number;

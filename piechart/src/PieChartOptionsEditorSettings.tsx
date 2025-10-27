@@ -33,6 +33,7 @@ import {
   ModeOption,
   SortOption,
   OptionsEditorControl,
+  useChartsTheme,
 } from '@perses-dev/components';
 import { CalculationType, isPercentUnit, FormatOptions } from '@perses-dev/core';
 import {
@@ -45,14 +46,12 @@ import {
   Switch,
   SwitchProps,
   Typography,
-  useTheme,
 } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
 import { PieChartOptions, PieChartOptionsEditorProps, DEFAULT_FORMAT } from './pie-chart-model';
 
 export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
-  const muiTheme = useTheme();
 
   const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation: CalculationType) => {
     onChange(
@@ -102,14 +101,23 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     );
   };
 
-  const gradientColor: string | undefined = useMemo(() => {
-    return value.gradientColor || undefined;
-  }, [value.gradientColor]);
+  const chartsTheme = useChartsTheme();
+  const themePalette = chartsTheme.echartsTheme.color;
 
-  const handleColorChange = (color?: string) => {
+  const colorPalette: string[] | undefined = useMemo(() => {
+    return value.colorPalette || undefined;
+  }, [value.colorPalette]);
+
+  const handleColorChange = (color?: string[]) => {
     onChange(
       produce(value, (draft: PieChartOptions) => {
-        draft.gradientColor = color;
+        if (Array.isArray(color)) {
+          draft.colorPalette = color;
+        } else if (typeof color === 'string') {
+          draft.colorPalette = [color];
+        } else {
+          draft.colorPalette = undefined;
+        }
       })
     );
   };
@@ -139,32 +147,50 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Color Scheme</InputLabel>
                 <Select
-                  value={gradientColor === undefined || '' ? 'theme' : 'custom'}
+                  value={Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default'}
                   label="Color Scheme"
                   onChange={(e) => {
                     if (e.target.value === 'theme') {
+                      handleColorChange(themePalette as string[]);
+                    } else if (e.target.value === 'default') {
                       handleColorChange();
                     } else {
-                      handleColorChange(gradientColor || muiTheme.palette.primary.main);
+                      // gradient: keep existing single color if present (user-chosen via OptionsColorPicker)
+                      if (Array.isArray(colorPalette) && colorPalette.length === 1) {
+                        return;
+                      }
+                      // initialize with a sensible default so the color picker shows a color
+                      handleColorChange(['#ffffff']);
                     }
                   }}
                 >
-                  <MenuItem value="theme">Theme Default</MenuItem>
-                  <MenuItem value="custom">Custom Color</MenuItem>
+                  <MenuItem value="default">Default</MenuItem>
+                  <MenuItem value="theme">Theme</MenuItem>
+                  <MenuItem value="gradient">Gradient</MenuItem>
                 </Select>
               </FormControl>
-              {gradientColor !== undefined && (
-                <OptionsColorPicker label="Color" color={gradientColor} onColorChange={handleColorChange} />
+              {Array.isArray(colorPalette) && colorPalette.length === 1 && (
+                <OptionsColorPicker
+                  label="Color"
+                  color={colorPalette?.[0] ?? (themePalette as string[])[0] ?? '#ffffff'}
+                  onColorChange={(c: string) => handleColorChange([c])}
+                />
               )}
             </Stack>
 
-            {gradientColor === undefined && (
+            {colorPalette === undefined && (
               <Typography variant="body2" color="text.secondary">
                 Colors will be automatically assigned using the current theme color palette.
               </Typography>
             )}
 
-            {gradientColor !== undefined && (
+            {Array.isArray(colorPalette) && colorPalette.length > 1 && (
+              <Typography variant="body2" color="text.secondary">
+                Colors will be automatically assigned using the current theme color palette.
+              </Typography>
+            )}
+
+            {Array.isArray(colorPalette) && colorPalette.length === 1 && (
               <Typography variant="body2" color="text.secondary">
                 All series will use a gradient based on the selected color.
               </Typography>
@@ -180,7 +206,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                 produce(value, (draft: PieChartOptions) => {
                   // reset button removes all optional panel options
                   draft.legend = undefined;
-                  draft.gradientColor = undefined;
+                  draft.colorPalette = undefined;
                 })
               );
             }}

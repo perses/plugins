@@ -35,24 +35,17 @@ export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode, legend: pieChartLegend, gradientColor: gradientColor },
+    spec: { calculation, sort, mode, legend: pieChartLegend, colorPalette: colorPalette },
     contentDimensions,
     queryResults,
   } = props;
   const chartsTheme = useChartsTheme();
   const chartId = useId('time-series-panel');
-  const colorPalette = chartsTheme.echartsTheme.color;
-
-  // Memoize the total series count so it doesn't recompute on resize
-  const totalSeriesCount = useMemo(() => {
-    return queryResults.reduce((count, result) => count + (result?.data.series?.length || 0), 0);
-  }, [queryResults]);
 
   // Memoize the color list so it only regenerates when color/palette/series count changes
   const colorList = useMemo(() => {
-    const palette = gradientColor && gradientColor !== undefined ? [gradientColor] : (colorPalette as string[]);
-    return getSeriesColor(totalSeriesCount, palette);
-  }, [gradientColor, colorPalette, totalSeriesCount]);
+    return getSeriesColor(queryResults, colorPalette);
+  }, [colorPalette, queryResults]);
 
   const { pieChartData, legendItems, legendColumns } = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];

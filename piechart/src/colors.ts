@@ -11,6 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeSeriesData } from '@perses-dev/core';
+import { PanelData } from '@perses-dev/plugin-system';
+import ColorHash from 'color-hash';
+
+// Valid hue values are 0 to 360 and can be adjusted to control the generated colors.
+// More info: https://github.com/zenozeng/color-hash#custom-hue
+// Picked min of 20 and max of 360 to exclude common threshold colors (red).
+// Items with "error" in them will always be generated as red.
+const ERROR_HUE_CUTOFF = 20;
+const colorGenerator = new ColorHash({ hue: { min: ERROR_HUE_CUTOFF, max: 360 } });
+const redColorGenerator = new ColorHash({ hue: { min: 0, max: ERROR_HUE_CUTOFF } });
+
+/*
+ * Generate a consistent series name color (if series name includes 'error', it will have a red hue).
+ */
+export function getConsistentSeriesNameColor(inputString: string): string {
+  return getConsistentColor(inputString, inputString.toLowerCase().includes('error'));
+}
+
+export interface SeriesColorProps {
+  categoricalPalette: string[];
+  muiPrimaryColor: string;
+  seriesName: string;
+}
+
 // Color utility functions
 /**
  * Converts a number to a 2-digit hex string
@@ -54,15 +79,34 @@ export function generateGradientColor(baseColor: string, factor: number): string
  * @param colorPalette - Array of color strings to use as the base palette
  * @returns Array of color strings, one for each series
  */
-export function getSeriesColor(totalSeries: number, colorPalette: string[]): string[] {
+export function getSeriesColor(queryResults: Array<PanelData<TimeSeriesData>>, colorPalette?: string[]): string[] {
+  const totalSeries = queryResults.reduce((count, result) => count + (result?.data.series?.length || 0), 0);
+
   if (totalSeries <= 0) {
     return [];
   }
 
   const colors: string[] = [];
 
-  // Special case: single color palette - generate gradients from that color
-  if (colorPalette.length === 1 || !colorPalette || colorPalette.length === 0) {
+  // undefined palette - default
+  if (colorPalette === undefined) {
+    for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
+      const result = queryResults[queryIndex];
+
+      for (const seriesData of result?.data.series ?? []) {
+        const seriesColor = getDefaultSeriesColor({
+          categoricalPalette: ['#000000'],
+          muiPrimaryColor: '#000000',
+          seriesName: seriesData.name,
+        });
+        colors.push(seriesColor);
+      }
+    }
+    return colors;
+  }
+
+  // single color palette - generate gradients from that color
+  if (colorPalette.length === 1) {
     const baseColor = colorPalette[0] ?? '#555555';
     for (let i = 0; i < totalSeries; i++) {
       if (i === 0) {
@@ -75,12 +119,16 @@ export function getSeriesColor(totalSeries: number, colorPalette: string[]): str
     return colors.sort(() => Math.random() - 0.5);
   }
 
+  // multi color palette - loops through colors and adds gradient when palette is exhausted
   for (let i = 0; i < totalSeries; i++) {
     const color = getColor(colorPalette, i);
     colors.push(color);
   }
 
-  return colors.sort(() => Math.random() - 0.5);
+  if (totalSeries > colorPalette.length) {
+    return colors.sort(() => Math.random() - 0.5);
+  }
+  return colors;
 }
 
 /**
@@ -108,4 +156,53 @@ export function getColor(palette: string[], seriesIndex: number): string {
   // Apply gradient based on cycle number to create visual distinction
   const gradientFactor = Math.min(1 - cycleNumber * 0.2, 1);
   return generateGradientColor(baseColor, gradientFactor);
+}
+
+function computeConsistentColor(name: string, error: boolean): string {
+  const [hue, saturation, lightness] = error ? redColorGenerator.hsl(name) : colorGenerator.hsl(name);
+  const saturationPercent = `${(saturation * 100).toFixed(0)}%`;
+  const lightnessPercent = `${(lightness * 100).toFixed(0)}%`;
+  return `hsla(${hue.toFixed(2)},${saturationPercent},${lightnessPercent},0.9)`;
+}
+
+// To check whether a color has already been generated for a given string.
+// TODO: Predefined color aliases will be defined here
+const colorLookup: Record<string, string> = {};
+
+/**
+ * Return a consistent color for (name, error) tuple
+ */
+export function getConsistentColor(name: string, error: boolean): string {
+  const key = `${name}_____${error}`;
+  let value = colorLookup[key];
+  if (!value) {
+    value = computeConsistentColor(name, error);
+    colorLookup[key] = value;
+  }
+  return value;
+}
+
+/**
+ * Get line color as well as color for tooltip and legend, account for whether palette is 'categorical' or 'auto' aka generative
+ */
+export function getDefaultSeriesColor(props: SeriesColorProps): string {
+  const { categoricalPalette, muiPrimaryColor, seriesName } = props;
+
+  // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
+  const fallbackColor =
+    Array.isArray(categoricalPalette) && categoricalPalette[0]
+      ? (categoricalPalette[0] as string) // Needed since echarts color property isn't always an array.
+      : muiPrimaryColor;
+
+  return getAutoPaletteColor(seriesName, fallbackColor);
+}
+
+/**
+ * Get color from generative color palette, this approaches uses series name as the seed and
+ * allows for consistent colors across panels (when all panels use this approach).
+ */
+export function getAutoPaletteColor(name: string, fallbackColor: string): string {
+  // corresponds to 'Auto' in palette.kind for generative color palette
+  const generatedColor = getConsistentSeriesNameColor(name);
+  return generatedColor ?? fallbackColor;
 }

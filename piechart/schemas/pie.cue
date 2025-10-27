@@ -32,5 +32,5 @@ spec: close({
 	mode?:          "value" | "percentage"
 	showLabels?:    bool
 	radius:         number
-	gradientColor?: 		string
+	colorPalette?: 	string[]
 })
