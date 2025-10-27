@@ -50,7 +50,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
 
   // Memoize the color list so it only regenerates when color/palette/series count changes
   const colorList = useMemo(() => {
-    const palette = color && color !== '' ? [color] : (colorPalette as string[]);
+    const palette = color && color !== undefined ? [color] : (colorPalette as string[]);
     return getSeriesColor(totalSeriesCount, palette);
   }, [color, colorPalette, totalSeriesCount]);
 

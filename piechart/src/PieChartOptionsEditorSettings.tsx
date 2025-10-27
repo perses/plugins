@@ -102,11 +102,11 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     );
   };
 
-  const color: string = useMemo(() => {
-    return value.color || '';
+  const color: string | undefined = useMemo(() => {
+    return value.color || undefined;
   }, [value.color]);
 
-  const handleColorChange = (color: string) => {
+  const handleColorChange = (color?: string) => {
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.color = color;
@@ -139,11 +139,11 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Color Scheme</InputLabel>
                 <Select
-                  value={color === '' ? 'theme' : 'custom'}
+                  value={color === undefined || '' ? 'theme' : 'custom'}
                   label="Color Scheme"
                   onChange={(e) => {
                     if (e.target.value === 'theme') {
-                      handleColorChange('');
+                      handleColorChange();
                     } else {
                       handleColorChange(color || muiTheme.palette.primary.main);
                     }
@@ -153,16 +153,18 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                   <MenuItem value="custom">Custom Color</MenuItem>
                 </Select>
               </FormControl>
-              {color !== '' && <OptionsColorPicker label="Color" color={color} onColorChange={handleColorChange} />}
+              {color !== undefined && (
+                <OptionsColorPicker label="Color" color={color} onColorChange={handleColorChange} />
+              )}
             </Stack>
 
-            {color === '' && (
+            {color === undefined && (
               <Typography variant="body2" color="text.secondary">
                 Colors will be automatically assigned using the current theme color palette.
               </Typography>
             )}
 
-            {color !== '' && (
+            {color !== undefined && (
               <Typography variant="body2" color="text.secondary">
                 All series will use a gradient based on the selected color.
               </Typography>
@@ -178,7 +180,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                 produce(value, (draft: PieChartOptions) => {
                   // reset button removes all optional panel options
                   draft.legend = undefined;
-                  draft.color = '';
+                  draft.color = undefined;
                 })
               );
             }}
