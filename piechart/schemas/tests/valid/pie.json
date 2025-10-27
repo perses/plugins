@@ -13,7 +13,6 @@
     "sort": "desc",
     "mode": "value",
     "radius": 50,
-    "colorPalette": "",
     "showLabels": true
   }
 }
