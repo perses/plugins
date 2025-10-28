@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
 import ColorHash from 'color-hash';
 
 // Valid hue values are 0 to 360 and can be adjusted to control the generated colors.
@@ -79,8 +77,8 @@ export function generateGradientColor(baseColor: string, factor: number): string
  * @param colorPalette - Array of color strings to use as the base palette
  * @returns Array of color strings, one for each series
  */
-export function getSeriesColor(queryResults: Array<PanelData<TimeSeriesData>>, colorPalette?: string[]): string[] {
-  const totalSeries = queryResults.reduce((count, result) => count + (result?.data.series?.length || 0), 0);
+export function getSeriesColor(seriesNames: string[], colorPalette?: string[]): string[] {
+  const totalSeries = seriesNames.length;
 
   if (totalSeries <= 0) {
     return [];
@@ -90,24 +88,20 @@ export function getSeriesColor(queryResults: Array<PanelData<TimeSeriesData>>, c
 
   // undefined palette - default
   if (colorPalette === undefined) {
-    for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
-      const result = queryResults[queryIndex];
-
-      for (const seriesData of result?.data.series ?? []) {
-        const seriesColor = getDefaultSeriesColor({
-          categoricalPalette: ['#000000'],
-          muiPrimaryColor: '#000000',
-          seriesName: seriesData.name,
-        });
-        colors.push(seriesColor);
-      }
+    for (let nameIndex = 0; nameIndex < seriesNames.length; nameIndex++) {
+      const seriesColor = getDefaultSeriesColor({
+        categoricalPalette: ['#ff0000'],
+        muiPrimaryColor: '#ff0000',
+        seriesName: seriesNames[nameIndex] || '',
+      });
+      colors.push(seriesColor);
     }
     return colors;
   }
 
   // single color palette - generate gradients from that color
   if (colorPalette.length === 1) {
-    const baseColor = colorPalette[0] ?? '#555555';
+    const baseColor = colorPalette[0] ?? '#ff0000';
     for (let i = 0; i < totalSeries; i++) {
       if (i === 0) {
         colors.push(baseColor);
@@ -138,12 +132,12 @@ export function getSeriesColor(queryResults: Array<PanelData<TimeSeriesData>>, c
 export function getColor(palette: string[], seriesIndex: number): string {
   // Handle undefined or empty palette
   if (!palette || palette.length === 0) {
-    return '#555555';
+    return '#ff0000';
   }
 
   const paletteTotalColors = palette.length;
   const paletteIndex = seriesIndex % paletteTotalColors;
-  const baseColor = palette[paletteIndex] ?? '#555555';
+  const baseColor = palette[paletteIndex] ?? '#ff0000';
 
   // If we haven't exhausted the palette yet, use the original color
   if (seriesIndex < paletteTotalColors) {

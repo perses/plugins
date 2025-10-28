@@ -41,11 +41,12 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   } = props;
   const chartsTheme = useChartsTheme();
   const chartId = useId('time-series-panel');
+  const seriesNames = queryResults.flatMap((result) => result?.data.series?.map((series) => series.name) || []);
 
   // Memoize the color list so it only regenerates when color/palette/series count changes
   const colorList = useMemo(() => {
-    return getSeriesColor(queryResults, colorPalette);
-  }, [colorPalette, queryResults]);
+    return getSeriesColor(seriesNames, colorPalette);
+  }, [colorPalette, seriesNames]);
 
   const { pieChartData, legendItems, legendColumns } = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];
@@ -58,7 +59,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
 
       series.forEach((seriesData, seriesIndex) => {
         const seriesId = `${chartId}${seriesData.name}${seriesIndex}${queryIndex}`;
-        const seriesColor = colorList[queryIndex * series.length + seriesIndex] ?? '#555555';
+        const seriesColor = colorList[queryIndex * series.length + seriesIndex] ?? '#ff0000';
 
         const seriesItem = {
           id: seriesId,

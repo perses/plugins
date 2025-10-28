@@ -125,6 +125,40 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   // ensures decimalPlaces defaults to correct value
   const format = merge({}, DEFAULT_FORMAT, value.format);
 
+  type ColorScheme = 'default' | 'theme' | 'gradient';
+
+  const colorScheme: ColorScheme = useMemo(() => {
+    return Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default';
+  }, [colorPalette]);
+
+  const handleColorSchemeChange = (scheme: ColorScheme) => {
+    if (scheme === 'theme') {
+      handleColorChange(themePalette as string[]);
+    } else if (scheme === 'default') {
+      handleColorChange();
+    } else {
+      // gradient: keep existing single color if present (user-chosen via OptionsColorPicker)
+      if (Array.isArray(colorPalette) && colorPalette.length === 1) {
+        return;
+      }
+      // initialize with a sensible default so the color picker shows a color
+      handleColorChange(['#ff0000']);
+    }
+  };
+
+  const colorHelpText = useMemo(() => {
+    if (colorPalette === undefined) {
+      return 'Colors will be automatically assigned using metrics name hash.';
+    }
+    if (Array.isArray(colorPalette) && colorPalette.length > 1) {
+      return 'Colors will be automatically assigned using the current theme color palette.';
+    }
+    if (Array.isArray(colorPalette) && colorPalette.length === 1) {
+      return 'All series will use a gradient based on the selected color.';
+    }
+    return undefined;
+  }, [colorPalette]);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -147,22 +181,9 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Color Scheme</InputLabel>
                 <Select
-                  value={Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default'}
+                  value={colorScheme}
                   label="Color Scheme"
-                  onChange={(e) => {
-                    if (e.target.value === 'theme') {
-                      handleColorChange(themePalette as string[]);
-                    } else if (e.target.value === 'default') {
-                      handleColorChange();
-                    } else {
-                      // gradient: keep existing single color if present (user-chosen via OptionsColorPicker)
-                      if (Array.isArray(colorPalette) && colorPalette.length === 1) {
-                        return;
-                      }
-                      // initialize with a sensible default so the color picker shows a color
-                      handleColorChange(['#ffffff']);
-                    }
-                  }}
+                  onChange={(e) => handleColorSchemeChange(e.target.value as ColorScheme)}
                 >
                   <MenuItem value="default">Default</MenuItem>
                   <MenuItem value="theme">Theme</MenuItem>
@@ -172,27 +193,14 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
               {Array.isArray(colorPalette) && colorPalette.length === 1 && (
                 <OptionsColorPicker
                   label="Color"
-                  color={colorPalette?.[0] ?? (themePalette as string[])[0] ?? '#ffffff'}
+                  color={colorPalette?.[0] ?? (themePalette as string[])[0] ?? '#ff0000'}
                   onColorChange={(c: string) => handleColorChange([c])}
                 />
               )}
             </Stack>
-
-            {colorPalette === undefined && (
+            {colorHelpText && (
               <Typography variant="body2" color="text.secondary">
-                Colors will be automatically assigned using the current theme color palette.
-              </Typography>
-            )}
-
-            {Array.isArray(colorPalette) && colorPalette.length > 1 && (
-              <Typography variant="body2" color="text.secondary">
-                Colors will be automatically assigned using the current theme color palette.
-              </Typography>
-            )}
-
-            {Array.isArray(colorPalette) && colorPalette.length === 1 && (
-              <Typography variant="body2" color="text.secondary">
-                All series will use a gradient based on the selected color.
+                {colorHelpText}
               </Typography>
             )}
           </Stack>

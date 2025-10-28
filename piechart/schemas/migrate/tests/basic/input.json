@@ -2,7 +2,8 @@
   "fieldConfig": {
     "defaults": {
       "color": {
-        "mode": "palette-classic"
+        "mode": "shades",
+        "fixedColor": "semi-dark-red"
       },
       "custom": {
         "hideFrom": {
@@ -39,7 +40,10 @@
     "tooltip": {
       "mode": "single",
       "sort": "none"
-    }
+    },
+    "displayLabels": [
+      "name"
+    ]
   },
   "pluginVersion": "11.3.0-pre",
   "targets": [
