@@ -11,19 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps } from '@mui/material';
+import { Switch, SwitchProps, useTheme } from '@mui/material';
 import {
   FontSizeOption,
   FontSizeSelector,
   FontSizeSelectorProps,
   FormatControls,
   FormatControlsProps,
+  OptionsColorPicker,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   ThresholdsEditor,
   ThresholdsEditorProps,
+  OptionsColorPickerProps,
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import {
@@ -34,13 +36,15 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
+const DEMONSTRATION_WHITE_BACKGROUND = '#F5F5F5';
 
 export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
+  const theme = useTheme();
 
   // ensures decimalPlaces defaults to correct value
   const format = merge({}, DEFAULT_FORMAT, value.format);
@@ -96,6 +100,31 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
+  const onHandlerColorChange: OptionsColorPickerProps['onColorChange'] = (color: string) => {
+    let backgroundColor = '';
+    backgroundColor =
+      theme.palette.mode === 'light' && color === DEMONSTRATION_WHITE_BACKGROUND
+        ? theme.palette.background.default
+        : color;
+
+    onChange(
+      produce(value, (draft: StatChartOptions) => {
+        draft.backgroundColor = backgroundColor;
+      })
+    );
+  };
+
+  const colorPickerSelectedColor = useMemo((): string => {
+    if (value?.backgroundColor) return value?.backgroundColor;
+
+    if (theme.palette.mode === 'dark') return theme.palette.background.default;
+
+    /* The white color picker on the white editor panel form will be completely invisible
+       So, let's make it slightly darker JUST for demonstration.   
+    */
+    return DEMONSTRATION_WHITE_BACKGROUND;
+  }, [theme, value?.backgroundColor]);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -103,6 +132,16 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <OptionsEditorControl
             label="Sparkline"
             control={<Switch checked={!!value.sparkline} onChange={handleSparklineChange} />}
+          />
+          <OptionsEditorControl
+            label="Background color"
+            control={
+              <OptionsColorPicker
+                label="Background color"
+                color={colorPickerSelectedColor}
+                onColorChange={onHandlerColorChange}
+              />
+            }
           />
           <FormatControls value={format} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />

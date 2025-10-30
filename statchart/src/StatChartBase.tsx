@@ -44,10 +44,11 @@ export interface StatChartProps {
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
   valueFontSize?: FontSizeOption;
+  backgroundColor?: string;
 }
 
 export const StatChartBase: FC<StatChartProps> = (props) => {
-  const { width, height, data, sparkline, showSeriesName, format, valueFontSize } = props;
+  const { width, height, data, sparkline, showSeriesName, format, valueFontSize, backgroundColor } = props;
   const chartsTheme = useChartsTheme();
   const color = data.color;
 
@@ -88,12 +89,12 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   seriesNameFontSize = Math.min(optimalValueFontSize * 0.7, seriesNameFontSize);
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data.seriesData === undefined) return chartsTheme.noDataOption;
+    if (!data.seriesData) return chartsTheme.noDataOption;
 
     const series = data.seriesData;
     const statSeries: LineSeriesOption[] = [];
 
-    if (sparkline !== undefined) {
+    if (sparkline) {
       const lineSeries = {
         type: 'line',
         name: series.name,
@@ -107,7 +108,8 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
       statSeries.push(mergedSeries);
     }
 
-    const option = {
+    const option: EChartsCoreOption = {
+      backgroundColor,
       title: {
         show: false,
       },
@@ -142,7 +144,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     };
 
     return option;
-  }, [data, chartsTheme, sparkline]);
+  }, [data, chartsTheme, sparkline, backgroundColor]);
 
   const textAlignment = sparkline ? 'auto' : 'center';
   const textStyles = {
@@ -159,13 +161,20 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
           {data.seriesData?.name}
         </SeriesName>
       )}
-      <Value variant="h3" color={color} fontSize={optimalValueFontSize} padding={containerPadding}>
+      <Value
+        variant="h3"
+        color={color}
+        backgroundColor={backgroundColor}
+        fontSize={optimalValueFontSize}
+        padding={containerPadding}
+      >
         {formattedValue}
       </Value>
-      {sparkline !== undefined && (
+      {sparkline && (
         <EChart
           sx={{
             width: '100%',
+            backgroundColor,
           }}
           style={{
             // ECharts rounds the height to the nearest integer by default.
@@ -194,9 +203,10 @@ const SeriesName = styled(Typography, {
 
 const Value = styled(Typography, {
   shouldForwardProp: (prop) => prop !== 'color' && prop !== 'padding' && prop !== 'fontSize' && prop !== 'sparkline',
-})<{ color?: string; padding?: number; fontSize?: number; sparkline?: boolean }>(
-  ({ theme, color, padding, fontSize, sparkline }) => ({
+})<{ color?: string; padding?: number; fontSize?: number; sparkline?: boolean; backgroundColor?: string }>(
+  ({ theme, color, padding, fontSize, sparkline, backgroundColor }) => ({
     color: color ?? theme.palette.text.primary,
+    backgroundColor: backgroundColor ?? theme.palette.background.default,
     fontSize: `${fontSize}px`,
     padding: sparkline ? `${padding}px ${padding}px 0 ${padding}px` : ` 0 ${padding}px`,
     whiteSpace: 'nowrap',

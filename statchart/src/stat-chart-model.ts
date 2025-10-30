@@ -30,6 +30,7 @@ export interface StatChartOptions {
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
   mappings?: ValueMapping[];
+  backgroundColor?: string;
 }
 
 export interface StatChartSparklineOptions {
