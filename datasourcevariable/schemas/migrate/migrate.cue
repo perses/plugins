@@ -13,7 +13,11 @@
 
 package migrate
 
-#var: _
+#grafanaVar: {
+	type: "datasource"
+	query: string
+	...
+}
 
 // TODO migrate to perses common package
 // key = Grafana kind, value = Perses kind
@@ -24,9 +28,7 @@ package migrate
 	"tempo":                        "TempoDatasource"
 }
 
-if #var.type == "datasource" {
-	kind: "DatasourceVariable"
-	spec: {
-		datasourcePluginKind: *#kindMapping[#var.query] | "not-supported-\(#var.query)"
-	}
+kind: "DatasourceVariable"
+spec: {
+	datasourcePluginKind: *#kindMapping[#grafanaVar.query] | "not-supported-\(#grafanaVar.query)"
 }
