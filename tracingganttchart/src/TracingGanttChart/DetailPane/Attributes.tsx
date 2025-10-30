@@ -146,9 +146,10 @@ export function AttributeItem(props: AttributeItemProps): ReactElement {
 }
 
 function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
-  if ('stringValue' in value) return value.stringValue.length > 0 ? value.stringValue : '<empty string>';
+  if ('stringValue' in value) return value.stringValue || '<empty string>';
   if ('intValue' in value) return value.intValue;
-  if ('boolValue' in value) return value.boolValue.toString();
+  if ('doubleValue' in value) return String(value.doubleValue);
+  if ('boolValue' in value) return String(value.boolValue);
   if ('arrayValue' in value) return value.arrayValue.values.map(renderAttributeValue).join(', ');
   return 'unknown';
 }
