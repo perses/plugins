@@ -21,13 +21,6 @@ const ERROR_HUE_CUTOFF = 20;
 const colorGenerator = new ColorHash({ hue: { min: ERROR_HUE_CUTOFF, max: 360 } });
 const redColorGenerator = new ColorHash({ hue: { min: 0, max: ERROR_HUE_CUTOFF } });
 
-/*
- * Generate a consistent series name color (if series name includes 'error', it will have a red hue).
- */
-export function getConsistentSeriesNameColor(inputString: string): string {
-  return getConsistentColor(inputString, inputString.toLowerCase().includes('error'));
-}
-
 export interface SeriesColorProps {
   categoricalPalette: string[];
   muiPrimaryColor: string;
@@ -53,6 +46,20 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
     g: parseInt(cleanHex.substring(2, 4), 16),
     b: parseInt(cleanHex.substring(4, 6), 16),
   };
+}
+
+/**
+ * Returns a deterministic number between 0 and 1 for a given string
+ */
+function stringToSeed(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  // Convert to positive number and normalize to 0-1 range
+  return Math.abs(hash) / 2147483647;
 }
 
 /**
@@ -110,7 +117,11 @@ export function getSeriesColor(seriesNames: string[], colorPalette?: string[]): 
         colors.push(generateGradientColor(baseColor, gradientFactor));
       }
     }
-    return colors.sort(() => Math.random() - 0.5);
+    return colors.sort((a, b) => {
+      const seedA = stringToSeed(seriesNames[colors.indexOf(a)] || 'fallback');
+      const seedB = stringToSeed(seriesNames[colors.indexOf(b)] || 'fallback');
+      return seedA - seedB;
+    });
   }
 
   // multi color palette - loops through colors and adds gradient when palette is exhausted
@@ -120,7 +131,11 @@ export function getSeriesColor(seriesNames: string[], colorPalette?: string[]): 
   }
 
   if (totalSeries > colorPalette.length) {
-    return colors.sort(() => Math.random() - 0.5);
+    return colors.sort((a, b) => {
+      const seedA = stringToSeed(seriesNames[colors.indexOf(a)] || 'fallback');
+      const seedB = stringToSeed(seriesNames[colors.indexOf(b)] || 'fallback');
+      return seedA - seedB;
+    });
   }
   return colors;
 }
@@ -174,6 +189,13 @@ export function getConsistentColor(name: string, error: boolean): string {
     colorLookup[key] = value;
   }
   return value;
+}
+
+/*
+ * Generate a consistent series name color (if series name includes 'error', it will have a red hue).
+ */
+export function getConsistentSeriesNameColor(inputString: string): string {
+  return getConsistentColor(inputString, inputString.toLowerCase().includes('error'));
 }
 
 /**
