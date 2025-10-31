@@ -28,6 +28,7 @@ interface MetricsExplorerQueryParams extends FinderQueryParams {
 }
 
 const PANEL_PREVIEW_HEIGHT = 700;
+const FILTERED_QUERY_PLUGINS = ['PrometheusTimeSeriesQuery'];
 
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const { width, ref: boxRef } = useResizeObserver();
@@ -115,6 +116,7 @@ export function PrometheusExplorer(): ReactElement {
               queryTypes={['TimeSeriesQuery']}
               onChange={(state) => setData({ tab, queries: state })}
               queries={queries}
+              filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
             />
             <MetricDataTable queries={queries} />
           </Stack>
@@ -125,6 +127,7 @@ export function PrometheusExplorer(): ReactElement {
               queryTypes={['TimeSeriesQuery']}
               onChange={(state) => setData({ tab, queries: state })}
               queries={queries}
+              filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
             />
             <TimeSeriesPanel queries={queries} />
           </Stack>
