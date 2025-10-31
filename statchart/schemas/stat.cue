@@ -29,4 +29,5 @@ spec: close({
 	})
 	valueFontSize?: number
 	mappings?: [...common.#mappings]
+	backgroundColor?: string
 })

@@ -31,7 +31,7 @@ export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions, queryResults } = props;
 
-  const { format, sparkline, valueFontSize: valueFontSize } = spec;
+  const { format, sparkline, valueFontSize: valueFontSize, backgroundColor } = spec;
   const chartsTheme = useChartsTheme();
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
@@ -74,6 +74,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               sparkline={sparklineConfig}
               showSeriesName={isMultiSeries}
               valueFontSize={valueFontSize}
+              backgroundColor={backgroundColor}
             />
           );
         })
