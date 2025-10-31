@@ -13,22 +13,21 @@
 
 import { use } from 'echarts/core';
 import { PieChart as EChartsPieChart } from 'echarts/charts';
-import {
+import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import { Box, useTheme } from '@mui/material';
+import { ReactElement } from 'react';
+import { EChart, useChartsTheme } from '@perses-dev/components';
+
+use([
+  EChartsPieChart,
   GridComponent,
   DatasetComponent,
   TitleComponent,
   TooltipComponent,
-  LegendComponentOption,
-} from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
-import { Box } from '@mui/material';
-import { ReactElement } from 'react';
-import { EChart, useChartsTheme } from '@perses-dev/components';
-
-use([EChartsPieChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
-
-const PIE_WIN_WIDTH = 12;
-const PIE_GAP = 4;
+  LegendComponent,
+  CanvasRenderer,
+]);
 export interface PieChartData {
   id?: string;
   name: string;
@@ -39,33 +38,34 @@ export interface PieChartBaseProps {
   width: number;
   height: number;
   data: PieChartData[] | null;
-  legend?: LegendComponentOption;
+  showLabels?: boolean;
 }
 
 export function PieChartBase(props: PieChartBaseProps): ReactElement {
-  const { width, height, data } = props;
+  const { width, height, data, showLabels } = props;
   const chartsTheme = useChartsTheme();
+  const muiTheme = useTheme();
 
   const option = {
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center',
-    },
     tooltip: {
       trigger: 'item',
-      formatter: '{b} : {c} ({d}%)',
-    },
-    axisLabel: {
-      overflow: 'truncate',
-      width: width / 3,
+      formatter: '{b}: {c} ({d}%)',
+      appendTo: document.body,
+      confine: false,
     },
     series: [
       {
         type: 'pie',
-        radius: '55%',
-        label: false,
-        center: ['40%', '50%'],
+        radius: '90%',
+        label: {
+          show: Boolean(showLabels),
+          position: 'inner',
+          fontSize: 14,
+          formatter: '{b}\n{c}',
+          overflow: 'truncate',
+          fontWeight: 'bold',
+        },
+        center: ['50%', '50%'],
         data: data,
         emphasis: {
           itemStyle: {
@@ -74,12 +74,13 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
             shadowColor: 'rgba(0, 0, 0, 0.5)',
           },
         },
+        itemStyle: {
+          borderRadius: 5,
+          borderColor: muiTheme.palette.background.default,
+          borderWidth: 2,
+        },
       },
     ],
-    itemStyle: {
-      borderRadius: 2,
-      color: chartsTheme.echartsTheme[0],
-    },
   };
 
   return (
@@ -92,8 +93,8 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
     >
       <EChart
         sx={{
-          minHeight: height,
-          height: data ? data.length * (PIE_WIN_WIDTH + PIE_GAP) : '100%',
+          width: '100%',
+          height: '100%',
         }}
         option={option}
         theme={chartsTheme.echartsTheme}

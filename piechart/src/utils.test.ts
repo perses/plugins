@@ -70,20 +70,20 @@ describe('sortSeriesData', () => {
     const sorted = sortSeriesData(MOCK_DATA, 'asc');
     expect(sorted).toEqual([
       {
-        name: 'Label 4',
-        value: 5,
-      },
-      {
-        name: 'Label 1',
-        value: 3,
+        name: 'Label 3',
+        value: 0,
       },
       {
         name: 'Label 2',
         value: 2,
       },
       {
-        name: 'Label 3',
-        value: 0,
+        name: 'Label 1',
+        value: 3,
+      },
+      {
+        name: 'Label 4',
+        value: 5,
       },
       {
         name: 'Label 5',
@@ -96,24 +96,24 @@ describe('sortSeriesData', () => {
     const sorted = sortSeriesData(MOCK_DATA, 'desc');
     expect(sorted).toEqual([
       {
-        name: 'Label 5',
-        value: null,
-      },
-      {
-        name: 'Label 3',
-        value: 0,
-      },
-      {
-        name: 'Label 2',
-        value: 2,
+        name: 'Label 4',
+        value: 5,
       },
       {
         name: 'Label 1',
         value: 3,
       },
       {
-        name: 'Label 4',
-        value: 5,
+        name: 'Label 2',
+        value: 2,
+      },
+      {
+        name: 'Label 3',
+        value: 0,
+      },
+      {
+        name: 'Label 5',
+        value: null,
       },
     ]);
   });

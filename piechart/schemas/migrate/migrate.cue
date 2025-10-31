@@ -46,5 +46,17 @@ spec: {
 			mode: *(#panel.options.legend.displayMode & "table")  | "list"
 		}
 	}
+
+	#showLabels: *#panel.options.displayLabels | null
+	if #showLabels != null {
+		showLabels: true
+	}
+
+	#colorMode: *#panel.fieldConfig.defaults.color.mode | null
+	if #colorMode == "shades" {
+		#mappedColor: *commonMigrate.#mapping.color[#panel.fieldConfig.defaults.color.fixedColor] | "#555555"
+		colorPalette: [#mappedColor]
+	}
+
 	radius: 50
 }

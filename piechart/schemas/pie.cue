@@ -30,5 +30,7 @@ spec: close({
 	format?:        common.#format
 	sort?:          "asc" | "desc"
 	mode?:          "value" | "percentage"
+	showLabels?:    bool
 	radius:         number
+	colorPalette?: 	[...string]
 })

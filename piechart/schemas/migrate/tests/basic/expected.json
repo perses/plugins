@@ -6,6 +6,8 @@
       "mode": "list",
       "position": "bottom"
     },
+    "showLabels": true,
+    "colorPalette": ["#e02f44"],
     "radius": 50
   }
 }
