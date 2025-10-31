@@ -79,6 +79,12 @@ describe('Attributes', () => {
     expect(screen.getByText('abc, true')).toBeInTheDocument();
   });
 
+  it('render empty array', () => {
+    const attributes = [{ key: 'attrkey', value: { arrayValue: {} } }];
+    renderAttributeList({ attributes });
+    expect(screen.getByText('<empty array>')).toBeInTheDocument();
+  });
+
   it('render an attribute with a link', () => {
     const customLinks: CustomLinks = {
       links: {
