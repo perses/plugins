@@ -126,6 +126,11 @@ function getRsbuildConfig(name: string): RsbuildConfig {
     },
     tools: {
       htmlPlugin: false,
+      rspack: (config) => {
+        config.output = config.output || {};
+        config.output.publicPath = 'auto';
+        return config;
+      },
     },
   };
 }
