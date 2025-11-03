@@ -23,7 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func release(pluginName string) {
+func release(pluginName string, dryRun *bool) {
 	version, err := npm.GetVersion(pluginName)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to get the version of the plugin %s", pluginName)
@@ -35,6 +35,12 @@ func release(pluginName string) {
 		logrus.Infof("release %s already exists", releaseName)
 		return
 	}
+
+	if dryRun != nil && *dryRun {
+		logrus.Infof("[dry-run] creating the release: `gh release create %s -t %s -n %s`", releaseName, releaseName, generateChangelog(pluginName))
+		return
+	}
+
 	// create the GitHub release
 	if execErr := command.Run("gh", "release", "create", releaseName, "-t", releaseName, "-n", generateChangelog(pluginName)); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to create the release %s", releaseName)
@@ -60,6 +66,7 @@ func release(pluginName string) {
 // NB: this script doesn't handle the plugin archive creation, a CI task achieves this.
 func main() {
 	releaseAll := flag.Bool("all", false, "release all the plugins")
+	dryRun := flag.Bool("dry-run", false, "do not perform any changes, only print what would be done")
 	releaseSingleName := flag.String("name", "", "release a single plugin")
 	flag.Parse()
 	// get all tags locally
@@ -68,7 +75,7 @@ func main() {
 	}
 	if !*releaseAll {
 		logrus.Infof("releasing %s", *releaseSingleName)
-		release(*releaseSingleName)
+		release(*releaseSingleName, dryRun)
 		return
 	}
 	workspaces, err := npm.GetWorkspaces()
@@ -77,6 +84,6 @@ func main() {
 	}
 	for _, workspace := range workspaces {
 		logrus.Infof("releasing %s", workspace)
-		release(workspace)
+		release(workspace, dryRun)
 	}
 }
