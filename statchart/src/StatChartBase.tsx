@@ -11,17 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FC, useMemo } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
 import { FormatOptions } from '@perses-dev/core';
-import { Box, Typography, styled } from '@mui/material';
+import { Box, Typography, styled, useTheme } from '@mui/material';
 import merge from 'lodash/merge';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, FontSizeOption, GraphSeries, useChartsTheme } from '@perses-dev/components';
+import chroma from 'chroma-js';
 import { useOptimalFontSize } from './utils/calculate-font-size';
 import { formatStatChartValue } from './utils/format-stat-chart-value';
+import { ColorMode } from './stat-chart-model';
 
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -29,6 +31,8 @@ const LINE_HEIGHT = 1.2;
 const SERIES_NAME_MAX_FONT_SIZE = 30;
 const SERIES_NAME_FONT_WEIGHT = 400;
 const VALUE_FONT_WEIGHT = 700;
+const WHITE_COLOR_CODE = '#FFFFFF';
+const BLACK_COLOR_CODE = '#000000';
 
 export interface StatChartData {
   color: string;
@@ -44,15 +48,30 @@ export interface StatChartProps {
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
   valueFontSize?: FontSizeOption;
+  colorMode?: ColorMode;
 }
 
 export const StatChartBase: FC<StatChartProps> = (props) => {
-  const { width, height, data, sparkline, showSeriesName, format, valueFontSize } = props;
+  const {
+    width,
+    height,
+    data,
+    data: { color },
+    sparkline,
+    showSeriesName,
+    format,
+    valueFontSize,
+    colorMode,
+  } = props;
+
+  const {
+    palette: {
+      mode: paletteMode,
+      text: { secondary },
+    },
+  } = useTheme();
   const chartsTheme = useChartsTheme();
-  const color = data.color;
-
   const formattedValue = formatStatChartValue(data.calculatedValue, format);
-
   const containerPadding = chartsTheme.container.padding.default;
 
   // calculate series name font size and height
@@ -88,12 +107,12 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   seriesNameFontSize = Math.min(optimalValueFontSize * 0.7, seriesNameFontSize);
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data.seriesData === undefined) return chartsTheme.noDataOption;
+    if (!data.seriesData) return chartsTheme.noDataOption;
 
     const series = data.seriesData;
     const statSeries: LineSeriesOption[] = [];
 
-    if (sparkline !== undefined) {
+    if (sparkline) {
       const lineSeries = {
         type: 'line',
         name: series.name,
@@ -103,11 +122,18 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
         animation: false,
         silent: true,
       };
-      const mergedSeries = merge(lineSeries, sparkline);
+
+      const clonedSparkLine = { ...sparkline };
+      if (colorMode === 'background_solid') {
+        clonedSparkLine.areaStyle = { color: WHITE_COLOR_CODE, opacity: 0.4 };
+        clonedSparkLine.lineStyle = { color: WHITE_COLOR_CODE, opacity: 1 };
+      }
+
+      const mergedSeries = merge(lineSeries, clonedSparkLine);
       statSeries.push(mergedSeries);
     }
 
-    const option = {
+    const option: EChartsCoreOption = {
       title: {
         show: false,
       },
@@ -142,7 +168,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     };
 
     return option;
-  }, [data, chartsTheme, sparkline]);
+  }, [data, chartsTheme, sparkline, colorMode]);
 
   const textAlignment = sparkline ? 'auto' : 'center';
   const textStyles = {
@@ -152,17 +178,70 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     alignItems: textAlignment,
   };
 
-  return (
-    <Box sx={{ height: '100%', width: '100%', ...textStyles }}>
-      {showSeriesName && (
-        <SeriesName padding={containerPadding} fontSize={seriesNameFontSize}>
-          {data.seriesData?.name}
-        </SeriesName>
-      )}
-      <Value variant="h3" color={color} fontSize={optimalValueFontSize} padding={containerPadding}>
+  const styledFormattedValue = useMemo(() => {
+    let valueColor = '';
+
+    switch (colorMode) {
+      case 'background_solid':
+        valueColor =
+          chroma.contrast(color, WHITE_COLOR_CODE) > chroma.contrast(color, BLACK_COLOR_CODE)
+            ? WHITE_COLOR_CODE
+            : BLACK_COLOR_CODE;
+        break;
+      case 'none':
+        valueColor = paletteMode === 'dark' ? WHITE_COLOR_CODE : BLACK_COLOR_CODE;
+        break;
+      case 'value':
+      default:
+        valueColor = color;
+        break;
+    }
+
+    return (
+      <Value variant="h3" color={valueColor} fontSize={optimalValueFontSize} padding={containerPadding}>
         {formattedValue}
       </Value>
-      {sparkline !== undefined && (
+    );
+  }, [colorMode, containerPadding, optimalValueFontSize, formattedValue, color, paletteMode]);
+
+  const seriesName = useMemo((): ReactNode | null => {
+    if (!showSeriesName) return null;
+
+    let textColor = '';
+
+    switch (colorMode) {
+      case 'background_solid':
+        textColor =
+          chroma.contrast(color, WHITE_COLOR_CODE) > chroma.contrast(color, BLACK_COLOR_CODE)
+            ? WHITE_COLOR_CODE
+            : BLACK_COLOR_CODE;
+        break;
+      case 'none':
+      case 'value':
+      default:
+        textColor = secondary;
+        break;
+    }
+
+    return (
+      <SeriesName padding={containerPadding} fontSize={seriesNameFontSize} color={textColor}>
+        {data.seriesData?.name}
+      </SeriesName>
+    );
+  }, [colorMode, showSeriesName, secondary, color, containerPadding, seriesNameFontSize, data?.seriesData?.name]);
+
+  return (
+    <Box
+      sx={{
+        height: '100%',
+        width: '100%',
+        backgroundColor: colorMode === 'background_solid' ? color : 'transparent',
+        ...textStyles,
+      }}
+    >
+      {seriesName}
+      {styledFormattedValue}
+      {sparkline && (
         <EChart
           sx={{
             width: '100%',
@@ -183,8 +262,8 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
 
 const SeriesName = styled(Typography, {
   shouldForwardProp: (prop) => prop !== 'padding' && prop !== 'fontSize',
-})<{ padding?: number; fontSize?: number; textAlignment?: string }>(({ theme, padding, fontSize }) => ({
-  color: theme.palette.text.secondary,
+})<{ padding?: number; fontSize?: number; textAlignment?: string; color?: string }>(({ padding, fontSize, color }) => ({
+  color: color,
   padding: `${padding}px`,
   fontSize: `${fontSize}px`,
   overflow: 'hidden',

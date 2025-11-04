@@ -22,6 +22,7 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  SettingsAutocomplete,
   ThresholdsEditor,
   ThresholdsEditorProps,
 } from '@perses-dev/components';
@@ -34,8 +35,13 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
-import { ReactElement } from 'react';
-import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
+import { ReactElement, useCallback, useMemo } from 'react';
+import {
+  COLOR_MODE_LABELS,
+  ColorModeLabelItem,
+  StatChartOptions,
+  StatChartOptionsEditorProps,
+} from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
 
@@ -96,6 +102,36 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
+  const handleColorModeChange = useCallback(
+    (_: unknown, newColorMode: ColorModeLabelItem): void => {
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          draft.colorMode = newColorMode.id;
+        })
+      );
+    },
+    [onChange, value]
+  );
+
+  const selectColorMode = useMemo((): ReactElement => {
+    return (
+      <OptionsEditorControl
+        label="Color mode"
+        control={
+          <SettingsAutocomplete
+            onChange={handleColorModeChange}
+            options={COLOR_MODE_LABELS.map(({ id, label }) => ({ id, label }))}
+            disableClearable
+            value={
+              COLOR_MODE_LABELS.find((i) => i.id === value.colorMode) ??
+              COLOR_MODE_LABELS.find((i) => i.id === 'value')!
+            }
+          />
+        }
+      />
+    );
+  }, [value.colorMode, handleColorModeChange]);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -108,6 +144,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <MetricLabelInput value={value.metricLabel} onChange={handleMetricLabelChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
+          {selectColorMode}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

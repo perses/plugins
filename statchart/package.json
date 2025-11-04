@@ -33,11 +33,11 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
+    "immer": "^10.1.1",
     "lodash": "^4.17.21",
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0",
-    "use-resize-observer": "^9.0.0",
-    "immer": "^10.1.1"
+    "use-resize-observer": "^9.0.0"
   },
   "files": [
     "lib/**/*",
@@ -57,5 +57,11 @@
         }
       }
     ]
+  },
+  "dependencies": {
+    "chroma-js": "^3.1.2"
+  },
+  "devDependencies": {
+    "@types/chroma-js": "^3.1.2"
   }
 }

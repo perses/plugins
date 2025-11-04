@@ -31,13 +31,13 @@ export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions, queryResults } = props;
 
-  const { format, sparkline, valueFontSize: valueFontSize } = spec;
+  const { format, sparkline, valueFontSize: valueFontSize, colorMode } = spec;
   const chartsTheme = useChartsTheme();
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
   const isMultiSeries = statChartData.length > 1;
 
-  if (contentDimensions === undefined) return null;
+  if (!contentDimensions) return null;
 
   // Calculates chart width
   const spacing = SPACING * (statChartData.length - 1);
@@ -74,6 +74,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               sparkline={sparklineConfig}
               showSeriesName={isMultiSeries}
               valueFontSize={valueFontSize}
+              colorMode={colorMode}
             />
           );
         })

@@ -22,6 +22,19 @@ export interface StatChartDefinition extends Definition<StatChartOptions> {
   kind: 'StatChart';
 }
 
+export type ColorMode = 'none' | 'value' | 'background_solid';
+
+export type ColorModeLabelItem = {
+  id: ColorMode;
+  label: string;
+};
+
+export const COLOR_MODE_LABELS: ColorModeLabelItem[] = [
+  { id: 'none', label: 'None' },
+  { id: 'value', label: 'Text' },
+  { id: 'background_solid', label: 'Background' },
+];
+
 export interface StatChartOptions {
   calculation: CalculationType;
   format: FormatOptions;
@@ -30,6 +43,7 @@ export interface StatChartOptions {
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
   mappings?: ValueMapping[];
+  colorMode?: ColorMode;
 }
 
 export interface StatChartSparklineOptions {

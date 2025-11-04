@@ -28,5 +28,6 @@ spec: close({
 		width?: number
 	})
 	valueFontSize?: number
+	colorMode?: *"value" | "background_solid" | "none"
 	mappings?: [...common.#mappings]
 })
