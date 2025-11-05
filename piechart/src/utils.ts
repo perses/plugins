@@ -21,39 +21,20 @@ export function calculatePercentages(data: PieChartData[]): Array<{ id?: string;
     const percentage = ((seriesData.value ?? 0) / sum) * 100;
     return {
       ...seriesData,
-      value: percentage,
+      value: Number(percentage.toFixed(2)),
     };
   });
 }
 
 export function sortSeriesData(data: PieChartData[], sortOrder: SortOption = DEFAULT_SORT): PieChartData[] {
-  if (sortOrder === 'asc') {
-    // sort in ascending order by value
-    return data.sort((a, b) => {
-      if (a.value === null) {
-        return 1;
-      }
-      if (b.value === null) {
-        return -1;
-      }
-      if (a.value === b.value) {
-        return 0;
-      }
-      return a.value < b.value ? 1 : -1;
-    });
-  } else {
-    // sort in descending order by value
-    return data.sort((a, b) => {
-      if (a.value === null) {
-        return -1;
-      }
-      if (b.value === null) {
-        return 1;
-      }
-      if (a.value === b.value) {
-        return 0;
-      }
-      return a.value < b.value ? -1 : 1;
-    });
-  }
+  return data.sort((a, b) => {
+    // Handle null values - push them to the end regardless of sort order
+    if (a.value === null && b.value === null) return 0;
+    if (a.value === null) return 1;
+    if (b.value === null) return -1;
+
+    // Sort by value
+    const diff = (a.value ?? 0) - (b.value ?? 0);
+    return sortOrder === 'asc' ? diff : -diff;
+  });
 }

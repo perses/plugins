@@ -13,10 +13,10 @@
 
 import { ReactElement, SyntheticEvent, useCallback, useEffect, useState } from 'react';
 import { Autocomplete, Checkbox, Stack, TextField, TextFieldProps } from '@mui/material';
-import { isAbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
 import { TempoClient } from '../model';
+import { getUnixTimeRange } from '../plugins/tempo-trace-query/get-trace-data';
 import { filterToTraceQL } from './filter/filter_to_traceql';
 import { traceQLToFilter } from './filter/traceql_to_filter';
 import { DurationField, Filter, splitByUnquotedWhitespace } from './filter/filter';
@@ -37,24 +37,22 @@ export function AttributeFilters(props: AttributeFiltersProps): ReactElement {
     setQuery(filterToTraceQL(filter));
   };
 
-  const { timeRange } = useTimeRange();
-  const absTimeRange = !isAbsoluteTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-  const startTime = Math.round(absTimeRange.start.getTime() / 1000);
-  const endTime = Math.round(absTimeRange.end.getTime() / 1000);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   const { data: serviceNameOptions } = useTagValues(
     client,
     'resource.service.name',
     filterToTraceQL({ ...filter, serviceName: [] }),
-    startTime,
-    endTime
+    start,
+    end
   );
   const { data: spanNameOptions } = useTagValues(
     client,
     'name',
     filterToTraceQL({ ...filter, spanName: [] }),
-    startTime,
-    endTime
+    start,
+    end
   );
 
   return (

@@ -14,7 +14,7 @@
 import { Box, styled, useTheme } from '@mui/material';
 import useResizeObserver from 'use-resize-observer';
 import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback, ReactElement } from 'react';
-import { useEvent } from '@perses-dev/core';
+import { useEvent } from '@perses-dev/plugin-system';
 import { useChartsTheme } from '@perses-dev/components';
 import { Ticks } from '../Ticks';
 import { getSpanColor, Viewport } from '../utils';

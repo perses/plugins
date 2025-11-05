@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, StackProps, Switch, TextField } from '@mui/material';
+import { Button, ButtonGroup, Stack, StackProps, Switch, TextField } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
@@ -25,6 +25,7 @@ import {
 import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
 import { ColumnSettings } from '../../models';
+import { ConditionalPanel } from '../ConditionalPanel';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
@@ -44,160 +45,176 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
   );
 
   return (
-    <OptionsEditorGrid {...others}>
-      <OptionsEditorColumn>
-        <OptionsEditorGroup title="Column">
-          <OptionsEditorControl
-            label="Name*"
-            control={
-              <TextField value={column.name} onChange={(e) => onChange({ ...column, name: e.target.value })} required />
-            }
-          />
-          <OptionsEditorControl
-            label="Header"
-            control={
-              <TextField
-                value={column.header ?? ''}
-                onChange={(e) => onChange({ ...column, header: e.target.value ? e.target.value : undefined })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Header Tooltip"
-            control={
-              <TextField
-                value={column.headerDescription ?? ''}
-                onChange={(e) =>
-                  onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })
-                }
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Cell Tooltip"
-            control={
-              <TextField
-                value={column.cellDescription ?? ''}
-                onChange={(e) => onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Enable sorting"
-            control={
-              <Switch
-                checked={column.enableSorting ?? false}
-                onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
-              />
-            }
-          />
-          {column.enableSorting && (
+    <Stack {...others}>
+      <OptionsEditorGrid>
+        <OptionsEditorColumn>
+          <OptionsEditorGroup title="Column">
             <OptionsEditorControl
-              label="Default Sort"
-              control={
-                <SortSelectorButtons
-                  size="medium"
-                  value={column.sort}
-                  sx={{
-                    margin: 0.5,
-                  }}
-                  onChange={(sort) => onChange({ ...column, sort: sort })}
-                />
-              }
-            />
-          )}
-        </OptionsEditorGroup>
-      </OptionsEditorColumn>
-
-      <OptionsEditorColumn>
-        <OptionsEditorGroup title="Visual">
-          <OptionsEditorControl
-            label="Show column"
-            control={
-              <Switch
-                checked={!(column.hide ?? false)}
-                onChange={(e) => onChange({ ...column, hide: !e.target.checked })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Display"
-            control={
-              <ButtonGroup aria-label="Display" size="small">
-                <Button
-                  variant={!column.plugin ? 'contained' : 'outlined'}
-                  onClick={() => onChange({ ...column, plugin: undefined })}
-                >
-                  Text
-                </Button>
-                <Button
-                  variant={column.plugin ? 'contained' : 'outlined'}
-                  onClick={() => onChange({ ...column, plugin: { kind: 'StatChart', spec: {} } })}
-                >
-                  Embedded Panel
-                </Button>
-              </ButtonGroup>
-            }
-          />
-          {column.plugin ? (
-            <OptionsEditorControl
-              label="Panel Type"
-              control={
-                <PluginKindSelect
-                  pluginTypes={['Panel']}
-                  value={{ type: 'Panel', kind: column.plugin.kind }}
-                  onChange={(event) => onChange({ ...column, plugin: { kind: event.kind, spec: {} } })}
-                />
-              }
-            />
-          ) : (
-            <FormatControls
-              value={column.format ?? DEFAULT_FORMAT}
-              onChange={(newFormat): void =>
-                onChange({
-                  ...column,
-                  format: newFormat,
-                })
-              }
-            />
-          )}
-          <OptionsEditorControl
-            label="Alignment"
-            control={
-              <AlignSelector
-                size="small"
-                value={column.align ?? 'left'}
-                onChange={(align) => onChange({ ...column, align: align })}
-              />
-            }
-          />
-          <OptionsEditorControl
-            label="Custom width"
-            control={
-              <Switch
-                checked={column.width !== undefined && column.width !== 'auto'}
-                onChange={(e) => onChange({ ...column, width: e.target.checked ? width : 'auto' })}
-              />
-            }
-          />
-          {column.width !== undefined && column.width !== 'auto' && (
-            <OptionsEditorControl
-              label="Width"
+              label="Name*"
               control={
                 <TextField
-                  type="number"
-                  value={width}
-                  slotProps={{ htmlInput: { min: 1 } }}
-                  onChange={(e) => {
-                    setWidth(+e.target.value);
-                    onChange({ ...column, width: +e.target.value });
-                  }}
+                  value={column.name}
+                  onChange={(e) => onChange({ ...column, name: e.target.value })}
+                  required
                 />
               }
             />
-          )}
+            <OptionsEditorControl
+              label="Header"
+              control={
+                <TextField
+                  value={column.header ?? ''}
+                  onChange={(e) => onChange({ ...column, header: e.target.value ? e.target.value : undefined })}
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Header Tooltip"
+              control={
+                <TextField
+                  value={column.headerDescription ?? ''}
+                  onChange={(e) =>
+                    onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })
+                  }
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Cell Tooltip"
+              control={
+                <TextField
+                  value={column.cellDescription ?? ''}
+                  onChange={(e) =>
+                    onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })
+                  }
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Enable sorting"
+              control={
+                <Switch
+                  checked={column.enableSorting ?? false}
+                  onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
+                />
+              }
+            />
+            {column.enableSorting && (
+              <OptionsEditorControl
+                label="Default Sort"
+                control={
+                  <SortSelectorButtons
+                    size="medium"
+                    value={column.sort}
+                    sx={{
+                      margin: 0.5,
+                    }}
+                    onChange={(sort) => onChange({ ...column, sort: sort })}
+                  />
+                }
+              />
+            )}
+          </OptionsEditorGroup>
+        </OptionsEditorColumn>
+
+        <OptionsEditorColumn>
+          <OptionsEditorGroup title="Visual">
+            <OptionsEditorControl
+              label="Show column"
+              control={
+                <Switch
+                  checked={!(column.hide ?? false)}
+                  onChange={(e) => onChange({ ...column, hide: !e.target.checked })}
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Display"
+              control={
+                <ButtonGroup aria-label="Display" size="small">
+                  <Button
+                    variant={!column.plugin ? 'contained' : 'outlined'}
+                    onClick={() => onChange({ ...column, plugin: undefined })}
+                  >
+                    Text
+                  </Button>
+                  <Button
+                    variant={column.plugin ? 'contained' : 'outlined'}
+                    onClick={() => onChange({ ...column, plugin: { kind: 'StatChart', spec: {} } })}
+                  >
+                    Embedded Panel
+                  </Button>
+                </ButtonGroup>
+              }
+            />
+            {column.plugin ? (
+              <OptionsEditorControl
+                label="Panel Type"
+                control={
+                  <PluginKindSelect
+                    pluginTypes={['Panel']}
+                    value={{ type: 'Panel', kind: column.plugin.kind }}
+                    onChange={(event) => onChange({ ...column, plugin: { kind: event.kind, spec: {} } })}
+                  />
+                }
+              />
+            ) : (
+              <FormatControls
+                value={column.format ?? DEFAULT_FORMAT}
+                onChange={(newFormat): void =>
+                  onChange({
+                    ...column,
+                    format: newFormat,
+                  })
+                }
+              />
+            )}
+            <OptionsEditorControl
+              label="Alignment"
+              control={
+                <AlignSelector
+                  size="small"
+                  value={column.align ?? 'left'}
+                  onChange={(align) => onChange({ ...column, align: align })}
+                />
+              }
+            />
+            <OptionsEditorControl
+              label="Custom width"
+              control={
+                <Switch
+                  checked={column.width !== undefined && column.width !== 'auto'}
+                  onChange={(e) => onChange({ ...column, width: e.target.checked ? width : 'auto' })}
+                />
+              }
+            />
+            {column.width !== undefined && column.width !== 'auto' && (
+              <OptionsEditorControl
+                label="Width"
+                control={
+                  <TextField
+                    type="number"
+                    value={width}
+                    slotProps={{ htmlInput: { min: 1 } }}
+                    onChange={(e) => {
+                      setWidth(+e.target.value);
+                      onChange({ ...column, width: +e.target.value });
+                    }}
+                  />
+                }
+              />
+            )}
+          </OptionsEditorGroup>
+        </OptionsEditorColumn>
+      </OptionsEditorGrid>
+      <Stack sx={{ px: 8 }}>
+        <OptionsEditorGroup title="Conditional Cell Format">
+          <ConditionalPanel
+            cellSettings={column.cellSettings}
+            onChange={(cellSettings) => onChange({ ...column, cellSettings })}
+          />
         </OptionsEditorGroup>
-      </OptionsEditorColumn>
-    </OptionsEditorGrid>
+      </Stack>
+    </Stack>
   );
 }

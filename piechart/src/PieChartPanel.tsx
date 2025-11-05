@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import {
   ChartInstance,
   ContentWithLegend,
@@ -26,24 +26,27 @@ import { CalculationType, CalculationsMap, DEFAULT_LEGEND, TimeSeriesData } from
 import { comparisonLegends, ComparisonValues, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { getSeriesColor } from './palette-gen';
 import { PieChartOptions } from './pie-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
+import { getSeriesColor } from './colors';
 import { PieChartBase, PieChartData } from './PieChartBase';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode, legend: pieChartLegend },
+    spec: { calculation, sort, mode, legend: pieChartLegend, colorPalette: colorPalette },
     contentDimensions,
     queryResults,
   } = props;
   const chartsTheme = useChartsTheme();
-  const muiTheme = useTheme();
-  const PADDING = chartsTheme.container.padding.default;
   const chartId = useId('time-series-panel');
-  const categoricalPalette = chartsTheme.echartsTheme.color;
+  const seriesNames = queryResults.flatMap((result) => result?.data.series?.map((series) => series.name) || []);
+
+  // Memoize the color list so it only regenerates when color/palette/series count changes
+  const colorList = useMemo(() => {
+    return getSeriesColor(seriesNames, colorPalette);
+  }, [colorPalette, seriesNames]);
 
   const { pieChartData, legendItems, legendColumns } = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];
@@ -51,20 +54,14 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
     const legendItems: LegendItem[] = [];
     const legendColumns: Array<TableColumnConfig<LegendItem>> = [];
 
-    for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
-      const result = queryResults[queryIndex];
+    queryResults.forEach((result, queryIndex) => {
+      const series = result?.data.series ?? [];
 
-      let seriesIndex = 0;
-      for (const seriesData of result?.data.series ?? []) {
-        const seriesColor = getSeriesColor({
-          categoricalPalette: categoricalPalette as string[],
-          muiPrimaryColor: muiTheme.palette.primary.main,
-          seriesName: seriesData.name,
-        });
+      series.forEach((seriesData, seriesIndex) => {
+        const seriesId = `${chartId}${seriesData.name}${seriesIndex}${queryIndex}`;
+        const seriesColor = colorList[queryIndex * series.length + seriesIndex] ?? '#ff0000';
 
-        const seriesId = `${chartId}${seriesData.name}${seriesIndex}`;
-
-        const series = {
+        const seriesItem = {
           id: seriesId,
           value: calculate(seriesData.values) ?? null,
           name: seriesData.formattedName ?? '',
@@ -72,19 +69,26 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
             color: seriesColor,
           },
         };
-        pieChartData.push(series);
 
+        pieChartData.push(seriesItem);
         legendItems.push({
           id: seriesId,
-          label: series.name,
+          label: seriesData.formattedName ?? '',
           color: seriesColor,
           data: {},
         });
-        seriesIndex++;
-      }
-    }
+      });
+    });
 
     const sortedPieChartData = sortSeriesData(pieChartData, sort);
+
+    // Reorder legend items to reflect the current sorting order of series
+    const valueById = new Map(sortedPieChartData.map((pd) => [pd.id ?? pd.name, pd.value ?? 0]));
+    legendItems.sort((a, b) => {
+      const av = valueById.get(a.id) ?? 0;
+      const bv = valueById.get(b.id) ?? 0;
+      return sort === 'asc' ? av - bv : bv - av;
+    });
 
     if (pieChartLegend?.values?.length && pieChartLegend?.mode === 'table') {
       const { values } = pieChartLegend;
@@ -129,16 +133,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
       legendItems,
       legendColumns,
     };
-  }, [
-    calculation,
-    sort,
-    mode,
-    queryResults,
-    categoricalPalette,
-    muiTheme.palette.primary.main,
-    chartId,
-    pieChartLegend,
-  ]);
+  }, [calculation, sort, mode, queryResults, colorList, chartId, pieChartLegend]);
 
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
@@ -166,7 +161,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   if (!contentDimensions) return null;
 
   return (
-    <Box sx={{ padding: `${PADDING}px` }}>
+    <Box sx={{ padding: `${contentPadding}px` }}>
       <ContentWithLegend
         width={adjustedContentDimensions?.width ?? 400}
         height={adjustedContentDimensions?.height ?? 1000}
@@ -199,8 +194,9 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
             <Box style={{ height, width }}>
               <PieChartBase
                 data={pieChartData}
-                width={contentDimensions.width - PADDING * 2}
-                height={contentDimensions.height - PADDING * 2}
+                width={width}
+                height={height}
+                showLabels={Boolean(props.spec.showLabels)}
               />
             </Box>
           );

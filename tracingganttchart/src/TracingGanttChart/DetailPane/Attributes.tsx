@@ -150,6 +150,9 @@ function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
   if ('intValue' in value) return value.intValue;
   if ('doubleValue' in value) return String(value.doubleValue);
   if ('boolValue' in value) return String(value.boolValue);
-  if ('arrayValue' in value) return value.arrayValue.values.map(renderAttributeValue).join(', ');
+  if ('arrayValue' in value) {
+    const values = value.arrayValue.values;
+    return values && values.length > 0 ? values.map(renderAttributeValue).join(', ') : '<empty array>';
+  }
   return 'unknown';
 }
