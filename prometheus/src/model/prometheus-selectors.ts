@@ -31,7 +31,9 @@ export const DEFAULT_PROM: PrometheusDatasourceSelector = { kind: PROM_DATASOURC
 /**
  * Returns true if the provided datasourceSelectValue is the default PrometheusDatasourceSelector.
  */
-export function isDefaultPromSelector(datasourceSelectValue: DatasourceSelectValue): boolean {
+export function isDefaultPromSelector(
+  datasourceSelectValue: DatasourceSelectValue<PrometheusDatasourceSelector>
+): boolean {
   return !isVariableDatasource(datasourceSelectValue) && datasourceSelectValue.name === undefined;
 }
 
@@ -39,7 +41,7 @@ export function isDefaultPromSelector(datasourceSelectValue: DatasourceSelectVal
  * Type guard to make sure a datasourceSelectValue is a Prometheus one.
  */
 export function isPrometheusDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue
+  datasourceSelectValue: DatasourceSelectValue<DatasourceSelector>
 ): datasourceSelectValue is PrometheusDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === PROM_DATASOURCE_KIND;
 }

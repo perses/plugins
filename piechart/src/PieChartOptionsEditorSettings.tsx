@@ -22,6 +22,7 @@ import { produce } from 'immer';
 import {
   FormatControls,
   FormatControlsProps,
+  OptionsColorPicker,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -31,10 +32,22 @@ import {
   ModeSelectorProps,
   ModeOption,
   SortOption,
+  OptionsEditorControl,
+  useChartsTheme,
 } from '@perses-dev/components';
 import { CalculationType, isPercentUnit, FormatOptions } from '@perses-dev/core';
-import { Button } from '@mui/material';
-import { ReactElement } from 'react';
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Switch,
+  SwitchProps,
+  Typography,
+} from '@mui/material';
+import { ReactElement, useMemo } from 'react';
 import { PieChartOptions, PieChartOptionsEditorProps, DEFAULT_FORMAT } from './pie-chart-model';
 
 export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps): ReactElement {
@@ -49,7 +62,6 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   };
 
   const handleLegendChange: LegendOptionsEditorProps['onChange'] = (newLegend) => {
-    // TODO (sjcobb): fix type, add position, fix glitch
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.legend = newLegend;
@@ -81,14 +93,81 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     );
   };
 
+  const handleShowLabelsChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
+    onChange(
+      produce(value, (draft: PieChartOptions) => {
+        draft.showLabels = checked;
+      })
+    );
+  };
+
+  const chartsTheme = useChartsTheme();
+  const themePalette = chartsTheme.echartsTheme.color;
+
+  const colorPalette: string[] | undefined = useMemo(() => {
+    return value.colorPalette || undefined;
+  }, [value.colorPalette]);
+
+  const handleColorChange = (color?: string[]) => {
+    onChange(
+      produce(value, (draft: PieChartOptions) => {
+        if (Array.isArray(color)) {
+          draft.colorPalette = color;
+        } else if (typeof color === 'string') {
+          draft.colorPalette = [color];
+        } else {
+          draft.colorPalette = undefined;
+        }
+      })
+    );
+  };
+
   // ensures decimalPlaces defaults to correct value
   const format = merge({}, DEFAULT_FORMAT, value.format);
+
+  type ColorScheme = 'default' | 'theme' | 'gradient';
+
+  const colorScheme: ColorScheme = useMemo(() => {
+    return Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default';
+  }, [colorPalette]);
+
+  const handleColorSchemeChange = (scheme: ColorScheme) => {
+    if (scheme === 'theme') {
+      handleColorChange(themePalette as string[]);
+    } else if (scheme === 'default') {
+      handleColorChange();
+    } else {
+      // gradient: keep existing single color if present (user-chosen via OptionsColorPicker)
+      if (Array.isArray(colorPalette) && colorPalette.length === 1) {
+        return;
+      }
+      // initialize with a sensible default so the color picker shows a color
+      handleColorChange(['#ff0000']);
+    }
+  };
+
+  const colorHelpText = useMemo(() => {
+    if (colorPalette === undefined) {
+      return 'Colors will be automatically assigned using metrics name hash.';
+    }
+    if (Array.isArray(colorPalette) && colorPalette.length > 1) {
+      return 'Colors will be automatically assigned using the current theme color palette.';
+    }
+    if (Array.isArray(colorPalette) && colorPalette.length === 1) {
+      return 'All series will use a gradient based on the selected color.';
+    }
+    return undefined;
+  }, [colorPalette]);
 
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <LegendOptionsEditor calculation="comparison" value={value.legend} onChange={handleLegendChange} />
         <OptionsEditorGroup title="Misc">
+          <OptionsEditorControl
+            label="Show Labels"
+            control={<Switch checked={Boolean(value.showLabels)} onChange={handleShowLabelsChange} />}
+          />
           <FormatControls value={format} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <SortSelector value={value.sort} onChange={handleSortChange} />
@@ -96,6 +175,36 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>
+        <OptionsEditorGroup title="Colors">
+          <Stack spacing={2}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Color Scheme</InputLabel>
+                <Select
+                  value={colorScheme}
+                  label="Color Scheme"
+                  onChange={(e) => handleColorSchemeChange(e.target.value as ColorScheme)}
+                >
+                  <MenuItem value="default">Default</MenuItem>
+                  <MenuItem value="theme">Theme</MenuItem>
+                  <MenuItem value="gradient">Gradient</MenuItem>
+                </Select>
+              </FormControl>
+              {Array.isArray(colorPalette) && colorPalette.length === 1 && (
+                <OptionsColorPicker
+                  label="Color"
+                  color={colorPalette?.[0] ?? (themePalette as string[])[0] ?? '#ff0000'}
+                  onColorChange={(c: string) => handleColorChange([c])}
+                />
+              )}
+            </Stack>
+            {colorHelpText && (
+              <Typography variant="body2" color="text.secondary">
+                {colorHelpText}
+              </Typography>
+            )}
+          </Stack>
+        </OptionsEditorGroup>
         <OptionsEditorGroup title="Reset Settings">
           <Button
             variant="outlined"
@@ -105,6 +214,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                 produce(value, (draft: PieChartOptions) => {
                   // reset button removes all optional panel options
                   draft.legend = undefined;
+                  draft.colorPalette = undefined;
                 })
               );
             }}

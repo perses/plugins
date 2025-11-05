@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DurationString, HTTPProxy } from '@perses-dev/core';
+import { DatasourceSelectValue } from '@perses-dev/plugin-system';
 import { PrometheusDatasourceSelector } from '../model';
 
 export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
@@ -23,7 +24,7 @@ export interface PrometheusDatasourceSpec {
 }
 
 export interface PrometheusVariableOptionsBase {
-  datasource?: PrometheusDatasourceSelector;
+  datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
 }
 
 export type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {

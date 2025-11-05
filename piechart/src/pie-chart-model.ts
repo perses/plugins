@@ -24,12 +24,14 @@ export interface BarChartDefinition extends Definition<PieChartOptions> {
 }
 
 export interface PieChartOptions {
-  legend?: LegendSpecOptions;
   calculation: CalculationType;
-  radius: number;
   format?: FormatOptions;
-  sort?: SortOption;
+  colorPalette?: string[];
+  legend?: LegendSpecOptions;
   mode?: ModeOption;
+  radius: number;
+  showLabels?: boolean;
+  sort?: SortOption;
 }
 
 export type PieChartOptionsEditorProps = OptionsEditorProps<PieChartOptions>;
@@ -38,8 +40,9 @@ export function createInitialPieChartOptions(): PieChartOptions {
   return {
     calculation: DEFAULT_CALCULATION,
     format: DEFAULT_FORMAT,
-    radius: 50,
-    sort: DEFAULT_SORT,
     mode: DEFAULT_MODE,
+    radius: 50,
+    showLabels: false,
+    sort: DEFAULT_SORT,
   };
 }
