@@ -17,7 +17,7 @@ import (
 	"regexp"
 )
 
-#promQLRegexp: =~ "^label_values\\(.*\\)$"
+#promQLRegexp: =~ "^query_result\\(.*\\)$"
 
 #grafanaVar: {
 	type: "query"
