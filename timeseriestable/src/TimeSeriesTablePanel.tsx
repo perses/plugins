@@ -27,7 +27,10 @@ export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement 
   const contentPadding = chartsTheme.container.padding.default;
 
   return (
-    <Box sx={{ height: contentDimensions?.height || 0, padding: `${contentPadding}px`, overflowY: 'scroll' }}>
+    <Box
+      style={{ height: contentDimensions?.height ?? 0 }}
+      sx={{ padding: `${contentPadding}px`, overflowY: 'scroll' }}
+    >
       <DataTable queryResults={queryResults} />
     </Box>
   );

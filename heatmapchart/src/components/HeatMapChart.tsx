@@ -167,9 +167,11 @@ export function HeatMapChart({
   const chart = useMemo(
     () => (
       <EChart
-        sx={{
+        style={{
           width: width,
           height: height,
+        }}
+        sx={{
           padding: `${chartsTheme.container.padding.default}px`,
         }}
         option={option}

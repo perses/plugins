@@ -124,7 +124,7 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
 
   return (
     <EChart
-      sx={{
+      style={{
         width: width,
         height: height,
       }}

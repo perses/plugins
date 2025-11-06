@@ -148,7 +148,7 @@ export const StatusHistoryChartBase: FC<StatusHistoryChartBaseProps> = (props) =
   return (
     <Box style={{ height: height }} sx={{ overflow: 'auto' }}>
       <EChart
-        sx={{
+        style={{
           width: '100%',
           height: height,
         }}

@@ -171,12 +171,6 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   }, [data, chartsTheme, sparkline, colorMode]);
 
   const textAlignment = sparkline ? 'auto' : 'center';
-  const textStyles = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: textAlignment,
-    alignItems: textAlignment,
-  };
 
   const styledFormattedValue = useMemo(() => {
     let valueColor = '';
@@ -236,7 +230,10 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
         height: '100%',
         width: '100%',
         backgroundColor: colorMode === 'background_solid' ? color : 'transparent',
-        ...textStyles,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: textAlignment,
+        alignItems: textAlignment,
       }}
     >
       {seriesName}

@@ -80,7 +80,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
       {selectedSpan && (
         <>
           <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
-          <Box sx={{ width: `${(1 - tableWidth) * 100}%`, overflow: 'auto' }}>
+          <Box style={{ width: `${(1 - tableWidth) * 100}%` }} sx={{ overflow: 'auto' }}>
             <DetailPane
               customLinks={customLinks}
               trace={trace}

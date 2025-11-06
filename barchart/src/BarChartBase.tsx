@@ -120,7 +120,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
       sx={{ overflow: 'auto' }}
     >
       <EChart
-        sx={{
+        style={{
           minHeight: height,
           height: data ? data.length * (BAR_WIN_WIDTH + BAR_GAP) : '100%',
         }}
