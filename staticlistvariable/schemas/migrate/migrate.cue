@@ -19,14 +19,13 @@ import (
 
 #grafanaVar: {
 	type: "custom" | "interval"
-	{
-		options : [...{
-			text: string
-			value: string
-		}]
-	} | {
-		query: string
-	}
+	options?: [...{
+		text: string
+		value: string
+	}]
+    if options == _|_ {
+      query: string
+    }
 	...
 }
 
