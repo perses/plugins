@@ -5,6 +5,8 @@ updates:
 - package-ecosystem: "gomod"
   directories:
     - "**/*"
+  ignore:
+    - dependency-name: "github.com/perses/perses"
   open-pull-requests-limit: 10
   schedule:
     interval: "weekly"
