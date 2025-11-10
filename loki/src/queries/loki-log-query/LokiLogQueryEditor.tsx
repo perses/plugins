@@ -19,14 +19,14 @@ import {
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
 import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { ReactElement, useCallback, useState, useEffect } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
 import { OptionsEditorControl } from '@perses-dev/components';
 import { LogQLEditor } from '../../components/logql-editor';
 import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
-import { LokiLogQuerySpec } from './loki-log-query-types';
 import { useQueryState } from '../query-editor-model';
+import { LokiLogQuerySpec } from './loki-log-query-types';
 
 type LokiQueryEditorProps = OptionsEditorProps<LokiLogQuerySpec>;
 

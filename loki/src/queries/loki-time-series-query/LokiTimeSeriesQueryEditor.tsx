@@ -24,8 +24,8 @@ import { produce } from 'immer';
 import { LogQLEditor } from '../../components/logql-editor';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
-import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 import { useQueryState } from '../query-editor-model';
+import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 
 type LokiQueryEditorProps = OptionsEditorProps<LokiTimeSeriesQuerySpec>;
 
