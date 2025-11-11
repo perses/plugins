@@ -18,7 +18,7 @@ import { PanelData } from '@perses-dev/plugin-system';
 import { SeriesName } from './SeriesName';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
-const MAX_FORMATABLE_SERIES = 1000;
+const MAX_FORMATTABLE_SERIES = 1000;
 
 export interface DataTableProps {
   queryResults: Array<PanelData<TimeSeriesData>>;
@@ -36,15 +36,26 @@ export const DataTable = ({ queryResults }: DataTableProps): ReactElement | null
   const series = useMemo(() => queryResults.flatMap((d) => d.data).flatMap((d) => d?.series || []), [queryResults]);
   const rows = useMemo(() => buildRows(series, queryResults), [series, queryResults]);
 
-  if (!queryResults) {
-    return <Typography>No data</Typography>;
+  if (!queryResults || !rows?.length) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+        }}
+      >
+        <Typography>No data</Typography>
+      </Box>
+    );
   }
 
   return (
     <>
-      {series.length >= MAX_FORMATABLE_SERIES && (
+      {series.length >= MAX_FORMATTABLE_SERIES && (
         <Alert severity="warning">
-          Showing more than {MAX_FORMATABLE_SERIES} series, turning off label formatting for performance reasons.
+          Showing more than {MAX_FORMATTABLE_SERIES} series, turning off label formatting for performance reasons.
         </Alert>
       )}
       <Table className="data-table">
@@ -55,7 +66,7 @@ export const DataTable = ({ queryResults }: DataTableProps): ReactElement | null
 };
 
 function buildRows(series: TimeSeries[], queryResults: Array<PanelData<TimeSeriesData>>): ReactNode[] {
-  const isFormatted = series.length < MAX_FORMATABLE_SERIES; // only format series names if we have less than 1000 series for performance reasons
+  const isFormatted = series.length < MAX_FORMATTABLE_SERIES; // only format series names if we have less than 1000 series for performance reasons
   return series.map((s, seriesIdx) => {
     const displayTimeStamps = (s.values?.length ?? 0) > 1;
     const valuesAndTimes = s.values

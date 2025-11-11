@@ -16,6 +16,7 @@ import { useChartsTheme } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { TimeSeriesData } from '@perses-dev/core';
+
 import { TimeSeriesTableOptions } from './model';
 import { DataTable } from './components';
 
