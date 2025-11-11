@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, useTheme } from '@mui/material';
+import { Box, SxProps, Typography, useTheme } from '@mui/material';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
 import {
   GridComponent,
@@ -24,7 +24,7 @@ import {
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { TimeScale } from '@perses-dev/core';
-import { EChartsCoreOption } from 'echarts';
+import { EChartsCoreOption, TitleComponentOption } from 'echarts';
 import { FC } from 'react';
 import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { getFormattedStatusHistoryAxisLabel } from './utils/get-formatted-axis-label';
@@ -64,9 +64,12 @@ export interface StatusHistoryChartBaseProps {
 
 export const StatusHistoryChartBase: FC<StatusHistoryChartBaseProps> = (props) => {
   const { height, data, xAxisCategories, yAxisCategories, timeScale, colors } = props;
+
   const { timeZone } = useTimeZone();
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
+
+  const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
   const option: EChartsCoreOption = {
     tooltip: {
@@ -147,14 +150,18 @@ export const StatusHistoryChartBase: FC<StatusHistoryChartBaseProps> = (props) =
 
   return (
     <Box style={{ height: height }} sx={{ overflow: 'auto' }}>
-      <EChart
-        style={{
-          width: '100%',
-          height: height,
-        }}
-        option={option}
-        theme={chartsTheme.echartsTheme}
-      />
+      {data.length ? (
+        <EChart
+          style={{
+            width: '100%',
+            height: height,
+          }}
+          option={option}
+          theme={chartsTheme.echartsTheme}
+        />
+      ) : (
+        <Typography sx={{ ...noDataTextStyle }}>No data</Typography>
+      )}
     </Box>
   );
 };
