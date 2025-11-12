@@ -13,7 +13,6 @@ export interface LogQueryContext {
   timeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
-  refreshKey: string;
 }
 
 type LogQueryPluginDependencies = {

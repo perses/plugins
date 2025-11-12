@@ -31,7 +31,7 @@ victorialogsStubClient.streamQueryRange = jest.fn(async () => {
       level: 'error',
       _time: '1686141338877000000',
       _msg: 'Error processing request',
-    }
+    },
   ] as VictoriaLogsStreamQueryRangeResponse;
 });
 
@@ -50,7 +50,6 @@ const createStubContext = (): LogQueryContext => {
       getSavedDatasources: jest.fn(),
       setSavedDatasources: jest.fn(),
     },
-    refreshKey: 'test',
     timeRange: {
       end: new Date('01-01-2025'),
       start: new Date('01-02-2025'),

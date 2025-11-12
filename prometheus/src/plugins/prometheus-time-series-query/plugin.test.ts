@@ -73,7 +73,6 @@ const createStubContext = (): TimeSeriesQueryContext => {
       getSavedDatasources: jest.fn(),
       setSavedDatasources: jest.fn(),
     },
-    refreshKey: 'test',
     timeRange: {
       end: new Date('01-01-2023'),
       start: new Date('01-02-2023'),

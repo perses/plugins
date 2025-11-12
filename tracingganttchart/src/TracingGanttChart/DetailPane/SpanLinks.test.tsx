@@ -16,7 +16,8 @@ import { render, RenderResult } from '@testing-library/react';
 import { otlptracev1 } from '@perses-dev/core';
 import { MemoryRouter } from 'react-router-dom';
 import { VariableProvider } from '@perses-dev/dashboards';
-import { ReactRouterProvider, TimeRangeProvider } from '@perses-dev/plugin-system';
+import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CustomLinks } from '../../gantt-chart-model';
 import { getTraceModel } from '../trace';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
@@ -25,16 +26,20 @@ import { SpanLinkList, SpanLinkListProps } from './SpanLinks';
 describe('SpanLinks', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
   const renderComponent = (props: SpanLinkListProps): RenderResult => {
+    const queryClient = new QueryClient();
+
     return render(
-      <MemoryRouter>
-        <ReactRouterProvider>
-          <TimeRangeProvider timeRange={{ pastDuration: '1m' }}>
-            <VariableProvider>
-              <SpanLinkList {...props} />
-            </VariableProvider>
-          </TimeRangeProvider>
-        </ReactRouterProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <ReactRouterProvider>
+            <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1m' }}>
+              <VariableProvider>
+                <SpanLinkList {...props} />
+              </VariableProvider>
+            </TimeRangeProviderBasic>
+          </ReactRouterProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
   };
 

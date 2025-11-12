@@ -46,7 +46,6 @@ const createStubContext = (): ClickHouseQueryContext => {
       getSavedDatasources: jest.fn(),
       setSavedDatasources: jest.fn(),
     },
-    refreshKey: 'test',
     timeRange: {
       end: new Date('01-01-2025'),
       start: new Date('01-02-2025'),
