@@ -31,6 +31,7 @@ import {
 } from '../test/mock-query-results';
 import { TablePanel } from './TablePanel';
 
+const TEST_TIMEOUT = 15000; // Github Actions is slow
 const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> = {
   contentDimensions: {
     width: 500,
@@ -55,46 +56,54 @@ describe('TablePanel', () => {
     );
   };
 
-  it('should render time series in table', async () => {
-    renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE);
+  it(
+    'should render time series in table',
+    async () => {
+      renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE);
 
-    expect(await screen.findAllByRole('columnheader')).toHaveLength(8); // 1 timestamp column +  1 value column + 6 labels columns
-    expect(await screen.findByRole('columnheader', { name: 'timestamp' })).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: 'value' })).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: 'device' })).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: 'env' })).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: 'fstype' })).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: 'instance' })).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: 'job' })).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: 'mountpoint' })).toBeInTheDocument();
+      expect(await screen.findAllByRole('columnheader')).toHaveLength(8); // 1 timestamp column +  1 value column + 6 labels columns
+      expect(await screen.findByRole('columnheader', { name: 'timestamp' })).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: 'value' })).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: 'device' })).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: 'env' })).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: 'fstype' })).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: 'instance' })).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: 'job' })).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: 'mountpoint' })).toBeInTheDocument();
 
-    expect(await screen.findAllByRole('cell')).toHaveLength(16); // 2 time series with 8 columns
-  }, 15000); // Github Actions is slow
+      expect(await screen.findAllByRole('cell')).toHaveLength(16); // 2 time series with 8 columns
+    },
+    TEST_TIMEOUT
+  );
 
-  it('should apply column settings', async () => {
-    renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
-      columnSettings: [
-        { name: 'value', header: 'Value', headerDescription: 'Timeseries Value' },
-        { name: 'device', width: 200 },
-        { name: 'env', hide: true },
-        { name: 'fstype', enableSorting: true },
-      ],
-    });
+  it(
+    'should apply column settings',
+    async () => {
+      renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+        columnSettings: [
+          { name: 'value', header: 'Value', headerDescription: 'Timeseries Value' },
+          { name: 'device', width: 200 },
+          { name: 'env', hide: true },
+          { name: 'fstype', enableSorting: true },
+        ],
+      });
 
-    expect(await screen.findAllByRole('columnheader')).toHaveLength(7); // 1 timestamp column +  1 value column + 6 labels columns - 1 column hidden
-    expect(screen.queryByRole('columnheader', { name: 'env' })).not.toBeInTheDocument();
+      expect(await screen.findAllByRole('columnheader')).toHaveLength(7); // 1 timestamp column +  1 value column + 6 labels columns - 1 column hidden
+      expect(screen.queryByRole('columnheader', { name: 'env' })).not.toBeInTheDocument();
 
-    const valueHeaderCell = await screen.findByRole('columnheader', { name: /Value/i });
-    expect(valueHeaderCell).toBeInTheDocument();
-    expect(await within(valueHeaderCell).findByLabelText('Timeseries Value')).toBeInTheDocument();
-    expect(await screen.findByRole('columnheader', { name: /Value/i })).toBeInTheDocument();
+      const valueHeaderCell = await screen.findByRole('columnheader', { name: /Value/i });
+      expect(valueHeaderCell).toBeInTheDocument();
+      expect(await within(valueHeaderCell).findByLabelText('Timeseries Value')).toBeInTheDocument();
+      expect(await screen.findByRole('columnheader', { name: /Value/i })).toBeInTheDocument();
 
-    const fstypeHeaderCell = await screen.findByRole('columnheader', { name: 'fstype' });
-    expect(fstypeHeaderCell).toBeInTheDocument();
-    expect(await within(fstypeHeaderCell).findByTestId('ArrowDownwardIcon')).toBeInTheDocument();
+      const fstypeHeaderCell = await screen.findByRole('columnheader', { name: 'fstype' });
+      expect(fstypeHeaderCell).toBeInTheDocument();
+      expect(await within(fstypeHeaderCell).findByTestId('ArrowDownwardIcon')).toBeInTheDocument();
 
-    expect(await screen.findAllByRole('cell')).toHaveLength(14); // 2 time series with 7 columns
-  });
+      expect(await screen.findAllByRole('cell')).toHaveLength(14); // 2 time series with 7 columns
+    },
+    TEST_TIMEOUT
+  );
 
   it('should apply transforms', async () => {
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
