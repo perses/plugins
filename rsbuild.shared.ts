@@ -128,7 +128,9 @@ function getRsbuildConfig(name: string): RsbuildConfig {
       htmlPlugin: false,
       rspack: (config) => {
         config.output = config.output || {};
-        config.output.publicPath = 'auto';
+        if (process.env.NODE_ENV !== 'development') {
+          config.output.publicPath = 'auto';
+        }
         return config;
       },
     },
