@@ -149,7 +149,15 @@ export const StatusHistoryChartBase: FC<StatusHistoryChartBaseProps> = (props) =
   };
 
   return (
-    <Box style={{ height: height }} sx={{ overflow: 'auto' }}>
+    <Box
+      style={{ height: height }}
+      sx={{
+        overflow: 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
       {data.length ? (
         <EChart
           style={{

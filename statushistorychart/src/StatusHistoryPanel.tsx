@@ -43,10 +43,6 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
       }
     : undefined;
 
-  if (!statusHistoryData || statusHistoryData.length === 0) {
-    return null;
-  }
-
   return (
     <Box sx={{ padding: `${PADDING}px` }}>
       <ContentWithLegend
@@ -68,7 +64,7 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
               <StatusHistoryChartBase
                 xAxisCategories={xAxisCategories}
                 yAxisCategories={yAxisCategories}
-                data={statusHistoryData}
+                data={statusHistoryData ?? []}
                 timeScale={timeScale}
                 height={height}
                 colors={colors}
