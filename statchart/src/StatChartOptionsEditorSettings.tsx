@@ -39,6 +39,8 @@ import { ReactElement, useCallback, useMemo } from 'react';
 import {
   COLOR_MODE_LABELS,
   ColorModeLabelItem,
+  SHOW_LEGEND_LABELS,
+  ShowLegendLabelItem,
   StatChartOptions,
   StatChartOptionsEditorProps,
 } from './stat-chart-model';
@@ -66,6 +68,17 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
       })
     );
   };
+
+  const handleShowLegendChange = useCallback(
+    (_: unknown, newShowLegend: ShowLegendLabelItem): void => {
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          draft.showLegend = newShowLegend.id;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
   const handleUnitChange: FormatControlsProps['onChange'] = (newFormat) => {
     onChange(
@@ -113,6 +126,25 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     [onChange, value]
   );
 
+  const selectShowLegend = useMemo((): ReactElement => {
+    return (
+      <OptionsEditorControl
+        label="Show Legend"
+        control={
+          <SettingsAutocomplete
+            onChange={handleShowLegendChange}
+            options={SHOW_LEGEND_LABELS}
+            disableClearable
+            value={
+              SHOW_LEGEND_LABELS.find((i) => i.id === value.showLegend) ??
+              SHOW_LEGEND_LABELS.find((i) => i.id === 'auto')!
+            }
+          />
+        }
+      />
+    );
+  }, [value.showLegend, handleShowLegendChange]);
+
   const selectColorMode = useMemo((): ReactElement => {
     return (
       <OptionsEditorControl
@@ -135,6 +167,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
+        <OptionsEditorGroup title="Legend">{selectShowLegend}</OptionsEditorGroup>
         <OptionsEditorGroup title="Misc">
           <OptionsEditorControl
             label="Sparkline"
