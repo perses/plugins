@@ -40,14 +40,6 @@ import {
   PrometheusPromQLVariableOptions,
 } from './types';
 
-/* TODO: 
-Open Question for later improvement
-The usage of direct onchange here causes an immediate spec update which eventually updates the panel
-This was probably intentional to allow for quick switching between values.
-Shouldn't we update the panel only through the Run Query Button? 
-I think we should only track the changes and let the button to Run the query
-*/
-
 export function PrometheusLabelValuesVariableEditor(
   props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>
 ): ReactElement {
@@ -55,7 +47,6 @@ export function PrometheusLabelValuesVariableEditor(
     onChange,
     value,
     value: { datasource },
-    queryHandlerSettings,
   } = props;
   const selectedDatasource = datasource ?? DEFAULT_PROM;
   const [labelValue, setLabelValue] = useState(props.value.labelName);
@@ -69,32 +60,21 @@ export function PrometheusLabelValuesVariableEditor(
             draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
           })
         );
-        if (queryHandlerSettings?.setWatchOtherSpecs)
-          queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
         return;
       }
 
       throw new Error('Got unexpected non-Prometheus datasource selector');
     },
-    [onChange, queryHandlerSettings, value]
+    [onChange, value]
   );
 
-  const handleLabelChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setLabelValue(e.target.value);
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, labelName: e.target.value });
-    },
-    [value, queryHandlerSettings]
-  );
+  const handleLabelChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setLabelValue(e.target.value);
+  }, []);
 
-  const handleMatchEditorsChange = useCallback(
-    (e: string[]) => {
-      setMatchersValues(e);
-      if (queryHandlerSettings?.setWatchOtherSpecs) queryHandlerSettings.setWatchOtherSpecs({ ...value, matchers: e });
-    },
-    [value, queryHandlerSettings]
-  );
+  const handleMatchEditorsChange = useCallback((e: string[]) => {
+    setMatchersValues(e);
+  }, []);
 
   return (
     <Stack spacing={2}>
@@ -129,7 +109,6 @@ export function PrometheusLabelNamesVariableEditor(
     onChange,
     value,
     value: { datasource },
-    queryHandlerSettings,
   } = props;
 
   const selectedDatasource = datasource ?? DEFAULT_PROM;
@@ -143,25 +122,17 @@ export function PrometheusLabelNamesVariableEditor(
             draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
           })
         );
-        if (queryHandlerSettings?.setWatchOtherSpecs)
-          queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
         return;
       }
 
       throw new Error('Got unexpected non-Prometheus datasource selector');
     },
-    [onChange, queryHandlerSettings, value]
+    [onChange, value]
   );
 
-  const handleMatchEditorChange = useCallback(
-    (e: string[]) => {
-      setMatchersValues(e);
-      if (queryHandlerSettings?.setWatchOtherSpecs) {
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, matchers: e });
-      }
-    },
-    [value, queryHandlerSettings]
-  );
+  const handleMatchEditorChange = useCallback((e: string[]) => {
+    setMatchersValues(e);
+  }, []);
 
   return (
     <Stack spacing={2}>
@@ -187,7 +158,6 @@ export function PrometheusPromQLVariableEditor(
     onChange,
     value,
     value: { datasource },
-    queryHandlerSettings,
   } = props;
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
   const selectedDatasource = useDatasourceSelectValueToSelector(
@@ -197,7 +167,7 @@ export function PrometheusPromQLVariableEditor(
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
-  const [labelValue, setLableValue] = useState(props.value.labelName);
+  const [labelValue, setLabelValue] = useState(props.value.labelName);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
       if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
@@ -207,14 +177,12 @@ export function PrometheusPromQLVariableEditor(
             draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
           })
         );
-        if (queryHandlerSettings?.setWatchOtherSpecs)
-          queryHandlerSettings?.setWatchOtherSpecs({ ...value, datasource: next });
         return;
       }
 
       throw new Error('Got unexpected non-Prometheus datasource selector');
     },
-    [value, onChange, queryHandlerSettings]
+    [value, onChange]
   );
 
   const handleOnBlurPromQlChange = useCallback(
@@ -224,22 +192,9 @@ export function PrometheusPromQLVariableEditor(
     [onChange, value]
   );
 
-  const trackPromQlChanges = useCallback(
-    (e: React.FocusEvent<HTMLDivElement, Element>) => {
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings?.setWatchOtherSpecs({ ...value, expr: e.target.textContent ?? '' });
-    },
-    [queryHandlerSettings, value]
-  );
-
-  const handleLabelNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setLableValue(e.target.value);
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings?.setWatchOtherSpecs({ ...value, labelName: e.target.value });
-    },
-    [queryHandlerSettings, value]
-  );
+  const handleLabelNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setLabelValue(e.target.value);
+  }, []);
 
   return (
     <Stack spacing={2}>
@@ -257,7 +212,7 @@ export function PrometheusPromQLVariableEditor(
         completeConfig={{ remote: { url: promURL } }}
         value={value.expr}
         datasource={selectedDatasource}
-        onBlur={queryHandlerSettings?.runWithOnBlur ? handleOnBlurPromQlChange : trackPromQlChanges}
+        onBlur={handleOnBlurPromQlChange}
         readOnly={props.isReadonly}
         width="100%"
       />
