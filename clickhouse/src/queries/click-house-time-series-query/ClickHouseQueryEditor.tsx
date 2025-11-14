@@ -19,17 +19,17 @@ import {
 } from '@perses-dev/plugin-system';
 import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
-import { ClickHouseTimeSeriesQuerySpec } from './click-house-query-types';
+import { Stack } from '@mui/material';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { ClickQLEditor } from '../../components';
-import { Stack } from '@mui/material';
 import { queryExample } from '../../components/constants';
 import { useQueryState } from '../query-editor-model';
+import { ClickHouseTimeSeriesQuerySpec } from './click-house-query-types';
 
 type ClickHouseTimeSeriesQueryEditorProps = OptionsEditorProps<ClickHouseTimeSeriesQuerySpec>;
 
 export function ClickHouseTimeSeriesQueryEditor(props: ClickHouseTimeSeriesQueryEditorProps): ReactElement {
-  const { onChange, value, queryHandlerSettings } = props;
+  const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_DATASOURCE;
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
@@ -41,9 +41,6 @@ export function ClickHouseTimeSeriesQueryEditor(props: ClickHouseTimeSeriesQuery
           draft.datasource = newDatasourceSelection;
         })
       );
-
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: newDatasourceSelection });
       return;
     }
     throw new Error('Got unexpected non ClickHouse datasource selection');
@@ -51,9 +48,6 @@ export function ClickHouseTimeSeriesQueryEditor(props: ClickHouseTimeSeriesQuery
 
   // Immediate query execution on Enter or blur
   const handleQueryExecute = (query: string) => {
-    if (queryHandlerSettings?.watchQueryChanges) {
-      queryHandlerSettings.watchQueryChanges(query);
-    }
     onChange(
       produce(value, (draft) => {
         draft.query = query;
@@ -64,11 +58,8 @@ export function ClickHouseTimeSeriesQueryEditor(props: ClickHouseTimeSeriesQuery
   const handleClickHouseQueryChange = useCallback(
     (e: string) => {
       handleQueryChange(e);
-      if (queryHandlerSettings?.watchQueryChanges) {
-        queryHandlerSettings.watchQueryChanges(e);
-      }
     },
-    [handleQueryChange, queryHandlerSettings]
+    [handleQueryChange]
   );
 
   const examplesStyle: React.CSSProperties = {
@@ -94,7 +85,7 @@ export function ClickHouseTimeSeriesQueryEditor(props: ClickHouseTimeSeriesQuery
       <ClickQLEditor
         value={query}
         onChange={handleClickHouseQueryChange}
-        onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
+        onBlur={handleQueryBlur}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
             event.preventDefault();

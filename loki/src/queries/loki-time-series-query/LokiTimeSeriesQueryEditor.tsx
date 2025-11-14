@@ -21,7 +21,7 @@ import {
 import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
-import { LogQLEditor } from '../../components/logql-editor';
+import { LogQLEditor } from '../../components';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
@@ -30,7 +30,7 @@ import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 type LokiQueryEditorProps = OptionsEditorProps<LokiTimeSeriesQuerySpec>;
 
 export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
-  const { onChange, value, queryHandlerSettings } = props;
+  const { onChange, value } = props;
   const { datasource } = value;
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
@@ -46,9 +46,6 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
           draft.datasource = newDatasourceSelection;
         })
       );
-
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: newDatasourceSelection });
       return;
     }
 
@@ -57,9 +54,6 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
 
   // Immediate query execution on Enter or blur
   const handleQueryExecute = (query: string) => {
-    if (queryHandlerSettings?.watchQueryChanges) {
-      queryHandlerSettings.watchQueryChanges(query);
-    }
     onChange(
       produce(value, (draft) => {
         draft.query = query;
@@ -70,11 +64,8 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
   const handleLogsQueryChange = useCallback(
     (e: string) => {
       handleQueryChange(e);
-      if (queryHandlerSettings?.watchQueryChanges) {
-        queryHandlerSettings.watchQueryChanges(e);
-      }
     },
-    [handleQueryChange, queryHandlerSettings]
+    [handleQueryChange]
   );
 
   return (
@@ -111,7 +102,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
         <LogQLEditor
           value={query}
           onChange={handleLogsQueryChange}
-          onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
+          onBlur={handleQueryBlur}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
               event.preventDefault();

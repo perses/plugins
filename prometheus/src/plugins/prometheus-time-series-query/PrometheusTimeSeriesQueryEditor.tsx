@@ -21,7 +21,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { FormControl, Stack, TextField } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
+import { ReactElement } from 'react';
 import {
   DEFAULT_PROM,
   DurationString,
@@ -48,7 +48,6 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     onChange,
     value,
     value: { query, datasource },
-    queryHandlerSettings,
     isReadonly,
   } = props;
 
@@ -86,41 +85,11 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           draft.datasource = nextDatasource;
         })
       );
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
       return;
     }
 
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
-
-  const handlePromQlEditorChanges = useCallback(
-    (e: string) => {
-      handleQueryChange(e);
-      if (queryHandlerSettings?.watchQueryChanges) {
-        queryHandlerSettings?.watchQueryChanges(e);
-      }
-    },
-    [queryHandlerSettings, handleQueryChange]
-  );
-
-  const handleLegendSpecChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      handleFormatChange(e.target.value);
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, seriesNameFormat: e.target.value });
-    },
-    [queryHandlerSettings, handleFormatChange, value]
-  );
-
-  const handleMinStepSpecChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined);
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, minStep: e.target.value });
-    },
-    [queryHandlerSettings, handleMinStepChange, value]
-  );
 
   return (
     <Stack spacing={2}>
@@ -139,8 +108,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         completeConfig={{ remote: { url: promURL } }}
         value={query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
         datasource={selectedDatasource}
-        onChange={handlePromQlEditorChanges}
-        onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
+        onChange={handleQueryChange}
+        onBlur={handleQueryBlur}
         isReadOnly={isReadonly}
       />
       <Stack direction="row" spacing={2}>
@@ -150,8 +119,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           placeholder="Example: '{{instance}}' will generate series names like 'webserver-123', 'webserver-456'..."
           helperText="Text to be displayed in the legend and the tooltip. Use {{label_name}} to interpolate label values."
           value={format ?? ''}
-          onChange={handleLegendSpecChange}
-          onBlur={queryHandlerSettings?.runWithOnBlur ? handleFormatBlur : undefined}
+          onChange={(e) => handleFormatChange(e.target.value)}
+          onBlur={handleFormatBlur}
           slotProps={{
             inputLabel: { shrink: isReadonly ? true : undefined },
             input: { readOnly: isReadonly },
@@ -162,8 +131,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           placeholder={minStepPlaceholder}
           helperText="Lower bound for the step. If not provided, the scrape interval of the datasource is used."
           value={minStep ?? ''}
-          onChange={handleMinStepSpecChange}
-          onBlur={queryHandlerSettings?.runWithOnBlur ? handleMinStepBlur : undefined}
+          onChange={(e) => handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined)}
+          onBlur={handleMinStepBlur}
           sx={{ width: '250px' }}
           slotProps={{
             inputLabel: { shrink: isReadonly ? true : undefined },

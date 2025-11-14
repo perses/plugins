@@ -19,18 +19,15 @@ import {
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback, useState, useMemo, SyntheticEvent } from 'react';
+import { ReactElement, useCallback, useMemo, SyntheticEvent } from 'react';
 import {
   DEFAULT_VICTORIALOGS,
   isDefaultVictoriaLogsSelector,
   isVictoriaLogsDatasourceSelector,
   VICTORIALOGS_DATASOURCE_KIND,
-  VictoriaLogsClient,
   VictoriaLogsDatasourceSelector,
 } from '../../model';
-import {
-  VictoriaLogsFieldValuesVariableOptions,
-} from '../types';
+import { VictoriaLogsFieldValuesVariableOptions } from '../types';
 import { useFieldNames } from '../utils';
 
 export function VictoriaLogsFieldValuesVariableEditor(
@@ -40,7 +37,6 @@ export function VictoriaLogsFieldValuesVariableEditor(
     onChange,
     value,
     value: { datasource, query, field },
-    queryHandlerSettings,
   } = props;
   const datasourceSelectValue = datasource ?? DEFAULT_VICTORIALOGS;
   const selectedDatasource = useDatasourceSelectValueToSelector(
@@ -57,14 +53,12 @@ export function VictoriaLogsFieldValuesVariableEditor(
             draft.datasource = !isVariableDatasource(next) && isDefaultVictoriaLogsSelector(next) ? undefined : next;
           })
         );
-        if (queryHandlerSettings?.setWatchOtherSpecs)
-          queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
         return;
       }
 
       throw new Error('Got unexpected non-VictoriaLogs datasource selector');
     },
-    [onChange, queryHandlerSettings, value]
+    [onChange, value]
   );
 
   const handleQueryChange = useCallback(
@@ -74,30 +68,24 @@ export function VictoriaLogsFieldValuesVariableEditor(
           draft.query = event.target.value;
         })
       );
-      if (queryHandlerSettings?.watchQueryChanges) {
-        queryHandlerSettings.watchQueryChanges(event.target.value);
-      }
     },
-    [onChange, queryHandlerSettings, value]
+    [onChange, value]
   );
 
   const handleFieldChange = useCallback(
     (_: SyntheticEvent, newValue: string | null) => {
       onChange(
         produce(value, (draft) => {
-          draft.field = newValue || "";
+          draft.field = newValue || '';
         })
       );
-      if (queryHandlerSettings?.setWatchOtherSpecs) {
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, field: newValue });
-      }
     },
-    [onChange, queryHandlerSettings, value]
+    [onChange, value]
   );
 
   const fieldNamesOptions = useMemo(() => {
-    return fieldNames?.values.map(o => o.value) || [];
-  }, [isFieldNamesOptionsLoading, fieldNames]);
+    return fieldNames?.values.map((o) => o.value) || [];
+  }, [fieldNames]);
 
   return (
     <Stack spacing={2}>
@@ -119,14 +107,7 @@ export function VictoriaLogsFieldValuesVariableEditor(
         loading={isFieldNamesOptionsLoading}
         options={fieldNamesOptions}
         renderInput={(params) => {
-          return (
-            <TextField
-              {...params}
-              required
-              label="Field Name"
-              variant="outlined"
-            />
-          );
+          return <TextField {...params} required label="Field Name" variant="outlined" />;
         }}
         onChange={handleFieldChange}
       />

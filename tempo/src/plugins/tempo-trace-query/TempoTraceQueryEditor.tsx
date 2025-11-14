@@ -21,17 +21,15 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, useState } from 'react';
-import { TraceQLEditor } from '../../components';
-import { TempoClient } from '../../model/tempo-client';
 import {
+  TempoClient,
   DEFAULT_TEMPO,
   isDefaultTempoSelector,
   isTempoDatasourceSelector,
   TEMPO_DATASOURCE_KIND,
-} from '../../model/tempo-selectors';
+} from '../../model';
 import { AttributeFilters } from '../../components/AttributeFilters';
-import { filterToTraceQL } from '../../components/filter/filter_to_traceql';
-import { traceQLToFilter } from '../../components/filter/traceql_to_filter';
+import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
 import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
@@ -39,7 +37,6 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     onChange,
     value,
     value: { datasource, limit },
-    queryHandlerSettings,
   } = props;
 
   const datasourceSelectValue = datasource ?? DEFAULT_TEMPO;
@@ -59,8 +56,6 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
           draft.datasource = nextDatasource;
         })
       );
-      if (queryHandlerSettings?.setWatchOtherSpecs)
-        queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
       return;
     }
 
@@ -68,9 +63,6 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   };
 
   const runQuery = (newQuery: string) => {
-    if (queryHandlerSettings?.watchQueryChanges) {
-      queryHandlerSettings.watchQueryChanges(newQuery);
-    }
     onChange(
       produce(value, (draft) => {
         draft.query = newQuery;
@@ -81,11 +73,8 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   const handleTraceQueryChange = useCallback(
     (e: string) => {
       handleQueryChange(e);
-      if (queryHandlerSettings?.watchQueryChanges) {
-        queryHandlerSettings.watchQueryChanges(e);
-      }
     },
-    [handleQueryChange, queryHandlerSettings]
+    [handleQueryChange]
   );
 
   return (
@@ -104,12 +93,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
         {showAttributeFilters ? (
           <AttributeFilters client={client} query={query} setQuery={runQuery} />
         ) : (
-          <TraceQLEditor
-            client={client}
-            value={query}
-            onChange={handleTraceQueryChange}
-            onBlur={queryHandlerSettings?.runWithOnBlur ? handleQueryBlur : undefined}
-          />
+          <TraceQLEditor client={client} value={query} onChange={handleTraceQueryChange} onBlur={handleQueryBlur} />
         )}
         <Button onClick={() => setShowAttributeFilters(!showAttributeFilters)}>
           {showAttributeFilters ? 'Show query' : 'Hide query'}
