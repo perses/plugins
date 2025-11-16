@@ -5,6 +5,7 @@
     "format": {
       "unit": "decimal"
     },
+    "colorMode": "background_solid",
     "mappings": [
       {
         "kind": "Value",

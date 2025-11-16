@@ -91,6 +91,17 @@ spec: {
 		sparkline: {}
 	}
 
+	// colorMode
+	#colorMode: *#panel.options.colorMode | null
+    if #colorMode != null {
+        colorMode: [
+            if #colorMode == "background" || #colorMode == "background_solid" {"background_solid"},
+            if #colorMode == "value" {"value"},
+            if #colorMode == "none" {"none"},
+            {"value"}, // default
+        ][0]
+    }
+
 	// mappings
 	#mappings: list.Concat([
 		// Using flatten to get rid of the nested array for "value" mappings
