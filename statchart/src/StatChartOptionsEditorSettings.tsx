@@ -129,7 +129,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
   const selectShowLegend = useMemo((): ReactElement => {
     return (
       <OptionsEditorControl
-        label="Show Legend"
+        label="Show"
         control={
           <SettingsAutocomplete
             onChange={handleShowLegendChange}
