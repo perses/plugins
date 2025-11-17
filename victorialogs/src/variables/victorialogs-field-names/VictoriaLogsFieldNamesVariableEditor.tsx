@@ -16,21 +16,18 @@ import {
   DatasourceSelectProps,
   OptionsEditorProps,
   isVariableDatasource,
-  useDatasourceSelectValueToSelector
+  useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useCallback } from 'react';
 import {
   DEFAULT_VICTORIALOGS,
   isDefaultVictoriaLogsSelector,
   isVictoriaLogsDatasourceSelector,
   VICTORIALOGS_DATASOURCE_KIND,
-  VictoriaLogsClient,
   VictoriaLogsDatasourceSelector,
 } from '../../model';
-import {
-  VictoriaLogsFieldNamesVariableOptions,
-} from '../types';
+import { VictoriaLogsFieldNamesVariableOptions } from '../types';
 
 export function VictoriaLogsFieldNamesVariableEditor(
   props: OptionsEditorProps<VictoriaLogsFieldNamesVariableOptions>
@@ -39,7 +36,6 @@ export function VictoriaLogsFieldNamesVariableEditor(
     onChange,
     value,
     value: { datasource, query },
-    queryHandlerSettings,
   } = props;
 
   const datasourceSelectValue = datasource ?? DEFAULT_VICTORIALOGS;
@@ -55,14 +51,12 @@ export function VictoriaLogsFieldNamesVariableEditor(
             draft.datasource = !isVariableDatasource(next) && isDefaultVictoriaLogsSelector(next) ? undefined : next;
           })
         );
-        if (queryHandlerSettings?.setWatchOtherSpecs)
-          queryHandlerSettings.setWatchOtherSpecs({ ...value, datasource: next });
         return;
       }
 
       throw new Error('Got unexpected non-VictoriaLogs datasource selector');
     },
-    [onChange, queryHandlerSettings, value]
+    [onChange, value]
   );
 
   const handleQueryChange = useCallback(
@@ -72,11 +66,8 @@ export function VictoriaLogsFieldNamesVariableEditor(
           draft.query = event.target.value;
         })
       );
-      if (queryHandlerSettings?.watchQueryChanges) {
-        queryHandlerSettings.watchQueryChanges(event.target.value);
-      }
     },
-    [onChange, queryHandlerSettings, value]
+    [onChange, value]
   );
 
   return (
