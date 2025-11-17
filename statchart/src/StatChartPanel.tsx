@@ -37,6 +37,9 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 
   const isMultiSeries = statChartData.length > 1;
 
+  // Handle three-state showLegend: 'on' | 'off' | 'auto' (or undefined for backward compatibility)
+  const shouldShowLegend = spec.legendMode === 'on' ? true : spec.legendMode === 'off' ? false : isMultiSeries;
+
   if (!contentDimensions) return null;
 
   // Calculates chart width
@@ -72,7 +75,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               data={series}
               format={format}
               sparkline={sparklineConfig}
-              showSeriesName={isMultiSeries}
+              showSeriesName={shouldShowLegend}
               valueFontSize={valueFontSize}
               colorMode={colorMode}
             />

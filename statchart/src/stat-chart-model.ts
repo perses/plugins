@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationType, Definition, ThresholdOptions, FormatOptions, ValueMapping } from '@perses-dev/core';
 import { FontSizeOption } from '@perses-dev/components';
+import { CalculationType, Definition, FormatOptions, ThresholdOptions, ValueMapping } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
@@ -35,6 +35,20 @@ export const COLOR_MODE_LABELS: ColorModeLabelItem[] = [
   { id: 'background_solid', label: 'Background' },
 ];
 
+export type legendMode = 'auto' | 'on' | 'off';
+
+export type ShowLegendLabelItem = {
+  id: legendMode;
+  label: string;
+  description?: string;
+};
+
+export const SHOW_LEGEND_LABELS: ShowLegendLabelItem[] = [
+  { id: 'auto', label: 'Auto', description: 'Show legend for multi-series, hide legend for single series' },
+  { id: 'on', label: 'On', description: 'Always show legend' },
+  { id: 'off', label: 'Off', description: 'Always hide legend' },
+];
+
 export interface StatChartOptions {
   calculation: CalculationType;
   format: FormatOptions;
@@ -44,6 +58,7 @@ export interface StatChartOptions {
   valueFontSize?: FontSizeOption;
   mappings?: ValueMapping[];
   colorMode?: ColorMode;
+  legendMode?: legendMode;
 }
 
 export interface StatChartSparklineOptions {
@@ -60,5 +75,6 @@ export function createInitialStatChartOptions(): StatChartOptions {
       unit: 'decimal',
     },
     sparkline: {},
+    legendMode: 'auto',
   };
 }
