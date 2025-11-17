@@ -35,10 +35,10 @@ export const COLOR_MODE_LABELS: ColorModeLabelItem[] = [
   { id: 'background_solid', label: 'Background' },
 ];
 
-export type ShowLegendMode = 'auto' | 'on' | 'off';
+export type legendMode = 'auto' | 'on' | 'off';
 
 export type ShowLegendLabelItem = {
-  id: ShowLegendMode;
+  id: legendMode;
   label: string;
   description?: string;
 };
@@ -58,7 +58,7 @@ export interface StatChartOptions {
   valueFontSize?: FontSizeOption;
   mappings?: ValueMapping[];
   colorMode?: ColorMode;
-  showLegendMode?: ShowLegendMode;
+  legendMode?: legendMode;
 }
 
 export interface StatChartSparklineOptions {
@@ -75,6 +75,6 @@ export function createInitialStatChartOptions(): StatChartOptions {
       unit: 'decimal',
     },
     sparkline: {},
-    showLegendMode: 'auto',
+    legendMode: 'auto',
   };
 }

@@ -29,6 +29,6 @@ spec: close({
 	})
 	valueFontSize?: number
 	colorMode?: *"value" | "background_solid" | "none"
-	showLegendMode?: *"auto" | "on" | "off"
+	legendMode?: *"auto" | "on" | "off"
 	mappings?: [...common.#mappings]
 })

@@ -73,7 +73,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     (_: unknown, newShowLegend: ShowLegendLabelItem): void => {
       onChange(
         produce(value, (draft: StatChartOptions) => {
-          draft.showLegendMode = newShowLegend.id;
+          draft.legendMode = newShowLegend.id;
         })
       );
     },
@@ -136,14 +136,14 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
             options={SHOW_LEGEND_LABELS}
             disableClearable
             value={
-              SHOW_LEGEND_LABELS.find((i) => i.id === value.showLegendMode) ??
+              SHOW_LEGEND_LABELS.find((i) => i.id === value.legendMode) ??
               SHOW_LEGEND_LABELS.find((i) => i.id === 'auto')!
             }
           />
         }
       />
     );
-  }, [value.showLegendMode, handleShowLegendChange]);
+  }, [value.legendMode, handleShowLegendChange]);
 
   const selectColorMode = useMemo((): ReactElement => {
     return (
