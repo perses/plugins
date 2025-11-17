@@ -5,6 +5,7 @@
     "format": {
       "unit": "decimal"
     },
-    "calculation": "last-number"
+    "calculation": "last-number",
+    "colorMode": "background_solid"
   }
 }

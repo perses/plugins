@@ -5,6 +5,7 @@
     "format": {
       "unit": "decimal"
     },
-    "calculation": "mean"
+    "calculation": "mean",
+    "colorMode": "background_solid"
   }
 }

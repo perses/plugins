@@ -52,7 +52,7 @@
     "orientation": "auto",
     "textMode": "auto",
     "wideLayout": true,
-    "colorMode": "background",
+    "colorMode": "background_solid",
     "graphMode": "none",
     "justifyMode": "auto",
     "showPercentChange": false,

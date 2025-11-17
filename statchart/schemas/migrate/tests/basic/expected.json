@@ -6,6 +6,7 @@
       "decimalPlaces": 2,
       "unit": "bytes/sec"
     },
+    "colorMode": "value",
     "sparkline": {},
     "thresholds": {
       "steps": [
