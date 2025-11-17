@@ -58,7 +58,7 @@ export interface StatChartOptions {
   valueFontSize?: FontSizeOption;
   mappings?: ValueMapping[];
   colorMode?: ColorMode;
-  showLegend?: ShowLegendMode;
+  showLegendMode?: ShowLegendMode;
 }
 
 export interface StatChartSparklineOptions {
@@ -75,6 +75,6 @@ export function createInitialStatChartOptions(): StatChartOptions {
       unit: 'decimal',
     },
     sparkline: {},
-    showLegend: 'auto',
+    showLegendMode: 'auto',
   };
 }
