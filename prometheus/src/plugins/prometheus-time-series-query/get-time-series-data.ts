@@ -73,6 +73,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
       // TODO add a validation check to make sure the variable is a DurationString, to avoid the back & forth cast here
       replaceVariables(spec.minStep as string, context.variableState) as DurationString
     ) ?? datasourceScrapeInterval;
+
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
 
@@ -99,6 +100,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   // Replace variable placeholders in PromQL query
   const intervalMs = step * 1000;
   const minStepMs = minStep * 1000;
+
   let query = replacePromBuiltinVariables(spec.query, minStepMs, intervalMs);
   query = replaceVariables(query, context.variableState);
 
