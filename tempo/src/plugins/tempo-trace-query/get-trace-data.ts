@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, isValidTraceId, otlptracev1, TraceSearchResult } from '@perses-dev/core';
+import { AbsoluteTimeRange, isValidTraceId, Notice, otlptracev1, TraceSearchResult } from '@perses-dev/core';
 import { datasourceSelectValueToSelector, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { getUnixTime } from 'date-fns';
 import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector, TempoTraceQuerySpec } from '../../model';
-import { QueryResponse, SearchRequestParameters, SearchResponse } from '../../model/api-types';
+import { DEFAULT_SEARCH_LIMIT, QueryResponse, SearchRequestParameters, SearchResponse } from '../../model/api-types';
 import { TempoClient } from '../../model/tempo-client';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
@@ -44,25 +44,6 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
 
   const client = await context.datasourceStore.getDatasourceClient<TempoClient>(datasourceSelector);
 
-  const getQuery = (): SearchRequestParameters => {
-    const params: SearchRequestParameters = {
-      q: spec.query,
-    };
-
-    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
-    if (context.absoluteTimeRange) {
-      const { start, end } = getUnixTimeRange(context.absoluteTimeRange);
-      params.start = start;
-      params.end = end;
-    }
-
-    if (spec.limit) {
-      params.limit = spec.limit;
-    }
-
-    return params;
-  };
-
   /**
    * determine type of query:
    * if the query is a valid traceId, fetch the trace by traceId
@@ -77,11 +58,44 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
       },
     };
   } else {
-    const response = await client.searchWithFallback(getQuery());
+    const params: SearchRequestParameters = {
+      q: spec.query,
+    };
+
+    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
+    if (context.absoluteTimeRange) {
+      const { start, end } = getUnixTimeRange(context.absoluteTimeRange);
+      params.start = start;
+      params.end = end;
+    }
+
+    // Fetch one more trace than requested.
+    // This way we can check if there are more traces available matching the search request, and show a notice to the user.
+    const limit = spec.limit ?? DEFAULT_SEARCH_LIMIT;
+    params.limit = limit + 1;
+
+    const response = await client.searchWithFallback(params);
+    const searchResult = parseSearchResponse(response);
+    const hasMoreResults = searchResult.length > limit;
+
+    const notices: Notice[] = [];
+    if (hasMoreResults) {
+      notices.push({
+        type: 'info',
+        message:
+          'Not all matching traces are currently displayed. Increase the result limit to view additional traces.',
+      });
+
+      // Remove the extra element, i.e. do not return more results than requested.
+      searchResult.splice(limit);
+    }
+
     return {
-      searchResult: parseSearchResponse(response),
+      searchResult,
       metadata: {
         executedQueryString: spec.query,
+        hasMoreResults,
+        notices,
       },
     };
   }

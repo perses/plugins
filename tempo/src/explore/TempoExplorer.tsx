@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack } from '@mui/material';
+import { Alert, Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
 import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
@@ -51,6 +51,8 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
   if (!tracesFound) {
     return <NoDataOverlay resource="traces" />;
   }
+
+  const hasMoreResults = queryResults.some((traceData) => traceData.data?.metadata?.hasMoreResults);
 
   return (
     <Stack sx={{ height: '100%' }} gap={2}>
@@ -95,6 +97,11 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
           },
         }}
       />
+      {hasMoreResults && (
+        <Alert severity="info">
+          Not all matching traces are currently displayed. Increase the result limit to view additional traces.
+        </Alert>
+      )}
     </Stack>
   );
 }

@@ -27,6 +27,8 @@ export interface SearchRequestParameters {
   spss?: number;
 }
 
+export const DEFAULT_SEARCH_LIMIT = 20;
+
 /**
  * Response of Tempo HTTP API endpoint GET /api/search
  * https://grafana.com/docs/tempo/latest/api_docs/#search
