@@ -64,19 +64,19 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
     series: options.series,
     dataZoom: options.dataZoom,
     grid: {
-      bottom: 40,
-      top: 50,
-      left: 50,
-      right: 100,
+      top: 45,
+      bottom: 20,
+      left: 30,
+      right: 20,
     },
     xAxis: {
       type: 'time',
-      name: 'Local Time',
     },
     yAxis: {
       scale: true,
       type: 'value',
       name: 'Duration',
+      splitNumber: 4,
       axisLabel: {
         formatter: (durationMs: number) => formatValue(durationMs, { unit: 'milliseconds' }),
       },
