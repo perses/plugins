@@ -1,3 +1,7 @@
+---
+tags:
+  - datasource
+---
 # Pyroscope plugins
 
 The Pyroscope package includes several plugins that provide comprehensive support for Pyroscope continuous profiling in Perses dashboards.

@@ -1,3 +1,7 @@
+---
+tags:
+  - datasource
+---
 # ClickHouse plugins
 
 The ClickHouse package includes several plugins that provide comprehensive support for ClickHouse database in Perses dashboards.
