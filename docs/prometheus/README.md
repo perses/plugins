@@ -1,3 +1,7 @@
+---
+tags:
+  - datasource
+---
 # Prometheus plugins
 
 The Prometheus package includes several plugins that provide comprehensive support for Prometheus in Perses.

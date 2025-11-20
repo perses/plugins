@@ -1,3 +1,7 @@
+---
+tags:
+  - datasource
+---
 # VictoriaLogs plugins
 
 The VictoriaLogs package includes several plugins that provide comprehensive support for VictoriaLogs in Perses dashboards.
