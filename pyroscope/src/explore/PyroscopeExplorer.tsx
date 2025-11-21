@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
 import { Panel } from '@perses-dev/dashboards';
 import { QueryDefinition } from '@perses-dev/core';
@@ -51,6 +51,8 @@ export function PyroscopeExplorer(): ReactElement {
     setData,
   } = useExplorerManagerContext<ProfilesExplorerQueryParams>();
 
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
+
   // map ProfileQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
     ? queries.map((query: QueryDefinition) => {
@@ -65,8 +67,9 @@ export function PyroscopeExplorer(): ReactElement {
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor
         queryTypes={['ProfileQuery']}
-        onChange={(newQueries) => setData({ queries: newQueries })}
-        queries={queries}
+        onChange={(state) => setQueryDefinitions(state)}
+        queries={queryDefinitions}
+        onQueryRun={() => setData({ queries: queryDefinitions })}
       />
       <DataQueriesProvider definitions={definitions}>
         <Box height={980}>
