@@ -26,7 +26,12 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption, ScatterSeriesOption } from 'echarts';
 import { formatValue } from '@perses-dev/core';
-import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import {
+  replaceVariablesInString,
+  useAllVariableValues,
+  useRouterContext,
+  useTimeRange,
+} from '@perses-dev/plugin-system';
 import { EChartTraceValue } from './ScatterChartPanel';
 
 use([
@@ -55,6 +60,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
 export function Scatterplot(props: ScatterplotProps): ReactElement {
   const { width, height, options, link: linkTemplate } = props;
   const chartsTheme = useChartsTheme();
+  const { absoluteTimeRange } = useTimeRange();
   const variableValues = useAllVariableValues();
   const { navigate } = useRouterContext();
 
@@ -64,19 +70,21 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
     series: options.series,
     dataZoom: options.dataZoom,
     grid: {
-      bottom: 40,
-      top: 50,
-      left: 50,
-      right: 100,
+      top: 45,
+      bottom: 20,
+      left: 30,
+      right: 20,
     },
     xAxis: {
       type: 'time',
-      name: 'Local Time',
+      min: absoluteTimeRange.start,
+      max: absoluteTimeRange.end,
     },
     yAxis: {
       scale: true,
       type: 'value',
       name: 'Duration',
+      splitNumber: 4,
       axisLabel: {
         formatter: (durationMs: number) => formatValue(durationMs, { unit: 'milliseconds' }),
       },

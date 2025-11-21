@@ -17,7 +17,7 @@ import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@pers
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { DEFAULT_PROM } from '../model/prometheus-selectors';
 import { FinderQueryParams } from './PrometheusMetricsFinder/types';
 import { PrometheusMetricsFinder } from './PrometheusMetricsFinder';
@@ -97,6 +97,8 @@ export function PrometheusExplorer(): ReactElement {
     setData,
   } = useExplorerManagerContext<MetricsExplorerQueryParams>();
 
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
+
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <Tabs
@@ -114,8 +116,9 @@ export function PrometheusExplorer(): ReactElement {
           <Stack>
             <MultiQueryEditor
               queryTypes={['TimeSeriesQuery']}
-              onChange={(state) => setData({ tab, queries: state })}
-              queries={queries}
+              onChange={(state) => setQueryDefinitions(state)}
+              queries={queryDefinitions}
+              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
               filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
             />
             <MetricDataTable queries={queries} />
@@ -125,8 +128,9 @@ export function PrometheusExplorer(): ReactElement {
           <Stack>
             <MultiQueryEditor
               queryTypes={['TimeSeriesQuery']}
-              onChange={(state) => setData({ tab, queries: state })}
-              queries={queries}
+              onChange={(state) => setQueryDefinitions(state)}
+              queries={queryDefinitions}
+              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
               filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
             />
             <TimeSeriesPanel queries={queries} />

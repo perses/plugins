@@ -1,3 +1,7 @@
+---
+tags:
+  - datasource
+---
 # Loki plugins
 
 The Loki package includes several plugins that provide comprehensive support for Grafana Loki log aggregation in Perses dashboards.

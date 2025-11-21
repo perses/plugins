@@ -1,3 +1,7 @@
+---
+tags:
+  - datasource
+---
 # Tempo plugins
 
 The Tempo package includes several plugins that provide comprehensive support for Grafana Tempo distributed tracing in Perses.
