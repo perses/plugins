@@ -17,7 +17,7 @@ import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { TempoTraceQuerySpec } from '../model';
 import { linkToSpan, linkToTrace } from './links';
 
@@ -138,6 +138,8 @@ export function TempoExplorer(): ReactElement {
     setData,
   } = useExplorerManagerContext<TracesExplorerQueryParams>();
 
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
+
   // map TraceQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
     ? queries.map((query: QueryDefinition) => {
@@ -155,8 +157,9 @@ export function TempoExplorer(): ReactElement {
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor
         queryTypes={['TraceQuery']}
-        onChange={(newQueries) => setData({ queries: newQueries })}
-        queries={queries}
+        onChange={(state) => setQueryDefinitions(state)}
+        queries={queryDefinitions}
+        onQueryRun={() => setData({ queries: queryDefinitions })}
       />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
