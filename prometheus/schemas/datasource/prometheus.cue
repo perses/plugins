@@ -22,6 +22,7 @@ kind: #kind
 spec: {
 	#directUrl | #proxy
 	scrapeInterval?: =~#durationRegex
+	queryParams?: {[string]: string}
 }
 
 #kind: "PrometheusDatasource"

@@ -21,6 +21,7 @@ export interface PrometheusDatasourceSpec {
   directUrl?: string;
   proxy?: HTTPProxy;
   scrapeInterval?: DurationString; // default to 1m
+  queryParams?: Record<string, string>;
 }
 
 export interface PrometheusVariableOptionsBase {

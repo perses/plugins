@@ -1,0 +1,11 @@
+{
+  "kind": "PrometheusDatasource",
+  "spec": {
+    "directUrl": "http://localhost:9090",
+    "scrapeInterval": "15s",
+    "queryParams": {
+      "dedup": "false",
+      "timeout": "30s"
+    }
+  }
+}

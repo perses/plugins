@@ -27,9 +27,10 @@ const (
 )
 
 type PluginSpec struct {
-	DirectURL      string          `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy          *http.Proxy     `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-	ScrapeInterval common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	DirectURL      string            `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy          *http.Proxy       `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	ScrapeInterval common.Duration   `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	QueryParams    map[string]string `json:"queryParams,omitempty" yaml:"queryParams,omitempty"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {

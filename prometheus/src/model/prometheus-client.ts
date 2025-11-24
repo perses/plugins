@@ -75,6 +75,7 @@ export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
   abortSignal?: AbortSignal;
+  queryParams?: Record<string, string>;
 }
 
 /**
@@ -179,11 +180,20 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers } = queryOptions;
+  const { datasourceUrl, headers, queryParams } = queryOptions;
   let url = `${datasourceUrl}${apiURI}`;
-  const urlParams = createSearchParams(params).toString();
-  if (urlParams !== '') {
-    url += `?${urlParams}`;
+  const urlParams = createSearchParams(params);
+
+  // Add datasource-level query parameters
+  if (queryParams && Object.keys(queryParams).length > 0) {
+    Object.entries(queryParams).forEach(([key, value]) => {
+      urlParams.set(key, value);
+    });
+  }
+
+  const urlParamsString = urlParams.toString();
+  if (urlParamsString !== '') {
+    url += `?${urlParamsString}`;
   }
   return fetchJson<TResponse>(url, { method: 'GET', headers });
 }
@@ -193,8 +203,21 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers, abortSignal: signal } = queryOptions;
-  const url = `${datasourceUrl}${apiURI}`;
+  const { datasourceUrl, headers, abortSignal: signal, queryParams } = queryOptions;
+  let url = `${datasourceUrl}${apiURI}`;
+
+  // Add datasource-level query parameters
+  if (queryParams && Object.keys(queryParams).length > 0) {
+    const urlParams = new URLSearchParams();
+    Object.entries(queryParams).forEach(([key, value]) => {
+      urlParams.set(key, value);
+    });
+    const urlParamsString = urlParams.toString();
+    if (urlParamsString !== '') {
+      url += `?${urlParamsString}`;
+    }
+  }
+
   const init = {
     method: 'POST',
     headers: {
