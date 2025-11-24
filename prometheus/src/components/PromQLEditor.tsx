@@ -33,10 +33,21 @@ export type PromQLEditorProps = {
   completeConfig: CompleteConfiguration;
   datasource: PrometheusDatasourceSelector;
   isReadOnly?: boolean;
+  treeViewMetadata?: {
+    minStepMs: number;
+    intervalMs: number;
+  };
 } & Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
 
-export function PromQLEditor({ completeConfig, datasource, isReadOnly, ...rest }: PromQLEditorProps): ReactElement {
+export function PromQLEditor({
+  completeConfig,
+  datasource,
+  isReadOnly,
+  treeViewMetadata,
+  ...rest
+}: PromQLEditorProps): ReactElement {
   const theme = useTheme();
+
   const isDarkMode = theme.palette.mode === 'dark';
   const [isTreeViewVisible, setTreeViewVisible] = useState(false);
   const readOnly = isReadOnly ?? false;
@@ -46,12 +57,9 @@ export function PromQLEditor({ completeConfig, datasource, isReadOnly, ...rest }
   }, [completeConfig]);
 
   let queryExpr = useReplaceVariablesInString(rest.value);
-  if (queryExpr) {
-    // TODO placeholder values for steps to be replaced with actual values
-    // Looks like providing proper values involves some refactoring: currently we'd need to rely on the timeseries query context,
-    // but these step values are actually computed independently / before the queries are getting fired, so it's useless to fire
-    // queries here, so maybe we should extract this part to independant hook(s), to be reused here?
-    queryExpr = replacePromBuiltinVariables(queryExpr, 12345, 12345);
+  if (queryExpr && treeViewMetadata) {
+    const { minStepMs, intervalMs } = treeViewMetadata;
+    queryExpr = replacePromBuiltinVariables(queryExpr, minStepMs, intervalMs);
   }
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
