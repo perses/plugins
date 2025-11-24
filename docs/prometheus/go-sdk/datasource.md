@@ -84,7 +84,6 @@ Another example that makes use of http query params for a Thanos setup:
 
 ```golang
 func main() {
-	// Example 1: Using QueryParams for multiple parameters
 	dashboard.New("Example Dashboard",
 		dashboard.AddDatasource("thanosQuery", 
 			promDs.Prometheus(

@@ -13,7 +13,7 @@
 
 import { DurationString } from '@perses-dev/core';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { Box, Button, TextField, Typography, IconButton } from '@mui/material';
+import { Box, TextField, Typography, IconButton } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
 import React, { ReactElement, useState } from 'react';
@@ -145,21 +145,19 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
       <Typography variant="h4" mb={2}>
         General Settings
       </Typography>
-      <Box mb={2}>
-        <TextField
-          size="small"
-          fullWidth
-          label="Scrape Interval"
-          value={value.scrapeInterval || ''}
-          placeholder={`Default: ${DEFAULT_SCRAPE_INTERVAL}`}
-          InputProps={{
-            readOnly: isReadonly,
-          }}
-          InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-          onChange={(e) => onChange({ ...value, scrapeInterval: e.target.value as DurationString })}
-          helperText="Set it to match the typical scrape interval used in your Prometheus instance."
-        />
-      </Box>
+      <TextField
+        size="small"
+        fullWidth
+        label="Scrape Interval"
+        value={value.scrapeInterval || ''}
+        placeholder={`Default: ${DEFAULT_SCRAPE_INTERVAL}`}
+        InputProps={{
+          readOnly: isReadonly,
+        }}
+        InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+        onChange={(e) => onChange({ ...value, scrapeInterval: e.target.value as DurationString })}
+        helperText="Set it to match the typical scrape interval used in your Prometheus instance."
+      />
       <HTTPSettingsEditor
         value={value}
         onChange={onChange}
@@ -167,59 +165,57 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         initialSpecDirect={initialSpecDirect}
         initialSpecProxy={initialSpecProxy}
       />
-      <Box mt={2}>
-        <Typography variant="h5" mb={1}>
-          Query Parameters
+      <Typography variant="h5" mt={2} mb={1}>
+        Query Parameters
+      </Typography>
+      {entries.length > 0 && (
+        <>
+          {entries.map((entry, index) => (
+            <Box key={index} display="flex" alignItems="center" gap={2} mb={1}>
+              <TextField
+                size="small"
+                label="Key"
+                value={entry.key}
+                placeholder="Parameter name"
+                disabled={isReadonly}
+                onChange={(e) => handleQueryParamChange(index, 'key', e.target.value)}
+                error={entry.key !== '' && duplicateKeys.has(entry.key)}
+                sx={{ minWidth: 150 }}
+              />
+              <TextField
+                size="small"
+                label="Value"
+                value={entry.value}
+                placeholder="Parameter value"
+                disabled={isReadonly}
+                onChange={(e) => handleQueryParamChange(index, 'value', e.target.value)}
+                sx={{ minWidth: 150, flexGrow: 1 }}
+              />
+              {!isReadonly && (
+                <IconButton onClick={() => removeQueryParam(index)}>
+                  <MinusIcon />
+                </IconButton>
+              )}
+            </Box>
+          ))}
+        </>
+      )}
+      {hasDuplicates && (
+        <Typography variant="body2" color="error" mb={1}>
+          Duplicate parameter keys detected. Each key must be unique.
         </Typography>
-        {entries.length > 0 && (
-          <>
-            {entries.map((entry, index) => (
-              <Box key={index} display="flex" alignItems="center" gap={2} mb={1}>
-                <TextField
-                  size="small"
-                  label="Key"
-                  value={entry.key}
-                  placeholder="Parameter name"
-                  disabled={isReadonly}
-                  onChange={(e) => handleQueryParamChange(index, 'key', e.target.value)}
-                  error={entry.key !== '' && duplicateKeys.has(entry.key)}
-                  sx={{ minWidth: 150 }}
-                />
-                <TextField
-                  size="small"
-                  label="Value"
-                  value={entry.value}
-                  placeholder="Parameter value"
-                  disabled={isReadonly}
-                  onChange={(e) => handleQueryParamChange(index, 'value', e.target.value)}
-                  sx={{ minWidth: 150, flexGrow: 1 }}
-                />
-                {!isReadonly && (
-                  <IconButton onClick={() => removeQueryParam(index)}>
-                    <MinusIcon />
-                  </IconButton>
-                )}
-              </Box>
-            ))}
-          </>
-        )}
-        {hasDuplicates && (
-          <Typography variant="body2" color="error" mb={1}>
-            Duplicate parameter keys detected. Each key must be unique.
-          </Typography>
-        )}
-        {!isReadonly && (
-          <IconButton onClick={addQueryParam}>
-            <PlusIcon />
-          </IconButton>
-        )}
-        {entries.length === 0 && (
-          <Typography variant="body2" color="textSecondary">
-            No query parameters configured. Use query parameters to pass additional options to Prometheus (e.g.,
-            dedup=false for Thanos).
-          </Typography>
-        )}
-      </Box>
+      )}
+      {entries.length === 0 && (
+        <Typography variant="body2" color="textSecondary">
+          No query parameters configured. Use query parameters to pass additional options to Prometheus (e.g.,
+          dedup=false for Thanos).
+        </Typography>
+      )}
+      {!isReadonly && (
+        <IconButton onClick={addQueryParam}>
+          <PlusIcon />
+        </IconButton>
+      )}
     </>
   );
 }

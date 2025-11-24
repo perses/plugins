@@ -4,7 +4,7 @@
     "proxy": {
       "kind": "HTTPProxy",
       "spec": {
-        "url": "http://proxy:8080"
+        "url": "http://localhost:9090"
       }
     },
     "scrapeInterval": "30s",
