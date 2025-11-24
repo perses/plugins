@@ -79,11 +79,29 @@ export interface QueryOptions {
 }
 
 /**
+ * Builds a query string from datasource-level query parameters.
+ * Optionally merges with existing URLSearchParams.
+ * Returns empty string if no parameters, otherwise returns query string with leading '?'.
+ */
+function buildQueryString(queryParams?: Record<string, string>, initialParams?: URLSearchParams): string {
+  const urlParams = initialParams || new URLSearchParams();
+
+  if (queryParams) {
+    Object.entries(queryParams).forEach(([key, value]) => {
+      urlParams.set(key, value);
+    });
+  }
+
+  const queryString = urlParams.toString();
+  return queryString !== '' ? `?${queryString}` : '';
+}
+
+/**
  * Calls the `/-/healthy` endpoint to check if the datasource is healthy.
  */
 export function healthCheck(queryOptions: QueryOptions) {
   return async (): Promise<boolean> => {
-    const url = `${queryOptions.datasourceUrl}/-/healthy`;
+    const url = `${queryOptions.datasourceUrl}/-/healthy${buildQueryString(queryOptions.queryParams)}`;
 
     try {
       const resp = await fetch(url, { headers: queryOptions.headers, signal: queryOptions.abortSignal });
@@ -181,20 +199,7 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   queryOptions: QueryOptions
 ): Promise<TResponse> {
   const { datasourceUrl, headers, queryParams } = queryOptions;
-  let url = `${datasourceUrl}${apiURI}`;
-  const urlParams = createSearchParams(params);
-
-  // Add datasource-level query parameters
-  if (queryParams && Object.keys(queryParams).length > 0) {
-    Object.entries(queryParams).forEach(([key, value]) => {
-      urlParams.set(key, value);
-    });
-  }
-
-  const urlParamsString = urlParams.toString();
-  if (urlParamsString !== '') {
-    url += `?${urlParamsString}`;
-  }
+  const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams, createSearchParams(params))}`;
   return fetchJson<TResponse>(url, { method: 'GET', headers });
 }
 
@@ -204,19 +209,7 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
   queryOptions: QueryOptions
 ): Promise<TResponse> {
   const { datasourceUrl, headers, abortSignal: signal, queryParams } = queryOptions;
-  let url = `${datasourceUrl}${apiURI}`;
-
-  // Add datasource-level query parameters
-  if (queryParams && Object.keys(queryParams).length > 0) {
-    const urlParams = new URLSearchParams();
-    Object.entries(queryParams).forEach(([key, value]) => {
-      urlParams.set(key, value);
-    });
-    const urlParamsString = urlParams.toString();
-    if (urlParamsString !== '') {
-      url += `?${urlParamsString}`;
-    }
-  }
+  const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams)}`;
 
   const init = {
     method: 'POST',
