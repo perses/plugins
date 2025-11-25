@@ -16,7 +16,7 @@ import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/componen
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
 import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
-import { useTheme, Theme } from '@mui/material';
+import { useTheme, Theme, Typography, Box } from '@mui/material';
 import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
@@ -447,8 +447,23 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return null;
   }
 
+  if (!data?.length) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+        }}
+      >
+        <Typography>No data</Typography>
+      </Box>
+    );
+  }
+
   return (
-    <div>
+    <>
       {spec.enableFiltering && (
         <div
           style={{
@@ -542,7 +557,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
           })}
         </div>
       )}
-
       <Table
         data={filteredData}
         columns={columns}
@@ -557,6 +571,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         pagination={pagination}
         onPaginationChange={setPagination}
       />
-    </div>
+    </>
   );
 }
