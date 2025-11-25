@@ -45,6 +45,11 @@ spec: close({
 	width?:             number | "auto"
 	hide?:              bool
 	cellSettings?:      [...#cellSettings]
+	dataLink?: {
+		url: string
+		title?: string
+		openNewTab: bool		
+	}
 }
 
 #valueCondition: {

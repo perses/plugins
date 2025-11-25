@@ -11,7 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, Stack, StackProps, Switch, TextField } from '@mui/material';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormLabel,
+  IconButton,
+  Stack,
+  StackProps,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
@@ -21,9 +36,14 @@ import {
   OptionsEditorGrid,
   OptionsEditorGroup,
   SortSelectorButtons,
+  Dialog,
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/Delete';
+import InformationIcon from 'mdi-material-ui/Information';
+import LinkIcon from 'mdi-material-ui/Link';
 import { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
 
@@ -39,13 +59,120 @@ export interface ColumnEditorProps extends Omit<StackProps, OmittedMuiProps> {
   onChange: (column: ColumnSettings) => void;
 }
 
+type LinkManagementDialogueProps = Pick<ColumnEditorProps, 'onChange' | 'column'> & {
+  actionTitle: string;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+};
+const LinkManagementDialogue = (props: LinkManagementDialogueProps): ReactElement => {
+  const {
+    actionTitle,
+    open,
+    column: { dataLink },
+    column,
+    onChange,
+    setOpen,
+  } = props;
+
+  const [url, setUrl] = useState(dataLink?.url);
+  const [title, setTitle] = useState(dataLink?.title);
+  const [openNewTab, setOpenNewTab] = useState(!!dataLink?.openNewTab);
+
+  const handleSaveDataLink = (): void => {
+    if (!url) return;
+    onChange({ ...column, dataLink: { url, title, openNewTab } });
+    setOpen(false);
+  };
+
+  return (
+    <Dialog
+      sx={{
+        '& .MuiDialog-paper': {
+          width: '80vw',
+        },
+      }}
+      open={open}
+    >
+      <DialogTitle>{actionTitle}</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2}>
+          <FormControl>
+            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+              <FormLabel>URL</FormLabel>
+            </Box>
+            <TextField
+              onChange={(e) => {
+                setUrl(e.target.value);
+              }}
+              type="url"
+              placeholder="http://target.com/x/{dynamic}/z"
+              value={url}
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Title</FormLabel>
+            <TextField
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
+              placeholder="Title"
+              type="text"
+              value={title}
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Open in new tab</FormLabel>
+            <FormControl>
+              <Switch
+                onChange={(e) => {
+                  setOpenNewTab(e.target.checked);
+                }}
+                checked={openNewTab}
+              />
+            </FormControl>
+          </FormControl>
+          <FormControl>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <InformationIcon fontSize="small" />
+              <Typography variant="body1">
+                {`You can create dynamic links by proper positioning of {dynamic}`}
+              </Typography>
+            </Stack>
+          </FormControl>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleSaveDataLink}>Save</Button>
+        <Button
+          onClick={() => {
+            setOpen(false);
+          }}
+        >
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps): ReactElement {
   const [width, setWidth] = useState<number>(
     column.width === undefined || column.width === 'auto' ? 100 : column.width
   );
 
+  const [openAddLinkDialogue, setOpenAddLinkDialogue] = useState<boolean>(false);
+  const linkManagementAction = column?.dataLink ? 'Edit Link' : 'Add Link';
+
   return (
     <Stack {...others}>
+      <LinkManagementDialogue
+        actionTitle={linkManagementAction}
+        onChange={onChange}
+        column={column}
+        open={openAddLinkDialogue}
+        setOpen={setOpenAddLinkDialogue}
+      />
       <OptionsEditorGrid>
         <OptionsEditorColumn>
           <OptionsEditorGroup title="Column">
@@ -203,6 +330,46 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                   />
                 }
               />
+            )}
+          </OptionsEditorGroup>
+        </OptionsEditorColumn>
+        <OptionsEditorColumn>
+          <OptionsEditorGroup title="Link and Actions">
+            <OptionsEditorControl
+              label="Link"
+              control={
+                <Button
+                  startIcon={<LinkIcon />}
+                  onClick={(): void => {
+                    setOpenAddLinkDialogue(true);
+                  }}
+                >
+                  {linkManagementAction}
+                </Button>
+              }
+            />
+            {column?.dataLink?.url && (
+              <Stack direction="row" spacing={1} alignItems="center" alignContent="center">
+                <Typography sx={{ flexGrow: 1, minWidth: 0 }} component="span" variant="body1" noWrap>
+                  {column?.dataLink?.title || column?.dataLink?.url}
+                </Typography>
+                <IconButton
+                  onClick={(): void => {
+                    if (column?.dataLink?.url) navigator.clipboard.writeText(column?.dataLink?.url);
+                  }}
+                  size="small"
+                >
+                  <ContentCopyIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                </IconButton>
+                <IconButton
+                  onClick={(): void => {
+                    onChange({ ...column, dataLink: undefined });
+                  }}
+                  size="small"
+                >
+                  <DeleteIcon fontSize="small" sx={{ verticalAlign: 'middle' }} />
+                </IconButton>
+              </Stack>
             )}
           </OptionsEditorGroup>
         </OptionsEditorColumn>
