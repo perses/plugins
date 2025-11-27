@@ -267,19 +267,19 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     const columns: Array<TableColumnConfig<unknown>> = [];
     const customizedColumns = new Set<string>();
 
-    if (spec.columnSettings) {
-      for (const columnSetting of spec.columnSettings) {
-        if (!columnSetting || !keys.includes(columnSetting.name)) continue;
-        if (customizedColumns.has(columnSetting.name)) continue; // Skip duplicates
+    // Process columnSettings if they exist
+    for (const columnSetting of spec.columnSettings ?? []) {
+      if (!columnSetting || !keys.includes(columnSetting.name)) continue;
+      if (customizedColumns.has(columnSetting.name)) continue; // Skip duplicates
 
-        const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings);
-        if (columnConfig !== undefined) {
-          columns.push(columnConfig);
-          customizedColumns.add(columnSetting.name);
-        }
+      const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings ?? []);
+      if (columnConfig !== undefined) {
+        columns.push(columnConfig);
+        customizedColumns.add(columnSetting.name);
       }
     }
 
+    // Add remaining columns if defaultColumnHidden is false
     if (!spec.defaultColumnHidden) {
       for (const key of keys) {
         if (!customizedColumns.has(key)) {
