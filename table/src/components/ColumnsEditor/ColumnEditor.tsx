@@ -64,7 +64,7 @@ type LinkManagementDialogueProps = Pick<ColumnEditorProps, 'onChange' | 'column'
   open: boolean;
   setOpen: (value: boolean) => void;
 };
-const LinkManagementDialogue = (props: LinkManagementDialogueProps): ReactElement => {
+const LinkManagementDialog = (props: LinkManagementDialogueProps): ReactElement => {
   const {
     actionTitle,
     open,
@@ -143,7 +143,9 @@ const LinkManagementDialogue = (props: LinkManagementDialogueProps): ReactElemen
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleSaveDataLink}>Save</Button>
+        <Button variant="contained" onClick={handleSaveDataLink}>
+          Save
+        </Button>
         <Button
           onClick={() => {
             setOpen(false);
@@ -166,7 +168,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
 
   return (
     <Stack {...others}>
-      <LinkManagementDialogue
+      <LinkManagementDialog
         actionTitle={linkManagementAction}
         onChange={onChange}
         column={column}
