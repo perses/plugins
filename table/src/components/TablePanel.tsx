@@ -262,26 +262,31 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return uniqueValues;
   }, [data, keys]);
 
+  // Generate columns and map each column accessor to its settings index and data key
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
+    const customizedColumns = new Set<string>();
 
-    // Taking the customized columns first for the ordering of the columns in the table
-    const customizedColumns =
-      spec.columnSettings?.map((column) => column.name).filter((name) => keys.includes(name)) ?? [];
-    const defaultColumns = keys.filter((key) => !customizedColumns.includes(key));
-
-    for (const key of customizedColumns) {
-      const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
-      if (columnConfig !== undefined) {
-        columns.push(columnConfig);
+    if (spec.columnSettings) {
+      for (const columnSetting of spec.columnSettings) {
+        if (!columnSetting || !keys.includes(columnSetting.name)) continue;
+        if (customizedColumns.has(columnSetting.name)) continue; // Skip duplicates
+        
+        const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings);
+        if (columnConfig !== undefined) {
+          columns.push(columnConfig);
+          customizedColumns.add(columnSetting.name);
+        }
       }
     }
 
     if (!spec.defaultColumnHidden) {
-      for (const key of defaultColumns) {
-        const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
-        if (columnConfig !== undefined) {
-          columns.push(columnConfig);
+      for (const key of keys) {
+        if (!customizedColumns.has(key)) {
+          const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
+          if (columnConfig !== undefined) {
+            columns.push(columnConfig);
+          }
         }
       }
     }
@@ -315,11 +320,12 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         ...row,
       };
 
+      // Generate cellConfigs for each column (including duplicates with different headers)
       for (const [key, value] of Object.entries(extendRow)) {
         // First, try to get cell config from global cell settings
         let cellConfig = evaluateConditionalFormatting(value, spec.cellSettings ?? []);
 
-        // Then, try to get cell config from column-specific cell settings if conditional formatting is enabled
+        // Then, try to get cell config from column-specific cell settings
         const columnSetting = spec.columnSettings?.find((col) => col.name === key);
         if (columnSetting?.cellSettings?.length) {
           const columnCellConfig = evaluateConditionalFormatting(value, columnSetting.cellSettings);
