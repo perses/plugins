@@ -269,7 +269,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
     // Process columnSettings if they exist
     for (const columnSetting of spec.columnSettings ?? []) {
-      if (!columnSetting || !keys.includes(columnSetting.name)) continue;
       if (customizedColumns.has(columnSetting.name)) continue; // Skip duplicates
 
       const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings ?? []);
