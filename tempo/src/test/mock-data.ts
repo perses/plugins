@@ -2424,5 +2424,5 @@ export const MOCK_TRACE_DATA_SEARCHRESULT: TraceData = {
       rootTraceName: 'article-to-cart',
     },
   ],
-  metadata: { executedQueryString: 'duration > 900ms' },
+  metadata: { executedQueryString: 'duration > 900ms', hasMoreResults: false, notices: [] },
 };
