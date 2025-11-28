@@ -34,3 +34,20 @@ func HTTPProxy(url string, options ...http.Option) Option {
 		return nil
 	}
 }
+
+func QueryParams(params map[string]string) Option {
+	return func(builder *Builder) error {
+		builder.QueryParams = params
+		return nil
+	}
+}
+
+func QueryParam(key, value string) Option {
+	return func(builder *Builder) error {
+		if builder.QueryParams == nil {
+			builder.QueryParams = make(map[string]string)
+		}
+		builder.QueryParams[key] = value
+		return nil
+	}
+}

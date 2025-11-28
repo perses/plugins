@@ -75,6 +75,25 @@ export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
   abortSignal?: AbortSignal;
+  queryParams?: Record<string, string>;
+}
+
+/**
+ * Builds a query string from datasource-level query parameters.
+ * Optionally merges with existing URLSearchParams.
+ * Returns empty string if no parameters, otherwise returns query string with leading '?'.
+ */
+function buildQueryString(queryParams?: Record<string, string>, initialParams?: URLSearchParams): string {
+  const urlParams = initialParams || new URLSearchParams();
+
+  if (queryParams) {
+    Object.entries(queryParams).forEach(([key, value]) => {
+      urlParams.set(key, value);
+    });
+  }
+
+  const queryString = urlParams.toString();
+  return queryString !== '' ? `?${queryString}` : '';
 }
 
 /**
@@ -82,7 +101,7 @@ export interface QueryOptions {
  */
 export function healthCheck(queryOptions: QueryOptions) {
   return async (): Promise<boolean> => {
-    const url = `${queryOptions.datasourceUrl}/-/healthy`;
+    const url = `${queryOptions.datasourceUrl}/-/healthy${buildQueryString(queryOptions.queryParams)}`;
 
     try {
       const resp = await fetch(url, { headers: queryOptions.headers, signal: queryOptions.abortSignal });
@@ -179,12 +198,8 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers } = queryOptions;
-  let url = `${datasourceUrl}${apiURI}`;
-  const urlParams = createSearchParams(params).toString();
-  if (urlParams !== '') {
-    url += `?${urlParams}`;
-  }
+  const { datasourceUrl, headers, queryParams } = queryOptions;
+  const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams, createSearchParams(params))}`;
   return fetchJson<TResponse>(url, { method: 'GET', headers });
 }
 
@@ -193,8 +208,9 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers, abortSignal: signal } = queryOptions;
-  const url = `${datasourceUrl}${apiURI}`;
+  const { datasourceUrl, headers, abortSignal: signal, queryParams } = queryOptions;
+  const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams)}`;
+
   const init = {
     method: 'POST',
     headers: {

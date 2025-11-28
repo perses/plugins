@@ -31,7 +31,7 @@ import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
  * Creates a PrometheusClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
-  const { directUrl, proxy } = spec;
+  const { directUrl, proxy, queryParams } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -47,21 +47,21 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     options: {
       datasourceUrl,
     },
-    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders }),
+    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders, queryParams }),
     instantQuery: (params, headers, abortSignal) =>
-      instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+      instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
     rangeQuery: (params, headers, abortSignal) =>
-      rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+      rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
     labelNames: (params, headers, abortSignal) =>
-      labelNames(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+      labelNames(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
     labelValues: (params, headers, abortSignal) =>
-      labelValues(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+      labelValues(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
     metricMetadata: (params, headers, abortSignal) =>
-      metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+      metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
     series: (params, headers, abortSignal) =>
-      series(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+      series(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
     parseQuery: (params, headers, abortSignal) =>
-      parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal }),
+      parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
   };
 };
 
