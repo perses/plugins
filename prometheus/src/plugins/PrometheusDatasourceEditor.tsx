@@ -16,10 +16,12 @@ import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import { Box, TextField, Typography, IconButton } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useRef } from 'react';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
 
 interface QueryParamEntry {
+  // Unique identifier for the entry, added to avoid using array index as key
+  id: string;
   key: string;
   value: string;
 }
@@ -33,11 +35,18 @@ export interface PrometheusDatasourceEditorProps {
 export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProps): ReactElement {
   const { value, onChange, isReadonly } = props;
 
+  // Counter for generating unique IDs
+  const nextIdRef = useRef(0);
+
   // Use local state to maintain an array of entries during editing, instead of
   // manipulating a map directly which causes weird UX.
   const [entries, setEntries] = useState<QueryParamEntry[]>(() => {
     const queryParams = value.queryParams ?? {};
-    return Object.entries(queryParams).map(([key, value]) => ({ key, value }));
+    return Object.entries(queryParams).map(([key, value]) => ({
+      id: String(nextIdRef.current++),
+      key,
+      value,
+    }));
   });
 
   // Check for duplicate keys
@@ -58,7 +67,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const syncToParent = (newEntries: QueryParamEntry[]) => {
     const newParams: Record<string, string> = {};
     newEntries.forEach(({ key, value }) => {
-      if (key !== '' || value !== '') {
+      if (key !== '') {
         newParams[key] = value;
       }
     });
@@ -69,29 +78,23 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
     });
   };
 
-  const handleQueryParamChange = (index: number, field: 'key' | 'value', newValue: string) => {
-    const newEntries = entries.slice();
-    const entry = newEntries[index];
-    if (!entry) return;
-
-    if (field === 'key') {
-      newEntries[index] = { key: newValue, value: entry.value };
-    } else {
-      newEntries[index] = { key: entry.key, value: newValue };
-    }
+  const handleQueryParamChange = (id: string, field: 'key' | 'value', newValue: string) => {
+    const newEntries = entries.map((entry) => {
+      if (entry.id !== id) return entry;
+      return field === 'key' ? { ...entry, key: newValue } : { ...entry, value: newValue };
+    });
     setEntries(newEntries);
     syncToParent(newEntries);
   };
 
   const addQueryParam = () => {
-    const newEntries = [...entries, { key: '', value: '' }];
+    const newEntries = [...entries, { id: String(nextIdRef.current++), key: '', value: '' }];
     setEntries(newEntries);
     syncToParent(newEntries);
   };
 
-  const removeQueryParam = (index: number) => {
-    const newEntries = entries.slice();
-    newEntries.splice(index, 1);
+  const removeQueryParam = (id: string) => {
+    const newEntries = entries.filter((entry) => entry.id !== id);
     setEntries(newEntries);
     syncToParent(newEntries);
   };
@@ -170,16 +173,16 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
       </Typography>
       {entries.length > 0 && (
         <>
-          {entries.map((entry, index) => (
-            <Box key={index} display="flex" alignItems="center" gap={2} mb={1}>
+          {entries.map((entry) => (
+            <Box key={entry.id} display="flex" alignItems="center" gap={2} mb={1}>
               <TextField
                 size="small"
                 label="Key"
                 value={entry.key}
                 placeholder="Parameter name"
                 disabled={isReadonly}
-                onChange={(e) => handleQueryParamChange(index, 'key', e.target.value)}
-                error={entry.key !== '' && duplicateKeys.has(entry.key)}
+                onChange={(e) => handleQueryParamChange(entry.id, 'key', e.target.value)}
+                error={duplicateKeys.has(entry.key)}
                 sx={{ minWidth: 150 }}
               />
               <TextField
@@ -188,11 +191,11 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                 value={entry.value}
                 placeholder="Parameter value"
                 disabled={isReadonly}
-                onChange={(e) => handleQueryParamChange(index, 'value', e.target.value)}
+                onChange={(e) => handleQueryParamChange(entry.id, 'value', e.target.value)}
                 sx={{ minWidth: 150, flexGrow: 1 }}
               />
               {!isReadonly && (
-                <IconButton onClick={() => removeQueryParam(index)}>
+                <IconButton onClick={() => removeQueryParam(entry.id)}>
                   <MinusIcon />
                 </IconButton>
               )}
