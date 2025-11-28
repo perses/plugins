@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import {
-  Box,
   Button,
   ButtonGroup,
   DialogActions,
@@ -62,12 +61,14 @@ export interface ColumnEditorProps extends Omit<StackProps, OmittedMuiProps> {
 type LinkManagementDialogueProps = Pick<ColumnEditorProps, 'onChange' | 'column'> & {
   actionTitle: string;
   open: boolean;
-  setOpen: (value: boolean) => void;
+  key?: string;
+  setOpen: (value: { open: boolean }) => void;
 };
 const LinkManagementDialog = (props: LinkManagementDialogueProps): ReactElement => {
   const {
     actionTitle,
     open,
+    key,
     column: { dataLink },
     column,
     onChange,
@@ -77,15 +78,20 @@ const LinkManagementDialog = (props: LinkManagementDialogueProps): ReactElement 
   const [url, setUrl] = useState(dataLink?.url);
   const [title, setTitle] = useState(dataLink?.title);
   const [openNewTab, setOpenNewTab] = useState(!!dataLink?.openNewTab);
+  const [urlError, setUrlError] = useState<{ hasError: boolean; helperText: string } | undefined>(undefined);
 
   const handleSaveDataLink = (): void => {
-    if (!url) return;
+    if (!url) {
+      setUrlError({ hasError: true, helperText: 'Url Can not be empty' });
+      return;
+    }
     onChange({ ...column, dataLink: { url, title, openNewTab } });
-    setOpen(false);
+    setOpen({ open: false });
   };
 
   return (
     <Dialog
+      key={key}
       sx={{
         '& .MuiDialog-paper': {
           width: '80vw',
@@ -97,22 +103,26 @@ const LinkManagementDialog = (props: LinkManagementDialogueProps): ReactElement 
       <DialogContent>
         <Stack spacing={2}>
           <FormControl>
-            <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-              <FormLabel>URL</FormLabel>
-            </Box>
             <TextField
+              error={urlError?.hasError}
+              helperText={urlError?.hasError ? urlError?.helperText : undefined}
+              label="URL"
+              sx={{ marginTop: '12px' }}
+              multiline
+              maxRows={5}
               onChange={(e) => {
+                if (urlError) setUrlError(undefined);
                 setUrl(e.target.value);
               }}
               type="url"
-              placeholder="http://target.com/x/{dynamic}/z"
+              placeholder="http://target.com/x/{column_name}/z"
               value={url}
             />
           </FormControl>
 
           <FormControl>
-            <FormLabel>Title</FormLabel>
             <TextField
+              label="Title"
               onChange={(e) => {
                 setTitle(e.target.value);
               }}
@@ -136,7 +146,7 @@ const LinkManagementDialog = (props: LinkManagementDialogueProps): ReactElement 
             <Stack direction="row" spacing={1} alignItems="center">
               <InformationIcon fontSize="small" />
               <Typography variant="body1">
-                {`You can create dynamic links by proper positioning of {dynamic}`}
+                You can create dynamic links using column names wrapped with curly braces
               </Typography>
             </Stack>
           </FormControl>
@@ -148,7 +158,7 @@ const LinkManagementDialog = (props: LinkManagementDialogueProps): ReactElement 
         </Button>
         <Button
           onClick={() => {
-            setOpen(false);
+            setOpen({ open: false });
           }}
         >
           Cancel
@@ -163,8 +173,10 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
     column.width === undefined || column.width === 'auto' ? 100 : column.width
   );
 
-  const [openAddLinkDialogue, setOpenAddLinkDialogue] = useState<boolean>(false);
-  const linkManagementAction = column?.dataLink ? 'Edit Link' : 'Add Link';
+  const [openAddLinkDialog, setOpenAddLinkDialog] = useState<{ open: boolean; key?: string }>({
+    open: false,
+  });
+  const linkManagementAction = column?.dataLink ? 'Edit Column Link' : 'Add Column Link';
 
   return (
     <Stack {...others}>
@@ -172,8 +184,9 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
         actionTitle={linkManagementAction}
         onChange={onChange}
         column={column}
-        open={openAddLinkDialogue}
-        setOpen={setOpenAddLinkDialogue}
+        open={openAddLinkDialog.open}
+        key={openAddLinkDialog.key}
+        setOpen={setOpenAddLinkDialog}
       />
       <OptionsEditorGrid>
         <OptionsEditorColumn>
@@ -338,12 +351,12 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
         <OptionsEditorColumn>
           <OptionsEditorGroup title="Link and Actions">
             <OptionsEditorControl
-              label="Link"
+              label="Column link"
               control={
                 <Button
                   startIcon={<LinkIcon />}
                   onClick={(): void => {
-                    setOpenAddLinkDialogue(true);
+                    setOpenAddLinkDialog({ open: true, key: String(Date.now()) });
                   }}
                 >
                   {linkManagementAction}
