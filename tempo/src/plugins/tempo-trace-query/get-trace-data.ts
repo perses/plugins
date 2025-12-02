@@ -94,8 +94,7 @@ function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
 
   // Tempo returns Trace ID and Span ID base64-encoded.
   // The OTLP spec defines the encoding in the hex format:
-  // Spec: https://opentelemetry.io/docs/specs/otlp/#json-protobuf-encoding
-  // Example: https://github.com/open-telemetry/opentelemetry-proto/blob/v1.7.0/examples/trace.json
+  // Spec: https://opentelemetry.io/docs/specs/otel/trace/api/#retrieving-the-traceid-and-spanid
   // Therefore, let's convert it to hex encoding.
   for (const resourceSpan of trace.resourceSpans) {
     for (const scopeSpan of resourceSpan.scopeSpans) {
@@ -129,7 +128,7 @@ function base64ToHex(str: string) {
   try {
     return atob(str)
       .split('')
-      .map((char) => char.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase())
+      .map((char) => char.charCodeAt(0).toString(16).padStart(2, '0'))
       .join('');
   } catch {
     return str;
