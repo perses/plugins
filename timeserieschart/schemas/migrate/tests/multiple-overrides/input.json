@@ -112,6 +112,54 @@
             }
           }
         ]
+      },
+      {
+        "matcher": {
+          "id": "byFrameRefID",
+          "options": "forecast"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "yellow",
+              "mode": "fixed"
+            }
+          },
+          {
+            "id": "unit",
+            "value": "tps"
+          },
+          {
+            "id": "custom.lineStyle",
+            "value": {
+              "dash": [
+                10,
+                10
+              ],
+              "fill": "dash"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byFrameRefID",
+          "options": "throughput"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "#3274D9",
+              "mode": "fixed"
+            }
+          },
+          {
+            "id": "unit",
+            "value": "tps"
+          }
+        ]
       }
     ]
   },
@@ -155,6 +203,34 @@
       "intervalFactor": 1,
       "legendFormat": "Lt: {{container}} - {{pod}} - {{cluster}}",
       "refId": "memory_d",
+      "datasource": {
+        "uid": "$datasource"
+      }
+    },
+    {
+      "exemplar": false,
+      "expr": "max by (cluster,pod,container) (my_throughput_metric{cluster=~\"$cluster\",pod=~\"$pod\",container=~\"$container\"})",
+      "format": "time_series",
+      "hide": false,
+      "instant": false,
+      "interval": "$sampling",
+      "intervalFactor": 1,
+      "legendFormat": "tps",
+      "refId": "throughput",
+      "datasource": {
+        "uid": "$datasource"
+      }
+    },
+    {
+      "exemplar": false,
+      "expr": "max by (cluster,pod,container) (my_throughput_metric:forecast{cluster=~\"$cluster\",pod=~\"$pod\",container=~\"$container\"})",
+      "format": "time_series",
+      "hide": false,
+      "instant": false,
+      "interval": "$sampling",
+      "intervalFactor": 1,
+      "legendFormat": "tps (forecast)",
+      "refId": "forecast",
       "datasource": {
         "uid": "$datasource"
       }
