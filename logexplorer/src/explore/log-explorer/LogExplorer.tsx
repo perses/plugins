@@ -17,11 +17,16 @@ import { ReactElement, useMemo, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
+import { useExplorerManagerContext } from '@perses-dev/explore';
+
+interface LogExplorerQueryParams {
+  queries?: QueryDefinition[];
+}
 
 const PANEL_PREVIEW_HEIGHT = 700;
 
 function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
-  const { width, ref: boxRef } = useResizeObserver();
+  const { ref: boxRef } = useResizeObserver();
   const height = PANEL_PREVIEW_HEIGHT;
 
   // map QueryDefinition to Definition<UnknownSpec>
@@ -54,8 +59,12 @@ function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactEleme
 }
 
 export function LogExplorer(): ReactElement {
-  const [queries, setQueries] = useState<QueryDefinition[]>([]);
-  const [runningQueries, setRunningQueries] = useState<QueryDefinition[]>([]);
+  const {
+    data: { queries = [] },
+    setData,
+  } = useExplorerManagerContext<LogExplorerQueryParams>();
+
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
   // Get all datasource plugins that support LogQuery
   const { data: datasourcePlugins } = useListPluginMetadata(['Datasource']);
@@ -72,24 +81,16 @@ export function LogExplorer(): ReactElement {
     [datasourcePlugins]
   );
 
-  const handleQueryChange = (newQueries: QueryDefinition[]) => {
-    setQueries(newQueries);
-  };
-
-  const handleQueryRun = () => {
-    setRunningQueries(queries);
-  };
-
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor
         queryTypes={['LogQuery']}
         filteredQueryPlugins={logDatasourcePlugins}
-        queries={queries}
-        onChange={handleQueryChange}
-        onQueryRun={handleQueryRun}
+        queries={queryDefinitions}
+        onChange={(state) => setQueryDefinitions(state)}
+        onQueryRun={() => setData({ queries: queryDefinitions })}
       />
-      <LogsTablePanel queries={runningQueries} />
+      <LogsTablePanel queries={queries} />
     </Stack>
   );
 }
