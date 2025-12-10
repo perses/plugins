@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/perses/plugins/scripts/command"
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/command"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -78,11 +78,7 @@ func main() {
 		release(*releaseSingleName, dryRun)
 		return
 	}
-	workspaces, err := npm.GetWorkspaces()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
-	}
-	for _, workspace := range workspaces {
+	for _, workspace := range npm.MustGetWorkspaces(".") {
 		logrus.Infof("releasing %s", workspace)
 		release(workspace, dryRun)
 	}

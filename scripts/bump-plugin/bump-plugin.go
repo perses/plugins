@@ -16,7 +16,7 @@ package main
 import (
 	"flag"
 
-	"github.com/perses/plugins/scripts/command"
+	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/sirupsen/logrus"
 )
 

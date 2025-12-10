@@ -4,18 +4,14 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	workspaces, err := npm.GetWorkspaces()
 	var isError bool
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
-	}
 
-	for _, workspace := range workspaces {
+	for _, workspace := range npm.MustGetWorkspaces(".") {
 		cmd := exec.Command("golangci-lint", "run")
 		cmd.Dir = workspace
 		cmd.Stdout = os.Stdout

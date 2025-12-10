@@ -20,8 +20,8 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/perses/plugins/scripts/command"
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/command"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -88,12 +88,9 @@ func main() {
 	if *version == "" {
 		logrus.Fatal("you must provide a version to use for the bump")
 	}
-	workspaces, err := npm.GetWorkspaces()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
-	}
+
 	bumpPackage("", *version)
-	for _, workspace := range workspaces {
+	for _, workspace := range npm.MustGetWorkspaces(".") {
 		bumpGoDep(workspace, *version)
 		bumpPackage(workspace, *version)
 		bumpCueDep(workspace, *version)

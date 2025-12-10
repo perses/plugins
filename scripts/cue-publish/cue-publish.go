@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/perses/plugins/scripts/command"
+	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
