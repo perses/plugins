@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,11 +41,7 @@ func tidyGoModule(workspace string) error {
 }
 
 func main() {
-	workspaces, err := npm.GetWorkspaces()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the list of workspaces")
-	}
-	for _, workspace := range workspaces {
+	for _, workspace := range npm.MustGetWorkspaces(".") {
 		logrus.Infof("Tidying module in workspace %s..", workspace)
 		if retrieveDepErr := tidyCueModule(workspace); retrieveDepErr != nil {
 			logrus.WithError(retrieveDepErr).Fatalf("unable to resolve the module dependencies for plugin %s", workspace)

@@ -19,7 +19,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/plugins/scripts/manifest"
 	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
@@ -31,11 +31,11 @@ func main() {
 	pluginFolderName, version := tag.Parse(t)
 	// The manifest is hopefully uploaded by a previous task in the CI
 	// It should be available in the plugin folder
-	manifest, err := npm.ReadManifest(pluginFolderName)
+	manif, err := manifest.Read(pluginFolderName)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to read manifest file for plugin %s", pluginFolderName)
 	}
-	pluginName := manifest.Metadata.BuildInfo.Name
+	pluginName := manif.Metadata.BuildInfo.Name
 	pluginPath := filepath.Join(pluginFolderName, "dist")
 
 	if err := os.Chdir(pluginPath); err != nil {

@@ -20,7 +20,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/npm"
+	"github.com/perses/plugins/scripts/manifest"
 	"github.com/sirupsen/logrus"
 )
 
@@ -34,7 +35,7 @@ var pluginFiles = []string{
 }
 
 func createArchive(pluginName string, createGroupArchive bool) error {
-	manifest, err := npm.ReadManifest(pluginName)
+	manif, err := manifest.Read(pluginName)
 	if err != nil {
 		return err
 	}
@@ -45,7 +46,7 @@ func createArchive(pluginName string, createGroupArchive bool) error {
 		}
 	}
 
-	archiveName := fmt.Sprintf("%s-%s.tar.gz", manifest.ID, manifest.Metadata.BuildInfo.Version)
+	archiveName := fmt.Sprintf("%s-%s.tar.gz", manif.ID, manif.Metadata.BuildInfo.Version)
 	args := []string{"-czvf", filepath.Join(pluginName, archiveName), "-C", filepath.Join(pluginName, "archive"), "."}
 
 	if runtime.GOOS == "darwin" {
@@ -70,11 +71,7 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "--group" {
 		createGroupArchive = true
 	}
-	workspaces, err := npm.GetWorkspaces()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
-	}
-	for _, workspace := range workspaces {
+	for _, workspace := range npm.MustGetWorkspaces(".") {
 		logrus.Infof("building archive for the plugin %s", workspace)
 		if createArchiveErr := createArchive(workspace, createGroupArchive); createArchiveErr != nil {
 			logrus.WithError(createArchiveErr).Fatalf("unable to generate the archive for the plugin %s", workspace)

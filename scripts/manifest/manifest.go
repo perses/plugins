@@ -11,42 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
+package manifest
 
 import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 )
-
-type Package struct {
-	Version    string   `json:"version"`
-	Workspaces []string `json:"workspaces"`
-}
-
-func GetVersion(pluginPath string) (string, error) {
-	data, err := os.ReadFile(filepath.Join(pluginPath, "package.json"))
-	if err != nil {
-		return "", err
-	}
-	pkg := Package{}
-	if unmarshalErr := json.Unmarshal(data, &pkg); unmarshalErr != nil {
-		return "", unmarshalErr
-	}
-	return pkg.Version, nil
-}
-
-func GetWorkspaces() ([]string, error) {
-	data, err := os.ReadFile("package.json")
-	if err != nil {
-		return nil, err
-	}
-	pkg := Package{}
-	if unmarshalErr := json.Unmarshal(data, &pkg); unmarshalErr != nil {
-		return nil, unmarshalErr
-	}
-	return pkg.Workspaces, nil
-}
 
 type BuildInfo struct {
 	Version string `json:"buildVersion"`
@@ -63,7 +36,7 @@ type Manifest struct {
 	Metadata Metadata `json:"metaData"`
 }
 
-func ReadManifest(pluginPath string) (*Manifest, error) {
+func Read(pluginPath string) (*Manifest, error) {
 	manifestFilePath := filepath.Join(pluginPath, "dist", "mf-manifest.json")
 	data, err := os.ReadFile(manifestFilePath)
 	if err != nil {
@@ -71,4 +44,12 @@ func ReadManifest(pluginPath string) (*Manifest, error) {
 	}
 	manifestData := &Manifest{}
 	return manifestData, json.Unmarshal(data, manifestData)
+}
+
+func MustRead(pluginPath string) *Manifest {
+	manif, err := Read(pluginPath)
+	if err != nil {
+		logrus.WithError(err).Fatalf("unable to read manifest file for plugin %s", pluginPath)
+	}
+	return manif
 }
