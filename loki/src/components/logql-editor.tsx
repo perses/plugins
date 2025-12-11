@@ -14,17 +14,20 @@
 import { ReactElement, useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import { LogQLExtension } from './logql-extension';
+import { LogQLExtension, CompletionConfig } from './logql-extension';
 
-export type LogQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
+export type LogQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> & {
+  completionConfig?: CompletionConfig;
+};
 
 export function LogQLEditor(props: LogQLEditorProps): ReactElement {
+  const { completionConfig, ...codemirrorProps } = props;
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
   const logqlExtension = useMemo(() => {
-    return LogQLExtension();
-  }, []);
+    return LogQLExtension(completionConfig);
+  }, [completionConfig]);
 
   const codemirrorTheme = useMemo(() => {
     const borderColor = theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.23)' : 'rgba(255, 255, 255, 0.23)';
@@ -46,7 +49,7 @@ export function LogQLEditor(props: LogQLEditorProps): ReactElement {
 
   return (
     <CodeMirror
-      {...props}
+      {...codemirrorProps}
       theme={isDarkMode ? 'dark' : 'light'}
       basicSetup={{
         lineNumbers: false,

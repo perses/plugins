@@ -12,4 +12,5 @@
 // limitations under the License.
 
 export * from './loki-client';
+export * from './loki-client-types';
 export * from './loki-selectors';

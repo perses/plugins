@@ -13,8 +13,12 @@
 
 import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-logql';
+import { CompletionContext } from '@codemirror/autocomplete';
 import { Extension } from '@uiw/react-codemirror';
+import { AbsoluteTimeRange } from '@perses-dev/core';
+import { LokiClient } from '../model';
 import { logqlHighlight } from './logql-highlight';
+import { complete } from './complete';
 
 function logqlLanguage(): LRLanguage {
   return LRLanguage.define({
@@ -28,7 +32,28 @@ function logqlLanguage(): LRLanguage {
   });
 }
 
-export function LogQLExtension(): Array<LRLanguage | Extension> {
+export interface CompletionConfig {
+  /** a LokiClient instance, can be created with LokiDatasource.createClient() */
+  client?: LokiClient;
+
+  /** search for label values in a given time range */
+  timeRange?: AbsoluteTimeRange;
+}
+
+export function LogQLExtension(completionCfg?: CompletionConfig): Array<LRLanguage | Extension> {
   const language = logqlLanguage();
+
+  // Only add autocomplete if config is provided
+  if (completionCfg) {
+    const completion = language.data.of({
+      autocomplete: (ctx: CompletionContext) =>
+        complete(completionCfg, ctx).catch((e) => {
+          console.error('error during LogQL auto-complete', e);
+          return null;
+        }),
+    });
+    return [language, completion];
+  }
+
   return [language];
 }
