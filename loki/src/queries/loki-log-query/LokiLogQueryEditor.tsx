@@ -17,13 +17,15 @@ import {
   isVariableDatasource,
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
+  useDatasourceClient,
+  useTimeRange,
 } from '@perses-dev/plugin-system';
 import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { produce } from 'immer';
 import { OptionsEditorControl } from '@perses-dev/components';
 import { LogQLEditor } from '../../components';
-import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
+import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND, LokiDatasourceSelector, LokiClient } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
 import { LokiLogQuerySpec } from './loki-log-query-types';
@@ -39,6 +41,19 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     LOKI_DATASOURCE_KIND
   ) as LokiDatasourceSelector;
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+
+  // Get client and time range for autocompletion
+  const { data: client } = useDatasourceClient<LokiClient>(selectedDatasource);
+  const { absoluteTimeRange } = useTimeRange();
+
+  // Create completion config for autocompletion
+  const completionConfig = useMemo(() => {
+    if (!client) return undefined;
+    return {
+      client,
+      timeRange: absoluteTimeRange,
+    };
+  }, [client, absoluteTimeRange]);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
     if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
@@ -120,6 +135,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
             }
           }}
           placeholder='Enter LogQL query (e.g. {job="mysql"} |= "error")'
+          completionConfig={completionConfig}
           // height="120px"
         />
       </div>

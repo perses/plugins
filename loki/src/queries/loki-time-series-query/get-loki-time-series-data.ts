@@ -15,13 +15,9 @@ import { TimeSeries, DurationString, parseDurationString } from '@perses-dev/cor
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { milliseconds } from 'date-fns';
 import { LokiClient } from '../../model/loki-client';
+import { LokiMatrixResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { LokiTimeSeriesQuerySpec, LokiTimeSeriesQueryResponse } from './loki-time-series-query-types';
-
-export type LokiMatrixResult = {
-  metric: Record<string, string>;
-  values: Array<[number, string]>;
-};
 
 export type LokiMatrixResponse = {
   resultType: 'matrix';
