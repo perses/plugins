@@ -63,6 +63,12 @@ export interface ColumnSettings {
   hide?: boolean;
   // Customize cell display based on their value for this specific column.
   cellSettings?: CellSettings[];
+
+  dataLink?: {
+    url: string;
+    title?: string;
+    openNewTab: boolean;
+  };
 }
 
 export interface ValueCondition {
