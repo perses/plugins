@@ -106,6 +106,17 @@ spec: {
 		yAxis: max: #max
 	}
 
+	#logBase: [// switch
+		if (*#panel.fieldConfig.defaults.logBase | null) != null {
+			#panel.fieldConfig.defaults.logBase
+		},
+		null,
+	][0]
+	if #logBase != null {
+		yAxis: logBase: #logBase
+		yAxis: type: "log"
+	}
+
 	#yAxisLabel: *#panel.fieldConfig.defaults.custom.axisLabel | null
 	if #yAxisLabel != null if len(#yAxisLabel) > 0 {
 		yAxis: label: #yAxisLabel

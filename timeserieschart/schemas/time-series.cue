@@ -56,6 +56,7 @@ spec: close({
 	if min != _|_ && max != _|_ {
 		max: >=min
 	}
+	logBase?: 2 | 10
 }
 
 #querySettings: [...{
