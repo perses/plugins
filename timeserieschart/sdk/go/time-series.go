@@ -96,11 +96,12 @@ type Visual struct {
 }
 
 type YAxis struct {
-	Show   bool           `json:"show,omitempty" yaml:"show,omitempty"`
-	Label  string         `json:"label,omitempty" yaml:"label,omitempty"`
-	Format *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
-	Min    float64        `json:"min,omitempty" yaml:"min,omitempty"`
-	Max    float64        `json:"max,omitempty" yaml:"max,omitempty"`
+	Show    bool           `json:"show,omitempty" yaml:"show,omitempty"`
+	Label   string         `json:"label,omitempty" yaml:"label,omitempty"`
+	Format  *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
+	Min     float64        `json:"min,omitempty" yaml:"min,omitempty"`
+	Max     float64        `json:"max,omitempty" yaml:"max,omitempty"`
+	LogBase uint           `json:"logBase,omitempty" yaml:"logBase,omitempty"`
 }
 
 type PluginSpec struct {
