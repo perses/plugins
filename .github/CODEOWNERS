@@ -1,0 +1,14 @@
+# General codeowners for the entire repository
+/* @perses/frontend-maintainers-with-random
+
+# Dedicated codeowners for a specific file type
+*.cue @AntoineThebaud
+*.go @Nexucis
+
+# Dedicated codeowners for a plugin
+/tempo @andreasgerstmayr
+
+# Dedicated codeowners for a specific directory
+
+/docs @AntoineThebaud
+/scripts @Nexucis
