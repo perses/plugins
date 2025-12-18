@@ -21,7 +21,7 @@ import {
   VariableOption,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useCallback, ChangeEvent, FocusEvent } from 'react';
 import { PromQLEditor } from '../components';
 import {
   DEFAULT_PROM,
@@ -49,8 +49,7 @@ export function PrometheusLabelValuesVariableEditor(
     value: { datasource },
   } = props;
   const selectedDatasource = datasource ?? DEFAULT_PROM;
-  const [labelValue, setLabelValue] = useState(props.value.labelName);
-  const [matchersValues, setMatchersValues] = useState(props.value.matchers ?? []);
+
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
       if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
@@ -68,13 +67,27 @@ export function PrometheusLabelValuesVariableEditor(
     [onChange, value]
   );
 
-  const handleLabelChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setLabelValue(e.target.value);
-  }, []);
+  const handleLabelChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.labelName = e.target.value;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
-  const handleMatchEditorsChange = useCallback((e: string[]) => {
-    setMatchersValues(e);
-  }, []);
+  const handleMatchEditorsChange = useCallback(
+    (matchers: string[]) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.matchers = matchers;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
   return (
     <Stack spacing={2}>
@@ -91,13 +104,19 @@ export function PrometheusLabelValuesVariableEditor(
       <TextField
         label="Label Name"
         required
-        value={labelValue}
+        value={props.value.labelName}
         onChange={handleLabelChange}
-        InputProps={{
-          readOnly: props.isReadonly,
+        slotProps={{
+          input: {
+            readOnly: props.isReadonly,
+          },
         }}
       />
-      <MatcherEditor matchers={matchersValues} onChange={handleMatchEditorsChange} isReadonly={props.isReadonly} />
+      <MatcherEditor
+        matchers={props.value.matchers ?? []}
+        onChange={handleMatchEditorsChange}
+        isReadonly={props.isReadonly}
+      />
     </Stack>
   );
 }
@@ -112,7 +131,6 @@ export function PrometheusLabelNamesVariableEditor(
   } = props;
 
   const selectedDatasource = datasource ?? DEFAULT_PROM;
-  const [matchersValues, setMatchersValues] = useState(props.value.matchers ?? []);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
       if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
@@ -130,9 +148,16 @@ export function PrometheusLabelNamesVariableEditor(
     [onChange, value]
   );
 
-  const handleMatchEditorChange = useCallback((e: string[]) => {
-    setMatchersValues(e);
-  }, []);
+  const handleMatchEditorChange = useCallback(
+    (matchers: string[]) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.matchers = matchers;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
   return (
     <Stack spacing={2}>
@@ -146,7 +171,11 @@ export function PrometheusLabelNamesVariableEditor(
           label="Prometheus Datasource"
         />
       </FormControl>
-      <MatcherEditor matchers={matchersValues} isReadonly={props.isReadonly} onChange={handleMatchEditorChange} />
+      <MatcherEditor
+        matchers={props.value.matchers ?? []}
+        isReadonly={props.isReadonly}
+        onChange={handleMatchEditorChange}
+      />
     </Stack>
   );
 }
@@ -167,7 +196,6 @@ export function PrometheusPromQLVariableEditor(
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
-  const [labelValue, setLabelValue] = useState(props.value.labelName);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
       if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
@@ -186,15 +214,26 @@ export function PrometheusPromQLVariableEditor(
   );
 
   const handleOnBlurPromQlChange = useCallback(
-    (e: React.FocusEvent<HTMLDivElement, Element>) => {
-      onChange({ ...value, expr: e.target.textContent ?? '' });
+    (e: FocusEvent<HTMLDivElement>) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.expr = e.target.textContent ?? '';
+        })
+      );
     },
     [onChange, value]
   );
 
-  const handleLabelNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setLabelValue(e.target.value);
-  }, []);
+  const handleLabelNameChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.labelName = e.target.value;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
   return (
     <Stack spacing={2}>
@@ -219,9 +258,11 @@ export function PrometheusPromQLVariableEditor(
       <TextField
         label="Label Name"
         required
-        value={labelValue}
-        InputProps={{
-          readOnly: props.isReadonly,
+        value={props.value.labelName}
+        slotProps={{
+          input: {
+            readOnly: props.isReadonly,
+          },
         }}
         onChange={handleLabelNameChange}
       />
