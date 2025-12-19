@@ -54,7 +54,7 @@ describe('convertPanelYAxis', () => {
       min: 0.1,
       max: 1,
     };
-    const echartsAxis = convertPanelYAxis(persesAxis);
+    const echartsAxis = convertPanelYAxis(persesAxis, 'none');
     // Axis label is handled outside of echarts since it is built with a custom React component.
     expect(echartsAxis).toEqual({
       show: true,
