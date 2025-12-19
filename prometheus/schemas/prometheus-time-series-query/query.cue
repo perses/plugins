@@ -15,7 +15,7 @@ package model
 
 import (
 	"strings"
-	"github.com/perses/perses/cue/common"
+	"github.com/perses/shared/cue/common"
 	promDs "github.com/perses/plugins/prometheus/schemas/datasource:model"
 )
 
