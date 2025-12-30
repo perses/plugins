@@ -18,6 +18,7 @@ import { LogEntry } from '@perses-dev/core';
 import { LogTimestamp } from './LogTimestamp';
 import { LogRowContainer, LogRowContent, ExpandButton, LogText } from './LogsStyles';
 import { LogDetailsTable } from './LogDetailsTable';
+import { useSeverityColor } from '../hooks/useSeverity';
 
 interface LogRowProps {
   log?: LogEntry;
