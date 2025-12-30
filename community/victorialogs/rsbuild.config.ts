@@ -1,5 +1,5 @@
 import { pluginReact } from '@rsbuild/plugin-react';
-import { createConfigForPlugin } from '../rsbuild.shared';
+import { createConfigForPlugin } from '../../rsbuild.shared';
 
 export default createConfigForPlugin({
   name: 'VictoriaLogs',

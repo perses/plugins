@@ -12,14 +12,15 @@
   },
   "workspaces": [
     "barchart",
-    "clickhouse",
+    "community/clickhouse",
+    "community/loki",
+    "community/victorialogs",
     "datasourcevariable",
     "flamechart",
     "gaugechart",
     "heatmapchart",
     "histogramchart",
     "logstable",
-    "loki",
     "markdown",
     "piechart",
     "prometheus",
@@ -33,8 +34,7 @@
     "timeserieschart",
     "timeseriestable",
     "tracetable",
-    "tracingganttchart",
-    "victorialogs"
+    "tracingganttchart"
   ],
   "peerDependencies": {
     "@types/react-dom": "^18.3.0",
