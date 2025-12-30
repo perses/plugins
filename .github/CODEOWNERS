@@ -2,6 +2,8 @@
 /* @perses/frontend-maintainers-with-random
 
 # Dedicated codeowners for a specific file type
+*.ts @perses/frontend-maintainers-with-random
+*.tsx @perses/frontend-maintainers-with-random
 *.cue @AntoineThebaud
 *.go @Nexucis
 
