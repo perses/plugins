@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { memo, useCallback } from 'react';
-import { Box, Collapse, useTheme } from '@mui/material';
+import { Box, Collapse } from '@mui/material';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { LogEntry } from '@perses-dev/core';
 import { useSeverityColor } from '../hooks/useSeverity';
