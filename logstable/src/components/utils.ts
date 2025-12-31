@@ -17,8 +17,8 @@ export const getSeverity = (log: LogEntry): 'info' | 'warn' | 'error' | 'debug' 
   const level = log.labels?.level?.toLowerCase();
 
   if (level) {
-    if (level.includes('critical')) return 'error'
-    if (level.includes('fatal')) return 'error'
+    if (level.includes('critical')) return 'error';
+    if (level.includes('fatal')) return 'error';
     if (level.includes('error') || level.includes('err')) return 'error';
     if (level.includes('warn')) return 'warn';
     if (level.includes('info')) return 'info';

@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { useTheme } from '@mui/material';
-import { getSeverity } from '../utils';
 import { LogEntry } from '@perses-dev/core';
+import { getSeverity } from '../utils';
 
 export const useSeverityColor = (log?: LogEntry) => {
   const theme = useTheme();
