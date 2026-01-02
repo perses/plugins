@@ -13,15 +13,12 @@
       },
       {
         "header": "API server",
-        "name": "apiserver"
+        "name": "apiserver",
+        "width": 300
       },
       {
         "header": "ValueCustomHeader",
         "name": "value"
-      },
-      {
-        "name": "API server",
-        "width": 300
       },
       {
         "name": "endpoint",

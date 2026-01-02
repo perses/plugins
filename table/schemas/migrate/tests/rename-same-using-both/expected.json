@@ -3,20 +3,12 @@
   "spec": {
     "columnSettings": [
       {
-        "header": "bonjour",
-        "name": "value"
-      },
-      {
-        "header": "family",
+        "header": "group",
         "name": "job"
       },
       {
-        "header": "group",
-        "name": "family"
-      },
-      {
         "header": "hello",
-        "name": "bonjour"
+        "name": "value"
       }
     ],
     "density": "compact"

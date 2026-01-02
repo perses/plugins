@@ -3,10 +3,6 @@
   "spec": {
     "columnSettings": [
       {
-        "header": "bonjour",
-        "name": "value"
-      },
-      {
         "header": "hello",
         "name": "value"
       }

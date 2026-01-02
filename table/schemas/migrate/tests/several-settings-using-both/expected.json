@@ -4,19 +4,13 @@
     "columnSettings": [
       {
         "header": "hello",
-        "name": "value"
+        "hide": false,
+        "name": "value",
+        "width": 100
       },
       {
         "hide": true,
         "name": "timestamp"
-      },
-      {
-        "hide": false,
-        "name": "value"
-      },
-      {
-        "name": "hello",
-        "width": 100
       }
     ],
     "density": "compact"
