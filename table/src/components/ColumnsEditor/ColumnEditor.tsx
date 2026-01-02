@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { Button, ButtonGroup, Stack, StackProps, Switch, TextField, IconButton } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
@@ -24,8 +24,11 @@ import {
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
+import LinkIcon from 'mdi-material-ui/Link';
+import TrashIcon from 'mdi-material-ui/TrashCan';
 import { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
+import { DataLinkEditor } from './DataLinkEditorDialog';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
@@ -44,8 +47,23 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
     column.width === undefined || column.width === 'auto' ? 100 : column.width
   );
 
+  const [linkEditorOpen, setLinkEditorOpen] = useState(false);
+
   return (
     <Stack {...others}>
+      {linkEditorOpen && (
+        <DataLinkEditor
+          linkData={column.dataLink ?? { url: '', title: '', openNewTab: true }}
+          actionTitle={column.dataLink ? 'Edit' : 'Add'}
+          open={linkEditorOpen}
+          onClose={() => {
+            setLinkEditorOpen(false);
+          }}
+          onSave={(dataLink) => {
+            onChange({ ...column, dataLink });
+          }}
+        />
+      )}
       <OptionsEditorGrid>
         <OptionsEditorColumn>
           <OptionsEditorGroup title="Column">
@@ -201,6 +219,44 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                       onChange({ ...column, width: +e.target.value });
                     }}
                   />
+                }
+              />
+            )}
+          </OptionsEditorGroup>
+        </OptionsEditorColumn>
+        <OptionsEditorColumn>
+          <OptionsEditorGroup title="Link">
+            {!column.dataLink ? (
+              <Button
+                startIcon={<LinkIcon />}
+                onClick={() => {
+                  setLinkEditorOpen(true);
+                }}
+                variant="contained"
+                color="primary"
+              >
+                Add Link
+              </Button>
+            ) : (
+              <OptionsEditorControl
+                label="Data Link"
+                control={
+                  <>
+                    <IconButton
+                      onClick={() => {
+                        onChange({ ...column, dataLink: undefined });
+                      }}
+                    >
+                      <TrashIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => {
+                        setLinkEditorOpen(true);
+                      }}
+                    >
+                      <LinkIcon />
+                    </IconButton>
+                  </>
                 }
               />
             )}
