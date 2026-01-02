@@ -23,14 +23,18 @@ export const useSeverityColor = (log?: LogEntry) => {
   const severity = getSeverity(log);
 
   switch (severity) {
+    case 'critical':
+      return theme.palette.error.dark;
     case 'error':
       return theme.palette.error.main;
-    case 'warn':
+    case 'warning':
       return theme.palette.warning.main;
     case 'info':
       return theme.palette.info.main;
     case 'debug':
       return theme.palette.primary.main;
+    case 'trace':
+      return theme.palette.grey[500];
     default:
       return theme.palette.text.secondary;
   }

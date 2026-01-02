@@ -13,16 +13,28 @@
 
 import { LogEntry } from '@perses-dev/core';
 
-export const getSeverity = (log: LogEntry): 'info' | 'warn' | 'error' | 'debug' | 'unknown' => {
+export type Severity = 'critical' | 'error' | 'warning' | 'info' | 'debug' | 'trace' | 'unknown' | 'other';
+
+export const severityAbbreviations: Record<Severity, string[]> = {
+  critical: ['critical', 'emerg', 'fatal', 'alert', 'crit'],
+  error: ['error', 'err', 'eror'],
+  debug: ['debug', 'dbug'],
+  info: ['info', 'inf', 'information', 'notice'],
+  trace: ['trace'],
+  warning: ['warn', 'warning'],
+  unknown: ['unknown'],
+  other: [''],
+};
+
+export const getSeverity = (log: LogEntry): Severity => {
   const level = log.labels?.level?.toLowerCase();
 
   if (level) {
-    if (level.includes('critical')) return 'error';
-    if (level.includes('fatal')) return 'error';
-    if (level.includes('error') || level.includes('err')) return 'error';
-    if (level.includes('warn')) return 'warn';
-    if (level.includes('info')) return 'info';
-    if (level.includes('debug')) return 'debug';
+    for (const [severity, abbreviations] of Object.entries(severityAbbreviations)) {
+      if (abbreviations.some((abbr) => abbr && level.includes(abbr))) {
+        return severity as Severity;
+      }
+    }
   }
 
   return 'unknown';
