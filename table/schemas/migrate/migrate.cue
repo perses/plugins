@@ -15,6 +15,8 @@ package migrate
 
 import (
 	"list"
+	"strconv"
+	"struct"
 
 	commonMigrate "github.com/perses/perses/cue/common/migrate"
 )
@@ -22,9 +24,25 @@ import (
 #grafanaType: "table" | "table-old"
 #panel: _
 
-if (*#panel.type | null) == "table" {
-	kind: "Table"
-	spec: {
+// Function to rename anonymous fields that Perses names differently than Grafana
+_renameAnonymousFields: {
+	#var: string
+	output: [
+		if #var == "Time" {"timestamp"},
+		if #var == "Value" {"value"},
+		#var,
+	][0]
+}
+
+// Function to return the last key of a map
+_getLastKey: {
+    #map: struct.MinFields(1)
+    output: [for k, _ in #map {k}][len(#map) - 1]
+}
+
+kind: "Table"
+spec: {
+	if (*#panel.type | null) == "table" {
 		#cellHeight: *#panel.options.cellHeight | null
 		if #cellHeight != null {
 			density: [
@@ -34,64 +52,96 @@ if (*#panel.type | null) == "table" {
 			][0]
 		}
 
-		_nameBuilder: {
+		// Retrieve the settings defined in transformations
+		_columnSettingsFromTansform: {
+			for transformation in (*#panel.transformations | []) if transformation.id == "organize" {
+				for columnName, columnIndex in (*transformation.options.indexByName | {}) {
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": index: columnIndex
+				}
+				for columnName, hidden in (*transformation.options.excludeByName | {}) {
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": hide: hidden
+				}
+				for columnName, displayName in (*transformation.options.renameByName | {}) {
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": header: displayName
+				}
+			}
+		}
+
+		// Function to rename a field if it was renamed by a transformation
+		_reuseMatchingName: this={
 			#var: string
 			output: [
-				// Rename anonymous fields that Perses names differently than Grafana
-				if #var == "Time" {"timestamp"},
-				if #var == "Value" {"value"},
-				#var,
+				// Check if the column was renamed by a transform
+				for k, v in _columnSettingsFromTansform if #var == (*v.header | null) { k },
+				{_renameAnonymousFields & {#var: this.#var}}.output,
 			][0]
 		}
 
+		// Retrieve the settings defined in field overrides
+		_columnSettingsFromOverrides: {
+			for override in (*#panel.fieldConfig.overrides | []) if override.matcher.id == "byName" && override.matcher.options != _|_ {
+				for property in override.properties {
+					if property.id == "displayName" {
+						// Several header overrides could be defined for the same column name, thus we use yet another intermediary map to gather the "possibilites" in a list
+						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": headers: "\(property.value)": true // dummy value, we care only about the key
+					}
+					if property.id == "custom.width" {
+						// Same principle for width
+						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": widths: (*"\(property.value)" | "auto"): true
+					}
+					// NB: enrich this part when this is done https://github.com/perses/perses/issues/2852
+				}
+			}
+		}
+
+		// Build a last intermediary object merging both sources of settings
+		_columnSettingsMerged: {
+			for name, settings in _columnSettingsFromOverrides {
+				"\(name)": {
+					// In Grafana if there are multiple overrides for the same field, the last one takes precedence
+					if settings.headers != _|_ if len(settings.headers) > 0 {
+						header: {_getLastKey & {#map: settings.headers}}.output
+					}
+					if settings.widths != _|_ if len(settings.widths) > 0 {
+						_width: {_getLastKey & {#map: settings.widths}}.output
+						width: [
+							if _width == "auto" {"auto"},
+							strconv.Atoi(_width),
+						][0]
+					}
+				}
+			}
+			for name, settings in _columnSettingsFromTansform {
+				"\(name)": [
+				  // We have to hande potential name conflicts due to the overrides.
+				  // In Grafana field overrides take precedence over the organize transformations.
+				  if (*_columnSettingsFromOverrides[name].headers | null) != null {
+					  // Copy all fields except header
+					  for fieldName, fieldValue in settings if fieldName != "header" {
+						"\(fieldName)": fieldValue
+					  }
+				  },
+				  settings
+				][0]
+			}
+		}
+
+		// Building the columnSettings is a bit tricky because:
+		// - column order in Perses is based on the order of items in the array (and not on a index field like Grafana)
+		// - not all elements from our intermediary object _columnSettingsMerged have an index defined
+		// Thus we append first the items that could be reordered, and append the remaining ones in bulk after
 		columnSettings: list.Concat([
-			for transformation in (*#panel.transformations | [])
-			// In Grafana, when ordering column at least one column, it will give an index to all columns (in indexByName map).
-			// And Perses, columns are sorted by their index in the array of columnSettings.
-			// However, if indexByName map is empty, we can just iterate over renameByName and excludeByName maps "randomly".
-			if transformation.id == "organize" && len((*transformation.options.indexByName | {})) == 0 {
-				list.Concat([
-					[for columnName, displayName in (*transformation.options.renameByName | {}) {
-						name: {_nameBuilder & {#var: columnName}}.output
-						header: displayName
-					}],
-					[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
-						name: {_nameBuilder & {#var: columnName}}.output
-						hide: isExcluded
-					}],
-				])
-			},
-			// If indexByName map is not empty, we need can reorder columns based on the index correctly.
-			[for transformation in (*#panel.transformations | [])
-				if transformation.id == "organize" && len((*transformation.options.indexByName | {})) > 0
-				// very smart trick going on here:
-				// since column order in Perses is based on the order of items in the array (and not on a index field like Grafana), we have to reorder the items.
-				// To do that we need first to iterate from 0 to the length of the map (= first loop) and then to find (= inner loop) the map item whose index equals the current value of the loop variable.
-				for desiredIndex, _ in [for k in transformation.options.indexByName {}] for columnName, index in transformation.options.indexByName if desiredIndex == index {
-					name: {_nameBuilder & {#var: columnName}}.output
-					if (*transformation.options.renameByName[columnName] | null) != null {
-						header: transformation.options.renameByName[columnName]
-					}
-					if (*transformation.options.excludeByName[columnName] | null) != null {
-						hide: transformation.options.excludeByName[columnName]
-					}
-				},
-			],
-			[for override in (*#panel.fieldConfig.overrides | [])
-				if override.matcher.id == "byName" && override.matcher.options != _|_ {
-					name: {_nameBuilder & {#var: override.matcher.options}}.output
-					for property in override.properties {
-						if property.id == "displayName" {
-							header: property.value
-						}
-						if property.id == "custom.width" {
-							#width: *property.value | "auto"
-							width: #width
-						}
-						// NB: enrich this part when this is done https://github.com/perses/perses/issues/2852
-					}
-				},
-			],
+			[for desiredIndex, _ in [for k in _columnSettingsMerged {}] for columnName, settings in _columnSettingsMerged if settings.index != _|_ if desiredIndex == settings.index {
+				name: columnName
+				// Copy all fields except index
+				for fieldName, fieldValue in settings if fieldName != "index" {
+				  "\(fieldName)": fieldValue
+				}
+			}],
+			[for columnName, settings in _columnSettingsMerged if settings.index == _|_ {
+				name: columnName
+				settings
+			}]
 		])
 		
 		// Using flatten to get rid of the nested array for "value" mappings
@@ -185,13 +235,10 @@ if (*#panel.type | null) == "table" {
 			}
 		}
 	}
-}
-if (*#panel.type | null) == "table-old" {
-	kind: "Table"
-	spec: {
+	if (*#panel.type | null) == "table-old" {
 		if #panel.styles != _|_ {
 			columnSettings: [for style in #panel.styles {
-				name: style.pattern
+				name: "\({_renameAnonymousFields & {#var: style.pattern}}.output)"
 				if style.type == "hidden" {
 					hide: true
 				}
