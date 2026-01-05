@@ -24,8 +24,10 @@ import {
 } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
+
 import { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
+import { DataLinkEditor } from './DataLinkEditorDialog';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
@@ -204,6 +206,11 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
                 }
               />
             )}
+          </OptionsEditorGroup>
+        </OptionsEditorColumn>
+        <OptionsEditorColumn>
+          <OptionsEditorGroup title="Link">
+            <DataLinkEditor column={column} onChange={onChange} />
           </OptionsEditorGroup>
         </OptionsEditorColumn>
       </OptionsEditorGrid>
