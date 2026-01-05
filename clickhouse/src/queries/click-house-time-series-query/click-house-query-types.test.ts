@@ -32,8 +32,8 @@ clickhouseStubClient.query = jest.fn(async () => {
   const stubResponse: ClickHouseQueryResponse = {
     status: 'success',
     data: [
-      { time: '2025-09-09 05:18:00', log_count: '277' },
-      { time: '2025-09-09 05:19:00', log_count: '156102' },
+      { time: '2025-09-09 05:18:00', value: '277' },
+      { time: '2025-09-09 05:19:00', value: '156102' },
     ],
   };
   return stubResponse as ClickHouseQueryResponse;
@@ -95,6 +95,6 @@ describe('ClickHouseTimeSeriesQuery', () => {
     const resp = await client.query('SELECT count(*) FROM otel_logs');
     expect(resp.data.length).toBeGreaterThan(0);
     expect(resp.data[0]).toHaveProperty('time');
-    expect(resp.data[0]).toHaveProperty('log_count');
+    expect(resp.data[0]).toHaveProperty('value');
   });
 });

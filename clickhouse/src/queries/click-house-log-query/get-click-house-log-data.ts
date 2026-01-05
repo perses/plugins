@@ -17,6 +17,7 @@ import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-hou
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { LogQueryPlugin } from './log-query-plugin-interface';
+import { replaceClickHouseBuiltinVariables } from '../click-house-time-series-query/replace-click-house-builtin-variables';
 
 function flattenObject(
   obj: Record<string, any>,
@@ -76,17 +77,20 @@ export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLo
     };
   }
 
-  const query = replaceVariables(spec.query, context.variableState);
+  const { start, end } = context.timeRange;
+
+  // Default step for log queries (60 seconds)
+  const stepMs = 60 * 1000;
+
+  // Replace built-in variables first, then user-defined variables
+  let query = replaceClickHouseBuiltinVariables(spec.query, start, end, stepMs);
+  query = replaceVariables(query, context.variableState);
 
   const client = (await context.datasourceStore.getDatasourceClient(
     spec.datasource ?? DEFAULT_DATASOURCE
   )) as ClickHouseClient;
 
-  const { start, end } = context.timeRange;
-
   const response: ClickHouseQueryResponse = await client.query({
-    start: start.getTime().toString(),
-    end: end.getTime().toString(),
     query,
   });
 

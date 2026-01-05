@@ -29,7 +29,7 @@ export interface ClickHouseQueryResponse {
 }
 
 export interface ClickHouseClient {
-  query: (params: { start: string; end: string; query: string }) => Promise<ClickHouseQueryResponse>;
+  query: (params: ClickHouseQueryParams) => Promise<ClickHouseQueryResponse>;
 }
 
 export async function query(
