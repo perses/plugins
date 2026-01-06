@@ -5,7 +5,7 @@
       {
         "header": "Time",
         "hide": true,
-        "name": "Time"
+        "name": "timestamp"
       },
       {
         "align": "right",
