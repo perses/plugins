@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import React, { memo, useCallback } from 'react';
-import { Box, Collapse, useTheme } from '@mui/material';
+import { Box, Collapse } from '@mui/material';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { LogEntry } from '@perses-dev/core';
+import { useSeverityColor } from '../hooks/useSeverity';
 import { LogTimestamp } from './LogTimestamp';
 import { LogRowContainer, LogRowContent, ExpandButton, LogText } from './LogsStyles';
 import { LogDetailsTable } from './LogDetailsTable';
@@ -38,8 +39,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
   showTime = false,
   allowWrap = false,
 }) => {
-  const theme = useTheme();
-  const severityColor = theme.palette.text.secondary;
+  const severityColor = useSeverityColor(log);
 
   const handleToggle = useCallback(() => {
     if (isExpandable) {
