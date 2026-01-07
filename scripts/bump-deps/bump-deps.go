@@ -26,8 +26,10 @@ import (
 )
 
 var (
-	bumpNPMDeps = regexp.MustCompile(`"@perses-dev/([a-zA-Z-]+)":\s*"(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`)
 	bumpCueDeps = regexp.MustCompile(`v:(\s*)"v(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`)
+	// sharedPackageNames contains the list of packages release by the repository perses/shared to bump
+	sharedPackageNames = []string{"component", "dashboards", "plugin-system", "explorer"}
+	persesPackageName  = "core"
 )
 
 func bumpGoDep(workspace, version string) {
@@ -61,39 +63,62 @@ func bumpCueDep(workspace, version string) {
 	logrus.Infof("successfully bumped cue dependencies for %s to version %s", workspace, version)
 }
 
-func replaceNPMPackage(data []byte, version string) []byte {
-	return bumpNPMDeps.ReplaceAll(data, fmt.Appendf(nil, `"@perses-dev/$1": "^%s"`, version))
+func replaceNPMPackage(data []byte, version string, componentNames ...string) []byte {
+	newData := data
+	for _, name := range componentNames {
+		bumpNPMDeps := regexp.MustCompile(fmt.Sprintf(`"@perses-dev/%s":\s*"(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`, name))
+		newData = bumpNPMDeps.ReplaceAll(newData, []byte(fmt.Sprintf(`"@perses-dev/%s": "^%s"`, name, version)))
+	}
+	return newData
 }
 
-func bumpPackage(workspace string, version string) {
+func bumpPackage(workspace string, version string, componentNames ...string) {
 	pkgPath := filepath.Join(workspace, "package.json")
 	data, err := os.ReadFile(pkgPath)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to read the file %s", pkgPath)
 	}
-	newData := replaceNPMPackage(data, version)
+	newData := replaceNPMPackage(data, version, componentNames...)
 	if writeErr := os.WriteFile(pkgPath, newData, 0644); writeErr != nil {
 		logrus.WithError(writeErr).Fatalf("unable to write the file %s", pkgPath)
 	}
 	logrus.Infof("successfully bumped npm dependencies for %s to version %s", workspace, version)
 }
 
-// This script bumps all perse-dev dependencies for go and npm packages to the provided version.
+func bumpPersesDep(workspaces []string, version string) {
+	for _, workspace := range workspaces {
+		bumpGoDep(workspace, version)
+		bumpPackage(workspace, version, persesPackageName)
+		bumpCueDep(workspace, version)
+	}
+}
+
+func bumpSharedDep(workspaces []string, version string) {
+	for _, workspace := range workspaces {
+		bumpPackage(workspace, version, sharedPackageNames...)
+	}
+}
+
+// This script bumps all perse-dev and perses shared dependencies for go, cuelang and npm packages to the provided version.
 // To be used like that: go run ./scripts/bump-deps/bump-deps.go --version=<version>
 // Note: the version provided does not contain the prefix 'v'.
-// Example: go run ./scripts/bump-deps/bump-deps.go --version=0.52.0-beta.4
+// Example: go run ./scripts/bump-deps/bump-deps.go --version=0.52.0-beta.4 --shared-version=0.10.0
 func main() {
 	version := flag.String("version", "", "the version to use for the bump.")
+	sharedVersion := flag.String("shared-version", "", "the version for the shared component to use for the bump.")
 	flag.Parse()
-	if *version == "" {
+	if *version == "" || *sharedVersion == "" {
 		logrus.Fatal("you must provide a version to use for the bump")
 	}
 
-	bumpPackage("", *version)
-	for _, workspace := range npm.MustGetWorkspaces(".") {
-		bumpGoDep(workspace, *version)
-		bumpPackage(workspace, *version)
-		bumpCueDep(workspace, *version)
+	workspaces := npm.MustGetWorkspaces(".")
+	if *version != "" {
+		bumpPackage("", *version, persesPackageName)
+		bumpPersesDep(workspaces, *version)
+	}
+	if *sharedVersion != "" {
+		bumpPackage("", *sharedVersion, sharedPackageNames...)
+		bumpSharedDep(workspaces, *sharedVersion)
 	}
 	if npmErr := command.Run("npm", "install"); npmErr != nil {
 		logrus.WithError(npmErr).Fatal("unable to run npm install")
