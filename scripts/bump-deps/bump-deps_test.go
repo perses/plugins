@@ -35,14 +35,14 @@ func TestReplaceNPMPackage(t *testing.T) {
   "name": "@perses-dev/plugin-example",
   "version": "0.1.0",
   "dependencies": {
-	"@perses-dev/core": "^0.52.0-beta.4",
+	"@perses-dev/core": "^0.51.0",
 	"@perses-dev/dashboards": "^0.52.0-beta.4",
 	"@perses-dev/panels": "^0.52.0-beta.4",
 	"@perses-dev/alerting": "^0.52.0-beta.4",
 	"react": "^17.0.2"
   }
 }`)
-	result := replaceNPMPackage(original, "0.52.0-beta.4")
+	result := replaceNPMPackage(original, "0.52.0-beta.4", "dashboards", "panels", "alerting")
 	assert.Equal(t, string(expected), string(result))
 }
 
