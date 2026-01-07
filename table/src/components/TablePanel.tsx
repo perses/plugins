@@ -164,13 +164,15 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
         return undefined;
       }
 
+      const { name, header, headerDescription, enableSorting, width, align, dataLink } = column;
       return {
         accessorKey: name,
-        header: column.header ?? name,
-        headerDescription: column.headerDescription,
-        enableSorting: column.enableSorting,
-        width: column.width,
-        align: column.align,
+        header: header ?? name,
+        headerDescription,
+        enableSorting,
+        width,
+        align,
+        dataLink,
         ...generateCellContentConfig(column),
       };
     }
