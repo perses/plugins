@@ -12,9 +12,18 @@
 // limitations under the License.
 
 import { Switch, TextField } from '@mui/material';
-import { OptionsEditorControl, OptionsEditorGroup, FormatControls } from '@perses-dev/components';
+
+import { OptionsEditorControl, OptionsEditorGroup, FormatControls, SettingsAutocomplete } from '@perses-dev/components';
 import { ReactElement } from 'react';
-import { DEFAULT_FORMAT, DEFAULT_Y_AXIS, TimeSeriesChartYAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
+import {
+  DEFAULT_FORMAT,
+  DEFAULT_Y_AXIS,
+  TimeSeriesChartYAxisOptions,
+  Y_AXIS_CONFIG,
+  LOG_BASE_OPTIONS,
+  LOG_BASE_CONFIG,
+  LOG_VALID_BASES,
+} from './time-series-chart-model';
 
 export interface YAxisOptionsEditorProps {
   value: TimeSeriesChartYAxisOptions;
@@ -22,6 +31,8 @@ export interface YAxisOptionsEditorProps {
 }
 
 export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps): ReactElement {
+  const logBase = LOG_BASE_CONFIG[LOG_VALID_BASES[value.logBase ?? 'none']];
+
   return (
     <OptionsEditorGroup title="Y Axis">
       <OptionsEditorControl
@@ -45,6 +56,27 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
             ...value,
             format: newFormat,
           })
+        }
+      />
+      <OptionsEditorControl
+        label={Y_AXIS_CONFIG.logBase.label}
+        control={
+          <SettingsAutocomplete
+            value={{
+              ...logBase,
+              id: logBase.label,
+            }}
+            options={LOG_BASE_OPTIONS}
+            onChange={(__, newValue) => {
+              const updatedValue: TimeSeriesChartYAxisOptions = {
+                ...value,
+                logBase: newValue.log,
+              };
+              onChange(updatedValue);
+            }}
+            disabled={value === undefined}
+            disableClearable
+          ></SettingsAutocomplete>
         }
       />
       <OptionsEditorControl

@@ -54,6 +54,7 @@ import {
   DEFAULT_VISUAL,
   THRESHOLD_PLOT_INTERVAL,
   QuerySettingsOptions,
+  LOG_BASE,
 } from './time-series-chart-model';
 import {
   getTimeSeries,
@@ -121,10 +122,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     return merge({}, DEFAULT_VISUAL, props.spec.visual);
   }, [props.spec.visual]);
 
+  // Use the logBase from yAxis options, defaulting to 'none' if not set
+  const useLogarithmicBase: LOG_BASE = yAxis?.logBase ?? 'none';
+
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = useMemo(() => {
-    return convertPanelYAxis(yAxis);
-  }, [yAxis]);
+    return convertPanelYAxis(yAxis, useLogarithmicBase);
+  }, [yAxis, useLogarithmicBase]);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
