@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"struct"
 
-	commonMigrate "github.com/perses/perses/cue/common/migrate"
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
 )
 
 #grafanaType: "table" | "table-old"
