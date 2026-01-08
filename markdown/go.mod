@@ -2,7 +2,7 @@ module github.com/perses/plugins/markdown
 
 go 1.25.5
 
-require github.com/perses/perses v0.53.0-beta.4
+require github.com/perses/perses v0.53.0-rc.0
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
