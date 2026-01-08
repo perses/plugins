@@ -3,7 +3,7 @@ module github.com/perses/plugins/table
 go 1.25.5
 
 require (
-	github.com/perses/perses v0.53.0-beta.4
+	github.com/perses/perses v0.53.0-rc.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
