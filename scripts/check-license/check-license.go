@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './get-loki-log-data';
-export * from './LokiLogQuery';
-export * from './LokiLogQueryEditor';
-export * from './loki-log-query-types';
+package main
+
+import (
+	"flag"
+
+	"github.com/perses/perses/scripts/pkg/license"
+)
+
+func main() {
+	l := license.DefaultLicense()
+	l.RegisterFlags()
+	flag.Parse()
+	l.Execute()
+}

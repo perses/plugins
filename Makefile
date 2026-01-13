@@ -54,3 +54,13 @@ build:
 test:
 	@echo ">> running all tests"
 	$(GO) test -count=1 -v ./...
+
+.PHONY: checklicense
+checklicense:
+	@echo ">> checking license"
+	$(GO) run ./scripts/check-license --check
+
+.PHONY: fixlicense
+fixlicense:
+	@echo ">> adding license header where it's missing"
+	$(GO) run ./scripts/check-license --fix
