@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 import { MouseEvent as ReactMouseEvent, ReactElement, useEffect, useState } from 'react';
 import { Box, styled } from '@mui/material';
-import { useEvent } from '@perses-dev/core';
+import { useEvent } from '@perses-dev/plugin-system';
 
 interface ResizableDividerProps {
   parentRef: React.RefObject<Element>;

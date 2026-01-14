@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -103,7 +103,7 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps): {
  */
 export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps): {
   minStep: string | undefined;
-  handleMinStepChange: (e: DurationString) => void;
+  handleMinStepChange: (e: DurationString | undefined) => void;
   handleMinStepBlur: () => void;
 } {
   const { onChange, value } = props;
@@ -117,7 +117,7 @@ export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps): {
   }
 
   // Update our local state as the user types
-  const handleMinStepChange = (e: DurationString): void => {
+  const handleMinStepChange = (e: DurationString | undefined): void => {
     setMinStep(e);
   };
 

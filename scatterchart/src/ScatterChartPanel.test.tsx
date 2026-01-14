@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelData } from '@perses-dev/plugin-system';
+import { PanelData, ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import { TraceData } from '@perses-dev/core';
 import { screen, render } from '@testing-library/react';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { MemoryRouter } from 'react-router-dom';
+import { VariableProvider } from '@perses-dev/dashboards';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT, MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY } from './mock-trace-data';
 import { getSymbolSize, ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 
@@ -28,10 +31,22 @@ const TEST_SCATTER_PANEL: Omit<ScatterChartPanelProps, 'queryResults'> = {
 
 describe('ScatterChartPanel', (): void => {
   const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
+    const queryClient = new QueryClient();
+
     render(
-      <ChartsProvider chartsTheme={testChartsTheme}>
-        <ScatterChartPanel {...TEST_SCATTER_PANEL} queryResults={queryResults} />
-      </ChartsProvider>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <ReactRouterProvider>
+            <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1m' }}>
+              <VariableProvider>
+                <ChartsProvider chartsTheme={testChartsTheme}>
+                  <ScatterChartPanel {...TEST_SCATTER_PANEL} queryResults={queryResults} />
+                </ChartsProvider>
+              </VariableProvider>
+            </TimeRangeProviderBasic>
+          </ReactRouterProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
   };
 

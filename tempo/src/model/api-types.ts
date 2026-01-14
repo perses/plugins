@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -26,6 +26,8 @@ export interface SearchRequestParameters {
   /** max number of matching spans per trace in search result, default: 3 */
   spss?: number;
 }
+
+export const DEFAULT_SEARCH_LIMIT = 20;
 
 /**
  * Response of Tempo HTTP API endpoint GET /api/search

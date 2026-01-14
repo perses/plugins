@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,16 +15,24 @@ import { produce } from 'immer';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
+  replaceVariables,
+  useAllVariableValues,
   useDatasource,
   useDatasourceClient,
   useDatasourceSelectValueToSelector,
+  useSuggestedStepMs,
+  useTimeRange,
 } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { FormControl, Stack, TextField } from '@mui/material';
-import { ReactElement } from 'react';
+import { ReactElement, useContext, useMemo } from 'react';
+import { PanelEditorContext } from '@perses-dev/dashboards';
 import {
   DEFAULT_PROM,
   DurationString,
+  getDurationStringSeconds,
+  getPrometheusTimeRange,
+  getRangeStep,
   isDefaultPromSelector,
   isPrometheusDatasourceSelector,
   PROM_DATASOURCE_KIND,
@@ -39,13 +47,17 @@ import {
   useFormatState,
   useMinStepState,
 } from './query-editor-model';
-
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
  */
 export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps): ReactElement {
-  const { onChange, value } = props;
-  const { datasource } = value;
+  const {
+    onChange,
+    value,
+    value: { query, datasource },
+    isReadonly,
+  } = props;
+
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
 
   const datasourceSelectLabelID = useId('prom-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
@@ -69,6 +81,10 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {
+      /* Good to know: The usage of onchange here causes an immediate spec update which eventually updates the panel
+         This was probably intentional to allow for quick switching between datasources.
+         Could have been triggered only with Run Query button as well.
+      */
       onChange(
         produce(value, (draft) => {
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
@@ -82,6 +98,37 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
 
+  const variableState = useAllVariableValues();
+  const { absoluteTimeRange } = useTimeRange();
+  const panelEditorContext = useContext(PanelEditorContext);
+  const suggestedStepMs = useSuggestedStepMs(panelEditorContext?.preview.previewPanelWidth);
+
+  const minStepMs = useMemo(() => {
+    /* Try catch is necessary, because when the minStep value is being typed, it will be valid when the duration unit is added. Example: 2m = 2 + m */
+    try {
+      const durationsSeconds = getDurationStringSeconds(
+        replaceVariables(minStepPlaceholder, variableState) as DurationString
+      );
+      return durationsSeconds !== undefined ? durationsSeconds * 1000 : undefined;
+    } catch {
+      return undefined;
+    }
+  }, [variableState, minStepPlaceholder]);
+
+  const intervalMs = useMemo(() => {
+    const minStepSeconds = (minStepMs ?? 0) / 1000;
+    return getRangeStep(getPrometheusTimeRange(absoluteTimeRange), minStepSeconds, undefined, suggestedStepMs) * 1000;
+  }, [absoluteTimeRange, minStepMs, suggestedStepMs]);
+
+  const treeViewMetadata = useMemo(() => {
+    return minStepMs && intervalMs
+      ? {
+          minStepMs,
+          intervalMs,
+        }
+      : undefined;
+  }, [minStepMs, intervalMs]);
+
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
@@ -92,14 +139,17 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           labelId={datasourceSelectLabelID}
           label="Prometheus Datasource"
           notched
+          readOnly={isReadonly}
         />
       </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
-        value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
+        value={query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
         datasource={selectedDatasource}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
+        isReadOnly={isReadonly}
+        treeViewMetadata={treeViewMetadata}
       />
       <Stack direction="row" spacing={2}>
         <TextField
@@ -110,15 +160,23 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           value={format ?? ''}
           onChange={(e) => handleFormatChange(e.target.value)}
           onBlur={handleFormatBlur}
+          slotProps={{
+            inputLabel: { shrink: isReadonly ? true : undefined },
+            input: { readOnly: isReadonly },
+          }}
         />
         <TextField
           label="Min Step"
           placeholder={minStepPlaceholder}
           helperText="Lower bound for the step. If not provided, the scrape interval of the datasource is used."
-          value={minStep}
-          onChange={(e) => handleMinStepChange(e.target.value as DurationString)}
+          value={minStep ?? ''}
+          onChange={(e) => handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined)}
           onBlur={handleMinStepBlur}
           sx={{ width: '250px' }}
+          slotProps={{
+            inputLabel: { shrink: isReadonly ? true : undefined },
+            input: { readOnly: isReadonly },
+          }}
         />
       </Stack>
     </Stack>

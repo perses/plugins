@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -52,9 +52,7 @@ spec: {
 							spec: {
 								value: key
 								result: {
-									if option.text != _|_ {
-										value: option.text
-									}
+									value: *option.text | ""
 									if option.color != _|_ {
 										color: *commonMigrate.#mapping.color[option.color] | option.color
 									}

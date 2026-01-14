@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,8 +20,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/perses/plugins/scripts/command"
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/command"
+	"github.com/perses/plugins/scripts/manifest"
 	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
@@ -32,11 +32,7 @@ func main() {
 	pluginFolderName, version := tag.Parse(t)
 	// The manifest is hopefully uploaded by a previous task in the CI
 	// It should be available in the plugin folder
-	manifest, err := npm.ReadManifest(pluginFolderName)
-	if err != nil {
-		logrus.WithError(err).Fatalf("unable to read manifest file for plugin %s", pluginFolderName)
-	}
-	pluginName := manifest.Name
+	pluginName := manifest.MustRead(pluginFolderName).Name
 
 	// Check that the archive release does not already exist
 	expectedArchiveName := fmt.Sprintf("%s-%s.tar.gz", pluginName, version)

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,15 +13,23 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
-import { TimeSeriesChartOptionsEditorSettings } from './TimeSeriesChartOptionsEditorSettings';
+import { TimeSeriesChartGeneralSettings } from './GeneralSettingsEditor';
+import { QuerySettingsEditor } from './QuerySettingsEditor';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import { TimeSeriesExportAction } from './TimeSeriesExportAction';
 
-/**
- * The core TimeSeriesChart panel plugin for Perses.
- */
 export const TimeSeriesChart: PanelPlugin<TimeSeriesChartOptions, TimeSeriesChartProps> = {
   PanelComponent: TimeSeriesChartPanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
-  panelOptionsEditorComponents: [{ label: 'Settings', content: TimeSeriesChartOptionsEditorSettings }],
+  panelOptionsEditorComponents: [
+    { label: 'General Settings', content: TimeSeriesChartGeneralSettings },
+    { label: 'Query Settings', content: QuerySettingsEditor },
+  ],
   createInitialOptions: createInitialTimeSeriesChartOptions,
+  actions: [
+    {
+      component: TimeSeriesExportAction,
+      location: 'header',
+    },
+  ],
 };

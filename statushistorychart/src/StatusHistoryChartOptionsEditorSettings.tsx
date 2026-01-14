@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -48,7 +48,12 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <LegendOptionsEditor showValuesEditor={false} value={value.legend} onChange={handleLegendChange} />
+        <LegendOptionsEditor
+          calculation="aggregation"
+          showValuesEditor={false}
+          value={value.legend}
+          onChange={handleLegendChange}
+        />
         <SortSelector value={value.sorting} onChange={handleSortChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>

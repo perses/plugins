@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,10 +21,16 @@ export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'Tr
 // TODO: Add support for scatter chart formatting options.
 // Some scaffolding has been done to support formatting options.
 // This includes the interface below which still needs implementation.
-// Note: The interface attributes must match cue/schemas/panels/scatter/scatter.cue
+// Note: The interface attributes must match schemas/scatter.cue
 export interface ScatterChartOptions {
   /** range of the circles diameter */
   sizeRange?: [number, number];
+
+  /**
+   * Where to navigate after clicking on a bubble.
+   * Supported variables: datasourceName, traceId
+   */
+  link?: string;
 }
 
 /**

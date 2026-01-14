@@ -1,0 +1,36 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "mode": "list",
+      "position": "bottom",
+      "values": []
+    },
+    "visual": {
+      "areaOpacity": 0.1,
+      "connectNulls": false,
+      "display": "line",
+      "lineWidth": 1,
+      "lineStyle": "solid"
+    },
+    "yAxis": {
+      "format": {
+        "unit": "bytes"
+      },
+      "label": "Amount of endpoints succesfully monitored",
+      "min": 0
+    },
+    "thresholds": {
+      "steps": [
+        {
+          "color": "#73bf69",
+          "value": 0
+        },
+        {
+          "color": "#f2cc0c",
+          "value": 80
+        }
+      ]
+    }
+  }
+}

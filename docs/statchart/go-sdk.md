@@ -1,4 +1,4 @@
-# StatChart Panel Builder
+# StatChart Go SDK
 
 ## Constructor
 

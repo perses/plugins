@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,6 +22,7 @@ kind: #kind
 spec: {
 	#directUrl | #proxy
 	scrapeInterval?: =~#durationRegex
+	queryParams?: {[string]: string}
 }
 
 #kind: "PrometheusDatasource"
@@ -37,7 +38,7 @@ spec: {
 #durationRegex: "^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"
 
 #selector: common.#datasourceSelector & {
-	datasource?: {
-		kind:  #kind
+	datasource?: =~common.#variableSyntaxRegex | {
+		kind: #kind
 	}
 }

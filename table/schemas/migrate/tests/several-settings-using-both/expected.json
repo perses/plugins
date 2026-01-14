@@ -1,0 +1,18 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "header": "hello",
+        "hide": false,
+        "name": "value",
+        "width": 100
+      },
+      {
+        "hide": true,
+        "name": "timestamp"
+      }
+    ],
+    "density": "compact"
+  }
+}

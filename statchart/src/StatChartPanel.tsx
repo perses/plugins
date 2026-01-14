@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,13 +31,16 @@ export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions, queryResults } = props;
 
-  const { format, sparkline, valueFontSize: valueFontSize } = spec;
+  const { format, sparkline, valueFontSize: valueFontSize, colorMode } = spec;
   const chartsTheme = useChartsTheme();
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
   const isMultiSeries = statChartData.length > 1;
 
-  if (contentDimensions === undefined) return null;
+  // Handle three-state showLegend: 'on' | 'off' | 'auto' (or undefined for backward compatibility)
+  const shouldShowLegend = spec.legendMode === 'on' ? true : spec.legendMode === 'off' ? false : isMultiSeries;
+
+  if (!contentDimensions) return null;
 
   // Calculates chart width
   const spacing = SPACING * (statChartData.length - 1);
@@ -72,8 +75,9 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               data={series}
               format={format}
               sparkline={sparklineConfig}
-              showSeriesName={isMultiSeries}
+              showSeriesName={shouldShowLegend}
               valueFontSize={valueFontSize}
+              colorMode={colorMode}
             />
           );
         })

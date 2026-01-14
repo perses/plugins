@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,11 +13,22 @@
 
 package migrate
 
-#var:       _
+#grafanaVar: {
+	type: "datasource"
+	query: string
+	...
+}
 
-if #var.type == "datasource" {
-  kind: "DatasourceVariable",
-  spec: {
-    datasourcePluginKind: #var.query
-  }
+// TODO migrate to perses common package
+// key = Grafana kind, value = Perses kind
+#kindMapping: {
+	"loki":                         "LokiDatasource"
+	"prometheus":                   "PrometheusDatasource"
+	"grafana-pyroscope-datasource": "PyroscopeDatasource"
+	"tempo":                        "TempoDatasource"
+}
+
+kind: "DatasourceVariable"
+spec: {
+	datasourcePluginKind: *#kindMapping[#grafanaVar.query] | "not-supported-\(#grafanaVar.query)"
 }

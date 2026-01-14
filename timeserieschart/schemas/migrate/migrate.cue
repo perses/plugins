@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,10 +15,19 @@ package migrate
 
 import (
 	commonMigrate "github.com/perses/perses/cue/common/migrate"
+	"strings"
+	"strconv"
 )
 
 #grafanaType: "timeseries" | "graph"
 #panel:       _
+
+// key: grafana line style, value: perses line style
+#lineStyleMapping: {
+	solid:  "solid"
+	dash: "dashed"
+	dot: "dotted"
+}
 
 kind: "TimeSeriesChart"
 spec: {
@@ -71,14 +80,46 @@ spec: {
 		}
 	}
 
-	#min: *#panel.fieldConfig.defaults.min | null
+	#min: [// switch
+		if (*#panel.fieldConfig.defaults.min | null) != null {
+			#panel.fieldConfig.defaults.min
+		},
+		if (*#panel.fieldConfig.defaults.custom.axisSoftMin | null) != null {
+			#panel.fieldConfig.defaults.custom.axisSoftMin
+		},
+		null,
+	][0]
 	if #min != null {
 		yAxis: min: #min
 	}
 
-	#max: *#panel.fieldConfig.defaults.max | null
+	#max: [// switch
+		if (*#panel.fieldConfig.defaults.max | null) != null {
+			#panel.fieldConfig.defaults.max
+		},
+		if (*#panel.fieldConfig.defaults.custom.axisSoftMax | null) != null {
+			#panel.fieldConfig.defaults.custom.axisSoftMax
+		},
+		null,
+	][0]
 	if #max != null {
 		yAxis: max: #max
+	}
+
+	#logBase: [// switch
+		if (*#panel.fieldConfig.defaults.logBase | null) != null {
+			#panel.fieldConfig.defaults.logBase
+		},
+		null,
+	][0]
+	if #logBase != null {
+		yAxis: logBase: #logBase
+		yAxis: type: "log"
+	}
+
+	#yAxisLabel: *#panel.fieldConfig.defaults.custom.axisLabel | null
+	if #yAxisLabel != null if len(#yAxisLabel) > 0 {
+		yAxis: label: #yAxisLabel
 	}
 
 	// thresholds
@@ -93,23 +134,28 @@ spec: {
 					if step.value == null {0},
 					step.value,
 				][0]
-				color: step.color // TODO how to manage the overrides part?
+				color: *commonMigrate.#mapping.color[step.color] | step.color // TODO how to manage the overrides part?
 			}]
 		}
 	}
 
 	// visual
-	#lineWidth: *#panel.fieldConfig.defaults.custom.lineWidth | null
+	#lineWidthRaw: *#panel.fieldConfig.defaults.custom.lineWidth | null
+	#lineWidth: [
+		if (#lineWidthRaw & string) != _|_ { strconv.Atoi(#lineWidthRaw) },
+		#lineWidthRaw,
+	][0]
 	if #lineWidth != null {
-		if #lineWidth > 3 {
-			visual: lineWidth: 3 // line width can't go beyond 3 in Perses
-		}
-		if #lineWidth < 0.25 {
-			visual: lineWidth: 0.25 // line width can't go below 0.25 in Perses
-		}
-		if #lineWidth >= 0.25 && #lineWidth <= 3 {
-			visual: lineWidth: #lineWidth
-		}
+		visual: lineWidth: [
+			if #lineWidth > 3 { 3 },        // line width can't go beyond 3 in Perses
+			if #lineWidth < 0.25 { 0.25 },  // line width can't go below 0.25 in Perses
+			#lineWidth,
+		][0]
+	}
+
+	#lineStyle: *#panel.fieldConfig.defaults.custom.lineStyle.fill | null
+	if #lineStyle != null {
+		visual: lineStyle: #lineStyleMapping[#lineStyle]
 	}
 
 	#fillOpacity: *#panel.fieldConfig.defaults.custom.fillOpacity | null
@@ -134,5 +180,33 @@ spec: {
 	#stacking: *#panel.fieldConfig.defaults.custom.stacking.mode | "none"
 	if #stacking != "none" {
 		visual: stack: "all"
+	}
+
+	// migrate fixedColor overrides to querySettings when applicable
+	#querySettings: [
+		for i, target in (*#panel.targets | []) {
+			queryIndex: i
+			for override in (*#panel.fieldConfig.overrides | [])
+			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp" || override.matcher.id == "byFrameRefID") && override.matcher.options != _|_
+			for property in override.properties
+			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && (target.legendFormat == override.matcher.options || target.legendFormat =~ strings.Trim(override.matcher.options, "/")) ||
+			   (override.matcher.id == "byFrameRefID" && target.refId == override.matcher.options) {
+				if property.id == "color" if (*property.value.fixedColor | null) != null {
+					colorMode: "fixed"
+					colorValue: property.value.fixedColor
+				}
+				if property.id == "custom.lineStyle" if (*property.value.fill | null) != null {
+					lineStyle: #lineStyleMapping[property.value.fill]
+				}
+				if property.id == "custom.fillOpacity" {
+					areaOpacity: property.value / 100
+				}
+			}
+		}
+	]
+	// don't keep elements that just define the queryIndex
+	#querySettingsFiltered: [for qs in #querySettings if len(qs) > 1 { qs }]
+	if len(#querySettingsFiltered) != 0 {
+		querySettings: #querySettingsFiltered
 	}
 }

@@ -1,4 +1,4 @@
-# Static List Variable Model
+# StaticListVariable model
 
 ```yaml
 kind: "StaticListVariable"

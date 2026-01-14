@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -24,12 +24,14 @@ export interface BarChartDefinition extends Definition<PieChartOptions> {
 }
 
 export interface PieChartOptions {
-  legend?: LegendSpecOptions;
   calculation: CalculationType;
-  radius: number;
   format?: FormatOptions;
-  sort?: SortOption;
+  colorPalette?: string[];
+  legend?: LegendSpecOptions;
   mode?: ModeOption;
+  radius: number;
+  showLabels?: boolean;
+  sort?: SortOption;
 }
 
 export type PieChartOptionsEditorProps = OptionsEditorProps<PieChartOptions>;
@@ -38,8 +40,9 @@ export function createInitialPieChartOptions(): PieChartOptions {
   return {
     calculation: DEFAULT_CALCULATION,
     format: DEFAULT_FORMAT,
-    radius: 50,
-    sort: DEFAULT_SORT,
     mode: DEFAULT_MODE,
+    radius: 50,
+    showLabels: false,
+    sort: DEFAULT_SORT,
   };
 }

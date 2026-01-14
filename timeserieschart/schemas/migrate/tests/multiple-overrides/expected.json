@@ -1,0 +1,53 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "position": "right",
+      "mode": "table",
+      "values": [
+        "min",
+        "max",
+        "mean"
+      ]
+    },
+    "yAxis": {
+      "format": {
+        "unit": "bytes"
+      },
+      "label": "Memory",
+      "min": 0
+    },
+    "visual": {
+      "lineWidth": 2,
+      "areaOpacity": 0.1,
+      "connectNulls": false,
+      "display": "line"
+    },
+    "querySettings": [
+      {
+        "queryIndex": 1,
+        "colorMode": "fixed",
+        "colorValue": "#5794F2",
+        "lineStyle": "dashed",
+        "areaOpacity": 0
+      },
+      {
+        "queryIndex": 2,
+        "colorMode": "fixed",
+        "colorValue": "#F2495C",
+        "areaOpacity": 0
+      },
+      {
+        "queryIndex": 3,
+        "colorMode": "fixed",
+        "colorValue": "#3274D9"
+      },
+      {
+        "queryIndex": 4,
+        "colorMode": "fixed",
+        "colorValue": "yellow",
+        "lineStyle": "dashed"
+      }
+    ]
+  }
+}

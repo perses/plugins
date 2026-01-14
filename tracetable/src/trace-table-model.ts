@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,9 +14,10 @@
 /**
  * The Options object type supported by the TraceTable panel plugin.
  */
-// Note: The interface attributes must match cue/schemas/panels/trace-table/trace-table.cue
+// Note: The interface attributes must match schemas/trace-table.cue
 export interface TraceTableOptions {
   visual?: TraceTableVisualOptions;
+  links?: TraceTableCustomLinks;
 }
 
 export interface TraceTableVisualOptions {
@@ -25,6 +26,14 @@ export interface TraceTableVisualOptions {
 
 export interface TraceTablePaletteOptions {
   mode: 'auto' | 'categorical';
+}
+
+export interface TraceTableCustomLinks {
+  /**
+   * Link to a trace.
+   * Supported variables: datasourceName, traceId
+   */
+  trace?: string;
 }
 
 /**

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,69 +12,147 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { Link, List, ListItem, ListItemText } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
 import { otlpcommonv1 } from '@perses-dev/core';
+import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { Span, Trace } from '../trace';
+import { formatDuration } from '../utils';
+import { CustomLinks } from '../../gantt-chart-model';
 
-export type AttributeLinks = Record<string, (attributes: Record<string, otlpcommonv1.AnyValue>) => string>;
-
-export interface AttributeListProps {
-  attributeLinks?: AttributeLinks;
-  attributes: otlpcommonv1.KeyValue[];
+export interface TraceAttributesProps {
+  customLinks?: CustomLinks;
+  trace: Trace;
+  span: Span;
 }
 
-export function AttributeList(props: AttributeListProps): ReactElement {
-  const { attributeLinks, attributes } = props;
-  const attributesMap = useMemo(
-    () => Object.fromEntries(attributes.map((attr) => [attr.key, attr.value])),
-    [attributes]
-  );
+export function TraceAttributes(props: TraceAttributesProps) {
+  const { customLinks, trace, span } = props;
 
   return (
     <>
       <List>
-        {attributes
-          .sort((a, b) => a.key.localeCompare(b.key))
-          .map((attribute, i) => (
-            <AttributeItem key={i} attribute={attribute} linkTo={attributeLinks?.[attribute.key]?.(attributesMap)} />
-          ))}
+        <AttributeItem name="span ID" value={span.spanId} />
+        <AttributeItem name="start" value={formatDuration(span.startTimeUnixMs - trace.startTimeUnixMs)} />
+        <AttributeItem name="duration" value={formatDuration(span.endTimeUnixMs - span.startTimeUnixMs)} />
       </List>
+      <Divider />
+      {span.attributes.length > 0 && (
+        <>
+          <AttributeList
+            customLinks={customLinks}
+            attributes={span.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
+          />
+          <Divider />
+        </>
+      )}
+      <AttributeList
+        customLinks={customLinks}
+        attributes={span.resource.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
+      />
+    </>
+  );
+}
+
+export interface AttributeListProps {
+  customLinks?: CustomLinks;
+  attributes: otlpcommonv1.KeyValue[];
+}
+
+export function AttributeList(props: AttributeListProps): ReactElement {
+  const { customLinks, attributes } = props;
+
+  return (
+    <List>
+      <AttributeItems customLinks={customLinks} attributes={attributes} />
+    </List>
+  );
+}
+
+interface AttributeItemsProps {
+  customLinks?: CustomLinks;
+  attributes: otlpcommonv1.KeyValue[];
+}
+
+export function AttributeItems(props: AttributeItemsProps): ReactElement {
+  const { customLinks, attributes } = props;
+  const variableValues = useAllVariableValues();
+
+  // turn array into map for fast access
+  const attributeLinks = useMemo(() => {
+    const attrs = (customLinks?.links.attributes ?? []).map((a) => [a.name, a.link]);
+    return Object.fromEntries(attrs);
+  }, [customLinks]);
+
+  // some links require access to other attributes, for example a pod link "/namespace/${k8s_namespace_name}/pod/${k8s_pod_name}"
+  const extraVariables = useMemo(() => {
+    // replace dot with underscore in attribute name, because dot is not allowed in variable names
+    const stringAttrs = attributes.map((attr) => [attr.key.replaceAll('.', '_'), renderAttributeValue(attr.value)]);
+
+    return {
+      ...customLinks?.variables,
+      ...Object.fromEntries(stringAttrs),
+    };
+  }, [customLinks, attributes]);
+
+  return (
+    <>
+      {attributes.map((attribute, i) => (
+        <AttributeItem
+          key={i}
+          name={attribute.key}
+          value={renderAttributeValue(attribute.value)}
+          link={
+            attributeLinks[attribute.key]
+              ? replaceVariablesInString(attributeLinks[attribute.key], variableValues, extraVariables)
+              : undefined
+          }
+        />
+      ))}
     </>
   );
 }
 
 interface AttributeItemProps {
-  attribute: otlpcommonv1.KeyValue;
-  linkTo?: string;
+  name: string;
+  value: string;
+  link?: string;
 }
 
-function AttributeItem(props: AttributeItemProps): ReactElement {
-  const { attribute, linkTo } = props;
+export function AttributeItem(props: AttributeItemProps): ReactElement {
+  const { name, value, link } = props;
+  const { RouterComponent } = useRouterContext();
 
-  const value = linkTo ? (
-    <Link component={RouterLink} to={linkTo}>
-      {renderAttributeValue(attribute.value)}
-    </Link>
-  ) : (
-    renderAttributeValue(attribute.value)
-  );
+  const valueComponent =
+    RouterComponent && link ? (
+      <Link component={RouterComponent} to={link}>
+        {value}
+      </Link>
+    ) : (
+      value
+    );
 
   return (
-    <ListItem disablePadding>
+    <ListItem sx={{ px: 1, py: 0 }}>
       <ListItemText
-        primary={attribute.key}
-        secondary={value}
-        primaryTypographyProps={{ variant: 'h5' }}
-        secondaryTypographyProps={{ variant: 'body1', sx: { wordBreak: 'break-word' } }}
+        primary={name}
+        secondary={valueComponent}
+        slotProps={{
+          primary: { variant: 'h5' },
+          secondary: { variant: 'body1', sx: { wordBreak: 'break-word' } },
+        }}
       />
     </ListItem>
   );
 }
 
 function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
-  if ('stringValue' in value) return value.stringValue.length > 0 ? value.stringValue : '<empty string>';
+  if ('stringValue' in value) return value.stringValue || '<empty string>';
   if ('intValue' in value) return value.intValue;
-  if ('boolValue' in value) return value.boolValue.toString();
-  if ('arrayValue' in value) return value.arrayValue.values.map(renderAttributeValue).join(', ');
+  if ('doubleValue' in value) return String(value.doubleValue);
+  if ('boolValue' in value) return String(value.boolValue);
+  if ('arrayValue' in value) {
+    const values = value.arrayValue.values;
+    return values && values.length > 0 ? values.map(renderAttributeValue).join(', ') : '<empty array>';
+  }
   return 'unknown';
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,16 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack } from '@mui/material';
+import { Alert, Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
 import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
+import { TempoTraceQuerySpec } from '../model';
+import { linkToSpan, linkToTrace } from './links';
 
 interface TracesExplorerQueryParams {
   queries?: QueryDefinition[];
+  spanId?: string;
 }
 
 interface SearchResultsPanelProps {
@@ -49,6 +52,8 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
     return <NoDataOverlay resource="traces" />;
   }
 
+  const hasMoreResults = queryResults.some((traceData) => traceData.data?.metadata?.hasMoreResults);
+
   return (
     <Stack sx={{ height: '100%' }} gap={2}>
       <Box sx={{ height: '35%', flexShrink: 0 }}>
@@ -58,7 +63,16 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
           }}
           definition={{
             kind: 'Panel',
-            spec: { queries, display: { name: '' }, plugin: { kind: 'ScatterChart', spec: {} } },
+            spec: {
+              queries,
+              display: { name: '' },
+              plugin: {
+                kind: 'ScatterChart',
+                spec: {
+                  link: linkToTrace,
+                },
+              },
+            },
           }}
         />
       </Box>
@@ -69,22 +83,57 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
         }}
         definition={{
           kind: 'Panel',
-          spec: { queries, display: { name: '' }, plugin: { kind: 'TraceTable', spec: {} } },
+          spec: {
+            queries,
+            display: { name: '' },
+            plugin: {
+              kind: 'TraceTable',
+              spec: {
+                links: {
+                  trace: linkToTrace,
+                },
+              },
+            },
+          },
         }}
       />
+      {hasMoreResults && (
+        <Alert severity="info">
+          Not all matching traces are currently displayed. Increase the result limit to view additional traces.
+        </Alert>
+      )}
     </Stack>
   );
 }
 
-function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
+interface TracingGanttChartPanelProps {
+  queries: QueryDefinition[];
+  selectedSpanId?: string;
+}
+
+function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
+  const { queries, selectedSpanId } = props;
+  const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
+
   return (
     <Panel
-      panelOptions={{
-        hideHeader: true,
-      }}
+      panelOptions={{ showIcons: 'always' }}
       definition={{
         kind: 'Panel',
-        spec: { queries, display: { name: '' }, plugin: { kind: 'TracingGanttChart', spec: {} } },
+        spec: {
+          queries,
+          display: { name: `Trace ${firstQuery}` },
+          plugin: {
+            kind: 'TracingGanttChart',
+            spec: {
+              links: {
+                trace: linkToTrace,
+                span: linkToSpan,
+              },
+              selectedSpanId,
+            },
+          },
+        },
       }}
     />
   );
@@ -92,9 +141,11 @@ function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): Re
 
 export function TempoExplorer(): ReactElement {
   const {
-    data: { queries = [] },
+    data: { queries = [], spanId: selectedSpanId },
     setData,
   } = useExplorerManagerContext<TracesExplorerQueryParams>();
+
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
   // map TraceQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
@@ -106,25 +157,26 @@ export function TempoExplorer(): ReactElement {
       })
     : [];
 
-  // Cannot cast to TempoTraceQuerySpec because 'tempo-plugin' types are not accessible in @perses-dev/explore
-  const isSingleTrace =
-    queries.length === 1 &&
-    queries[0]?.kind === 'TraceQuery' &&
-    queries[0]?.spec.plugin.kind === 'TempoTraceQuery' &&
-    isValidTraceId((queries[0]?.spec.plugin.spec as any).query ?? ''); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
+  const isSingleTrace = isValidTraceId(firstQuery ?? '');
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor
         queryTypes={['TraceQuery']}
-        onChange={(newQueries) => setData({ queries: newQueries })}
-        queries={queries}
+        onChange={(state) => setQueryDefinitions(state)}
+        queries={queryDefinitions}
+        onQueryRun={() => setData({ queries: queryDefinitions })}
       />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
         <DataQueriesProvider definitions={definitions}>
           <Box height={700}>
-            {isSingleTrace ? <TracingGanttChartPanel queries={queries} /> : <SearchResultsPanel queries={queries} />}
+            {isSingleTrace ? (
+              <TracingGanttChartPanel queries={queries} selectedSpanId={selectedSpanId} />
+            ) : (
+              <SearchResultsPanel queries={queries} />
+            )}
           </Box>
         </DataQueriesProvider>
       </ErrorBoundary>

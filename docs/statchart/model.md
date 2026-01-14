@@ -1,4 +1,4 @@
-# StatChart Panel Model
+# StatChart model
 
 ```yaml
 kind: "StatChart"

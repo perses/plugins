@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,7 +31,9 @@ export const DEFAULT_PROM: PrometheusDatasourceSelector = { kind: PROM_DATASOURC
 /**
  * Returns true if the provided datasourceSelectValue is the default PrometheusDatasourceSelector.
  */
-export function isDefaultPromSelector(datasourceSelectValue: DatasourceSelectValue): boolean {
+export function isDefaultPromSelector(
+  datasourceSelectValue: DatasourceSelectValue<PrometheusDatasourceSelector>
+): boolean {
   return !isVariableDatasource(datasourceSelectValue) && datasourceSelectValue.name === undefined;
 }
 
@@ -39,7 +41,7 @@ export function isDefaultPromSelector(datasourceSelectValue: DatasourceSelectVal
  * Type guard to make sure a datasourceSelectValue is a Prometheus one.
  */
 export function isPrometheusDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue
+  datasourceSelectValue: DatasourceSelectValue<DatasourceSelector>
 ): datasourceSelectValue is PrometheusDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === PROM_DATASOURCE_KIND;
 }

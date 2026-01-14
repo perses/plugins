@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,25 +14,37 @@
 package migrate
 
 import (
-	"regexp"
 	"strings"
 )
 
-#var: _
+#grafanaVar: {
+	type: "custom" | "interval"
+	options?: [...{
+		text: string
+		value: string
+	}]
+    if options == _|_ {
+      query: string
+    }
+	...
+}
 
-if #var.type == "custom" || #var.type == "interval" {
-	kind: "StaticListVariable"
-	spec: {
-		_valuesArray:        strings.Split(#var.query, ",")
-		_aliasedValueRegexp: "^(.*) : (.*)$"
-		values: [for val in _valuesArray {
+kind: "StaticListVariable"
+spec: {
+	if #grafanaVar.options != _|_ {
+		values: [for option in #grafanaVar.options {
 			[// switch
-				if val =~ _aliasedValueRegexp {
-					label: strings.TrimSpace(regexp.FindSubmatch(_aliasedValueRegexp, val)[1])
-					value: strings.TrimSpace(regexp.FindSubmatch(_aliasedValueRegexp, val)[2])
+				if option.text != option.value {
+					label: strings.TrimSpace(option.text)
+					value: strings.TrimSpace(option.value)
 				},
-				strings.TrimSpace(val),
+				strings.TrimSpace(option.value),
 			][0]
+		}]
+	}
+	if #grafanaVar.options == _|_ && #grafanaVar.query != _|_ {
+		values: [for interval in strings.Split(#grafanaVar.query, ",") {
+			strings.TrimSpace(interval)
 		}]
 	}
 }

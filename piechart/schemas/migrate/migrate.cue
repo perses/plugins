@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -46,5 +46,17 @@ spec: {
 			mode: *(#panel.options.legend.displayMode & "table")  | "list"
 		}
 	}
+
+	#showLabels: *#panel.options.displayLabels | null
+	if #showLabels != null {
+		showLabels: true
+	}
+
+	#colorMode: *#panel.fieldConfig.defaults.color.mode | null
+	if #colorMode == "shades" {
+		#mappedColor: *commonMigrate.#mapping.color[#panel.fieldConfig.defaults.color.fixedColor] | "#555555"
+		colorPalette: [#mappedColor]
+	}
+
 	radius: 50
 }

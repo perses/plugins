@@ -1,0 +1,61 @@
+{
+  "id": 9,
+  "type": "stat",
+  "title": "Exporter version [$application - $environment - $nodename]",
+  "description": " - {{version}}: Node Exporter version used",
+  "gridPos": {
+    "x": 6,
+    "y": 5,
+    "h": 3,
+    "w": 3
+  },
+  "fieldConfig": {
+    "defaults": {
+      "mappings": [],
+      "color": {
+        "mode": "thresholds"
+      },
+      "links": [],
+      "unit": "none"
+    },
+    "overrides": []
+  },
+  "pluginVersion": "11.6.3",
+  "targets": [
+    {
+      "exemplar": false,
+      "expr": "node_exporter_build_info{osname=~\".*Linux.*\", application=~\"$application\", environment=~\"$environment\", nodename=~\"$nodename\", instance=~\".*:50700\"}",
+      "format": "time_series",
+      "hide": false,
+      "instant": true,
+      "interval": "$sampling",
+      "intervalFactor": 1,
+      "legendFormat": "{{version}}",
+      "refId": "version_linux",
+      "datasource": {
+        "uid": "$datasource"
+      },
+      "editorMode": "code"
+    }
+  ],
+  "datasource": {
+    "uid": "$datasource"
+  },
+  "options": {
+    "reduceOptions": {
+      "values": false,
+      "calcs": [
+        "mean"
+      ],
+      "fields": ""
+    },
+    "orientation": "auto",
+    "textMode": "name",
+    "wideLayout": true,
+    "colorMode": "background",
+    "graphMode": "none",
+    "justifyMode": "auto",
+    "showPercentChange": false,
+    "percentChangeColorMode": "standard"
+  }
+}

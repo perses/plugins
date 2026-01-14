@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,21 +19,21 @@ import (
 
 func Expr(expr string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Expr = expr
+		builder.Expr = expr
 		return nil
 	}
 }
 
 func LabelName(labelName string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.LabelName = labelName
+		builder.LabelName = labelName
 		return nil
 	}
 }
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.PluginSpec.Datasource = promDatasource.Selector(datasourceName)
+		builder.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }

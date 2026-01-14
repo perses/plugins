@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,6 +31,23 @@ func HTTPProxy(url string, options ...http.Option) Option {
 			return err
 		}
 		builder.Proxy = &p.Proxy
+		return nil
+	}
+}
+
+func QueryParams(params map[string]string) Option {
+	return func(builder *Builder) error {
+		builder.QueryParams = params
+		return nil
+	}
+}
+
+func QueryParam(key, value string) Option {
+	return func(builder *Builder) error {
+		if builder.QueryParams == nil {
+			builder.QueryParams = make(map[string]string)
+		}
+		builder.QueryParams[key] = value
 		return nil
 	}
 }

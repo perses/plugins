@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,7 +31,7 @@ import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
  * Creates a PrometheusClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
-  const { directUrl, proxy } = spec;
+  const { directUrl, proxy, queryParams } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -47,14 +47,21 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     options: {
       datasourceUrl,
     },
-    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders }),
-    instantQuery: (params, headers) => instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    rangeQuery: (params, headers) => rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelNames: (params, headers) => labelNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    metricMetadata: (params, headers) => metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    series: (params, headers) => series(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    parseQuery: (params, headers) => parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders, queryParams }),
+    instantQuery: (params, headers, abortSignal) =>
+      instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
+    rangeQuery: (params, headers, abortSignal) =>
+      rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
+    labelNames: (params, headers, abortSignal) =>
+      labelNames(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
+    labelValues: (params, headers, abortSignal) =>
+      labelValues(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
+    metricMetadata: (params, headers, abortSignal) =>
+      metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
+    series: (params, headers, abortSignal) =>
+      series(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
+    parseQuery: (params, headers, abortSignal) =>
+      parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
   };
 };
 

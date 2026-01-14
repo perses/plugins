@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,7 +21,7 @@ type StaticListVariableOptions = {
 
 const EMPTY_SELECTED_KIND = { label: '', value: '' };
 
-const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticListVariableOptions>) => {
+export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticListVariableOptions>) => {
   const { onChange, value } = props;
   const { datasourcePluginKind } = value;
   const { data: datasourcePlugins } = useListPluginMetadata(['Datasource']);
@@ -40,10 +40,13 @@ const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticListVari
 
   // If there is no selected kind and there are available options, select the first one
   useEffect(() => {
-    if (selectedKind.value === EMPTY_SELECTED_KIND.value && datasourcePluginKindSet.size > 0) {
-      onChange({
-        datasourcePluginKind: Array.from(datasourcePluginKindSet)[0],
-      });
+    const datasourcePluginKindArray = Array.from(datasourcePluginKindSet);
+    if (
+      selectedKind.value === EMPTY_SELECTED_KIND.value &&
+      datasourcePluginKindArray.length > 0 &&
+      datasourcePluginKindArray[0]
+    ) {
+      onChange({ datasourcePluginKind: datasourcePluginKindArray[0] });
     }
   }, [selectedKind, datasourcePluginKind, onChange, datasourcePluginKindSet]);
 

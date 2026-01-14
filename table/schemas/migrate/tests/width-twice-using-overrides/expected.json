@@ -1,0 +1,12 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "value",
+        "width": 200
+      }
+    ],
+    "density": "compact"
+  }
+}

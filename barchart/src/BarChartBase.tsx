@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -120,7 +120,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
       sx={{ overflow: 'auto' }}
     >
       <EChart
-        sx={{
+        style={{
           minHeight: height,
           height: data ? data.length * (BAR_WIN_WIDTH + BAR_GAP) : '100%',
         }}

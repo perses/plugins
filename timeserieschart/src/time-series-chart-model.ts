@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,6 +13,11 @@
 
 import { Definition, ThresholdOptions, FormatOptions } from '@perses-dev/core';
 import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
+
+/**
+ * Line style options for time series charts.
+ */
+export type LineStyleType = 'solid' | 'dashed' | 'dotted';
 
 /**
  * The schema for a TimeSeriesChart panel.
@@ -35,8 +40,10 @@ export interface TimeSeriesChartOptions {
 
 export interface QuerySettingsOptions {
   queryIndex: number;
-  colorMode: 'fixed' | 'fixed-single';
-  colorValue: string;
+  colorMode?: 'fixed' | 'fixed-single';
+  colorValue?: string;
+  lineStyle?: LineStyleType;
+  areaOpacity?: number;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -47,6 +54,7 @@ export interface TimeSeriesChartYAxisOptions {
   format?: FormatOptions;
   min?: number;
   max?: number;
+  logBase?: LOG_BASE;
 }
 
 export interface TooltipSpecOptions {
@@ -60,6 +68,7 @@ export interface TimeSeriesChartPaletteOptions {
 export type TimeSeriesChartVisualOptions = {
   display?: 'line' | 'bar';
   lineWidth?: number;
+  lineStyle?: LineStyleType;
   areaOpacity?: number;
   showPoints?: 'auto' | 'always';
   palette?: TimeSeriesChartPaletteOptions;
@@ -79,6 +88,7 @@ export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   format: DEFAULT_FORMAT,
   min: undefined,
   max: undefined,
+  logBase: 'none',
 };
 
 export const Y_AXIS_CONFIG = {
@@ -87,19 +97,22 @@ export const Y_AXIS_CONFIG = {
   unit: { label: 'Unit' },
   min: { label: 'Min' },
   max: { label: 'Max' },
+  logBase: { label: 'Log Base' },
 };
 
+export const DEFAULT_DISPLAY = 'line';
 export const DEFAULT_LINE_WIDTH = 1.25;
+export const DEFAULT_LINE_STYLE = 'solid';
 export const DEFAULT_AREA_OPACITY = 0;
-
 // How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.
 export const POINT_SIZE_OFFSET = 1.5;
 export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
-
 export const DEFAULT_CONNECT_NULLS = false;
 
 export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
+  display: DEFAULT_DISPLAY,
   lineWidth: DEFAULT_LINE_WIDTH,
+  lineStyle: DEFAULT_LINE_STYLE,
   areaOpacity: DEFAULT_AREA_OPACITY,
   pointRadius: DEFAULT_POINT_RADIUS,
   connectNulls: DEFAULT_CONNECT_NULLS,
@@ -116,6 +129,9 @@ export const VISUAL_CONFIG = {
     min: 0.25,
     max: 3,
     step: 0.25,
+  },
+  lineStyle: {
+    label: 'Line Style',
   },
   pointRadius: {
     label: 'Point Radius',
@@ -155,6 +171,42 @@ export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => 
     ...config,
   };
 });
+
+export const LINE_STYLE_CONFIG = {
+  solid: { label: 'Solid' },
+  dashed: { label: 'Dashes' },
+  dotted: { label: 'Dots' },
+};
+
+export const OPACITY_CONFIG = {
+  label: 'Opacity',
+  testId: 'slider-opacity',
+  min: 0,
+  max: 1,
+  step: 0.05,
+};
+
+// LogBase outlines the allowed log bases for the log-supported charts.
+export type LOG_BASE_LABEL = 'none' | 'log2' | 'log10';
+export type LOG_BASE = 'none' | 2 | 10;
+
+// Single source of truth for log base configuration
+export const LOG_BASE_CONFIG: Record<LOG_BASE_LABEL, { label: string; log: LOG_BASE }> = {
+  none: { label: 'None', log: 'none' },
+  log2: { label: '2', log: 2 },
+  log10: { label: '10', log: 10 },
+};
+
+// Options array for SettingsAutocomplete
+export const LOG_BASE_OPTIONS = Object.entries(LOG_BASE_CONFIG).map(([id, config]) => ({
+  id: id as LOG_BASE_LABEL,
+  ...config,
+}));
+
+// Reverse lookup map from LOG_BASE value to LOG_BASE_LABEL
+export const LOG_VALID_BASES: Record<LOG_BASE, LOG_BASE_LABEL> = Object.fromEntries(
+  Object.entries(LOG_BASE_CONFIG).map(([label, config]) => [config.log, label])
+) as Record<LOG_BASE, LOG_BASE_LABEL>;
 
 // Both of these constants help produce a value that is LESS THAN the initial value.
 // For positive values, we multiply by a number less than 1 to get this outcome.

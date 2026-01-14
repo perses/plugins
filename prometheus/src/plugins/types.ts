@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DurationString, HTTPProxy } from '@perses-dev/core';
+import { DatasourceSelectValue } from '@perses-dev/plugin-system';
 import { PrometheusDatasourceSelector } from '../model';
 
 export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
@@ -20,10 +21,11 @@ export interface PrometheusDatasourceSpec {
   directUrl?: string;
   proxy?: HTTPProxy;
   scrapeInterval?: DurationString; // default to 1m
+  queryParams?: Record<string, string>;
 }
 
 export interface PrometheusVariableOptionsBase {
-  datasource?: PrometheusDatasourceSelector;
+  datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
 }
 
 export type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase & {

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,9 +13,18 @@
 
 import { DurationString } from '@perses-dev/core';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { TextField, Typography } from '@mui/material';
-import React, { ReactElement } from 'react';
+import { Box, TextField, Typography, IconButton } from '@mui/material';
+import PlusIcon from 'mdi-material-ui/Plus';
+import MinusIcon from 'mdi-material-ui/Minus';
+import React, { ReactElement, useState, useRef } from 'react';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
+
+interface QueryParamEntry {
+  // Unique identifier for the entry, added to avoid using array index as key
+  id: string;
+  key: string;
+  value: string;
+}
 
 export interface PrometheusDatasourceEditorProps {
   value: PrometheusDatasourceSpec;
@@ -25,6 +34,70 @@ export interface PrometheusDatasourceEditorProps {
 
 export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProps): ReactElement {
   const { value, onChange, isReadonly } = props;
+
+  // Counter for generating unique IDs
+  const nextIdRef = useRef(0);
+
+  // Use local state to maintain an array of entries during editing, instead of
+  // manipulating a map directly which causes weird UX.
+  const [entries, setEntries] = useState<QueryParamEntry[]>(() => {
+    const queryParams = value.queryParams ?? {};
+    return Object.entries(queryParams).map(([key, value]) => ({
+      id: String(nextIdRef.current++),
+      key,
+      value,
+    }));
+  });
+
+  // Check for duplicate keys
+  const keyMap = new Map<string, number>();
+  const duplicateKeys = new Set<string>();
+  entries.forEach(({ key }) => {
+    if (key !== '') {
+      const count = (keyMap.get(key) || 0) + 1;
+      keyMap.set(key, count);
+      if (count > 1) {
+        duplicateKeys.add(key);
+      }
+    }
+  });
+  const hasDuplicates = duplicateKeys.size > 0;
+
+  // Convert entries array to object and trigger onChange
+  const syncToParent = (newEntries: QueryParamEntry[]) => {
+    const newParams: Record<string, string> = {};
+    newEntries.forEach(({ key, value }) => {
+      if (key !== '') {
+        newParams[key] = value;
+      }
+    });
+
+    onChange({
+      ...value,
+      queryParams: Object.keys(newParams).length > 0 ? newParams : undefined,
+    });
+  };
+
+  const handleQueryParamChange = (id: string, field: 'key' | 'value', newValue: string) => {
+    const newEntries = entries.map((entry) => {
+      if (entry.id !== id) return entry;
+      return field === 'key' ? { ...entry, key: newValue } : { ...entry, value: newValue };
+    });
+    setEntries(newEntries);
+    syncToParent(newEntries);
+  };
+
+  const addQueryParam = () => {
+    const newEntries = [...entries, { id: String(nextIdRef.current++), key: '', value: '' }];
+    setEntries(newEntries);
+    syncToParent(newEntries);
+  };
+
+  const removeQueryParam = (id: string) => {
+    const newEntries = entries.filter((entry) => entry.id !== id);
+    setEntries(newEntries);
+    syncToParent(newEntries);
+  };
 
   const initialSpecDirect: PrometheusDatasourceSpec = {
     directUrl: '',
@@ -76,6 +149,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         General Settings
       </Typography>
       <TextField
+        size="small"
         fullWidth
         label="Scrape Interval"
         value={value.scrapeInterval || ''}
@@ -85,6 +159,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         }}
         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
         onChange={(e) => onChange({ ...value, scrapeInterval: e.target.value as DurationString })}
+        helperText="Set it to match the typical scrape interval used in your Prometheus instance."
       />
       <HTTPSettingsEditor
         value={value}
@@ -93,6 +168,57 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         initialSpecDirect={initialSpecDirect}
         initialSpecProxy={initialSpecProxy}
       />
+      <Typography variant="h5" mt={2} mb={1}>
+        Query Parameters
+      </Typography>
+      {entries.length > 0 && (
+        <>
+          {entries.map((entry) => (
+            <Box key={entry.id} display="flex" alignItems="center" gap={2} mb={1}>
+              <TextField
+                size="small"
+                label="Key"
+                value={entry.key}
+                placeholder="Parameter name"
+                disabled={isReadonly}
+                onChange={(e) => handleQueryParamChange(entry.id, 'key', e.target.value)}
+                error={duplicateKeys.has(entry.key)}
+                sx={{ minWidth: 150 }}
+              />
+              <TextField
+                size="small"
+                label="Value"
+                value={entry.value}
+                placeholder="Parameter value"
+                disabled={isReadonly}
+                onChange={(e) => handleQueryParamChange(entry.id, 'value', e.target.value)}
+                sx={{ minWidth: 150, flexGrow: 1 }}
+              />
+              {!isReadonly && (
+                <IconButton onClick={() => removeQueryParam(entry.id)}>
+                  <MinusIcon />
+                </IconButton>
+              )}
+            </Box>
+          ))}
+        </>
+      )}
+      {hasDuplicates && (
+        <Typography variant="body2" color="error" mb={1}>
+          Duplicate parameter keys detected. Each key must be unique.
+        </Typography>
+      )}
+      {entries.length === 0 && (
+        <Typography variant="body2" color="textSecondary">
+          No query parameters configured. Use query parameters to pass additional options to Prometheus (e.g.,
+          dedup=false for Thanos).
+        </Typography>
+      )}
+      {!isReadonly && (
+        <IconButton onClick={addQueryParam}>
+          <PlusIcon />
+        </IconButton>
+      )}
     </>
   );
 }

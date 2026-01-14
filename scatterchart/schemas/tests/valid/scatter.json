@@ -1,0 +1,6 @@
+{
+  "kind": "ScatterChart",
+  "spec": {
+    "link": "/datasource/${datasourceName}/trace/${traceId}"
+  }
+}

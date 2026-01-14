@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -137,8 +137,13 @@ export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: 
       </Stack>
 
       <Stack sx={{ width: '100%' }} gap={0.5}>
-        <Stack direction="row" gap={2}>
+        <Stack direction="row" gap={0.5}>
           <Typography variant="subtitle1">{valueCounters.length} values</Typography>
+          {valueCounters.length > 5 && (
+            <Button variant="text" size="small" sx={{ padding: 0 }} onClick={() => setShowAllValues((prev) => !prev)}>
+              {showAllValues ? '[-]' : '[+]'}
+            </Button>
+          )}
         </Stack>
 
         <Stack sx={{ overflow: isMobileSize ? 'auto' : 'unset' }}>

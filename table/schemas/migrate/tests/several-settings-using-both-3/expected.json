@@ -1,0 +1,30 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "header": "",
+        "hide": true,
+        "name": "timestamp"
+      },
+      {
+        "hide": true,
+        "name": "__name__"
+      },
+      {
+        "header": "API server",
+        "name": "apiserver",
+        "width": 300
+      },
+      {
+        "header": "ValueCustomHeader",
+        "name": "value"
+      },
+      {
+        "name": "endpoint",
+        "width": 75
+      }
+    ],
+    "density": "compact"
+  }
+}

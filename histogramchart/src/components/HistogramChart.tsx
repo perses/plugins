@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -136,9 +136,11 @@ export function HistogramChart({
 
   return (
     <EChart
-      sx={{
+      style={{
         width: width,
         height: height,
+      }}
+      sx={{
         padding: `${chartsTheme.container.padding.default}px`,
       }}
       option={option}

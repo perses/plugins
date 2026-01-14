@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -54,7 +54,7 @@ describe('convertPanelYAxis', () => {
       min: 0.1,
       max: 1,
     };
-    const echartsAxis = convertPanelYAxis(persesAxis);
+    const echartsAxis = convertPanelYAxis(persesAxis, 'none');
     // Axis label is handled outside of echarts since it is built with a custom React component.
     expect(echartsAxis).toEqual({
       show: true,

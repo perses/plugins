@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,9 +13,11 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TraceData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
+import { PanelData, ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { VariableProvider } from '@perses-dev/dashboards';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from './test/mock-trace-data';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 
@@ -30,12 +32,22 @@ const TEST_TRACE_TABLE_PROPS: Omit<TraceTablePanelProps, 'queryResults'> = {
 describe('TraceTablePanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
+    const queryClient = new QueryClient();
+
     render(
-      <MemoryRouter>
-        <ChartsProvider chartsTheme={testChartsTheme}>
-          <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
-        </ChartsProvider>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <ReactRouterProvider>
+            <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1m' }}>
+              <VariableProvider>
+                <ChartsProvider chartsTheme={testChartsTheme}>
+                  <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
+                </ChartsProvider>
+              </VariableProvider>
+            </TimeRangeProviderBasic>
+          </ReactRouterProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
   };
 

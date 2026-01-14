@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,6 +20,34 @@ import (
 func WithDensity(density Density) Option {
 	return func(builder *Builder) error {
 		builder.Density = density
+		return nil
+	}
+}
+
+func WithDefaultColumWidth(width int) Option {
+	return func(builder *Builder) error {
+		builder.DefaultColumnWidth = width
+		return nil
+	}
+}
+
+func WithDefaultColumHeight(height int) Option {
+	return func(builder *Builder) error {
+		builder.DefaultColumnHeight = height
+		return nil
+	}
+}
+
+func WithDefaultColumnHidden(hidden bool) Option {
+	return func(builder *Builder) error {
+		builder.DefaultColumnHidden = hidden
+		return nil
+	}
+}
+
+func WithDefaultPagination(enabled bool) Option {
+	return func(builder *Builder) error {
+		builder.Pagination = enabled
 		return nil
 	}
 }

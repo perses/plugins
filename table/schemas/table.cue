@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,6 +16,7 @@ package model
 import (
 	"strings"
 	"github.com/perses/perses/cue/common"
+	model "github.com/perses/perses/cue/model/api/v1/common"
 )
 
 kind: "Table"
@@ -23,7 +24,9 @@ spec: close({
 	density?:             "compact" | "standard" | "comfortable"
 	defaultColumnWidth?:  "auto" | number
 	defaultColumnHeight?: "auto" | number
+	defaultColumnHidden?: bool
 	pagination?:          bool
+	enableFiltering?:    bool
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
 	transforms?: [...common.#transform]
@@ -34,13 +37,19 @@ spec: close({
 	header?:            string
 	headerDescription?: string
 	cellDescription?:   string
-	plugin?:            common.#Plugin
+	plugin?:            model.#Plugin
 	format?:            common.#format
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool
 	sort?:              "asc" | "desc"
 	width?:             number | "auto"
 	hide?:              bool
+	cellSettings?:      [...#cellSettings]
+	dataLink?: {
+		url: string
+		title?: string
+		openNewTab: bool
+	}
 }
 
 #valueCondition: {
@@ -79,6 +88,8 @@ spec: close({
 #cellSettings: {
 	condition:        #condition
 	text?:            string
+	prefix?:          string
+	suffix?:          string
 	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }

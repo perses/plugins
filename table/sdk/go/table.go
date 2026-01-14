@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -57,6 +57,7 @@ type ColumnSettings struct {
 	Sort              Sort           `json:"sort,omitempty" yaml:"sort,omitempty"`
 	Width             float64        `json:"width,omitempty" yaml:"width,omitempty"`
 	Hide              bool           `json:"hide,omitempty" yaml:"hide,omitempty"`
+	CellSettings      []CellSettings `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
 }
 
 type ValueConditionSpec struct {
@@ -145,15 +146,21 @@ func (c *Condition) unmarshal(unmarshal func(interface{}) error, staticMarshal f
 type CellSettings struct {
 	Condition       Condition `json:"condition" yaml:"condition"`
 	Text            string    `json:"text,omitempty" yaml:"text,omitempty"`
+	Prefix          string    `json:"prefix,omitempty" yaml:"prefix,omitempty"`
+	Suffix          string    `json:"suffix,omitempty" yaml:"suffix,omitempty"`
 	TextColor       string    `json:"textColor,omitempty" yaml:"textColor,omitempty"`
 	BackgroundColor string    `json:"backgroundColor,omitempty" yaml:"backgroundColor,omitempty"`
 }
 
 type PluginSpec struct {
-	Density        Density            `json:"density,omitempty" yaml:"density,omitempty"`
-	ColumnSettings []ColumnSettings   `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
-	CellSettings   []CellSettings     `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
-	Transforms     []common.Transform `json:"transforms,omitempty" yaml:"transforms,omitempty"`
+	Density             Density            `json:"density,omitempty" yaml:"density,omitempty"`
+	DefaultColumnWidth  int                `json:"defaultColumnWidth,omitempty" yaml:"defaultColumnWidth,omitempty"`
+	DefaultColumnHeight int                `json:"defaultColumnHeight,omitempty" yaml:"defaultColumnHeight,omitempty"`
+	DefaultColumnHidden bool               `json:"defaultColumnHidden,omitempty" yaml:"defaultColumnHidden,omitempty"`
+	Pagination          bool               `json:"pagination,omitempty" yaml:"pagination,omitempty"`
+	ColumnSettings      []ColumnSettings   `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
+	CellSettings        []CellSettings     `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Transforms          []common.Transform `json:"transforms,omitempty" yaml:"transforms,omitempty"`
 }
 
 type Option func(plugin *Builder) error

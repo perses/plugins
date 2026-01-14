@@ -1,4 +1,4 @@
-# TimeSeries Panel Builder
+# TimeSeriesChart Go SDK
 
 ## Constructor
 

@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -32,24 +32,34 @@ const treeViewCloseStr = 'Close ' + treeViewStr;
 export type PromQLEditorProps = {
   completeConfig: CompleteConfiguration;
   datasource: PrometheusDatasourceSelector;
+  isReadOnly?: boolean;
+  treeViewMetadata?: {
+    minStepMs: number;
+    intervalMs: number;
+  };
 } & Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
 
-export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEditorProps): ReactElement {
+export function PromQLEditor({
+  completeConfig,
+  datasource,
+  isReadOnly,
+  treeViewMetadata,
+  ...rest
+}: PromQLEditorProps): ReactElement {
   const theme = useTheme();
+
   const isDarkMode = theme.palette.mode === 'dark';
   const [isTreeViewVisible, setTreeViewVisible] = useState(false);
+  const readOnly = isReadOnly ?? false;
 
   const promQLExtension = useMemo(() => {
     return new PromQLExtension().activateLinter(false).setComplete(completeConfig).asExtension();
   }, [completeConfig]);
 
   let queryExpr = useReplaceVariablesInString(rest.value);
-  if (queryExpr) {
-    // TODO placeholder values for steps to be replaced with actual values
-    // Looks like providing proper values involves some refactoring: currently we'd need to rely on the timeseries query context,
-    // but these step values are actually computed independently / before the queries are getting fired, so it's useless to fire
-    // queries here, so maybe we should extract this part to independant hook(s), to be reused here?
-    queryExpr = replacePromBuiltinVariables(queryExpr, 12345, 12345);
+  if (queryExpr && treeViewMetadata) {
+    const { minStepMs, intervalMs } = treeViewMetadata;
+    queryExpr = replacePromBuiltinVariables(queryExpr, minStepMs, intervalMs);
   }
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
@@ -64,7 +74,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
         shrink
         sx={{
           position: 'absolute',
-          top: '-8px',
+          top: '-12px',
           left: '10px',
           padding: '0 4px',
           color: theme.palette.text.primary,
@@ -73,10 +83,13 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
       >
         PromQL Expression
       </InputLabel>
+      {/* TODO: We need to wait for this to be merged, then we need to add proper e2e for some scenarios */}
       <CodeMirror
+        data-testid="promql_expression_editor"
         {...rest}
         style={{ border: `1px solid ${theme.palette.divider}` }}
         theme={isDarkMode ? 'dark' : 'light'}
+        readOnly={readOnly}
         basicSetup={{
           highlightActiveLine: false,
           highlightActiveLineGutter: false,

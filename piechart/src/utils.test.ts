@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -70,20 +70,20 @@ describe('sortSeriesData', () => {
     const sorted = sortSeriesData(MOCK_DATA, 'asc');
     expect(sorted).toEqual([
       {
-        name: 'Label 4',
-        value: 5,
-      },
-      {
-        name: 'Label 1',
-        value: 3,
+        name: 'Label 3',
+        value: 0,
       },
       {
         name: 'Label 2',
         value: 2,
       },
       {
-        name: 'Label 3',
-        value: 0,
+        name: 'Label 1',
+        value: 3,
+      },
+      {
+        name: 'Label 4',
+        value: 5,
       },
       {
         name: 'Label 5',
@@ -96,24 +96,24 @@ describe('sortSeriesData', () => {
     const sorted = sortSeriesData(MOCK_DATA, 'desc');
     expect(sorted).toEqual([
       {
-        name: 'Label 5',
-        value: null,
-      },
-      {
-        name: 'Label 3',
-        value: 0,
-      },
-      {
-        name: 'Label 2',
-        value: 2,
+        name: 'Label 4',
+        value: 5,
       },
       {
         name: 'Label 1',
         value: 3,
       },
       {
-        name: 'Label 4',
-        value: 5,
+        name: 'Label 2',
+        value: 2,
+      },
+      {
+        name: 'Label 3',
+        value: 0,
+      },
+      {
+        name: 'Label 5',
+        value: null,
       },
     ]);
   });

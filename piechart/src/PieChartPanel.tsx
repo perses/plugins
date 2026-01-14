@@ -11,85 +11,129 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import {
   ChartInstance,
   ContentWithLegend,
   LegendItem,
   LegendProps,
   SelectedLegendItemState,
+  TableColumnConfig,
   useChartsTheme,
   useId,
 } from '@perses-dev/components';
 import { CalculationType, CalculationsMap, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
-import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
+import { comparisonLegends, ComparisonValues, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { getSeriesColor } from './palette-gen';
 import { PieChartOptions } from './pie-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
+import { getSeriesColor } from './colors';
 import { PieChartBase, PieChartData } from './PieChartBase';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode },
+    spec: { calculation, sort, mode, legend: pieChartLegend, colorPalette: colorPalette },
     contentDimensions,
     queryResults,
   } = props;
   const chartsTheme = useChartsTheme();
-  const muiTheme = useTheme();
-  const PADDING = chartsTheme.container.padding.default;
   const chartId = useId('time-series-panel');
-  const categoricalPalette = chartsTheme.echartsTheme.color;
+  const seriesNames = queryResults.flatMap((result) => result?.data.series?.map((series) => series.name) || []);
 
-  const { pieChartData, legendItems } = useMemo(() => {
+  // Memoize the color list so it only regenerates when color/palette/series count changes
+  const colorList = useMemo(() => {
+    return getSeriesColor(seriesNames, colorPalette);
+  }, [colorPalette, seriesNames]);
+
+  const { pieChartData, legendItems, legendColumns } = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];
     const pieChartData: PieChartData[] = [];
     const legendItems: LegendItem[] = [];
+    const legendColumns: Array<TableColumnConfig<LegendItem>> = [];
 
-    for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
-      const result = queryResults[queryIndex];
+    queryResults.forEach((result, queryIndex) => {
+      const series = result?.data.series ?? [];
 
-      let seriesIndex = 0;
-      for (const seriesData of result?.data.series ?? []) {
-        const seriesColor = getSeriesColor({
-          categoricalPalette: categoricalPalette as string[],
-          muiPrimaryColor: muiTheme.palette.primary.main,
-          seriesName: seriesData.name,
-        });
-        const series = {
+      series.forEach((seriesData, seriesIndex) => {
+        const seriesId = `${chartId}${seriesData.name}${seriesIndex}${queryIndex}`;
+        const seriesColor = colorList[queryIndex * series.length + seriesIndex] ?? '#ff0000';
+
+        const seriesItem = {
+          id: seriesId,
           value: calculate(seriesData.values) ?? null,
           name: seriesData.formattedName ?? '',
           itemStyle: {
             color: seriesColor,
           },
         };
-        pieChartData.push(series);
 
-        const seriesId = chartId + seriesData.name + seriesIndex;
+        pieChartData.push(seriesItem);
         legendItems.push({
           id: seriesId,
-          label: series.name,
+          label: seriesData.formattedName ?? '',
           color: seriesColor,
+          data: {},
         });
-        seriesIndex++;
-      }
-    }
+      });
+    });
 
     const sortedPieChartData = sortSeriesData(pieChartData, sort);
-    if (mode === 'percentage') {
-      return {
-        pieChartData: calculatePercentages(sortedPieChartData),
-        legendItems,
-      };
+
+    // Reorder legend items to reflect the current sorting order of series
+    const valueById = new Map(sortedPieChartData.map((pd) => [pd.id ?? pd.name, pd.value ?? 0]));
+    legendItems.sort((a, b) => {
+      const av = valueById.get(a.id) ?? 0;
+      const bv = valueById.get(b.id) ?? 0;
+      return sort === 'asc' ? av - bv : bv - av;
+    });
+
+    if (pieChartLegend?.values?.length && pieChartLegend?.mode === 'table') {
+      const { values } = pieChartLegend;
+      [...values].sort().forEach((v) => {
+        /* First, create a column for the current legend value */
+        legendColumns.push({
+          accessorKey: `data.${v}`,
+          header: comparisonLegends[v as ComparisonValues]?.label || v,
+          headerDescription: comparisonLegends[v as ComparisonValues]?.description,
+          width: 90,
+          align: 'right',
+          cellDescription: true,
+          enableSorting: true,
+        });
+        /* Then, settle the legend items related to this legend value */
+        switch (v) {
+          case 'abs':
+            legendItems.forEach((li) => {
+              const { value: itemAbsoluteValue } = pieChartData.find((pd) => li.id === pd.id) || {};
+              if (typeof itemAbsoluteValue === 'number' && li.data) {
+                li.data['abs'] = itemAbsoluteValue;
+              }
+            });
+            break;
+          case 'relative':
+            legendItems.forEach((li) => {
+              const { value: itemPercentageValue } =
+                calculatePercentages(sortedPieChartData).find((ppd) => li.id === ppd.id) || {};
+              if (typeof itemPercentageValue === 'number' && li.data) {
+                li.data['relative'] = `${itemPercentageValue.toFixed(2)}%`;
+              }
+            });
+            break;
+          default:
+            break;
+        }
+      });
     }
+
     return {
-      pieChartData: sortedPieChartData,
+      pieChartData: mode === 'percentage' ? calculatePercentages(sortedPieChartData) : sortedPieChartData,
       legendItems,
+      legendColumns,
     };
-  }, [calculation, sort, mode, queryResults, categoricalPalette, muiTheme.palette.primary.main, chartId]);
+  }, [calculation, sort, mode, queryResults, colorList, chartId, pieChartLegend]);
 
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
@@ -114,10 +158,10 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
 
-  if (contentDimensions === undefined) return null;
+  if (!contentDimensions) return null;
 
   return (
-    <Box sx={{ padding: `${PADDING}px` }}>
+    <Box sx={{ padding: `${contentPadding}px` }}>
       <ContentWithLegend
         width={adjustedContentDimensions?.width ?? 400}
         height={adjustedContentDimensions?.height ?? 1000}
@@ -132,7 +176,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
             selectedItems: selectedLegendItems,
             onSelectedItemsChange: setSelectedLegendItems,
             tableProps: {
-              columns: [],
+              columns: legendColumns,
               sorting: legendSorting,
               onSortingChange: setLegendSorting,
             },
@@ -150,8 +194,9 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
             <Box style={{ height, width }}>
               <PieChartBase
                 data={pieChartData}
-                width={contentDimensions.width - PADDING * 2}
-                height={contentDimensions.height - PADDING * 2}
+                width={width}
+                height={height}
+                showLabels={Boolean(props.spec.showLabels)}
               />
             </Box>
           );

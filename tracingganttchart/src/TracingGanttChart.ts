@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,9 +14,11 @@
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTracingGanttChartOptions, TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChartPanel, TracingGanttChartPanelProps } from './TracingGanttChartPanel';
+import { DownloadTraceAction } from './PanelActions';
 
 export const TracingGanttChart: PanelPlugin<TracingGanttChartOptions, TracingGanttChartPanelProps> = {
   PanelComponent: TracingGanttChartPanel,
   supportedQueryTypes: ['TraceQuery'],
   createInitialOptions: createInitialTracingGanttChartOptions,
+  actions: [{ component: DownloadTraceAction }],
 };

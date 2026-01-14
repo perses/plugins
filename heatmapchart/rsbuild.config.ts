@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,48 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { createConfigForPlugin } from '../rsbuild.shared';
 
-const assetPrefix = '/plugins/HeatMapChart/';
-
-export default defineConfig({
-  server: { port: 3021 },
-  dev: { assetPrefix },
-  source: { entry: { main: './src/index-federation.ts' } },
-  output: {
-    assetPrefix,
-    copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
-    distPath: {
-      root: 'dist',
-      js: '__mf/js',
-      css: '__mf/css',
-      font: '__mf/font',
-    },
+export default createConfigForPlugin({
+  name: 'HeatMapChart',
+  rsbuildConfig: {
+    server: { port: 3021 },
+    plugins: [pluginReact()],
   },
-  plugins: [
-    pluginReact(),
-    pluginModuleFederation({
-      name: 'HeatMapChart',
-      exposes: {
-        './HeatMapChart': './src/HeatMapChart.ts',
-      },
-      shared: {
-        react: { requiredVersion: '18.2.0', singleton: true },
-        'react-dom': { requiredVersion: '18.2.0', singleton: true },
-        echarts: { singleton: true },
-        lodash: { singleton: true },
-        '@perses-dev/core': { singleton: true },
-        '@perses-dev/components': { singleton: true },
-        '@perses-dev/plugin-system': { singleton: true },
-        immer: { singleton: true },
-      },
-      dts: false,
-      runtime: false,
-    }),
-  ],
-  tools: {
-    htmlPlugin: false,
+  moduleFederation: {
+    exposes: {
+      './HeatMapChart': './src/HeatMapChart.ts',
+    },
+    shared: {
+      react: { requiredVersion: '18.2.0', singleton: true },
+      'react-dom': { requiredVersion: '18.2.0', singleton: true },
+      echarts: { singleton: true },
+      lodash: { singleton: true },
+      '@perses-dev/core': { singleton: true },
+      '@perses-dev/components': { singleton: true },
+      '@perses-dev/plugin-system': { singleton: true },
+      immer: { singleton: true },
+    },
   },
 });

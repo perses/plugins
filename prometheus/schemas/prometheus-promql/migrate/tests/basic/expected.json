@@ -1,0 +1,7 @@
+{
+  "kind": "PrometheusPromQLVariable",
+  "spec": {
+    "expr": "group by(type) (up{osname=~\".*Linux.*\", job=~\"node-exporter.*\", prometheus=~\"system\"})",
+    "labelName": "type"
+  }
+}

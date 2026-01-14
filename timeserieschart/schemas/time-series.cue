@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -38,7 +38,8 @@ spec: close({
 #visual: {
 	display?:      "line" | "bar"
 	lineWidth?:    number & >=0.25 & <=3
-	areaOpacity?:  number & >=0 & <=1
+	lineStyle?:    #lineStyle
+	areaOpacity?:  #areaOpacity
 	showPoints?:   "auto" | "always"
 	palette?:      #palette
 	pointRadius?:  number & >=0 & <=6
@@ -51,11 +52,20 @@ spec: close({
 	label?:  string
 	format?: common.#format
 	min?:    number
-	max?:    number & >= min
+	max?:    number
+	if min != _|_ && max != _|_ {
+		max: >=min
+	}
+	logBase?: 2 | 10
 }
 
 #querySettings: [...{
-	queryIndex: int & >=0
-	colorMode:  "fixed" | "fixed-single"       // NB: "palette" could be added later
-	colorValue: =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
+	queryIndex:    int & >=0
+	colorMode?:    "fixed" | "fixed-single"       // NB: "palette" could be added later
+	colorValue?:   =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
+	lineStyle?:    #lineStyle
+	areaOpacity?:  #areaOpacity
 }]
+
+#lineStyle:   "solid" | "dashed" | "dotted"
+#areaOpacity: number & >=0 & <=1 // transparency level from 0 (transparent) to 1 (opaque)

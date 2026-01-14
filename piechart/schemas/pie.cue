@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,10 +19,18 @@ import (
 
 kind: "PieChart"
 spec: close({
-	legend?:        common.#legendWithValues
+	 // TODO: create a new common definition for this altered legend once perses/perses/cue/common has been moved outside of perses/perses
+	legend?:        {
+		position: "bottom" | "right"
+		mode?: "list" | "table"
+		size?: "small" | "medium"
+		values?: [..."abs" | "relative"]
+	}
 	calculation:    common.#calculation
 	format?:        common.#format
 	sort?:          "asc" | "desc"
 	mode?:          "value" | "percentage"
+	showLabels?:    bool
 	radius:         number
+	colorPalette?: 	[...string]
 })

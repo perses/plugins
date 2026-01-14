@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -39,6 +39,8 @@ import {
   NEGATIVE_MIN_VALUE_MULTIPLIER,
   TimeSeriesChartVisualOptions,
   TimeSeriesChartYAxisOptions,
+  LineStyleType,
+  LOG_BASE,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -64,65 +66,7 @@ export function getCommonTimeScaleForQueries(queries: Array<PanelData<TimeSeries
 }
 
 /**
- * [DEPRECATED] Gets ECharts line series option properties for legacy LineChart
- */
-export function getLineSeries(
-  id: string,
-  formattedName: string,
-  data: LegacyTimeSeries['data'],
-  visual: TimeSeriesChartVisualOptions,
-  paletteColor?: string
-): LegacyTimeSeries {
-  const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
-  const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
-
-  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
-  let showPoints = data !== undefined && data.length <= HIDE_DATAPOINTS_LIMIT;
-  // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
-  if (visual.showPoints === 'always') {
-    showPoints = true;
-  }
-
-  return {
-    type: 'line',
-    id: id,
-    name: formattedName,
-    data: data,
-    connectNulls: visual.connectNulls ?? DEFAULT_CONNECT_NULLS,
-    color: paletteColor,
-    stack: visual.stack === 'all' ? visual.stack : undefined,
-    sampling: 'lttb',
-    progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
-    showSymbol: showPoints,
-    showAllSymbol: true,
-    symbolSize: pointRadius,
-    lineStyle: {
-      width: lineWidth,
-      opacity: 0.8,
-    },
-    areaStyle: {
-      opacity: visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
-    },
-    // https://echarts.apache.org/en/option.html#series-line.emphasis
-    emphasis: {
-      focus: 'series',
-      disabled: visual.areaOpacity !== undefined && visual.areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
-      lineStyle: {
-        width: lineWidth + 1.5,
-        opacity: 1,
-      },
-    },
-    blur: {
-      lineStyle: {
-        width: lineWidth,
-        opacity: BLUR_FADEOUT_OPACITY,
-      },
-    },
-  };
-}
-
-/**
- * Gets ECharts line series option properties for recommended TimeChart
+ * Gets ECharts line series option properties for regular trends
  */
 export function getTimeSeries(
   id: string,
@@ -130,7 +74,8 @@ export function getTimeSeries(
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
-  paletteColor: string
+  paletteColor: string,
+  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number }
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -173,10 +118,10 @@ export function getTimeSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.95,
+      type: (querySettings?.lineStyle ?? visual.lineStyle) as LineStyleType,
     },
     areaStyle: {
-      opacity: visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
+      opacity: querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
@@ -185,6 +130,7 @@ export function getTimeSeries(
       lineStyle: {
         width: lineWidth + 1,
         opacity: 1,
+        type: visual.lineStyle,
       },
     },
     selectedMode: 'single',
@@ -198,6 +144,7 @@ export function getTimeSeries(
       lineStyle: {
         width: lineWidth,
         opacity: BLUR_FADEOUT_OPACITY,
+        type: visual.lineStyle,
       },
     },
   };
@@ -282,22 +229,29 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
 }
 
 /**
- * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options
+ * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options.
+ * Handles both linear and logarithmic scales with appropriate min/max calculations.
  */
-export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
-  const yAxis: YAXisComponentOption = {
-    show: true,
-    axisLabel: {
-      show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
-    },
-    min: inputAxis?.min,
-    max: inputAxis?.max,
-  };
+export function convertPanelYAxis(
+  inputAxis: TimeSeriesChartYAxisOptions = {},
+  useLogarithmicBase: LOG_BASE
+): YAXisComponentOption {
+  // Determine the appropriate min value based on scale type and user input
+  let minValue: YAXisComponentOption['min'];
 
-  // Set the y-axis minimum relative to the data
-  if (inputAxis?.min === undefined) {
+  if (inputAxis?.min !== undefined) {
+    // User explicitly set a min value - use it for both linear and log scales
+    minValue = inputAxis.min;
+  } else if (useLogarithmicBase !== 'none') {
+    // For logarithmic scales without explicit min:
+    // Let ECharts auto-calculate the range based on data to avoid issues with
+    // function-based calculations which can result in improper ranges (e.g., 1-10)
+    minValue = undefined;
+  } else {
+    // For linear scales without explicit min:
+    // Use dynamic calculation with padding for better visualization
     // https://echarts.apache.org/en/option.html#yAxis.min
-    yAxis.min = (value): number => {
+    minValue = (value): number => {
       if (value.min >= 0 && value.min <= 1) {
         // Helps with PercentDecimal units, or datasets that return 0 or 1 booleans
         return 0;
@@ -310,6 +264,25 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
       } else {
         return roundDown(value.min * NEGATIVE_MIN_VALUE_MULTIPLIER);
       }
+    };
+  }
+
+  // Build the yAxis configuration
+  const yAxis: YAXisComponentOption = {
+    show: true,
+    axisLabel: {
+      show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
+    },
+    min: minValue,
+    max: inputAxis?.max,
+  };
+
+  // Apply logarithmic scale settings if requested
+  if (useLogarithmicBase !== 'none') {
+    return {
+      ...yAxis,
+      type: 'log',
+      logBase: useLogarithmicBase,
     };
   }
 

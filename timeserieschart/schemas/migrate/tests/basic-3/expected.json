@@ -1,0 +1,23 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "mode": "list",
+      "position": "bottom",
+      "values": []
+    },
+    "visual": {
+      "areaOpacity": 0.1,
+      "connectNulls": false,
+      "display": "line",
+      "lineWidth": 1,
+      "lineStyle": "dotted"
+    },
+    "yAxis": {
+      "format": {
+        "unit": "decimal"
+      },
+      "max": 1
+    }
+  }
+}

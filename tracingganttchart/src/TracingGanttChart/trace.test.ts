@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -71,7 +71,7 @@ const spanTree = {
           },
           scope: { name: 'k6' },
           childSpans: [],
-          traceId: 'tid1',
+          traceId: '5B8EFFF798038103D269B633813FC60C',
           spanId: 'sid3',
           parentSpanId: 'sid2',
           name: 'testChildSpan3',
@@ -80,10 +80,24 @@ const spanTree = {
           endTimeUnixMs: 1450,
           attributes: [{ key: 'http.method', value: { stringValue: 'PUT' } }],
           events: [],
+          links: [
+            {
+              traceId: 'tid1',
+              spanId: 'sid1',
+              attributes: [
+                {
+                  key: 'link-key1',
+                  value: {
+                    stringValue: 'link-value1',
+                  },
+                },
+              ],
+            },
+          ],
           status: {},
         },
       ],
-      traceId: 'tid1',
+      traceId: '5B8EFFF798038103D269B633813FC60C',
       spanId: 'sid2',
       parentSpanId: 'sid1',
       name: 'testChildSpan2',
@@ -98,10 +112,11 @@ const spanTree = {
           attributes: [{ key: 'event1_key', value: { stringValue: 'event1_value' } }],
         },
       ],
+      links: [],
       status: { message: 'Forbidden', code: 'STATUS_CODE_ERROR' as const },
     },
   ],
-  traceId: 'tid1',
+  traceId: '5B8EFFF798038103D269B633813FC60C',
   spanId: 'sid1',
   name: 'testRootSpan',
   kind: 'SPAN_KIND_SERVER',
@@ -109,6 +124,7 @@ const spanTree = {
   endTimeUnixMs: 2000,
   attributes: [],
   events: [],
+  links: [],
   status: {},
 };
 

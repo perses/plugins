@@ -1,0 +1,25 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "family",
+        "header": "group",
+        "width": 150
+      },
+      {
+        "header": "bonjour",
+        "name": "value"
+      },
+      {
+        "header": "family",
+        "name": "job"
+      },
+      {
+        "header": "Timestamp",
+        "name": "timestamp"
+      }
+    ],
+    "density": "compact"
+  }
+}

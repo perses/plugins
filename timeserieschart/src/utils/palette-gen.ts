@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -40,9 +40,9 @@ export function getSeriesColor(props: SeriesColorProps): string {
 
   // Use color overrides defined in query settings in priority, if applicable
   if (querySettings) {
-    if (querySettings.colorMode === 'fixed') {
+    if (querySettings.colorMode === 'fixed' && querySettings.colorValue) {
       return querySettings.colorValue;
-    } else if (querySettings.colorMode === 'fixed-single' && !queryHasMultipleResults) {
+    } else if (querySettings.colorMode === 'fixed-single' && !queryHasMultipleResults && querySettings.colorValue) {
       return querySettings.colorValue;
     }
   }

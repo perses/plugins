@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,12 +14,14 @@ import { FormControl, Stack, TextField } from '@mui/material';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
+  isVariableDatasource,
   OptionsEditorProps,
   useDatasourceClient,
+  useDatasourceSelectValueToSelector,
   VariableOption,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement } from 'react';
+import { ReactElement, useCallback, ChangeEvent, FocusEvent } from 'react';
 import { PromQLEditor } from '../components';
 import {
   DEFAULT_PROM,
@@ -28,6 +30,7 @@ import {
   MatrixData,
   PROM_DATASOURCE_KIND,
   PrometheusClient,
+  PrometheusDatasourceSelector,
   VectorData,
 } from '../model';
 import { MatcherEditor } from './MatcherEditor';
@@ -40,23 +43,51 @@ import {
 export function PrometheusLabelValuesVariableEditor(
   props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>
 ): ReactElement {
-  const { onChange, value } = props;
-  const { datasource } = value;
+  const {
+    onChange,
+    value,
+    value: { datasource },
+  } = props;
   const selectedDatasource = datasource ?? DEFAULT_PROM;
 
-  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
-    if (isPrometheusDatasourceSelector(next)) {
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
+    (next) => {
+      if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
+        onChange(
+          produce(value, (draft) => {
+            // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+            draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
+          })
+        );
+        return;
+      }
+
+      throw new Error('Got unexpected non-Prometheus datasource selector');
+    },
+    [onChange, value]
+  );
+
+  const handleLabelChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       onChange(
         produce(value, (draft) => {
-          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-          draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+          draft.labelName = e.target.value;
         })
       );
-      return;
-    }
+    },
+    [onChange, value]
+  );
 
-    throw new Error('Got unexpected non-Prometheus datasource selector');
-  };
+  const handleMatchEditorsChange = useCallback(
+    (matchers: string[]) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.matchers = matchers;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
   return (
     <Stack spacing={2}>
@@ -74,18 +105,16 @@ export function PrometheusLabelValuesVariableEditor(
         label="Label Name"
         required
         value={props.value.labelName}
-        onChange={(e) => {
-          props.onChange({ ...props.value, labelName: e.target.value });
-        }}
-        InputProps={{
-          readOnly: props.isReadonly,
+        onChange={handleLabelChange}
+        slotProps={{
+          input: {
+            readOnly: props.isReadonly,
+          },
         }}
       />
       <MatcherEditor
         matchers={props.value.matchers ?? []}
-        onChange={(e) => {
-          props.onChange({ ...props.value, matchers: e });
-        }}
+        onChange={handleMatchEditorsChange}
         isReadonly={props.isReadonly}
       />
     </Stack>
@@ -95,23 +124,40 @@ export function PrometheusLabelValuesVariableEditor(
 export function PrometheusLabelNamesVariableEditor(
   props: OptionsEditorProps<PrometheusLabelNamesVariableOptions>
 ): ReactElement {
-  const { onChange, value } = props;
-  const { datasource } = value;
-  const selectedDatasource = datasource ?? DEFAULT_PROM;
+  const {
+    onChange,
+    value,
+    value: { datasource },
+  } = props;
 
-  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
-    if (isPrometheusDatasourceSelector(next)) {
+  const selectedDatasource = datasource ?? DEFAULT_PROM;
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
+    (next) => {
+      if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
+        onChange(
+          produce(value, (draft) => {
+            // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+            draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
+          })
+        );
+        return;
+      }
+
+      throw new Error('Got unexpected non-Prometheus datasource selector');
+    },
+    [onChange, value]
+  );
+
+  const handleMatchEditorChange = useCallback(
+    (matchers: string[]) => {
       onChange(
         produce(value, (draft) => {
-          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-          draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+          draft.matchers = matchers;
         })
       );
-      return;
-    }
-
-    throw new Error('Got unexpected non-Prometheus datasource selector');
-  };
+    },
+    [onChange, value]
+  );
 
   return (
     <Stack spacing={2}>
@@ -128,9 +174,7 @@ export function PrometheusLabelNamesVariableEditor(
       <MatcherEditor
         matchers={props.value.matchers ?? []}
         isReadonly={props.isReadonly}
-        onChange={(e) => {
-          props.onChange({ ...props.value, matchers: e });
-        }}
+        onChange={handleMatchEditorChange}
       />
     </Stack>
   );
@@ -139,33 +183,64 @@ export function PrometheusLabelNamesVariableEditor(
 export function PrometheusPromQLVariableEditor(
   props: OptionsEditorProps<PrometheusPromQLVariableOptions>
 ): ReactElement {
-  const { onChange, value } = props;
-  const { datasource } = value;
-  const selectedDatasource = datasource ?? DEFAULT_PROM;
+  const {
+    onChange,
+    value,
+    value: { datasource },
+  } = props;
+  const datasourceSelectValue = datasource ?? DEFAULT_PROM;
+  const selectedDatasource = useDatasourceSelectValueToSelector(
+    datasourceSelectValue,
+    PROM_DATASOURCE_KIND
+  ) as PrometheusDatasourceSelector;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
+    (next) => {
+      if (isVariableDatasource(next) || isPrometheusDatasourceSelector(next)) {
+        onChange(
+          produce(value, (draft) => {
+            // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+            draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
+          })
+        );
+        return;
+      }
 
-  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
-    if (isPrometheusDatasourceSelector(next)) {
+      throw new Error('Got unexpected non-Prometheus datasource selector');
+    },
+    [value, onChange]
+  );
+
+  const handleOnBlurPromQlChange = useCallback(
+    (e: FocusEvent<HTMLDivElement>) => {
       onChange(
         produce(value, (draft) => {
-          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-          draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+          draft.expr = e.target.textContent ?? '';
         })
       );
-      return;
-    }
+    },
+    [onChange, value]
+  );
 
-    throw new Error('Got unexpected non-Prometheus datasource selector');
-  };
+  const handleLabelNameChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.labelName = e.target.value;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
-          value={selectedDatasource}
+          value={datasourceSelectValue}
           onChange={handleDatasourceChange}
           labelId="prom-datasource-label"
           label="Prometheus Datasource"
@@ -176,21 +251,20 @@ export function PrometheusPromQLVariableEditor(
         completeConfig={{ remote: { url: promURL } }}
         value={value.expr}
         datasource={selectedDatasource}
-        onBlur={(event) => {
-          props.onChange({ ...props.value, expr: event.target.textContent ?? '' });
-        }}
+        onBlur={handleOnBlurPromQlChange}
         readOnly={props.isReadonly}
         width="100%"
       />
       <TextField
         label="Label Name"
+        required
         value={props.value.labelName}
-        InputProps={{
-          readOnly: props.isReadonly,
+        slotProps={{
+          input: {
+            readOnly: props.isReadonly,
+          },
         }}
-        onChange={(e) => {
-          props.onChange({ ...props.value, labelName: e.target.value });
-        }}
+        onChange={handleLabelNameChange}
       />
     </Stack>
   );

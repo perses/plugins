@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -69,5 +69,14 @@ describe('TempoTraceQuery', () => {
       stubTempoContext
     );
     expect(results).toEqual(MOCK_TRACE_DATA_SEARCHRESULT);
+  });
+
+  it('should convert base64-encoded trace IDs and span IDs in the response to hex format', async () => {
+    const results = await TempoTraceQuery.getTraceData({ query: 'fbd37845209d43cdccd418dc5f9ff021' }, stubTempoContext);
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.traceId).toEqual(
+      'fbd37845209d43cdccd418dc5f9ff021'
+    );
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.spanId).toEqual('8467bca11377c166');
+    expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.parentSpanId).toEqual('9c22eb77cb5c14c7');
   });
 });

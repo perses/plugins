@@ -1,0 +1,25 @@
+{
+  "allValue": ".*",
+  "current": {},
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "definition": "label_values(stack)",
+  "description": "Label values, 1rst flavor",
+  "hide": 0,
+  "includeAll": true,
+  "label": "Stack",
+  "multi": false,
+  "name": "lv1",
+  "options": [],
+  "query": {
+    "query": "label_values(stack)",
+    "refId": "StandardVariableQuery"
+  },
+  "refresh": 1,
+  "regex": "",
+  "skipUrlSync": false,
+  "sort": 0,
+  "type": "query"
+}

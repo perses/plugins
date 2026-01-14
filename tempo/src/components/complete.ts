@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -26,7 +26,7 @@ import {
   FieldOp,
 } from '@grafana/lezer-traceql';
 import { EditorView } from '@uiw/react-codemirror';
-import { isAbsoluteTimeRange, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
+import { getUnixTimeRange } from '../plugins/tempo-trace-query';
 import { CompletionConfig } from './TraceQLExtension';
 
 /** CompletionScope specifies the completion kind, e.g. whether to complete tag names or values etc. */
@@ -44,6 +44,9 @@ export interface Completions {
   from: number;
   to?: number;
 }
+
+const quoteChars = ['"', '`'];
+const defaultQuoteChar = '"';
 
 export async function complete(
   completionCfg: CompletionConfig,
@@ -179,7 +182,7 @@ export function identifyCompletions(state: EditorState, pos: number, tree: Tree)
         const fieldExpr = node.parent.firstChild;
         const attribute = state.sliceDoc(fieldExpr.from, fieldExpr.to);
         // ignore leading " in { name="HT
-        const from = state.sliceDoc(node.from, node.from + 1) === '"' ? node.from + 1 : node.from;
+        const from = quoteChars.includes(state.sliceDoc(node.from, node.from + 1)) ? node.from + 1 : node.from;
         return { scopes: [{ kind: 'TagValue', tag: attribute }], from };
       }
 
@@ -223,17 +226,6 @@ async function retrieveOptions(completionCfg: CompletionConfig, completions: Com
   return options.flat();
 }
 
-function getUnixTimeRange(timeRange?: TimeRangeValue): { start?: number; end?: number } {
-  if (!timeRange) {
-    return {};
-  }
-
-  const absTimeRange = !isAbsoluteTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-  const start = Math.round(absTimeRange.start.getTime() / 1000);
-  const end = Math.round(absTimeRange.end.getTime() / 1000);
-  return { start, end };
-}
-
 async function completeTagName(
   completionCfg: CompletionConfig,
   scope: 'resource' | 'span' | 'intrinsic'
@@ -242,11 +234,24 @@ async function completeTagName(
     return [];
   }
 
-  const { start, end } = getUnixTimeRange(completionCfg.timeRange);
+  const { start, end } = completionCfg.timeRange ? getUnixTimeRange(completionCfg.timeRange) : {};
   const { limit, maxStaleValues } = completionCfg;
 
   const response = await completionCfg.client.searchTags({ scope, start, end, limit, maxStaleValues });
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
+}
+
+function escapeString(input: string, quoteChar: string) {
+  // do not escape raw strings (when using backticks)
+  if (quoteChar === '`') {
+    return input;
+  }
+
+  let escaped = input;
+  // escape sequences: https://grafana.com/docs/tempo/v2.8.x/traceql/construct-traceql-queries/#quoted-attribute-names
+  escaped = escaped.replaceAll('\\', '\\\\');
+  escaped = escaped.replaceAll('"', '\\"');
+  return escaped;
 }
 
 /**
@@ -256,14 +261,24 @@ async function completeTagName(
  * { name="x
  * { name="x" where cursor is after the 'x'
  */
-function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number): void {
-  let insertText = completion.label;
-  if (view.state.sliceDoc(from - 1, from) !== '"') {
-    insertText = '"' + insertText;
+export function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number): void {
+  let quoteChar = defaultQuoteChar;
+  if (quoteChars.includes(view.state.sliceDoc(from - 1, from))) {
+    quoteChar = view.state.sliceDoc(from - 1, from);
+    from--;
   }
-  if (view.state.sliceDoc(to, to + 1) !== '"') {
-    insertText = insertText + '"';
+  if (quoteChars.includes(view.state.sliceDoc(to, to + 1))) {
+    quoteChar = view.state.sliceDoc(to, to + 1);
+    to++;
   }
+
+  // When using raw strings (`), we cannot escape a backtick.
+  // Therefore, switch the quote character.
+  if (completion.label.includes('`')) {
+    quoteChar = '"';
+  }
+
+  const insertText = `${quoteChar}${escapeString(completion.label, quoteChar)}${quoteChar}`;
   view.dispatch(insertCompletionText(view.state, insertText, from, to));
 }
 
@@ -272,7 +287,7 @@ async function completeTagValue(completionCfg: CompletionConfig, tag: string): P
     return [];
   }
 
-  const { start, end } = getUnixTimeRange(completionCfg.timeRange);
+  const { start, end } = completionCfg.timeRange ? getUnixTimeRange(completionCfg.timeRange) : {};
   const { limit, maxStaleValues } = completionCfg;
 
   const response = await completionCfg.client.searchTagValues({ tag, start, end, limit, maxStaleValues });

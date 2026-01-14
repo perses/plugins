@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -89,18 +89,19 @@ type Visual struct {
 	LineWidth    float64          `json:"lineWidth,omitempty" yaml:"lineWidth,omitempty"`
 	AreaOpacity  float64          `json:"areaOpacity,omitempty" yaml:"areaOpacity,omitempty"`
 	ShowPoints   VisualShowPoints `json:"showPoints,omitempty" yaml:"showPoints,omitempty"`
-	Palette      Palette          `json:"palette,omitempty" yaml:"palette,omitempty"`
+	Palette      *Palette         `json:"palette,omitempty" yaml:"palette,omitempty"`
 	PointRadius  float64          `json:"pointRadius,omitempty" yaml:"pointRadius,omitempty"`
 	Stack        VisualStack      `json:"stack,omitempty" yaml:"stack,omitempty"`
 	ConnectNulls bool             `json:"connectNulls,omitempty" yaml:"connectNulls,omitempty"`
 }
 
 type YAxis struct {
-	Show   bool           `json:"show,omitempty" yaml:"show,omitempty"`
-	Label  string         `json:"label,omitempty" yaml:"label,omitempty"`
-	Format *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
-	Min    float64        `json:"min,omitempty" yaml:"min,omitempty"`
-	Max    float64        `json:"max,omitempty" yaml:"max,omitempty"`
+	Show    bool           `json:"show,omitempty" yaml:"show,omitempty"`
+	Label   string         `json:"label,omitempty" yaml:"label,omitempty"`
+	Format  *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
+	Min     float64        `json:"min,omitempty" yaml:"min,omitempty"`
+	Max     float64        `json:"max,omitempty" yaml:"max,omitempty"`
+	LogBase uint           `json:"logBase,omitempty" yaml:"logBase,omitempty"`
 }
 
 type PluginSpec struct {

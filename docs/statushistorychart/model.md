@@ -1,4 +1,4 @@
-# StatusHistoryChart Panel Model
+# StatusHistoryChart model
 
 ```yaml
 kind: "StatusHistoryChart"

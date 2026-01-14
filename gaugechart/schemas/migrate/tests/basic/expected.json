@@ -1,0 +1,22 @@
+{
+  "kind": "GaugeChart",
+  "spec": {
+    "calculation": "last-number",
+    "format": {
+      "decimalPlaces": 1,
+      "unit": "hours"
+    },
+    "thresholds": {
+      "steps": [
+        {
+          "color": "#73bf69",
+          "value": 0
+        },
+        {
+          "color": "#f2495c",
+          "value": 80
+        }
+      ]
+    }
+  }
+}

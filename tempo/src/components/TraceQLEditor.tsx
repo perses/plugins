@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,19 +15,22 @@ import { ReactElement, useMemo } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { isValidTraceId } from '@perses-dev/core';
-import { CompletionConfig, TraceQLExtension } from './TraceQLExtension';
+import { useTimeRange } from '@perses-dev/plugin-system';
+import { TempoClient } from '../model';
+import { TraceQLExtension } from './TraceQLExtension';
 
 export interface TraceQLEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {
-  completionConfig: CompletionConfig;
+  client?: TempoClient;
 }
 
-export function TraceQLEditor({ completionConfig, ...rest }: TraceQLEditorProps): ReactElement {
+export function TraceQLEditor({ client, ...rest }: TraceQLEditorProps): ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
+  const { absoluteTimeRange } = useTimeRange();
   const traceQLExtension = useMemo(() => {
-    return TraceQLExtension(completionConfig);
-  }, [completionConfig]);
+    return TraceQLExtension({ client, timeRange: absoluteTimeRange });
+  }, [client, absoluteTimeRange]);
 
   const codemirrorTheme = useMemo(() => {
     // https://github.com/mui/material-ui/blob/v5.16.7/packages/mui-material/src/OutlinedInput/OutlinedInput.js#L43

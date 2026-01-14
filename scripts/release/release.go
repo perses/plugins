@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,12 +18,12 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/perses/plugins/scripts/command"
-	"github.com/perses/plugins/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/command"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
-func release(pluginName string, optionalReleaseMessage string) {
+func release(pluginName string, dryRun *bool) {
 	version, err := npm.GetVersion(pluginName)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to get the version of the plugin %s", pluginName)
@@ -35,8 +35,14 @@ func release(pluginName string, optionalReleaseMessage string) {
 		logrus.Infof("release %s already exists", releaseName)
 		return
 	}
+
+	if dryRun != nil && *dryRun {
+		logrus.Infof("[dry-run] creating the release: `gh release create %s -t %s -n %s`", releaseName, releaseName, generateChangelog(pluginName))
+		return
+	}
+
 	// create the GitHub release
-	if execErr := command.Run("gh", "release", "create", releaseName, "-t", releaseName, "-n", optionalReleaseMessage); execErr != nil {
+	if execErr := command.Run("gh", "release", "create", releaseName, "-t", releaseName, "-n", generateChangelog(pluginName)); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to create the release %s", releaseName)
 	}
 }
@@ -51,21 +57,17 @@ func release(pluginName string, optionalReleaseMessage string) {
 //
 // This will release every plugin not yet released:
 //
-//	go run ./scripts/release/release.go --all
+//	go run ./scripts/release --all
 //
 // This will release only the tempo plugin (note that the `--name` flag is set with the folder name not the plugin name):
 //
-//	go run ./scripts/release/release.go --name=tempo
-//
-// To add a release message that will appear in every release:
-//
-//	go run ./scripts/release/release.go --all --message="Release message"
+//	go run ./scripts/release --name=tempo
 //
 // NB: this script doesn't handle the plugin archive creation, a CI task achieves this.
 func main() {
 	releaseAll := flag.Bool("all", false, "release all the plugins")
+	dryRun := flag.Bool("dry-run", false, "do not perform any changes, only print what would be done")
 	releaseSingleName := flag.String("name", "", "release a single plugin")
-	optionalReleaseMessage := flag.String("message", "", "release message")
 	flag.Parse()
 	// get all tags locally
 	if err := exec.Command("git", "fetch", "--tags").Run(); err != nil {
@@ -73,15 +75,11 @@ func main() {
 	}
 	if !*releaseAll {
 		logrus.Infof("releasing %s", *releaseSingleName)
-		release(*releaseSingleName, *optionalReleaseMessage)
+		release(*releaseSingleName, dryRun)
 		return
 	}
-	workspaces, err := npm.GetWorkspaces()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
-	}
-	for _, workspace := range workspaces {
+	for _, workspace := range npm.MustGetWorkspaces(".") {
 		logrus.Infof("releasing %s", workspace)
-		release(workspace, *optionalReleaseMessage)
+		release(workspace, dryRun)
 	}
 }

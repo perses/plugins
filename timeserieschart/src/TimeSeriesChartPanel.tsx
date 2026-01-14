@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -24,6 +24,7 @@ import {
   TimeSeries,
   TimeSeriesValueTuple,
   TimeSeriesData,
+  CalculationType,
 } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
@@ -53,6 +54,7 @@ import {
   DEFAULT_VISUAL,
   THRESHOLD_PLOT_INTERVAL,
   QuerySettingsOptions,
+  LOG_BASE,
 } from './time-series-chart-model';
 import {
   getTimeSeries,
@@ -120,10 +122,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     return merge({}, DEFAULT_VISUAL, props.spec.visual);
   }, [props.spec.visual]);
 
+  // Use the logBase from yAxis options, defaulting to 'none' if not set
+  const useLogarithmicBase: LOG_BASE = yAxis?.logBase ?? 'none';
+
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = useMemo(() => {
-    return convertPanelYAxis(yAxis);
-  }, [yAxis]);
+    return convertPanelYAxis(yAxis, useLogarithmicBase);
+  }, [yAxis, useLogarithmicBase]);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
@@ -192,7 +197,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           // when there are multiple on the page.
           const seriesId = chartId + timeSeries.name + seriesIndex;
 
-          const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
+          const legendCalculations = legend?.values
+            ? getCalculations(timeSeries.values, legend.values as CalculationType[])
+            : undefined;
 
           // When we initially load the chart, we want to show all series, but
           // DO NOT want to visualy highlight all the items in the legend.
@@ -209,7 +216,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
             // Each series is stored as a separate dataset source.
             // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
             timeSeriesMapping.push(
-              getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor)
+              getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor, querySettings)
             );
 
             timeChartData.push({

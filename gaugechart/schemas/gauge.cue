@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,4 +23,9 @@ spec: close({
 	format?:     common.#format
 	thresholds?: common.#thresholds
 	max?:        number // determines end value of last threshold color segment when unit is not a percent
+	legend?: #legend
 })
+
+#legend: {
+	show?: bool | *true
+}

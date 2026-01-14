@@ -1,4 +1,4 @@
-# Prometheus Query Builder
+# Prometheus Query Go SDK
 
 ## Constructor
 
@@ -42,7 +42,7 @@ Define the datasource the query will use.
 ```golang
 import "github.com/perses/plugins/prometheus/sdk/go/query"
 
-query.SeriesNameFormat("") // TODO: check
+query.SeriesNameFormat("{{label_name}}")
 ```
 
 Define query series name format.

@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/prometheus-plugin",
-  "version": "0.51.0",
+  "version": "0.57.0-rc.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@nexucis/fuzzy": "^0.5.1",
-    "@prometheus-io/codemirror-promql": "^0.45.6",
+    "@prometheus-io/codemirror-promql": "^0.308.0",
     "color-hash": "^2.0.2",
     "qs": "^6.13.0",
     "react-virtuoso": "^4.12.2"
@@ -34,11 +34,11 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.51.0-rc.1",
-    "@perses-dev/core": "^0.51.0-rc.1",
-    "@perses-dev/dashboards": "^0.51.0-rc.1",
-    "@perses-dev/explore": "^0.51.0-rc.1",
-    "@perses-dev/plugin-system": "^0.51.0-rc.1",
+    "@perses-dev/components": "^0.53.0-rc.1",
+    "@perses-dev/core": "^0.53.0-beta.4",
+    "@perses-dev/dashboards": "^0.53.0-rc.1",
+    "@perses-dev/explore": "^0.53.0-rc.1",
+    "@perses-dev/plugin-system": "^0.53.0-rc.1",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
@@ -85,7 +85,7 @@
         "kind": "Variable",
         "spec": {
           "display": {
-            "name": "Prometheus Label Variable"
+            "name": "Prometheus Label Values Variable"
           },
           "name": "PrometheusLabelValuesVariable"
         }
@@ -94,7 +94,7 @@
         "kind": "Variable",
         "spec": {
           "display": {
-            "name": "Prometheus Names Variable"
+            "name": "Prometheus Label Names Variable"
           },
           "name": "PrometheusLabelNamesVariable"
         }
