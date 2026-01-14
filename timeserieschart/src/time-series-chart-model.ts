@@ -44,6 +44,7 @@ export interface QuerySettingsOptions {
   colorValue?: string;
   lineStyle?: LineStyleType;
   areaOpacity?: number;
+  format?: FormatOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;

@@ -74,7 +74,8 @@ export function getTimeSeries(
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
   paletteColor: string,
-  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number }
+  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number },
+  yAxisIndex?: number
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -95,6 +96,7 @@ export function getTimeSeries(
       name: formattedName,
       color: paletteColor,
       stack: visual.stack === 'all' ? visual.stack : undefined,
+      yAxisIndex: yAxisIndex,
       label: {
         show: false,
       },
@@ -110,6 +112,7 @@ export function getTimeSeries(
     connectNulls: visual.connectNulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
     stack: visual.stack === 'all' ? visual.stack : undefined,
+    yAxisIndex: yAxisIndex,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,

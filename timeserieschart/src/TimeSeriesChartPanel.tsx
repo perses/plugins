@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { Box, useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
@@ -47,6 +47,7 @@ import {
   TooltipConfig,
   DEFAULT_TOOLTIP_CONFIG,
   TimeChartSeriesMapping,
+  getFormattedMultipleYAxes,
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
@@ -126,18 +127,59 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     return convertPanelYAxis(yAxis);
   }, [yAxis]);
 
+  // Collect unique formats from query settings that differ from the base format
+  // These will create additional Y axes on the right side
+  const { additionalFormats, formatToYAxisIndex, seriesFormatMap } = useMemo(() => {
+    const baseUnit = format?.unit ?? 'decimal';
+    const additionalFormats: typeof format[] = [];
+    const formatToYAxisIndex = new Map<string, number>();
+    const seriesFormatMap = new Map<string, typeof format>();
+
+    // Index 0 is reserved for the base Y axis
+    formatToYAxisIndex.set(baseUnit, 0);
+
+    // Collect unique formats from query settings
+    for (const qs of querySettingsList ?? []) {
+      if (qs.format?.unit && qs.format.unit !== baseUnit) {
+        const unitKey = qs.format.unit;
+        if (!formatToYAxisIndex.has(unitKey)) {
+          // Add new format - index is 1 + position in additionalFormats array
+          formatToYAxisIndex.set(unitKey, 1 + additionalFormats.length);
+          additionalFormats.push(qs.format);
+        }
+      }
+    }
+
+    return { additionalFormats, formatToYAxisIndex, seriesFormatMap };
+  }, [format, querySettingsList]);
+
+  // Create multiple Y axes if there are additional formats
+  const multipleYAxes = useMemo(() => {
+    if (additionalFormats.length === 0) {
+      return undefined; // Use single Y axis (default behavior)
+    }
+    return getFormattedMultipleYAxes(echartsYAxis, format, additionalFormats);
+  }, [echartsYAxis, format, additionalFormats]);
+
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
 
   // Populate series data based on query results
-  const { timeScale, timeChartData, timeSeriesMapping, legendItems } = useMemo(() => {
+  const {
+    timeScale,
+    timeChartData,
+    timeSeriesMapping,
+    legendItems,
+    seriesFormatMap: computedSeriesFormatMap,
+  } = useMemo(() => {
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
       return {
         timeChartData: [],
         timeSeriesMapping: [],
+        seriesFormatMap: new Map(),
       };
     }
 
@@ -209,11 +251,29 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
             // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
             const datasetIndex = timeChartData.length;
 
+            // Determine yAxisIndex based on the query's format setting
+            const queryFormat = querySettings?.format;
+            const yAxisIndex = queryFormat?.unit ? (formatToYAxisIndex.get(queryFormat.unit) ?? 0) : 0;
+
             // Each series is stored as a separate dataset source.
             // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
             timeSeriesMapping.push(
-              getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor, querySettings)
+              getTimeSeries(
+                seriesId,
+                datasetIndex,
+                formattedSeriesName,
+                visual,
+                timeScale,
+                seriesColor,
+                querySettings,
+                yAxisIndex
+              )
             );
+
+            // Store the format for this series for tooltip formatting
+            if (queryFormat) {
+              seriesFormatMap.set(seriesId, queryFormat);
+            }
 
             timeChartData.push({
               name: formattedSeriesName,
@@ -278,6 +338,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       timeChartData,
       timeSeriesMapping,
       legendItems,
+      seriesFormatMap,
     };
   }, [
     queryResults,
@@ -292,6 +353,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     chartId,
     chartsTheme.thresholds,
     muiTheme.palette.primary.main,
+    formatToYAxisIndex,
+    seriesFormatMap,
   ]);
 
   // Translate the legend values into columns for the table legend.
@@ -337,9 +400,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = yAxis && yAxis.label ? 30 : 20;
+  // Add extra right margin when there are additional Y axes on the right side
+  const gridRight = additionalFormats.length > 0 ? 20 + additionalFormats.length * 60 : 20;
   const gridOverrides: GridComponentOption = {
     left: !echartsYAxis.show ? 0 : gridLeft,
-    right: 20,
+    right: gridRight,
     bottom: 0,
   };
 
@@ -402,8 +467,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 data={timeChartData}
                 seriesMapping={timeSeriesMapping}
                 timeScale={timeScale}
-                yAxis={echartsYAxis}
+                yAxis={multipleYAxes ?? echartsYAxis}
                 format={format}
+                seriesFormatMap={computedSeriesFormatMap}
                 grid={gridOverrides}
                 isStackedBar={isStackedBar}
                 tooltipConfig={tooltipConfig}
