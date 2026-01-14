@@ -12,10 +12,17 @@
 // limitations under the License.
 
 import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MOCK_LOGS_QUERY_RESULT, MOCK_LOGS_QUERY_DEFINITION } from './test/mock-query-results';
 import { LogsTablePanel } from './LogsTablePanel';
 import { LogsQueryData, LogsTableProps } from './model';
+
+// Mock clipboard API
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn(() => Promise.resolve()),
+  },
+});
 
 const TEST_LOGS_TABLE_PROPS: Omit<LogsTableProps, 'queryResults'> = {
   contentDimensions: {
@@ -42,6 +49,10 @@ describe('LogsTablePanel', () => {
     );
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render multi values with timestamps', async () => {
     renderPanel(MOCK_LOGS_QUERY_RESULT);
     const items = screen.getByTestId('virtuoso-item-list');
@@ -49,5 +60,50 @@ describe('LogsTablePanel', () => {
     expect(await items.querySelectorAll('div[data-index]')).toHaveLength(2); // 2 lines
     expect(await screen.findAllByText('2022-10-24T15:31:30.000Z')).toHaveLength(1); // first timestamp appear once per line
     expect(await screen.findAllByText('2022-10-24T15:31:31.000Z')).toHaveLength(1); // second timestamp appear once per line
+  });
+
+  it('should select multiple rows with Cmd+Click', () => {
+    renderPanel(MOCK_LOGS_QUERY_RESULT);
+    const items = screen.getByTestId('virtuoso-item-list');
+    const firstRow = items.querySelector('[data-log-index="0"] > div')!;
+    const secondRow = items.querySelector('[data-log-index="1"] > div')!;
+
+    // Get computed background before selection
+    const firstRowInitialBg = window.getComputedStyle(firstRow).backgroundColor;
+
+    // Cmd+Click first row
+    fireEvent.mouseDown(firstRow, { metaKey: true });
+
+    // Background should change (selected state)
+    const firstRowSelectedBg = window.getComputedStyle(firstRow).backgroundColor;
+    expect(firstRowSelectedBg).not.toBe(firstRowInitialBg);
+
+    // Cmd+Click second row
+    fireEvent.mouseDown(secondRow, { metaKey: true });
+
+    // Both should still be selected
+    expect(window.getComputedStyle(firstRow).backgroundColor).toBe(firstRowSelectedBg);
+    expect(window.getComputedStyle(secondRow).backgroundColor).toBe(firstRowSelectedBg);
+  });
+
+  it('should copy multiple selected rows with Cmd+C', () => {
+    renderPanel(MOCK_LOGS_QUERY_RESULT);
+    const items = screen.getByTestId('virtuoso-item-list');
+    const firstRow = items.querySelector('[data-log-index="0"] > div')!;
+    const secondRow = items.querySelector('[data-log-index="1"] > div')!;
+
+    // Select both rows
+    fireEvent.mouseDown(firstRow, { metaKey: true });
+    fireEvent.mouseDown(secondRow, { metaKey: true });
+
+    // Copy with onCopy event
+    const virtuosoScroller = screen.getByTestId('virtuoso-scroller');
+    const mockClipboardData = {
+      setData: jest.fn(),
+    };
+    fireEvent.copy(virtuosoScroller, { clipboardData: mockClipboardData });
+
+    // Should have copied both logs
+    expect(mockClipboardData.setData).toHaveBeenCalledWith('text/plain', expect.stringMatching(/foo.*bar/s));
   });
 });
