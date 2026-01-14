@@ -441,6 +441,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             enablePinning={isPinningEnabled}
             pinnedPos={tooltipPinnedCoords}
             format={format}
+            seriesFormatMap={seriesFormatMap}
             onUnpinClick={() => {
               // Unpins tooltip when clicking Pin icon in TooltipHeader.
               setTooltipPinnedCoords(null);
