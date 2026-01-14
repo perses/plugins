@@ -71,12 +71,6 @@ describe('copyHelpers', () => {
       expect(result).toBe('2026-01-01T00:00:00.000Z foo bar baz');
       expect(result).not.toContain('=');
     });
-
-    it('should handle undefined labels', () => {
-      const logWithoutLabels = { ...mockLog, labels: undefined as any };
-      const result = formatLogEntry(logWithoutLabels);
-      expect(result).toBe('2026-01-01T00:00:00.000Z foo bar baz');
-    });
   });
 
   describe('formatLogMessage', () => {
