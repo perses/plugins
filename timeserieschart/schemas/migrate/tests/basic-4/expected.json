@@ -19,8 +19,7 @@
       },
       "label": "Amount of endpoints succesfully monitored",
       "min": 0,
-      "logBase": 2,
-      "type": "log"
+      "logBase": 2
     },
     "thresholds": {
       "steps": [
