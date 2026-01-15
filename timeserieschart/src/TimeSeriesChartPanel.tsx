@@ -400,8 +400,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = yAxis && yAxis.label ? 30 : 20;
-  // Add extra right margin when there are additional Y axes on the right side
-  const gridRight = additionalFormats.length > 0 ? 20 + additionalFormats.length * 60 : 20;
+  // With containLabel: true in theme, ECharts auto-reserves space for axis labels.
+  // For multiple right axes, we only need minimal base padding - the offset property
+  // on each axis handles their stacking, and containLabel expands as needed.
+  const gridRight = additionalFormats.length > 0 ? 5 : 20;
   const gridOverrides: GridComponentOption = {
     left: !echartsYAxis.show ? 0 : gridLeft,
     right: gridRight,
