@@ -153,14 +153,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     return { additionalFormats, formatToYAxisIndex, seriesFormatMap };
   }, [format, querySettingsList]);
 
-  // Create multiple Y axes if there are additional formats
-  const multipleYAxes = useMemo(() => {
-    if (additionalFormats.length === 0) {
-      return undefined; // Use single Y axis (default behavior)
-    }
-    return getFormattedMultipleYAxes(echartsYAxis, format, additionalFormats);
-  }, [echartsYAxis, format, additionalFormats]);
-
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
@@ -173,6 +165,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     timeSeriesMapping,
     legendItems,
     seriesFormatMap: computedSeriesFormatMap,
+    maxValuesByFormat,
   } = useMemo(() => {
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
@@ -180,6 +173,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
         timeChartData: [],
         timeSeriesMapping: [],
         seriesFormatMap: new Map(),
+        maxValuesByFormat: new Map<string, number>(),
       };
     }
 
@@ -189,6 +183,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     // https://apache.github.io/echarts-handbook/en/concepts/dataset/
     const timeChartData: TimeSeries[] = [];
     const timeSeriesMapping: TimeChartSeriesMapping = [];
+
+    // Track max values for each format unit (used for dynamic Y axis offset calculation)
+    const maxValuesByFormat = new Map<string, number>();
 
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
@@ -273,6 +270,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
             // Store the format for this series for tooltip formatting
             if (queryFormat) {
               seriesFormatMap.set(seriesId, queryFormat);
+
+              // Track max value for this format unit (used for dynamic Y axis offset calculation)
+              const unitKey = queryFormat.unit;
+              if (unitKey) {
+                const seriesMax = Math.max(...timeSeries.values.map((v) => Math.abs(v[1] ?? 0)));
+                const currentMax = maxValuesByFormat.get(unitKey) ?? 0;
+                if (seriesMax > currentMax) {
+                  maxValuesByFormat.set(unitKey, seriesMax);
+                }
+              }
             }
 
             timeChartData.push({
@@ -339,6 +346,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       timeSeriesMapping,
       legendItems,
       seriesFormatMap,
+      maxValuesByFormat,
     };
   }, [
     queryResults,
@@ -356,6 +364,20 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     formatToYAxisIndex,
     seriesFormatMap,
   ]);
+
+  // Create multiple Y axes if there are additional formats
+  // Uses max values from data to compute dynamic offsets that adapt to label widths
+  const multipleYAxes = useMemo(() => {
+    if (additionalFormats.length === 0) {
+      return undefined; // Use single Y axis (default behavior)
+    }
+    // Build array of max values for each additional format (in order)
+    const maxValues = additionalFormats.map((fmt) => {
+      const unitKey = fmt.unit;
+      return unitKey ? (maxValuesByFormat.get(unitKey) ?? 1000) : 1000;
+    });
+    return getFormattedMultipleYAxes(echartsYAxis, format, additionalFormats, maxValues);
+  }, [echartsYAxis, format, additionalFormats, maxValuesByFormat]);
 
   // Translate the legend values into columns for the table legend.
   const legendColumns = useMemo(() => {
