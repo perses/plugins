@@ -54,7 +54,9 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
           value={value.legend}
           onChange={handleLegendChange}
         />
-        <SortSelector value={value.sorting} onChange={handleSortChange} />
+        <OptionsEditorGroup title="Visual">
+          <SortSelector value={value.sorting} onChange={handleSortChange} />
+        </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Reset Settings">
