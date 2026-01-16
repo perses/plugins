@@ -123,7 +123,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   }, [props.spec.visual]);
 
   // Use the logBase from yAxis options, defaulting to 'none' if not set
-  const useLogarithmicBase: LOG_BASE = yAxis?.logBase ?? 'none';
+  const useLogarithmicBase: LOG_BASE = yAxis?.logBase;
 
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = useMemo(() => {
