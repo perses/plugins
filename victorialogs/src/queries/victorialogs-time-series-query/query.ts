@@ -83,8 +83,8 @@ function convertMatrixToTimeSeries(matrix: VictoriaLogsMatrixResult[]): TimeSeri
     if (_stream) {
       const match = _stream.match(/{([^}]+)}/);
       if (match && match[1]) {
-        const labelsStr = match[1].split(',').forEach(labelPair => {
-          const [key, val] = labelPair.split('=').map(s => s.trim().replace(/^"|"$/g, ''));
+        const labelsStr = match[1].split(',').forEach((labelPair) => {
+          const [key, val] = labelPair.split('=').map((s) => s.trim().replace(/^"|"$/g, ''));
           if (key && val) labels[key] = val;
         });
       }
@@ -103,51 +103,54 @@ function convertMatrixToTimeSeries(matrix: VictoriaLogsMatrixResult[]): TimeSeri
   });
 }
 
-export const getVictoriaLogsTimeSeriesData: TimeSeriesQueryPlugin<VictoriaLogsTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
-  spec,
-  context
-) => {
-  if (!spec.query) {
+export const getVictoriaLogsTimeSeriesData: TimeSeriesQueryPlugin<VictoriaLogsTimeSeriesQuerySpec>['getTimeSeriesData'] =
+  async (spec, context) => {
+    if (!spec.query) {
+      return {
+        series: [],
+        timeRange: { start: context.timeRange.start, end: context.timeRange.end },
+        stepMs: DEFAULT_MIN_STEP_SECONDS * 1000,
+      };
+    }
+
+    const query = replaceVariables(spec.query, context.variableState);
+    const client = (await context.datasourceStore.getDatasourceClient<VictoriaLogsClient>(
+      spec.datasource ?? DEFAULT_DATASOURCE
+    )) as VictoriaLogsClient;
+
+    const { start, end } = context.timeRange;
+
+    const minStepSeconds = spec.step
+      ? (getDurationStringSeconds(spec.step as DurationString) ?? DEFAULT_MIN_STEP_SECONDS)
+      : DEFAULT_MIN_STEP_SECONDS;
+    const stepSeconds = getVictoriaLogsRangeStep(
+      start.getTime(),
+      end.getTime(),
+      minStepSeconds,
+      context.suggestedStepMs
+    );
+    const stepString = formatStepForVictoriaLogs(stepSeconds);
+    const stepMs = stepSeconds * 1000;
+
+    const response: VictoriaLogsStatsQueryRangeResponse = await client.statsQueryRange({
+      query,
+      step: stepString,
+      start: start.toISOString(),
+      end: end.toISOString(),
+    });
+
+    if (response.status === 'error') {
+      throw new Error(response.error);
+    }
+
+    const series = convertMatrixToTimeSeries(response.data.result as VictoriaLogsMatrixResult[]);
+
     return {
-      series: [],
-      timeRange: { start: context.timeRange.start, end: context.timeRange.end },
-      stepMs: DEFAULT_MIN_STEP_SECONDS * 1000,
+      series: series,
+      timeRange: { start, end },
+      stepMs,
+      metadata: {
+        executedQueryString: query,
+      },
     };
-  }
-
-  const query = replaceVariables(spec.query, context.variableState);
-  const client = (await context.datasourceStore.getDatasourceClient<VictoriaLogsClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
-  )) as VictoriaLogsClient;
-
-  const { start, end } = context.timeRange;
-
-  const minStepSeconds = spec.step
-    ? (getDurationStringSeconds(spec.step as DurationString) ?? DEFAULT_MIN_STEP_SECONDS)
-    : DEFAULT_MIN_STEP_SECONDS;
-  const stepSeconds = getVictoriaLogsRangeStep(start.getTime(), end.getTime(), minStepSeconds, context.suggestedStepMs);
-  const stepString = formatStepForVictoriaLogs(stepSeconds);
-  const stepMs = stepSeconds * 1000;
-
-  const response: VictoriaLogsStatsQueryRangeResponse = await client.statsQueryRange({
-    query,
-    step: stepString,
-    start: start.toISOString(),
-    end: end.toISOString(),
-  });
-
-  if (response.status === 'error') {
-    throw new Error(response.error)
-  }
-
-  const series = convertMatrixToTimeSeries(response.data.result as VictoriaLogsMatrixResult[]);
-
-  return {
-    series: series,
-    timeRange: { start, end },
-    stepMs,
-    metadata: {
-      executedQueryString: query,
-    },
   };
-};

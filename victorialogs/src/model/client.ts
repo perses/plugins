@@ -54,10 +54,22 @@ export interface VictoriaLogsClient {
   options: {
     datasourceUrl: string;
   };
-  streamQueryRange: (params: VictoriaLogsStreamQueryRangeParams, headers?: VictoriaLogsRequestHeaders) => Promise<VictoriaLogsStreamQueryRangeResponse>;
-  statsQueryRange: (params: VictoriaLogsStatsQueryRangeParams, headers?: VictoriaLogsRequestHeaders) => Promise<VictoriaLogsStatsQueryRangeResponse>;
-  fieldNames: (params: VictoriaLogsFieldNamesParams, headers?: VictoriaLogsRequestHeaders) => Promise<VictoriaLogsFieldNamesResponse>;
-  fieldValues: (params: VictoriaLogsFieldValuesParams, headers?: VictoriaLogsRequestHeaders) => Promise<VictoriaLogsFieldValuesResponse>;
+  streamQueryRange: (
+    params: VictoriaLogsStreamQueryRangeParams,
+    headers?: VictoriaLogsRequestHeaders
+  ) => Promise<VictoriaLogsStreamQueryRangeResponse>;
+  statsQueryRange: (
+    params: VictoriaLogsStatsQueryRangeParams,
+    headers?: VictoriaLogsRequestHeaders
+  ) => Promise<VictoriaLogsStatsQueryRangeResponse>;
+  fieldNames: (
+    params: VictoriaLogsFieldNamesParams,
+    headers?: VictoriaLogsRequestHeaders
+  ) => Promise<VictoriaLogsFieldNamesResponse>;
+  fieldValues: (
+    params: VictoriaLogsFieldValuesParams,
+    headers?: VictoriaLogsRequestHeaders
+  ) => Promise<VictoriaLogsFieldValuesResponse>;
 }
 
 function buildUrl(path: string, datasourceUrl: string): URL {
@@ -86,7 +98,7 @@ export async function streamQueryRange(
   const postData: Record<string, string> = {
     query: params.query,
     start: params.start,
-    end: params.end
+    end: params.end,
   };
   if (params?.limit) postData['limit'] = params.limit.toString();
   if (params?.offset) postData['offset'] = params.offset.toString();
@@ -96,7 +108,7 @@ export async function streamQueryRange(
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept': 'application/stream+json',
+      Accept: 'application/stream+json',
       ...options.headers,
     },
     body: data,
@@ -108,7 +120,7 @@ export async function streamQueryRange(
 
   if (!response?.body) return output;
   const reader = response.body.getReader();
-  const decoder = new TextDecoder("utf-8");
+  const decoder = new TextDecoder('utf-8');
   let buffer = '';
 
   while (true) {
@@ -147,7 +159,7 @@ export async function statsQueryRange(
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...options.headers,
     },
     body: data,
@@ -171,7 +183,7 @@ export async function fieldNames(
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...options.headers,
     },
     body: data,
@@ -196,7 +208,7 @@ export async function fieldValues(
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...options.headers,
     },
     body: data,
