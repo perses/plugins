@@ -122,11 +122,9 @@ export async function streamQueryRange(
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
 
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
+  let result = await reader.read();
+  while (!result.done) {
+    buffer += decoder.decode(result.value, { stream: true });
     let boundary = buffer.indexOf('\n');
     while (boundary !== -1) {
       const line = buffer.slice(0, boundary);
@@ -134,6 +132,7 @@ export async function streamQueryRange(
       output.push(JSON.parse(line));
       boundary = buffer.indexOf('\n');
     }
+    result = await reader.read();
   }
   if (buffer.trim().length > 0) {
     output.push(JSON.parse(buffer));
