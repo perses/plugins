@@ -83,7 +83,7 @@ function convertMatrixToTimeSeries(matrix: VictoriaLogsMatrixResult[]): TimeSeri
     if (_stream) {
       const match = _stream.match(/{([^}]+)}/);
       if (match && match[1]) {
-        const labelsStr = match[1].split(',').forEach((labelPair) => {
+        match[1].split(',').forEach((labelPair) => {
           const [key, val] = labelPair.split('=').map((s) => s.trim().replace(/^"|"$/g, ''));
           if (key && val) labels[key] = val;
         });
