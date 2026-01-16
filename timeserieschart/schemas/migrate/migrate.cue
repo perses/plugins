@@ -14,7 +14,7 @@
 package migrate
 
 import (
-	commonMigrate "github.com/perses/perses/cue/common/migrate"
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
 	"strings"
 	"strconv"
 )
@@ -114,7 +114,6 @@ spec: {
 	][0]
 	if #logBase != null {
 		yAxis: logBase: #logBase
-		yAxis: type: "log"
 	}
 
 	#yAxisLabel: *#panel.fieldConfig.defaults.custom.axisLabel | null
@@ -193,7 +192,7 @@ spec: {
 			   (override.matcher.id == "byFrameRefID" && target.refId == override.matcher.options) {
 				if property.id == "color" if (*property.value.fixedColor | null) != null {
 					colorMode: "fixed"
-					colorValue: property.value.fixedColor
+					colorValue: *commonMigrate.#mapping.color[property.value.fixedColor] | property.value.fixedColor
 				}
 				if property.id == "custom.lineStyle" if (*property.value.fill | null) != null {
 					lineStyle: #lineStyleMapping[property.value.fill]
