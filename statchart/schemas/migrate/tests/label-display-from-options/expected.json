@@ -1,6 +1,7 @@
 {
   "kind": "StatChart",
   "spec": {
+    "textMode": "auto",
     "metricLabel": "version",
     "format": {
       "unit": "decimal"

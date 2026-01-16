@@ -31,14 +31,11 @@ export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions, queryResults } = props;
 
-  const { format, sparkline, valueFontSize: valueFontSize, colorMode } = spec;
+  const { format, sparkline, valueFontSize: valueFontSize, colorMode, textMode, legendMode } = spec;
   const chartsTheme = useChartsTheme();
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
   const isMultiSeries = statChartData.length > 1;
-
-  // Handle three-state showLegend: 'on' | 'off' | 'auto' (or undefined for backward compatibility)
-  const shouldShowLegend = spec.legendMode === 'on' ? true : spec.legendMode === 'off' ? false : isMultiSeries;
 
   if (!contentDimensions) return null;
 
@@ -75,9 +72,11 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               data={series}
               format={format}
               sparkline={sparklineConfig}
-              showSeriesName={shouldShowLegend}
               valueFontSize={valueFontSize}
               colorMode={colorMode}
+              textMode={textMode}
+              isMultiSeries={isMultiSeries}
+              legendMode={legendMode}
             />
           );
         })
@@ -94,31 +93,100 @@ const useStatChartData = (
   chartsTheme: PersesChartsTheme
 ): StatChartData[] => {
   return useMemo(() => {
-    const { calculation, mappings, metricLabel } = spec;
+    const { calculation, mappings, metricLabel, textMode } = spec;
 
     const statChartData: StatChartData[] = [];
+
+    // Count total series to determine if multi-series
+    const totalSeries = queryResults.reduce((sum, result) => sum + result.data.series.length, 0);
+    const isMultiSeries = totalSeries > 1;
+
     for (const result of queryResults) {
       for (const seriesData of result.data.series) {
-        const calculatedValue = calculateValue(calculation, seriesData);
+        const numericValue = calculateValue(calculation, seriesData);
 
-        // get label metric value
+        // Get label if metricLabel is set
         const labelValue = getLabelValue(metricLabel, seriesData.labels);
 
-        // get actual value to display
-        const displayValue = getValueOrLabel(calculatedValue, mappings, labelValue);
+        // Use formattedName (with legend format applied) or fallback to raw name
+        const formattedSeriesName = seriesData.formattedName ?? seriesData.name;
 
-        const color = getStatChartColor(chartsTheme, spec, calculatedValue);
+        // Determine what to display based on textMode
+        const { displayValue, displayName } = getDisplayContent({
+          textMode: textMode ?? 'auto',
+          numericValue,
+          labelValue,
+          seriesName: formattedSeriesName,
+          isMultiSeries,
+          mappings,
+        });
+
+        // Color based on numeric value (always)
+        const color = getStatChartColor(chartsTheme, spec, numericValue);
 
         const series: GraphSeries = {
-          name: seriesData.formattedName ?? '',
+          name: formattedSeriesName,
           values: seriesData.values,
         };
 
-        statChartData.push({ calculatedValue: displayValue, seriesData: series, color });
+        statChartData.push({
+          numericValue,
+          displayValue,
+          displayName,
+          seriesData: series,
+          color,
+        });
       }
     }
     return statChartData;
   }, [queryResults, spec, chartsTheme]);
+};
+
+const getDisplayContent = ({
+  textMode,
+  numericValue,
+  labelValue,
+  seriesName,
+  mappings,
+  isMultiSeries,
+}: {
+  textMode: string;
+  numericValue?: number | null;
+  labelValue?: string;
+  seriesName: string;
+  mappings?: ValueMapping[];
+  isMultiSeries: boolean;
+}): { displayValue?: string | number | null; displayName?: string } => {
+  const formattedValue = getValueOrLabel(numericValue, mappings, labelValue);
+
+  switch (textMode) {
+    case 'value':
+      return {
+        displayValue: formattedValue,
+        displayName: undefined,
+      };
+    case 'name':
+      return {
+        displayValue: seriesName,
+        displayName: undefined,
+      };
+    case 'value_and_name':
+      return {
+        displayValue: formattedValue,
+        displayName: seriesName,
+      };
+    case 'none':
+      return {
+        displayValue: undefined,
+        displayName: undefined,
+      };
+    case 'auto':
+    default:
+      return {
+        displayValue: formattedValue,
+        displayName: isMultiSeries ? seriesName : undefined,
+      };
+  }
 };
 
 const getValueOrLabel = (
