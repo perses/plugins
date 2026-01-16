@@ -16,7 +16,6 @@ import {
   VictoriaLogsStatsQueryRangeResponse,
   VictoriaLogsFieldNamesResponse,
   VictoriaLogsFieldValuesResponse,
-  VictoriaLogsIndexStatsResponse,
   VictoriaLogsRequestHeaders,
 } from './types';
 
