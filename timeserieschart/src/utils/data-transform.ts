@@ -238,15 +238,14 @@ export function convertPanelYAxis(
 ): YAXisComponentOption {
   // Determine the appropriate min value based on scale type and user input
   let minValue: YAXisComponentOption['min'];
-
-  if (inputAxis?.min !== undefined) {
-    // User explicitly set a min value - use it for both linear and log scales
-    minValue = inputAxis.min;
-  } else if (useLogarithmicBase !== 'none') {
+  if (useLogarithmicBase !== undefined) {
     // For logarithmic scales without explicit min:
     // Let ECharts auto-calculate the range based on data to avoid issues with
     // function-based calculations which can result in improper ranges (e.g., 1-10)
     minValue = undefined;
+  } else if (inputAxis?.min !== undefined) {
+    // User explicitly set a min value - use it for both linear and log scales
+    minValue = inputAxis.min;
   } else {
     // For linear scales without explicit min:
     // Use dynamic calculation with padding for better visualization
@@ -278,7 +277,7 @@ export function convertPanelYAxis(
   };
 
   // Apply logarithmic scale settings if requested
-  if (useLogarithmicBase !== 'none') {
+  if (useLogarithmicBase !== undefined) {
     return {
       ...yAxis,
       type: 'log',
