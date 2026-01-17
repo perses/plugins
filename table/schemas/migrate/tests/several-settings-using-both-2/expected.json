@@ -3,6 +3,11 @@
   "spec": {
     "columnSettings": [
       {
+        "name": "family",
+        "header": "group",
+        "width": 150
+      },
+      {
         "header": "bonjour",
         "name": "value"
       },
@@ -13,14 +18,6 @@
       {
         "header": "Timestamp",
         "name": "timestamp"
-      },
-      {
-        "header": "group",
-        "name": "family"
-      },
-      {
-        "name": "group",
-        "width": 150
       }
     ],
     "density": "compact"

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import {
   PluginLoader,
   PluginModuleResource,
   PluginRegistry,
+  VariableStateMap,
 } from '@perses-dev/plugin-system';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as packagejson from '../../package.json';
@@ -30,6 +31,15 @@ import {
   MOCK_TIME_SERIES_QUERY_DEFINITION,
 } from '../test/mock-query-results';
 import { TablePanel } from './TablePanel';
+
+/* mock all variables */
+jest.mock('@perses-dev/plugin-system', () => ({
+  ...jest.requireActual('@perses-dev/plugin-system'),
+  useAllVariableValues: (): VariableStateMap => ({
+    myproject: { loading: false, value: 'my_project' },
+    __range: { loading: false, value: '1h' },
+  }),
+}));
 
 const TEST_TIMEOUT = 15000; // Github Actions is slow
 const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> = {
@@ -81,7 +91,16 @@ describe('TablePanel', () => {
     async () => {
       renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
         columnSettings: [
-          { name: 'value', header: 'Value', headerDescription: 'Timeseries Value' },
+          {
+            name: 'value',
+            header: 'Value',
+            headerDescription: 'Timeseries Value',
+            dataLink: {
+              url: 'https://fakeurl.com/$myproject/$__range',
+              title: 'data link',
+              openNewTab: true,
+            },
+          },
           { name: 'device', width: 200 },
           { name: 'env', hide: true },
           { name: 'fstype', enableSorting: true },
@@ -95,6 +114,8 @@ describe('TablePanel', () => {
       expect(valueHeaderCell).toBeInTheDocument();
       expect(await within(valueHeaderCell).findByLabelText('Timeseries Value')).toBeInTheDocument();
       expect(await screen.findByRole('columnheader', { name: /Value/i })).toBeInTheDocument();
+      // TODO: Add this line of test after the @perses-dev\components is updated
+      // expect(await screen.getByRole('link', { name: /https:\/\/fakeurl\.com\/\$myproject\/\$__range/ }));
 
       const fstypeHeaderCell = await screen.findByRole('columnheader', { name: 'fstype' });
       expect(fstypeHeaderCell).toBeInTheDocument();

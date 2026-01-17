@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -54,6 +54,7 @@ export interface TimeSeriesChartYAxisOptions {
   format?: FormatOptions;
   min?: number;
   max?: number;
+  logBase?: LOG_BASE;
 }
 
 export interface TooltipSpecOptions {
@@ -87,6 +88,7 @@ export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   format: DEFAULT_FORMAT,
   min: undefined,
   max: undefined,
+  logBase: 'none',
 };
 
 export const Y_AXIS_CONFIG = {
@@ -95,6 +97,7 @@ export const Y_AXIS_CONFIG = {
   unit: { label: 'Unit' },
   min: { label: 'Min' },
   max: { label: 'Max' },
+  logBase: { label: 'Log Base' },
 };
 
 export const DEFAULT_DISPLAY = 'line';
@@ -182,6 +185,28 @@ export const OPACITY_CONFIG = {
   max: 1,
   step: 0.05,
 };
+
+// LogBase outlines the allowed log bases for the log-supported charts.
+export type LOG_BASE_LABEL = 'none' | 'log2' | 'log10';
+export type LOG_BASE = 'none' | 2 | 10;
+
+// Single source of truth for log base configuration
+export const LOG_BASE_CONFIG: Record<LOG_BASE_LABEL, { label: string; log: LOG_BASE }> = {
+  none: { label: 'None', log: 'none' },
+  log2: { label: '2', log: 2 },
+  log10: { label: '10', log: 10 },
+};
+
+// Options array for SettingsAutocomplete
+export const LOG_BASE_OPTIONS = Object.entries(LOG_BASE_CONFIG).map(([id, config]) => ({
+  id: id as LOG_BASE_LABEL,
+  ...config,
+}));
+
+// Reverse lookup map from LOG_BASE value to LOG_BASE_LABEL
+export const LOG_VALID_BASES: Record<LOG_BASE, LOG_BASE_LABEL> = Object.fromEntries(
+  Object.entries(LOG_BASE_CONFIG).map(([label, config]) => [config.log, label])
+) as Record<LOG_BASE, LOG_BASE_LABEL>;
 
 // Both of these constants help produce a value that is LESS THAN the initial value.
 // For positive values, we multiply by a number less than 1 to get this outcome.

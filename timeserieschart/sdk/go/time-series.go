@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -96,11 +96,12 @@ type Visual struct {
 }
 
 type YAxis struct {
-	Show   bool           `json:"show,omitempty" yaml:"show,omitempty"`
-	Label  string         `json:"label,omitempty" yaml:"label,omitempty"`
-	Format *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
-	Min    float64        `json:"min,omitempty" yaml:"min,omitempty"`
-	Max    float64        `json:"max,omitempty" yaml:"max,omitempty"`
+	Show    bool           `json:"show,omitempty" yaml:"show,omitempty"`
+	Label   string         `json:"label,omitempty" yaml:"label,omitempty"`
+	Format  *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
+	Min     float64        `json:"min,omitempty" yaml:"min,omitempty"`
+	Max     float64        `json:"max,omitempty" yaml:"max,omitempty"`
+	LogBase uint           `json:"logBase,omitempty" yaml:"logBase,omitempty"`
 }
 
 type PluginSpec struct {

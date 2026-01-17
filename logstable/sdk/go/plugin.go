@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,9 +20,9 @@ import (
 const PluginKind = "LogsTable"
 
 type PluginSpec struct {
-	AllowWrap          *bool `json:"allowWrap,omitempty" yaml:"allowWrap,omitempty"`
+	AllowWrap     *bool `json:"allowWrap,omitempty" yaml:"allowWrap,omitempty"`
 	EnableDetails *bool `json:"enableDetails,omitempty" yaml:"enableDetails,omitempty"`
-	ShowTime          *bool `json:"showTime,omitempty" yaml:"showTime,omitempty"`
+	ShowTime      *bool `json:"showTime,omitempty" yaml:"showTime,omitempty"`
 }
 
 type Option func(plugin *Builder) error

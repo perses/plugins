@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -40,6 +40,7 @@ import {
   TimeSeriesChartVisualOptions,
   TimeSeriesChartYAxisOptions,
   LineStyleType,
+  LOG_BASE,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -228,22 +229,29 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
 }
 
 /**
- * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options
+ * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options.
+ * Handles both linear and logarithmic scales with appropriate min/max calculations.
  */
-export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
-  const yAxis: YAXisComponentOption = {
-    show: true,
-    axisLabel: {
-      show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
-    },
-    min: inputAxis?.min,
-    max: inputAxis?.max,
-  };
+export function convertPanelYAxis(
+  inputAxis: TimeSeriesChartYAxisOptions = {},
+  useLogarithmicBase: LOG_BASE
+): YAXisComponentOption {
+  // Determine the appropriate min value based on scale type and user input
+  let minValue: YAXisComponentOption['min'];
 
-  // Set the y-axis minimum relative to the data
-  if (inputAxis?.min === undefined) {
+  if (inputAxis?.min !== undefined) {
+    // User explicitly set a min value - use it for both linear and log scales
+    minValue = inputAxis.min;
+  } else if (useLogarithmicBase !== 'none') {
+    // For logarithmic scales without explicit min:
+    // Let ECharts auto-calculate the range based on data to avoid issues with
+    // function-based calculations which can result in improper ranges (e.g., 1-10)
+    minValue = undefined;
+  } else {
+    // For linear scales without explicit min:
+    // Use dynamic calculation with padding for better visualization
     // https://echarts.apache.org/en/option.html#yAxis.min
-    yAxis.min = (value): number => {
+    minValue = (value): number => {
       if (value.min >= 0 && value.min <= 1) {
         // Helps with PercentDecimal units, or datasets that return 0 or 1 booleans
         return 0;
@@ -256,6 +264,25 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
       } else {
         return roundDown(value.min * NEGATIVE_MIN_VALUE_MULTIPLIER);
       }
+    };
+  }
+
+  // Build the yAxis configuration
+  const yAxis: YAXisComponentOption = {
+    show: true,
+    axisLabel: {
+      show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
+    },
+    min: minValue,
+    max: inputAxis?.max,
+  };
+
+  // Apply logarithmic scale settings if requested
+  if (useLogarithmicBase !== 'none') {
+    return {
+      ...yAxis,
+      type: 'log',
+      logBase: useLogarithmicBase,
     };
   }
 

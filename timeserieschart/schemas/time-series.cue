@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 package model
 
 import (
-	"github.com/perses/perses/cue/common"
+	"github.com/perses/shared/cue/common"
 )
 
 kind: "TimeSeriesChart"
@@ -56,6 +56,7 @@ spec: close({
 	if min != _|_ && max != _|_ {
 		max: >=min
 	}
+	logBase?: 2 | 10
 }
 
 #querySettings: [...{

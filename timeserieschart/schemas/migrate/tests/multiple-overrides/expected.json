@@ -45,7 +45,7 @@
       {
         "queryIndex": 4,
         "colorMode": "fixed",
-        "colorValue": "yellow",
+        "colorValue": "#fade2a",
         "lineStyle": "dashed"
       }
     ]

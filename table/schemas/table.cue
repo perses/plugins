@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,7 +15,7 @@ package model
 
 import (
 	"strings"
-	"github.com/perses/perses/cue/common"
+	"github.com/perses/shared/cue/common"
 	model "github.com/perses/perses/cue/model/api/v1/common"
 )
 

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelData, PanelProps } from '@perses-dev/plugin-system';
+import {
+  PanelData,
+  PanelProps,
+  replaceVariablesInString,
+  useAllVariableValues,
+  VariableStateMap,
+} from '@perses-dev/plugin-system';
 import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
@@ -157,20 +163,30 @@ function ColumnFilterDropdown({
  * If column is hidden, return undefined.
  * If column do not have a definition, return a default column config.
  */
-function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): TableColumnConfig<unknown> | undefined {
+function generateColumnConfig(
+  name: string,
+  columnSettings: ColumnSettings[],
+  allVariables: VariableStateMap
+): TableColumnConfig<unknown> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
       if (column.hide) {
         return undefined;
       }
 
+      const { name, header, headerDescription, enableSorting, width, align, dataLink } = column;
+      const modifiedDataLink = dataLink
+        ? { ...dataLink, url: replaceVariablesInString(dataLink.url, allVariables) }
+        : undefined;
+
       return {
         accessorKey: name,
-        header: column.header ?? name,
-        headerDescription: column.headerDescription,
-        enableSorting: column.enableSorting,
-        width: column.width,
-        align: column.align,
+        header: header ?? name,
+        headerDescription,
+        enableSorting,
+        width,
+        align,
+        dataLink: modifiedDataLink,
         ...generateCellContentConfig(column),
       };
     }
@@ -193,6 +209,7 @@ export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
 
 export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
   const theme = useTheme();
+  const allVariables = useAllVariableValues();
 
   // TODO: handle other query types
   const queryMode = getTablePanelQueryOptions(spec).mode;
@@ -271,7 +288,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     for (const columnSetting of spec.columnSettings ?? []) {
       if (customizedColumns.has(columnSetting.name)) continue; // Skip duplicates
 
-      const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings ?? []);
+      const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings ?? [], allVariables);
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
         customizedColumns.add(columnSetting.name);
@@ -282,7 +299,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     if (!spec.defaultColumnHidden) {
       for (const key of keys) {
         if (!customizedColumns.has(key)) {
-          const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
+          const columnConfig = generateColumnConfig(key, spec.columnSettings ?? [], allVariables);
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
           }
@@ -291,7 +308,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return columns;
-  }, [keys, spec.columnSettings, spec.defaultColumnHidden]);
+  }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables]);
 
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {

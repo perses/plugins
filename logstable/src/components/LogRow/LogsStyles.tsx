@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,21 +20,29 @@ export const LogRowContainer = styled(Box, {
   transition: 'all 0.2s ease',
   marginBottom: '4px',
   fontFamily: '"DejaVu Sans Mono", monospace',
+  userSelect: 'text',
 }));
 
 export const LogRowContent = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'isExpandable',
-})<{ isExpandable: boolean }>(({ theme, isExpandable }) => ({
-  display: 'grid',
-  gridTemplateColumns: isExpandable ? '16px minmax(160px, max-content) 1fr' : 'minmax(160px, max-content) 1fr',
-  alignItems: 'flex-start',
-  padding: '4px 8px',
-  cursor: isExpandable ? 'pointer' : 'default',
-  gap: '12px',
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
+  shouldForwardProp: (prop) => prop !== 'isExpandable' && prop !== 'isHighlighted' && prop !== 'isSelected',
+})<{ isExpandable: boolean; isHighlighted?: boolean; isSelected?: boolean }>(
+  ({ theme, isExpandable, isHighlighted, isSelected }) => ({
+    display: 'grid',
+    gridTemplateColumns: isExpandable ? '16px minmax(160px, max-content) 1fr' : 'minmax(160px, max-content) 1fr',
+    alignItems: 'flex-start',
+    padding: '4px 8px',
+    cursor: 'default',
+    gap: '12px',
+    backgroundColor: isHighlighted
+      ? theme.palette.action.hover
+      : isSelected
+        ? theme.palette.action.selected
+        : 'transparent',
+    '&:hover': {
+      backgroundColor: isSelected ? theme.palette.action.focus : theme.palette.action.hover,
+    },
+  })
+);
 
 export const ExpandButton = styled(IconButton, {
   shouldForwardProp: (prop) => prop !== 'isExpanded',
