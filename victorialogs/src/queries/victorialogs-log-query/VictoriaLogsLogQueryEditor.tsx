@@ -18,10 +18,8 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback, useState, useEffect } from 'react';
-import { produce } from 'immer';
-import { OptionsEditorControl } from '@perses-dev/components';
 import { LogsQLEditor } from '../../components/logsql-editor';
 import { VICTORIALOGS_DATASOURCE_KIND, VictoriaLogsDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';

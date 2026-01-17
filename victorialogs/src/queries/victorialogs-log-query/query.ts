@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { replaceVariables } from '@perses-dev/plugin-system';
+import { LogEntry, LogData } from '@perses-dev/core';
 import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsClient } from '../../model/client';
-import { LogEntry, LogData } from '@perses-dev/core';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { VictoriaLogsLogQuerySpec } from './types';
 import { LogQueryPlugin, LogQueryContext } from './interface';
@@ -24,10 +24,10 @@ function convertStreamToLogs(data: VictoriaLogsStreamQueryRangeResponse, default
 
   data.forEach((entry) => {
     const { _msg, _time, ...labels } = entry;
-    const time = (!_time && !_msg) ? defaultTime : Date.parse(_time);
+    const time = !_time && !_msg ? defaultTime : Date.parse(_time);
     entries.push({
       timestamp: Number(time) / 1000,
-      line: _msg || "",
+      line: _msg || '',
       labels: labels,
     });
   });

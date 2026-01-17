@@ -11,10 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VictoriaLogsClient, VictoriaLogsFieldItem, VictoriaLogsFieldNamesResponse, VictoriaLogsFieldValuesResponse } from '../model';
 import { VariableOption, useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
-import { AbsoluteTimeRange, DatasourceSelector, StatusError } from '@perses-dev/core'
+import { AbsoluteTimeRange, DatasourceSelector, StatusError } from '@perses-dev/core';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import {
+  VictoriaLogsClient,
+  VictoriaLogsFieldItem,
+  VictoriaLogsFieldNamesResponse,
+  VictoriaLogsFieldValuesResponse,
+} from '../model';
 
 export const fieldItemsToVariableOptions = (values?: VictoriaLogsFieldItem[]): VariableOption[] => {
   if (!values) return [];

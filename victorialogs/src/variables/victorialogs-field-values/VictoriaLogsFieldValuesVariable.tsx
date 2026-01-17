@@ -20,9 +20,9 @@ import {
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
 import { VictoriaLogsClient, DEFAULT_VICTORIALOGS, VICTORIALOGS_DATASOURCE_KIND } from '../../model';
-import { VictoriaLogsFieldValuesVariableEditor } from './VictoriaLogsFieldValuesVariableEditor';
 import { VictoriaLogsFieldValuesVariableOptions } from '../types';
 import { fieldItemsToVariableOptions, getVictoriaLogsTimeRange } from '../utils';
+import { VictoriaLogsFieldValuesVariableEditor } from './VictoriaLogsFieldValuesVariableEditor';
 
 export const VictoriaLogsFieldValuesVariable: VariablePlugin<VictoriaLogsFieldValuesVariableOptions> = {
   getVariableOptions: async (spec: VictoriaLogsFieldValuesVariableOptions, ctx: GetVariableOptionsContext) => {
@@ -37,11 +37,13 @@ export const VictoriaLogsFieldValuesVariable: VariablePlugin<VictoriaLogsFieldVa
 
     const timeRange = getVictoriaLogsTimeRange(ctx.timeRange);
 
-    const { values } = query ? await client.fieldValues({
-      field: replaceVariables(spec.field, ctx.variables),
-      query: query,
-      ...timeRange,
-    }) : { values: [] };
+    const { values } = query
+      ? await client.fieldValues({
+          field: replaceVariables(spec.field, ctx.variables),
+          query: query,
+          ...timeRange,
+        })
+      : { values: [] };
     return {
       data: fieldItemsToVariableOptions(values),
     };

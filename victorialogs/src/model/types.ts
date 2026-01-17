@@ -24,30 +24,30 @@ export type VictoriaLogsLogEntry = {
   _msg: string;
   _time: string;
   [key: string]: string;
-}
+};
 
 export type VictoriaLogsStreamQueryRangeResponse = VictoriaLogsLogEntry[];
 
 export type VictoriaLogsStatsQueryRangeResult = {
   metric: Record<string, string>;
   values: Array<[number, string]>;
-}
+};
 
 export type VictoriaLogsStatsQueryRangeData = {
   resultType: string;
   result: VictoriaLogsStatsQueryRangeResult[];
-}
+};
 
 export type VictoriaLogsStatsQueryRangeResponse = {
   status: 'success' | 'error';
   error?: string;
   data: VictoriaLogsStatsQueryRangeData;
-}
+};
 
 export type VictoriaLogsFieldItem = {
   value: string;
   hits: number;
-}
+};
 
 export interface VictoriaLogsFieldNamesResponse {
   values: VictoriaLogsFieldItem[];
