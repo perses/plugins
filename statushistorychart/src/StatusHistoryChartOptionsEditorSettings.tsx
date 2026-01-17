@@ -13,7 +13,14 @@
 
 import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { OptionsEditorGroup, OptionsEditorGrid, OptionsEditorColumn } from '@perses-dev/components';
+import {
+  OptionsEditorGroup,
+  OptionsEditorGrid,
+  OptionsEditorColumn,
+  SortSelector,
+  SortOption,
+  SortSelectorProps,
+} from '@perses-dev/components';
 import { Button } from '@mui/material';
 import { ReactElement } from 'react';
 import { StatusHistoryChartOptions, StatusHistroyChartEditorProps } from './status-history-model.js';
@@ -30,6 +37,14 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
     );
   };
 
+  const handleSortChange: SortSelectorProps['onChange'] = (newSort: SortOption) => {
+    onChange(
+      produce(value, (draft: StatusHistoryChartOptions) => {
+        draft.sorting = newSort;
+      })
+    );
+  };
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -39,6 +54,9 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
           value={value.legend}
           onChange={handleLegendChange}
         />
+        <OptionsEditorGroup title="Visual">
+          <SortSelector value={value.sorting} onChange={handleSortChange} />
+        </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Reset Settings">
