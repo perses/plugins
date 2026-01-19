@@ -17,11 +17,9 @@ import {
   ThresholdsEditor,
   ThresholdsEditorProps,
 } from '@perses-dev/components';
-import { LegendOptionsEditor, LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
-import { LogsTableOptions } from './model';
-
-type LogsTableSettingsEditorProps = OptionsEditorProps<LogsTableOptions>;
+import { LogsTableSettingsEditorProps } from './model';
 
 export function LogsTableSettingsEditor(props: LogsTableSettingsEditorProps): ReactElement {
   const { onChange, value } = props;
