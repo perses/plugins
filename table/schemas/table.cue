@@ -15,7 +15,7 @@ package model
 
 import (
 	"strings"
-	"github.com/perses/perses/cue/common"
+	"github.com/perses/shared/cue/common"
 	model "github.com/perses/perses/cue/model/api/v1/common"
 )
 

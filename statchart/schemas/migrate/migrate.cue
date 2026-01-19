@@ -16,7 +16,7 @@ package migrate
 import (
 	"list"
 	"strings"
-	commonMigrate "github.com/perses/perses/cue/common/migrate"
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
 )
 
 #grafanaType: "stat"

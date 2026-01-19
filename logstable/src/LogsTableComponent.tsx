@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { LogsTableProps } from './model';
 import { LogsList } from './components/LogsList';
 
@@ -21,15 +21,16 @@ export function LogsTableComponent(props: LogsTableProps): ReactElement | null {
 
   if (queryResults[0]?.data.logs === undefined) {
     return (
-      <Typography
-        variant="h3"
+      <Box
         sx={{
-          textAlign: 'center',
-          marginTop: 4,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
         }}
       >
-        No logs to display
-      </Typography>
+        <Typography>No logs to display</Typography>
+      </Box>
     );
   }
   const logs = queryResults[0]?.data.logs.entries;
