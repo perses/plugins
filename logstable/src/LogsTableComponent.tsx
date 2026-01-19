@@ -17,7 +17,7 @@ import { LogsTableProps } from './model';
 import { LogsList } from './components/LogsList';
 
 export function LogsTableComponent(props: LogsTableProps): ReactElement | null {
-  const { queryResults, spec } = props;
+  const { queryResults, spec, contentDimensions } = props;
 
   // all queries results must be included
   const logs = queryResults
@@ -39,5 +39,5 @@ export function LogsTableComponent(props: LogsTableProps): ReactElement | null {
     );
   }
 
-  return <LogsList logs={logs} spec={spec} />;
+  return <LogsList logs={logs} spec={spec} contentDimensions={contentDimensions} />;
 }

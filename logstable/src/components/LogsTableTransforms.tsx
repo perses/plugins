@@ -11,13 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-// import { useExpandedRows } from './hooks/useExpandedRows';
-import { LogEntry } from '@perses-dev/core';
-import { LogsTableProps } from '../model';
-import { VirtualizedLogsList } from './VirtualizedLogsList';
+import { TransformsEditor, TransformsEditorProps } from '@perses-dev/components';
+import { ReactElement } from 'react';
+import { LogsTableSettingsEditorProps } from '../model';
 
-type Props = Pick<LogsTableProps, 'spec' | 'contentDimensions'> & { logs: LogEntry[] };
-export const LogsList: React.FC<Props> = ({ spec, logs, contentDimensions }) => {
-  return <VirtualizedLogsList contentDimensions={contentDimensions} logs={logs} spec={spec} />;
+export const LogsTableTransforms = (props: LogsTableSettingsEditorProps): ReactElement => {
+  const { onChange, value } = props;
+
+  const handleTransformsChange: TransformsEditorProps['onChange'] = (transforms) => {
+    onChange({ ...value, transforms });
+  };
+
+  return <TransformsEditor value={value.transforms ?? []} onChange={handleTransformsChange} />;
 };
