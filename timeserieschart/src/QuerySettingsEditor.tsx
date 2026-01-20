@@ -378,8 +378,8 @@ function QuerySettingsInput({
   };
 
   return (
-    <Stack spacing={2} sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+    <Stack sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+      <Stack direction="row" alignItems="center" sx={{ flexWrap: 'wrap', gap: 2 }}>
         {/* Query Index Selection */}
         <TextField
           select
