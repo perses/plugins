@@ -16,6 +16,7 @@ import { Box, useTheme, Popover, Button, ButtonGroup, IconButton } from '@mui/ma
 import CloseIcon from 'mdi-material-ui/Close';
 import { Virtuoso } from 'react-virtuoso';
 import { LogEntry } from '@perses-dev/core';
+import { useSelection } from '@perses-dev/components';
 import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogsTableOptions } from '../model';
 import { LogRow } from './LogRow';
@@ -55,10 +56,29 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     }
   });
 
-  // Keep ref in sync with state
+  const selectionEnabled = spec.selection?.enabled ?? false;
+  const { setSelection, clearSelection } = useSelection<LogEntry, number>();
+
   useEffect(() => {
     selectedRowsRef.current = selectedRows;
   }, [selectedRows]);
+
+  // Sync local selection state with context when selection is enabled
+  useEffect(() => {
+    if (!selectionEnabled) return;
+
+    if (selectedRows.size === 0) {
+      clearSelection();
+    } else {
+      const selectionItems = Array.from(selectedRows)
+        .map((index) => {
+          const log = logs[index];
+          return log ? { id: index, item: log } : null;
+        })
+        .filter((entry): entry is { id: number; item: LogEntry } => entry !== null);
+      setSelection(selectionItems);
+    }
+  }, [selectedRows, logs, selectionEnabled, setSelection, clearSelection]);
 
   const handleDismissHints = useCallback(() => {
     setIsHintsDismissed(true);

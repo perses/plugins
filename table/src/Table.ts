@@ -12,16 +12,17 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialTableOptions, TableOptions } from './models';
 import {
   getTablePanelQueryOptions,
+  TableCellsEditor,
+  TableColumnsEditor,
   TablePanel,
   TableProps,
-  TableColumnsEditor,
   TableSettingsEditor,
-  TableCellsEditor,
   TableTransformsEditor,
 } from './components';
+import { TableSelectionsEditor } from './components/TableSelectionsEditor';
+import { createInitialTableOptions, TableOptions } from './models';
 
 /**
  * The core TimeSeriesTable panel plugin for Perses.
@@ -35,6 +36,7 @@ export const Table: PanelPlugin<TableOptions, TableProps> = {
     { label: 'Column Settings', content: TableColumnsEditor },
     { label: 'Cell Settings', content: TableCellsEditor },
     { label: 'Transforms', content: TableTransformsEditor },
+    { label: 'Selections', content: TableSelectionsEditor },
   ],
   createInitialOptions: createInitialTableOptions,
 };
