@@ -272,10 +272,7 @@ export function convertPanelYAxis(
 
   // Build the yAxis configuration
   const yAxis: YAXisComponentOption = {
-    show: true,
-    axisLabel: {
-      show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
-    },
+    show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: minValue,
     max: inputAxis?.max,
   };
