@@ -420,16 +420,22 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     return null;
   }
 
-  // override default spacing, see: https://echarts.apache.org/en/option.html#grid
-  const gridLeft = yAxis && yAxis.label ? 30 : 20;
-  // With containLabel: true in theme, ECharts auto-reserves space for axis labels.
-  // For multiple right axes, add extra padding for the last axis labels that extend beyond the grid.
-  const gridRight = additionalFormats.length > 0 ? 10 : 20;
-  const gridOverrides: GridComponentOption = {
-    left: !echartsYAxis.show ? 0 : gridLeft,
-    right: gridRight,
-    bottom: 0,
-  };
+  const gridOverrides: GridComponentOption = echartsYAxis.show === false
+    ? {
+        // When Y axes are hidden, disable containLabel to prevent auto-spacing, but add bottom padding for X axis
+        left: 0,
+        right: 0,
+        bottom: 30,
+        containLabel: false,
+      }
+    : {
+        left: yAxis && yAxis.label ? 30 : 20,
+        // With containLabel: true in theme, ECharts auto-reserves space for axis labels.
+        // For multiple right axes, add extra padding for the last axis labels that extend beyond the grid.
+        right: additionalFormats.length > 0 ? 10 : 20,
+        bottom: 0,
+        containLabel: true,
+      };
 
   const handleDataZoom = (event: ZoomEventData): void => {
     // TODO: add ECharts transition animation on zoom
