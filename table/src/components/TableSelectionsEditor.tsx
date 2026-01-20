@@ -11,27 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { SelectionOptions, SelectionOptionsEditor } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
+import { TableSettingsEditorProps } from '../models';
 
-import (
-	"github.com/perses/shared/cue/common"
-)
+export function TableSelectionsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {
+  function handleSelectionsChange(selection: SelectionOptions | undefined): void {
+    onChange({ ...value, selection: selection });
+  }
 
-#palette: {
-	mode: "auto" | "categorical"
+  return <SelectionOptionsEditor value={value.selection} onChange={handleSelectionsChange} />;
 }
-
-#visual: {
-	palette?: #palette
-}
-
-#links: {
-	trace?: string
-}
-
-kind: "TraceTable"
-spec: close({
-	visual?:    #visual
-	links?:     #links
-	selection?: common.#selection
-})

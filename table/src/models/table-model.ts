@@ -13,7 +13,7 @@
 
 import { Definition, FormatOptions, Transform, UnknownSpec } from '@perses-dev/core';
 import { TableDensity, TableCellConfig } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
 import React from 'react';
 import { TextField, Stack, MenuItem, Typography } from '@mui/material';
 
@@ -138,6 +138,8 @@ export interface TableOptions {
   pagination?: boolean;
   // Enable filtering for individual columns.
   enableFiltering?: boolean;
+  // Enable row selection.
+  selection?: SelectionOptions;
   // Customize column display and order them by their index in the array.
   columnSettings?: ColumnSettings[];
   // Customize cell display based on their value.

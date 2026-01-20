@@ -18,10 +18,10 @@ import {
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
-import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
+import { PaginationState, RowSelectionState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
 import { useTheme, Theme, Typography, Box } from '@mui/material';
 import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
@@ -210,6 +210,41 @@ export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
 export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
   const theme = useTheme();
   const allVariables = useAllVariableValues();
+
+  const selectionEnabled = spec.selection?.enabled ?? false;
+  const { selectionMap, setSelection, clearSelection } = useSelection<Record<string, unknown>, string>();
+
+  const filteredDataRef = useRef<Array<Record<string, unknown>>>([]);
+
+  // Convert selectionMap to TanStack's RowSelectionState format
+  const rowSelection = useMemo((): RowSelectionState => {
+    const result: RowSelectionState = {};
+    selectionMap.forEach((_, id) => {
+      result[id as string] = true;
+    });
+    return result;
+  }, [selectionMap]);
+
+  const handleRowSelectionChange = useCallback(
+    (newRowSelection: RowSelectionState) => {
+      const newSelection: Array<{ id: string; item: Record<string, unknown> }> = [];
+      for (const [id, isSelected] of Object.entries(newRowSelection)) {
+        if (isSelected) {
+          const index = parseInt(id, 10);
+          if (filteredDataRef.current[index] !== undefined) {
+            newSelection.push({ id, item: filteredDataRef.current[index] });
+          }
+        }
+      }
+
+      if (newSelection.length === 0) {
+        clearSelection();
+      } else {
+        setSelection(newSelection);
+      }
+    },
+    [setSelection, clearSelection]
+  );
 
   // TODO: handle other query types
   const queryMode = getTablePanelQueryOptions(spec).mode;
@@ -452,6 +487,9 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return filtered;
   }, [data, columnFilters, spec.enableFiltering]);
 
+  // Keep ref in sync with filtered data for use in selection handler
+  filteredDataRef.current = filteredData;
+
   const [pagination, setPagination] = useState<PaginationState | undefined>(
     spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
   );
@@ -592,6 +630,9 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         onSortingChange={setSorting}
         pagination={pagination}
         onPaginationChange={setPagination}
+        checkboxSelection={selectionEnabled}
+        rowSelection={rowSelection}
+        onRowSelectionChange={handleRowSelectionChange}
       />
     </>
   );
