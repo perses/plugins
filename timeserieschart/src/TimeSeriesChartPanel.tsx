@@ -421,6 +421,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   }
 
   const gridOverrides: GridComponentOption = useMemo(() => {
+    // When Y axes are hidden, disable containLabel to prevent auto-spacing, but add bottom padding for X axis
     return echartsYAxis.show === false
       ? {
           left: 0,
@@ -430,6 +431,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
         }
       : {
           left: yAxis && yAxis.label ? 30 : 20,
+          // With containLabel: true in theme, ECharts auto-reserves space for axis labels.
+          // For multiple right axes, add extra padding for the last axis labels that extend beyond the grid.
           right: additionalFormats.length > 0 ? 10 : 20,
           bottom: 0,
           containLabel: true,
