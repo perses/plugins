@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import '@testing-library/jest-dom';
 
-/**
- * Default datasource selector for OpenGemini.
- * Used when no specific datasource is selected in a query.
- */
-export const DEFAULT_OPENGEMINI_DATASOURCE: DatasourceSelector = {
-  kind: 'OpenGeminiDatasource',
-};
+// Always mock e-charts during tests since we don't have a proper canvas in jsdom
+jest.mock('echarts/core');

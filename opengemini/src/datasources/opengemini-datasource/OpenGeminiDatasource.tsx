@@ -14,10 +14,10 @@
 import { fetch } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import {
-    OpenGeminiDatasourceSpec,
-    OpenGeminiClient,
-    OpenGeminiQueryParams,
-    OpenGeminiQueryResponse,
+  OpenGeminiDatasourceSpec,
+  OpenGeminiClient,
+  OpenGeminiQueryParams,
+  OpenGeminiQueryResponse,
 } from './opengemini-datasource-types';
 import { OpenGeminiDatasourceEditor } from './OpenGeminiDatasourceEditor';
 
@@ -26,57 +26,55 @@ import { OpenGeminiDatasourceEditor } from './OpenGeminiDatasourceEditor';
  * OpenGemini is InfluxDB v1.x compatible, so we use the standard /query endpoint.
  */
 const createClient: DatasourcePlugin<OpenGeminiDatasourceSpec, OpenGeminiClient>['createClient'] = (spec, options) => {
-    const { directUrl, proxy } = spec;
-    const { proxyUrl } = options;
+  const { directUrl, proxy } = spec;
+  const { proxyUrl } = options;
 
-    // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
-    const datasourceUrl = directUrl ?? proxyUrl;
-    if (datasourceUrl === undefined) {
-        throw new Error(
-            'No URL specified for OpenGemini client. You can use directUrl in the spec to configure it.'
-        );
-    }
+  // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
+  const datasourceUrl = directUrl ?? proxyUrl;
+  if (datasourceUrl === undefined) {
+    throw new Error('No URL specified for OpenGemini client. You can use directUrl in the spec to configure it.');
+  }
 
-    const specHeaders = proxy?.spec.headers;
+  const specHeaders = proxy?.spec.headers;
 
-    return {
-        options: {
-            datasourceUrl,
-        },
-        query: async (params: OpenGeminiQueryParams, headers): Promise<OpenGeminiQueryResponse> => {
-            // Build the query URL with parameters
-            const queryParams = new URLSearchParams({
-                db: params.db,
-                q: params.q,
-            });
+  return {
+    options: {
+      datasourceUrl,
+    },
+    query: async (params: OpenGeminiQueryParams, headers): Promise<OpenGeminiQueryResponse> => {
+      // Build the query URL with parameters
+      const queryParams = new URLSearchParams({
+        db: params.db,
+        q: params.q,
+      });
 
-            if (params.epoch) {
-                queryParams.set('epoch', params.epoch);
-            }
+      if (params.epoch) {
+        queryParams.set('epoch', params.epoch);
+      }
 
-            const url = `${datasourceUrl}/query?${queryParams.toString()}`;
+      const url = `${datasourceUrl}/query?${queryParams.toString()}`;
 
-            const init = {
-                method: 'GET',
-                headers: headers ?? specHeaders,
-            };
+      const init = {
+        method: 'GET',
+        headers: headers ?? specHeaders,
+      };
 
-            const response = await fetch(url, init);
+      const response = await fetch(url, init);
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`OpenGemini query failed: ${response.status} ${response.statusText} - ${errorText}`);
-            }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OpenGemini query failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
 
-            try {
-                const body = await response.json();
-                return body as OpenGeminiQueryResponse;
-            } catch (e) {
-                console.error('Invalid response from OpenGemini server', e);
-                throw new Error('Invalid response from OpenGemini server');
-            }
-        },
-    };
+      try {
+        const body = await response.json();
+        return body as OpenGeminiQueryResponse;
+      } catch (e) {
+        console.error('Invalid response from OpenGemini server', e);
+        throw new Error('Invalid response from OpenGemini server');
+      }
+    },
+  };
 };
 
 /**
@@ -84,7 +82,7 @@ const createClient: DatasourcePlugin<OpenGeminiDatasourceSpec, OpenGeminiClient>
  * Provides connectivity to OpenGemini time-series database using InfluxDB-compatible HTTP API.
  */
 export const OpenGeminiDatasource: DatasourcePlugin<OpenGeminiDatasourceSpec, OpenGeminiClient> = {
-    createClient,
-    OptionsEditorComponent: OpenGeminiDatasourceEditor,
-    createInitialOptions: () => ({ directUrl: '' }),
+  createClient,
+  OptionsEditorComponent: OpenGeminiDatasourceEditor,
+  createInitialOptions: () => ({ directUrl: '' }),
 };

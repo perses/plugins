@@ -16,9 +16,9 @@ import React, { ReactElement } from 'react';
 import { OpenGeminiDatasourceSpec } from './opengemini-datasource-types';
 
 export interface OpenGeminiDatasourceEditorProps {
-    value: OpenGeminiDatasourceSpec;
-    onChange: (next: OpenGeminiDatasourceSpec) => void;
-    isReadonly?: boolean;
+  value: OpenGeminiDatasourceSpec;
+  onChange: (next: OpenGeminiDatasourceSpec) => void;
+  isReadonly?: boolean;
 }
 
 /**
@@ -26,38 +26,38 @@ export interface OpenGeminiDatasourceEditorProps {
  * Allows users to configure either a direct URL or proxy settings.
  */
 export function OpenGeminiDatasourceEditor(props: OpenGeminiDatasourceEditorProps): ReactElement {
-    const { value, onChange, isReadonly } = props;
+  const { value, onChange, isReadonly } = props;
 
-    const initialSpecDirect: OpenGeminiDatasourceSpec = {
-        directUrl: '',
-    };
+  const initialSpecDirect: OpenGeminiDatasourceSpec = {
+    directUrl: '',
+  };
 
-    const initialSpecProxy: OpenGeminiDatasourceSpec = {
-        proxy: {
-            kind: 'HTTPProxy',
-            spec: {
-                allowedEndpoints: [
-                    {
-                        endpointPattern: '/query',
-                        method: 'GET',
-                    },
-                    {
-                        endpointPattern: '/write',
-                        method: 'POST',
-                    },
-                ],
-                url: '',
-            },
-        },
-    };
+  const initialSpecProxy: OpenGeminiDatasourceSpec = {
+    proxy: {
+      kind: 'HTTPProxy',
+      spec: {
+        allowedEndpoints: [
+          {
+            endpointPattern: '/query',
+            method: 'GET',
+          },
+          {
+            endpointPattern: '/write',
+            method: 'POST',
+          },
+        ],
+        url: '',
+      },
+    },
+  };
 
-    return (
-        <HTTPSettingsEditor
-            value={value}
-            onChange={onChange}
-            isReadonly={isReadonly}
-            initialSpecDirect={initialSpecDirect}
-            initialSpecProxy={initialSpecProxy}
-        />
-    );
+  return (
+    <HTTPSettingsEditor
+      value={value}
+      onChange={onChange}
+      isReadonly={isReadonly}
+      initialSpecDirect={initialSpecDirect}
+      initialSpecProxy={initialSpecProxy}
+    />
+  );
 }

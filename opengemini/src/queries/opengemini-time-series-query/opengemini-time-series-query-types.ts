@@ -17,19 +17,19 @@ import { DatasourceSelector } from '@perses-dev/core';
  * OpenGemini time series query specification.
  */
 export interface OpenGeminiTimeSeriesQuerySpec {
-    /**
-     * Optional datasource selector. If not provided, the default OpenGemini datasource will be used.
-     */
-    datasource?: DatasourceSelector;
+  /**
+   * Optional datasource selector. If not provided, the default OpenGemini datasource will be used.
+   */
+  datasource?: DatasourceSelector;
 
-    /**
-     * InfluxQL query string.
-     * Example: SELECT mean("value") FROM "cpu" WHERE time > now() - 1h GROUP BY time(1m)
-     */
-    query: string;
+  /**
+   * InfluxQL query string.
+   * Example: SELECT mean("value") FROM "cpu" WHERE time > now() - 1h GROUP BY time(1m)
+   */
+  query: string;
 
-    /**
-     * Database name to query against.
-     */
-    database: string;
+  /**
+   * Database name to query against.
+   */
+  database: string;
 }

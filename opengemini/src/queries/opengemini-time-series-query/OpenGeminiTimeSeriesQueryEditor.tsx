@@ -23,51 +23,51 @@ export type OpenGeminiTimeSeriesQueryEditorProps = OptionsEditorProps<OpenGemini
  * Provides fields for database selection and InfluxQL query input.
  */
 export function OpenGeminiTimeSeriesQueryEditor(props: OpenGeminiTimeSeriesQueryEditorProps): ReactElement {
-    const { value, onChange, isReadonly } = props;
+  const { value, onChange, isReadonly } = props;
 
-    const handleDatabaseChange = (event: ChangeEvent<HTMLInputElement>) => {
-        onChange({
-            ...value,
-            database: event.target.value,
-        });
-    };
+  const handleDatabaseChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({
+      ...value,
+      database: event.target.value,
+    });
+  };
 
-    const handleQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
-        onChange({
-            ...value,
-            query: event.target.value,
-        });
-    };
+  const handleQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({
+      ...value,
+      query: event.target.value,
+    });
+  };
 
-    return (
-        <Stack spacing={2}>
-            <TextField
-                label="Database"
-                value={value.database}
-                onChange={handleDatabaseChange}
-                disabled={isReadonly}
-                placeholder="Enter database name"
-                fullWidth
-                size="small"
-                helperText="The OpenGemini database to query"
-            />
-            <div>
-                <Typography variant="subtitle2" gutterBottom>
-                    InfluxQL Query
-                </Typography>
-                <TextField
-                    value={value.query}
-                    onChange={handleQueryChange}
-                    disabled={isReadonly}
-                    placeholder='SELECT mean("value") FROM "measurement" WHERE $timeFilter GROUP BY time($__interval)'
-                    fullWidth
-                    multiline
-                    minRows={3}
-                    maxRows={10}
-                    size="small"
-                    helperText="Enter an InfluxQL query. Use $timeFilter for time range and $__interval for auto-interval."
-                />
-            </div>
-        </Stack>
-    );
+  return (
+    <Stack spacing={2}>
+      <TextField
+        label="Database"
+        value={value.database}
+        onChange={handleDatabaseChange}
+        disabled={isReadonly}
+        placeholder="Enter database name"
+        fullWidth
+        size="small"
+        helperText="The OpenGemini database to query"
+      />
+      <div>
+        <Typography variant="subtitle2" gutterBottom>
+          InfluxQL Query
+        </Typography>
+        <TextField
+          value={value.query}
+          onChange={handleQueryChange}
+          disabled={isReadonly}
+          placeholder='SELECT mean("value") FROM "measurement" WHERE $timeFilter GROUP BY time($__interval)'
+          fullWidth
+          multiline
+          minRows={3}
+          maxRows={10}
+          size="small"
+          helperText="Enter an InfluxQL query. Use $timeFilter for time range and $__interval for auto-interval."
+        />
+      </div>
+    </Stack>
+  );
 }

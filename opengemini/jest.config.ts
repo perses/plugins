@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import type { Config } from '@jest/types';
+import shared from '../jest.shared';
 
-/**
- * Default datasource selector for OpenGemini.
- * Used when no specific datasource is selected in a query.
- */
-export const DEFAULT_OPENGEMINI_DATASOURCE: DatasourceSelector = {
-  kind: 'OpenGeminiDatasource',
+const jestConfig: Config.InitialOptions = {
+    ...shared,
+
+    setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+    modulePathIgnorePatterns: ['<rootDir>/dist/'],
 };
+
+export default jestConfig;

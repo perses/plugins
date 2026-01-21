@@ -22,11 +22,11 @@
 // Datasource exports
 export { OpenGeminiDatasource, OpenGeminiDatasourceEditor } from './datasources/opengemini-datasource';
 export type {
-    OpenGeminiDatasourceSpec,
-    OpenGeminiClient,
-    OpenGeminiQueryParams,
-    OpenGeminiQueryResponse,
-    OpenGeminiSeries,
+  OpenGeminiDatasourceSpec,
+  OpenGeminiClient,
+  OpenGeminiQueryParams,
+  OpenGeminiQueryResponse,
+  OpenGeminiSeries,
 } from './datasources/opengemini-datasource';
 
 // Query exports

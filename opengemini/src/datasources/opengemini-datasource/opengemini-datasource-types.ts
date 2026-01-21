@@ -19,57 +19,57 @@ import { DatasourceClient } from '@perses-dev/plugin-system';
  * Supports either direct URL connection or proxy configuration.
  */
 export interface OpenGeminiDatasourceSpec {
-    directUrl?: string;
-    proxy?: HTTPProxy;
+  directUrl?: string;
+  proxy?: HTTPProxy;
 }
 
 /**
  * Query request parameters for OpenGemini (InfluxDB compatible).
  */
 export interface OpenGeminiQueryParams {
-    db: string;
-    q: string;
-    epoch?: 'ns' | 'u' | 'ms' | 's' | 'm' | 'h';
+  db: string;
+  q: string;
+  epoch?: 'ns' | 'u' | 'ms' | 's' | 'm' | 'h';
 }
 
 /**
  * OpenGemini client options.
  */
 export interface OpenGeminiClientOptions {
-    datasourceUrl: string;
-    headers?: RequestHeaders;
+  datasourceUrl: string;
+  headers?: RequestHeaders;
 }
 
 /**
  * Single series result from OpenGemini.
  */
 export interface OpenGeminiSeries {
-    name: string;
-    columns: string[];
-    values: Array<Array<number | string | null>>;
-    tags?: Record<string, string>;
+  name: string;
+  columns: string[];
+  values: Array<Array<number | string | null>>;
+  tags?: Record<string, string>;
 }
 
 /**
  * Single statement result from OpenGemini.
  */
 export interface OpenGeminiStatementResult {
-    statement_id: number;
-    series?: OpenGeminiSeries[];
-    error?: string;
+  statement_id: number;
+  series?: OpenGeminiSeries[];
+  error?: string;
 }
 
 /**
  * Full response from OpenGemini query endpoint.
  */
 export interface OpenGeminiQueryResponse {
-    results: OpenGeminiStatementResult[];
+  results: OpenGeminiStatementResult[];
 }
 
 /**
  * OpenGemini datasource client interface.
  */
 export interface OpenGeminiClient extends DatasourceClient {
-    options: OpenGeminiClientOptions;
-    query(params: OpenGeminiQueryParams, headers?: RequestHeaders): Promise<OpenGeminiQueryResponse>;
+  options: OpenGeminiClientOptions;
+  query(params: OpenGeminiQueryParams, headers?: RequestHeaders): Promise<OpenGeminiQueryResponse>;
 }

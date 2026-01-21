@@ -21,19 +21,19 @@ import { OpenGeminiTimeSeriesQuerySpec } from './opengemini-time-series-query-ty
  * Allows querying OpenGemini using InfluxQL and displaying results in time series panels.
  */
 export const OpenGeminiTimeSeriesQuery: TimeSeriesQueryPlugin<OpenGeminiTimeSeriesQuerySpec> = {
-    getTimeSeriesData,
-    OptionsEditorComponent: OpenGeminiTimeSeriesQueryEditor,
-    createInitialOptions: () => ({
-        query: '',
-        database: '',
-    }),
-    dependsOn: (spec) => {
-        // Parse variables from the query string
-        const queryVariables = parseVariables(spec.query);
-        const databaseVariables = parseVariables(spec.database);
-        const allVariables = [...new Set([...queryVariables, ...databaseVariables])];
-        return {
-            variables: allVariables,
-        };
-    },
+  getTimeSeriesData,
+  OptionsEditorComponent: OpenGeminiTimeSeriesQueryEditor,
+  createInitialOptions: () => ({
+    query: '',
+    database: '',
+  }),
+  dependsOn: (spec) => {
+    // Parse variables from the query string
+    const queryVariables = parseVariables(spec.query);
+    const databaseVariables = parseVariables(spec.database);
+    const allVariables = [...new Set([...queryVariables, ...databaseVariables])];
+    return {
+      variables: allVariables,
+    };
+  },
 };
