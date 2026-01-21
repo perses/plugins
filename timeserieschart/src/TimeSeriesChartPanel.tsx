@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
@@ -131,7 +131,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   // These will create additional Y axes on the right side
   const { additionalFormats, formatToYAxisIndex, seriesFormatMap } = useMemo(() => {
     const baseUnit = format?.unit ?? 'decimal';
-    const additionalFormats: typeof format[] = [];
+    const additionalFormats: Array<typeof format> = [];
     const formatToYAxisIndex = new Map<string, number>();
     const seriesFormatMap = new Map<string, typeof format>();
 
@@ -416,10 +416,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     );
   }, [legend?.values, format]);
 
-  if (adjustedContentDimensions === undefined) {
-    return null;
-  }
-
   const gridOverrides: GridComponentOption = useMemo(() => {
     // When Y axes are hidden, disable containLabel to prevent auto-spacing, but add bottom padding for X axis
     return echartsYAxis.show === false
@@ -438,6 +434,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           containLabel: true,
         };
   }, [echartsYAxis.show, yAxis, additionalFormats.length]);
+
+  if (adjustedContentDimensions === undefined) {
+    return null;
+  }
 
   const handleDataZoom = (event: ZoomEventData): void => {
     // TODO: add ECharts transition animation on zoom
