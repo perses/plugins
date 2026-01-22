@@ -13,7 +13,7 @@
 
 import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MOCK_LOGS_QUERY_RESULT, MOCK_LOGS_QUERY_DEFINITION } from './test/mock-query-results';
+import { MOCK_LOGS_QUERY_RESULT, MOCK_LOGS_QUERY_DEFINITION, MOCK_LOGS_QUERY_RESULTS } from './test/mock-query-results';
 import { LogsTablePanel } from './LogsTablePanel';
 import { LogsQueryData, LogsTableProps } from './model';
 
@@ -36,13 +36,17 @@ const TEST_LOGS_TABLE_PROPS: Omit<LogsTableProps, 'queryResults'> = {
 
 describe('LogsTablePanel', () => {
   // Helper to render the panel with some context set
-  const renderPanel = (data: LogsQueryData): void => {
+  const renderPanel = (data: LogsQueryData | LogsQueryData[]): void => {
     render(
       <SnackbarProvider>
         <ChartsProvider chartsTheme={testChartsTheme}>
           <LogsTablePanel
             {...TEST_LOGS_TABLE_PROPS}
-            queryResults={[{ definition: MOCK_LOGS_QUERY_DEFINITION, data }]}
+            queryResults={
+              !Array.isArray(data)
+                ? [{ definition: MOCK_LOGS_QUERY_DEFINITION, data }]
+                : data.map((d) => ({ definition: MOCK_LOGS_QUERY_DEFINITION, data: d }))
+            }
           />
         </ChartsProvider>
       </SnackbarProvider>
@@ -60,6 +64,12 @@ describe('LogsTablePanel', () => {
     expect(await items.querySelectorAll('div[data-index]')).toHaveLength(2); // 2 lines
     expect(await screen.findAllByText('2022-10-24T15:31:30.000Z')).toHaveLength(1); // first timestamp appear once per line
     expect(await screen.findAllByText('2022-10-24T15:31:31.000Z')).toHaveLength(1); // second timestamp appear once per line
+  });
+
+  it('should include results from multiple queries', async () => {
+    renderPanel(MOCK_LOGS_QUERY_RESULTS);
+    const items = screen.getAllByTestId(/^log-row-container-/);
+    expect(items.length).toBe(2);
   });
 
   it('should select multiple rows with Cmd+Click', () => {
