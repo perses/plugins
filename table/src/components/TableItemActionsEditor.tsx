@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './CellsEditor';
-export * from './ColumnsEditor';
-export * from './EmbeddedPanel';
-export * from './TableCellsEditor';
-export * from './TableColumnsEditor';
-export * from './TableItemActionsEditor';
-export * from './TablePanel';
-export * from './TableSelectionsEditor';
-export * from './TableSettingsEditor';
-export * from './TableTransformsEditor';
+import { ActionsOptions, ItemActionsEditor } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
+import { TableSettingsEditorProps } from '../models';
+
+export function TableItemActionsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {
+  function handleActionsChange(actions: ActionsOptions | undefined): void {
+    onChange({ ...value, actions: actions });
+  }
+
+  return <ItemActionsEditor value={value.actions} onChange={handleActionsChange} />;
+}

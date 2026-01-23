@@ -26,11 +26,12 @@ spec: close({
 	defaultColumnHeight?: "auto" | number
 	defaultColumnHidden?: bool
 	pagination?:          bool
-	enableFiltering?:    bool
-	selection?:          common.#selection
-	columnSettings?: [...#columnSettings]
-	cellSettings?: [...#cellSettings]
-	transforms?: [...common.#transform]
+	enableFiltering?:     bool
+	selection?:           common.#selection
+	actions?:             common.#actions
+	columnSettings?:      [...#columnSettings]
+	cellSettings?:        [...#cellSettings]
+	transforms?:          [...common.#transform]
 })
 
 #columnSettings: {

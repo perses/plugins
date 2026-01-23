@@ -11,19 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, Theme, Typography, useTheme } from '@mui/material';
+import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
+import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
 import {
+  ActionsOptions,
   PanelData,
   PanelProps,
   replaceVariablesInString,
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
-import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
+import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { PaginationState, RowSelectionState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
-import { useTheme, Theme, Typography, Box } from '@mui/material';
-import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
+import { ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -213,6 +215,15 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   const selectionEnabled = spec.selection?.enabled ?? false;
   const { selectionMap, setSelection, clearSelection } = useSelection<Record<string, unknown>, string>();
+
+  const itemActionsConfig = spec.actions ? (spec.actions as ActionsOptions) : undefined;
+  const itemActionsListConfig =
+    itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : [];
+
+  const { getItemActionButtons, confirmDialog, actionButtons } = useSelectionItemActions({
+    actions: itemActionsListConfig,
+    variableState: allVariables,
+  });
 
   const filteredDataRef = useRef<Array<Record<string, unknown>>>([]);
 
@@ -524,6 +535,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   return (
     <>
+      {confirmDialog}
       {spec.enableFiltering && (
         <div
           style={{
@@ -633,6 +645,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         checkboxSelection={selectionEnabled}
         rowSelection={rowSelection}
         onRowSelectionChange={handleRowSelectionChange}
+        getItemActions={({ id, data }) => getItemActionButtons({ id, data: data as Record<string, unknown> })}
+        hasItemActions={actionButtons && actionButtons.length > 0}
       />
     </>
   );
