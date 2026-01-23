@@ -30,6 +30,12 @@ export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): Reac
     return <TextOverlay message="This panel does not support more than one query." />;
   }
 
+  if (queryResults[0]?.data.searchResult) {
+    return (
+      <TextOverlay message="This panel does not support displaying trace search results. Please enter a trace id in the query field instead." />
+    );
+  }
+
   const trace = queryResults[0]?.data.trace;
   if (!trace) {
     return <NoDataOverlay resource="trace" />;
