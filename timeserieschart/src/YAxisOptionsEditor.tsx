@@ -20,9 +20,8 @@ import {
   DEFAULT_Y_AXIS,
   TimeSeriesChartYAxisOptions,
   Y_AXIS_CONFIG,
-  LOG_BASE_OPTIONS,
   LOG_BASE_CONFIG,
-  LOG_VALID_BASES,
+  LOG_BASE_OPTIONS,
 } from './time-series-chart-model';
 
 export interface YAxisOptionsEditorProps {
@@ -31,7 +30,7 @@ export interface YAxisOptionsEditorProps {
 }
 
 export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps): ReactElement {
-  const logBase = LOG_BASE_CONFIG[LOG_VALID_BASES[value.logBase ?? 'none']];
+  const logBase = value.logBase ? LOG_BASE_CONFIG[value.logBase] : undefined;
 
   return (
     <OptionsEditorGroup title="Y Axis">
@@ -64,13 +63,13 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
           <SettingsAutocomplete
             value={{
               ...logBase,
-              id: logBase.label,
+              id: logBase?.label ?? 'None',
             }}
             options={LOG_BASE_OPTIONS}
             onChange={(__, newValue) => {
               const updatedValue: TimeSeriesChartYAxisOptions = {
                 ...value,
-                logBase: newValue.log,
+                logBase: newValue.log ?? undefined,
               };
               onChange(updatedValue);
             }}

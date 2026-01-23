@@ -88,7 +88,7 @@ export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   format: DEFAULT_FORMAT,
   min: undefined,
   max: undefined,
-  logBase: 'none',
+  logBase: undefined,
 };
 
 export const Y_AXIS_CONFIG = {
@@ -187,26 +187,20 @@ export const OPACITY_CONFIG = {
 };
 
 // LogBase outlines the allowed log bases for the log-supported charts.
-export type LOG_BASE_LABEL = 'none' | 'log2' | 'log10';
-export type LOG_BASE = 'none' | 2 | 10;
+export type LOG_BASE = undefined | 2 | 10;
 
 // Single source of truth for log base configuration
-export const LOG_BASE_CONFIG: Record<LOG_BASE_LABEL, { label: string; log: LOG_BASE }> = {
-  none: { label: 'None', log: 'none' },
-  log2: { label: '2', log: 2 },
-  log10: { label: '10', log: 10 },
+export const LOG_BASE_CONFIG: Record<string, { label: string; log: LOG_BASE }> = {
+  none: { label: 'None', log: undefined },
+  '2': { label: '2', log: 2 },
+  '10': { label: '10', log: 10 },
 };
 
 // Options array for SettingsAutocomplete
 export const LOG_BASE_OPTIONS = Object.entries(LOG_BASE_CONFIG).map(([id, config]) => ({
-  id: id as LOG_BASE_LABEL,
+  id: id as string,
   ...config,
 }));
-
-// Reverse lookup map from LOG_BASE value to LOG_BASE_LABEL
-export const LOG_VALID_BASES: Record<LOG_BASE, LOG_BASE_LABEL> = Object.fromEntries(
-  Object.entries(LOG_BASE_CONFIG).map(([label, config]) => [config.log, label])
-) as Record<LOG_BASE, LOG_BASE_LABEL>;
 
 // Both of these constants help produce a value that is LESS THAN the initial value.
 // For positive values, we multiply by a number less than 1 to get this outcome.
