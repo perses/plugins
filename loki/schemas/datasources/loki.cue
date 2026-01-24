@@ -18,15 +18,11 @@ import (
 	commonProxy "github.com/perses/shared/cue/common/proxy"
 )
 
-kind: "LokiDatasource"
+#kind: "LokiDatasource"
+
+kind: #kind
 spec: {
-	#directUrl | #proxy
+	commonProxy.#baseHTTPDatasourceSpec
 }
 
-#directUrl: {
-	directUrl: common.#url
-}
-
-#proxy: {
-	proxy: commonProxy.#HTTPProxy
-}
+#selector: common.#datasourceSelector & { _kind: #kind }
