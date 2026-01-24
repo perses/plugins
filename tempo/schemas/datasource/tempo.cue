@@ -18,23 +18,11 @@ import (
 	commonProxy "github.com/perses/shared/cue/common/proxy"
 )
 
-kind: #kind
-spec: {
-	#directUrl | #proxy
-}
-
 #kind: "TempoDatasource"
 
-#directUrl: {
-	directUrl: common.#url
+kind: #kind
+spec: {
+	commonProxy.#baseHTTPDatasourceSpec
 }
 
-#proxy: {
-	proxy: commonProxy.#HTTPProxy
-}
-
-#selector: common.#datasourceSelector & {
-	datasource?: =~common.#variableSyntaxRegex | {
-		kind: #kind
-	}
-}
+#selector: common.#datasourceSelector & { _kind: #kind }
