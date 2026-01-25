@@ -1,0 +1,81 @@
+services:
+  # PostgreSQL with TimescaleDB for time-series testing
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: perses-sql-test-postgres
+    environment:
+      POSTGRES_DB: perses_test
+      POSTGRES_USER: perses
+      POSTGRES_PASSWORD: perses_test_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./test-data/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./test-data/postgres/sample-data.sql:/docker-entrypoint-initdb.d/02-sample-data.sql
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U perses -d perses_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # MySQL for testing
+  mysql:
+    image: mysql:8.0
+    container_name: perses-sql-test-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: perses_test
+      MYSQL_USER: perses
+      MYSQL_PASSWORD: perses_test_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./test-data/mysql/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./test-data/mysql/sample-data.sql:/docker-entrypoint-initdb.d/02-sample-data.sql
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # MariaDB for testing
+  mariadb:
+    image: mariadb:11
+    container_name: perses-sql-test-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: root_password
+      MARIADB_DATABASE: perses_test
+      MARIADB_USER: perses
+      MARIADB_PASSWORD: perses_test_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./test-data/mariadb/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./test-data/mariadb/sample-data.sql:/docker-entrypoint-initdb.d/02-sample-data.sql
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Adminer for database management UI
+  adminer:
+    image: adminer:latest
+    container_name: perses-sql-test-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - mysql
+      - mariadb
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+volumes:
+  postgres-data:
+  mysql-data:
+  mariadb-data:
