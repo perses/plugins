@@ -30,6 +30,7 @@
     "prometheus",
     "pyroscope",
     "scatterchart",
+    "sql",
     "statchart",
     "staticlistvariable",
     "statushistorychart",
