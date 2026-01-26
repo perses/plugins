@@ -251,7 +251,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [queryResults, queryMode, spec.columnSettings]);
 
   // Transform will be applied by their orders on the original data
-  const data = transformData(rawData, spec.transforms ?? []);
+  const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
