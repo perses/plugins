@@ -22,7 +22,9 @@ export interface VictoriaLogsDatasourceSelector extends DatasourceSelector {
 
 export const DEFAULT_VICTORIALOGS: VictoriaLogsDatasourceSelector = { kind: VICTORIALOGS_DATASOURCE_KIND };
 
-export function isDefaultVictoriaLogsSelector(datasourceSelectValue: DatasourceSelectValue<VictoriaLogsDatasourceSelector>): boolean {
+export function isDefaultVictoriaLogsSelector(
+  datasourceSelectValue: DatasourceSelectValue<VictoriaLogsDatasourceSelector>
+): boolean {
   return !isVariableDatasource(datasourceSelectValue) && datasourceSelectValue.name === undefined;
 }
 
