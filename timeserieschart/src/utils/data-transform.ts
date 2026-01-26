@@ -40,7 +40,6 @@ import {
   TimeSeriesChartVisualOptions,
   TimeSeriesChartYAxisOptions,
   LineStyleType,
-  LOG_BASE,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -232,13 +231,10 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
  * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options.
  * Handles both linear and logarithmic scales with appropriate min/max calculations.
  */
-export function convertPanelYAxis(
-  inputAxis: TimeSeriesChartYAxisOptions = {},
-  useLogarithmicBase: LOG_BASE | undefined
-): YAXisComponentOption {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   // Determine the appropriate min value based on scale type and user input
   let minValue: YAXisComponentOption['min'];
-  if (useLogarithmicBase !== undefined) {
+  if (inputAxis.logBase !== undefined) {
     // For logarithmic scales without explicit min:
     // Let ECharts auto-calculate the range based on data to avoid issues with
     // function-based calculations which can result in improper ranges (e.g., 1-10)
@@ -277,11 +273,11 @@ export function convertPanelYAxis(
   };
 
   // Apply logarithmic scale settings if requested
-  if (useLogarithmicBase !== undefined) {
+  if (inputAxis.logBase !== undefined) {
     return {
       ...yAxis,
       type: 'log',
-      logBase: useLogarithmicBase,
+      logBase: inputAxis.logBase,
     };
   }
 

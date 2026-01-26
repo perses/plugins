@@ -54,7 +54,7 @@ describe('convertPanelYAxis', () => {
       min: 0.1,
       max: 1,
     };
-    const echartsAxis = convertPanelYAxis(persesAxis, undefined);
+    const echartsAxis = convertPanelYAxis(persesAxis);
     // Axis label is handled outside of echarts since it is built with a custom React component.
     expect(echartsAxis).toEqual({
       show: true,
@@ -75,8 +75,9 @@ describe('convertPanelYAxis', () => {
       },
       min: 0.1,
       max: 1,
+      logBase: 2,
     };
-    const actualAxisLog2 = convertPanelYAxis(persesAxis, 2);
+    const actualAxisLog2 = convertPanelYAxis(persesAxis);
     // Axis label is handled outside of echarts since it is built with a custom React component.
     expect(actualAxisLog2).toEqual({
       show: true,
@@ -88,7 +89,8 @@ describe('convertPanelYAxis', () => {
         show: true,
       },
     });
-    const actualAxisLog10 = convertPanelYAxis(persesAxis, 10);
+    persesAxis.logBase = 10;
+    const actualAxisLog10 = convertPanelYAxis(persesAxis);
     // Axis label is handled outside of echarts since it is built with a custom React component.
     expect(actualAxisLog10).toEqual({
       show: true,
