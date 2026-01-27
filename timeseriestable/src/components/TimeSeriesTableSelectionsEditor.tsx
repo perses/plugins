@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { SelectionOptions, SelectionOptionsEditor } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
+import { TimeSeriesTableSettingsEditorProps } from '../model';
 
-import (
-	"github.com/perses/shared/cue/common"
-)
+export function TimeSeriesTableSelectionsEditor({ value, onChange }: TimeSeriesTableSettingsEditorProps): ReactElement {
+  function handleSelectionsChange(selection: SelectionOptions | undefined): void {
+    onChange({ ...value, selection: selection });
+  }
 
-kind: "TimeSeriesTable"
-spec: close({
-  selection?: common.#selection
-	actions?:   common.#actions
-})
+  return <SelectionOptionsEditor value={value.selection} onChange={handleSelectionsChange} />;
+}
