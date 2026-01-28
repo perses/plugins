@@ -37,10 +37,7 @@ spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
 	// textMode - map directly from Grafana's BigValueTextMode enum
-	#grafanaTextMode: *#panel.options.textMode | "auto"
-	if #grafanaTextMode != null {
-		textMode: #grafanaTextMode
-	}
+	textMode: *#panel.options.textMode | "auto"
 
 	// metricLabel - map from reduceOptions.fields for field selection
 	#fields: *#panel.options.reduceOptions.fields | null
