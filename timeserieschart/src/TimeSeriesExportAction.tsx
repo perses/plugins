@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useMemo } from 'react';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton } from '@mui/material';
+import { InfoTooltip } from '@perses-dev/components';
 import DownloadIcon from 'mdi-material-ui/Download';
+import React, { useCallback, useMemo } from 'react';
+import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilename } from './CSVExportUtils';
 import { TimeSeriesChartProps } from './TimeSeriesChartPanel';
-import { extractExportableData, isExportableData, sanitizeFilename, exportDataAsCSV } from './CSVExportUtils';
 
 export const TimeSeriesExportAction: React.FC<TimeSeriesChartProps> = ({ queryResults, definition }) => {
   const exportableData = useMemo(() => {
@@ -56,10 +57,10 @@ export const TimeSeriesExportAction: React.FC<TimeSeriesChartProps> = ({ queryRe
   }
 
   return (
-    <Tooltip title="Export as CSV">
+    <InfoTooltip description="Export as CSV">
       <IconButton size="small" onClick={handleExport} aria-label="Export time series data as CSV">
         <DownloadIcon fontSize="inherit" />
       </IconButton>
-    </Tooltip>
+    </InfoTooltip>
   );
 };

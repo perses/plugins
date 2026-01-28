@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
 import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
@@ -19,6 +19,7 @@ import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
 import { TempoTraceQuerySpec } from '../model';
+import { ClosableAlert } from '../components/ClosableAlert';
 import { linkToSpan, linkToTrace } from './links';
 
 interface TracesExplorerQueryParams {
@@ -56,6 +57,11 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
 
   return (
     <Stack sx={{ height: '100%' }} gap={2}>
+      {hasMoreResults && (
+        <ClosableAlert severity="warning">
+          Not all matching traces are currently visible. Increase the display limit to view more.
+        </ClosableAlert>
+      )}
       <Box sx={{ height: '35%', flexShrink: 0 }}>
         <Panel
           panelOptions={{
@@ -97,11 +103,6 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
           },
         }}
       />
-      {hasMoreResults && (
-        <Alert severity="info">
-          Not all matching traces are currently displayed. Increase the result limit to view additional traces.
-        </Alert>
-      )}
     </Stack>
   );
 }
