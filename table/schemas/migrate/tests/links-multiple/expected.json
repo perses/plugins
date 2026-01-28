@@ -1,0 +1,23 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "instance",
+        "dataLink": {
+          "url": "http://example.com/third",
+          "openNewTab": true,
+          "title": "Third Link"
+        }
+      },
+      {
+        "name": "job",
+        "dataLink": {
+          "url": "http://example.com/second",
+          "openNewTab": true,
+          "title": "Second Link"
+        }
+      }
+    ]
+  }
+}
