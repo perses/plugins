@@ -16,15 +16,15 @@ package model
 import (
 	"strings"
 	"github.com/perses/shared/cue/common"
-	promDs "github.com/perses/plugins/prometheus/schemas/datasource:model"
+	ds "github.com/perses/plugins/prometheus/schemas/datasource:model"
 )
 
 kind: "PrometheusTimeSeriesQuery"
 spec: close({
-	promDs.#selector
+	ds.#selector
 	query:             strings.MinRunes(1)
 	seriesNameFormat?: string
-	minStep?:          =~promDs.#durationRegex | =~common.#variableSyntaxRegex
+	minStep?:          =~ds.#durationRegex | =~common.#variableSyntaxRegex
 	resolution?:       number
 })
 
