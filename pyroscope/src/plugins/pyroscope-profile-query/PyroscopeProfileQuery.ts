@@ -15,7 +15,17 @@ import { LabelFilter } from '../../utils/types';
 import { getProfileData } from './get-profile-data';
 import { PyroscopeProfileQueryEditor } from './PyroscopeProfileQueryEditor';
 
-export const PyroscopeProfileQuery = {
+export const PyroscopeProfileQuery: {
+  getProfileData: typeof getProfileData;
+  OptionsEditorComponent: typeof PyroscopeProfileQueryEditor;
+  createInitialOptions: () => {
+    maxNodes: number;
+    datasource?: string;
+    service: string;
+    profileType: string;
+    filters: LabelFilter[];
+  };
+} = {
   getProfileData,
   OptionsEditorComponent: PyroscopeProfileQueryEditor,
   createInitialOptions: (): {

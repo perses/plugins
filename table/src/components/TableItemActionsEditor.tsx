@@ -11,27 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { ActionsOptions, ItemActionsEditor } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
+import { TableSettingsEditorProps } from '../models';
 
-import (
-	"github.com/perses/shared/cue/common"
-)
+export function TableItemActionsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {
+  function handleActionsChange(actions: ActionsOptions | undefined): void {
+    onChange({ ...value, actions: actions });
+  }
 
-#palette: {
-	mode: "auto" | "categorical"
+  return <ItemActionsEditor value={value.actions} onChange={handleActionsChange} />;
 }
-
-#visual: {
-	palette?: #palette
-}
-
-#links: {
-	trace?: string
-}
-
-kind: "TraceTable"
-spec: close({
-	visual?:    #visual
-	links?:     #links
-	selection?: common.#selection
-})
