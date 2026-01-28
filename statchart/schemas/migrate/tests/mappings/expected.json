@@ -2,6 +2,7 @@
   "kind": "StatChart",
   "spec": {
     "calculation": "last",
+    "textMode": "auto",
     "mappings": [
       {
         "kind": "Value",
