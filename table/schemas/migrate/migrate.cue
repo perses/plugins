@@ -40,6 +40,12 @@ _getLastKey: {
     output: [for k, _ in #map {k}][len(#map) - 1]
 }
 
+// Function to return the last value of a map
+_getLastValue: {
+    #map: struct.MinFields(1)
+    output: [for _, v in #map {v}][len(#map) - 1]
+}
+
 kind: "Table"
 spec: {
 	if (*#panel.type | null) == "table" {
@@ -89,6 +95,17 @@ spec: {
 						// Same principle for width
 						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": widths: (*"\(property.value)" | "auto"): true
 					}
+					if property.id == "links" {
+						for link in property.value {
+							"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": dataLinks: "\(link.url)": {
+								url:        link.url
+								openNewTab: *link.targetBlank | false
+								if link.title != _|_ {
+									title: link.title
+								}
+							}
+						}
+					}
 					// NB: enrich this part when this is done https://github.com/perses/perses/issues/2852
 				}
 			}
@@ -108,6 +125,9 @@ spec: {
 							if _width == "auto" {"auto"},
 							strconv.Atoi(_width),
 						][0]
+					}
+					if settings.dataLinks != _|_ {
+						dataLink: {_getLastValue & {#map: settings.dataLinks}}.output
 					}
 				}
 			}
@@ -143,7 +163,7 @@ spec: {
 				settings
 			}]
 		])
-		
+
 		// Using flatten to get rid of the nested array for "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
 		#cellSettings: list.FlattenN([
