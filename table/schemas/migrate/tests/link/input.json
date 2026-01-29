@@ -53,7 +53,7 @@
               {
                 "targetBlank": false,
                 "title": "",
-                "url": "/d/job-dashboard?job=${__data.fields.job}"
+                "url": "/d/job-dashboard?job=${__data.fields[\"job\"]}"
               }
             ]
           }
