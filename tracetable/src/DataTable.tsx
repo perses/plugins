@@ -21,6 +21,7 @@ import {
   msToPrometheusDuration,
 } from '@perses-dev/core';
 import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme, useSelection } from '@perses-dev/components';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
@@ -57,6 +58,15 @@ export function DataTable(props: DataTableProps): ReactElement {
 
   const selectionEnabled = options.selection?.enabled ?? false;
   const { selectionMap, setSelection, clearSelection } = useSelection<Row, string>();
+
+  const itemActionsConfig = options.actions;
+  const showItemActions = itemActionsConfig?.enabled && itemActionsConfig?.displayWithItem;
+  const actionsList = showItemActions ? itemActionsConfig.actionsList : undefined;
+
+  const { getItemActionButtons, confirmDialog } = useSelectionItemActions({
+    actions: actionsList,
+    variableState: variableValues,
+  });
 
   // Convert selectionMap to DataGrid's row selection model
   const rowSelectionModel = useMemo((): GridRowSelectionModel => {
@@ -205,30 +215,45 @@ export function DataTable(props: DataTableProps): ReactElement {
           </Tooltip>
         ),
       },
+      ...(actionsList && actionsList.length > 0
+        ? [
+            {
+              field: 'actions',
+              headerName: 'Actions',
+              type: 'actions' as const,
+              width: 100,
+              getActions: ({ row }: { row: Row }) =>
+                getItemActionButtons({ id: row.traceId, data: row as unknown as Record<string, unknown> }),
+            },
+          ]
+        : []),
     ],
-    [serviceColorGenerator]
+    [serviceColorGenerator, actionsList, getItemActionButtons]
   );
 
   return (
-    <DataGrid
-      sx={{ borderWidth: 0 }}
-      columns={columns}
-      rows={rows}
-      getRowId={(row) => row.traceId}
-      getRowHeight={() => 'auto'}
-      getEstimatedRowHeight={() => 66}
-      checkboxSelection={selectionEnabled}
-      rowSelectionModel={selectionEnabled ? rowSelectionModel : undefined}
-      onRowSelectionModelChange={selectionEnabled ? handleRowSelectionModelChange : undefined}
-      disableRowSelectionOnClick={!selectionEnabled}
-      pageSizeOptions={[10, 20, 50, 100]}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 20 } },
-        sorting: {
-          sortModel: [{ field: 'startTimeUnixMs', sort: 'desc' }],
-        },
-      }}
-    />
+    <>
+      {confirmDialog}
+      <DataGrid
+        sx={{ borderWidth: 0 }}
+        columns={columns}
+        rows={rows}
+        getRowId={(row) => row.traceId}
+        getRowHeight={() => 'auto'}
+        getEstimatedRowHeight={() => 66}
+        checkboxSelection={selectionEnabled}
+        rowSelectionModel={selectionEnabled ? rowSelectionModel : undefined}
+        onRowSelectionModelChange={selectionEnabled ? handleRowSelectionModelChange : undefined}
+        disableRowSelectionOnClick={!selectionEnabled}
+        pageSizeOptions={[10, 20, 50, 100]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 20 } },
+          sorting: {
+            sortModel: [{ field: 'startTimeUnixMs', sort: 'desc' }],
+          },
+        }}
+      />
+    </>
   );
 }
 

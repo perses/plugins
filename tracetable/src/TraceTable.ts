@@ -13,6 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
+import { TraceTableItemActionsEditor } from './TraceTableItemActionsEditor';
 import { TraceTableSelectionsEditor } from './TraceTableSelectionsEditor';
 import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table-model';
 
@@ -22,7 +23,10 @@ import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table
 export const TraceTable: PanelPlugin<TraceTableOptions, TraceTablePanelProps> = {
   PanelComponent: TraceTablePanel,
   OptionsEditorComponent: TraceTableSelectionsEditor,
-  panelOptionsEditorComponents: [{ label: 'Selections', content: TraceTableSelectionsEditor }],
+  panelOptionsEditorComponents: [
+    { label: 'Selections', content: TraceTableSelectionsEditor },
+    { label: 'Item Actions', content: TraceTableItemActionsEditor },
+  ],
   supportedQueryTypes: ['TraceQuery'],
   createInitialOptions: createInitialTraceTableOptions,
 };

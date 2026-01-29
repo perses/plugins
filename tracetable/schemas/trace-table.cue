@@ -34,4 +34,5 @@ spec: close({
 	visual?:    #visual
 	links?:     #links
 	selection?: common.#selection
+	actions?:  	common.#actions
 })
