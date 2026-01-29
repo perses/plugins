@@ -12,7 +12,13 @@
 // limitations under the License.
 
 import { LogData, ThresholdOptions } from '@perses-dev/core';
-import { PanelProps, LegendSpecOptions, SelectionOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
+import {
+  PanelProps,
+  LegendSpecOptions,
+  SelectionOptions,
+  OptionsEditorProps,
+  ActionsOptions,
+} from '@perses-dev/plugin-system';
 
 export type LogsTableProps = PanelProps<LogsTableOptions, LogsQueryData>;
 
@@ -28,6 +34,7 @@ export interface LogsTableOptions {
   showTime?: boolean;
   showAll?: boolean;
   selection?: SelectionOptions;
+  actions?: ActionsOptions;
 }
 
 export type LogsTableSettingsEditorProps = OptionsEditorProps<LogsTableOptions>;

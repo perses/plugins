@@ -14,7 +14,7 @@
 package model
 
 import (
-	"github.com/perses/local/cue/common"
+	"github.com/perses/shared/cue/common"
 )
 
 kind: "LogsTable"
@@ -23,4 +23,5 @@ spec: close({
 	enableDetails?: bool
 	showTime?:      bool
 	selection?:     common.#selection
+	actions?:       common.#actions
 })

@@ -13,6 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { LogsTableComponent } from './LogsTableComponent';
+import { LogsTableItemActionsEditor } from './LogsTableItemActionsEditor';
 import { LogsTableSelectionsEditor } from './LogsTableSelectionsEditor';
 import { LogsTableSettingsEditor } from './LogsTableSettingsEditor';
 import { LogsTableOptions, LogsTableProps } from './model';
@@ -22,6 +23,7 @@ export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
   panelOptionsEditorComponents: [
     { label: 'Settings', content: LogsTableSettingsEditor },
     { label: 'Selections', content: LogsTableSelectionsEditor },
+    { label: 'Item Actions', content: LogsTableItemActionsEditor },
   ],
   supportedQueryTypes: ['LogQuery'],
   createInitialOptions: () => ({
