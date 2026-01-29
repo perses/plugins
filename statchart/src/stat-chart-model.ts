@@ -64,6 +64,7 @@ export interface StatChartOptions {
 export interface StatChartSparklineOptions {
   color?: string;
   width?: number;
+  areaOpacity?: number;
 }
 
 export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;

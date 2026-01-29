@@ -30,7 +30,7 @@ export function convertSparkline(
     },
     areaStyle: {
       color,
-      opacity: chartsTheme.sparkline.areaOpacity,
+      opacity: sparkline.areaOpacity ?? chartsTheme.sparkline.areaOpacity,
     },
   };
 }
