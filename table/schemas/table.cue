@@ -16,6 +16,7 @@ package model
 import (
 	"strings"
 	"github.com/perses/shared/cue/common"
+	commLocal "github.com/perses/local/cue/common"
 	model "github.com/perses/perses/cue/model/api/v1/common"
 )
 
@@ -26,10 +27,12 @@ spec: close({
 	defaultColumnHeight?: "auto" | number
 	defaultColumnHidden?: bool
 	pagination?:          bool
-	enableFiltering?:    bool
-	columnSettings?: [...#columnSettings]
-	cellSettings?: [...#cellSettings]
-	transforms?: [...common.#transform]
+	enableFiltering?:     bool
+	selection?:           commLocal.#selection
+	actions?:             commLocal.#actions
+	columnSettings?:      [...#columnSettings]
+	cellSettings?:        [...#cellSettings]
+	transforms?:          [...common.#transform]
 })
 
 #columnSettings: {
