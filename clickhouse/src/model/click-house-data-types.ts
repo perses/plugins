@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry, LogData, TimeSeriesData } from '@perses-dev/core';
+import { LogData, TimeSeriesData } from '@perses-dev/core';
 
 export interface ClickHouseTimeSeriesData extends TimeSeriesData {
   logs?: LogData;

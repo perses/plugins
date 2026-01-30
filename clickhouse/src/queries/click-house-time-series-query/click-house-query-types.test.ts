@@ -69,6 +69,7 @@ const createStubContext = (): TimeSeriesQueryContext => {
       start: new Date('01-02-2025'),
     },
     variableState: {},
+    refreshKey: '',
   };
   return stubTimeSeriesContext;
 };
