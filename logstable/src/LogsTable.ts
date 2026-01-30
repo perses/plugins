@@ -15,10 +15,14 @@ import { PanelPlugin } from '@perses-dev/plugin-system';
 import { LogsTableComponent } from './LogsTableComponent';
 import { LogsTableOptions, LogsTableProps } from './model';
 import { LogsTableSettingsEditor } from './LogsTableSettingsEditor';
+import { LogsTableTransforms } from './components/LogsTableTransforms';
 
 export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
   PanelComponent: LogsTableComponent,
-  panelOptionsEditorComponents: [{ label: 'Settings', content: LogsTableSettingsEditor }],
+  panelOptionsEditorComponents: [
+    { label: 'Settings', content: LogsTableSettingsEditor },
+    { label: 'Transforms', content: LogsTableTransforms },
+  ],
   supportedQueryTypes: ['LogQuery'],
   createInitialOptions: () => ({
     showTime: true,
