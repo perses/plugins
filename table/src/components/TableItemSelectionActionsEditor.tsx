@@ -11,14 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ActionsOptions, ItemActionsEditor } from '@perses-dev/plugin-system';
+import { ActionOptions, ItemSelectionActionsEditor, SelectionOptions } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 import { TableSettingsEditorProps } from '../models';
 
-export function TableItemActionsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {
-  function handleActionsChange(actions: ActionsOptions | undefined): void {
+export function TableItemSelectionActionsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {
+  function handleActionsChange(actions: ActionOptions | undefined): void {
     onChange({ ...value, actions: actions });
   }
 
-  return <ItemActionsEditor value={value.actions} onChange={handleActionsChange} />;
+  function handleSelectionChange(selection: SelectionOptions | undefined): void {
+    onChange({ ...value, selection: selection });
+  }
+
+  return (
+    <ItemSelectionActionsEditor
+      actionOptions={value.actions}
+      onChangeActions={handleActionsChange}
+      selectionOptions={value.selection}
+      onChangeSelection={handleSelectionChange}
+    />
+  );
 }

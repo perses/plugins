@@ -11,18 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ActionsOptions, ItemActionsEditor, OptionsEditorProps } from '@perses-dev/plugin-system';
+import {
+  ActionOptions,
+  ItemSelectionActionsEditor,
+  OptionsEditorProps,
+  SelectionOptions,
+} from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 import { TraceTableOptions } from './trace-table-model';
 
-type TraceTableItemActionsEditorProps = OptionsEditorProps<TraceTableOptions>;
+type TraceTableItemSelectionActionsEditorProps = OptionsEditorProps<TraceTableOptions>;
 
-export function TraceTableItemActionsEditor(props: TraceTableItemActionsEditorProps): ReactElement {
+export function TraceTableItemSelectionActionsEditor(props: TraceTableItemSelectionActionsEditorProps): ReactElement {
   const { onChange, value } = props;
 
-  const handleActionsChange = (actions?: ActionsOptions): void => {
+  const handleActionsChange = (actions?: ActionOptions): void => {
     onChange({ ...value, actions });
   };
 
-  return <ItemActionsEditor value={value.actions} onChange={handleActionsChange} />;
+  const handleSelectionChange = (selection?: SelectionOptions): void => {
+    onChange({ ...value, selection });
+  };
+
+  return (
+    <ItemSelectionActionsEditor
+      actionOptions={value.actions}
+      onChangeActions={handleActionsChange}
+      selectionOptions={value.selection}
+      onChangeSelection={handleSelectionChange}
+    />
+  );
 }

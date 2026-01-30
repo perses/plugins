@@ -14,7 +14,7 @@
 package model
 
 import (
-	"github.com/perses/shared/cue/common"
+	localComm "github.com/perses/local/cue/common"
 )
 
 #palette: {
@@ -33,6 +33,6 @@ kind: "TraceTable"
 spec: close({
 	visual?:    #visual
 	links?:     #links
-	selection?: common.#selection
-	actions?:  	common.#actions
+	selection?: localComm.#selection
+	actions?:  	localComm.#actions
 })

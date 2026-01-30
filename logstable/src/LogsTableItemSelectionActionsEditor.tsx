@@ -11,14 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SelectionOptions, SelectionOptionsEditor } from '@perses-dev/plugin-system';
+import { ActionOptions, ItemSelectionActionsEditor, SelectionOptions } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 import { LogsTableSettingsEditorProps } from './model';
 
-export function LogsTableSelectionsEditor({ value, onChange }: LogsTableSettingsEditorProps): ReactElement {
-  function handleSelectionsChange(selection: SelectionOptions | undefined): void {
+export function LogsTableItemSelectionActionsEditor({ value, onChange }: LogsTableSettingsEditorProps): ReactElement {
+  function handleActionsChange(actions: ActionOptions | undefined): void {
+    onChange({ ...value, actions: actions });
+  }
+
+  function handleSelectionChange(selection: SelectionOptions | undefined): void {
     onChange({ ...value, selection: selection });
   }
 
-  return <SelectionOptionsEditor value={value.selection} onChange={handleSelectionsChange} />;
+  return (
+    <ItemSelectionActionsEditor
+      actionOptions={value.actions}
+      onChangeActions={handleActionsChange}
+      selectionOptions={value.selection}
+      onChangeSelection={handleSelectionChange}
+    />
+  );
 }
