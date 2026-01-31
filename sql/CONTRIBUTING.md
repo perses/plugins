@@ -264,7 +264,7 @@ percli plugin start .
 ### Browser DevTools
 - F12 to open DevTools
 - Check Console for errors
-- Check Network tab for API calls
+- Check the Network tab for API calls
 ## Common Issues
 ### Plugin Not Loading
 - Check backend is running

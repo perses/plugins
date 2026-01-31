@@ -14,10 +14,13 @@
 import type { Config } from '@jest/types';
 import shared from '../jest.shared';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
+// Cast shared to the exact Jest config type to avoid type incompatibilities coming from differing @jest/types
+const sharedConfig = shared as unknown as Config.InitialOptions;
 
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+const jestConfig: Config.InitialOptions = {
+  ...sharedConfig,
+
+  setupFilesAfterEnv: [...(sharedConfig.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
 };
 
 export default jestConfig;
