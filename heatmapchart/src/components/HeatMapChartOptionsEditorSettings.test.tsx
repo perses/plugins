@@ -39,7 +39,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const showVisualMapSwitch = await screen.findByLabelText(/Show Visual Map/);
+    const showVisualMapSwitch = await screen.findByRole('checkbox', { name: /Show Visual Map/ });
     expect(showVisualMapSwitch).toBeInTheDocument();
     act(() => {
       fireEvent.click(showVisualMapSwitch);
