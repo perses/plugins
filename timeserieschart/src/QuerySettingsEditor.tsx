@@ -218,7 +218,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
-  const handleUnitChange = (format: FormatOptions | undefined, i: number): void => {
+  const handleUnitChange = (i: number, format?: FormatOptions): void => {
     updateQuerySettings(i, (qs) => {
       qs.format = format;
     });
@@ -287,7 +287,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             onRemoveAreaOpacity={() => removeAreaOpacity(i)}
             onAddUnit={() => addUnit(i)}
             onRemoveUnit={() => removeUnit(i)}
-            onUnitChange={(format) => handleUnitChange(format, i)}
+            onUnitChange={(format) => handleUnitChange(i, format)}
           />
         ))
       )}
@@ -319,7 +319,7 @@ interface QuerySettingsInputProps {
   onRemoveAreaOpacity: () => void;
   onAddUnit: () => void;
   onRemoveUnit: () => void;
-  onUnitChange: (format: FormatOptions | undefined) => void;
+  onUnitChange: (format?: FormatOptions) => void;
 }
 
 function QuerySettingsInput({
