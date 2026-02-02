@@ -66,7 +66,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const minInput = await screen.findByLabelText(/Min/);
+    const minInput = await screen.findByRole('spinbutton', { name: /Min/ });
     expect(minInput).toBeInTheDocument();
     userEvent.clear(minInput);
     userEvent.type(minInput, '5');
@@ -88,7 +88,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const maxInput = await screen.findByLabelText(/Max/);
+    const maxInput = await screen.findByRole('spinbutton', { name: /Max/ });
     expect(maxInput).toBeInTheDocument();
     userEvent.clear(maxInput);
     userEvent.type(maxInput, '5');
