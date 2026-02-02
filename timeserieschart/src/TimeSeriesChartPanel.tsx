@@ -374,7 +374,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     // Build array of max values for each additional format (in order)
     const maxValues = additionalFormats.map((fmt) => {
       const unitKey = fmt.unit;
-      return unitKey ? (maxValuesByFormat.get(unitKey) ?? 1000) : 1000;
+      return unitKey ? (maxValuesByFormat?.get(unitKey) ?? 1000) : 1000;
     });
     return getFormattedMultipleYAxes(echartsYAxis, format, additionalFormats, maxValues);
   }, [echartsYAxis, format, additionalFormats, maxValuesByFormat]);
