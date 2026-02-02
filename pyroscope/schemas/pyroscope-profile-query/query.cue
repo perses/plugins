@@ -14,7 +14,6 @@
 package model
 
 import (
-	pyroscope "github.com/perses/plugins/pyroscope/schemas/datasource:model"
 	ds "github.com/perses/plugins/pyroscope/schemas/datasource:model"
 )
 
