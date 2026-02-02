@@ -28,7 +28,7 @@ import (
 var (
 	bumpCueDeps = regexp.MustCompile(`v:(\s*)"v(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`)
 	// sharedPackageNames contains the list of packages release by the repository perses/shared to bump
-	sharedPackageNames = []string{"component", "dashboards", "plugin-system", "explorer"}
+	sharedPackageNames = []string{"components", "dashboards", "plugin-system", "explore"}
 	persesPackageName  = "core"
 )
 
@@ -107,7 +107,7 @@ func main() {
 	version := flag.String("version", "", "the version to use for the bump.")
 	sharedVersion := flag.String("shared-version", "", "the version for the shared component to use for the bump.")
 	flag.Parse()
-	if *version == "" || *sharedVersion == "" {
+	if *version == "" && *sharedVersion == "" {
 		logrus.Fatal("you must provide a version to use for the bump")
 	}
 
