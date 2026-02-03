@@ -14,14 +14,12 @@
 package model
 
 import (
-	pyroscope "github.com/perses/plugins/pyroscope/schemas/datasource:model"
+	ds "github.com/perses/plugins/pyroscope/schemas/datasource:model"
 )
 
 kind: "PyroscopeProfileQuery"
 spec: close({
-	datasource?: {
-		kind: pyroscope.kind
-	}
+	ds.#selector
 	maxNodes?: number
 	profileType: string
 	filters?: [...{
