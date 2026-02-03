@@ -21,9 +21,10 @@ import {
   msToPrometheusDuration,
 } from '@perses-dev/core';
 import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
 import InformationIcon from 'mdi-material-ui/Information';
-import { useChartsTheme } from '@perses-dev/components';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useChartsTheme, useSelection } from '@perses-dev/components';
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { ReactElement, useCallback, useMemo } from 'react';
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
@@ -55,30 +56,74 @@ export function DataTable(props: DataTableProps): ReactElement {
   const chartsTheme = useChartsTheme();
   const variableValues = useAllVariableValues();
 
+  const selectionEnabled = options.selection?.enabled ?? false;
+  const { selectionMap, setSelection, clearSelection } = useSelection<Row, string>();
+
+  const itemActionsConfig = options.actions;
+  const showItemActions = itemActionsConfig?.enabled && itemActionsConfig?.displayWithItem;
+  const actionsList = showItemActions ? itemActionsConfig.actionsList : undefined;
+
+  const { getItemActionButtons, confirmDialog } = useSelectionItemActions({
+    actions: actionsList,
+    variableState: variableValues,
+  });
+
+  // Convert selectionMap to DataGrid's row selection model
+  const rowSelectionModel = useMemo((): GridRowSelectionModel => {
+    return Array.from(selectionMap.keys()) as string[];
+  }, [selectionMap]);
+
   const paletteMode = options.visual?.palette?.mode;
   const serviceColorGenerator = useCallback(
     (serviceName: string) => getServiceColor(muiTheme, chartsTheme, paletteMode, serviceName),
     [muiTheme, chartsTheme, paletteMode]
   );
 
-  const rows: Row[] = [];
-  for (const query of result) {
-    const pluginSpec = query.definition.spec.plugin.spec as { datasource?: { name?: string } } | undefined;
-    const datasourceName = pluginSpec?.datasource?.name;
+  const rows: Row[] = useMemo(() => {
+    const result_rows: Row[] = [];
+    for (const query of result) {
+      const pluginSpec = query.definition.spec.plugin.spec as { datasource?: { name?: string } } | undefined;
+      const datasourceName = pluginSpec?.datasource?.name;
 
-    for (const trace of query.data?.searchResult || []) {
-      const traceLink = options.links?.trace
-        ? replaceVariablesInString(options.links.trace, variableValues, {
-            datasourceName: datasourceName ?? '',
-            traceId: trace.traceId,
-          })
-        : undefined;
-      rows.push({
-        ...trace,
-        traceLink,
-      });
+      for (const trace of query.data?.searchResult || []) {
+        const traceLink = options.links?.trace
+          ? replaceVariablesInString(options.links.trace, variableValues, {
+              datasourceName: datasourceName ?? '',
+              traceId: trace.traceId,
+            })
+          : undefined;
+        result_rows.push({
+          ...trace,
+          traceLink,
+        });
+      }
     }
-  }
+    return result_rows;
+  }, [result, options.links?.trace, variableValues]);
+
+  const rowsById = useMemo(() => {
+    const map = new Map<string, Row>();
+    rows.forEach((row) => map.set(row.traceId, row));
+    return map;
+  }, [rows]);
+
+  const handleRowSelectionModelChange = useCallback(
+    (newSelectionModel: GridRowSelectionModel) => {
+      const selectedIds = newSelectionModel as string[];
+      if (selectedIds.length === 0) {
+        clearSelection();
+      } else {
+        const newSelection = selectedIds
+          .map((id) => {
+            const row = rowsById.get(id);
+            return row ? { id, item: row } : null;
+          })
+          .filter((entry): entry is { id: string; item: Row } => entry !== null);
+        setSelection(newSelection);
+      }
+    },
+    [rowsById, setSelection, clearSelection]
+  );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
@@ -170,27 +215,46 @@ export function DataTable(props: DataTableProps): ReactElement {
           </Tooltip>
         ),
       },
+      ...(actionsList && actionsList.length > 0
+        ? [
+            {
+              field: 'actions',
+              headerName: 'Actions',
+              flex: actionsList.length,
+              display: 'flex' as const,
+              type: 'actions' as const,
+              getActions: ({ row }: { row: Row }) =>
+                getItemActionButtons({ id: row.traceId, data: row as unknown as Record<string, unknown> }),
+            },
+          ]
+        : []),
     ],
-    [serviceColorGenerator]
+    [serviceColorGenerator, actionsList, getItemActionButtons]
   );
 
   return (
-    <DataGrid
-      sx={{ borderWidth: 0 }}
-      columns={columns}
-      rows={rows}
-      getRowId={(row) => row.traceId}
-      getRowHeight={() => 'auto'}
-      getEstimatedRowHeight={() => 66}
-      disableRowSelectionOnClick={true}
-      pageSizeOptions={[10, 20, 50, 100]}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 20 } },
-        sorting: {
-          sortModel: [{ field: 'startTimeUnixMs', sort: 'desc' }],
-        },
-      }}
-    />
+    <>
+      {confirmDialog}
+      <DataGrid
+        sx={{ borderWidth: 0 }}
+        columns={columns}
+        rows={rows}
+        getRowId={(row) => row.traceId}
+        getRowHeight={() => 'auto'}
+        getEstimatedRowHeight={() => 66}
+        checkboxSelection={selectionEnabled}
+        rowSelectionModel={selectionEnabled ? rowSelectionModel : undefined}
+        onRowSelectionModelChange={selectionEnabled ? handleRowSelectionModelChange : undefined}
+        disableRowSelectionOnClick={!selectionEnabled}
+        pageSizeOptions={[10, 20, 50, 100]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 20 } },
+          sorting: {
+            sortModel: [{ field: 'startTimeUnixMs', sort: 'desc' }],
+          },
+        }}
+      />
+    </>
   );
 }
 
