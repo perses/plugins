@@ -8,6 +8,7 @@
     "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
+    "lint": "eslint src --ext .ts,.tsx",
     "test": "cross-env LC_ALL=C TZ=UTC jest",
     "type-check": "tsc --noEmit"
   },
