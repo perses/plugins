@@ -60,9 +60,6 @@ describe('convertPanelYAxis', () => {
       show: true,
       max: 1,
       min: 0.1,
-      axisLabel: {
-        show: true,
-      },
     });
   });
   it('should convert a Perses yAxis spec of type log to the ECharts equivalent', () => {
@@ -85,9 +82,6 @@ describe('convertPanelYAxis', () => {
       min: undefined,
       type: 'log',
       logBase: 2,
-      axisLabel: {
-        show: true,
-      },
     });
     persesAxis.logBase = 10;
     const actualAxisLog10 = convertPanelYAxis(persesAxis);
@@ -98,9 +92,6 @@ describe('convertPanelYAxis', () => {
       min: undefined,
       type: 'log',
       logBase: 10,
-      axisLabel: {
-        show: true,
-      },
     });
   });
 });

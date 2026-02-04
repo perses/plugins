@@ -25,7 +25,8 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { OptionsColorPicker } from '@perses-dev/components';
+import { OptionsColorPicker, UnitSelector } from '@perses-dev/components';
+import { FormatOptions } from '@perses-dev/core';
 import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
@@ -205,6 +206,24 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
+  const addUnit = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.format = { unit: 'decimal' };
+    });
+  };
+
+  const removeUnit = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.format = undefined;
+    });
+  };
+
+  const handleUnitChange = (i: number, format?: FormatOptions): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.format = format;
+    });
+  };
+
   const queryCount = useQueryCountContext();
 
   // Compute the list of query indexes for which query settings are not already defined.
@@ -266,6 +285,9 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             onRemoveLineStyle={() => removeLineStyle(i)}
             onAddAreaOpacity={() => addAreaOpacity(i)}
             onRemoveAreaOpacity={() => removeAreaOpacity(i)}
+            onAddUnit={() => addUnit(i)}
+            onRemoveUnit={() => removeUnit(i)}
+            onUnitChange={(format) => handleUnitChange(i, format)}
           />
         ))
       )}
@@ -295,10 +317,13 @@ interface QuerySettingsInputProps {
   onRemoveLineStyle: () => void;
   onAddAreaOpacity: () => void;
   onRemoveAreaOpacity: () => void;
+  onAddUnit: () => void;
+  onRemoveUnit: () => void;
+  onUnitChange: (format?: FormatOptions) => void;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity },
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format },
   availableQueryIndexes,
   onQueryIndexChange,
   onColorModeChange,
@@ -313,6 +338,9 @@ function QuerySettingsInput({
   onRemoveLineStyle,
   onAddAreaOpacity,
   onRemoveAreaOpacity,
+  onAddUnit,
+  onRemoveUnit,
+  onUnitChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
@@ -326,8 +354,9 @@ function QuerySettingsInput({
     if (!colorMode) options.push({ key: 'color', label: 'Color', action: onAddColor });
     if (!lineStyle) options.push({ key: 'lineStyle', label: 'Line Style', action: onAddLineStyle });
     if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
+    if (format === undefined) options.push({ key: 'unit', label: 'Unit', action: onAddUnit });
     return options;
-  }, [colorMode, lineStyle, areaOpacity, onAddColor, onAddLineStyle, onAddAreaOpacity]);
+  }, [colorMode, lineStyle, areaOpacity, format, onAddColor, onAddLineStyle, onAddAreaOpacity, onAddUnit]);
 
   const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     if (availableOptions.length === 1 && availableOptions[0]) {
@@ -349,8 +378,8 @@ function QuerySettingsInput({
   };
 
   return (
-    <Stack spacing={2} sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+    <Stack sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+      <Stack direction="row" alignItems="center" sx={{ flexWrap: 'wrap', gap: 2 }}>
         {/* Query Index Selection */}
         <TextField
           select
@@ -422,6 +451,15 @@ function QuerySettingsInput({
               onChange={onAreaOpacityChange}
               sx={{ flexGrow: 1 }}
             />
+          </SettingsSection>
+        )}
+
+        {/* Unit section */}
+        {format !== undefined && (
+          <SettingsSection label="Unit" onRemove={onRemoveUnit}>
+            <Box sx={{ minWidth: '180px' }}>
+              <UnitSelector value={format} onChange={onUnitChange} />
+            </Box>
           </SettingsSection>
         )}
 
