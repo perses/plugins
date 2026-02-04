@@ -54,7 +54,7 @@ const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<ClickHouseDatasource
 });
 
 const createStubContext = (): TimeSeriesQueryContext => {
-  const stubTimeSeriesContext: TimeSeriesQueryContext = {
+  const stubTimeSeriesContext: Partial<TimeSeriesQueryContext> = {
     datasourceStore: {
       getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
@@ -69,9 +69,8 @@ const createStubContext = (): TimeSeriesQueryContext => {
       start: new Date('01-02-2025'),
     },
     variableState: {},
-    refreshKey: '',
   };
-  return stubTimeSeriesContext;
+  return stubTimeSeriesContext as TimeSeriesQueryContext;
 };
 
 describe('ClickHouseTimeSeriesQuery', () => {
