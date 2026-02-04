@@ -154,6 +154,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
         }
       }}
       data-log-index={index}
+      data-testid={`log-row-container-${index}`}
     >
       <LogRowContent
         onMouseDown={handleRowMouseDown}
