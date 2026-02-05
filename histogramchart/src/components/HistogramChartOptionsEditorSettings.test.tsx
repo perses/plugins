@@ -14,7 +14,6 @@
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { HistogramChartOptions } from '../histogram-chart-model';
 import { HistogramChartOptionsEditorSettings } from './HistogramChartOptionsEditorSettings';
 
@@ -94,5 +93,52 @@ describe('HistogramChartOptionsEditorSettings', () => {
     userEvent.type(maxInput, '5');
     expect(onChange).toHaveBeenCalledTimes(2);
     expect(maxValue).toBe(5);
+  });
+
+  it('can modify log base', async () => {
+    const onChange = jest.fn();
+    renderHistogramChartOptionsEditorSettings(
+      {
+        format: {
+          unit: 'decimal',
+        },
+      },
+      onChange
+    );
+    const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
+    userEvent.click(logBaseSelector);
+    const log10Option = screen.getByRole('option', {
+      name: '10',
+    });
+    userEvent.click(log10Option);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logBase: 10,
+      })
+    );
+  });
+
+  it('can clear log base to none', async () => {
+    const onChange = jest.fn();
+    renderHistogramChartOptionsEditorSettings(
+      {
+        format: {
+          unit: 'decimal',
+        },
+        logBase: 10,
+      },
+      onChange
+    );
+    const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
+    userEvent.click(logBaseSelector);
+    const noneOption = screen.getByRole('option', {
+      name: 'None',
+    });
+    userEvent.click(noneOption);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logBase: undefined,
+      })
+    );
   });
 });
