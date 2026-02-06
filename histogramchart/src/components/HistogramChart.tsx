@@ -18,6 +18,7 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
 import { getColorFromThresholds } from '../utils';
+import { LOG_BASE } from '../histogram-chart-model';
 
 use([CustomChart]);
 
@@ -33,7 +34,7 @@ export interface HistogramChartProps {
   min?: number;
   max?: number;
   thresholds?: ThresholdOptions;
-  // TODO: exponential?: boolean;
+  logBase?: LOG_BASE;
 }
 
 export function HistogramChart({
@@ -44,26 +45,52 @@ export function HistogramChart({
   min,
   max,
   thresholds,
+  logBase,
 }: HistogramChartProps): ReactElement | null {
   const chartsTheme = useChartsTheme();
 
   const transformedData = useMemo(() => {
-    return data.buckets.map(([bucket, lowerBound, upperBound, count]) => {
-      return {
-        value: [parseFloat(lowerBound), parseFloat(upperBound), parseFloat(count), bucket],
-        itemStyle: {
-          color: getColorFromThresholds(
-            parseFloat(lowerBound),
-            thresholds,
-            chartsTheme,
-            chartsTheme.echartsTheme[0] as string
-          ),
-        },
-      };
-    });
-  }, [chartsTheme, data.buckets, thresholds]);
+    return data.buckets
+      .map(([bucket, lowerBound, upperBound, count]) => {
+        let lower = parseFloat(lowerBound);
+        const upper = parseFloat(upperBound);
+        const countValue = parseFloat(count);
+
+        // For logarithmic scales, we need to handle non-positive lower bounds
+        // since log(0) and log(negative) are undefined
+        if (logBase !== undefined && lower <= 0) {
+          // Skip buckets that would be entirely non-positive on a log scale
+          if (upper <= 0) {
+            return null;
+          }
+          // For buckets that span from 0 (or negative) to positive,
+          // use a small fraction of the upper bound as the lower bound
+          // This ensures the bucket is still visible on the log scale
+          lower = upper * 0.001; // Use 0.1% of upper bound as minimum
+        }
+
+        return {
+          value: [lower, upper, countValue, bucket],
+          itemStyle: {
+            color: getColorFromThresholds(
+              parseFloat(lowerBound), // Use original lower bound for threshold coloring
+              thresholds,
+              chartsTheme,
+              chartsTheme.echartsTheme[0] as string
+            ),
+          },
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+  }, [chartsTheme, data.buckets, logBase, thresholds]);
 
   const minXAxis: number | undefined = useMemo(() => {
+    if (logBase !== undefined) {
+      // For logarithmic scales, let ECharts auto-calculate the range based on data
+      // to avoid issues with non-positive values
+      return undefined;
+    }
+
     if (min) {
       return min;
     }
@@ -72,7 +99,7 @@ export function HistogramChart({
       return Math.min(0, Math.floor(transformedData[0]?.value[0] ?? 0));
     }
     return undefined;
-  }, [min, transformedData]);
+  }, [logBase, min, transformedData]);
 
   const maxXAxis: number | undefined = useMemo(() => {
     if (max) {
@@ -87,33 +114,74 @@ export function HistogramChart({
   const option: EChartsCoreOption = useMemo(() => {
     if (!transformedData) return chartsTheme.noDataOption;
 
+    // Build xAxis configuration based on whether logarithmic scale is requested
+    const xAxisConfig: Record<string, unknown> = {
+      scale: false,
+      min: minXAxis,
+      max: maxXAxis,
+    };
+
+    // Apply logarithmic scale settings if requested
+    if (logBase !== undefined) {
+      xAxisConfig.type = 'log';
+      xAxisConfig.logBase = logBase;
+    }
+
     return {
       title: {
         show: false,
       },
       tooltip: {},
-      xAxis: {
-        scale: false,
-        min: minXAxis,
-        max: maxXAxis,
-      },
+      xAxis: xAxisConfig,
       yAxis: getFormattedAxis({}, format),
       series: [
         {
           type: 'custom',
           renderItem: function (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) {
-            const yValue = api.value(2);
-            const start = api.coord([api.value(0), yValue]);
-            const size = api.size?.([(api.value(1) as number) - (api.value(0) as number), yValue]) as number[];
+            const lowerBound = api.value(0) as number;
+            const upperBound = api.value(1) as number;
+            const yValue = api.value(2) as number;
+
+            // Get the pixel coordinates for the start and end points of the bar
+            const startCoord = api.coord([lowerBound, yValue]);
+            const endCoord = api.coord([upperBound, 0]);
+
+            // Extract coordinates with safety checks
+            const startX = startCoord?.[0];
+            const startY = startCoord?.[1];
+            const endX = endCoord?.[0];
+            const endY = endCoord?.[1];
+
+            // Check if coordinates are valid before proceeding
+            if (startX === undefined || startY === undefined || endX === undefined || endY === undefined) {
+              return null;
+            }
+
+            // For logarithmic scales, api.size() doesn't work correctly because
+            // the visual width isn't linear. Instead, we calculate the width
+            // directly from the pixel coordinates.
+            const barWidth = endX - startX;
+            const barHeight = endY - startY;
+
             const style = api.style?.();
+
+            // Skip rendering if coordinates are invalid (can happen with log scale edge cases)
+            if (
+              !Number.isFinite(startX) ||
+              !Number.isFinite(startY) ||
+              !Number.isFinite(barWidth) ||
+              !Number.isFinite(barHeight)
+            ) {
+              return null;
+            }
 
             return {
               type: 'rect',
               shape: {
-                x: start[0],
-                y: start[1],
-                width: size[0],
-                height: size[1],
+                x: startX,
+                y: startY,
+                width: barWidth,
+                height: barHeight,
               },
               style: style,
             };
@@ -132,7 +200,7 @@ export function HistogramChart({
         },
       ],
     };
-  }, [chartsTheme.noDataOption, format, maxXAxis, minXAxis, transformedData]);
+  }, [chartsTheme.noDataOption, format, logBase, maxXAxis, minXAxis, transformedData]);
 
   return (
     <EChart

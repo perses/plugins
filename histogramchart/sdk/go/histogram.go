@@ -25,6 +25,7 @@ type PluginSpec struct {
 	Min        float64            `json:"min,omitempty" yaml:"min,omitempty"`
 	Max        float64            `json:"max,omitempty" yaml:"max,omitempty"`
 	Thresholds *common.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
+	LogBase    uint               `json:"logBase,omitempty" yaml:"logBase,omitempty"`
 }
 
 type Option func(plugin *Builder) error
