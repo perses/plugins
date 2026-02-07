@@ -9,6 +9,7 @@
       "unit": "decimal",
       "decimalPlaces": 2
     },
-    "showVisualMap": true
+    "showVisualMap": true,
+    "logBase": 10
   }
 }

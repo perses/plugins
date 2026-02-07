@@ -19,11 +19,18 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  SettingsAutocomplete,
 } from '@perses-dev/components';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import { ReactElement } from 'react';
-import { DEFAULT_FORMAT, HeatMapChartOptions, HeatMapChartOptionsEditorProps } from '../heat-map-chart-model';
+import {
+  DEFAULT_FORMAT,
+  HeatMapChartOptions,
+  HeatMapChartOptionsEditorProps,
+  LOG_BASE_CONFIG,
+  LOG_BASE_OPTIONS,
+} from '../heat-map-chart-model';
 
 export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -56,6 +63,10 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
   const yAxisFormat = merge({}, DEFAULT_FORMAT, value.yAxisFormat);
   const countFormat = merge({}, DEFAULT_FORMAT, value.countFormat);
 
+  // Get the current log base configuration, defaulting to 'none' if not set
+  const logBaseKey = value.logBase ? String(value.logBase) : 'none';
+  const logBase = LOG_BASE_CONFIG[logBaseKey] ?? LOG_BASE_CONFIG['none'];
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -70,6 +81,23 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Y Axis">
           <FormatControls value={yAxisFormat} onChange={handleYAxisFormatChange} />
+          <OptionsEditorControl
+            label="Log Base"
+            control={
+              <SettingsAutocomplete
+                value={{ ...logBase, id: logBase?.label ?? 'None' }}
+                options={LOG_BASE_OPTIONS}
+                onChange={(__, newValue) => {
+                  onChange(
+                    produce(value, (draft: HeatMapChartOptions) => {
+                      draft.logBase = newValue.log;
+                    })
+                  );
+                }}
+                disableClearable
+              />
+            }
+          />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>

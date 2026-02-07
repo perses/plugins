@@ -24,6 +24,7 @@ type PluginSpec struct {
 	YAxisFormat   *common.Format `json:"yAxisFormat,omitempty" yaml:"yAxisFormat,omitempty"`
 	CountFormat   *common.Format `json:"countFormat,omitempty" yaml:"countFormat,omitempty"`
 	ShowVisualMap bool           `json:"showVisualMap,omitempty" yaml:"showVisualMap,omitempty"`
+	LogBase       uint           `json:"logBase,omitempty" yaml:"logBase,omitempty"`
 }
 
 type Option func(plugin *Builder) error

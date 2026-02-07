@@ -61,7 +61,6 @@ export interface HeatMapChartProps {
   countMax?: number;
   timeScale?: TimeScale;
   showVisualMap?: boolean;
-  // TODO: exponential?: boolean;
 }
 
 export function HeatMapChart({

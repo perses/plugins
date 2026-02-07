@@ -13,6 +13,7 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React, { act } from 'react';
 import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
 import { HeatMapChartOptionsEditorSettings } from './HeatMapChartOptionsEditorSettings';
@@ -46,5 +47,50 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     });
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(showVisualMap).toBe(true);
+  });
+
+  it('can modify y-axis log base', async () => {
+    const onChange = jest.fn();
+    renderHeatMapChartOptionsEditorSettings(
+      {
+        yAxisFormat: DEFAULT_FORMAT,
+        countFormat: DEFAULT_FORMAT,
+      },
+      onChange
+    );
+    const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
+    userEvent.click(logBaseSelector);
+    const log10Option = screen.getByRole('option', {
+      name: '10',
+    });
+    userEvent.click(log10Option);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logBase: 10,
+      })
+    );
+  });
+
+  it('can clear y-axis log base to none', async () => {
+    const onChange = jest.fn();
+    renderHeatMapChartOptionsEditorSettings(
+      {
+        yAxisFormat: DEFAULT_FORMAT,
+        countFormat: DEFAULT_FORMAT,
+        logBase: 10,
+      },
+      onChange
+    );
+    const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
+    userEvent.click(logBaseSelector);
+    const noneOption = screen.getByRole('option', {
+      name: 'None',
+    });
+    userEvent.click(noneOption);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logBase: undefined,
+      })
+    );
   });
 });
