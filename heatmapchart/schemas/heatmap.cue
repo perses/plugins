@@ -24,6 +24,9 @@ spec: close({
 	// The visual map is an helper for highlighting cell with the targeted value
 	showVisualMap?: bool
 	min?:          number
-	max?:          number & >= min
+	max?:          number
+	if min != _|_ && max != _|_ {
+		max: >= min
+	}
 	logBase?:      2 | 10
 })
