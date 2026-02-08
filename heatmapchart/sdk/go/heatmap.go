@@ -24,6 +24,8 @@ type PluginSpec struct {
 	YAxisFormat   *common.Format `json:"yAxisFormat,omitempty" yaml:"yAxisFormat,omitempty"`
 	CountFormat   *common.Format `json:"countFormat,omitempty" yaml:"countFormat,omitempty"`
 	ShowVisualMap bool           `json:"showVisualMap,omitempty" yaml:"showVisualMap,omitempty"`
+	Min           float64        `json:"min,omitempty" yaml:"min,omitempty"`
+	Max           float64        `json:"max,omitempty" yaml:"max,omitempty"`
 	LogBase       uint           `json:"logBase,omitempty" yaml:"logBase,omitempty"`
 }
 
