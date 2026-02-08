@@ -23,5 +23,7 @@ spec: close({
 	countFormat?:   common.#format
 	// The visual map is an helper for highlighting cell with the targeted value
 	showVisualMap?: bool
-	logBase?:  2 | 10
+	min?:          number
+	max?:          number & >= min
+	logBase?:      2 | 10
 })

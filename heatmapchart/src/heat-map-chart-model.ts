@@ -48,6 +48,8 @@ export interface HeatMapChartOptions {
   countFormat?: FormatOptions;
   showVisualMap?: boolean;
   logBase?: LOG_BASE;
+  min?: number;
+  max?: number;
 }
 
 export type HeatMapChartOptionsEditorProps = OptionsEditorProps<HeatMapChartOptions>;

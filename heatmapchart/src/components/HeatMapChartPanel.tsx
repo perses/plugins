@@ -20,24 +20,6 @@ import { DEFAULT_FORMAT, HeatMapChartOptions, LOG_BASE } from '../heat-map-chart
 import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils';
 import { HeatMapChart, HeatMapDataItem } from './HeatMapChart';
 
-const HEATMAP_MIN_HEIGHT = 200;
-const HEATMAP_ITEM_MIN_HEIGHT = 2;
-
-/**
- * Helper function to apply logarithmic transformation to a value.
- * Returns the log of the value in the specified base.
- *
- * NOTE: This custom log transformation is required because ECharts heatmap
- * charts require category-type axes (type: 'category'), which do not support
- * native logarithmic scaling. Only value-type axes support type: 'log'.
- * Unlike HistogramChart or TimeSeriesChart which can use ECharts' native
- * log axis, we must manually transform the data and Y-axis categories.
- */
-const logTransform = (value: number, logBase: number): number => {
-  if (value <= 0) return -Infinity;
-  return Math.log(value) / Math.log(logBase);
-};
-
 /**
  * Helper function to get the effective lower bound for log scale.
  * For values <= 0, we use a small fraction of the upper bound.
@@ -63,14 +45,16 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
   const {
     data,
     xAxisCategories,
-    yAxisCategories,
+    min,
+    max,
     countMin,
     countMax,
     timeScale,
   }: {
     data: HeatMapDataItem[];
     xAxisCategories: number[];
-    yAxisCategories: string[];
+    min?: number;
+    max?: number;
     countMin: number;
     countMax: number;
     timeScale?: TimeScale;
@@ -79,7 +63,8 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
       return {
         data: [],
         xAxisCategories: [],
-        yAxisCategories: [],
+        min: 0,
+        max: 0,
         countMin: 0,
         countMax: 0,
         timeScale: undefined,
@@ -94,7 +79,8 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
       return {
         data: [],
         xAxisCategories: [],
-        yAxisCategories: [],
+        min: 0,
+        max: 0,
         countMin: 0,
         countMax: 0,
         timeScale: undefined,
@@ -114,17 +100,14 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     let countMin = Infinity;
     let countMax = -Infinity;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [_, histogram] of series?.histograms ?? []) {
       for (const bucket of histogram?.buckets ?? []) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, lowerBound, upperBound, count] = bucket;
         let lowerBoundFloat = parseFloat(lowerBound);
         const upperBoundFloat = parseFloat(upperBound);
         const countFloat = parseFloat(count);
 
         // For logarithmic scales, skip buckets that would be entirely non-positive
-        // Log scales cannot represent non-positive values, so we exclude any buckets where the upper bound is <= 0
         if (logBase !== undefined && upperBoundFloat <= 0) {
           continue;
         }
@@ -149,48 +132,12 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
       }
     }
 
-    const height = contentDimensions?.height ?? HEATMAP_MIN_HEIGHT;
-
-    // Calculate range and item size based on scale type
-    let totalRange: number;
-    let rangePerItem: number;
-    let totalItems: number;
-
-    if (logBase !== undefined) {
-      // For logarithmic scale, work in log space
-      const logLowest = logTransform(lowestBound, logBase);
-      const logHighest = logTransform(highestBound, logBase);
-      totalRange = logHighest - logLowest;
-      totalItems = Math.ceil(height / HEATMAP_ITEM_MIN_HEIGHT);
-      rangePerItem = totalRange / totalItems;
-    } else {
-      // Linear scale (original behavior)
-      totalRange = highestBound - lowestBound;
-      rangePerItem = (totalRange * HEATMAP_ITEM_MIN_HEIGHT) / height;
-      totalItems = Math.ceil(height / HEATMAP_ITEM_MIN_HEIGHT);
-    }
-
-    // Generating value of the Y axis based on the height divided by the size of a cell (item)
-    // For log scale, we generate categories from log-transformed space but display original values
-    const yAxisCategories: string[] = Array.from({ length: totalItems }, (_, index) => {
-      if (logBase !== undefined) {
-        // Convert from log space back to linear space for display
-        const logLowest = logTransform(lowestBound, logBase);
-        const logValue = logLowest + index * rangePerItem;
-        const linearValue = Math.pow(logBase, logValue);
-        return linearValue.toFixed(3);
-      } else {
-        return (lowestBound + index * rangePerItem).toFixed(3);
-      }
-    });
-
     const data: HeatMapDataItem[] = [];
-    // Logic for filling all cells where a bucket is present
+    // Each bucket becomes a rectangle spanning [lowerBound, upperBound] at the given x index
     for (const [time, histogram] of series?.histograms ?? []) {
       const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time * 1000);
 
       for (const bucket of histogram?.buckets ?? []) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, lowerBound, upperBound, count] = bucket;
         let lowerBoundFloat = parseFloat(lowerBound);
         const upperBoundFloat = parseFloat(upperBound);
@@ -205,39 +152,47 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
           lowerBoundFloat = getEffectiveLowerBound(lowerBoundFloat, upperBoundFloat, logBase);
         }
 
-        let yLowerBoundItem: number;
-        let yUpperBoundItem: number;
-
-        if (logBase !== undefined) {
-          // Calculate Y positions in log space
-          const logLowest = logTransform(lowestBound, logBase);
-          const logLower = logTransform(lowerBoundFloat, logBase);
-          const logUpper = logTransform(upperBoundFloat, logBase);
-          yLowerBoundItem = Math.floor((logLower - logLowest) / rangePerItem);
-          yUpperBoundItem = Math.ceil((logUpper - logLowest) / rangePerItem);
-        } else {
-          yLowerBoundItem = Math.floor((lowerBoundFloat - lowestBound) / rangePerItem);
-          yUpperBoundItem = Math.ceil((upperBoundFloat - lowestBound) / rangePerItem);
-        }
-
-        for (let i = 0; i < yUpperBoundItem - yLowerBoundItem; i++) {
-          // TODO: some bucket may have overlapping cells, we could use avg value. Probably will need to move to a matrix data structure for performance reasons
-          data.push({
-            value: [itemIndexOnXaxis, yLowerBoundItem + i, parseFloat(count)],
-            label: count,
-          });
-        }
+        data.push({
+          value: [itemIndexOnXaxis, lowerBoundFloat, upperBoundFloat, parseFloat(count)],
+          label: count,
+        });
       }
     }
     return {
       data,
       xAxisCategories,
-      yAxisCategories,
+      min: lowestBound === Infinity ? undefined : lowestBound,
+      max: highestBound === -Infinity ? undefined : highestBound,
       countMin,
       countMax,
       timeScale,
     };
   }, [contentDimensions?.height, pluginSpec.logBase, queryResults]);
+
+  // Use configured min/max if provided, otherwise use calculated values
+  // For logarithmic scales, ignore user-provided min if it's <= 0 (log of non-positive is undefined)
+  // and let ECharts auto-calculate the range to avoid rendering issues
+  const finalMin = useMemo(() => {
+    if (pluginSpec.logBase !== undefined) {
+      // For log scale, ignore min if it's <= 0 or let ECharts auto-calculate
+      if (pluginSpec.min !== undefined && pluginSpec.min <= 0) {
+        return undefined; // Let ECharts auto-calculate
+      }
+      return pluginSpec.min ?? min;
+    }
+    return pluginSpec.min ?? min;
+  }, [pluginSpec.logBase, pluginSpec.min, min]);
+
+  const finalMax = useMemo(() => {
+    if (pluginSpec.logBase !== undefined) {
+      // For log scale, ignore max if it's <= 0
+      if (pluginSpec.max !== undefined && pluginSpec.max <= 0) {
+        return undefined; // Let ECharts auto-calculate
+      }
+      return pluginSpec.max ?? max;
+    }
+    return pluginSpec.max ?? max;
+  }, [pluginSpec.logBase, pluginSpec.max, max]);
 
   // TODO: add support for multiple queries
   if (queryResults.length > 1) {
@@ -270,13 +225,15 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
         height={contentDimensions.height}
         data={data}
         xAxisCategories={xAxisCategories}
-        yAxisCategories={yAxisCategories}
         yAxisFormat={yAxisFormat}
         countFormat={countFormat}
         countMin={countMin}
         countMax={countMax}
         timeScale={timeScale}
         showVisualMap={pluginSpec.showVisualMap}
+        min={finalMin}
+        max={finalMax}
+        logBase={pluginSpec.logBase}
       />
     </Stack>
   );

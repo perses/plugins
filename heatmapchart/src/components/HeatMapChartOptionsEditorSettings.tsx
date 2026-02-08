@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps } from '@mui/material';
+import { Switch, SwitchProps, TextField } from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
@@ -81,6 +81,44 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Y Axis">
           <FormatControls value={yAxisFormat} onChange={handleYAxisFormatChange} />
+          <OptionsEditorControl
+            label="Min"
+            control={
+              <TextField
+                type="number"
+                value={value.min ?? ''}
+                onChange={(e) => {
+                  const newValue = e.target.value ? Number(e.target.value) : undefined;
+                  onChange(
+                    produce(value, (draft: HeatMapChartOptions) => {
+                      draft.min = newValue;
+                    })
+                  );
+                }}
+                placeholder="Auto"
+                sx={{ width: '100%' }}
+              />
+            }
+          />
+          <OptionsEditorControl
+            label="Max"
+            control={
+              <TextField
+                type="number"
+                value={value.max ?? ''}
+                onChange={(e) => {
+                  const newValue = e.target.value ? Number(e.target.value) : undefined;
+                  onChange(
+                    produce(value, (draft: HeatMapChartOptions) => {
+                      draft.max = newValue;
+                    })
+                  );
+                }}
+                placeholder="Auto"
+                sx={{ width: '100%' }}
+              />
+            }
+          />
           <OptionsEditorControl
             label="Log Base"
             control={

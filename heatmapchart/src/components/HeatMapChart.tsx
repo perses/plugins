@@ -15,12 +15,14 @@ import { ReactElement, useMemo } from 'react';
 import { FormatOptions, TimeScale } from '@perses-dev/core';
 import { EChart, getFormattedAxis, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
-import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
+import { CustomChart } from 'echarts/charts';
+import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { useTheme } from '@mui/material';
 import { getFormattedHeatmapAxisLabel } from '../utils';
 import { generateTooltipHTML } from './HeatMapTooltip';
+import { LOG_BASE } from '../heat-map-chart-model';
 
-use([EChartsHeatmapChart]);
+use([CustomChart]);
 
 // The default coloring is a blue->yellow->red gradient
 const DEFAULT_VISUAL_MAP_COLORS = [
@@ -37,7 +39,7 @@ const DEFAULT_VISUAL_MAP_COLORS = [
   '#a50026',
 ];
 
-export type HeatMapData = [number, number, number | undefined]; // [x, y, value]
+export type HeatMapData = [number, number, number, number | undefined]; // [xIndex, yLower, yUpper, count]
 
 export interface HeatMapDataItem {
   value: HeatMapData;
@@ -54,13 +56,15 @@ export interface HeatMapChartProps {
   height: number;
   data: HeatMapDataItem[];
   xAxisCategories: number[];
-  yAxisCategories: string[];
   yAxisFormat?: FormatOptions;
   countFormat?: FormatOptions;
   countMin?: number;
   countMax?: number;
   timeScale?: TimeScale;
   showVisualMap?: boolean;
+  min?: number;
+  max?: number;
+  logBase?: LOG_BASE;
 }
 
 export function HeatMapChart({
@@ -68,13 +72,15 @@ export function HeatMapChart({
   height,
   data,
   xAxisCategories,
-  yAxisCategories,
   yAxisFormat,
   countFormat,
   countMin,
   countMax,
   timeScale,
   showVisualMap,
+  min,
+  max,
+  logBase,
 }: HeatMapChartProps): ReactElement | null {
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
@@ -90,7 +96,6 @@ export function HeatMapChart({
             label: params.data.label,
             marker: params.marker,
             xAxisCategories,
-            yAxisCategories,
             theme,
             yAxisFormat: yAxisFormat,
             countFormat: countFormat,
@@ -107,8 +112,10 @@ export function HeatMapChart({
       },
       yAxis: getFormattedAxis(
         {
-          type: 'category',
-          data: yAxisCategories,
+          type: logBase !== undefined ? 'log' : 'value',
+          logBase: logBase,
+          min: min,
+          max: max,
         },
         yAxisFormat
       ),
@@ -131,18 +138,48 @@ export function HeatMapChart({
           textBorderColor: theme.palette.background.default,
           textBorderWidth: 5,
         },
+        // Color by the count dimension (index 3)
+        dimension: 3,
       },
       series: [
         {
-          name: 'Gaussian',
-          type: 'heatmap',
-          data: data,
-          emphasis: {
-            itemStyle: {
-              borderColor: '#333',
-              borderWidth: 1,
-            },
+          name: 'HeatMap',
+          type: 'custom',
+          renderItem: function (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) {
+            const xIndex = api.value(0) as number;
+            const yLower = api.value(1) as number;
+            const yUpper = api.value(2) as number;
+
+            // Pixel coordinates
+            const upperStart = api.coord([xIndex, yUpper]);
+            const lowerStart = api.coord([xIndex, yLower]);
+            const upperNext = api.coord([xIndex + 1, yUpper]);
+
+            const startX = upperStart?.[0];
+            const upperY = upperStart?.[1];
+            const lowerY = lowerStart?.[1];
+            const nextX = upperNext?.[0];
+
+            if (startX === undefined || upperY === undefined || lowerY === undefined || nextX === undefined) {
+              return null;
+            }
+
+            const topY = Math.min(upperY, lowerY);
+            const bottomY = Math.max(upperY, lowerY);
+            const width = nextX - startX;
+            const height = bottomY - topY;
+
+            const style = api.style?.();
+            return {
+              type: 'rect',
+              shape: { x: startX, y: topY, width, height },
+              style: style,
+            };
           },
+          label: { show: false },
+          dimensions: ['xIndex', 'yLower', 'yUpper', 'count'],
+          encode: { x: 0, y: [1, 2], tooltip: [1, 2, 3] },
+          data: data,
           progressive: 1000,
           animation: false,
         },
@@ -152,7 +189,6 @@ export function HeatMapChart({
     xAxisCategories,
     timeScale?.rangeMs,
     timeZone,
-    yAxisCategories,
     yAxisFormat,
     showVisualMap,
     countMin,
@@ -161,6 +197,9 @@ export function HeatMapChart({
     theme,
     data,
     countFormat,
+    min,
+    max,
+    logBase,
   ]);
 
   const chart = useMemo(
