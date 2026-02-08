@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { FormatOptions, TimeScale } from '@perses-dev/core';
-import { EChart, getFormattedAxis, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { formatValue, FormatOptions, TimeScale } from '@perses-dev/core';
+import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomChart } from 'echarts/charts';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
@@ -110,15 +110,24 @@ export function HeatMapChart({
           formatter: getFormattedHeatmapAxisLabel(timeScale?.rangeMs ?? 0, timeZone),
         },
       },
-      yAxis: getFormattedAxis(
-        {
-          type: logBase !== undefined ? 'log' : 'value',
-          logBase: logBase,
-          min: min,
-          max: max,
+      yAxis: {
+        type: logBase !== undefined ? 'log' : 'value',
+        logBase: logBase,
+        boundaryGap: [0, '10%'],
+        min: min,
+        max: max,
+        axisLabel: {
+          hideOverlap: true,
+          formatter: (value: number): string => {
+            // On log scales, ECharts may generate a tick at 0 which is mathematically
+            // invalid (log(0) is undefined). Return empty string to hide such labels.
+            if (logBase !== undefined && value === 0) {
+              return '';
+            }
+            return formatValue(value, yAxisFormat);
+          },
         },
-        yAxisFormat
-      ),
+      },
       visualMap: {
         show: showVisualMap ?? false,
         type: 'continuous',
