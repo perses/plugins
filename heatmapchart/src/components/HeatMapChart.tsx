@@ -18,9 +18,9 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomChart } from 'echarts/charts';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { useTheme } from '@mui/material';
+import { LOG_BASE } from '../heat-map-chart-model';
 import { getFormattedHeatmapAxisLabel } from '../utils';
 import { generateTooltipHTML } from './HeatMapTooltip';
-import { LOG_BASE } from '../heat-map-chart-model';
 
 use([CustomChart]);
 
@@ -169,11 +169,12 @@ export function HeatMapChart({
             const width = nextX - startX;
             const height = bottomY - topY;
 
-            const style = api.style?.();
             return {
               type: 'rect',
               shape: { x: startX, y: topY, width, height },
-              style: style,
+              style: {
+                fill: api.visual('color'),
+              },
             };
           },
           label: { show: false },

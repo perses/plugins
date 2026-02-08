@@ -100,9 +100,9 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     let countMin = Infinity;
     let countMax = -Infinity;
 
-    for (const [_, histogram] of series?.histograms ?? []) {
+    for (const [, histogram] of series?.histograms ?? []) {
       for (const bucket of histogram?.buckets ?? []) {
-        const [_, lowerBound, upperBound, count] = bucket;
+        const [, lowerBound, upperBound, count] = bucket;
         let lowerBoundFloat = parseFloat(lowerBound);
         const upperBoundFloat = parseFloat(upperBound);
         const countFloat = parseFloat(count);
@@ -138,7 +138,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
       const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time * 1000);
 
       for (const bucket of histogram?.buckets ?? []) {
-        const [_, lowerBound, upperBound, count] = bucket;
+        const [, lowerBound, upperBound, count] = bucket;
         let lowerBoundFloat = parseFloat(lowerBound);
         const upperBoundFloat = parseFloat(upperBound);
 
@@ -167,7 +167,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
       countMax,
       timeScale,
     };
-  }, [contentDimensions?.height, pluginSpec.logBase, queryResults]);
+  }, [pluginSpec.logBase, queryResults]);
 
   // Use configured min/max if provided, otherwise use calculated values
   // For logarithmic scales, ignore user-provided min if it's <= 0 (log of non-positive is undefined)
