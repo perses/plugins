@@ -39,7 +39,8 @@ describe('StatChart', () => {
   };
 
   const mockStatData: StatChartData = {
-    calculatedValue: 7.72931659687181,
+    numericValue: 7.72931659687181,
+    displayValue: 7.72931659687181,
     color: '#1976d2',
     seriesData: {
       name: '(((count(count(node_cpu_seconds_total{job="example"}) by (cpu))',
