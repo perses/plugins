@@ -65,16 +65,19 @@ func main() {
 	retryMaxAttempts := 10
 	// Initial sleep duration between retries: random value between 1s and 10s
 	sleepBetweenRetries := (1 + time.Duration(rand.Int64N(9))) * time.Second
-	for attempt := 1; attempt <= retryMaxAttempts; attempt++ {
+	doesItFail := true
+	for attempt := 1; attempt <= retryMaxAttempts && doesItFail; attempt++ {
+		// Wait for a few seconds immediately before the first attempt to reduce collision risk with other jobs running in parallel.
+		time.Sleep(sleepBetweenRetries)
 		if err := command.Run("cue", "mod", "publish", version); err != nil {
 			logrus.WithError(err).Warnf("Attempt %d/%d: Error publishing the module, retrying...", attempt, retryMaxAttempts)
 			if attempt == retryMaxAttempts {
 				logrus.Fatal("Max retry attempts reached, failing the publish process")
 			}
-			// Wait for a few seconds before retrying
-			time.Sleep(sleepBetweenRetries)
 			// Increase the sleep duration for the next attempt with a random value to reduce collision risk with other jobs running in parallel.
 			sleepBetweenRetries = sleepBetweenRetries + (1+time.Duration(rand.Int64N(19)))*time.Second
+		} else {
+			doesItFail = false
 		}
 	}
 	logrus.Infof("CUE module %s published successfully", module)
