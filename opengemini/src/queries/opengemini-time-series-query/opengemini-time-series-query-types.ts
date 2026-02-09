@@ -27,9 +27,4 @@ export interface OpenGeminiTimeSeriesQuerySpec {
    * Example: SELECT mean("value") FROM "cpu" WHERE time > now() - 1h GROUP BY time(1m)
    */
   query: string;
-
-  /**
-   * Database name to query against.
-   */
-  database: string;
 }

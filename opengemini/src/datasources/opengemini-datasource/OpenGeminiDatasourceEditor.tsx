@@ -11,15 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import React, { ReactElement } from 'react';
+import { HTTPSettingsEditor, OptionsEditorProps } from '@perses-dev/plugin-system';
+import React, { ReactElement, ChangeEvent } from 'react';
+import { Stack, TextField } from '@mui/material';
 import { OpenGeminiDatasourceSpec } from './opengemini-datasource-types';
 
-export interface OpenGeminiDatasourceEditorProps {
-  value: OpenGeminiDatasourceSpec;
-  onChange: (next: OpenGeminiDatasourceSpec) => void;
-  isReadonly?: boolean;
-}
+export type OpenGeminiDatasourceEditorProps = OptionsEditorProps<OpenGeminiDatasourceSpec>;
 
 /**
  * Editor component for OpenGemini datasource configuration.
@@ -51,13 +48,32 @@ export function OpenGeminiDatasourceEditor(props: OpenGeminiDatasourceEditorProp
     },
   };
 
+  const handleDatabaseChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({
+      ...value,
+      database: event.target.value,
+    });
+  };
+
   return (
-    <HTTPSettingsEditor
-      value={value}
-      onChange={onChange}
-      isReadonly={isReadonly}
-      initialSpecDirect={initialSpecDirect}
-      initialSpecProxy={initialSpecProxy}
-    />
+    <Stack spacing={2}>
+      <HTTPSettingsEditor
+        value={value}
+        onChange={onChange}
+        isReadonly={isReadonly}
+        initialSpecDirect={initialSpecDirect}
+        initialSpecProxy={initialSpecProxy}
+      />
+      <TextField
+        label="Database"
+        value={value.database ?? ''}
+        onChange={handleDatabaseChange}
+        disabled={isReadonly}
+        placeholder="Enter database name"
+        fullWidth
+        required
+        helperText="The OpenGemini database to query."
+      />
+    </Stack>
   );
 }

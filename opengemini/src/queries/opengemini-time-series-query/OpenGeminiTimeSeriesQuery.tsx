@@ -25,15 +25,12 @@ export const OpenGeminiTimeSeriesQuery: TimeSeriesQueryPlugin<OpenGeminiTimeSeri
   OptionsEditorComponent: OpenGeminiTimeSeriesQueryEditor,
   createInitialOptions: () => ({
     query: '',
-    database: '',
   }),
   dependsOn: (spec) => {
     // Parse variables from the query string
     const queryVariables = parseVariables(spec.query);
-    const databaseVariables = parseVariables(spec.database);
-    const allVariables = [...new Set([...queryVariables, ...databaseVariables])];
     return {
-      variables: allVariables,
+      variables: queryVariables,
     };
   },
 };

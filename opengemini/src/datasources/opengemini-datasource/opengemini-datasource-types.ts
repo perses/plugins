@@ -21,6 +21,7 @@ import { DatasourceClient } from '@perses-dev/plugin-system';
 export interface OpenGeminiDatasourceSpec {
   directUrl?: string;
   proxy?: HTTPProxy;
+  database?: string;
 }
 
 /**
@@ -37,6 +38,7 @@ export interface OpenGeminiQueryParams {
  */
 export interface OpenGeminiClientOptions {
   datasourceUrl: string;
+  database?: string;
   headers?: RequestHeaders;
 }
 

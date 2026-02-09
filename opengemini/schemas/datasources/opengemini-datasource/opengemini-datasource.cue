@@ -19,7 +19,10 @@ import (
 )
 
 kind: #kind
-spec: commonProxy.#baseHTTPDatasourceSpec
+spec: commonProxy.#baseHTTPDatasourceSpec & {
+	// Database name to query
+	database: strings.MinRunes(1)
+}
 
 #kind: "OpenGeminiDatasource"
 

@@ -26,7 +26,7 @@ import { OpenGeminiDatasourceEditor } from './OpenGeminiDatasourceEditor';
  * OpenGemini is InfluxDB v1.x compatible, so we use the standard /query endpoint.
  */
 const createClient: DatasourcePlugin<OpenGeminiDatasourceSpec, OpenGeminiClient>['createClient'] = (spec, options) => {
-  const { directUrl, proxy } = spec;
+  const { directUrl, proxy, database } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -40,6 +40,7 @@ const createClient: DatasourcePlugin<OpenGeminiDatasourceSpec, OpenGeminiClient>
   return {
     options: {
       datasourceUrl,
+      database,
     },
     query: async (params: OpenGeminiQueryParams, headers): Promise<OpenGeminiQueryResponse> => {
       // Build the query URL with parameters

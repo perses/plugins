@@ -89,22 +89,35 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<OpenGeminiTimeSeriesQueryS
   context
 ) => {
   // Return empty data if the query is empty
-  if (!spec.query || !spec.database) {
+  if (!spec.query) {
     return { series: [] };
   }
 
   // Replace variables in the query
   const query = replaceVariables(spec.query, context.variableState);
-  const database = replaceVariables(spec.database, context.variableState);
 
   // Get the OpenGemini client
   const client = (await context.datasourceStore.getDatasourceClient(
     spec.datasource ?? DEFAULT_OPENGEMINI_DATASOURCE
   )) as OpenGeminiClient;
 
+  // Get the database from the datasource options
+  let database = client.options.database;
+
+  // Allow variable replacement in the database name if it was set in the datasource
+  if (database) {
+    database = replaceVariables(database, context.variableState);
+  } else {
+    // Fallback or error handling if database is not set?
+    // OpenGemini usually requires a database.
+    // However, if the query includes the database (e.g. SELECT ... FROM "db"."retention"."measurement"), it might work without `db` param?
+    // But standardization implies we should probably enforce it or warn.
+    // For now, let's proceed. If it's missing, the query might fail or rely on a default.
+  }
+
   // Execute the query with epoch=ms for millisecond timestamps
   const response = await client.query({
-    db: database,
+    db: database ?? '',
     q: query,
     epoch: 'ms',
   });

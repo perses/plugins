@@ -23,6 +23,4 @@ spec: close({
 	datasource?: ds.#selector
 	// InfluxQL query string
 	query: strings.MinRunes(1)
-	// Database name to query
-	database: strings.MinRunes(1)
 })

@@ -25,13 +25,6 @@ export type OpenGeminiTimeSeriesQueryEditorProps = OptionsEditorProps<OpenGemini
 export function OpenGeminiTimeSeriesQueryEditor(props: OpenGeminiTimeSeriesQueryEditorProps): ReactElement {
   const { value, onChange, isReadonly } = props;
 
-  const handleDatabaseChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange({
-      ...value,
-      database: event.target.value,
-    });
-  };
-
   const handleQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange({
       ...value,
@@ -41,16 +34,6 @@ export function OpenGeminiTimeSeriesQueryEditor(props: OpenGeminiTimeSeriesQuery
 
   return (
     <Stack spacing={2}>
-      <TextField
-        label="Database"
-        value={value.database}
-        onChange={handleDatabaseChange}
-        disabled={isReadonly}
-        placeholder="Enter database name"
-        fullWidth
-        size="small"
-        helperText="The OpenGemini database to query"
-      />
       <div>
         <Typography variant="subtitle2" gutterBottom>
           InfluxQL Query
