@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { memo, useCallback, useState, useRef, useEffect } from 'react';
+import React, { memo, useCallback, useState, useRef, useEffect, ReactNode } from 'react';
 import {
   Box,
   Collapse,
@@ -48,6 +48,7 @@ interface LogRowProps {
   allowWrap?: boolean;
   isSelected?: boolean;
   onSelect?: (index: number, event: React.MouseEvent) => void;
+  itemActionButtons?: ReactNode[];
 }
 
 const DefaultLogRow: React.FC<LogRowProps> = ({
@@ -60,6 +61,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
   allowWrap = false,
   isSelected = false,
   onSelect,
+  itemActionButtons,
 }) => {
   const theme = useTheme();
   const severityColor = useSeverityColor(log);
@@ -143,6 +145,8 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
 
   if (!log) return null;
 
+  const hasRowActions = itemActionButtons && itemActionButtons.length > 0;
+
   return (
     <LogRowContainer
       severityColor={severityColor}
@@ -160,6 +164,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
         onMouseDown={handleRowMouseDown}
         isExpandable={isExpandable}
         isHighlighted={Boolean(anchorEl)}
+        hasRowActions={hasRowActions}
         isSelected={isSelected}
       >
         {isExpandable && (
@@ -223,6 +228,20 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
               )}
             </IconButton>
           </Tooltip>
+          {hasRowActions && (
+            <Box
+              sx={{
+                display: 'flex',
+                gap: '4px',
+                alignItems: 'center',
+                opacity: isHovered || Boolean(anchorEl) ? 1 : 0,
+                pointerEvents: isHovered || Boolean(anchorEl) ? 'auto' : 'none',
+                transition: 'opacity 0.08s ease',
+              }}
+            >
+              {itemActionButtons}
+            </Box>
+          )}
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}

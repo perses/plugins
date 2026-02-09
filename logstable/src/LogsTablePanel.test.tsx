@@ -11,11 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MOCK_LOGS_QUERY_RESULT, MOCK_LOGS_QUERY_DEFINITION, MOCK_LOGS_QUERY_RESULTS } from './test/mock-query-results';
+import {
+  ChartsProvider,
+  ItemActionsProvider,
+  SelectionProvider,
+  SnackbarProvider,
+  testChartsTheme,
+} from '@perses-dev/components';
+import { VariableProvider } from '@perses-dev/dashboards';
+import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { LogsTablePanel } from './LogsTablePanel';
 import { LogsQueryData, LogsTableProps } from './model';
+import { MOCK_LOGS_QUERY_DEFINITION, MOCK_LOGS_QUERY_RESULT, MOCK_LOGS_QUERY_RESULTS } from './test/mock-query-results';
 
 // Mock clipboard API
 Object.assign(navigator, {
@@ -38,18 +47,28 @@ describe('LogsTablePanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (data: LogsQueryData | LogsQueryData[]): void => {
     render(
-      <SnackbarProvider>
-        <ChartsProvider chartsTheme={testChartsTheme}>
-          <LogsTablePanel
-            {...TEST_LOGS_TABLE_PROPS}
-            queryResults={
-              !Array.isArray(data)
-                ? [{ definition: MOCK_LOGS_QUERY_DEFINITION, data }]
-                : data.map((d) => ({ definition: MOCK_LOGS_QUERY_DEFINITION, data: d }))
-            }
-          />
-        </ChartsProvider>
-      </SnackbarProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <SnackbarProvider>
+          <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1m' }}>
+            <VariableProvider>
+              <SelectionProvider>
+                <ItemActionsProvider>
+                  <ChartsProvider chartsTheme={testChartsTheme}>
+                    <LogsTablePanel
+                      {...TEST_LOGS_TABLE_PROPS}
+                      queryResults={
+                        !Array.isArray(data)
+                          ? [{ definition: MOCK_LOGS_QUERY_DEFINITION, data }]
+                          : data.map((d) => ({ definition: MOCK_LOGS_QUERY_DEFINITION, data: d }))
+                      }
+                    />
+                  </ChartsProvider>
+                </ItemActionsProvider>
+              </SelectionProvider>
+            </VariableProvider>
+          </TimeRangeProviderBasic>
+        </SnackbarProvider>
+      </QueryClientProvider>
     );
   };
 
