@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry } from '@perses-dev/core';
+import { Labels, LogEntry } from '@perses-dev/core';
 
 export type Severity = 'critical' | 'error' | 'warning' | 'info' | 'debug' | 'trace' | 'unknown' | 'other';
 
@@ -38,4 +38,22 @@ export const getSeverity = (log: LogEntry): Severity => {
   }
 
   return 'unknown';
+};
+
+export const convertLogEntriesToLogTableRows = (
+  logsEntries: LogEntry[],
+  allColumns: string[]
+): Array<Record<string, string>> => {
+  const records: Array<Record<string, string>> = [];
+  logsEntries.forEach((e) => {
+    const { timestamp, line, labels } = e;
+    const _labels: Labels = { ...labels, timestamp: String(timestamp), line };
+    const logTableRow: Record<string, string> = {};
+    allColumns.forEach((col) => {
+      const cellValue = _labels[col];
+      Object.assign(logTableRow, { [col]: cellValue ?? '' });
+    });
+    records.push(logTableRow);
+  });
+  return records;
 };

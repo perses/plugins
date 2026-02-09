@@ -13,9 +13,12 @@
 
 package model
 
+import ("github.com/perses/shared/cue/common")
+
 kind: "LogsTable"
 spec: close({
 	allowWrap?:     bool
 	enableDetails?: bool
 	showTime?:      bool
+	transforms?: [...common.#transform]
 })
