@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/victorialogs-plugin",
-  "version": "0.3.0-rc.0",
+  "version": "0.3.0-rc.1",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",
