@@ -16,7 +16,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math/rand/v2"
 	"os"
+	"time"
 
 	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/perses/plugins/scripts/tag"
@@ -58,9 +60,22 @@ func main() {
 	}
 
 	logrus.Info("Publishing module...")
-	if err := command.Run("cue", "mod", "publish", version); err != nil {
-		logrus.WithError(err).Fatal("Error publishing module")
+	// When we are releasing multiple modules in a short time span, the CUE Central Registry may block us because they consider we are spamming them.
+	// To mitigate this, we implement a retry mechanism.
+	retryMaxAttempts := 10
+	// Initial sleep duration between retries: random value between 1s and 10s
+	sleepBetweenRetries := (1 + time.Duration(rand.Int64N(9))) * time.Second
+	for attempt := 1; attempt <= retryMaxAttempts; attempt++ {
+		if err := command.Run("cue", "mod", "publish", version); err != nil {
+			logrus.WithError(err).Warnf("Attempt %d/%d: Error publishing the module, retrying...", attempt, retryMaxAttempts)
+			if attempt == retryMaxAttempts {
+				logrus.Fatal("Max retry attempts reached, failing the publish process")
+			}
+			// Wait for a few seconds before retrying
+			time.Sleep(sleepBetweenRetries)
+			// Increase the sleep duration for the next attempt with a random value to reduce collision risk with other jobs running in parallel.
+			sleepBetweenRetries = sleepBetweenRetries + (1+time.Duration(rand.Int64N(19)))*time.Second
+		}
 	}
-
 	logrus.Infof("CUE module %s published successfully", module)
 }

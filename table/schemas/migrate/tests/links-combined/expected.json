@@ -1,0 +1,29 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "instance",
+        "dataLink": {
+          "url": "/graph?instance=${__data.fields[\"instance\"]}",
+          "openNewTab": true,
+          "title": "View Instance"
+        }
+      },
+      {
+        "name": "job",
+        "dataLink": {
+          "url": "/d/job-dashboard?job=${__data.fields[\"job\"]}",
+          "openNewTab": false
+        }
+      },
+      {
+        "name": "value",
+        "dataLink": {
+          "url": "http://example.com/second",
+          "openNewTab": true
+        }
+      }
+    ]
+  }
+}

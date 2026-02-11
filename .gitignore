@@ -22,3 +22,7 @@ dist/
 
 # external CUE dependencies
 /*/cue.mod/pkg/
+
+# ignore shared package links
+.plugins-shared-link-bk.json
+.plugins-shared-link-lock-bk.json

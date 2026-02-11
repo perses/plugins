@@ -21,6 +21,9 @@ export function createInitialStatusHistoryChartOptions(): Record<string, unknown
 export interface StatusHistoryChartOptions {
   legend?: LegendSpecOptions;
   mappings?: ValueMapping[];
+  sorting?: StatusHistorySorting;
 }
+
+export type StatusHistorySorting = 'asc' | 'desc';
 
 export type StatusHistroyChartEditorProps = OptionsEditorProps<StatusHistoryChartOptions>;

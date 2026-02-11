@@ -47,6 +47,7 @@ import {
   TooltipConfig,
   DEFAULT_TOOLTIP_CONFIG,
   TimeChartSeriesMapping,
+  getFormattedMultipleYAxes,
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
@@ -54,7 +55,6 @@ import {
   DEFAULT_VISUAL,
   THRESHOLD_PLOT_INTERVAL,
   QuerySettingsOptions,
-  LOG_BASE,
 } from './time-series-chart-model';
 import {
   getTimeSeries,
@@ -122,13 +122,36 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     return merge({}, DEFAULT_VISUAL, props.spec.visual);
   }, [props.spec.visual]);
 
-  // Use the logBase from yAxis options, defaulting to 'none' if not set
-  const useLogarithmicBase: LOG_BASE = yAxis?.logBase ?? 'none';
-
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = useMemo(() => {
-    return convertPanelYAxis(yAxis, useLogarithmicBase);
-  }, [yAxis, useLogarithmicBase]);
+    return convertPanelYAxis(yAxis);
+  }, [yAxis]);
+
+  // Collect unique formats from query settings that differ from the base format
+  // These will create additional Y axes on the right side
+  const { additionalFormats, formatToYAxisIndex, seriesFormatMap } = useMemo(() => {
+    const baseUnit = format?.unit ?? 'decimal';
+    const additionalFormats: Array<typeof format> = [];
+    const formatToYAxisIndex = new Map<string, number>();
+    const seriesFormatMap = new Map<string, typeof format>();
+
+    // Index 0 is reserved for the base Y axis
+    formatToYAxisIndex.set(baseUnit, 0);
+
+    // Collect unique formats from query settings
+    for (const qs of querySettingsList ?? []) {
+      if (qs.format?.unit && qs.format.unit !== baseUnit) {
+        const unitKey = qs.format.unit;
+        if (!formatToYAxisIndex.has(unitKey)) {
+          // Add new format - index is 1 + position in additionalFormats array
+          formatToYAxisIndex.set(unitKey, 1 + additionalFormats.length);
+          additionalFormats.push(qs.format);
+        }
+      }
+    }
+
+    return { additionalFormats, formatToYAxisIndex, seriesFormatMap };
+  }, [format, querySettingsList]);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
@@ -136,12 +159,21 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   const { setTimeRange } = useTimeRange();
 
   // Populate series data based on query results
-  const { timeScale, timeChartData, timeSeriesMapping, legendItems } = useMemo(() => {
+  const {
+    timeScale,
+    timeChartData,
+    timeSeriesMapping,
+    legendItems,
+    seriesFormatMap: computedSeriesFormatMap,
+    maxValuesByFormat,
+  } = useMemo(() => {
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
       return {
         timeChartData: [],
         timeSeriesMapping: [],
+        seriesFormatMap: new Map(),
+        maxValuesByFormat: new Map<string, number>(),
       };
     }
 
@@ -151,6 +183,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     // https://apache.github.io/echarts-handbook/en/concepts/dataset/
     const timeChartData: TimeSeries[] = [];
     const timeSeriesMapping: TimeChartSeriesMapping = [];
+
+    // Track max values for each format unit (used for dynamic Y axis offset calculation)
+    const maxValuesByFormat = new Map<string, number>();
 
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
@@ -213,11 +248,39 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
             // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
             const datasetIndex = timeChartData.length;
 
+            // Determine yAxisIndex based on the query's format setting
+            const queryFormat = querySettings?.format;
+            const yAxisIndex = queryFormat?.unit ? (formatToYAxisIndex.get(queryFormat.unit) ?? 0) : 0;
+
             // Each series is stored as a separate dataset source.
             // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
             timeSeriesMapping.push(
-              getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor, querySettings)
+              getTimeSeries(
+                seriesId,
+                datasetIndex,
+                formattedSeriesName,
+                visual,
+                timeScale,
+                seriesColor,
+                querySettings,
+                yAxisIndex
+              )
             );
+
+            // Store the format for this series for tooltip formatting
+            if (queryFormat) {
+              seriesFormatMap.set(seriesId, queryFormat);
+
+              // Track max value for this format unit (used for dynamic Y axis offset calculation)
+              const unitKey = queryFormat.unit;
+              if (unitKey) {
+                const seriesMax = Math.max(...timeSeries.values.map((v) => Math.abs(v[1] ?? 0)));
+                const currentMax = maxValuesByFormat.get(unitKey) ?? 0;
+                if (seriesMax > currentMax) {
+                  maxValuesByFormat.set(unitKey, seriesMax);
+                }
+              }
+            }
 
             timeChartData.push({
               name: formattedSeriesName,
@@ -282,6 +345,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       timeChartData,
       timeSeriesMapping,
       legendItems,
+      seriesFormatMap,
+      maxValuesByFormat,
     };
   }, [
     queryResults,
@@ -296,7 +361,23 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     chartId,
     chartsTheme.thresholds,
     muiTheme.palette.primary.main,
+    formatToYAxisIndex,
+    seriesFormatMap,
   ]);
+
+  // Create multiple Y axes if there are additional formats
+  // Uses max values from data to compute dynamic offsets that adapt to label widths
+  const multipleYAxes = useMemo(() => {
+    if (additionalFormats.length === 0) {
+      return undefined; // Use single Y axis (default behavior)
+    }
+    // Build array of max values for each additional format (in order)
+    const maxValues = additionalFormats.map((fmt) => {
+      const unitKey = fmt.unit;
+      return unitKey ? (maxValuesByFormat?.get(unitKey) ?? 1000) : 1000;
+    });
+    return getFormattedMultipleYAxes(echartsYAxis, format, additionalFormats, maxValues);
+  }, [echartsYAxis, format, additionalFormats, maxValuesByFormat]);
 
   // Translate the legend values into columns for the table legend.
   const legendColumns = useMemo(() => {
@@ -335,17 +416,28 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     );
   }, [legend?.values, format]);
 
+  const gridOverrides: GridComponentOption = useMemo(() => {
+    // When Y axes are hidden, disable containLabel to prevent auto-spacing, but add bottom padding for X axis
+    return echartsYAxis.show === false
+      ? {
+          left: 0,
+          right: 0,
+          bottom: 30,
+          containLabel: false,
+        }
+      : {
+          left: yAxis && yAxis.label ? 30 : 20,
+          // With containLabel: true in theme, ECharts auto-reserves space for axis labels.
+          // For multiple right axes, add extra padding for the last axis labels that extend beyond the grid.
+          right: additionalFormats.length > 0 ? 10 : 20,
+          bottom: 0,
+          containLabel: true,
+        };
+  }, [echartsYAxis.show, yAxis, additionalFormats.length]);
+
   if (adjustedContentDimensions === undefined) {
     return null;
   }
-
-  // override default spacing, see: https://echarts.apache.org/en/option.html#grid
-  const gridLeft = yAxis && yAxis.label ? 30 : 20;
-  const gridOverrides: GridComponentOption = {
-    left: !echartsYAxis.show ? 0 : gridLeft,
-    right: 20,
-    bottom: 0,
-  };
 
   const handleDataZoom = (event: ZoomEventData): void => {
     // TODO: add ECharts transition animation on zoom
@@ -406,8 +498,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 data={timeChartData}
                 seriesMapping={timeSeriesMapping}
                 timeScale={timeScale}
-                yAxis={echartsYAxis}
+                yAxis={multipleYAxes ?? echartsYAxis}
                 format={format}
+                seriesFormatMap={computedSeriesFormatMap}
                 grid={gridOverrides}
                 isStackedBar={isStackedBar}
                 tooltipConfig={tooltipConfig}

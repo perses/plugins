@@ -60,9 +60,38 @@ describe('convertPanelYAxis', () => {
       show: true,
       max: 1,
       min: 0.1,
-      axisLabel: {
-        show: true,
+    });
+  });
+  it('should convert a Perses yAxis spec of type log to the ECharts equivalent', () => {
+    const persesAxis: TimeSeriesChartYAxisOptions = {
+      show: true,
+      label: 'Axis Label',
+      format: {
+        unit: 'percent-decimal',
+        decimalPlaces: 0,
       },
+      min: 0.1,
+      max: 1,
+      logBase: 2,
+    };
+    const actualAxisLog2 = convertPanelYAxis(persesAxis);
+    // Axis label is handled outside of echarts since it is built with a custom React component.
+    expect(actualAxisLog2).toEqual({
+      show: true,
+      max: 1,
+      min: undefined,
+      type: 'log',
+      logBase: 2,
+    });
+    persesAxis.logBase = 10;
+    const actualAxisLog10 = convertPanelYAxis(persesAxis);
+    // Axis label is handled outside of echarts since it is built with a custom React component.
+    expect(actualAxisLog10).toEqual({
+      show: true,
+      max: 1,
+      min: undefined,
+      type: 'log',
+      logBase: 10,
     });
   });
 });

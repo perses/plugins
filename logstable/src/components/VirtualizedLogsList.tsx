@@ -11,11 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'react';
 import { Box, useTheme, Popover, Button, ButtonGroup, IconButton } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { Virtuoso } from 'react-virtuoso';
 import { LogEntry } from '@perses-dev/core';
+import { useSelection } from '@perses-dev/components';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
+import { ActionOptions, useAllVariableValues } from '@perses-dev/plugin-system';
 import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogsTableOptions } from '../model';
 import { LogRow } from './LogRow';
@@ -55,10 +58,39 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     }
   });
 
-  // Keep ref in sync with state
+  const selectionEnabled = spec.selection?.enabled ?? false;
+  const { setSelection, clearSelection } = useSelection<LogEntry, number>();
+
+  const allVariables = useAllVariableValues();
+  const itemActionsConfig = spec.actions ? (spec.actions as ActionOptions) : undefined;
+  const itemActionsListConfig =
+    itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : [];
+
+  const { getItemActionButtons, confirmDialog } = useSelectionItemActions<number>({
+    actions: itemActionsListConfig,
+    variableState: allVariables,
+  });
+
   useEffect(() => {
     selectedRowsRef.current = selectedRows;
   }, [selectedRows]);
+
+  // Sync local selection state with context when selection is enabled
+  useEffect(() => {
+    if (!selectionEnabled) return;
+
+    if (selectedRows.size === 0) {
+      clearSelection();
+    } else {
+      const selectionItems = Array.from(selectedRows)
+        .map((index) => {
+          const log = logs[index];
+          return log ? { id: index, item: log } : null;
+        })
+        .filter((entry): entry is { id: number; item: LogEntry } => entry !== null);
+      setSelection(selectionItems);
+    }
+  }, [selectedRows, logs, selectionEnabled, setSelection, clearSelection]);
 
   const handleDismissHints = useCallback(() => {
     setIsHintsDismissed(true);
@@ -166,6 +198,10 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     const log = logs[index];
     if (!log) return null;
 
+    const itemActionButtons: ReactNode[] = itemActionsListConfig?.length
+      ? getItemActionButtons({ id: index, data: log as unknown as Record<string, unknown> })
+      : [];
+
     return (
       <LogRow
         isExpandable={spec.enableDetails}
@@ -177,6 +213,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
         showTime={spec.showTime}
         isSelected={selectedRows.has(index)}
         onSelect={handleRowSelect}
+        itemActionButtons={itemActionButtons}
       />
     );
   };
@@ -257,163 +294,169 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
   }, []);
 
   return (
-    <Box
-      sx={{
-        height: '100%',
-        backgroundColor: theme.palette.background.default,
-        overflow: 'hidden',
-        boxShadow: theme.shadows[1],
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      onCopy={handleCopy}
-    >
-      {!isHintsDismissed && (
-        <Box
-          sx={{
-            px: 2,
-            py: 0.75,
-            fontSize: '12px',
-            color: theme.palette.text.secondary,
-            backgroundColor: theme.palette.background.paper,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            flexShrink: 0,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-            <Box component="span" sx={{ opacity: 0.8 }}>
-              {isMac ? '⌘' : 'Ctrl'}+Click to select
-            </Box>
-            <Box component="span" sx={{ opacity: 0.6 }}>
-              •
-            </Box>
-            <Box component="span" sx={{ opacity: 0.8 }}>
-              Shift+Click for range
-            </Box>
-            <Box component="span" sx={{ opacity: 0.6 }}>
-              •
-            </Box>
-            <Box component="span" sx={{ opacity: 0.8 }}>
-              {isMac ? '⌘' : 'Ctrl'}+C to copy
-            </Box>
-            <Box component="span" sx={{ opacity: 0.6 }}>
-              •
-            </Box>
-            <Box component="span" sx={{ opacity: 0.8 }}>
-              Esc to clear
-            </Box>
-          </Box>
-          <IconButton
-            size="small"
-            onClick={handleDismissHints}
-            sx={{
-              opacity: 0.6,
-              '&:hover': { opacity: 1 },
-              padding: 0.5,
-            }}
-            aria-label="Dismiss hints"
-          >
-            <CloseIcon sx={{ fontSize: '16px' }} />
-          </IconButton>
-        </Box>
-      )}
-      <Virtuoso
-        style={{ height: '100%', flexGrow: 1 }}
-        initialItemCount={spec.showAll ? logs.length : undefined}
-        totalCount={logs.length}
-        itemContent={renderLogRow}
-      />
-      <Popover
-        open={Boolean(copyPopoverAnchor)}
-        anchorReference="anchorPosition"
-        anchorPosition={copyPopoverAnchor ? { top: copyPopoverAnchor.y, left: copyPopoverAnchor.x } : undefined}
-        onClose={handleCloseCopyPopover}
-        disableScrollLock
-        disableAutoFocus
-        disableRestoreFocus
-        disableEnforceFocus
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        slotProps={{
-          paper: {
-            sx: {
-              px: 2,
-              py: 1.5,
-              boxShadow: theme.shadows[8],
-              borderRadius: 2,
-              pointerEvents: 'auto',
-            },
-          },
-        }}
+    <>
+      {confirmDialog}
+      <Box
         sx={{
-          pointerEvents: 'none',
+          height: '100%',
+          backgroundColor: theme.palette.background.default,
+          overflow: 'hidden',
+          boxShadow: theme.shadows[1],
+          display: 'flex',
+          flexDirection: 'column',
         }}
+        onCopy={handleCopy}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {!isHintsDismissed && (
           <Box
             sx={{
-              fontSize: '14px',
-              color: theme.palette.text.primary,
-              fontWeight: 500,
+              px: 2,
+              py: 0.75,
+              fontSize: '12px',
+              color: theme.palette.text.secondary,
+              backgroundColor: theme.palette.background.paper,
+              borderBottom: `1px solid ${theme.palette.divider}`,
               display: 'flex',
               alignItems: 'center',
-              gap: 0.5,
+              gap: 2,
+              flexShrink: 0,
             }}
           >
-            ✓ Copied {lastCopiedCount} {lastCopiedCount === 1 ? 'log' : 'logs'} as{' '}
-            <Box component="span" sx={{ color: theme.palette.primary.main, minWidth: '60px', display: 'inline-block' }}>
-              {lastCopiedFormat === 'full' ? 'Full' : lastCopiedFormat === 'message' ? 'Message' : 'JSON'}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+              <Box component="span" sx={{ opacity: 0.8 }}>
+                {isMac ? '⌘' : 'Ctrl'}+Click to select
+              </Box>
+              <Box component="span" sx={{ opacity: 0.6 }}>
+                •
+              </Box>
+              <Box component="span" sx={{ opacity: 0.8 }}>
+                Shift+Click for range
+              </Box>
+              <Box component="span" sx={{ opacity: 0.6 }}>
+                •
+              </Box>
+              <Box component="span" sx={{ opacity: 0.8 }}>
+                {isMac ? '⌘' : 'Ctrl'}+C to copy
+              </Box>
+              <Box component="span" sx={{ opacity: 0.6 }}>
+                •
+              </Box>
+              <Box component="span" sx={{ opacity: 0.8 }}>
+                Esc to clear
+              </Box>
             </Box>
+            <IconButton
+              size="small"
+              onClick={handleDismissHints}
+              sx={{
+                opacity: 0.6,
+                '&:hover': { opacity: 1 },
+                padding: 0.5,
+              }}
+              aria-label="Dismiss hints"
+            >
+              <CloseIcon sx={{ fontSize: '16px' }} />
+            </IconButton>
           </Box>
-          <ButtonGroup size="small" variant="outlined">
-            <Button
-              onClick={() => handleCopyInFormat('full')}
+        )}
+        <Virtuoso
+          style={{ height: '100%', flexGrow: 1 }}
+          initialItemCount={spec.showAll ? logs.length : undefined}
+          totalCount={logs.length}
+          itemContent={renderLogRow}
+        />
+        <Popover
+          open={Boolean(copyPopoverAnchor)}
+          anchorReference="anchorPosition"
+          anchorPosition={copyPopoverAnchor ? { top: copyPopoverAnchor.y, left: copyPopoverAnchor.x } : undefined}
+          onClose={handleCloseCopyPopover}
+          disableScrollLock
+          disableAutoFocus
+          disableRestoreFocus
+          disableEnforceFocus
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          slotProps={{
+            paper: {
+              sx: {
+                px: 2,
+                py: 1.5,
+                boxShadow: theme.shadows[8],
+                borderRadius: 2,
+                pointerEvents: 'auto',
+              },
+            },
+          }}
+          sx={{
+            pointerEvents: 'none',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
               sx={{
-                fontSize: '12px',
-                textTransform: 'none',
-                minWidth: '52px',
-                fontWeight: lastCopiedFormat === 'full' ? 600 : 400,
-                bgcolor: lastCopiedFormat === 'full' ? theme.palette.action.selected : 'transparent',
+                fontSize: '14px',
+                color: theme.palette.text.primary,
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
               }}
             >
-              Full
-            </Button>
-            <Button
-              onClick={() => handleCopyInFormat('message')}
-              sx={{
-                fontSize: '12px',
-                textTransform: 'none',
-                minWidth: '74px',
-                fontWeight: lastCopiedFormat === 'message' ? 600 : 400,
-                bgcolor: lastCopiedFormat === 'message' ? theme.palette.action.selected : 'transparent',
-              }}
-            >
-              Message
-            </Button>
-            <Button
-              onClick={() => handleCopyInFormat('json')}
-              sx={{
-                fontSize: '12px',
-                textTransform: 'none',
-                minWidth: '52px',
-                fontWeight: lastCopiedFormat === 'json' ? 600 : 400,
-                bgcolor: lastCopiedFormat === 'json' ? theme.palette.action.selected : 'transparent',
-              }}
-            >
-              JSON
-            </Button>
-          </ButtonGroup>
-        </Box>
-      </Popover>
-    </Box>
+              ✓ Copied {lastCopiedCount} {lastCopiedCount === 1 ? 'log' : 'logs'} as{' '}
+              <Box
+                component="span"
+                sx={{ color: theme.palette.primary.main, minWidth: '60px', display: 'inline-block' }}
+              >
+                {lastCopiedFormat === 'full' ? 'Full' : lastCopiedFormat === 'message' ? 'Message' : 'JSON'}
+              </Box>
+            </Box>
+            <ButtonGroup size="small" variant="outlined">
+              <Button
+                onClick={() => handleCopyInFormat('full')}
+                sx={{
+                  fontSize: '12px',
+                  textTransform: 'none',
+                  minWidth: '52px',
+                  fontWeight: lastCopiedFormat === 'full' ? 600 : 400,
+                  bgcolor: lastCopiedFormat === 'full' ? theme.palette.action.selected : 'transparent',
+                }}
+              >
+                Full
+              </Button>
+              <Button
+                onClick={() => handleCopyInFormat('message')}
+                sx={{
+                  fontSize: '12px',
+                  textTransform: 'none',
+                  minWidth: '74px',
+                  fontWeight: lastCopiedFormat === 'message' ? 600 : 400,
+                  bgcolor: lastCopiedFormat === 'message' ? theme.palette.action.selected : 'transparent',
+                }}
+              >
+                Message
+              </Button>
+              <Button
+                onClick={() => handleCopyInFormat('json')}
+                sx={{
+                  fontSize: '12px',
+                  textTransform: 'none',
+                  minWidth: '52px',
+                  fontWeight: lastCopiedFormat === 'json' ? 600 : 400,
+                  bgcolor: lastCopiedFormat === 'json' ? theme.palette.action.selected : 'transparent',
+                }}
+              >
+                JSON
+              </Button>
+            </ButtonGroup>
+          </Box>
+        </Popover>
+      </Box>
+    </>
   );
 };

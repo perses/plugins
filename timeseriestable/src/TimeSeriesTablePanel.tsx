@@ -23,7 +23,7 @@ import { DataTable } from './components';
 export type TimeSeriesTableProps = PanelProps<TimeSeriesTableOptions, TimeSeriesData>;
 
 export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement {
-  const { contentDimensions, queryResults } = props;
+  const { contentDimensions, queryResults, spec } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
 
@@ -32,7 +32,7 @@ export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement 
       style={{ height: contentDimensions?.height ?? 0 }}
       sx={{ padding: `${contentPadding}px`, overflowY: 'scroll' }}
     >
-      <DataTable queryResults={queryResults} />
+      <DataTable queryResults={queryResults} spec={spec} />
     </Box>
   );
 }

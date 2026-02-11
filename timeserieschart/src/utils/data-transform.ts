@@ -40,7 +40,6 @@ import {
   TimeSeriesChartVisualOptions,
   TimeSeriesChartYAxisOptions,
   LineStyleType,
-  LOG_BASE,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -75,7 +74,8 @@ export function getTimeSeries(
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
   paletteColor: string,
-  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number }
+  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number },
+  yAxisIndex?: number
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -96,6 +96,7 @@ export function getTimeSeries(
       name: formattedName,
       color: paletteColor,
       stack: visual.stack === 'all' ? visual.stack : undefined,
+      yAxisIndex: yAxisIndex,
       label: {
         show: false,
       },
@@ -111,6 +112,7 @@ export function getTimeSeries(
     connectNulls: visual.connectNulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
     stack: visual.stack === 'all' ? visual.stack : undefined,
+    yAxisIndex: yAxisIndex,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,
@@ -232,21 +234,17 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
  * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options.
  * Handles both linear and logarithmic scales with appropriate min/max calculations.
  */
-export function convertPanelYAxis(
-  inputAxis: TimeSeriesChartYAxisOptions = {},
-  useLogarithmicBase: LOG_BASE
-): YAXisComponentOption {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   // Determine the appropriate min value based on scale type and user input
   let minValue: YAXisComponentOption['min'];
-
-  if (inputAxis?.min !== undefined) {
-    // User explicitly set a min value - use it for both linear and log scales
-    minValue = inputAxis.min;
-  } else if (useLogarithmicBase !== 'none') {
+  if (inputAxis.logBase !== undefined) {
     // For logarithmic scales without explicit min:
     // Let ECharts auto-calculate the range based on data to avoid issues with
     // function-based calculations which can result in improper ranges (e.g., 1-10)
     minValue = undefined;
+  } else if (inputAxis?.min !== undefined) {
+    // User explicitly set a min value - use it for both linear and log scales
+    minValue = inputAxis.min;
   } else {
     // For linear scales without explicit min:
     // Use dynamic calculation with padding for better visualization
@@ -269,20 +267,17 @@ export function convertPanelYAxis(
 
   // Build the yAxis configuration
   const yAxis: YAXisComponentOption = {
-    show: true,
-    axisLabel: {
-      show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
-    },
+    show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: minValue,
     max: inputAxis?.max,
   };
 
   // Apply logarithmic scale settings if requested
-  if (useLogarithmicBase !== 'none') {
+  if (inputAxis.logBase !== undefined) {
     return {
       ...yAxis,
       type: 'log',
-      logBase: useLogarithmicBase,
+      logBase: inputAxis.logBase,
     };
   }
 

@@ -11,19 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, Theme, Typography, useTheme } from '@mui/material';
+import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
+import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
 import {
+  ActionOptions,
   PanelData,
   PanelProps,
   replaceVariablesInString,
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
-import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
-import { useTheme, Theme, Typography, Box } from '@mui/material';
-import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
+import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -211,6 +213,50 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   const theme = useTheme();
   const allVariables = useAllVariableValues();
 
+  const selectionEnabled = spec.selection?.enabled ?? false;
+  const { selectionMap, setSelection, clearSelection } = useSelection<Record<string, unknown>, string>();
+
+  const itemActionsConfig = spec.actions ? (spec.actions as ActionOptions) : undefined;
+  const itemActionsListConfig =
+    itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : [];
+
+  const { getItemActionButtons, confirmDialog, actionButtons } = useSelectionItemActions({
+    actions: itemActionsListConfig,
+    variableState: allVariables,
+  });
+
+  const filteredDataRef = useRef<Array<Record<string, unknown>>>([]);
+
+  // Convert selectionMap to TanStack's RowSelectionState format
+  const rowSelection = useMemo((): RowSelectionState => {
+    const result: RowSelectionState = {};
+    selectionMap.forEach((_, id) => {
+      result[id] = true;
+    });
+    return result;
+  }, [selectionMap]);
+
+  const handleRowSelectionChange = useCallback(
+    (newRowSelection: RowSelectionState) => {
+      const newSelection: Array<{ id: string; item: Record<string, unknown> }> = [];
+      for (const [id, isSelected] of Object.entries(newRowSelection)) {
+        if (isSelected) {
+          const index = parseInt(id, 10);
+          if (filteredDataRef.current[index] !== undefined) {
+            newSelection.push({ id, item: filteredDataRef.current[index] });
+          }
+        }
+      }
+
+      if (newSelection.length === 0) {
+        clearSelection();
+      } else {
+        setSelection(newSelection);
+      }
+    },
+    [setSelection, clearSelection]
+  );
+
   // TODO: handle other query types
   const queryMode = getTablePanelQueryOptions(spec).mode;
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
@@ -251,7 +297,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [queryResults, queryMode, spec.columnSettings]);
 
   // Transform will be applied by their orders on the original data
-  const data = transformData(rawData, spec.transforms ?? []);
+  const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
@@ -452,6 +498,9 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return filtered;
   }, [data, columnFilters, spec.enableFiltering]);
 
+  // Keep ref in sync with filtered data for use in selection handler
+  filteredDataRef.current = filteredData;
+
   const [pagination, setPagination] = useState<PaginationState | undefined>(
     spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
   );
@@ -486,6 +535,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   return (
     <>
+      {confirmDialog}
       {spec.enableFiltering && (
         <div
           style={{
@@ -592,6 +642,11 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         onSortingChange={setSorting}
         pagination={pagination}
         onPaginationChange={setPagination}
+        checkboxSelection={selectionEnabled}
+        rowSelection={rowSelection}
+        onRowSelectionChange={handleRowSelectionChange}
+        getItemActions={({ id, data }) => getItemActionButtons({ id, data: data as Record<string, unknown> })}
+        hasItemActions={actionButtons && actionButtons.length > 0}
       />
     </>
   );
