@@ -1,0 +1,6 @@
+{
+  "kind": "HeatMapChart",
+  "spec": {
+    "max": 10
+  }
+}

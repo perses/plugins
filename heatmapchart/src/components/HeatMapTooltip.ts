@@ -21,7 +21,6 @@ interface CustomTooltipProps {
   label: string;
   marker: string;
   xAxisCategories: number[];
-  yAxisCategories: string[];
   theme: Theme;
   yAxisFormat?: FormatOptions;
   countFormat?: FormatOptions;
@@ -32,13 +31,12 @@ export function generateTooltipHTML({
   label,
   marker,
   xAxisCategories,
-  yAxisCategories,
   theme,
   yAxisFormat,
   countFormat,
 }: CustomTooltipProps): string {
-  const [x, y] = data;
-  const xAxisLabel = xAxisCategories[x];
+  const [xIndex, yLower, yUpper] = data;
+  const xAxisLabel = xAxisCategories[xIndex];
 
   const { formattedDate, formattedTime } = getDateAndTime(xAxisLabel);
 
@@ -57,10 +55,8 @@ export function generateTooltipHTML({
     margin-right: 16px;
   `;
 
-  const lowerBound = parseFloat(yAxisCategories[y]!);
-  const upperBound = yAxisCategories[y + 1]
-    ? parseFloat(yAxisCategories[y + 1]!)
-    : parseFloat(yAxisCategories[y]!) + parseFloat(yAxisCategories[y]!) - parseFloat(yAxisCategories[y - 1]!); // Top cell, upper bound need to be calculated from previous cell
+  const lowerBound = yLower;
+  const upperBound = yUpper;
 
   return `
     <div>
