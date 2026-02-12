@@ -17,13 +17,11 @@ import (
 	commonProxy "github.com/perses/shared/cue/common/proxy"
 )
 
-kind: #kind
-spec: {
-	#proxy
-}
-
 #kind: "SQLDatasource"
 
-#proxy: {
-	proxy: commonProxy.#SQLProxy
+kind: #kind
+spec: {
+	common.#baseHTTPDatasourceSpec
 }
+
+#selector: common.#datasourceSelector & { _kind: #kind }
