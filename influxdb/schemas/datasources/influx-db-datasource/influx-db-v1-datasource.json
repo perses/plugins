@@ -1,0 +1,8 @@
+{
+}
+  }
+    "database": "mydb"
+    "version": "v1",
+    "directUrl": "http://localhost:8086",
+  "spec": {
+  "kind": "InfluxDBV1Datasource",
