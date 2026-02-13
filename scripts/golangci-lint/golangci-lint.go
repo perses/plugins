@@ -16,15 +16,28 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
+func hasGoFiles(dir string) bool {
+	// Check if go.mod exists
+	_, err := os.Stat(filepath.Join(dir, "go.mod"))
+	return err == nil
+}
+
 func main() {
 	var isError bool
 
 	for _, workspace := range npm.MustGetWorkspaces(".") {
+		// Skip workspaces without Go files
+		if !hasGoFiles(workspace) {
+			logrus.Infof("skipping golangci-lint for the plugin %s (no Go files)", workspace)
+			continue
+		}
+
 		cmd := exec.Command("golangci-lint", "run")
 		cmd.Dir = workspace
 		cmd.Stdout = os.Stdout

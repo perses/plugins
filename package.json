@@ -21,6 +21,7 @@
     "logstable",
     "loki",
     "markdown",
+    "opengemini",
     "piechart",
     "prometheus",
     "pyroscope",
