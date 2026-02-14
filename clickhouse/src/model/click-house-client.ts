@@ -25,11 +25,12 @@ export interface ClickHouseQueryOptions {
 
 export interface ClickHouseQueryResponse {
   status: 'success' | 'error';
-  data: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
 }
 
 export interface ClickHouseClient {
-  query: (params: { start: string; end: string; query: string }) => Promise<ClickHouseQueryResponse>;
+  query: (params: ClickHouseQueryParams) => Promise<ClickHouseQueryResponse>;
 }
 
 export async function query(
