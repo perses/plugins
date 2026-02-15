@@ -1,9 +1,0 @@
-{
-  "kind": "InfluxDBV3Datasource",
-  "spec": {
-    "directUrl": "http://localhost:8086",
-    "version": "v3",
-    "organization": "myorg",
-    "bucket": "mybucket"
-  }
-}

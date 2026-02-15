@@ -11,24 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+export { getPluginModule } from './getPluginModule';
+export { InfluxDBV1Datasource as InfluxDBDatasource } from './datasources/influxdb-v1';
+export { InfluxDBTimeSeriesQuery } from './queries/influxdb-time-series-query';
 
-import (
-	"github.com/perses/shared/cue/common"
-	commonProxy "github.com/perses/shared/cue/common/proxy"
-)
-
-kind: "InfluxDBV1Datasource"
-spec: {
-	#directUrl | #proxy
-	version:      "v1"
-	database: string
-}
-
-#directUrl: {
-	directUrl: common.#url
-}
-
-#proxy: {
-	proxy: commonProxy.#HTTPProxy
-}

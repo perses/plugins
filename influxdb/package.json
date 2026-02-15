@@ -65,5 +65,28 @@
   "files": [
     "dist",
     "README.md"
-  ]
+  ],
+  "perses": {
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "InfluxDB Datasource"
+          },
+          "name": "InfluxDBDatasource"
+        }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "display": {
+            "name": "InfluxDB Time Series Query"
+          },
+          "name": "InfluxDBTimeSeriesQuery"
+        }
+      }
+    ]
+  }
 }
