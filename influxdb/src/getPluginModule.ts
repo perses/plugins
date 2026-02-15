@@ -1,11 +1,30 @@
-import { PluginModuleResource, DatasourcePluginModule, TimeSeriesQueryPluginModule } from '@perses-dev/plugin-system';
-import { InfluxDBV1Datasource } from './datasources/influxdb-v1';
-import { InfluxDBV3Datasource } from './datasources/influxdb-v3';
-import { InfluxDBTimeSeriesQuery } from './queries/influxdb-time-series-query';
-export function getPluginModules(): PluginModuleResource[] {
-  return [
-    { kind: 'Datasource', plugin: InfluxDBV1Datasource, pluginKind: 'InfluxDBV1Datasource' } as DatasourcePluginModule,
-    { kind: 'Datasource', plugin: InfluxDBV3Datasource, pluginKind: 'InfluxDBV3Datasource' } as DatasourcePluginModule,
-    { kind: 'TimeSeriesQuery', plugin: InfluxDBTimeSeriesQuery, pluginKind: 'InfluxDBTimeSeriesQuery' } as TimeSeriesQueryPluginModule,
-  ];
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { PluginModuleResource, PluginModuleSpec } from '@perses-dev/plugin-system';
+import packageJson from '../package.json';
+
+/**
+ * Returns the plugin module information from package.json
+ */
+export function getPluginModule(): PluginModuleResource {
+  const { name, version, perses } = packageJson;
+  return {
+    kind: 'PluginModule',
+    metadata: {
+      name,
+      version,
+    },
+    spec: perses as PluginModuleSpec,
+  };
 }

@@ -11,75 +11,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/core';
-import { InfluxDBDatasourceSpec, InfluxDBClient } from '../../model';
+import { TimeSeriesData, TimeSeries } from '@perses-dev/core';
 import { InfluxDBTimeSeriesQueryEditor } from './InfluxDBTimeSeriesQueryEditor';
 export interface InfluxDBTimeSeriesQuerySpec {
   query: string;
 }
-function convertV1ResponseToTimeSeries(response: any): TimeSeriesData {
-  const datasets: any[] = [];
+function convertV1ResponseToTimeSeries(response: any): TimeSeries[] {
+  const series: TimeSeries[] = [];
   if (response.results && response.results[0] && response.results[0].series) {
-    response.results[0].series.forEach((series: any) => {
-      const timeIndex = series.columns.indexOf('time');
-      const valueColumns = series.columns.filter((col: string) => col !== 'time');
+    response.results[0].series.forEach((seriesData: any) => {
+      const timeIndex = seriesData.columns.indexOf('time');
+      const valueColumns = seriesData.columns.filter((col: string) => col !== 'time');
       valueColumns.forEach((valueColumn: string) => {
-        const valueIndex = series.columns.indexOf(valueColumn);
-        const data = series.values.map((row: any[]) => ({
-          x: new Date(row[timeIndex]).getTime(),
-          y: row[valueIndex],
-        }));
-        const tagStr = series.tags
-          ? Object.entries(series.tags).map(([k, v]) => k + '="' + v + '"').join(',')
+        const valueIndex = seriesData.columns.indexOf(valueColumn);
+        const values = seriesData.values.map((row: any[]) => [new Date(row[timeIndex]).getTime(), row[valueIndex]]);
+        const tagStr = seriesData.tags
+          ? Object.entries(seriesData.tags)
+              .map(([k, v]) => k + '="' + v + '"')
+              .join(',')
           : '';
-        datasets.push({
-          name: series.name + '.' + valueColumn,
-          values: data,
+        series.push({
+          name: seriesData.name + '.' + valueColumn,
+          values: values as Array<[number, number | null]>,
           formattedName: tagStr
-            ? series.name + '{' + tagStr + '}.' + valueColumn
-            : series.name + '.' + valueColumn,
+            ? seriesData.name + '{' + tagStr + '}.' + valueColumn
+            : seriesData.name + '.' + valueColumn,
         });
       });
     });
   }
-  return { datasets };
+  return series;
 }
-function convertV3ResponseToTimeSeries(response: any): TimeSeriesData {
-  const datasets: any[] = [];
+function convertV3ResponseToTimeSeries(response: any): TimeSeries[] {
+  const series: TimeSeries[] = [];
   if (response.data && response.schema) {
     const timeField = response.schema.fields.find((f: any) => f.data_type === 'Timestamp');
     const timeIndex = response.schema.fields.indexOf(timeField);
     response.schema.fields.forEach((field: any, index: number) => {
       if (field.data_type !== 'Timestamp' && field.data_type !== 'Utf8') {
-        const data = response.data.map((row: any[]) => ({
-          x: new Date(row[timeIndex]).getTime(),
-          y: row[index],
-        }));
-        datasets.push({ name: field.name, values: data, formattedName: field.name });
+        const values = response.data.map((row: any[]) => [new Date(row[timeIndex]).getTime(), row[index]]);
+        series.push({
+          name: field.name,
+          values: values as Array<[number, number | null]>,
+          formattedName: field.name,
+        });
       }
     });
   }
-  return { datasets };
+  return series;
 }
-export const InfluxDBTimeSeriesQuery: TimeSeriesQueryPlugin<
-  InfluxDBTimeSeriesQuerySpec,
-  InfluxDBDatasourceSpec,
-  InfluxDBClient
-> = {
-  getTimeSeriesData: async (spec, context) => {
+export const InfluxDBTimeSeriesQuery: TimeSeriesQueryPlugin<InfluxDBTimeSeriesQuerySpec> = {
+  getTimeSeriesData: async (spec: InfluxDBTimeSeriesQuerySpec, context: any) => {
     const { query } = spec;
     const { datasourceClient, datasourceSpec } = context;
     if (!datasourceClient) {
       throw new Error('No datasource client available');
     }
+    let timeSeries: TimeSeries[] = [];
     if (datasourceSpec.version === 'v1') {
       const response = await datasourceClient.queryV1(query, datasourceSpec.database);
-      return convertV1ResponseToTimeSeries(response);
+      timeSeries = convertV1ResponseToTimeSeries(response);
     } else if (datasourceSpec.version === 'v3') {
       const response = await datasourceClient.queryV3SQL(query, datasourceSpec.organization, datasourceSpec.bucket);
-      return convertV3ResponseToTimeSeries(response);
+      timeSeries = convertV3ResponseToTimeSeries(response);
+    } else {
+      throw new Error('Unsupported InfluxDB version: ' + (datasourceSpec as any).version);
     }
-    throw new Error('Unsupported InfluxDB version: ' + (datasourceSpec as any).version);
+
+    return {
+      series: timeSeries,
+      timeRange: context.timeRange,
+      stepMs: 30 * 1000,
+      metadata: {
+        executedQueryString: query,
+      },
+    } as TimeSeriesData;
   },
   OptionsEditorComponent: InfluxDBTimeSeriesQueryEditor,
+  createInitialOptions: () => ({ query: '' }),
 };

@@ -14,12 +14,22 @@
 package model
 
 import (
-	"github.com/perses/shared/cue/common"
-	commonProxy "github.com/perses/shared/cue/common/proxy"
+	"github.com/perses/perses/cue/common"
+	commonProxy "github.com/perses/perses/cue/common/proxy"
 )
 
-kind: "InfluxDBV3Datasource"
+kind: "InfluxDBDatasource"
 spec: {
+	#v1Config | #v3Config
+}
+
+#v1Config: {
+	#directUrl | #proxy
+	version:      "v1"
+	database: string
+}
+
+#v3Config: {
 	#directUrl | #proxy
 	version:      "v3"
 	organization: string
