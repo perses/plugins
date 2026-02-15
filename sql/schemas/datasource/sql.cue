@@ -21,7 +21,7 @@ import (
 
 kind: #kind
 spec: {
-	common.#baseHTTPDatasourceSpec
+	commonProxy.#baseSQLDatasourceSpec
 }
 
 #selector: common.#datasourceSelector & { _kind: #kind }
