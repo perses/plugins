@@ -41,3 +41,7 @@ export const InfluxDBV1Datasource: DatasourcePlugin<InfluxDBV1Spec, InfluxDBClie
   createInitialOptions: () => ({ version: 'v1', database: '' }),
   OptionsEditorComponent: InfluxDBV1Editor,
 };
+
+// Default export for Module Federation
+export default InfluxDBV1Datasource;
+
