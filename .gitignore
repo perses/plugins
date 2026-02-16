@@ -4,6 +4,9 @@
 .DS_Store
 *.local
 *.log*
+playwright
+playwright-report
+test-results
 
 # Dist
 node_modules
