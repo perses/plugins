@@ -90,3 +90,7 @@ export const InfluxDBTimeSeriesQuery: TimeSeriesQueryPlugin<InfluxDBTimeSeriesQu
   OptionsEditorComponent: InfluxDBTimeSeriesQueryEditor,
   createInitialOptions: () => ({ query: '' }),
 };
+
+// Default export for Module Federation
+export default InfluxDBTimeSeriesQuery;
+
