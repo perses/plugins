@@ -48,6 +48,7 @@
     "@perses-dev/dashboards": "^0.53.0-rc.2",
     "@perses-dev/explore": "^0.53.0-rc.2",
     "@perses-dev/plugin-system": "^0.53.0-rc.2",
+    "@playwright/test": "^1.58.2",
     "@rsbuild/core": "^1.6.7",
     "@rsbuild/plugin-react": "^1.4.2",
     "@swc/cli": "^0.7.9",
