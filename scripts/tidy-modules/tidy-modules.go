@@ -15,7 +15,7 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
+	"os/exec"	
 
 	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
@@ -42,6 +42,12 @@ func tidyGoModule(workspace string) error {
 
 func main() {
 	for _, workspace := range npm.MustGetWorkspaces(".") {
+
+		if workspace == "e2e" {
+			logrus.Infof("Skipping e2e workspace: %s", workspace)
+			continue
+		}
+
 		logrus.Infof("Tidying module in workspace %s..", workspace)
 		if retrieveDepErr := tidyCueModule(workspace); retrieveDepErr != nil {
 			logrus.WithError(retrieveDepErr).Fatalf("unable to resolve the module dependencies for plugin %s", workspace)

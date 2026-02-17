@@ -91,6 +91,10 @@ func bumpPackage(workspace string, version string, componentNames ...string) {
 
 func bumpPersesDep(workspaces []string, version string) {
 	for _, workspace := range workspaces {
+		if workspace == "e2e" {
+			logrus.Infof("Skipping e2e workspace: %s", workspace)
+			continue
+		}
 		bumpGoDep(workspace, version)
 		bumpPackage(workspace, version, persesPackageName)
 		bumpCueDep(workspace, version, false)
@@ -99,6 +103,9 @@ func bumpPersesDep(workspaces []string, version string) {
 
 func bumpSharedDep(workspaces []string, version string) {
 	for _, workspace := range workspaces {
+		if workspace == "e2e" {
+			continue
+		}
 		bumpPackage(workspace, version, sharedPackageNames...)
 		bumpCueDep(workspace, version, true)
 	}

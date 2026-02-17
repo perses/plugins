@@ -42,6 +42,9 @@ func main() {
 		logrus.Info("no tag provided, building all plugins")
 
 		for _, workspace := range workspaces {
+			if workspace == "e2e" {
+				continue
+			}
 			logrus.Infof("Building plugin %s", workspace)
 			pluginsToBuild = append(pluginsToBuild, async.Async(func() (string, error) {
 				return workspace, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true")

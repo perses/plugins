@@ -79,6 +79,10 @@ func main() {
 		return
 	}
 	for _, workspace := range npm.MustGetWorkspaces(".") {
+		if workspace == "e2e" {
+			logrus.Infof("Skipping e2e workspace: %s", workspace)
+			continue
+		}
 		logrus.Infof("releasing %s", workspace)
 		release(workspace, dryRun)
 	}
