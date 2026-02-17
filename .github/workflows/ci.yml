@@ -76,6 +76,42 @@ jobs:
       - run: npm ci
       - run: npm run test
 
+  e2e:
+    name: "e2e tests"
+    needs: build # <--- CRITICAL: Wait for build to finish. PERSES_PLUGIN_ARCHIVE_PATHS accepts archive files only
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+      - name: download plugin archives
+        uses: actions/download-artifact@v4 # <--- Download the artifacts to use the archive files
+        with:
+          name: archives
+          path: ./plugins/temp-archives
+      - name: flatten plugin archives # <--- Move all plugins archive into a single folder for simplicity
+        run: |
+          mkdir -p ./plugins/development-archives          
+          find ./plugins/temp-archives -name "*.tar.gz" -exec mv {} ./plugins/development-archives/ \;          
+          rm -rf ./plugins/temp-archives          
+          ls -R ./plugins/development-archives
+      - name: start dev env
+        uses: hoverkraft-tech/compose-action@v2.5.0
+        with:
+            compose-file: .github/workflows/docker-compose.ci.yml      
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+          nvmrc_path: ".nvmrc"
+      - name: install dependencies
+        run: npm ci
+      - name: install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: e2e
+      - name: run e2e tests
+        run: npm run test:ci --prefix e2e -- src/tests
+          
+
   type-check:
     name: "type-check"
     runs-on: ubuntu-latest
