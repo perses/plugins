@@ -1,0 +1,18 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test:ci": "npx playwright test --workers=1 --reporter=github,list",
+    "test:install": "npx playwright install --with-deps",
+    "test:local": "npx playwright test --ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.2.3"
+  }
+}

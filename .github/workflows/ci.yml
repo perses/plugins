@@ -76,6 +76,75 @@ jobs:
       - run: npm ci
       - run: npm run test
 
+  e2e:
+    name: "e2e tests"
+    runs-on: ubuntu-latest
+    services:
+      perses:
+        image: persesdev/perses:latest
+        ports: ["8080:8080"]        
+        env:
+          PERSES_SECURITY_READONLY: "false"
+          PERSES_SECURITY_ENABLE_AUTH: "false"
+          PERSES_SECURITY_AUTHENTICATION_PROVIDERS_ENABLE_NATIVE: "false"
+          PERSES_SECURITY_AUTHENTICATION_DISABLE_SIGN_UP: "true"
+          PERSES_PLUGIN_ENABLE_DEV: "true"
+    steps:      
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:      
+          node-version: 20
+          cache: npm
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix e2e
+      
+      - name: Install percli
+        run: |
+          PERSES_VERSION=$(docker inspect $(docker ps -q --filter "ancestor=persesdev/perses:latest") --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')
+          echo "Detected Latest Version: $PERSES_VERSION"
+          URL="https://github.com/perses/perses/releases/download/v$PERSES_VERSION/perses_${PERSES_VERSION}_linux_amd64.tar.gz"
+          echo "Download percli URL $URL"
+          
+          curl -sL "$URL" | tar -xz          
+          sudo mv perses /usr/local/bin/percli
+          chmod +x percli
+          percli version
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        working-directory: e2e
+
+      - name: Setup Perses and Start Plugins
+        run: |          
+          # Handshake with server on port 8080
+          percli login http://localhost:8080         
+          
+          # It is better to keep it a static array
+          PLUGINS=("table" "tracetable")
+
+          for plugin in "${PLUGINS[@]}"; do
+            cd "$plugin" && npm run dev -- --port 3005 > /dev/null 2>&1 &                    
+
+            sleep 10
+
+            percli plugin start "./$plugin" http://172.17.0.1:3005
+
+            sleep 10            
+
+            npm run test:ci --prefix e2e -- "tests/$plugin"
+
+            echo "Releasing port 3005"
+            # Kill any process using port 3005
+            fuser -k 3005/tcp > /dev/null 2>&1 || true
+            sleep 2            
+          done
+
   type-check:
     name: "type-check"
     runs-on: ubuntu-latest
