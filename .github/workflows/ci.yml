@@ -116,10 +116,10 @@ jobs:
           percli login http://localhost:8080          
           PLUGINS=("table" "tracetable")
           for plugin in "${PLUGINS[@]}"; do
-            percli plugin start "./$plugin" http://172.17.0.1:3005 &
+            percli plugin start "./$plugin" http://172.17.0.1:3005 --bind-address="0.0.0.0" &
 
             TIMEOUT=30
-            while ! curl -s --head --fail http://localhost:3005 > /dev/null; do
+            while ! curl -s --head --fail http://127.0.0.1:3005 > /dev/null; do
               if [ $TIMEOUT -le 0 ]; then
                 echo "Error: Plugin $plugin failed to start within 30s"
                 exit 1
