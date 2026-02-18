@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       perses:
-        image: persesdev/perses:latest
+        image: persesdev/perses:v0.53.0-rc.1
         ports: ["8080:8080"]        
         env:
           PERSES_SECURITY_READONLY: "false"
@@ -93,28 +93,23 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v4
+      
+      - uses: actions/setup-node@v4
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:      
-          node-version: 20
-          cache: npm
+          enable_npm: true
+          nvmrc_path: ".nvmrc"
       
       - name: Install dependencies
         run: |
           npm ci
           npm ci --prefix e2e
       
-      - name: Install percli
-        run: |
-          PERSES_VERSION=$(docker inspect $(docker ps -q --filter "ancestor=persesdev/perses:latest") --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')
-          echo "Detected Latest Version: $PERSES_VERSION"
-          URL="https://github.com/perses/perses/releases/download/v$PERSES_VERSION/perses_${PERSES_VERSION}_linux_amd64.tar.gz"
-          echo "Download percli URL $URL"
-          
-          curl -sL "$URL" | tar -xz          
-          sudo mv perses /usr/local/bin/percli
-          chmod +x percli
-          percli version
+      - name: install percli
+        uses: perses/cli-actions/actions/install_percli@v0.2.0
+        with:
+          cli-version: "v0.53.0-rc.1"
+        run: percli version
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
@@ -123,19 +118,25 @@ jobs:
       - name: Setup Perses and Start Plugins
         run: |          
           # Handshake with server on port 8080
-          percli login http://localhost:8080         
+          percli login http://localhost:8080          
           
-          # It is better to keep it a static array
           PLUGINS=("table" "tracetable")
 
-          for plugin in "${PLUGINS[@]}"; do
-            cd "$plugin" && npm run dev -- --port 3005 > /dev/null 2>&1 &                    
+          for plugin in "${PLUGINS[@]}"; do           
 
-            sleep 10
+            percli plugin start "./$plugin" http://172.17.0.1:3005 &
 
-            percli plugin start "./$plugin" http://172.17.0.1:3005
-
-            sleep 10            
+            TIMEOUT=30
+            while ! curl -s --head --fail http://localhost:3005 > /dev/null; do
+              if [ $TIMEOUT -le 0 ]; then
+                echo "Error: Plugin $plugin failed to start within 30s"
+                exit 1
+              fi
+              printf '.'
+              sleep 1
+              ((TIMEOUT--))
+            done
+            echo "Plugin $plugin is up and running"            
 
             npm run test:ci --prefix e2e -- "tests/$plugin"
 
