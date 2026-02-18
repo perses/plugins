@@ -30,11 +30,11 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.53.0-beta.3",
-    "@perses-dev/core": "^0.53.0-beta.3",
-    "@perses-dev/dashboards": "^0.53.0-beta.3",
-    "@perses-dev/explore": "^0.53.0-beta.3",
-    "@perses-dev/plugin-system": "^0.53.0-beta.3",
+    "@perses-dev/components": "^0.53.0-rc.2",
+    "@perses-dev/core": "^0.53.0-rc.0",
+    "@perses-dev/dashboards": "^0.53.0-rc.2",
+    "@perses-dev/explore": "^0.53.0-rc.2",
+    "@perses-dev/plugin-system": "^0.53.0-rc.2",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
@@ -55,7 +55,7 @@
   ],
   "perses": {
     "moduleName": "LogExplorer",
-    "moduleOrg": "perses-dev",
+    "moduleOrg": "perses.dev",
     "schemasPath": "schemas",
     "plugins": [
       {
