@@ -90,42 +90,32 @@ jobs:
           PERSES_SECURITY_AUTHENTICATION_DISABLE_SIGN_UP: "true"
           PERSES_PLUGIN_ENABLE_DEV: "true"
     steps:      
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      
-      - uses: actions/setup-node@v4
+      - name: checkout
+        uses: actions/checkout@v6
+      - uses: perses/github-actions@v0.11.0     
       - uses: ./.github/perses-ci/actions/setup_environment
         with:      
           enable_npm: true
-          nvmrc_path: ".nvmrc"
-      
+          nvmrc_path: ".nvmrc"      
       - name: install dependencies
         run: |
           npm ci
-          npm ci --prefix e2e
-      
+          npm ci --prefix e2e      
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
-          cli-version: "v0.53.0-rc.1"
-          
+          cli-version: "v0.53.0-rc.1"          
       - name: verify percli installation
         run: percli version
-
       - name: install Playwright browsers
         run: npx playwright install --with-deps
         working-directory: e2e
-
       - name: setup Perses and start Plugins
         run: |          
           # Handshake with server on port 8080
           percli login http://localhost:8080          
-          
           PLUGINS=("table" "tracetable")
-
-          for plugin in "${PLUGINS[@]}"; do           
-
+          for plugin in "${PLUGINS[@]}"; do
             percli plugin start "./$plugin" http://172.17.0.1:3005 &
 
             TIMEOUT=30
