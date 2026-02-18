@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourceStore, Plugin, VariableStateMap } from '@perses-dev/plugin-system';
-import { AbsoluteTimeRange, LogData, UnknownSpec } from '@perses-dev/spec';
+import { AbsoluteTimeRange, LogData, UnknownSpec, QueryDefinition } from '@perses-dev/spec';
 
 export interface LogQueryResult {
   logs: LogData;
@@ -35,4 +35,10 @@ type LogQueryPluginDependencies = {
 export interface LogQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getLogData: (spec: Spec, ctx: ClickHouseQueryContext) => Promise<LogQueryResult>;
   dependsOn?: (spec: Spec, ctx: ClickHouseQueryContext) => LogQueryPluginDependencies;
+  /**
+   * Optional method to create a TimeSeriesQuery for log volume visualization.
+   * Returns a QueryDefinition that aggregates log volumes over time, typically grouped by log level.
+   * Returns null if volume queries are not supported or cannot be generated from the given spec.
+   */
+  createVolumeQuery?: (spec: Spec, ctx: ClickHouseQueryContext) => QueryDefinition | null;
 }
