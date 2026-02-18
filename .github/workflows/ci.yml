@@ -82,7 +82,9 @@ jobs:
     services:
       perses:
         image: persesdev/perses:v0.53.0-rc.1
-        ports: ["8080:8080"]        
+        ports: ["8080:8080"]
+        options: >-
+          --add-host=host.docker.internal:host-gateway                 
         env:
           PERSES_SECURITY_READONLY: "false"
           PERSES_SECURITY_ENABLE_AUTH: "false"
@@ -116,7 +118,7 @@ jobs:
           percli login http://localhost:8080          
           PLUGINS=("table" "tracetable")
           for plugin in "${PLUGINS[@]}"; do
-            percli plugin start "./$plugin" http://172.17.0.1:3005 --bind-address="0.0.0.0" &
+            percli plugin start "./$plugin" http://host.docker.internal:3005 &
 
             TIMEOUT=30
             while ! curl -s --head --fail http://127.0.0.1:3005 > /dev/null; do
