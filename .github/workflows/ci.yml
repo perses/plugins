@@ -100,7 +100,7 @@ jobs:
           enable_npm: true
           nvmrc_path: ".nvmrc"
       
-      - name: Install dependencies
+      - name: install dependencies
         run: |
           npm ci
           npm ci --prefix e2e
@@ -109,13 +109,15 @@ jobs:
         uses: perses/cli-actions/actions/install_percli@v0.2.0
         with:
           cli-version: "v0.53.0-rc.1"
+          
+      - name: verify percli installation
         run: percli version
 
-      - name: Install Playwright Browsers
+      - name: install Playwright browsers
         run: npx playwright install --with-deps
         working-directory: e2e
 
-      - name: Setup Perses and Start Plugins
+      - name: setup Perses and start Plugins
         run: |          
           # Handshake with server on port 8080
           percli login http://localhost:8080          
