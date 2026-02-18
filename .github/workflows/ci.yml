@@ -113,7 +113,7 @@ jobs:
         run: npx playwright install --with-deps
         working-directory: e2e
       - name: setup Perses and start Plugins
-        run: |          
+        run: |
           # Handshake with server on port 8080
           percli login http://localhost:8080          
           PLUGINS=("table" "tracetable")
