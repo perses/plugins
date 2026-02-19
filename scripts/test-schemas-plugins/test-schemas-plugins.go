@@ -29,6 +29,10 @@ func main() {
 	plugins := make([]async.Future[string], 0, len(workspaces))
 
 	for _, workspace := range workspaces {
+		if workspace == "e2e" {
+			logrus.Infof("Skipping e2e workspace: %s", workspace)
+			continue
+		}
 		logrus.Infof("Testing schemas of plugin %s", workspace)
 		plugins = append(plugins, async.Async(func() (string, error) {
 			return workspace, command.Run("percli", "plugin", "test-schemas", fmt.Sprintf("--plugin.path=%s", workspace))

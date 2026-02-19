@@ -29,6 +29,10 @@ func main() {
 	pluginsToLint := make([]async.Future[string], 0, len(workspaces))
 
 	for _, workspace := range workspaces {
+		if workspace == "e2e" {
+			logrus.Infof("Skipping e2e workspace: %s", workspace)
+			continue
+		}
 		logrus.Infof("Linting plugin %s", workspace)
 		pluginsToLint = append(pluginsToLint, async.Async(func() (string, error) {
 			return workspace, command.Run("percli", "plugin", "lint", fmt.Sprintf("--plugin.path=%s", workspace))

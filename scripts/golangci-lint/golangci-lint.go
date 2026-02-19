@@ -25,6 +25,12 @@ func main() {
 	var isError bool
 
 	for _, workspace := range npm.MustGetWorkspaces(".") {
+
+		if workspace == "e2e" {
+			logrus.Infof("Skipping e2e workspace: %s", workspace)
+			continue
+		}
+
 		cmd := exec.Command("golangci-lint", "run")
 		cmd.Dir = workspace
 		cmd.Stdout = os.Stdout

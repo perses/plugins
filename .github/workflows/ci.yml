@@ -76,6 +76,46 @@ jobs:
       - run: npm ci
       - run: npm run test
 
+  e2e:
+    name: "e2e tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+
+      - name: start dev env (host network)
+        uses: hoverkraft-tech/compose-action@v2.5.0
+        with:
+            compose-file: .github/workflows/docker-compose.e2e.yml
+      
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+          nvmrc_path: ".nvmrc"
+      - name: install dependencies
+        run: npm ci      
+      - name: install percli
+        uses: perses/cli-actions/actions/install_percli@v0.2.0
+        with:
+          cli-version: "v0.53.0-rc.1"
+      - name: verify percli installation
+        run: percli version
+      - name: install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: e2e        
+      - name: setup Perses and start Plugins
+        run: |
+          # Handshake with server on port 8080
+          percli login http://localhost:8080
+          PLUGINS=("table" "tracetable")
+          for plugin in "${PLUGINS[@]}"; do
+            percli plugin start "./$plugin" &
+            sleep 10           
+            npm run test:ci --prefix e2e -- "tests/$plugin"
+          done
+
   type-check:
     name: "type-check"
     runs-on: ubuntu-latest

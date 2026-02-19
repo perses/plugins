@@ -1,0 +1,9 @@
+services:
+  perses:
+    image: persesdev/perses:v0.53.0-rc.1
+    container_name: perses
+    network_mode: host
+    environment:
+      - PERSES_PLUGIN_ENABLE_DEV=true
+    volumes:
+      - ../..:/home/runner/work/plugins/plugins

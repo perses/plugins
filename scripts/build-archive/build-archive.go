@@ -72,6 +72,10 @@ func main() {
 		createGroupArchive = true
 	}
 	for _, workspace := range npm.MustGetWorkspaces(".") {
+		if workspace == "e2e" {
+			logrus.Infof("Skipping e2e workspace: %s", workspace)
+			continue
+		}
 		logrus.Infof("building archive for the plugin %s", workspace)
 		if createArchiveErr := createArchive(workspace, createGroupArchive); createArchiveErr != nil {
 			logrus.WithError(createArchiveErr).Fatalf("unable to generate the archive for the plugin %s", workspace)
