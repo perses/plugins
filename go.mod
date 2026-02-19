@@ -3,7 +3,7 @@ module github.com/perses/plugins
 go 1.25.5
 
 require (
-	github.com/perses/common v0.30.0
+	github.com/perses/common v0.30.1
 	github.com/perses/perses v0.53.0-rc.0.0.20260113112038-1e65a7475ba9
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
