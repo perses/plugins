@@ -22,7 +22,7 @@ import (
 	"regexp"
 
 	"github.com/perses/perses/scripts/pkg/command"
-	"github.com/perses/perses/scripts/pkg/npm"
+	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
 

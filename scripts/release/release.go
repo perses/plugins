@@ -20,6 +20,7 @@ import (
 
 	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/perses/perses/scripts/pkg/npm"
+	localNPM "github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -78,7 +79,7 @@ func main() {
 		release(*releaseSingleName, dryRun)
 		return
 	}
-	for _, workspace := range npm.MustGetWorkspaces(".") {
+	for _, workspace := range localNPM.MustGetWorkspaces(".") {
 		logrus.Infof("releasing %s", workspace)
 		release(workspace, dryRun)
 	}

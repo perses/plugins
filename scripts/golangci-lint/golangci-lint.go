@@ -17,7 +17,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/perses/perses/scripts/pkg/npm"
+	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
 
