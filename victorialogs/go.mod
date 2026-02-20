@@ -2,7 +2,7 @@ module github.com/perses/plugins/victorialogs
 
 go 1.25.5
 
-require github.com/perses/perses v0.53.0-rc.0.0.20260209095901-aedca26b9319
+require github.com/perses/perses v0.53.0-rc.1
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -23,7 +23,7 @@ require (
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/oauth2 v0.34.0 // indirect
+	golang.org/x/oauth2 v0.35.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect

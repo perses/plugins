@@ -7,7 +7,7 @@ source: {
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.53.0-rc.0"
+		v:       "v0.53.0-rc.1"
 		default: true
 	}
 	"github.com/perses/plugins/loki@v0": {
@@ -27,7 +27,7 @@ deps: {
 		default: true
 	}
 	"github.com/perses/shared/cue@v0": {
-		v:       "v0.53.0-rc.2"
+		v:       "v0.53.0-rc.3"
 		default: true
 	}
 }
