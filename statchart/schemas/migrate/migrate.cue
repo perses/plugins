@@ -36,17 +36,13 @@ kind: "StatChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
-	// metricLabel
-	#textMode: *#panel.options.textMode | null
-    if #textMode == "name" && (*#panel.targets[0].legendFormat | null) != null {
-		// /!\ best effort logic
-		// - if legendFormat contains a more complex expression than {{label}}, the result will be broken (but manually fixable afterwards still)
-		// - Perses's metricLabel is a single setting at panel level, hence the [0], so the result wont fit in case of multiple queries using different legendFormat
-        metricLabel: strings.Trim(#panel.targets[0].legendFormat, "{}")
-    }
-	// /!\ here too using [0] thus not perfect, even though the field getting remapped is unique to the whole panel in that case
-	if #textMode == "auto" && (*#panel.targets[0].format | null) == "table" && (*#panel.options.reduceOptions.fields | null) != null {
-		metricLabel: strings.Trim(#panel.options.reduceOptions.fields, "/^$")
+	// textMode - map directly from Grafana's BigValueTextMode enum
+	textMode: *#panel.options.textMode | "auto"
+
+	// metricLabel - map from reduceOptions.fields for field selection
+	#fields: *#panel.options.reduceOptions.fields | null
+	if #fields != null && #fields != "" {
+		metricLabel: strings.Trim(#fields, "/^$")
 	}
 
 	// format
