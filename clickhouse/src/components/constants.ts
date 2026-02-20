@@ -11,22 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const queryExample = `-- Time Series Query
-SELECT 
-  toStartOfMinute(timestamp) as time,
-  avg(cpu_usage) as avg_cpu,
-  max(memory_usage) as max_memory
-FROM system_metrics 
-WHERE timestamp BETWEEN '{start}' AND '{end}'
+export const queryExample = `-- Time Series Query (must alias to 'time' and 'value')
+-- Available macros: $__timeFrom, $__timeTo, $__interval, $__interval_ms
+SELECT
+  toStartOfInterval(timestamp, INTERVAL $__interval second) as time,
+  avg(cpu_usage) as value
+FROM system_metrics
+WHERE timestamp BETWEEN '$__timeFrom' AND '$__timeTo'
 GROUP BY time ORDER BY time
--- Logs Query  
-SELECT 
-  Timestamp as log_time,
-  Body,
-  ServiceName,
-  ResourceAttributes,
-  SeverityNumber,
-  SeverityText
-FROM application_logs 
-WHERE timestamp >= '{start}' 
-ORDER BY time DESC LIMIT 1000`;
+
+-- With labels (extra columns become labels)
+SELECT
+  toStartOfInterval(timestamp, INTERVAL $__interval second) as time,
+  count(*) as value,
+  service_name
+FROM logs
+WHERE timestamp BETWEEN '$__timeFrom' AND '$__timeTo'
+GROUP BY time, service_name ORDER BY time`;
