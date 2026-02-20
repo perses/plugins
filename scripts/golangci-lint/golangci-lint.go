@@ -16,6 +16,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
@@ -25,7 +26,7 @@ func main() {
 	var isError bool
 
 	for _, workspace := range npm.MustGetWorkspaces(".") {
-		schemasPath := workspace + "/schemas"
+		schemasPath := filepath.Join(workspace,"schemas")
 		if _, err := os.Stat(schemasPath); os.IsNotExist(err) {
 			// No schemas, skip go validation
 			logrus.Infof("skipping golangci-lint for %s (no schemas)", workspace)
