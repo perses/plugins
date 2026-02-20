@@ -13,19 +13,25 @@
 
 package migrate
 
+import (
+	lokiDatasource "github.com/perses/plugins/loki/schemas/datasources:model"
+	prometheusDatasource "github.com/perses/plugins/prometheus/schemas/datasource:model"
+	pyroscopeDatasource "github.com/perses/plugins/pyroscope/schemas/datasource:model"
+	tempoDatasource "github.com/perses/plugins/tempo/schemas/datasource:model"
+)
+
 #grafanaVar: {
 	type: "datasource"
 	query: string
 	...
 }
 
-// TODO migrate to perses common package
 // key = Grafana kind, value = Perses kind
 #kindMapping: {
-	"loki":                         "LokiDatasource"
-	"prometheus":                   "PrometheusDatasource"
-	"grafana-pyroscope-datasource": "PyroscopeDatasource"
-	"tempo":                        "TempoDatasource"
+	"loki":                         lokiDatasource.#kind
+	"prometheus":                   prometheusDatasource.#kind
+	"grafana-pyroscope-datasource": pyroscopeDatasource.#kind
+	"tempo":                        tempoDatasource.#kind
 }
 
 kind: "DatasourceVariable"
