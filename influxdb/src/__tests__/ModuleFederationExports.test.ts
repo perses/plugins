@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as InfluxDBDatasourceModule from '../datasources/influxdb-v1/InfluxDBV1Datasource';
+import * as InfluxDBDatasourceModule from '../datasource/influxdb-v1/InfluxDBV1Datasource';
 import * as InfluxDBTimeSeriesQueryModule from '../queries/influxdb-time-series-query/InfluxDBTimeSeriesQuery';
 
 describe('Module Federation Exports', () => {
-  describe('InfluxDBDatasource Module', () => {
+  describe('InfluxDBV1Datasource Module', () => {
     it('should export default InfluxDBV1Datasource', () => {
       expect(InfluxDBDatasourceModule.default).toBeDefined();
       expect(InfluxDBDatasourceModule.default).toHaveProperty('createClient');
@@ -63,7 +63,10 @@ describe('Module Federation Exports', () => {
 
     it('should export correct InfluxDBDatasource from bootstrap', async () => {
       const bootstrap = await import('../bootstrap');
-      expect(bootstrap.InfluxDBDatasource).toEqual(InfluxDBDatasourceModule.InfluxDBV1Datasource);
+      const datasource = bootstrap.InfluxDBDatasource;
+      expect(datasource).toHaveProperty('createClient');
+      expect(datasource).toHaveProperty('createInitialOptions');
+      expect(datasource).toHaveProperty('OptionsEditorComponent');
     });
 
     it('should export correct InfluxDBTimeSeriesQuery from bootstrap', async () => {

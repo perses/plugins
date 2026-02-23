@@ -11,32 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as InfluxDBDatasourceExpose from '../expose-datasource';
-import * as InfluxDBTimeSeriesQueryExpose from '../expose-query';
+import * as InfluxDBDatasourceModule from '../datasource/influxdb/InfluxDBDatasource';
+import * as InfluxDBTimeSeriesQueryModule from '../queries/influxdb-time-series-query/InfluxDBTimeSeriesQuery';
 
 describe('Module Federation Expose Modules', () => {
-  describe('expose-datasource.ts', () => {
+  describe('InfluxDBDatasource.ts', () => {
     it('should export default InfluxDBDatasource', () => {
-      expect(InfluxDBDatasourceExpose.default).toBeDefined();
-      expect(InfluxDBDatasourceExpose.default).toHaveProperty('createClient');
+      expect(InfluxDBDatasourceModule.default).toBeDefined();
+      expect(InfluxDBDatasourceModule.default).toHaveProperty('createClient');
     });
 
     it('should have all required datasource properties', () => {
-      const datasource = InfluxDBDatasourceExpose.default;
+      const datasource = InfluxDBDatasourceModule.default;
       expect(datasource).toHaveProperty('createClient');
       expect(datasource).toHaveProperty('createInitialOptions');
       expect(datasource).toHaveProperty('OptionsEditorComponent');
     });
   });
 
-  describe('expose-query.ts', () => {
+  describe('influxdb-time-series-query.ts', () => {
     it('should export default InfluxDBTimeSeriesQuery', () => {
-      expect(InfluxDBTimeSeriesQueryExpose.default).toBeDefined();
-      expect(InfluxDBTimeSeriesQueryExpose.default).toHaveProperty('getTimeSeriesData');
+      expect(InfluxDBTimeSeriesQueryModule.default).toBeDefined();
+      expect(InfluxDBTimeSeriesQueryModule.default).toHaveProperty('getTimeSeriesData');
     });
 
     it('should have all required query properties', () => {
-      const query = InfluxDBTimeSeriesQueryExpose.default;
+      const query = InfluxDBTimeSeriesQueryModule.default;
       expect(query).toHaveProperty('getTimeSeriesData');
       expect(query).toHaveProperty('createInitialOptions');
       expect(query).toHaveProperty('OptionsEditorComponent');

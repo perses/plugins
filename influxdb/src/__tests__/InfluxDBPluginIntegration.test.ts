@@ -69,7 +69,7 @@ describe('InfluxDB Plugin Integration', () => {
   });
 
   describe('Datasource Plugin Configuration', () => {
-    it('should have Datasource plugin configured', () => {
+    it('should have InfluxDB Datasource configured', () => {
       const pluginModule = getPluginModule();
       const datasourcePlugin = pluginModule.spec.plugins.find(
         (p: any) => p.kind === 'Datasource' && p.spec.name === 'InfluxDBDatasource'

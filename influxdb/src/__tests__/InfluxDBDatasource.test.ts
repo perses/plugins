@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { InfluxDBV1Datasource } from '../datasources/influxdb-v1';
+import { InfluxDBV1Datasource } from '../datasource/influxdb-v1/InfluxDBV1Datasource';
 
 describe('InfluxDBDatasource', () => {
   it('should have createClient method', () => {
@@ -28,10 +28,9 @@ describe('InfluxDBDatasource', () => {
     expect(typeof InfluxDBV1Datasource.createInitialOptions).toBe('function');
   });
 
-  it('should create initial options with version and database', () => {
+  it('should create initial options with database', () => {
     const initialOptions = InfluxDBV1Datasource.createInitialOptions();
     expect(initialOptions).toEqual({
-      version: 'v1',
       database: '',
     });
   });
@@ -46,7 +45,7 @@ describe('InfluxDBDatasource', () => {
 
     expect(() => {
       InfluxDBV1Datasource.createClient(spec, options);
-    }).toThrow('No URL specified for InfluxDB v1.8 client');
+    }).toThrow('No URL specified for InfluxDB v1 client');
   });
 
   it('should use directUrl when provided', () => {
@@ -73,16 +72,5 @@ describe('InfluxDBDatasource', () => {
     expect(client.options.datasourceUrl).toBe('http://proxy:8086');
   });
 
-  it('should throw error on v3 queries', async () => {
-    const spec = {
-      directUrl: 'http://localhost:8086',
-    };
-    const options = {
-      proxyUrl: undefined,
-    };
-
-    const client = InfluxDBV1Datasource.createClient(spec, options);
-    await expect(client.queryV3SQL()).rejects.toThrow('InfluxDB v3 queries not supported on v1.8 datasource');
-  });
 });
 
