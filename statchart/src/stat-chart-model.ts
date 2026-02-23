@@ -49,8 +49,25 @@ export const SHOW_LEGEND_LABELS: ShowLegendLabelItem[] = [
   { id: 'off', label: 'Off', description: 'Always hide legend' },
 ];
 
+export type TextMode = 'auto' | 'value' | 'name' | 'none' | 'value_and_name';
+
+export type TextModeLabelItem = {
+  id: TextMode;
+  label: string;
+  description?: string;
+};
+
+export const TEXT_MODE_LABELS: TextModeLabelItem[] = [
+  { id: 'auto', label: 'Auto', description: 'Show value by default, or value and name when label is present' },
+  { id: 'value', label: 'Value', description: 'Show only the calculated value' },
+  { id: 'name', label: 'Name', description: 'Show only the series name' },
+  { id: 'value_and_name', label: 'Value and name', description: 'Show both value and name' },
+  { id: 'none', label: 'None', description: 'Show nothing (empty)' },
+];
+
 export interface StatChartOptions {
   calculation: CalculationType;
+  textMode?: TextMode;
   format: FormatOptions;
   metricLabel?: string;
   thresholds?: ThresholdOptions;
@@ -76,5 +93,6 @@ export function createInitialStatChartOptions(): StatChartOptions {
     },
     sparkline: {},
     legendMode: 'auto',
+    textMode: 'auto',
   };
 }

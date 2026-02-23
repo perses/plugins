@@ -2,6 +2,7 @@
   "kind": "StatChart",
   "spec": {
     "calculation": "mean",
+    "textMode": "auto",
     "format": {
       "unit": "decimal"
     },

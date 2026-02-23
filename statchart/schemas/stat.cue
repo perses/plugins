@@ -20,6 +20,7 @@ import (
 kind: "StatChart"
 spec: close({
 	calculation:  common.#calculation
+	textMode?: "auto" | "value" | "name" | "none" | "value_and_name"
 	metricLabel?: common.#metricLabel
 	format?:      common.#format
 	thresholds?:  common.#thresholds

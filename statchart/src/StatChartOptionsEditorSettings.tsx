@@ -43,6 +43,8 @@ import {
   ShowLegendLabelItem,
   StatChartOptions,
   StatChartOptionsEditorProps,
+  TEXT_MODE_LABELS,
+  TextModeLabelItem,
 } from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
@@ -74,6 +76,17 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
       onChange(
         produce(value, (draft: StatChartOptions) => {
           draft.legendMode = newShowLegend.id;
+        })
+      );
+    },
+    [onChange, value]
+  );
+
+  const handleTextModeChange = useCallback(
+    (_: unknown, newTextMode: TextModeLabelItem): void => {
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          draft.textMode = newTextMode.id;
         })
       );
     },
@@ -164,6 +177,24 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   }, [value.colorMode, handleColorModeChange]);
 
+  const selectTextMode = useMemo((): ReactElement => {
+    return (
+      <OptionsEditorControl
+        label="Text mode"
+        control={
+          <SettingsAutocomplete
+            onChange={handleTextModeChange}
+            options={TEXT_MODE_LABELS}
+            disableClearable
+            value={
+              TEXT_MODE_LABELS.find((i) => i.id === value.textMode) ?? TEXT_MODE_LABELS.find((i) => i.id === 'auto')!
+            }
+          />
+        }
+      />
+    );
+  }, [value.textMode, handleTextModeChange]);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -175,6 +206,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           />
           <FormatControls value={format} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
+          {selectTextMode}
           <MetricLabelInput value={value.metricLabel} onChange={handleMetricLabelChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
           {selectColorMode}
