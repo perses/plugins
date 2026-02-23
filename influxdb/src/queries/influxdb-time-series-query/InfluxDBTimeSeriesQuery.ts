@@ -10,10 +10,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { TimeSeriesData, TimeSeries } from '@perses-dev/core';
+import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
+import { TimeSeriesData, TimeSeries, DatasourceSelector } from '@perses-dev/core';
 import { InfluxDBTimeSeriesQueryEditor } from './InfluxDBTimeSeriesQueryEditor';
 export interface InfluxDBTimeSeriesQuerySpec {
+  datasource?: DatasourceSelector;
   query: string;
 }
 function convertV1ResponseToTimeSeries(response: any): TimeSeries[] {
@@ -44,53 +45,88 @@ function convertV1ResponseToTimeSeries(response: any): TimeSeries[] {
 }
 function convertV3ResponseToTimeSeries(response: any): TimeSeries[] {
   const series: TimeSeries[] = [];
-  if (response.data && response.schema) {
-    const timeField = response.schema.fields.find((f: any) => f.data_type === 'Timestamp');
-    const timeIndex = response.schema.fields.indexOf(timeField);
-    response.schema.fields.forEach((field: any, index: number) => {
-      if (field.data_type !== 'Timestamp' && field.data_type !== 'Utf8') {
-        const values = response.data.map((row: any[]) => [new Date(row[timeIndex]).getTime(), row[index]]);
-        series.push({
-          name: field.name,
-          values: values as Array<[number, number | null]>,
-          formattedName: field.name,
-        });
-      }
-    });
-  }
+  // TODO: Implement V3 response conversion
+  // V3 CSV/Flux response format
   return series;
 }
 export const InfluxDBTimeSeriesQuery: TimeSeriesQueryPlugin<InfluxDBTimeSeriesQuerySpec> = {
   getTimeSeriesData: async (spec: InfluxDBTimeSeriesQuerySpec, context: any) => {
-    const { query } = spec;
-    const { datasourceClient, datasourceSpec } = context;
-    if (!datasourceClient) {
-      throw new Error('No datasource client available');
+    // Return empty if query is empty
+    if (!spec.query) {
+      return {
+        series: [],
+        timeRange: context.timeRange,
+        stepMs: 30 * 1000,
+        metadata: {
+          executedQueryString: '',
+        },
+      } as TimeSeriesData;
     }
-    let timeSeries: TimeSeries[] = [];
-    if (datasourceSpec.version === 'v1') {
-      const response = await datasourceClient.queryV1(query, datasourceSpec.database);
-      timeSeries = convertV1ResponseToTimeSeries(response);
-    } else if (datasourceSpec.version === 'v3') {
-      const response = await datasourceClient.queryV3SQL(query, datasourceSpec.organization, datasourceSpec.bucket);
-      timeSeries = convertV3ResponseToTimeSeries(response);
-    } else {
-      throw new Error('Unsupported InfluxDB version: ' + (datasourceSpec as any).version);
+    // Replace variables in query
+    const query = replaceVariables(spec.query, context.variableState);
+    try {
+      // Get datasource client from store
+      const client = await context.datasourceStore.getDatasourceClient(
+        spec.datasource ?? { kind: 'InfluxDBDatasource' }
+      );
+      if (!client) {
+        throw new Error('No datasource client available');
+      }
+      // Get time range
+      const { start, end } = context.timeRange;
+      let response: any;
+      let datasourceSpec: any;
+      // Try to get datasource spec to determine version
+      try {
+        datasourceSpec = await context.datasourceStore.getDatasourceSpec?.(
+          spec.datasource ?? { kind: 'InfluxDBDatasource' }
+        );
+      } catch (e) {
+        // Spec not available, we'll try to detect from client methods
+      }
+      // Determine version and call appropriate query method
+      if (typeof client.queryV1 === 'function') {
+        // V1 Query
+        const database = datasourceSpec?.database || '';
+        response = await client.queryV1(query, database);
+      } else if (typeof client.queryV3SQL === 'function') {
+        // V3 SQL Query
+        response = await client.queryV3SQL(query);
+      } else if (typeof client.queryV3Flux === 'function') {
+        // V3 Flux Query (fallback)
+        response = await client.queryV3Flux(query);
+      } else {
+        throw new Error(
+          'Datasource client has no query methods (queryV1, queryV3SQL, or queryV3Flux)'
+        );
+      }
+      // Convert response to timeseries
+      let timeSeries: TimeSeries[] = [];
+      if (response) {
+        // Auto-detect V1 vs V3 based on response structure
+        if (response.results) {
+          // V1 response format
+          timeSeries = convertV1ResponseToTimeSeries(response);
+        } else if (response.data) {
+          // V3 response format
+          timeSeries = convertV3ResponseToTimeSeries(response);
+        }
+      }
+      return {
+        series: timeSeries,
+        timeRange: { start, end },
+        stepMs: 30 * 1000,
+        metadata: {
+          executedQueryString: query,
+        },
+      } as TimeSeriesData;
+    } catch (error) {
+      console.error('Error executing InfluxDB query:', error);
+      throw error;
     }
-
-    return {
-      series: timeSeries,
-      timeRange: context.timeRange,
-      stepMs: 30 * 1000,
-      metadata: {
-        executedQueryString: query,
-      },
-    } as TimeSeriesData;
   },
   OptionsEditorComponent: InfluxDBTimeSeriesQueryEditor,
   createInitialOptions: () => ({ query: '' }),
 };
-
 // Default export for Module Federation
 export default InfluxDBTimeSeriesQuery;
-

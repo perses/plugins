@@ -29,7 +29,7 @@ func TestPluginSpecValidation(t *testing.T) {
 		errorMsg    string
 	}{
 		{
-			name: "valid V1.8 with directUrl",
+			name: "valid V1 with directUrl",
 			spec: PluginSpec{
 				DirectURL: "http://localhost:8086",
 				Version:   VersionV1,
@@ -82,7 +82,7 @@ func TestPluginSpecValidation(t *testing.T) {
 				Version:   VersionV1,
 			},
 			expectError: true,
-			errorMsg:    "database is required for InfluxDB v1.8",
+			errorMsg:    "database is required for InfluxDB v1",
 		},
 		{
 			name: "V3 missing organization",
@@ -129,7 +129,7 @@ func TestPluginSpecUnmarshalJSON(t *testing.T) {
 		expected    *PluginSpec
 	}{
 		{
-			name: "valid V1.8 JSON",
+			name: "valid V1 JSON",
 			json: `{
 				"directUrl": "http://localhost:8086",
 				"version": "v1",

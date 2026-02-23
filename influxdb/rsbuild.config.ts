@@ -8,8 +8,9 @@ export default createConfigForPlugin({
   },
   moduleFederation: {
     exposes: {
-      './InfluxDBDatasource': './src/expose-datasource.ts',
-      './InfluxDBTimeSeriesQuery': './src/expose-query.ts',
+      './InfluxDBDatasource': './src/datasource/influxdb/InfluxDBDatasource.ts',
+      './InfluxDBTimeSeriesQuery': './src/queries/influxdb-time-series-query/InfluxDBTimeSeriesQuery.ts',
+      './InfluxDBExplorer': './src/explore/InfluxDBExplorer.tsx',
     },
     shared: {
       react: { singleton: true, requiredVersion: false },

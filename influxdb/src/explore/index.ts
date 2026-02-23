@@ -11,5 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './InfluxDBV3Datasource';
-export * from './InfluxDBV3Editor';
+export * from './InfluxDBExplorer';

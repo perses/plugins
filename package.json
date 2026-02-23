@@ -18,6 +18,7 @@
     "gaugechart",
     "heatmapchart",
     "histogramchart",
+    "influxdb",
     "logstable",
     "loki",
     "markdown",

@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Re-export all plugin modules for Module Federation
+// Re-export plugin module metadata
 export { getPluginModule } from './getPluginModule';
 
-// Export Datasource plugin
-export { InfluxDBV1Datasource as InfluxDBDatasource } from './datasources/influxdb-v1';
-export { default as InfluxDBDatasourceDefault } from './datasources/influxdb-v1/InfluxDBV1Datasource';
+// Re-export the unified datasource for both V1 and V3
+export { InfluxDBDatasource } from './datasource/influxdb/InfluxDBDatasource';
 
-// Export TimeSeriesQuery plugin
-export { InfluxDBTimeSeriesQuery } from './queries/influxdb-time-series-query';
-export { default as InfluxDBTimeSeriesQueryDefault } from './queries/influxdb-time-series-query/InfluxDBTimeSeriesQuery';
+// Re-export the query with proper name for module federation
+export { InfluxDBTimeSeriesQuery } from './queries/influxdb-time-series-query/InfluxDBTimeSeriesQuery';
 
+// Re-export the explore plugin
+export { InfluxDBExplorer } from './explore/InfluxDBExplorer';

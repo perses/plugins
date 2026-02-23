@@ -38,7 +38,7 @@ type PluginSpec struct {
 	DirectURL string          `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
 	Proxy     *http.Proxy     `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 	Version   InfluxDBVersion `json:"version" yaml:"version"`
-	// V1.8 specific fields
+	// V1 specific fields
 	Database string `json:"database,omitempty" yaml:"database,omitempty"`
 	// V3 specific fields
 	Organization string `json:"organization,omitempty" yaml:"organization,omitempty"`
@@ -82,7 +82,7 @@ func (s *PluginSpec) validate() error {
 		return fmt.Errorf("version must be either 'v1' or 'v3'")
 	}
 	if s.Version == VersionV1 && len(s.Database) == 0 {
-		return fmt.Errorf("database is required for InfluxDB v1.8")
+		return fmt.Errorf("database is required for InfluxDB v1")
 	}
 	if s.Version == VersionV3 {
 		if len(s.Organization) == 0 {

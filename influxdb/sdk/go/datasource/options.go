@@ -41,7 +41,7 @@ func Version(version InfluxDBVersion) Option {
 	}
 }
 
-// Database sets the database name for InfluxDB V1.8
+// Database sets the database name for InfluxDB V1
 func Database(database string) Option {
 	return func(builder *Builder) error {
 		builder.Database = database

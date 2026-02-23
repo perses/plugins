@@ -10,4 +10,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-export * from './influxdb-types';
+
+package model
+
+import (
+	"strings"
+	ds "github.com/perses/plugins/influxdb/schemas/datasource:model"
+)
+
+kind: "InfluxDBTimeSeriesQuery"
+spec: close({
+	ds.#selector
+	query:             strings.MinRunes(1)
+	seriesNameFormat?: string
+})
+
+#variableSyntaxRegex: "^\\$\\w+$"
