@@ -19,6 +19,6 @@ import (
 
 kind: "TimeSeriesTable"
 spec: close({
-  selection?: common.#selection
+	selection?: common.#selection
 	actions?:   common.#actions
 })

@@ -17,7 +17,7 @@ import (
 	"github.com/perses/shared/cue/common"
 	commonProxy "github.com/perses/shared/cue/common/proxy"
 )
- 
+
 kind: #kind
 spec: {
 	commonProxy.#baseHTTPDatasourceSpec
@@ -29,4 +29,4 @@ spec: {
 
 #durationRegex: "^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"
 
-#selector: common.#datasourceSelector & { _kind: #kind }
+#selector: common.#datasourceSelector & {_kind: #kind}

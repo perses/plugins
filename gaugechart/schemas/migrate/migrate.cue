@@ -20,7 +20,7 @@ import (
 #grafanaType: "gauge"
 #panel:       _
 
-kind:         "GaugeChart"
+kind: "GaugeChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
