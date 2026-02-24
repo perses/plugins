@@ -11,53 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack } from '@mui/material';
 import { ReactElement, useState } from 'react';
-import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
+import { Box, Stack, Tab, Tabs } from '@mui/material';
+import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { Panel } from '@perses-dev/dashboards';
 import { QueryDefinition } from '@perses-dev/core';
 import { useExplorerManagerContext } from '@perses-dev/explore';
+import useResizeObserver from 'use-resize-observer';
 
 interface TimeSeriesExplorerQueryParams {
+  tab?: string;
   queries?: QueryDefinition[];
 }
 
-const initialSpec = {
-  yAxis: {
-    label: {
-      show: true,
-    },
-  },
-  tooltip: {
-    mode: 'multi',
-  },
-};
+const PANEL_PREVIEW_HEIGHT = 700;
+const FILTERED_QUERY_PLUGINS = ['InfluxDBTimeSeriesQuery'];
 
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
-  return (
-    <Panel
-      panelOptions={{
-        hideHeader: true,
-      }}
-      definition={{
-        kind: 'Panel',
-        spec: { queries, display: { name: '' }, plugin: { kind: 'TimeSeriesChart', spec: initialSpec } },
-      }}
-    />
-  );
-}
+  const { width, ref: boxRef } = useResizeObserver();
+  const height = PANEL_PREVIEW_HEIGHT;
 
-export function InfluxDBExplorer(): ReactElement {
-  const {
-    data: { queries = [] },
-    setData,
-  } = useExplorerManagerContext<TimeSeriesExplorerQueryParams>();
+  const suggestedStepMs = useSuggestedStepMs(width);
 
-  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
-
-  // map QueryDefinition to Definition<UnknownSpec>
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
-    ? queries.map((query: QueryDefinition) => {
+    ? queries.map((query) => {
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
@@ -66,18 +44,95 @@ export function InfluxDBExplorer(): ReactElement {
     : [];
 
   return (
-    <Stack gap={2} sx={{ width: '100%' }}>
-      <MultiQueryEditor
-        queryTypes={['InfluxDBTimeSeriesQuery'] as unknown as any}
-        onChange={(state) => setQueryDefinitions(state)}
-        queries={queryDefinitions}
-        onQueryRun={() => setData({ queries: queryDefinitions })}
-      />
-      <DataQueriesProvider definitions={definitions}>
-        <Box height={700}>
-          <TimeSeriesPanel queries={queries} />
-        </Box>
+    <Box ref={boxRef} height={height}>
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
+        <Panel
+          panelOptions={{
+            hideHeader: true,
+          }}
+          definition={{
+            kind: 'Panel',
+            spec: { queries: queries, display: { name: '' }, plugin: { kind: 'TimeSeriesChart', spec: {} } },
+          }}
+        />
       </DataQueriesProvider>
+    </Box>
+  );
+}
+
+function MetricDataTable({ queries }: { queries: QueryDefinition[] }): ReactElement {
+  const height = PANEL_PREVIEW_HEIGHT;
+
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
+  const definitions = queries.map((query) => {
+    return {
+      kind: query.spec.plugin.kind,
+      spec: query.spec.plugin.spec,
+    };
+  });
+
+  return (
+    <Box height={height}>
+      <DataQueriesProvider definitions={definitions} options={{ mode: 'instant' }}>
+        <Panel
+          panelOptions={{
+            hideHeader: true,
+          }}
+          definition={{
+            kind: 'Panel',
+            spec: { queries: queries, display: { name: '' }, plugin: { kind: 'TimeSeriesTable', spec: {} } },
+          }}
+        />
+      </DataQueriesProvider>
+    </Box>
+  );
+}
+
+export function InfluxDBExplorer(): ReactElement {
+  const {
+    data: { tab = 'table', queries = [] },
+    setData,
+  } = useExplorerManagerContext<TimeSeriesExplorerQueryParams>();
+
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
+
+  return (
+    <Stack gap={2} sx={{ width: '100%' }}>
+      <Tabs
+        value={tab}
+        onChange={(_, state) => setData({ tab: state, queries })}
+        variant="scrollable"
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
+      >
+        <Tab value="table" label="Table" />
+        <Tab value="graph" label="Graph" />
+      </Tabs>
+      <Stack gap={1}>
+        {tab === 'table' && (
+          <Stack>
+            <MultiQueryEditor
+              queryTypes={['TimeSeriesQuery']}
+              onChange={(state) => setQueryDefinitions(state)}
+              queries={queryDefinitions}
+              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
+              filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
+            />
+            <MetricDataTable queries={queries} />
+          </Stack>
+        )}
+        {tab === 'graph' && (
+          <Stack>
+            <MultiQueryEditor
+              queryTypes={['TimeSeriesQuery']}
+              onChange={(state) => setQueryDefinitions(state)}
+              queries={queryDefinitions}
+              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
+              filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
+            />
+            <TimeSeriesPanel queries={queries} />
+          </Stack>
+        )}
+      </Stack>
     </Stack>
   );
 }

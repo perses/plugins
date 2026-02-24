@@ -40,7 +40,7 @@ function validateReadOnlyQuery(query: string): void {
       const firstWord = trimmedQuery.split(' ')[0]?.toUpperCase() || 'UNKNOWN';
       throw new Error(
         `Write operations are not allowed. Query cannot start with: ${firstWord}. ` +
-        'Only read-only queries (SELECT, SHOW, etc.) are permitted.'
+          'Only read-only queries (SELECT, SHOW, etc.) are permitted.'
       );
     }
   }

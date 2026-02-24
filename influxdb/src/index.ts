@@ -15,4 +15,3 @@ export * from './explore';
 export { getPluginModule } from './getPluginModule';
 export * from './datasource/influxdb/InfluxDBDatasource';
 export * from './queries/influxdb-time-series-query/InfluxDBTimeSeriesQuery';
-

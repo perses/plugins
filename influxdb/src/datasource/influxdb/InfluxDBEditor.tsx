@@ -10,16 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import {
-  TextField,
-  Box,
-  Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-} from '@mui/material';
+import { TextField, Box, Stack, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import { HTTPDatasourceSpec } from '@perses-dev/core';
 import React, { ReactElement } from 'react';
@@ -78,8 +69,8 @@ export function InfluxDBEditor(props: InfluxDBEditorProps): ReactElement {
   const initialSpecDirect = version === 'v1' ? initialSpecDirectV1 : initialSpecDirectV3;
   const initialSpecProxy = version === 'v1' ? initialSpecProxyV1 : initialSpecProxyV3;
   // Handle changes from HTTP Settings
-  const handleHTTPSettingsChange = (next: any) => {
-    const updated = next as InfluxDBSpec;
+  const handleHTTPSettingsChange = (next: HTTPDatasourceSpec) => {
+    const updated = { ...value, ...next };
     // If this is a proxy config, ensure it has the correct version-specific endpoints
     if (updated.proxy?.spec) {
       const correctEndpoints = version === 'v1' ? allowedEndpointsV1 : allowedEndpointsV3;
@@ -92,9 +83,9 @@ export function InfluxDBEditor(props: InfluxDBEditorProps): ReactElement {
             allowedEndpoints: correctEndpoints,
           },
         },
-      });
+      } as InfluxDBSpec);
     } else {
-      onChange(updated);
+      onChange(updated as InfluxDBSpec);
     }
   };
   return (
@@ -137,7 +128,7 @@ export function InfluxDBEditor(props: InfluxDBEditorProps): ReactElement {
       </Box>
       {/* 2. HTTP Settings (Direct/Proxy) with version-specific endpoints */}
       <HTTPSettingsEditor
-        value={value as any}
+        value={value as HTTPDatasourceSpec}
         onChange={handleHTTPSettingsChange}
         isReadonly={isReadonly}
         initialSpecDirect={initialSpecDirect}
