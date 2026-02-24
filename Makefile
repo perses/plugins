@@ -64,3 +64,13 @@ checklicense:
 fixlicense:
 	@echo ">> Add license header where it's missing"
 	$(GO) run ./scripts/check-license --fix
+
+.PHONY: fmt-cue
+fmt-cue:
+	@echo ">> Format CUE files"
+	./scripts/cue.sh --fmt
+
+.PHONY: checkformat-cue
+checkformat-cue:
+	@echo ">> Check CUE files format"
+	./scripts/cue.sh --checkformat
