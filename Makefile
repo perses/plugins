@@ -31,13 +31,13 @@ tidy-modules:
 
 .PHONY: checkdocs
 checkdocs:
-	@echo ">> check format markdown docs"
+	@echo ">> Check markdown docs format"
 	@make fmt-docs
 	@git diff --exit-code -- *.md
 
 .PHONY: fmt-docs
 fmt-docs:
-	@echo ">> format markdown document"
+	@echo ">> Format markdown documents"
 	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "**/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: golangci-lint
@@ -52,15 +52,15 @@ build:
 
 .PHONY: test
 test:
-	@echo ">> running all tests"
+	@echo ">> Run all tests"
 	$(GO) test -count=1 -v ./...
 
 .PHONY: checklicense
 checklicense:
-	@echo ">> checking license"
+	@echo ">> Check license"
 	$(GO) run ./scripts/check-license --check
 
 .PHONY: fixlicense
 fixlicense:
-	@echo ">> adding license header where it's missing"
+	@echo ">> Add license header where it's missing"
 	$(GO) run ./scripts/check-license --fix
