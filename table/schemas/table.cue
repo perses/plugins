@@ -27,11 +27,11 @@ spec: close({
 	defaultColumnHidden?: bool
 	pagination?:          bool
 	enableFiltering?:     bool
-	columnSettings?:      [...#columnSettings]
-	cellSettings?:        [...#cellSettings]
-	transforms?:          [...common.#transform]
-	selection?:           common.#selection
-	actions?:             common.#actions
+	columnSettings?: [...#columnSettings]
+	cellSettings?: [...#cellSettings]
+	transforms?: [...common.#transform]
+	selection?: common.#selection
+	actions?:   common.#actions
 })
 
 #columnSettings: {
@@ -46,10 +46,10 @@ spec: close({
 	sort?:              "asc" | "desc"
 	width?:             number | "auto"
 	hide?:              bool
-	cellSettings?:      [...#cellSettings]
+	cellSettings?: [...#cellSettings]
 	dataLink?: {
-		url: string
-		title?: string
+		url:        string
+		title?:     string
 		openNewTab: bool
 	}
 }
@@ -65,7 +65,7 @@ spec: close({
 	kind: "Range"
 	spec: {
 		min?: number
-		max?: number & >= min
+		max?: number & >=min
 	}
 }
 

@@ -22,5 +22,5 @@ kind: "LokiLogQuery"
 spec: close({
 	ds.#selector
 	direction?: "forward" | "backward"
-	query: strings.MinRunes(1)
+	query:      strings.MinRunes(1)
 })

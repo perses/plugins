@@ -20,12 +20,12 @@ import (
 kind: "PyroscopeProfileQuery"
 spec: close({
 	ds.#selector
-	maxNodes?: number
+	maxNodes?:   number
 	profileType: string
 	filters?: [...{
-		labelName: string
+		labelName:  string
 		labelValue: string
-		operator: string
+		operator:   string
 	}]
 	service?: string
 })

@@ -22,15 +22,15 @@ import (
 listVarBuilder
 
 // specify the constraints for this variable
-#pluginKind: datasourceVar.kind  
-#datasourcePluginKind: datasourceVar.spec.datasourcePluginKind  
+#pluginKind:           datasourceVar.kind
+#datasourcePluginKind: datasourceVar.spec.datasourcePluginKind
 
-variable: listVarBuilder.variable & {  
-    spec: {  
-        plugin: datasourceVar & {  
-            spec: {  
-                datasourcePluginKind: #datasourcePluginKind  
-            }  
-        }  
-    }  
-}  
+variable: listVarBuilder.variable & {
+	spec: {
+		plugin: datasourceVar & {
+			spec: {
+				datasourcePluginKind: #datasourcePluginKind
+			}
+		}
+	}
+}

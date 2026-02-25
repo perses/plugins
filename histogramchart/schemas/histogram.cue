@@ -19,11 +19,11 @@ import (
 
 kind: "HistogramChart"
 spec: close({
-	format?:     common.#format
-	min?:        number
-	max?:        number
+	format?: common.#format
+	min?:    number
+	max?:    number
 	if min != _|_ && max != _|_ {
-		max: >= min
+		max: >=min
 	}
 	thresholds?: common.#thresholds
 	logBase?:    2 | 10

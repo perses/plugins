@@ -24,9 +24,9 @@ import (
 
 // key: grafana line style, value: perses line style
 #lineStyleMapping: {
-	solid:  "solid"
-	dash: "dashed"
-	dot: "dotted"
+	solid: "solid"
+	dash:  "dashed"
+	dot:   "dotted"
 }
 
 kind: "TimeSeriesChart"
@@ -141,13 +141,13 @@ spec: {
 	// visual
 	#lineWidthRaw: *#panel.fieldConfig.defaults.custom.lineWidth | null
 	#lineWidth: [
-		if (#lineWidthRaw & string) != _|_ { strconv.Atoi(#lineWidthRaw) },
+		if (#lineWidthRaw & string) != _|_ {strconv.Atoi(#lineWidthRaw)},
 		#lineWidthRaw,
 	][0]
 	if #lineWidth != null {
 		visual: lineWidth: [
-			if #lineWidth > 3 { 3 },        // line width can't go beyond 3 in Perses
-			if #lineWidth < 0.25 { 0.25 },  // line width can't go below 0.25 in Perses
+			if #lineWidth > 3 {3},       // line width can't go beyond 3 in Perses
+			if #lineWidth < 0.25 {0.25}, // line width can't go below 0.25 in Perses
 			#lineWidth,
 		][0]
 	}
@@ -189,9 +189,9 @@ spec: {
 			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp" || override.matcher.id == "byFrameRefID") && override.matcher.options != _|_
 			for property in override.properties
 			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && (target.legendFormat == override.matcher.options || target.legendFormat =~ strings.Trim(override.matcher.options, "/")) ||
-			   (override.matcher.id == "byFrameRefID" && target.refId == override.matcher.options) {
+				(override.matcher.id == "byFrameRefID" && target.refId == override.matcher.options) {
 				if property.id == "color" if (*property.value.fixedColor | null) != null {
-					colorMode: "fixed"
+					colorMode:  "fixed"
 					colorValue: *commonMigrate.#mapping.color[property.value.fixedColor] | property.value.fixedColor
 				}
 				if property.id == "custom.lineStyle" if (*property.value.fill | null) != null {
@@ -201,10 +201,11 @@ spec: {
 					areaOpacity: property.value / 100
 				}
 			}
-		}
+		},
 	]
+
 	// don't keep elements that just define the queryIndex
-	#querySettingsFiltered: [for qs in #querySettings if len(qs) > 1 { qs }]
+	#querySettingsFiltered: [for qs in #querySettings if len(qs) > 1 {qs}]
 	if len(#querySettingsFiltered) != 0 {
 		querySettings: #querySettingsFiltered
 	}

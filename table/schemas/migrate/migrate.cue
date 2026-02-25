@@ -22,7 +22,7 @@ import (
 )
 
 #grafanaType: "table" | "table-old"
-#panel: _
+#panel:       _
 
 // Function to rename anonymous fields that Perses names differently than Grafana
 _renameAnonymousFields: {
@@ -36,14 +36,14 @@ _renameAnonymousFields: {
 
 // Function to return the last key of a map
 _getLastKey: {
-    #map: struct.MinFields(1)
-    output: [for k, _ in #map {k}][len(#map) - 1]
+	#map: struct.MinFields(1)
+	output: [for k, _ in #map {k}][len(#map)-1]
 }
 
 // Function to return the last value of a map
 _getLastValue: {
-    #map: struct.MinFields(1)
-    output: [for _, v in #map {v}][len(#map) - 1]
+	#map: struct.MinFields(1)
+	output: [for _, v in #map {v}][len(#map)-1]
 }
 
 kind: "Table"
@@ -78,7 +78,7 @@ spec: {
 			#var: string
 			output: [
 				// Check if the column was renamed by a transform
-				for k, v in _columnSettingsFromTansform if #var == (*v.header | null) { k },
+				for k, v in _columnSettingsFromTansform if #var == (*v.header | null) {k},
 				{_renameAnonymousFields & {#var: this.#var}}.output,
 			][0]
 		}
@@ -133,15 +133,15 @@ spec: {
 			}
 			for name, settings in _columnSettingsFromTansform {
 				"\(name)": [
-				  // We have to hande potential name conflicts due to the overrides.
-				  // In Grafana field overrides take precedence over the organize transformations.
-				  if (*_columnSettingsFromOverrides[name].headers | null) != null {
-					  // Copy all fields except header
-					  for fieldName, fieldValue in settings if fieldName != "header" {
-						"\(fieldName)": fieldValue
-					  }
-				  },
-				  settings
+					// We have to hande potential name conflicts due to the overrides.
+					// In Grafana field overrides take precedence over the organize transformations.
+					if (*_columnSettingsFromOverrides[name].headers | null) != null {
+						// Copy all fields except header
+						for fieldName, fieldValue in settings if fieldName != "header" {
+							"\(fieldName)": fieldValue
+						}
+					},
+					settings,
 				][0]
 			}
 		}
@@ -155,13 +155,13 @@ spec: {
 				name: columnName
 				// Copy all fields except index
 				for fieldName, fieldValue in settings if fieldName != "index" {
-				  "\(fieldName)": fieldValue
+					"\(fieldName)": fieldValue
 				}
 			}],
 			[for columnName, settings in _columnSettingsMerged if settings.index == _|_ {
 				name: columnName
 				settings
-			}]
+			}],
 		])
 
 		// Using flatten to get rid of the nested array for "value" mappings
@@ -184,7 +184,7 @@ spec: {
 						}
 					}]
 				}
-				if mapping.type != "value" { // else
+				if mapping.type != "value" {
 					condition: [//switch
 						if mapping.type == "range" {
 							kind: "Range"
@@ -217,12 +217,13 @@ spec: {
 					if mapping.options.result.text != _|_ {
 						text: mapping.options.result.text
 					}
+
 					if mapping.options.result.color != _|_ {
 						backgroundColor: *commonMigrate.#mapping.color[mapping.options.result.color] | mapping.options.result.color
-					}
+					} // else
 				}
 			},
-		], 1),
+		], 1)
 		if len(#cellSettings) != 0 {
 			cellSettings: #cellSettings
 		}

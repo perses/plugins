@@ -21,7 +21,7 @@ import (
 )
 
 #grafanaVar: {
-	type: "datasource"
+	type:  "datasource"
 	query: string
 	...
 }
