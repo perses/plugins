@@ -26,7 +26,7 @@
   "peerDependencies": {
     "@perses-dev/components": "^0.53.0-rc.2",
     "@perses-dev/core": "^0.53.0-rc.0",
-    "@perses-dev/plugin-system": "^0.53.0-rc.2",
+    "@perses-dev/plugin-system": "file:../../shared/plugin-system",
     "echarts": "5.5.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2 || ^18.0.0",

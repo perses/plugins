@@ -23,7 +23,7 @@
     "@perses-dev/core": "^0.53.0-rc.0",
     "@perses-dev/dashboards": "^0.53.0-rc.2",
     "@perses-dev/explore": "^0.53.0-rc.2",
-    "@perses-dev/plugin-system": "^0.53.0-rc.2",
+    "@perses-dev/plugin-system": "file:../../shared/plugin-system",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
