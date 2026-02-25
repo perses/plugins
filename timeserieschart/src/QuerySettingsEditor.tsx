@@ -25,13 +25,14 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { FormatControls, FormatOptions, OptionsColorPicker } from '@perses-dev/components';
+import { FormatControls, FormatOptions, OptionsColorPicker, UnitSelector } from '@perses-dev/components';
 import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import CloseIcon from 'mdi-material-ui/Close';
 import { produce } from 'immer';
 import { useDataQueriesContext } from '@perses-dev/plugin-system';
+import { QueryDefinition } from '@perses-dev/spec';
 import {
   DEFAULT_AREA_OPACITY,
   LINE_STYLE_CONFIG,
@@ -42,7 +43,7 @@ import {
 } from './time-series-chart-model';
 
 const DEFAULT_COLOR_VALUE = '#555';
-const NO_INDEX_AVAILABLE = -1; // invalid array index value used to represent the fact that no query index is available
+const NO_INDEX_AVAILABLE = '-1'; // invalid array index value used to represent the fact that no query index is available
 
 export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -70,7 +71,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
         produce(querySettingsList, (draft) => {
           const querySettings = draft?.[i];
           if (querySettings) {
-            querySettings.queryIndex = parseInt(e.target.value);
+            querySettings.queryIndex = e.target.value;
           }
         })
       );
@@ -224,16 +225,21 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
   };
 
   const { queryDefinitions } = useDataQueriesContext();
-  const queryCount = queryDefinitions.length;
+
+  const queryNames: string[] = useMemo(
+    () => queryDefinitions.map((queryDef: QueryDefinition, index: number) => queryDef.spec.name ?? `#${index}`),
+    [queryDefinitions]
+  );
 
   // Compute the list of query indexes for which query settings are not already defined.
   // This is to avoid already-booked indexes to still be selectable in the dropdown(s)
   const availableQueryIndexes = useMemo(() => {
-    const bookedQueryIndexes = querySettingsList?.map((querySettings) => querySettings.queryIndex) ?? [];
-    const allQueryIndexes = Array.from({ length: queryCount }, (_, i) => i);
-    return allQueryIndexes.filter((_, queryIndex) => !bookedQueryIndexes.includes(queryIndex));
-  }, [querySettingsList, queryCount]);
+    return queryNames.filter((name) => {
+      return !querySettingsList?.some((qs) => qs.queryIndex === name);
+    });
+  }, [queryNames, querySettingsList]);
 
+  // TODO; hide add button if no more query index is available
   const firstAvailableQueryIndex = useMemo(() => {
     return availableQueryIndexes[0] ?? NO_INDEX_AVAILABLE;
   }, [availableQueryIndexes]);
@@ -257,13 +263,12 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
   return (
     <Stack>
-      {queryCount === 0 ? (
+      {queryDefinitions.length === 0 ? (
         <Typography mb={2} fontStyle="italic">
           No query defined
         </Typography>
       ) : (
-        querySettingsList?.length &&
-        querySettingsList.map((querySettings, i) => (
+        querySettingsList?.map((querySettings, i) => (
           <QuerySettingsInput
             inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
             key={i}
@@ -291,7 +296,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           />
         ))
       )}
-      {queryCount > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
+      {queryDefinitions.length > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
         <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={addQuerySettingsInput}>
           Add Query Settings
         </Button>
@@ -302,7 +307,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
 interface QuerySettingsInputProps {
   querySettings: QuerySettingsOptions;
-  availableQueryIndexes: number[];
+  availableQueryIndexes: string[];
   onQueryIndexChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorModeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorValueChange: (colorValue: string) => void;
@@ -343,7 +348,7 @@ function QuerySettingsInput({
   onFormatChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
-  const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
+  const selectableQueryIndexes = availableQueryIndexes.sort((a, b) => a.localeCompare(b));
 
   // State for dropdown menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -399,9 +404,10 @@ function QuerySettingsInput({
           onChange={onQueryIndexChange}
           sx={{ minWidth: '75px' }}
         >
+          <MenuItem value={queryIndex}>{queryIndex}</MenuItem>
           {selectableQueryIndexes.map((qi) => (
             <MenuItem key={`query-${qi}`} value={qi}>
-              #{qi + 1}
+              {qi}
             </MenuItem>
           ))}
         </TextField>
@@ -449,7 +455,7 @@ function QuerySettingsInput({
         {/* Area Opacity section */}
         {areaOpacity !== undefined && (
           <SettingsSection label="Opacity" onRemove={onRemoveAreaOpacity}>
-            {/* Spacer as I don't want to add a prop to SettingsSection for left-padding just for that case.. */}
+            {/* Spacer as I don't want to add a prop to SettingsSection for left-padding just for that case. */}
             <Box />
             <Slider
               value={areaOpacity}
@@ -506,7 +512,7 @@ function QuerySettingsInput({
       </Stack>
       {/* Delete Button for this query settings */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
+        <IconButton aria-label={`delete settings for query '${queryIndex}'`} onClick={onDelete}>
           <DeleteIcon />
         </IconButton>
       </Box>
