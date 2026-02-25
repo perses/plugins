@@ -18,6 +18,7 @@
     "gaugechart",
     "heatmapchart",
     "histogramchart",
+    "logexplorer",
     "logstable",
     "loki",
     "markdown",
