@@ -39,7 +39,7 @@ export interface TimeSeriesChartOptions {
 }
 
 export interface QuerySettingsOptions {
-  queryIndex: string;
+  queryName: string;
   colorMode?: 'fixed' | 'fixed-single';
   colorValue?: string;
   lineStyle?: LineStyleType;

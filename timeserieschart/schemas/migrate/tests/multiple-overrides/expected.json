@@ -4,11 +4,7 @@
     "legend": {
       "position": "right",
       "mode": "table",
-      "values": [
-        "min",
-        "max",
-        "mean"
-      ]
+      "values": ["min", "max", "mean"]
     },
     "yAxis": {
       "format": {
@@ -25,25 +21,25 @@
     },
     "querySettings": [
       {
-        "queryIndex": 1,
+        "queryName": "Query #1",
         "colorMode": "fixed",
         "colorValue": "#5794F2",
         "lineStyle": "dashed",
         "areaOpacity": 0
       },
       {
-        "queryIndex": 2,
+        "queryName": "Query #2",
         "colorMode": "fixed",
         "colorValue": "#F2495C",
         "areaOpacity": 0
       },
       {
-        "queryIndex": 3,
+        "queryName": "Query #3",
         "colorMode": "fixed",
         "colorValue": "#3274D9"
       },
       {
-        "queryIndex": 4,
+        "queryName": "Query #4",
         "colorMode": "fixed",
         "colorValue": "#fade2a",
         "lineStyle": "dashed"
