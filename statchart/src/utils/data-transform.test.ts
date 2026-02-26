@@ -67,6 +67,7 @@ describe('getStatChartColor', () => {
 describe('convertSparkline', () => {
   const sparkline: StatChartSparklineOptions = {
     color: 'purple',
+    areaOpacity: 0.2,
   };
 
   it('should render charts theme default threshold color', () => {
@@ -81,6 +82,7 @@ describe('convertSparkline', () => {
     const options = convertSparkline(testChartsTheme, defaultColor, sparkline) as LineSeriesOption;
     expect(options.lineStyle?.color).toEqual(defaultColor);
     expect(options.areaStyle?.color).toEqual(defaultColor);
+    expect(options.areaStyle?.opacity).toEqual(0.2);
   });
 
   it('should render orange if value meets the threshold', () => {
