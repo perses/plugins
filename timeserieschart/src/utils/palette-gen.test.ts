@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { defaultQueryName } from '@perses-dev/plugin-system';
 import { TimeSeriesChartVisualOptions } from '../time-series-chart-model';
 import { getSeriesColor, getAutoPaletteColor, getCategoricalPaletteColor, SeriesColorProps } from './palette-gen';
 
@@ -119,7 +120,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: 0,
+        queryName: defaultQueryName(0),
         colorMode: 'fixed',
         colorValue: '#000',
       },
@@ -142,7 +143,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: 0,
+        queryName: defaultQueryName(0),
         colorMode: 'fixed',
         colorValue: '#000',
       },
@@ -165,7 +166,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: 0,
+        queryName: defaultQueryName(0),
         colorMode: 'fixed-single',
         colorValue: '#000',
       },
@@ -188,7 +189,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: 0,
+        queryName: defaultQueryName(0),
         colorMode: 'fixed-single',
         colorValue: '#000',
       },

@@ -31,8 +31,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import CloseIcon from 'mdi-material-ui/Close';
 import { produce } from 'immer';
-import { useDataQueriesContext } from '@perses-dev/plugin-system';
-import { QueryDefinition } from '@perses-dev/spec';
+import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
   LINE_STYLE_CONFIG,
@@ -65,13 +64,13 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     focusRef.current = false;
   }, [querySettingsList?.length]);
 
-  const handleQueryIndexChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
+  const handleQueryNameChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {
       handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           const querySettings = draft?.[i];
           if (querySettings) {
-            querySettings.queryIndex = e.target.value;
+            querySettings.queryName = e.target.value;
           }
         })
       );
@@ -226,26 +225,23 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
   const { queryDefinitions } = useDataQueriesContext();
 
-  const queryNames: string[] = useMemo(
-    () => queryDefinitions.map((queryDef: QueryDefinition, index: number) => queryDef.spec.name ?? `#${index}`),
-    [queryDefinitions]
-  );
+  const queryNames: string[] = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
 
   // Compute the list of query indexes for which query settings are not already defined.
   // This is to avoid already-booked indexes to still be selectable in the dropdown(s)
-  const availableQueryIndexes = useMemo(() => {
+  const availableQueryNames = useMemo(() => {
     return queryNames.filter((name) => {
-      return !querySettingsList?.some((qs) => qs.queryIndex === name);
+      return !querySettingsList?.some((qs) => qs.queryName === name);
     });
   }, [queryNames, querySettingsList]);
 
   // TODO; hide add button if no more query index is available
-  const firstAvailableQueryIndex = useMemo(() => {
-    return availableQueryIndexes[0] ?? NO_INDEX_AVAILABLE;
-  }, [availableQueryIndexes]);
+  const firstAvailableQueryName = useMemo(() => {
+    return availableQueryNames[0] ?? NO_INDEX_AVAILABLE;
+  }, [availableQueryNames]);
 
   const defaultQuerySettings: QuerySettingsOptions = {
-    queryIndex: firstAvailableQueryIndex,
+    queryName: firstAvailableQueryName,
   };
 
   const addQuerySettingsInput = (): void => {
@@ -273,9 +269,9 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
             key={i}
             querySettings={querySettings}
-            availableQueryIndexes={availableQueryIndexes}
-            onQueryIndexChange={(e) => {
-              handleQueryIndexChange(e, i);
+            availableQueryNames={availableQueryNames}
+            onQueryNameChange={(e) => {
+              handleQueryNameChange(e, i);
             }}
             onColorModeChange={(e) => handleColorModeChange(e, i)}
             onColorValueChange={(color) => handleColorValueChange(color, i)}
@@ -296,7 +292,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           />
         ))
       )}
-      {queryDefinitions.length > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
+      {queryDefinitions.length > 0 && firstAvailableQueryName !== NO_INDEX_AVAILABLE && (
         <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={addQuerySettingsInput}>
           Add Query Settings
         </Button>
@@ -307,8 +303,8 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
 interface QuerySettingsInputProps {
   querySettings: QuerySettingsOptions;
-  availableQueryIndexes: string[];
-  onQueryIndexChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  availableQueryNames: string[];
+  onQueryNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorModeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorValueChange: (colorValue: string) => void;
   onLineStyleChange: (lineStyle: string) => void;
@@ -328,9 +324,9 @@ interface QuerySettingsInputProps {
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format },
-  availableQueryIndexes,
-  onQueryIndexChange,
+  querySettings: { queryName, colorMode, colorValue, lineStyle, areaOpacity, format },
+  availableQueryNames,
+  onQueryNameChange,
   onColorModeChange,
   onColorValueChange,
   onLineStyleChange,
@@ -348,7 +344,7 @@ function QuerySettingsInput({
   onFormatChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
-  const selectableQueryIndexes = availableQueryIndexes.sort((a, b) => a.localeCompare(b));
+  const selectableQueryName = availableQueryNames.sort((a, b) => a.localeCompare(b));
 
   // State for dropdown menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -399,13 +395,13 @@ function QuerySettingsInput({
         <TextField
           select
           inputRef={inputRef}
-          value={queryIndex}
+          value={queryName}
           label="Query"
-          onChange={onQueryIndexChange}
+          onChange={onQueryNameChange}
           sx={{ minWidth: '75px' }}
         >
-          <MenuItem value={queryIndex}>{queryIndex}</MenuItem>
-          {selectableQueryIndexes.map((qi) => (
+          <MenuItem value={queryName}>{queryName}</MenuItem>
+          {selectableQueryName.map((qi) => (
             <MenuItem key={`query-${qi}`} value={qi}>
               {qi}
             </MenuItem>
@@ -420,7 +416,7 @@ function QuerySettingsInput({
               <MenuItem value="fixed">Fixed</MenuItem>
             </TextField>
             <OptionsColorPicker
-              label={`Query n°${queryIndex + 1}`}
+              label={queryName}
               color={colorValue || DEFAULT_COLOR_VALUE}
               onColorChange={onColorValueChange}
             />
@@ -512,7 +508,7 @@ function QuerySettingsInput({
       </Stack>
       {/* Delete Button for this query settings */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <IconButton aria-label={`delete settings for query '${queryIndex}'`} onClick={onDelete}>
+        <IconButton aria-label={`delete settings for query '${queryName}'`} onClick={onDelete}>
           <DeleteIcon />
         </IconButton>
       </Box>
