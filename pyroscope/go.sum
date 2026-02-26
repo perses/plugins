@@ -27,8 +27,8 @@ github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f h1:KUppIJq7/+
 github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/nexucis/lamenv v0.5.2 h1:tK/u3XGhCq9qIoVNcXsK9LZb8fKopm0A5weqSRvHd7M=
 github.com/nexucis/lamenv v0.5.2/go.mod h1:HusJm6ltmmT7FMG8A750mOLuME6SHCsr2iFYxp5fFi0=
-github.com/perses/common v0.30.1 h1:XjCHCrBOyXacDA+fa1pzlq+pNiPazTj4anUhbYGU0ho=
-github.com/perses/common v0.30.1/go.mod h1:DFtur1QPah2/ChXbKKhw7djYdwNgz27s5fPKpiK0Xao=
+github.com/perses/common v0.30.2 h1:RAiVxUpX76lTCb4X7pfcXSvYdXQmZwKi4oDKAEO//u0=
+github.com/perses/common v0.30.2/go.mod h1:DFtur1QPah2/ChXbKKhw7djYdwNgz27s5fPKpiK0Xao=
 github.com/perses/perses v0.53.0-rc.2 h1:TenxdK6kbY0H209/FRDwN5/A0o9mu+3qmJ/xgmblE60=
 github.com/perses/perses v0.53.0-rc.2/go.mod h1:fwb2zZCwZ57PGFnjjfiWvkls1NLVskGJ2p+Kv7YTNdw=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
