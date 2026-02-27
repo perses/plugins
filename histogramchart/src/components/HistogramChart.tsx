@@ -17,6 +17,7 @@ import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components
 import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
+import { CustomSeriesRenderItemReturn } from 'echarts/types/dist/echarts';
 import { getColorFromThresholds } from '../utils';
 import { LOG_BASE } from '../histogram-chart-model';
 
@@ -137,7 +138,10 @@ export function HistogramChart({
       series: [
         {
           type: 'custom',
-          renderItem: function (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) {
+          renderItem: function (
+            params: CustomSeriesRenderItemParams,
+            api: CustomSeriesRenderItemAPI
+          ): CustomSeriesRenderItemReturn {
             const lowerBound = api.value(0) as number;
             const upperBound = api.value(1) as number;
             const yValue = api.value(2) as number;

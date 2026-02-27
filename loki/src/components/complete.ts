@@ -409,7 +409,7 @@ function createLineFilterCompletion(operator: string, detail: string): Completio
   return {
     label: `${operator} ""`,
     detail,
-    apply: (view, _completion, from, to) => {
+    apply: (view, _completion, from, to): void => {
       const insert = `${operator} ""`;
       view.dispatch({
         changes: { from, to, insert },
@@ -421,7 +421,7 @@ function createLineFilterCompletion(operator: string, detail: string): Completio
   };
 }
 
-function escapeString(input: string, quoteChar: string) {
+function escapeString(input: string, quoteChar: string): string {
   // do not escape raw strings (when using backticks)
   if (quoteChar === '`') {
     return input;

@@ -16,13 +16,14 @@ import { TraceQueryContext } from '@perses-dev/plugin-system';
 import { TempoDatasourceSpec } from '../tempo-datasource-types';
 import { TempoDatasource } from '../tempo-datasource';
 import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
+import { TempoClient } from '../../model';
 import { getTraceData } from './get-trace-data';
 
 const datasource: TempoDatasourceSpec = {
   directUrl: '/test',
 };
 
-const createMockClient = (searchResponse: SearchResponse) => {
+const createMockClient = (searchResponse: SearchResponse): TempoClient => {
   const client = TempoDatasource.createClient(datasource, {});
   client.searchWithFallback = jest.fn(async () => searchResponse);
   return client;

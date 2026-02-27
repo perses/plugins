@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, RenderResult } from '@testing-library/react';
 import { LogEntry } from '@perses-dev/core';
 import { LogRow } from './LogRow';
 
@@ -29,7 +29,7 @@ describe('LogRow', () => {
     labels: { level: 'info', service: 'foo', region: 'bar' },
   };
 
-  const renderLogRow = ({ onSelect = jest.fn(), isSelected = false } = {}) => {
+  const renderLogRow = ({ onSelect = jest.fn(), isSelected = false } = {}): RenderResult => {
     return render(
       <LogRow
         log={mockLog}
@@ -57,7 +57,7 @@ describe('LogRow', () => {
   });
 
   describe('copy formats', () => {
-    const openCopyMenu = async () => {
+    const openCopyMenu = async (): Promise<{ container: HTMLElement }> => {
       const { container } = renderLogRow();
       const row = container.querySelector('[data-log-index="0"]')!;
 

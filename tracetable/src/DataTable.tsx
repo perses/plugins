@@ -25,7 +25,7 @@ import { useSelectionItemActions } from '@perses-dev/dashboards';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme, useSelection } from '@perses-dev/components';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { ReactElement, useCallback, useMemo } from 'react';
+import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -158,7 +158,8 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 2,
         minWidth: 145,
         display: 'flex',
-        valueGetter: (_, trace) => Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
+        valueGetter: (_, trace): number =>
+          Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
         renderCell: ({ row }): ReactElement => {
           let totalSpanCount = 0;
           let totalErrorCount = 0;
@@ -192,7 +193,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 1,
         minWidth: 70,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Typography display="inline">
             {row.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(row.durationMs))}
           </Typography>
@@ -207,7 +208,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 3,
         minWidth: 240,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Tooltip title={UTC_DATE_FORMATTER(new Date(row.startTimeUnixMs))} placement="top" arrow>
             <Typography display="inline" key={`st-${row.traceId}`}>
               {DATE_FORMATTER(new Date(row.startTimeUnixMs))}
@@ -223,7 +224,7 @@ export function DataTable(props: DataTableProps): ReactElement {
               flex: actionsList.length,
               display: 'flex' as const,
               type: 'actions' as const,
-              getActions: ({ row }: { row: Row }) =>
+              getActions: ({ row }: { row: Row }): ReactNode[] =>
                 getItemActionButtons({ id: row.traceId, data: row as unknown as Record<string, unknown> }),
             },
           ]

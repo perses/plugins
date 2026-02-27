@@ -47,7 +47,7 @@ export function ClickHouseTimeSeriesQueryEditor(props: ClickHouseTimeSeriesQuery
   };
 
   // Immediate query execution on Enter or blur
-  const handleQueryExecute = (query: string) => {
+  const handleQueryExecute = (query: string): void => {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
