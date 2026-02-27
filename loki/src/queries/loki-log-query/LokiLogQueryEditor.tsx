@@ -70,7 +70,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     throw new Error('Got unexpected non LokiQuery datasource selection');
   };
 
-  const handleLogsDirection = (_: React.MouseEvent, v: 'backward' | 'forward') =>
+  const handleLogsDirection = (_: React.MouseEvent, v: 'backward' | 'forward'): void =>
     onChange(
       produce(value, (draft: LokiLogQuerySpec) => {
         draft.direction = v;
@@ -78,7 +78,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     );
 
   // Immediate query execution on Enter or blur
-  const handleQueryExecute = (query: string) => {
+  const handleQueryExecute = (query: string): void => {
     onChange(
       produce(value, (draft) => {
         draft.query = query;

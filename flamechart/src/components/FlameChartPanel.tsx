@@ -68,13 +68,13 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
-  const onChangePalette = (newPalette: 'package-name' | 'value') => {
+  const onChangePalette = (newPalette: 'package-name' | 'value'): void => {
     setLiveSpec((prev) => {
       return { ...prev, palette: newPalette };
     });
   };
 
-  const onDisplayChange = (value: 'table' | 'flame-graph' | 'both' | 'none') => {
+  const onDisplayChange = (value: 'table' | 'flame-graph' | 'both' | 'none'): void => {
     let showTable = true;
     let showFlameGraph = true;
     if (value === 'table') {

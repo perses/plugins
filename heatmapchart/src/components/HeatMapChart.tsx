@@ -18,6 +18,7 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomChart } from 'echarts/charts';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { useTheme } from '@mui/material';
+import { CustomSeriesRenderItemReturn } from 'echarts/types/dist/echarts';
 import { LOG_BASE } from '../heat-map-chart-model';
 import { getFormattedHeatmapAxisLabel } from '../utils';
 import { generateTooltipHTML } from './HeatMapTooltip';
@@ -90,7 +91,7 @@ export function HeatMapChart({
     return {
       tooltip: {
         appendToBody: true,
-        formatter: (params: { data: HeatMapDataItem; marker: string }) => {
+        formatter: (params: { data: HeatMapDataItem; marker: string }): string => {
           return generateTooltipHTML({
             data: params.data.value,
             label: params.data.label,
@@ -154,7 +155,10 @@ export function HeatMapChart({
         {
           name: 'HeatMap',
           type: 'custom',
-          renderItem: function (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) {
+          renderItem: function (
+            params: CustomSeriesRenderItemParams,
+            api: CustomSeriesRenderItemAPI
+          ): CustomSeriesRenderItemReturn {
             const xIndex = api.value(0) as number;
             const yLower = api.value(1) as number;
             const yUpper = api.value(2) as number;

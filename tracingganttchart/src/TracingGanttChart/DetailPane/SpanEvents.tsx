@@ -54,7 +54,7 @@ function SpanEventItem(props: SpanEventItemProps): ReactElement {
   const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
 
   const [open, setOpen] = useState(false);
-  const handleClick = () => {
+  const handleClick = (): void => {
     setOpen(!open);
   };
 

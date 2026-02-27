@@ -108,7 +108,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     return value.colorPalette || undefined;
   }, [value.colorPalette]);
 
-  const handleColorChange = (color?: string[]) => {
+  const handleColorChange = (color?: string[]): void => {
     onChange(
       produce(value, (draft: PieChartOptions) => {
         if (Array.isArray(color)) {
@@ -131,7 +131,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     return Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default';
   }, [colorPalette]);
 
-  const handleColorSchemeChange = (scheme: ColorScheme) => {
+  const handleColorSchemeChange = (scheme: ColorScheme): void => {
     if (scheme === 'theme') {
       handleColorChange(themePalette as string[]);
     } else if (scheme === 'default') {
