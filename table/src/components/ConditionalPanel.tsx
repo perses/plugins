@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   Button,
   Divider,
@@ -36,7 +36,7 @@ export interface ConditionalRuleProps extends Omit<GridProps, 'onChange'> {
   onDelete: () => void;
 }
 
-export function ConditionalRule({ cell, onChange, onDelete, ...props }: ConditionalRuleProps) {
+export function ConditionalRule({ cell, onChange, onDelete, ...props }: ConditionalRuleProps): ReactElement {
   return (
     <Grid container spacing={2} {...props}>
       <Grid size={{ xs: 5 }}>
@@ -170,20 +170,20 @@ export function ConditionalPanel({
   cellSettings = [],
   onChange,
   addButtonText = 'Add Conditional Format',
-}: ConditionalPanelProps) {
-  const handleCellChange = (index: number, updatedCell: CellSettings) => {
+}: ConditionalPanelProps): ReactElement {
+  const handleCellChange = (index: number, updatedCell: CellSettings): void => {
     const updatedCells = [...cellSettings];
     updatedCells[index] = updatedCell;
     onChange(updatedCells);
   };
 
-  const handleCellDelete = (index: number) => {
+  const handleCellDelete = (index: number): void => {
     const updatedCells = [...cellSettings];
     updatedCells.splice(index, 1);
     onChange(updatedCells.length > 0 ? updatedCells : undefined);
   };
 
-  const handleAddCell = () => {
+  const handleAddCell = (): void => {
     const updatedCells = [...cellSettings];
     updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
     onChange(updatedCells);

@@ -64,7 +64,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const hasDuplicates = duplicateKeys.size > 0;
 
   // Convert entries array to object and trigger onChange
-  const syncToParent = (newEntries: QueryParamEntry[]) => {
+  const syncToParent = (newEntries: QueryParamEntry[]): void => {
     const newParams: Record<string, string> = {};
     newEntries.forEach(({ key, value }) => {
       if (key !== '') {
@@ -78,7 +78,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
     });
   };
 
-  const handleQueryParamChange = (id: string, field: 'key' | 'value', newValue: string) => {
+  const handleQueryParamChange = (id: string, field: 'key' | 'value', newValue: string): void => {
     const newEntries = entries.map((entry) => {
       if (entry.id !== id) return entry;
       return field === 'key' ? { ...entry, key: newValue } : { ...entry, value: newValue };
@@ -87,13 +87,13 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
     syncToParent(newEntries);
   };
 
-  const addQueryParam = () => {
+  const addQueryParam = (): void => {
     const newEntries = [...entries, { id: String(nextIdRef.current++), key: '', value: '' }];
     setEntries(newEntries);
     syncToParent(newEntries);
   };
 
-  const removeQueryParam = (id: string) => {
+  const removeQueryParam = (id: string): void => {
     const newEntries = entries.filter((entry) => entry.id !== id);
     setEntries(newEntries);
     syncToParent(newEntries);

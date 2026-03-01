@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { IconButton, Menu, MenuItem } from '@mui/material';
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { InfoTooltip } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
@@ -24,7 +24,7 @@ export interface SpanLinksButtonProps {
   span: Span;
 }
 
-export function SpanLinksButton(props: SpanLinksButtonProps) {
+export function SpanLinksButton(props: SpanLinksButtonProps): ReactElement | null {
   const { customLinks, span } = props;
   const variableValues = useAllVariableValues();
   const { RouterComponent } = useRouterContext();
@@ -36,7 +36,7 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
   }
 
   // if there is a single span link, render the button directly without a menu
-  if (span.links.length == 1 && span.links[0]) {
+  if (span.links.length === 1 && span.links[0]) {
     const link = span.links[0];
     return (
       <InfoTooltip description="open linked span">
@@ -55,14 +55,14 @@ export function SpanLinksButton(props: SpanLinksButtonProps) {
     );
   }
 
-  const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
     // do not propagate onClick event to the table row (otherwise, the detail pane would open)
     event.stopPropagation();
 
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = (event: MouseEvent) => {
+  const handleClose = (event: MouseEvent): void => {
     // Closing the menu, i.e. clicking on the fullscreen transparent MUI backdrop element, does trigger a click on the table row (which opens the detail pane).
     // Therefore, stop propagating this event
     event.stopPropagation();

@@ -39,27 +39,27 @@ export function Settings(props: SettingsProps): ReactElement {
     minWidth: 'auto',
   };
 
-  const handleChangeColorShemeClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleChangeColorShemeClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleByPackageNameClick = () => {
+  const handleByPackageNameClick = (): void => {
     onChangePalette('package-name');
     handleClose();
   };
 
-  const handleByValueClick = () => {
+  const handleByValueClick = (): void => {
     onChangePalette('value');
     handleClose();
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setAnchorEl(null);
   };
 
-  const isTableSelected = () => selectedView === 'table';
-  const isFlameGraphSelected = () => selectedView === 'flame-graph';
-  const isBothSelected = () => selectedView === 'both';
+  const isTableSelected = (): boolean => selectedView === 'table';
+  const isFlameGraphSelected = (): boolean => selectedView === 'flame-graph';
+  const isBothSelected = (): boolean => selectedView === 'both';
 
   // Update selected view based on the value of showTable and showFlameGraph
   const selectedView: 'table' | 'flame-graph' | 'both' | 'none' = useMemo(() => {

@@ -14,11 +14,11 @@
 import { InfoTooltip } from '@perses-dev/components';
 import { otlptracev1 } from '@perses-dev/core';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { HeaderIconButton } from '@perses-dev/dashboards';
 import { TracingGanttChartPanelProps } from './TracingGanttChartPanel';
 
-export function DownloadTraceAction(props: TracingGanttChartPanelProps) {
+export function DownloadTraceAction(props: TracingGanttChartPanelProps): ReactElement | null {
   const { queryResults } = props;
   const trace = queryResults[0]?.data?.trace;
 
@@ -47,7 +47,7 @@ export function DownloadTraceAction(props: TracingGanttChartPanelProps) {
  * A trace can only contain spans with the same trace id. Therefore, let's return the trace id of the first span.
  * Exported for tests only.
  */
-export function getFilename(trace: otlptracev1.TracesData) {
+export function getFilename(trace: otlptracev1.TracesData): string {
   for (const resourceSpan of trace.resourceSpans) {
     for (const scopeSpan of resourceSpan.scopeSpans) {
       for (const span of scopeSpan.spans) {
@@ -59,7 +59,7 @@ export function getFilename(trace: otlptracev1.TracesData) {
   return 'trace.json';
 }
 
-function downloadFile(filename: string, type: string, data: string) {
+function downloadFile(filename: string, type: string, data: string): void {
   const url = URL.createObjectURL(new Blob([data], { type }));
 
   const link = document.createElement('a');

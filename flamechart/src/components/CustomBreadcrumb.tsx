@@ -47,7 +47,7 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
 export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
   const { totalValue, totalSample, otherItemSample, onSelectedIdChange } = props;
 
-  const handleClick = (event: React.MouseEvent<Element, MouseEvent>) => {
+  const handleClick = (event: React.MouseEvent<Element, MouseEvent>): void => {
     event.preventDefault();
     onSelectedIdChange(0);
   };

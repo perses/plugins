@@ -14,12 +14,10 @@
 import { ReactElement, SyntheticEvent, useCallback, useEffect, useState } from 'react';
 import { Autocomplete, Checkbox, Stack, TextField, TextFieldProps } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { TempoClient } from '../model';
-import { getUnixTimeRange } from '../plugins/tempo-trace-query/get-trace-data';
-import { filterToTraceQL } from './filter/filter_to_traceql';
-import { traceQLToFilter } from './filter/traceql_to_filter';
-import { DurationField, Filter, splitByUnquotedWhitespace } from './filter/filter';
+import { getUnixTimeRange } from '../plugins';
+import { filterToTraceQL, traceQLToFilter, DurationField, Filter, splitByUnquotedWhitespace } from './filter';
 
 const statusOptions = ['unset', 'ok', 'error'];
 
@@ -33,7 +31,7 @@ export function AttributeFilters(props: AttributeFiltersProps): ReactElement {
   const { client, query, setQuery } = props;
 
   const filter = traceQLToFilter(query);
-  const setFilter = (filter: Filter) => {
+  const setFilter = (filter: Filter): void => {
     setQuery(filterToTraceQL(filter));
   };
 
@@ -98,7 +96,7 @@ interface StringAttributeFilterProps {
   setValue: (value: string[]) => void;
 }
 
-function StringAttributeFilter(props: StringAttributeFilterProps) {
+function StringAttributeFilter(props: StringAttributeFilterProps): ReactElement {
   const { label, width, options, value, setValue } = props;
 
   return (
@@ -135,7 +133,7 @@ interface DurationAttributeFilterProps {
   setValue: (value: DurationField) => void;
 }
 
-function DurationAttributeFilter(props: DurationAttributeFilterProps) {
+function DurationAttributeFilter(props: DurationAttributeFilterProps): ReactElement {
   const { label, value, setValue } = props;
   const { min, max } = value;
 
@@ -155,7 +153,7 @@ interface DurationTextInputProps {
   setValue: (value: string) => void;
 }
 
-function DurationTextInput(props: DurationTextInputProps) {
+function DurationTextInput(props: DurationTextInputProps): ReactElement {
   const { label, value, setValue } = props;
 
   return (
@@ -177,7 +175,7 @@ interface CustomAttributesFilterProps {
   setValue: (value: string[]) => void;
 }
 
-function CustomAttributesFilter(props: CustomAttributesFilterProps) {
+function CustomAttributesFilter(props: CustomAttributesFilterProps): ReactElement {
   const { label, value, setValue } = props;
 
   return (
@@ -200,10 +198,10 @@ interface LazyTextInputProps extends Omit<TextFieldProps, 'variant'> {
 }
 
 /** A <TextField> which calls props.setValue when the input field is blurred and the validation passes. */
-function LazyTextInput(props: LazyTextInputProps) {
+function LazyTextInput(props: LazyTextInputProps): ReactElement {
   const { validationRegex, validationFailedMessage, value, setValue, ...otherProps } = props;
   const [draftValue, setDraftValue] = useState(value);
-  const isValidInput = draftValue == '' || validationRegex == undefined || validationRegex.test(draftValue);
+  const isValidInput = draftValue === '' || validationRegex === undefined || validationRegex.test(draftValue);
 
   useEffect(() => {
     setDraftValue(value);
@@ -231,7 +229,13 @@ function LazyTextInput(props: LazyTextInputProps) {
   );
 }
 
-function useTagValues(client: TempoClient | undefined, tag: string, query: string, start?: number, end?: number) {
+function useTagValues(
+  client: TempoClient | undefined,
+  tag: string,
+  query: string,
+  start?: number,
+  end?: number
+): UseQueryResult<string[] | undefined> {
   return useQuery({
     queryKey: ['useTagValues', client, tag, query, start, end],
     enabled: !!client,

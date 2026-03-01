@@ -49,7 +49,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
   const { onChange, value } = props;
   const querySettingsList = value.querySettings;
 
-  const handleQuerySettingsChange = (newQuerySettings: QuerySettingsOptions[]) => {
+  const handleQuerySettingsChange = (newQuerySettings: QuerySettingsOptions[]): void => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.querySettings = newQuerySettings;
@@ -358,7 +358,7 @@ function QuerySettingsInput({
     return options;
   }, [colorMode, lineStyle, areaOpacity, format, onAddColor, onAddLineStyle, onAddAreaOpacity, onAddUnit]);
 
-  const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     if (availableOptions.length === 1 && availableOptions[0]) {
       // If only one option left, add it directly
       availableOptions[0].action();
@@ -368,11 +368,11 @@ function QuerySettingsInput({
     }
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (): void => {
     setAnchorEl(null);
   };
 
-  const handleMenuItemClick = (action: () => void) => {
+  const handleMenuItemClick = (action: () => void): void => {
     action();
     handleMenuClose();
   };
