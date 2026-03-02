@@ -54,37 +54,49 @@ export function AttributeFilters(props: AttributeFiltersProps): ReactElement {
   );
 
   return (
-    <>
-      <StringAttributeFilter
-        label="Service Name"
-        options={serviceNameOptions ?? []}
-        value={filter.serviceName}
-        setValue={(x) => setFilter({ ...filter, serviceName: x })}
-      />
-      <StringAttributeFilter
-        label="Span Name"
-        options={spanNameOptions ?? []}
-        value={filter.spanName}
-        setValue={(x) => setFilter({ ...filter, spanName: x })}
-      />
-      <StringAttributeFilter
-        label="Status"
-        width={210}
-        options={statusOptions ?? []}
-        value={filter.status}
-        setValue={(x) => setFilter({ ...filter, status: x })}
-      />
-      <DurationAttributeFilter
-        label="Trace Duration"
-        value={filter.traceDuration}
-        setValue={(value) => setFilter({ ...filter, traceDuration: value })}
-      />
-      <CustomAttributesFilter
-        label="Custom Attributes"
-        value={filter.customMatchers}
-        setValue={(value) => setFilter({ ...filter, customMatchers: value })}
-      />
-    </>
+    <Stack direction="column" flex={1} gap={1}>
+      <Stack
+        direction="row"
+        flex={1}
+        gap={1}
+        sx={{
+          '& > *:nth-of-type(1)': { flex: 2 }, // Service Name
+          '& > *:nth-of-type(2)': { flex: 2 }, // Span Name
+          '& > *:nth-of-type(3)': { flex: 1 }, // Status
+        }}
+      >
+        <StringAttributeFilter
+          label="Service Name"
+          options={serviceNameOptions ?? []}
+          value={filter.serviceName}
+          setValue={(x) => setFilter({ ...filter, serviceName: x })}
+        />
+        <StringAttributeFilter
+          label="Span Name"
+          options={spanNameOptions ?? []}
+          value={filter.spanName}
+          setValue={(x) => setFilter({ ...filter, spanName: x })}
+        />
+        <StringAttributeFilter
+          label="Status"
+          options={statusOptions ?? []}
+          value={filter.status}
+          setValue={(x) => setFilter({ ...filter, status: x })}
+        />
+      </Stack>
+      <Stack direction="row" flex={1} gap={1}>
+        <DurationAttributeFilter
+          label="Trace Duration"
+          value={filter.traceDuration}
+          setValue={(value) => setFilter({ ...filter, traceDuration: value })}
+        />
+        <CustomAttributesFilter
+          label="Custom Attributes"
+          value={filter.customMatchers}
+          setValue={(value) => setFilter({ ...filter, customMatchers: value })}
+        />
+      </Stack>
+    </Stack>
   );
 }
 
