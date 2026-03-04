@@ -303,7 +303,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       }
     }
 
-    if (thresholds && thresholds.steps) {
+    // map thresholds only if there is at least one time series to avoid displaying thresholds without any data
+    if (thresholds && thresholds.steps && timeChartData.length > 0) {
       // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
       // These are styled with predefined colors and a dashed style to look different than series from query results.
       // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
