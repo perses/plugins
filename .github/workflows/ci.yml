@@ -43,7 +43,7 @@ jobs:
         if: github.event_name != 'release'
         run: go run ./scripts/build-plugins/build-plugins.go
       - name: store plugin archives
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: archives
           path: |
@@ -84,7 +84,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v6
       - name: download plugin archives
-        uses: actions/download-artifact@v4 # <--- Download the artifacts to use the archive files
+        uses: actions/download-artifact@v8 # <--- Download the artifacts to use the archive files
         with:
           name: archives
           path: ./plugins/temp-archives
@@ -210,7 +210,7 @@ jobs:
           cue_version: "v0.15.1"
           nvmrc_path: "./.nvmrc"
       - name: Download archive
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: archives
       - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
