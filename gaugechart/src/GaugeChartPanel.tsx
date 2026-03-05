@@ -102,21 +102,19 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
   const gaugeData = useMemo((): GaugeSeries[] => {
     const seriesData: GaugeSeries[] = [];
 
-    if (!queryResults[0]?.data?.series?.length) {
-      return seriesData;
-    }
-
     if (!CalculationsMap[calculation]) {
       console.warn(`Invalid GaugeChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
     }
 
     const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
 
-    for (const timeSeries of queryResults[0].data.series) {
-      seriesData.push({
-        value: calculate(timeSeries.values),
-        label: showLegend ? (timeSeries.formattedName ?? '') : '',
-      });
+    for (const result of queryResults) {
+      for (const timeSeries of result.data.series) {
+        seriesData.push({
+          value: calculate(timeSeries.values),
+          label: showLegend ? (timeSeries.formattedName ?? '') : '',
+        });
+      }
     }
     return seriesData;
   }, [queryResults, calculation, showLegend]);
