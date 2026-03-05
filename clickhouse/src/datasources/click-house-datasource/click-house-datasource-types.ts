@@ -13,16 +13,11 @@
 
 import { HTTPProxy, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
+import { ClickHouseQueryParams } from '../../model/click-house-client';
 
 export interface ClickHouseDatasourceSpec {
   directUrl?: string;
   proxy?: HTTPProxy;
-}
-
-interface QueryRequestParameters extends Record<string, string> {
-  query: string;
-  start: string;
-  end: string;
 }
 
 interface ClickHouseDatasourceClientOptions {
@@ -33,11 +28,11 @@ interface ClickHouseDatasourceClientOptions {
 export interface ClickHouseDatasourceResponse {
   status: string;
   warnings?: string[];
-  // TODO: adjust this type to match your datasource response shape
-  data: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
 }
 
 export interface ClickHouseDatasourceClient extends DatasourceClient {
   options: ClickHouseDatasourceClientOptions;
-  query(params: QueryRequestParameters, headers?: RequestHeaders): Promise<ClickHouseDatasourceResponse>;
+  query(params: ClickHouseQueryParams, headers?: RequestHeaders): Promise<ClickHouseDatasourceResponse>;
 }
