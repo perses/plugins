@@ -51,7 +51,7 @@ const EXPECTED_SERIES_TEXT =
   '{device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"}';
 
 describe('TimeSeriesTablePanel', () => {
-  const renderPanel = (data: TimeSeriesData, options?: TimeSeriesTableOptions) => {
+  const renderPanel = (data: TimeSeriesData, options?: TimeSeriesTableOptions): void => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <SnackbarProvider>
@@ -75,7 +75,7 @@ describe('TimeSeriesTablePanel', () => {
     );
   };
 
-  const getCheckboxes = () => screen.findAllByRole('checkbox');
+  const getCheckboxes = (): Promise<HTMLElement[]> => screen.findAllByRole('checkbox');
 
   it('should render multi values with timestamps', async () => {
     renderPanel(MOCK_TIME_SERIES_DATA_MULTIVALUE);

@@ -194,7 +194,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     [selectedRows, lastSelectedIndex]
   );
 
-  const renderLogRow = (index: number) => {
+  const renderLogRow = (index: number): ReactNode | null => {
     const log = logs[index];
     if (!log) return null;
 
@@ -218,7 +218,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     );
   };
 
-  const handleCopy = (e: React.ClipboardEvent<HTMLDivElement>) => {
+  const handleCopy = (e: React.ClipboardEvent<HTMLDivElement>): void => {
     const selection = window.getSelection();
     const hasTextSelection = selection && selection.rangeCount > 0 && selection.toString().length > 0;
 
@@ -242,7 +242,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
 
   // Keyboard shortcuts for selection
   useEffect(() => {
-    const handleKeyDown = async (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent): Promise<void> => {
       // Cmd/Ctrl+A: Select all logs
       if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
         e.preventDefault();
@@ -279,14 +279,14 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
+    return (): void => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [logs, selectedRows, showCopyPopover]);
 
   // Cleanup timer on unmount
   useEffect(() => {
-    return () => {
+    return (): void => {
       if (copyPopoverTimerRef.current) {
         window.clearTimeout(copyPopoverTimerRef.current);
       }

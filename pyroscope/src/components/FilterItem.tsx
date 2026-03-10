@@ -30,19 +30,19 @@ export interface FilterItemProps {
 export function FilterItem(props: FilterItemProps): ReactElement {
   const { datasource, value, onChange, deleteItem } = props;
 
-  const handleLabelNameChange = (label: string) => {
+  const handleLabelNameChange = (label: string): void => {
     onChange?.({ labelName: label, labelValue: '', operator: value.operator });
   };
 
-  const handleOperatorChange = (op: OperatorType) => {
+  const handleOperatorChange = (op: OperatorType): void => {
     onChange?.({ labelName: value.labelName, labelValue: value.labelValue, operator: op });
   };
 
-  const handleLabelValueChange = (val: string) => {
+  const handleLabelValueChange = (val: string): void => {
     onChange?.({ labelName: value.labelName, labelValue: val, operator: value.operator });
   };
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (): void => {
     deleteItem?.();
   };
 

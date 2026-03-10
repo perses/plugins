@@ -34,17 +34,17 @@ function generateCellContentConfig(
   const plugin = column.plugin;
   if (plugin !== undefined) {
     return {
-      cell: (ctx) => {
+      cell: (ctx): ReactElement => {
         const panelData: PanelData<QueryDataType> | undefined = ctx.getValue();
         if (!panelData) return <></>;
         return <EmbeddedPanel kind={plugin.kind} spec={plugin.spec} queryResults={[panelData]} />;
       },
-      cellDescription: column.cellDescription ? () => `${column.cellDescription}` : () => '', // disable hover text
+      cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : (): string => '', // disable hover text
     };
   }
 
   return {
-    cell: (ctx) => {
+    cell: (ctx): ReactElement | string => {
       const cellValue = ctx.getValue();
       return typeof cellValue === 'number' && column.format ? formatValue(cellValue, column.format) : cellValue;
     },
@@ -65,7 +65,7 @@ function ColumnFilterDropdown({
   onFilterChange,
   theme,
 }: ColumnFilterDropdownProps): ReactElement {
-  const values = [...new Set(allValues)].filter((v) => v != null).sort();
+  const values = [...new Set(allValues)].filter((v) => v !== null).sort();
   if (values.length === 0) {
     return (
       <div
@@ -434,7 +434,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   };
 
   // update column filter
-  const updateColumnFilter = (columnId: string, values: Array<string | number>) => {
+  const updateColumnFilter = (columnId: string, values: Array<string | number>): void => {
     const newFilters = columnFilters.filter((f) => f.id !== columnId);
     if (values.length > 0) {
       newFilters.push({ id: columnId, value: values });
@@ -443,14 +443,14 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   };
 
   // Handle filter clicks
-  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string) => {
+  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string): void => {
     event.preventDefault();
     event.stopPropagation();
     setFilterAnchorEl({ ...filterAnchorEl, [columnId]: event.currentTarget });
     setOpenFilterColumn(columnId);
   };
 
-  const handleFilterClose = () => {
+  const handleFilterClose = (): void => {
     setFilterAnchorEl({});
     setOpenFilterColumn(null);
   };
@@ -459,7 +459,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   useEffect(() => {
     if (!openFilterColumn) return;
 
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (e: MouseEvent): void => {
       const target = e.target as Element;
       if (!target.closest('[data-filter-dropdown]') && !target.closest('button')) {
         handleFilterClose();
@@ -470,7 +470,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       document.addEventListener('click', handleClick);
     }, 100);
 
-    return () => {
+    return (): void => {
       clearTimeout(timer);
       document.removeEventListener('click', handleClick);
     };

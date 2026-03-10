@@ -19,7 +19,7 @@ import { DurationField, Filter } from './filter';
  * 2. Join all matchers with '&&'
  * 3. Return the full TraceQL query, for example '{ resource.service.name = "some_value" && name = "span_name" }'
  */
-export function filterToTraceQL(filter: Filter) {
+export function filterToTraceQL(filter: Filter): string {
   const matchers: string[] = [
     ...stringMatcher('resource.service.name', filter.serviceName),
     ...stringMatcher('name', filter.spanName),
@@ -36,21 +36,21 @@ export function filterToTraceQL(filter: Filter) {
   return `{ ${matchers.join(' && ')} }`;
 }
 
-function escape(q: string) {
+function escape(q: string): string {
   return q.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
 }
 
-function stringMatcher(attribute: string, values: string[]) {
+function stringMatcher(attribute: string, values: string[]): string[] {
   const escapedValues = values.map(escape);
   if (escapedValues.length > 1) {
     return [`${attribute} =~ "${escapedValues.join('|')}"`];
-  } else if (escapedValues.length == 1) {
+  } else if (escapedValues.length === 1) {
     return [`${attribute} = "${escapedValues[0]}"`];
   }
   return [];
 }
 
-function intrinsicMatcher(attribute: string, values: string[]) {
+function intrinsicMatcher(attribute: string, values: string[]): string[] {
   const orConds = values.map((x) => `${attribute} = ${x}`);
   if (orConds.length > 1) {
     return ['(' + orConds.join(' || ') + ')'];
@@ -61,7 +61,7 @@ function intrinsicMatcher(attribute: string, values: string[]) {
   }
 }
 
-function durationMatcher(attribute: string, value: DurationField) {
+function durationMatcher(attribute: string, value: DurationField): string[] {
   const matchers = [];
   if (value.min) {
     matchers.push(`${attribute} >= ${value.min}`);
@@ -72,6 +72,6 @@ function durationMatcher(attribute: string, value: DurationField) {
   return matchers;
 }
 
-function customMatcher(customMatchers: string[]) {
+function customMatcher(customMatchers: string[]): string[] {
   return customMatchers;
 }

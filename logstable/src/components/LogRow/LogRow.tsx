@@ -73,7 +73,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
 
   // Cleanup timeout on unmount
   useEffect(() => {
-    return () => {
+    return (): void => {
       if (copyTimeoutRef.current) {
         window.clearTimeout(copyTimeoutRef.current);
       }

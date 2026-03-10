@@ -14,9 +14,16 @@
 import { AbsoluteTimeRange, isValidTraceId, Notice, otlptracev1, TraceSearchResult } from '@perses-dev/core';
 import { datasourceSelectValueToSelector, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { getUnixTime } from 'date-fns';
-import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector, TempoTraceQuerySpec } from '../../model';
-import { DEFAULT_SEARCH_LIMIT, QueryResponse, SearchRequestParameters, SearchResponse } from '../../model/api-types';
-import { TempoClient } from '../../model/tempo-client';
+import {
+  TEMPO_DATASOURCE_KIND,
+  TempoDatasourceSelector,
+  TempoTraceQuerySpec,
+  TempoClient,
+  DEFAULT_SEARCH_LIMIT,
+  QueryResponse,
+  SearchRequestParameters,
+  SearchResponse,
+} from '../../model';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
@@ -113,21 +120,21 @@ function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
   for (const resourceSpan of trace.resourceSpans) {
     for (const scopeSpan of resourceSpan.scopeSpans) {
       for (const span of scopeSpan.spans) {
-        if (span.traceId.length != 32) {
+        if (span.traceId.length !== 32) {
           span.traceId = base64ToHex(span.traceId);
         }
-        if (span.spanId.length != 16) {
+        if (span.spanId.length !== 16) {
           span.spanId = base64ToHex(span.spanId);
         }
-        if (span.parentSpanId && span.parentSpanId.length != 16) {
+        if (span.parentSpanId && span.parentSpanId.length !== 16) {
           span.parentSpanId = base64ToHex(span.parentSpanId);
         }
 
         for (const link of span.links ?? []) {
-          if (link.traceId.length != 32) {
+          if (link.traceId.length !== 32) {
             link.traceId = base64ToHex(link.traceId);
           }
-          if (link.spanId.length != 16) {
+          if (link.spanId.length !== 16) {
             link.spanId = base64ToHex(link.spanId);
           }
         }
@@ -138,7 +145,7 @@ function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
   return trace;
 }
 
-function base64ToHex(str: string) {
+function base64ToHex(str: string): string {
   try {
     return atob(str)
       .split('')

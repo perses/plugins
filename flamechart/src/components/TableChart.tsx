@@ -58,7 +58,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         align: 'left',
         enableSorting: true,
         width: 0.5 * availableWidth,
-        cell: (ctx) => {
+        cell: (ctx): ReactElement => {
           const cellValue = ctx.getValue();
           return (
             <Link
@@ -84,7 +84,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         align: 'right',
         enableSorting: true,
         width: 0.25 * availableWidth - SCROLL_BAR_WIDTH,
-        cell: (ctx) => {
+        cell: (ctx): string => {
           const cellValue = ctx.getValue();
           return formatItemValue(unit, cellValue);
         },
@@ -96,7 +96,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         align: 'right',
         enableSorting: true,
         width: 0.25 * availableWidth,
-        cell: (ctx) => {
+        cell: (ctx): string => {
           const cellValue = ctx.getValue();
           return formatItemValue(unit, cellValue);
         },
