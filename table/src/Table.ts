@@ -23,6 +23,7 @@ import {
 } from './components';
 import { TableItemSelectionActionsEditor } from './components/TableItemSelectionActionsEditor';
 import { createInitialTableOptions, TableOptions } from './models';
+import { TableExportAction } from './TableExportAction';
 
 /**
  * The core TimeSeriesTable panel plugin for Perses.
@@ -39,4 +40,10 @@ export const Table: PanelPlugin<TableOptions, TableProps> = {
     { label: 'Item Actions', content: TableItemSelectionActionsEditor },
   ],
   createInitialOptions: createInitialTableOptions,
+  actions: [
+    {
+      component: TableExportAction,
+      location: 'header',
+    },
+  ],
 };
