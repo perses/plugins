@@ -36,7 +36,7 @@ export const getTooltipFormatter = (formatOptions?: FormatOptions): ((props: for
   const relativeFormatOptions = { unit: 'percent', decimalPlaces: formatOptions?.decimalPlaces } as const;
   return ({ name, value, percent }: formatterProps): string => {
     if (typeof value === 'number') {
-      return `${format.encodeHTML(name)}: ${formatValue(value, formatOptions)} (${formatValue(percent, relativeFormatOptions)}%)`;
+      return `${format.encodeHTML(name)}: ${formatValue(value, formatOptions)} (${formatValue(percent, relativeFormatOptions)})`;
     }
     return `${format.encodeHTML(name)}: ${format.encodeHTML(value.toString())}`;
   };
