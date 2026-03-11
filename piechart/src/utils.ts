@@ -14,7 +14,7 @@
 import { LegendItem, ModeOption, SortOption, TableColumnConfig } from '@perses-dev/components';
 import { FormatOptions, formatValue } from '@perses-dev/core';
 import { format } from 'echarts';
-import { comparisonLegends, ComparisonValues } from '@perses-dev/plugin-system';
+import { comparisonLegends, ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
 import { PieChartData } from './PieChartBase';
 import { DEFAULT_SORT } from './pie-chart-model';
 
@@ -68,9 +68,12 @@ const percentageLabelFormatter = (formatOptions?: FormatOptions) => {
 };
 
 export interface PieChartLegendMapper {
-  mapToLegendItems: (pieChartData: Array<Required<PieChartData>>, selectedValues?: ComparisonValues[]) => LegendItem[];
+  mapToLegendItems: (
+    pieChartData: Array<Required<PieChartData>>,
+    selectedValues?: Array<LegendValue | ComparisonValues>
+  ) => LegendItem[];
   mapToLegendColumns: (
-    selectedValues?: ComparisonValues[],
+    selectedValues?: Array<LegendValue | ComparisonValues>,
     formatOptions?: FormatOptions
   ) => Array<TableColumnConfig<LegendItem>>;
 }
@@ -85,7 +88,10 @@ export class PieChartListLegendMapper implements PieChartLegendMapper {
 }
 
 export class PieChartTableLegendMapper implements PieChartLegendMapper {
-  mapToLegendItems(pieChartData: Array<Required<PieChartData>>, selectedValues?: ComparisonValues[]): LegendItem[] {
+  mapToLegendItems(
+    pieChartData: Array<Required<PieChartData>>,
+    selectedValues?: Array<LegendValue | ComparisonValues>
+  ): LegendItem[] {
     const relativePieChartData = calculatePercentages(pieChartData);
     const absoluteValueSelected = selectedValues?.includes('abs');
     const relativeValueSelected = selectedValues?.includes('relative');
@@ -110,26 +116,29 @@ export class PieChartTableLegendMapper implements PieChartLegendMapper {
   }
 
   mapToLegendColumns(
-    selectedValues?: ComparisonValues[],
+    selectedValues?: Array<LegendValue | ComparisonValues>,
     formatOptions?: FormatOptions
   ): Array<TableColumnConfig<LegendItem>> {
     const relativeFormatOptions = { unit: 'percent', decimalPlaces: formatOptions?.decimalPlaces } as const;
     return (
-      selectedValues?.toSorted().map((v) => ({
-        accessorKey: `data.${v}`,
-        header: comparisonLegends[v]?.label || v,
-        headerDescription: comparisonLegends[v]?.description,
-        width: 90,
-        align: 'right',
-        cellDescription: true,
-        enableSorting: true,
-        cell: ({ getValue }): string => {
-          const cellValue = getValue();
-          return typeof cellValue === 'number' && formatOptions
-            ? formatValue(cellValue, v === 'relative' ? relativeFormatOptions : formatOptions)
-            : cellValue;
-        },
-      })) ?? []
+      selectedValues?.toSorted().map((v) => {
+        const comparisonValue = isComparisonValue(v);
+        return {
+          accessorKey: `data.${v}`,
+          header: comparisonValue ? comparisonLegends[v].label : v,
+          headerDescription: comparisonValue ? comparisonLegends[v].description : undefined,
+          width: 90,
+          align: 'right',
+          cellDescription: true,
+          enableSorting: true,
+          cell: ({ getValue }): string => {
+            const cellValue = getValue();
+            return typeof cellValue === 'number' && formatOptions
+              ? formatValue(cellValue, v === 'relative' ? relativeFormatOptions : formatOptions)
+              : cellValue;
+          },
+        };
+      }) ?? []
     );
   }
 }
@@ -143,4 +152,9 @@ function calculatePercentages<T extends PieChartData>(data: T[]): T[] {
       value: Number(percentage.toFixed(4)),
     };
   });
+}
+
+const comparisonValuesArray = Object.keys(comparisonLegends);
+function isComparisonValue(value: string | undefined): value is ComparisonValues {
+  return typeof value === 'string' && comparisonValuesArray.includes(value);
 }

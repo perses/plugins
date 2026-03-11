@@ -21,7 +21,7 @@ import {
   useId,
 } from '@perses-dev/components';
 import { CalculationsMap, CalculationType, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
-import { ComparisonValues, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
+import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { PieChartOptions } from './pie-chart-model';
@@ -75,7 +75,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const { legendItems, legendColumns } = useMemo(() => {
     const pieChartLegendMapper: PieChartLegendMapper =
       pieChartLegend?.mode === 'table' ? new PieChartTableLegendMapper() : new PieChartListLegendMapper();
-    const values = pieChartLegend?.values as ComparisonValues[] | undefined;
+    const values = pieChartLegend?.values;
     const legendItems = pieChartLegendMapper.mapToLegendItems(pieChartData, values);
     const legendColumns = pieChartLegendMapper.mapToLegendColumns(values, formatOptions);
     return {
