@@ -44,3 +44,24 @@ func WithMode(mode Mode) Option {
 		return nil
 	}
 }
+
+func WithOrientation(orientation Orientation) Option {
+	return func(builder *Builder) error {
+		builder.Orientation = orientation
+		return nil
+	}
+}
+
+func WithGroupBy(groupBy []string) Option {
+	return func(builder *Builder) error {
+		builder.GroupBy = groupBy
+		return nil
+	}
+}
+
+func WithStacked(isStacked bool) Option {
+	return func(builder *Builder) error {
+		builder.IsStacked = isStacked
+		return nil
+	}
+}
