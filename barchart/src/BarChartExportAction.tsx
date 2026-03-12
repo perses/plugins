@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton } from '@mui/material';
-import { InfoTooltip } from '@perses-dev/components';
-import DownloadIcon from 'mdi-material-ui/Download';
 import React, { useCallback, useMemo } from 'react';
 import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilename } from '@perses-dev/plugin-system';
-import { TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import { InfoTooltip } from '@perses-dev/components';
+import { IconButton } from '@mui/material';
+import DownloadIcon from 'mdi-material-ui/Download';
+import { BarChartPanelProps } from './BarChartPanel';
 
-export const TimeSeriesExportAction: React.FC<TimeSeriesChartProps> = ({ queryResults, definition }) => {
+export const BarChartExportAction: React.FC<BarChartPanelProps> = ({ queryResults, definition }) => {
   const exportableData = useMemo(() => {
     return extractExportableData(queryResults);
   }, [queryResults]);
