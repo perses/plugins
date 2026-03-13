@@ -70,7 +70,6 @@
   "id": 27,
   "options": {
     "legend": {
-      "calcs": [],
       "displayMode": "list",
       "placement": "bottom",
       "showLegend": true
