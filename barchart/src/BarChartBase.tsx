@@ -114,13 +114,13 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
             params: Array<{ seriesName: string; data: number | null; name: string; color: string }>
           ): string => {
             if (!params.length) return '';
-            const header = `<b>${params[0]!.name}</b><br/>`;
+            const header = `<b>${params[0]?.name}</b><br/>`;
             const rows = params
-              .filter((p) => p.data !== null)
+              .filter((p): p is typeof p & { data: number } => p.data !== null)
               .map(
                 (p) =>
                   `<span style="display:inline-block;margin-right:5px;border-radius:50%;width:10px;height:10px;background-color:${p.color}"></span>` +
-                  `${p.seriesName}: <b>${formatValue(p.data as number, format)}</b>`
+                  `${p.seriesName}: <b>${formatValue(p.data, format)}</b>`
               )
               .join('<br/>');
             return header + rows;
@@ -199,6 +199,17 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
       : groupedData.categories.length * groupedData.series.length
     : 0;
 
+  function getChartHeight(): number | string {
+    if (groupedData) {
+      if (!isHorizontal) return height;
+      return Math.max(height, numGroupedRows * (BAR_WIN_WIDTH + BAR_GAP) + LEGEND_HEIGHT * 2 + 20);
+    }
+    if (data) {
+      return data.length * (BAR_WIN_WIDTH + BAR_GAP);
+    }
+    return '100%';
+  }
+
   return (
     <Box
       style={{
@@ -210,13 +221,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
       <EChart
         style={{
           minHeight: height,
-          height: groupedData
-            ? isHorizontal
-              ? Math.max(height, numGroupedRows * (BAR_WIN_WIDTH + BAR_GAP) + LEGEND_HEIGHT * 2 + 20)
-              : height
-            : data
-              ? data.length * (BAR_WIN_WIDTH + BAR_GAP)
-              : '100%',
+          height: getChartHeight(),
         }}
         option={option}
         theme={chartsTheme.echartsTheme}

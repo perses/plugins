@@ -24,17 +24,16 @@ export type BarChartPanelProps = PanelProps<BarChartOptions, TimeSeriesData>;
 
 export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, format, sort, mode, groupBy, isStacked = false, orientation = 'horizontal' },
+    spec: { calculation, format, sort, mode, groupBy = [], isStacked = false, orientation = 'horizontal' },
     contentDimensions,
     queryResults,
   } = props;
 
   const chartsTheme = useChartsTheme();
   const PADDING = chartsTheme.container.padding.default;
-  const groupByLabels = useMemo(() => groupBy ?? [], [groupBy]);
 
   const barChartData: BarChartData[] = useMemo(() => {
-    if (groupByLabels.length > 0) return [];
+    if (groupBy.length > 0) return [];
 
     const calculate = CalculationsMap[calculation as CalculationType];
     const barChartData: BarChartData[] = [];
@@ -54,10 +53,10 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
     } else {
       return sortedBarChartData;
     }
-  }, [queryResults, sort, mode, calculation, groupByLabels]);
+  }, [queryResults, sort, mode, calculation, groupBy]);
 
   const stackedBarChartData: StackedBarChartData | null = useMemo(() => {
-    if (groupByLabels.length === 0) return null;
+    if (groupBy.length === 0) return null;
 
     const calculate = CalculationsMap[calculation as CalculationType];
     const groupMap = new Map<string, Map<string, number>>();
@@ -68,9 +67,9 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
       for (const seriesData of queryResult.data.series) {
         const labels = seriesData.labels ?? {};
 
-        const groupKey = groupByLabels.map((k) => labels[k] ?? '').join(' / ');
+        const groupKey = groupBy.map((k) => labels[k] ?? '').join(' / ');
 
-        const remainingEntries = Object.entries(labels).filter(([k]) => !groupByLabels.includes(k));
+        const remainingEntries = Object.entries(labels).filter(([k]) => !groupBy.includes(k));
         const segmentName =
           remainingEntries.length > 0
             ? '{' + remainingEntries.map(([k, v]) => `${k}="${v}"`).join(', ') + '}'
@@ -79,7 +78,8 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
         if (!groupMap.has(groupKey)) {
           groupMap.set(groupKey, new Map());
         }
-        const segMap = groupMap.get(groupKey)!;
+        const segMap = groupMap.get(groupKey);
+        if (!segMap) continue;
         const value = calculate(seriesData.values) ?? 0;
         segMap.set(segmentName, (segMap.get(segmentName) ?? 0) + value);
 
@@ -91,7 +91,8 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
     }
 
     if (groupMap.size === 0) return null;
-    const getTotalValue = (cat: string): number => Array.from(groupMap.get(cat)!.values()).reduce((a, b) => a + b, 0);
+    const getTotalValue = (cat: string): number =>
+      Array.from(groupMap.get(cat)?.values() ?? []).reduce((a, b) => a + b, 0);
 
     let categories = Array.from(groupMap.keys());
     if (sort === 'asc') {
@@ -113,7 +114,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
     });
 
     return { categories, series };
-  }, [queryResults, groupByLabels, sort, mode, calculation]);
+  }, [queryResults, groupBy, sort, mode, calculation]);
 
   if (contentDimensions === undefined) return null;
 
@@ -126,7 +127,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
         width={contentDimensions.width - PADDING * 2}
         height={contentDimensions.height - PADDING * 2}
         data={barChartData}
-        format={groupByLabels.length > 0 ? effectiveFormat : format}
+        format={groupBy.length > 0 ? effectiveFormat : format}
         mode={mode}
         groupedData={stackedBarChartData}
         isStacked={isStacked}

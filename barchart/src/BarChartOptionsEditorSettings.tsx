@@ -134,14 +134,15 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
             multiple
             freeSolo
             value={groupBy}
-            onChange={(_, newValue) =>
+            onChange={(_, newValue) => {
+              const filtered = (newValue as string[]).filter((v) => v.trim() !== '');
               onChange(
                 produce(value, (draft: BarChartOptions) => {
-                  draft.groupBy = newValue as string[];
-                  if ((newValue as string[]).length === 0) draft.isStacked = false;
+                  draft.groupBy = filtered;
+                  if (filtered.length === 0) draft.isStacked = false;
                 })
-              )
-            }
+              );
+            }}
             options={[]}
             renderTags={(tagValues, getTagProps) =>
               tagValues.map((option, index) => (
