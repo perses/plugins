@@ -11,28 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface DistributionSettings {
-  unit: 'ms';
-  bins: number;
-  scale: 'linear' | 'logarithmic';
-  min: number;
-  max: number;
-  overflowStrategy: 'clamp' | 'filter';
-}
+import { PanelProps } from '@perses-dev/plugin-system';
+import { TraceData } from '@perses-dev/core';
+import { ReactElement } from 'react';
+import { TraceHeatmapOptions } from '../models';
 
-export interface TraceHeatmapOptions {
-  distributionSettings: DistributionSettings;
-}
+export type TableProps = PanelProps<TraceHeatmapOptions, TraceData>;
 
-export function createInitialTraceHeatmapOptions(): TraceHeatmapOptions {
-  return {
-    distributionSettings: {
-      unit: 'ms',
-      bins: 20,
-      scale: 'linear',
-      min: 0,
-      max: 5000,
-      overflowStrategy: 'clamp',
-    },
-  };
-}
+export const TraceHeatmapPanel = (): ReactElement | null => {
+  return <></>;
+};

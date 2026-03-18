@@ -11,28 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface DistributionSettings {
-  unit: 'ms';
-  bins: number;
-  scale: 'linear' | 'logarithmic';
-  min: number;
-  max: number;
-  overflowStrategy: 'clamp' | 'filter';
-}
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
-export interface TraceHeatmapOptions {
-  distributionSettings: DistributionSettings;
-}
-
-export function createInitialTraceHeatmapOptions(): TraceHeatmapOptions {
-  return {
-    distributionSettings: {
-      unit: 'ms',
-      bins: 20,
-      scale: 'linear',
-      min: 0,
-      max: 5000,
-      overflowStrategy: 'clamp',
-    },
-  };
-}
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(<React.StrictMode></React.StrictMode>);
