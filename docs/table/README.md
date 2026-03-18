@@ -47,6 +47,26 @@ For example,
 ${__data.fields["column_name:csv"]}
 ```
 
+The following interpolations are supported by Perses
+
+  - csv
+  - distributed
+  - doublequote
+  - glob
+  - json
+  - lucene
+  - percentencode
+  - pipe
+  - prometheus
+  - raw
+  - regex
+  - singlequote
+  - sqlstring
+  - text
+  - queryparam
+
+
+
 ## Transformations
 
 Transformations let you run post-processing on data after it is retrieved from the backend and before it is rendered. They are especially useful for applying manipulations that the queried backend does not support.
