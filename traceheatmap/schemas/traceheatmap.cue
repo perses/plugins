@@ -22,7 +22,7 @@ spec: {
     distributionSettings: {
         unit: "ms"
         bins: int & <=100 | *20
-        scale: "linear" | "logarithmic" | *"logarithmic"
+        scale: "linear" | "logarithmic" | *"linear"
         min: number | *0
         max: number & <=5000 | *2000
         overflowStrategy: "clamp" | "filter" | *"clamp"
