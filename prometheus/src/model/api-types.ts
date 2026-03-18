@@ -20,8 +20,8 @@ export type { DurationString };
 export interface SuccessResponse<T> {
   status: 'success';
   data: T;
-  rawResponse?: Response;
   warnings?: string[];
+  infos?: string[];
 }
 
 export interface ErrorResponse<T> {
