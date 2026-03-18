@@ -7,6 +7,9 @@ spec:
   format: <Format specification> # Optional
   sort: <enum = "asc" | "desc"> # Optional
   mode: <enum = "value" | "percentage"> # Optional
+  orientation: <enum = "horizontal" | "vertical"> # Optional
+  groupBy: <array[string]> # Optional
+  isStacked: <boolean> # Optional
 ```
 
 ## Calculation specification
