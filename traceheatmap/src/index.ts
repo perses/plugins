@@ -14,4 +14,4 @@
 export { getPluginModule } from './getPluginModule';
 export * from './models';
 export * from './components';
-export * from './TraceHeatMap';
+export * from './TraceHeatmap';
