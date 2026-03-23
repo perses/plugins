@@ -79,7 +79,7 @@ func (b *Builder) ApplyFilters() error {
 
 	for index, matcher := range b.PluginSpec.Matchers {
 		// Add filter if matcher do not already have metric filter
-		if !strings.Contains(matcher, "{") {
+		if !strings.Contains(matcher, "{") && len(filters) > 0 {
 			b.PluginSpec.Matchers[index] = fmt.Sprintf("%s{%s}", matcher, strings.Join(filters, ","))
 		}
 	}
