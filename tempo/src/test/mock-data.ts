@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -2424,5 +2424,5 @@ export const MOCK_TRACE_DATA_SEARCHRESULT: TraceData = {
       rootTraceName: 'article-to-cart',
     },
   ],
-  metadata: { executedQueryString: 'duration > 900ms' },
+  metadata: { executedQueryString: 'duration > 900ms', hasMoreResults: false, notices: [] },
 };

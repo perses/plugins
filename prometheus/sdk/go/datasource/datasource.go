@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -27,9 +27,10 @@ const (
 )
 
 type PluginSpec struct {
-	DirectURL      string          `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy          *http.Proxy     `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-	ScrapeInterval common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	DirectURL      string            `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy          *http.Proxy       `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	ScrapeInterval common.Duration   `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	QueryParams    map[string]string `json:"queryParams,omitempty" yaml:"queryParams,omitempty"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {

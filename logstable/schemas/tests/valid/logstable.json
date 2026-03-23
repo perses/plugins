@@ -1,0 +1,8 @@
+{
+  "kind": "LogsTable",
+  "spec": {
+    "allowWrap": true,
+    "enableDetails": true,
+    "showTime": true
+  }
+}

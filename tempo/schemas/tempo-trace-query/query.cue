@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,12 +15,12 @@ package model
 
 import (
 	"strings"
-	tempoDs "github.com/perses/plugins/tempo/schemas/datasource:model"
+	ds "github.com/perses/plugins/tempo/schemas/datasource:model"
 )
 
 kind: "TempoTraceQuery"
 spec: close({
-	tempoDs.#selector
+	ds.#selector
 	query:  strings.MinRunes(1)
 	limit?: number
 })

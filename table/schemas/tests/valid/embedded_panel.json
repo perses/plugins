@@ -1,0 +1,27 @@
+{
+  "kind": "Table",
+  "spec": {
+    "density": "comfortable",
+    "columnSettings": [
+      {
+        "name": "cluster",
+        "header": "PaaS"
+      },
+      {
+        "name": "value",
+        "plugin": {
+          "kind": "StatChart",
+          "spec": {
+            "sparkline": {}
+          }
+        },
+        "align": "left",
+        "width": "auto",
+        "enableSorting": false
+      }
+    ],
+    "pagination": false,
+    "defaultColumnWidth": "auto",
+    "defaultColumnHeight": 100
+  }
+}

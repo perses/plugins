@@ -1,0 +1,12 @@
+{
+  "kind": "HistogramChart",
+  "spec": {
+    "format": {
+      "unit": "decimal",
+      "decimalPlaces": 2
+    },
+    "min": 0,
+    "max": 100,
+    "logBase": 10
+  }
+}

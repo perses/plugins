@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -43,10 +43,6 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
       }
     : undefined;
 
-  if (!statusHistoryData || statusHistoryData.length === 0) {
-    return null;
-  }
-
   return (
     <Box sx={{ padding: `${PADDING}px` }}>
       <ContentWithLegend
@@ -68,7 +64,7 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
               <StatusHistoryChartBase
                 xAxisCategories={xAxisCategories}
                 yAxisCategories={yAxisCategories}
-                data={statusHistoryData}
+                data={statusHistoryData ?? []}
                 timeScale={timeScale}
                 height={height}
                 colors={colors}

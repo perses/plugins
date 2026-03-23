@@ -1,4 +1,4 @@
-# TimeSeriesTable Panel Model
+# TimeSeriesTable model
 
 ```yaml
 kind: "TimeSeriesTable"

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,6 +23,7 @@ export interface Trace {
    * this branch of the span tree will be appended to the root
    */
   rootSpans: Span[];
+  spanById: Map<string, Span>;
   startTimeUnixMs: number;
   endTimeUnixMs: number;
 }
@@ -43,6 +44,7 @@ export interface Span {
   endTimeUnixMs: number;
   attributes: otlpcommonv1.KeyValue[];
   events: Event[];
+  links: Link[];
   status: otlptracev1.Status;
 }
 
@@ -57,6 +59,12 @@ export interface Event {
   attributes: otlpcommonv1.KeyValue[];
 }
 
+export interface Link {
+  traceId: string;
+  spanId: string;
+  attributes: otlpcommonv1.KeyValue[];
+}
+
 /**
  * getTraceModel builds a tree of spans from an OTLP trace,
  * and precomputes common fields, for example the start and end time of a trace.
@@ -64,7 +72,7 @@ export interface Event {
  */
 export function getTraceModel(trace: otlptracev1.TracesData): Trace {
   // first pass: build lookup table <spanId, Span> and compute min/max
-  const lookup = new Map<string, Span>();
+  const spanById = new Map<string, Span>();
   const rootSpans: Span[] = [];
   let startTimeUnixMs: number = 0;
   let endTimeUnixMs: number = 0;
@@ -81,7 +89,7 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
           childSpans: [],
           ...parseSpan(otelSpan),
         };
-        lookup.set(otelSpan.spanId, span);
+        spanById.set(otelSpan.spanId, span);
 
         if (startTimeUnixMs === 0 || span.startTimeUnixMs < startTimeUnixMs) {
           startTimeUnixMs = span.startTimeUnixMs;
@@ -94,13 +102,13 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
   }
 
   // second pass: build tree based on parentSpanId property
-  for (const [, span] of lookup) {
+  for (const [, span] of spanById) {
     if (!span.parentSpanId) {
       rootSpans.push(span);
       continue;
     }
 
-    const parent = lookup.get(span.parentSpanId);
+    const parent = spanById.get(span.parentSpanId);
     if (!parent) {
       console.trace(`span ${span.spanId} has parent ${span.parentSpanId} which has not been received yet`);
       rootSpans.push(span);
@@ -112,7 +120,7 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
     parent.childSpans.splice(insertChildSpanAt, 0, span);
   }
 
-  return { trace, rootSpans, startTimeUnixMs, endTimeUnixMs };
+  return { trace, rootSpans, spanById, startTimeUnixMs, endTimeUnixMs };
 }
 
 function parseResource(resource?: otlpresourcev1.Resource): Resource {
@@ -149,6 +157,7 @@ function parseSpan(span: otlptracev1.Span): Omit<Span, 'resource' | 'scope' | 'c
     endTimeUnixMs: parseInt(span.endTimeUnixNano) * 1e-6,
     attributes: span.attributes ?? [],
     events: (span.events ?? []).map(parseEvent),
+    links: (span.links ?? []).map(parseLink),
     status: span.status ?? {},
   };
 }
@@ -158,5 +167,13 @@ function parseEvent(event: otlptracev1.Event): Event {
     timeUnixMs: parseInt(event.timeUnixNano) * 1e-6, // convert to milliseconds because JS cannot handle numbers larger than 9007199254740991
     name: event.name,
     attributes: event.attributes ?? [],
+  };
+}
+
+function parseLink(link: otlptracev1.Link): Link {
+  return {
+    traceId: link.traceId,
+    spanId: link.spanId,
+    attributes: link.attributes ?? [],
   };
 }

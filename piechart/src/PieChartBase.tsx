@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,59 +13,66 @@
 
 import { use } from 'echarts/core';
 import { PieChart as EChartsPieChart } from 'echarts/charts';
-import {
+import { DatasetComponent, GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import { Box, useTheme } from '@mui/material';
+import { ReactElement } from 'react';
+import { EChart, ModeOption, useChartsTheme } from '@perses-dev/components';
+import { FormatOptions } from '@perses-dev/core';
+import { getLabelFormatter, getTooltipFormatter } from './utils';
+
+use([
+  EChartsPieChart,
   GridComponent,
   DatasetComponent,
   TitleComponent,
   TooltipComponent,
-  LegendComponentOption,
-} from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
-import { Box } from '@mui/material';
-import { ReactElement } from 'react';
-import { EChart, useChartsTheme } from '@perses-dev/components';
-
-use([EChartsPieChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
-
-const PIE_WIN_WIDTH = 12;
-const PIE_GAP = 4;
+  LegendComponent,
+  CanvasRenderer,
+]);
 export interface PieChartData {
+  id?: string;
   name: string;
   value: number | null;
+  itemStyle?: {
+    color: string;
+  };
 }
 
 export interface PieChartBaseProps {
   width: number;
   height: number;
   data: PieChartData[] | null;
-  legend?: LegendComponentOption;
+  mode?: ModeOption;
+  showLabels?: boolean;
+  formatOptions?: FormatOptions;
 }
 
 export function PieChartBase(props: PieChartBaseProps): ReactElement {
-  const { width, height, data } = props;
+  const { width, height, data, mode, formatOptions, showLabels } = props;
   const chartsTheme = useChartsTheme();
+  const muiTheme = useTheme();
 
   const option = {
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center',
-    },
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b} : {c} ({d}%)',
-    },
-    axisLabel: {
-      overflow: 'truncate',
-      width: width / 3,
+      formatter: getTooltipFormatter(formatOptions),
+      appendTo: document.body,
+      confine: false,
     },
     series: [
       {
-        name: 'Access From',
         type: 'pie',
-        radius: '55%',
-        label: false,
-        center: ['40%', '50%'],
+        radius: '90%',
+        label: {
+          show: Boolean(showLabels),
+          position: 'inner',
+          fontSize: 14,
+          formatter: getLabelFormatter(mode, formatOptions),
+          overflow: 'truncate',
+          fontWeight: 'bold',
+        },
+        center: ['50%', '50%'],
         data: data,
         emphasis: {
           itemStyle: {
@@ -74,12 +81,13 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
             shadowColor: 'rgba(0, 0, 0, 0.5)',
           },
         },
+        itemStyle: {
+          borderRadius: 5,
+          borderColor: muiTheme.palette.background.default,
+          borderWidth: 2,
+        },
       },
     ],
-    itemStyle: {
-      borderRadius: 2,
-      color: chartsTheme.echartsTheme[0],
-    },
   };
 
   return (
@@ -92,8 +100,8 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
     >
       <EChart
         sx={{
-          minHeight: height,
-          height: data ? data.length * (PIE_WIN_WIDTH + PIE_GAP) : '100%',
+          width: '100%',
+          height: '100%',
         }}
         option={option}
         theme={chartsTheme.echartsTheme}

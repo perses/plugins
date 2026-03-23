@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,13 +14,14 @@
 import { Stack, styled, useTheme } from '@mui/material';
 import { memo } from 'react';
 import { Viewport, rowHeight } from '../utils';
-import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
 import { Span } from '../trace';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
 
 interface GanttTableRowProps {
   options: TracingGanttChartOptions;
+  customLinks?: CustomLinks;
   span: Span;
   viewport: Viewport;
   selected?: boolean;
@@ -30,7 +31,7 @@ interface GanttTableRowProps {
 }
 
 export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowProps) {
-  const { options, span, viewport, selected, nameColumnWidth, divider, onClick } = props;
+  const { options, customLinks, span, viewport, selected, nameColumnWidth, divider, onClick } = props;
   const theme = useTheme();
 
   const handleOnClick = (): void => {
@@ -46,7 +47,7 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
       direction="row"
       onClick={handleOnClick}
     >
-      <SpanName span={span} nameColumnWidth={nameColumnWidth} />
+      <SpanName customLinks={customLinks} span={span} nameColumnWidth={nameColumnWidth} />
       {divider}
       <SpanDuration options={options} span={span} viewport={viewport} />
     </RowContainer>

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,12 +20,12 @@ import {
   formatDuration,
   msToPrometheusDuration,
 } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
-import { Link as RouterLink } from 'react-router-dom';
+import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
 import InformationIcon from 'mdi-material-ui/Information';
-import { useChartsTheme } from '@perses-dev/components';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { ReactElement, useCallback, useMemo } from 'react';
+import { useChartsTheme, useSelection } from '@perses-dev/components';
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -44,18 +44,34 @@ export type TraceLink = (params: { query: QueryDefinition; traceId: string }) =>
 export interface DataTableProps {
   options: TraceTableOptions;
   result: Array<PanelData<TraceData>>;
-  traceLink?: TraceLink;
 }
 
 interface Row extends TraceSearchResult {
-  id: string;
   traceLink?: string;
 }
 
 export function DataTable(props: DataTableProps): ReactElement {
-  const { options, result, traceLink } = props;
+  const { options, result } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
+  const variableValues = useAllVariableValues();
+
+  const selectionEnabled = options.selection?.enabled ?? false;
+  const { selectionMap, setSelection, clearSelection } = useSelection<Row, string>();
+
+  const itemActionsConfig = options.actions;
+  const showItemActions = itemActionsConfig?.enabled && itemActionsConfig?.displayWithItem;
+  const actionsList = showItemActions ? itemActionsConfig.actionsList : undefined;
+
+  const { getItemActionButtons, confirmDialog } = useSelectionItemActions({
+    actions: actionsList,
+    variableState: variableValues,
+  });
+
+  // Convert selectionMap to DataGrid's row selection model
+  const rowSelectionModel = useMemo((): GridRowSelectionModel => {
+    return Array.from(selectionMap.keys()) as string[];
+  }, [selectionMap]);
 
   const paletteMode = options.visual?.palette?.mode;
   const serviceColorGenerator = useCallback(
@@ -63,16 +79,51 @@ export function DataTable(props: DataTableProps): ReactElement {
     [muiTheme, chartsTheme, paletteMode]
   );
 
-  const rows: Row[] = [];
-  for (const query of result) {
-    for (const trace of query.data?.searchResult || []) {
-      rows.push({
-        ...trace,
-        id: trace.traceId,
-        traceLink: traceLink?.({ query: query.definition, traceId: trace.traceId }),
-      });
+  const rows: Row[] = useMemo(() => {
+    const result_rows: Row[] = [];
+    for (const query of result) {
+      const pluginSpec = query.definition.spec.plugin.spec as { datasource?: { name?: string } } | undefined;
+      const datasourceName = pluginSpec?.datasource?.name;
+
+      for (const trace of query.data?.searchResult || []) {
+        const traceLink = options.links?.trace
+          ? replaceVariablesInString(options.links.trace, variableValues, {
+              datasourceName: datasourceName ?? '',
+              traceId: trace.traceId,
+            })
+          : undefined;
+        result_rows.push({
+          ...trace,
+          traceLink,
+        });
+      }
     }
-  }
+    return result_rows;
+  }, [result, options.links?.trace, variableValues]);
+
+  const rowsById = useMemo(() => {
+    const map = new Map<string, Row>();
+    rows.forEach((row) => map.set(row.traceId, row));
+    return map;
+  }, [rows]);
+
+  const handleRowSelectionModelChange = useCallback(
+    (newSelectionModel: GridRowSelectionModel) => {
+      const selectedIds = newSelectionModel as string[];
+      if (selectedIds.length === 0) {
+        clearSelection();
+      } else {
+        const newSelection = selectedIds
+          .map((id) => {
+            const row = rowsById.get(id);
+            return row ? { id, item: row } : null;
+          })
+          .filter((entry): entry is { id: string; item: Row } => entry !== null);
+        setSelection(newSelection);
+      }
+    },
+    [rowsById, setSelection, clearSelection]
+  );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
@@ -107,7 +158,8 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 2,
         minWidth: 145,
         display: 'flex',
-        valueGetter: (_, trace) => Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
+        valueGetter: (_, trace): number =>
+          Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
         renderCell: ({ row }): ReactElement => {
           let totalSpanCount = 0;
           let totalErrorCount = 0;
@@ -141,7 +193,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 1,
         minWidth: 70,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Typography display="inline">
             {row.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(row.durationMs))}
           </Typography>
@@ -156,7 +208,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 3,
         minWidth: 240,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Tooltip title={UTC_DATE_FORMATTER(new Date(row.startTimeUnixMs))} placement="top" arrow>
             <Typography display="inline" key={`st-${row.traceId}`}>
               {DATE_FORMATTER(new Date(row.startTimeUnixMs))}
@@ -164,23 +216,46 @@ export function DataTable(props: DataTableProps): ReactElement {
           </Tooltip>
         ),
       },
+      ...(actionsList && actionsList.length > 0
+        ? [
+            {
+              field: 'actions',
+              headerName: 'Actions',
+              flex: actionsList.length,
+              display: 'flex' as const,
+              type: 'actions' as const,
+              getActions: ({ row }: { row: Row }): ReactNode[] =>
+                getItemActionButtons({ id: row.traceId, data: row as unknown as Record<string, unknown> }),
+            },
+          ]
+        : []),
     ],
-    [serviceColorGenerator]
+    [serviceColorGenerator, actionsList, getItemActionButtons]
   );
 
   return (
-    <DataGrid
-      sx={{ borderWidth: 0 }}
-      columns={columns}
-      rows={rows}
-      getRowHeight={() => 'auto'}
-      getEstimatedRowHeight={() => 66}
-      disableRowSelectionOnClick={true}
-      pageSizeOptions={[10, 20, 50, 100]}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 20 } },
-      }}
-    />
+    <>
+      {confirmDialog}
+      <DataGrid
+        sx={{ borderWidth: 0 }}
+        columns={columns}
+        rows={rows}
+        getRowId={(row) => row.traceId}
+        getRowHeight={() => 'auto'}
+        getEstimatedRowHeight={() => 66}
+        checkboxSelection={selectionEnabled}
+        rowSelectionModel={selectionEnabled ? rowSelectionModel : undefined}
+        onRowSelectionModelChange={selectionEnabled ? handleRowSelectionModelChange : undefined}
+        disableRowSelectionOnClick={!selectionEnabled}
+        pageSizeOptions={[10, 20, 50, 100]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 20 } },
+          sorting: {
+            sortModel: [{ field: 'startTimeUnixMs', sort: 'desc' }],
+          },
+        }}
+      />
+    </>
   );
 }
 
@@ -189,9 +264,11 @@ interface TraceNameProps {
 }
 
 function TraceName({ row: trace }: TraceNameProps): ReactElement {
-  if (trace.traceLink) {
+  const { RouterComponent } = useRouterContext();
+
+  if (RouterComponent && trace.traceLink) {
     return (
-      <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={trace.traceLink}>
+      <Link variant="body1" color="inherit" underline="hover" component={RouterComponent} to={trace.traceLink}>
         <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
       </Link>
     );

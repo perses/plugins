@@ -1,8 +1,8 @@
-# Prometheus-related plugins
+# Prometheus plugin models
 
 This documentation provides the definition of the different plugins related to Prometheus.
 
-## Datasource
+## PrometheusDatasource
 
 Prometheus as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
@@ -73,7 +73,7 @@ spec:
           secret: "prometheus_secret_config"
 ```
 
-## Query
+## PrometheusTimeSeriesQuery
 
 Perses currently supports only one kind of query for Prometheus: `PrometheusTimeSeriesQuery`. Others will come in the future.
 
@@ -108,9 +108,7 @@ spec:
       query: "rate(caddy_http_response_duration_seconds_sum[$interval])"
 ```
 
-## Variable
-
-### PrometheusLabelNamesVariable
+## PrometheusLabelNamesVariable
 
 ```yaml
 kind: "PrometheusLabelNamesVariable"
@@ -126,7 +124,7 @@ spec:
 
 ### Example
 
-A simple Prometheus LabelNames variable would be
+A simple Prometheus LabelNames variable defined in a project would look like:
 
 ```yaml
 kind: "Variable"
@@ -162,7 +160,7 @@ spec:
           - "up"
 ```
 
-### PrometheusLabelValuesVariable
+## PrometheusLabelValuesVariable
 
 ```yaml
 kind: "PrometheusLabelValuesVariable"
@@ -179,13 +177,12 @@ spec:
 
 ### Example
 
-A simple Prometheus LabelValues variable would be
+A simple Prometheus LabelValues variable defined in the global scope would look like:
 
 ```yaml
-kind: "Variable"
+kind: "GlobalVariable"
 metadata:
   name: "job"
-  project: "perses"
 spec:
   kind: "ListVariable"
   spec:
@@ -200,10 +197,9 @@ spec:
 A more complex one
 
 ```yaml
-kind: "Variable"
+kind: "GlobalVariable"
 metadata:
   name: "instance"
-  project: "perses"
 spec:
   kind: "ListVariable"
   spec:
@@ -220,7 +216,7 @@ spec:
         - "up{job=~\"$job\"}"
 ```
 
-### PrometheusPromQLVariable
+## PrometheusPromQLVariable
 
 ```yaml
 kind: "PrometheusPromQLVariable"
@@ -230,10 +226,27 @@ spec:
   datasource: <Prometheus Datasource selector> # Optional
   # The promql expression
   expr: <string>
-  labelName: <string> # Optional
+  labelName: <string>
 ```
 
 - See [Prometheus Datasource selector](#prometheus-datasource-selector)
+
+### Example
+
+A simple Prometheus PromQL variable defined in a dashboard would look like:
+
+```yaml
+kind: "ListVariable"
+spec:
+  name: "job"
+  allowMultiple: false
+  allowAllValue: false
+  plugin:
+    kind: "PrometheusPromQLVariable"
+    spec:
+      expr: "group by (job) (up)",
+      labelName: "job"
+```
 
 ## Shared definitions
 

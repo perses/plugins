@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -41,7 +41,8 @@ import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
+  abortSignal
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     // Do not make a request to the backend, instead return an empty TimeSeriesData
@@ -72,11 +73,13 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
       // TODO add a validation check to make sure the variable is a DurationString, to avoid the back & forth cast here
       replaceVariables(spec.minStep as string, context.variableState) as DurationString
     ) ?? datasourceScrapeInterval;
+
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
 
   // Align the time range so that it's a multiple of the step
   let { start, end } = timeRange;
+
   const utcOffsetSec = new Date().getTimezoneOffset() * 60;
 
   const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
@@ -84,9 +87,20 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   start = alignedStart;
   end = alignedEnd;
 
+  /* Ensure end is always greater than start:
+     If the step is greater than equal to the diff of end and start,
+     both start, and end will eventually be rounded to the same value,
+     Consequently, the time range will be zero, which does not return any valid value
+  */
+  if (end === start) {
+    end = start + step;
+    console.warn(`Step (${step}) was larger than the time range! end of time range was set accordingly.`);
+  }
+
   // Replace variable placeholders in PromQL query
   const intervalMs = step * 1000;
   const minStepMs = minStep * 1000;
+
   let query = replacePromBuiltinVariables(spec.query, minStepMs, intervalMs);
   query = replaceVariables(query, context.variableState);
 
@@ -100,22 +114,31 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(selectedDatasource);
 
   // Make the request to Prom
+
   let response;
   switch (context.mode) {
     case 'instant':
-      response = await client.instantQuery({
-        query,
-        time: end,
-      });
+      response = await client.instantQuery(
+        {
+          query,
+          time: end,
+        },
+        undefined,
+        abortSignal
+      );
       break;
     case 'range':
     default:
-      response = await client.rangeQuery({
-        query,
-        start,
-        end,
-        step,
-      });
+      response = await client.rangeQuery(
+        {
+          query,
+          start,
+          end,
+          step,
+        },
+        undefined,
+        abortSignal
+      );
       break;
   }
 

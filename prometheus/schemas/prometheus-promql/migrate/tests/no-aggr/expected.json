@@ -1,0 +1,7 @@
+{
+  "kind": "PrometheusPromQLVariable",
+  "spec": {
+    "expr": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"node-exporter\", prometheus=~\"system\"}[$__range]))",
+    "labelName": "migration_from_grafana_not_supported"
+  }
+}

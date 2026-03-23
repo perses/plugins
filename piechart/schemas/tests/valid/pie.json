@@ -1,0 +1,18 @@
+{
+  "kind": "PieChart",
+  "spec": {
+    "legend": {
+      "position": "bottom",
+      "values": ["relative"]
+    },
+    "calculation": "last-number",
+    "format": {
+      "unit": "percent",
+      "decimalPlaces": 2
+    },
+    "sort": "desc",
+    "mode": "value",
+    "radius": 50,
+    "showLabels": true
+  }
+}

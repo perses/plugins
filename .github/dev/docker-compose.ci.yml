@@ -1,0 +1,12 @@
+services:
+  perses:
+    image: persesdev/perses:main-2026-02-26-739dc289-distroless-debug
+    container_name: perses
+    network_mode: host
+    environment:
+      - PERSES_PLUGIN_ENABLE_DEV=true
+      - PERSES_PLUGIN_ARCHIVE_PATHS_0=/etc/perses/development-archives
+      - PERSES_PROVISIONING_FOLDERS_0=/etc/perses/provisioning
+    volumes:
+      - ../../plugins/development-archives:/etc/perses/development-archives
+      - ../../e2e/src/data:/etc/perses/provisioning

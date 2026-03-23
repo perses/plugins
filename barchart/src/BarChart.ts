@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,6 +15,7 @@ import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialBarChartOptions, BarChartOptions } from './bar-chart-model';
 import { BarChartOptionsEditorSettings } from './BarChartOptionsEditorSettings';
 import { BarChartPanel, BarChartPanelProps } from './BarChartPanel';
+import { BarChartExportAction } from './BarChartExportAction';
 
 /**
  * The core BarChart panel plugin for Perses.
@@ -29,4 +30,10 @@ export const BarChart: PanelPlugin<BarChartOptions, BarChartPanelProps> = {
   ],
   supportedQueryTypes: ['TimeSeriesQuery'],
   createInitialOptions: createInitialBarChartOptions,
+  actions: [
+    {
+      component: BarChartExportAction,
+      location: 'header',
+    },
+  ],
 };

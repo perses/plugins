@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,6 +21,9 @@ export function createInitialStatusHistoryChartOptions(): Record<string, unknown
 export interface StatusHistoryChartOptions {
   legend?: LegendSpecOptions;
   mappings?: ValueMapping[];
+  sorting?: StatusHistorySorting;
 }
+
+export type StatusHistorySorting = 'asc' | 'desc';
 
 export type StatusHistroyChartEditorProps = OptionsEditorProps<StatusHistoryChartOptions>;

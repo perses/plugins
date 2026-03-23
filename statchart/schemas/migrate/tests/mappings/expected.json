@@ -1,0 +1,74 @@
+{
+  "kind": "StatChart",
+  "spec": {
+    "calculation": "last",
+    "mappings": [
+      {
+        "kind": "Value",
+        "spec": {
+          "result": {
+            "color": "#ff7383",
+            "value": "Down"
+          },
+          "value": "0"
+        }
+      },
+      {
+        "kind": "Value",
+        "spec": {
+          "result": {
+            "color": "#96d98d",
+            "value": "Up"
+          },
+          "value": "1"
+        }
+      },
+      {
+        "kind": "Value",
+        "spec": {
+          "result": {
+            "color": "#8f3bb8",
+            "value": ""
+          },
+          "value": "2"
+        }
+      },
+      {
+        "kind": "Range",
+        "spec": {
+          "from": 10,
+          "result": {
+            "value": "xxx"
+          },
+          "to": 100
+        }
+      },
+      {
+        "kind": "Misc",
+        "spec": {
+          "result": {
+            "value": "bac"
+          },
+          "value": "NaN"
+        }
+      },
+      {
+        "kind": "Regex",
+        "spec": {
+          "pattern": "asdf;sndf",
+          "result": {
+            "value": "xxx"
+          }
+        }
+      }
+    ],
+    "thresholds": {
+      "steps": [
+        {
+          "color": "#5794f2",
+          "value": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,4 +1,4 @@
-# Markdown Panel Model
+# Markdown model
 
 ```yaml
 kind: "Markdown"

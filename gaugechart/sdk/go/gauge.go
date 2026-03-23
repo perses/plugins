@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -25,6 +25,11 @@ type PluginSpec struct {
 	Format      *common.Format     `json:"format,omitempty" yaml:"format,omitempty"`
 	Thresholds  *common.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
 	Max         float64            `json:"max,omitempty" yaml:"max,omitempty"`
+	Legend      *LegendSpec        `json:"legend,omitempty" yaml:"legend,omitempty"`
+}
+
+type LegendSpec struct {
+	Show bool `json:"show" yaml:"show"`
 }
 
 type Option func(plugin *Builder) error

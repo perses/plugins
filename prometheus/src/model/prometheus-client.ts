@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -38,18 +38,62 @@ interface PrometheusClientOptions {
 
 export interface PrometheusClient extends DatasourceClient {
   options: PrometheusClientOptions;
-  instantQuery(params: InstantQueryRequestParameters, headers?: RequestHeaders): Promise<InstantQueryResponse>;
-  rangeQuery(params: RangeQueryRequestParameters, headers?: RequestHeaders): Promise<RangeQueryResponse>;
-  labelNames(params: LabelNamesRequestParameters, headers?: RequestHeaders): Promise<LabelNamesResponse>;
-  labelValues(params: LabelValuesRequestParameters, headers?: RequestHeaders): Promise<LabelValuesResponse>;
-  metricMetadata(params: MetricMetadataRequestParameters, headers?: RequestHeaders): Promise<MetricMetadataResponse>;
-  series(params: SeriesRequestParameters, headers?: RequestHeaders): Promise<SeriesResponse>;
-  parseQuery(params: ParseQueryRequestParameters, headers?: RequestHeaders): Promise<ParseQueryResponse>;
+  instantQuery(
+    params: InstantQueryRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<InstantQueryResponse>;
+  rangeQuery(
+    params: RangeQueryRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<RangeQueryResponse>;
+  labelNames(
+    params: LabelNamesRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<LabelNamesResponse>;
+  labelValues(
+    params: LabelValuesRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<LabelValuesResponse>;
+  metricMetadata(
+    params: MetricMetadataRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<MetricMetadataResponse>;
+  series(params: SeriesRequestParameters, headers?: RequestHeaders, signal?: AbortSignal): Promise<SeriesResponse>;
+  parseQuery(
+    params: ParseQueryRequestParameters,
+    headers?: RequestHeaders,
+    signal?: AbortSignal
+  ): Promise<ParseQueryResponse>;
 }
 
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  abortSignal?: AbortSignal;
+  queryParams?: Record<string, string>;
+}
+
+/**
+ * Builds a query string from datasource-level query parameters.
+ * Optionally merges with existing URLSearchParams.
+ * Returns empty string if no parameters, otherwise returns query string with leading '?'.
+ */
+function buildQueryString(queryParams?: Record<string, string>, initialParams?: URLSearchParams): string {
+  const urlParams = initialParams || new URLSearchParams();
+
+  if (queryParams) {
+    Object.entries(queryParams).forEach(([key, value]) => {
+      urlParams.set(key, value);
+    });
+  }
+
+  const queryString = urlParams.toString();
+  return queryString !== '' ? `?${queryString}` : '';
 }
 
 /**
@@ -57,10 +101,10 @@ export interface QueryOptions {
  */
 export function healthCheck(queryOptions: QueryOptions) {
   return async (): Promise<boolean> => {
-    const url = `${queryOptions.datasourceUrl}/-/healthy`;
+    const url = `${queryOptions.datasourceUrl}/-/healthy${buildQueryString(queryOptions.queryParams)}`;
 
     try {
-      const resp = await fetch(url, { headers: queryOptions.headers });
+      const resp = await fetch(url, { headers: queryOptions.headers, signal: queryOptions.abortSignal });
       return resp.status === 200;
     } catch {
       return false;
@@ -154,14 +198,9 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers } = queryOptions;
-
-  let url = `${datasourceUrl}${apiURI}`;
-  const urlParams = createSearchParams(params).toString();
-  if (urlParams !== '') {
-    url += `?${urlParams}`;
-  }
-  return fetchJson<TResponse>(url, { method: 'GET', headers });
+  const { datasourceUrl, headers, queryParams, abortSignal: signal } = queryOptions;
+  const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams, createSearchParams(params))}`;
+  return fetchJson<TResponse>(url, { method: 'GET', headers, signal });
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(
@@ -169,18 +208,19 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers } = queryOptions;
+  const { datasourceUrl, headers, abortSignal: signal, queryParams } = queryOptions;
+  const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams)}`;
 
-  const url = `${datasourceUrl}${apiURI}`;
   const init = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       ...headers,
     },
+    signal,
     body: createSearchParams(params),
   };
-  return fetchResults<TResponse>(url, init);
+  return fetchJson<TResponse>(url, init);
 }
 
 // Request parameter values we know how to serialize
@@ -216,13 +256,4 @@ function createSearchParams<T extends RequestParams<T>>(params: T): URLSearchPar
     }
   }
   return searchParams;
-}
-
-/**
- * Fetch JSON and parse warnings for query inspector
- */
-export async function fetchResults<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
-  const response = await fetch(...args);
-  const json: T = await response.json();
-  return { ...json, rawResponse: response };
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,7 +13,14 @@
 
 import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { OptionsEditorGroup, OptionsEditorGrid, OptionsEditorColumn } from '@perses-dev/components';
+import {
+  OptionsEditorGroup,
+  OptionsEditorGrid,
+  OptionsEditorColumn,
+  SortSelector,
+  SortOption,
+  SortSelectorProps,
+} from '@perses-dev/components';
 import { Button } from '@mui/material';
 import { ReactElement } from 'react';
 import { StatusHistoryChartOptions, StatusHistroyChartEditorProps } from './status-history-model.js';
@@ -30,10 +37,26 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
     );
   };
 
+  const handleSortChange: SortSelectorProps['onChange'] = (newSort: SortOption) => {
+    onChange(
+      produce(value, (draft: StatusHistoryChartOptions) => {
+        draft.sorting = newSort;
+      })
+    );
+  };
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <LegendOptionsEditor showValuesEditor={false} value={value.legend} onChange={handleLegendChange} />
+        <LegendOptionsEditor
+          calculation="aggregation"
+          showValuesEditor={false}
+          value={value.legend}
+          onChange={handleLegendChange}
+        />
+        <OptionsEditorGroup title="Visual">
+          <SortSelector value={value.sorting} onChange={handleSortChange} />
+        </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Reset Settings">

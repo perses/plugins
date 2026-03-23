@@ -1,0 +1,12 @@
+{
+  "kind": "Table",
+  "spec": {
+    "density": "compact",
+    "columnSettings": [
+      {
+        "name": "Reason",
+        "width": "auto"
+      }
+    ]
+  }
+}

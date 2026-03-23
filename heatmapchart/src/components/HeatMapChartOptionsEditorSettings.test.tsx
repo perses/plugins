@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React, { act } from 'react';
 import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
 import { HeatMapChartOptionsEditorSettings } from './HeatMapChartOptionsEditorSettings';
@@ -39,12 +40,57 @@ describe('HeatMapChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const showVisualMapSwitch = await screen.findByLabelText(/Show Visual Map/);
+    const showVisualMapSwitch = await screen.findByRole('checkbox', { name: /Show Visual Map/ });
     expect(showVisualMapSwitch).toBeInTheDocument();
     act(() => {
       fireEvent.click(showVisualMapSwitch);
     });
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(showVisualMap).toBe(true);
+  });
+
+  it('can modify y-axis log base', async () => {
+    const onChange = jest.fn();
+    renderHeatMapChartOptionsEditorSettings(
+      {
+        yAxisFormat: DEFAULT_FORMAT,
+        countFormat: DEFAULT_FORMAT,
+      },
+      onChange
+    );
+    const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
+    userEvent.click(logBaseSelector);
+    const log10Option = screen.getByRole('option', {
+      name: '10',
+    });
+    userEvent.click(log10Option);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logBase: 10,
+      })
+    );
+  });
+
+  it('can clear y-axis log base to none', async () => {
+    const onChange = jest.fn();
+    renderHeatMapChartOptionsEditorSettings(
+      {
+        yAxisFormat: DEFAULT_FORMAT,
+        countFormat: DEFAULT_FORMAT,
+        logBase: 10,
+      },
+      onChange
+    );
+    const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
+    userEvent.click(logBaseSelector);
+    const noneOption = screen.getByRole('option', {
+      name: 'None',
+    });
+    userEvent.click(noneOption);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logBase: undefined,
+      })
+    );
   });
 });

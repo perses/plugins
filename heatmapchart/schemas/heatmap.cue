@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,13 +14,19 @@
 package model
 
 import (
-	"github.com/perses/perses/cue/common"
+	"github.com/perses/shared/cue/common"
 )
 
 kind: "HeatMapChart"
 spec: close({
-	yAxisFormat?:   common.#format
-	countFormat?:   common.#format
+	yAxisFormat?: common.#format
+	countFormat?: common.#format
 	// The visual map is an helper for highlighting cell with the targeted value
 	showVisualMap?: bool
+	min?:           number
+	max?:           number
+	if min != _|_ && max != _|_ {
+		max: >=min
+	}
+	logBase?: 2 | 10
 })

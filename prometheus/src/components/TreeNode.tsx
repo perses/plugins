@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -383,7 +383,7 @@ function QueryStatus({
       <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
         {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
         &nbsp;&nbsp;–&nbsp;&nbsp;
-        {responseTime}ms
+        {responseTime ? `${Math.round(responseTime)}ms` : '? ms'}
         {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–</>}
       </Typography>
       {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (
@@ -412,11 +412,22 @@ function QueryStatus({
                             ? theme.palette.warning.dark
                             : theme.palette.warning.main,
                         fontFamily: 'monospace',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        flexGrow: 1,
                       }}
                     >
                       {escapeString(value)}
                     </Typography>
-                    <Typography variant="body2" component="span">
+                    <Typography
+                      variant="body2"
+                      component="span"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                      }}
+                    >
                       ({count}x)
                     </Typography>
                   </ListItem>

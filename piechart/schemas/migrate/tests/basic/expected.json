@@ -1,0 +1,13 @@
+{
+  "kind": "PieChart",
+  "spec": {
+    "calculation": "last-number",
+    "legend": {
+      "mode": "list",
+      "position": "bottom"
+    },
+    "showLabels": true,
+    "colorPalette": ["#e02f44"],
+    "radius": 50
+  }
+}

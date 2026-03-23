@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,9 +12,17 @@
 // limitations under the License.
 
 import { Switch, TextField } from '@mui/material';
-import { OptionsEditorControl, OptionsEditorGroup, FormatControls } from '@perses-dev/components';
+
+import { OptionsEditorControl, OptionsEditorGroup, FormatControls, SettingsAutocomplete } from '@perses-dev/components';
 import { ReactElement } from 'react';
-import { DEFAULT_FORMAT, DEFAULT_Y_AXIS, TimeSeriesChartYAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
+import {
+  DEFAULT_FORMAT,
+  DEFAULT_Y_AXIS,
+  TimeSeriesChartYAxisOptions,
+  Y_AXIS_CONFIG,
+  LOG_BASE_CONFIG,
+  LOG_BASE_OPTIONS,
+} from './time-series-chart-model';
 
 export interface YAxisOptionsEditorProps {
   value: TimeSeriesChartYAxisOptions;
@@ -22,6 +30,8 @@ export interface YAxisOptionsEditorProps {
 }
 
 export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps): ReactElement {
+  const logBase = value.logBase ? LOG_BASE_CONFIG[value.logBase] : undefined;
+
   return (
     <OptionsEditorGroup title="Y Axis">
       <OptionsEditorControl
@@ -45,6 +55,27 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
             ...value,
             format: newFormat,
           })
+        }
+      />
+      <OptionsEditorControl
+        label={Y_AXIS_CONFIG.logBase.label}
+        control={
+          <SettingsAutocomplete
+            value={{
+              ...logBase,
+              id: logBase?.label ?? 'None',
+            }}
+            options={LOG_BASE_OPTIONS}
+            onChange={(__, newValue) => {
+              const updatedValue: TimeSeriesChartYAxisOptions = {
+                ...value,
+                logBase: newValue.log ?? undefined,
+              };
+              onChange(updatedValue);
+            }}
+            disabled={value === undefined}
+            disableClearable
+          ></SettingsAutocomplete>
         }
       />
       <OptionsEditorControl

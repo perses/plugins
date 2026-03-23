@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,14 +17,6 @@ import { minSpanWidthPx } from '../utils';
 const MIN_BAR_HEIGHT = 1;
 const MAX_BAR_HEIGHT = 7;
 
-function countSpans(span: Span): number {
-  let n = 1;
-  for (const childSpan of span.childSpans) {
-    n += countSpans(childSpan);
-  }
-  return n;
-}
-
 export function drawSpans(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -33,7 +25,7 @@ export function drawSpans(
   spanColorGenerator: (span: Span) => string
 ): void {
   // calculate optimal height, enforce min and max bar height and finally round to an integer
-  const numSpans = trace.rootSpans.map(countSpans).reduce((acc, n) => acc + n, 0);
+  const numSpans = trace.spanById.size;
   const barHeight = Math.round(Math.min(Math.max(height / numSpans, MIN_BAR_HEIGHT), MAX_BAR_HEIGHT));
 
   const traceDuration = trace.endTimeUnixMs - trace.startTimeUnixMs;

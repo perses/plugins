@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,9 +14,15 @@
 /**
  * The Options object type supported by the TracingGanttChart panel plugin.
  */
-// Note: The interface attributes must match cue/schemas/panels/tracing-gantt-chart/tracing-gantt-chart.cue
+// Note: The interface attributes must match schemas/tracing-gantt-chart.cue
 export interface TracingGanttChartOptions {
   visual?: TracingGanttChartVisualOptions;
+  links?: TracingGanttChartCustomLinks;
+  /**
+   * Span ID of the initially selected span.
+   * This property is used in the explore view when clicking on span links, and is intentionally not exposed in the Cue schema.
+   */
+  selectedSpanId?: string;
 }
 
 export interface TracingGanttChartVisualOptions {
@@ -25,6 +31,35 @@ export interface TracingGanttChartVisualOptions {
 
 export interface TracingGanttChartPaletteOptions {
   mode: 'auto' | 'categorical';
+}
+
+export interface TracingGanttChartCustomLinks {
+  /**
+   * Link to a trace.
+   * Supported variables: datasourceName, traceId
+   */
+  trace?: string;
+
+  /**
+   * Link to a trace, with the span selected.
+   * Supported variables: datasourceName, traceId, spanId
+   */
+  span?: string;
+  attributes?: TracingGanttChartCustomAttributeLink[];
+}
+
+export interface TracingGanttChartCustomAttributeLink {
+  name: string;
+  /**
+   * Link to an arbitrary attribute value.
+   * Supported variables: datasourceName and all other attributes
+   */
+  link: string;
+}
+
+export interface CustomLinks {
+  variables: Record<string, string>;
+  links: TracingGanttChartCustomLinks;
 }
 
 /**

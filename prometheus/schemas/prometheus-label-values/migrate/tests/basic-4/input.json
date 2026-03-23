@@ -1,0 +1,25 @@
+
+{
+  "current": {},
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "definition": "label_values(thanos_build_info{stack=~\"$lv1\"}, stack)",
+  "description": "Label values, 4th flavor",
+  "hide": 0,
+  "includeAll": true,
+  "label": "Stack with Timeserie reusing other variable",
+  "multi": false,
+  "name": "lv4",
+  "options": [],
+  "query": {
+    "query": "label_values(thanos_build_info{stack=~\"$lv1\"}, stack)",
+    "refId": "StandardVariableQuery"
+  },
+  "refresh": 1,
+  "regex": "",
+  "skipUrlSync": false,
+  "sort": 2,
+  "type": "query"
+}

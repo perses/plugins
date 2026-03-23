@@ -1,9 +1,10 @@
-# TraceTable Panel Model
+# TraceTable model
 
 ```yaml
 kind: "TraceTable"
 spec:
   visual: <Visual specification> # Optional
+  links: <Links specification> # Optional
 ```
 
 ## Visual specification
@@ -16,4 +17,10 @@ palette: <Palette specification> # Optional
 
 ```yaml
 mode: <enum = "auto" | "categorical">
+```
+
+## Links specification
+
+```yaml
+trace: <string> # Optional
 ```

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,49 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack';
-import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { createConfigForPlugin } from '../rsbuild.shared';
 
-export default defineConfig({
-  server: {
-    port: 3022,
+export default createConfigForPlugin({
+  name: 'DatasourceVariable',
+  rsbuildConfig: {
+    server: { port: 3022 },
+    plugins: [pluginReact()],
   },
-  dev: {
-    assetPrefix: '/plugins/DatasourceVariable/',
-  },
-  output: {
-    assetPrefix: '/plugins/DatasourceVariable/',
-    copy: [{ from: './package.json' }, { from: 'README.md' }],
-  },
-  plugins: [pluginReact()],
-  tools: {
-    htmlPlugin: false,
-    rspack: (config, { appendPlugins }) => {
-      config.output!.uniqueName = 'DatasourceVariable';
-      appendPlugins([
-        new ModuleFederationPlugin({
-          name: 'DatasourceVariable',
-          exposes: {
-            './DatasourceVariable': './src/DatasourceVariable.tsx',
-          },
-          shared: {
-            react: { requiredVersion: '18.2.0', singleton: true },
-            'react-dom': { requiredVersion: '18.2.0', singleton: true },
-            echarts: { singleton: true },
-            'date-fns': { singleton: true },
-            'date-fns-tz': { singleton: true },
-            lodash: { singleton: true },
-            '@perses-dev/components': { singleton: true },
-            '@perses-dev/plugin-system': { singleton: true },
-            '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
-            '@emotion/styled': { singleton: true },
-            '@hookform/resolvers': { singleton: true },
-          },
-          dts: false,
-          runtime: false,
-        }),
-      ]);
+  moduleFederation: {
+    exposes: {
+      './DatasourceVariable': './src/DatasourceVariable.tsx',
+    },
+    shared: {
+      react: { requiredVersion: '18.2.0', singleton: true },
+      'react-dom': { requiredVersion: '18.2.0', singleton: true },
+      echarts: { singleton: true },
+      'date-fns': { singleton: true },
+      'date-fns-tz': { singleton: true },
+      lodash: { singleton: true },
+      '@perses-dev/components': { singleton: true },
+      '@perses-dev/plugin-system': { singleton: true },
+      '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
+      '@emotion/styled': { singleton: true },
+      '@hookform/resolvers': { singleton: true },
     },
   },
 });

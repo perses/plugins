@@ -1,0 +1,24 @@
+
+{
+  "current": {},
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "definition": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"node-exporter\", prometheus=~\"system\"}[$__range]))",
+  "description": "query result var with no <aggr> by clause",
+  "hide": 0,
+  "includeAll": false,
+  "multi": false,
+  "name": "queryResVarOther",
+  "options": [],
+  "query": {
+    "query": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"node-exporter\", prometheus=~\"system\"}[$__range]))",
+    "refId": "StandardVariableQuery"
+  },
+  "refresh": 1,
+  "regex": "^.*job=\"([a-z-]+)\".*$",
+  "skipUrlSync": false,
+  "sort": 0,
+  "type": "query"
+}

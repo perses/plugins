@@ -1,13 +1,13 @@
 module: "github.com/perses/plugins/statushistorychart@v0"
 language: {
-	version: "v0.12.0"
+	version: "v0.15.1"
 }
 source: {
 	kind: "git"
 }
 deps: {
-	"github.com/perses/perses/cue@v0": {
-		v:       "v0.51.0"
+	"github.com/perses/shared/cue@v0": {
+		v:       "v0.53.1"
 		default: true
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import { Box, styled, useTheme } from '@mui/material';
 import useResizeObserver from 'use-resize-observer';
 import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback, ReactElement } from 'react';
-import { useEvent } from '@perses-dev/core';
+import { useEvent } from '@perses-dev/plugin-system';
 import { useChartsTheme } from '@perses-dev/components';
 import { Ticks } from '../Ticks';
 import { getSpanColor, Viewport } from '../utils';

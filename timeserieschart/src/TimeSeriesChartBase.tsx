@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -82,8 +82,12 @@ export interface TimeChartProps {
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
   timeScale?: TimeScale;
-  yAxis?: YAXisComponentOption;
+  yAxis?: YAXisComponentOption | YAXisComponentOption[];
   format?: FormatOptions;
+  /**
+   * Map of series ID to format options, used for tooltip formatting when series have different units
+   */
+  seriesFormatMap?: Map<string, FormatOptions>;
   grid?: GridComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
@@ -102,6 +106,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     timeScale: timeScaleProp,
     yAxis,
     format,
+    seriesFormatMap,
     grid,
     isStackedBar = false,
     tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
@@ -226,7 +231,8 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           snap: false, // important so shared crosshair does not lag
         },
       },
-      yAxis: getFormattedAxis(yAxis, format),
+      // If yAxis is already an array (multiple Y axes), use it directly; otherwise use getFormattedAxis
+      yAxis: Array.isArray(yAxis) ? yAxis : getFormattedAxis(yAxis, format),
       animation: false,
       tooltip: {
         show: true,
@@ -435,6 +441,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             enablePinning={isPinningEnabled}
             pinnedPos={tooltipPinnedCoords}
             format={format}
+            seriesFormatMap={seriesFormatMap}
             onUnpinClick={() => {
               // Unpins tooltip when clicking Pin icon in TooltipHeader.
               setTooltipPinnedCoords(null);

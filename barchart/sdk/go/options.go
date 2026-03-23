@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -41,6 +41,27 @@ func SortingBy(sort Sort) Option {
 func WithMode(mode Mode) Option {
 	return func(builder *Builder) error {
 		builder.Mode = mode
+		return nil
+	}
+}
+
+func WithOrientation(orientation Orientation) Option {
+	return func(builder *Builder) error {
+		builder.Orientation = orientation
+		return nil
+	}
+}
+
+func WithGroupBy(groupBy []string) Option {
+	return func(builder *Builder) error {
+		builder.GroupBy = groupBy
+		return nil
+	}
+}
+
+func WithStacked(isStacked bool) Option {
+	return func(builder *Builder) error {
+		builder.IsStacked = isStacked
 		return nil
 	}
 }

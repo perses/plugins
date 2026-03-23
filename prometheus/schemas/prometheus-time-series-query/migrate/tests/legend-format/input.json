@@ -1,0 +1,11 @@
+{
+  "datasource": {
+    "uid": "${datasource}"
+  },
+  "editorMode": "code",
+  "expr": "avg without (instance) (hadoop_hdfs_datanode_capacity{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
+  "interval": "",
+  "legendFormat": "{{_target}}",
+  "range": true,
+  "refId": "A"
+}

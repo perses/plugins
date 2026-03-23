@@ -1,0 +1,12 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "header": "hello",
+        "name": "value"
+      }
+    ],
+    "density": "compact"
+  }
+}

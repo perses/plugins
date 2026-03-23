@@ -1,4 +1,4 @@
-# DatasourceVariable Plugin  
+# DatasourceVariable Plugin
 
 ## Setup
 

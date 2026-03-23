@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,49 +11,150 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SortOption } from '@perses-dev/components';
-import { DEFAULT_SORT } from './pie-chart-model';
+import { LegendItem, ModeOption, SortOption, TableColumnConfig } from '@perses-dev/components';
+import { FormatOptions, formatValue } from '@perses-dev/core';
+import { format } from 'echarts';
+import { comparisonLegends, ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
 import { PieChartData } from './PieChartBase';
+import { DEFAULT_SORT } from './pie-chart-model';
 
-export function calculatePercentages(data: PieChartData[]): Array<{ name: string; value: number }> {
+export function sortSeriesData<T extends PieChartData>(data: T[], sortOrder: SortOption = DEFAULT_SORT): T[] {
+  return data.sort((a, b) => {
+    // Handle null values - push them to the end regardless of sort order
+    if (a.value === null && b.value === null) return 0;
+    if (a.value === null) return 1;
+    if (b.value === null) return -1;
+
+    // Sort by value
+    const diff = (a.value ?? 0) - (b.value ?? 0);
+    return sortOrder === 'asc' ? diff : -diff;
+  });
+}
+
+type formatterProps = { name: string; value: number | unknown[] | object; percent: number };
+export const getTooltipFormatter = (formatOptions?: FormatOptions): ((props: formatterProps) => string) => {
+  const relativeFormatOptions = { unit: 'percent', decimalPlaces: formatOptions?.decimalPlaces } as const;
+  return ({ name, value, percent }: formatterProps): string => {
+    if (typeof value === 'number') {
+      return `${format.encodeHTML(name)}: ${formatValue(value, formatOptions)} (${formatValue(percent, relativeFormatOptions)})`;
+    }
+    return `${format.encodeHTML(name)}: ${format.encodeHTML(value.toString())}`;
+  };
+};
+export const getLabelFormatter = (
+  mode?: ModeOption,
+  formatOptions?: FormatOptions
+): ((props: formatterProps) => string) => {
+  if (mode === 'percentage') {
+    return percentageLabelFormatter(formatOptions);
+  }
+  return labelFormatter(formatOptions);
+};
+
+const labelFormatter = (formatOptions?: FormatOptions) => {
+  return ({ name, value }: formatterProps): string => {
+    if (typeof value === 'number') {
+      return `${name}:\n${formatValue(value, formatOptions)}`;
+    }
+    return `${name}:\n${format.encodeHTML(value.toString())}`;
+  };
+};
+
+const percentageLabelFormatter = (formatOptions?: FormatOptions) => {
+  const relativeFormatOptions = { unit: 'percent', decimalPlaces: formatOptions?.decimalPlaces } as const;
+  return ({ name, percent }: formatterProps): string => {
+    return `${name}:\n${formatValue(percent, relativeFormatOptions)}`;
+  };
+};
+
+export interface PieChartLegendMapper {
+  mapToLegendItems: (
+    pieChartData: Array<Required<PieChartData>>,
+    selectedValues?: Array<LegendValue | ComparisonValues>
+  ) => LegendItem[];
+  mapToLegendColumns: (
+    selectedValues?: Array<LegendValue | ComparisonValues>,
+    formatOptions?: FormatOptions
+  ) => Array<TableColumnConfig<LegendItem>>;
+}
+
+export class PieChartListLegendMapper implements PieChartLegendMapper {
+  mapToLegendItems(pieChartData: Array<Required<PieChartData>>): LegendItem[] {
+    return pieChartData.map(({ id, name, itemStyle }) => ({ id: id, label: name, color: itemStyle.color, data: {} }));
+  }
+  mapToLegendColumns(): Array<TableColumnConfig<LegendItem>> {
+    return [];
+  }
+}
+
+export class PieChartTableLegendMapper implements PieChartLegendMapper {
+  mapToLegendItems(
+    pieChartData: Array<Required<PieChartData>>,
+    selectedValues?: Array<LegendValue | ComparisonValues>
+  ): LegendItem[] {
+    const relativePieChartData = calculatePercentages(pieChartData);
+    const absoluteValueSelected = selectedValues?.includes('abs');
+    const relativeValueSelected = selectedValues?.includes('relative');
+    return pieChartData.map(({ id, name, itemStyle, value }) => {
+      const data: { [k in ComparisonValues]?: number } = {};
+      if (absoluteValueSelected && typeof value === 'number') {
+        data['abs'] = value;
+      }
+      if (relativeValueSelected) {
+        const itemPercentageValue = relativePieChartData.find((rpd) => rpd.id === id)?.value;
+        if (typeof itemPercentageValue === 'number') {
+          data['relative'] = itemPercentageValue;
+        }
+      }
+      return {
+        id: id,
+        label: name,
+        color: itemStyle.color,
+        data: data,
+      };
+    });
+  }
+
+  mapToLegendColumns(
+    selectedValues?: Array<LegendValue | ComparisonValues>,
+    formatOptions?: FormatOptions
+  ): Array<TableColumnConfig<LegendItem>> {
+    const relativeFormatOptions = { unit: 'percent', decimalPlaces: formatOptions?.decimalPlaces } as const;
+    return (
+      selectedValues?.toSorted().map((v) => {
+        const comparisonValue = isComparisonValue(v);
+        return {
+          accessorKey: `data.${v}`,
+          header: comparisonValue ? comparisonLegends[v].label : v,
+          headerDescription: comparisonValue ? comparisonLegends[v].description : undefined,
+          width: 90,
+          align: 'right',
+          cellDescription: true,
+          enableSorting: true,
+          cell: ({ getValue }): string => {
+            const cellValue = getValue();
+            return typeof cellValue === 'number' && formatOptions
+              ? formatValue(cellValue, v === 'relative' ? relativeFormatOptions : formatOptions)
+              : cellValue;
+          },
+        };
+      }) ?? []
+    );
+  }
+}
+
+function calculatePercentages<T extends PieChartData>(data: T[]): T[] {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);
   return data.map((seriesData) => {
     const percentage = ((seriesData.value ?? 0) / sum) * 100;
     return {
       ...seriesData,
-      value: percentage,
+      value: Number(percentage.toFixed(4)),
     };
   });
 }
 
-export function sortSeriesData(data: PieChartData[], sortOrder: SortOption = DEFAULT_SORT): PieChartData[] {
-  if (sortOrder === 'asc') {
-    // sort in ascending order by value
-    return data.sort((a, b) => {
-      if (a.value === null) {
-        return 1;
-      }
-      if (b.value === null) {
-        return -1;
-      }
-      if (a.value === b.value) {
-        return 0;
-      }
-      return a.value < b.value ? 1 : -1;
-    });
-  } else {
-    // sort in descending order by value
-    return data.sort((a, b) => {
-      if (a.value === null) {
-        return -1;
-      }
-      if (b.value === null) {
-        return 1;
-      }
-      if (a.value === b.value) {
-        return 0;
-      }
-      return a.value < b.value ? -1 : 1;
-    });
-  }
+const comparisonValuesArray = Object.keys(comparisonLegends);
+function isComparisonValue(value: string | undefined): value is ComparisonValues {
+  return typeof value === 'string' && comparisonValuesArray.includes(value);
 }

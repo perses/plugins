@@ -1,11 +1,26 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the \"License\");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an \"AS IS\" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
 	"flag"
 	"fmt"
+	"math/rand/v2"
 	"os"
+	"time"
 
-	"github.com/perses/plugins/scripts/command"
+	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
@@ -45,9 +60,24 @@ func main() {
 	}
 
 	logrus.Info("Publishing module...")
-	if err := command.Run("cue", "mod", "publish", version); err != nil {
-		logrus.WithError(err).Fatal("Error publishing module")
+	// When we are releasing multiple modules in a short time span, the CUE Central Registry may block us because they consider we are spamming them.
+	// To mitigate this, we implement a retry mechanism.
+	retryMaxAttempts := 10
+	// Initial sleep duration between retries: random value between 1s and 10s
+	sleepBetweenRetries := (1 + time.Duration(rand.Int64N(9))) * time.Second
+	for attempt := 1; attempt <= retryMaxAttempts; attempt++ {
+		// Wait for a few seconds immediately before the first attempt to reduce collision risk with other jobs running in parallel.
+		time.Sleep(sleepBetweenRetries)
+		err := command.Run("cue", "mod", "publish", version)
+		if err == nil {
+			break
+		}
+		if attempt == retryMaxAttempts {
+			logrus.Fatal("Max retry attempts reached, publish process failed")
+		}
+		logrus.WithError(err).Warnf("Attempt %d/%d: Error publishing the module, retrying...", attempt, retryMaxAttempts)
+		// Increase the sleep duration for the next attempt with a random value to reduce collision risk with other jobs running in parallel.
+		sleepBetweenRetries = sleepBetweenRetries + (1+time.Duration(rand.Int64N(19)))*time.Second
 	}
-
 	logrus.Infof("CUE module %s published successfully", module)
 }

@@ -1,6 +1,6 @@
-# Filter Builder
+# Prometheus Filter Builder
 
-The Filter builder helps generating a filter, a.k.a a labels matcher expression.
+This libary helps generating a filter, a.k.a a labels matcher expression.
 
 ## Usage
 

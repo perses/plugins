@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,16 +15,16 @@ package model
 
 import (
 	"strings"
-	"github.com/perses/perses/cue/common"
-	promDs "github.com/perses/plugins/prometheus/schemas/datasource:model"
+	"github.com/perses/shared/cue/common"
+	ds "github.com/perses/plugins/prometheus/schemas/datasource:model"
 )
 
 kind: "PrometheusTimeSeriesQuery"
 spec: close({
-	promDs.#selector
+	ds.#selector
 	query:             strings.MinRunes(1)
 	seriesNameFormat?: string
-	minStep?:          =~promDs.#durationRegex | =~common.#variableSyntaxRegex
+	minStep?:          =~ds.#durationRegex | =~common.#variableSyntaxRegex
 	resolution?:       number
 })
 

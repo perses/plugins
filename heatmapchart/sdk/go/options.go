@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -34,6 +34,27 @@ func CountFormat(format common.Format) Option {
 func ShowVisualMap(show bool) Option {
 	return func(builder *Builder) error {
 		builder.ShowVisualMap = show
+		return nil
+	}
+}
+
+func Min(min float64) Option {
+	return func(builder *Builder) error {
+		builder.Min = min
+		return nil
+	}
+}
+
+func Max(max float64) Option {
+	return func(builder *Builder) error {
+		builder.Max = max
+		return nil
+	}
+}
+
+func WithLogBase(logBase uint) Option {
+	return func(builder *Builder) error {
+		builder.LogBase = logBase
 		return nil
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -26,6 +26,12 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption, ScatterSeriesOption } from 'echarts';
 import { formatValue } from '@perses-dev/core';
+import {
+  replaceVariablesInString,
+  useAllVariableValues,
+  useRouterContext,
+  useTimeRange,
+} from '@perses-dev/plugin-system';
 import { EChartTraceValue } from './ScatterChartPanel';
 
 use([
@@ -39,11 +45,11 @@ use([
   CanvasRenderer,
 ]);
 
-interface ScatterplotProps<T> {
+export interface ScatterplotProps {
   width: number;
   height: number;
   options: EChartsOption;
-  onClick?: (data: T) => void;
+  link?: string;
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
@@ -51,9 +57,12 @@ const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   timeStyle: 'medium',
 }).format;
 
-export function Scatterplot<T>(props: ScatterplotProps<T>): ReactElement {
-  const { width, height, options, onClick } = props;
+export function Scatterplot(props: ScatterplotProps): ReactElement {
+  const { width, height, options, link: linkTemplate } = props;
   const chartsTheme = useChartsTheme();
+  const { absoluteTimeRange } = useTimeRange();
+  const variableValues = useAllVariableValues();
+  const { navigate } = useRouterContext();
 
   // Apache EChart Options Docs: https://echarts.apache.org/en/option.html
   const eChartOptions: EChartsCoreOption = {
@@ -61,19 +70,21 @@ export function Scatterplot<T>(props: ScatterplotProps<T>): ReactElement {
     series: options.series,
     dataZoom: options.dataZoom,
     grid: {
-      bottom: 40,
-      top: 50,
-      left: 50,
-      right: 100,
+      top: 45,
+      bottom: 20,
+      left: 30,
+      right: 20,
     },
     xAxis: {
       type: 'time',
-      name: 'Local Time',
+      min: absoluteTimeRange.start,
+      max: absoluteTimeRange.end,
     },
     yAxis: {
       scale: true,
       type: 'value',
       name: 'Duration',
+      splitNumber: 4,
       axisLabel: {
         formatter: (durationMs: number) => formatValue(durationMs, { unit: 'milliseconds' }),
       },
@@ -109,15 +120,19 @@ export function Scatterplot<T>(props: ScatterplotProps<T>): ReactElement {
 
   const handleEvents: OnEventsType<ScatterSeriesOption['data'] | unknown> = useMemo(() => {
     const handlers: OnEventsType<ScatterSeriesOption['data'] | unknown> = {};
-    if (onClick) {
-      handlers.click = (params): void => onClick(params.data as T);
+    if (navigate && linkTemplate) {
+      handlers.click = (params): void => {
+        const linkVariables = params.data.linkVariables as Record<string, string> | undefined;
+        const link = replaceVariablesInString(linkTemplate, variableValues, linkVariables);
+        navigate(link);
+      };
     }
     return handlers;
-  }, [onClick]);
+  }, [linkTemplate, navigate, variableValues]);
 
   return (
     <EChart
-      sx={{
+      style={{
         width: width,
         height: height,
       }}

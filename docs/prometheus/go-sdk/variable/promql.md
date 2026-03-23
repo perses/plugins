@@ -1,4 +1,4 @@
-# PromQL Variable Builder
+# Prometheus PromQL Variable Go SDK
 
 ## Constructor
 

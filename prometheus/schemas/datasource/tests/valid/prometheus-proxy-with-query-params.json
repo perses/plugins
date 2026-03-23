@@ -1,0 +1,16 @@
+{
+  "kind": "PrometheusDatasource",
+  "spec": {
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "http://localhost:9090"
+      }
+    },
+    "scrapeInterval": "30s",
+    "queryParams": {
+      "engine": "prometheus",
+      "tenant": "default"
+    }
+  }
+}

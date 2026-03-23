@@ -1,4 +1,4 @@
-# TimeSeriesChart Panel Model
+# TimeSeriesChart model
 
 ```yaml
 kind: "TimeSeriesChart"

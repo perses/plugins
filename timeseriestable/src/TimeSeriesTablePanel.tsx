@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,19 +16,23 @@ import { useChartsTheme } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { TimeSeriesData } from '@perses-dev/core';
+
 import { TimeSeriesTableOptions } from './model';
 import { DataTable } from './components';
 
 export type TimeSeriesTableProps = PanelProps<TimeSeriesTableOptions, TimeSeriesData>;
 
 export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement {
-  const { contentDimensions, queryResults } = props;
+  const { contentDimensions, queryResults, spec } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
 
   return (
-    <Box sx={{ height: contentDimensions?.height || 0, padding: `${contentPadding}px`, overflowY: 'scroll' }}>
-      <DataTable queryResults={queryResults} />
+    <Box
+      style={{ height: contentDimensions?.height ?? 0 }}
+      sx={{ padding: `${contentPadding}px`, overflowY: 'scroll' }}
+    >
+      <DataTable queryResults={queryResults} spec={spec} />
     </Box>
   );
 }

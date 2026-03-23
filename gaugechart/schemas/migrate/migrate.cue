@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,13 +14,13 @@
 package migrate
 
 import (
-	commonMigrate "github.com/perses/perses/cue/common/migrate"
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
 )
 
 #grafanaType: "gauge"
 #panel:       _
 
-kind:         "GaugeChart"
+kind: "GaugeChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
@@ -47,7 +47,7 @@ spec: {
 					if step.value == null {0},
 					step.value,
 				][0]
-				color: step.color
+				color: *commonMigrate.#mapping.color[step.color] | step.color
 			}]
 		}
 	}

@@ -1,4 +1,4 @@
-# TracingGanttChart Panel Model
+# TracingGanttChart model
 
 ```yaml
 kind: "TracingGanttChart"

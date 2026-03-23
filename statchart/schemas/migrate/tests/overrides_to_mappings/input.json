@@ -1,0 +1,115 @@
+{
+  "id": 8,
+  "type": "stat",
+  "title": "Exporter Status for $nodename",
+  "description": "Test the migration of Grafana overrides to Perses mappings",
+  "gridPos": {
+    "x": 6,
+    "y": 2,
+    "h": 3,
+    "w": 3
+  },
+  "fieldConfig": {
+    "defaults": {
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "red",
+            "value": null
+          },
+          {
+            "color": "green",
+            "value": 1
+          }
+        ]
+      },
+      "color": {
+        "mode": "thresholds"
+      },
+      "links": [],
+      "unit": "none"
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Value"
+        },
+        "properties": [
+          {
+            "id": "mappings",
+            "value": [
+              {
+                "type": "value",
+                "options": {
+                  "0": {
+                    "text": "DOWN",
+                    "index": 1
+                  },
+                  "1": {
+                    "text": "UP",
+                    "index": 0
+                  },
+                  "5": {
+                    "text": "INVICIBLE",
+                    "index": 3
+                  }
+                }
+              },
+              {
+                "type": "range",
+                "options": {
+                  "from": 2,
+                  "to": 4,
+                  "result": {
+                    "text": "VERY UP",
+                    "index": 2
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "pluginVersion": "11.6.3",
+  "targets": [
+    {
+      "exemplar": false,
+      "expr": "max ( up{osname=~\".*Linux.*\", nodename=~\"$nodename\", instance=~\".*:50700\"}) ",
+      "format": "time_series",
+      "hide": false,
+      "instant": true,
+      "interval": "$sampling",
+      "intervalFactor": 1,
+      "legendFormat": "status",
+      "refId": "status_linux",
+      "datasource": {
+        "uid": "$datasource"
+      }
+    }
+  ],
+  "datasource": {
+    "uid": "$datasource"
+  },
+  "options": {
+    "reduceOptions": {
+      "values": false,
+      "calcs": [
+        "mean"
+      ],
+      "fields": ""
+    },
+    "orientation": "auto",
+    "textMode": "auto",
+    "wideLayout": true,
+    "colorMode": "background",
+    "graphMode": "none",
+    "justifyMode": "auto",
+    "showPercentChange": false,
+    "percentChangeColorMode": "standard"
+  }
+}

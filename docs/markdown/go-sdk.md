@@ -1,4 +1,4 @@
-# Markdown Panel Builder
+# Markdown Go SDK
 
 ## Constructor
 

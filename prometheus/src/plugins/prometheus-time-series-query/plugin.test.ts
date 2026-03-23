@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -73,7 +73,6 @@ const createStubContext = (): TimeSeriesQueryContext => {
       getSavedDatasources: jest.fn(),
       setSavedDatasources: jest.fn(),
     },
-    refreshKey: 'test',
     timeRange: {
       end: new Date('01-01-2023'),
       start: new Date('01-02-2023'),

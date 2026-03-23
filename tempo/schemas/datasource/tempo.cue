@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,27 +14,15 @@
 package model
 
 import (
-	"github.com/perses/perses/cue/common"
-	commonProxy "github.com/perses/perses/cue/common/proxy"
+	"github.com/perses/shared/cue/common"
+	commonProxy "github.com/perses/shared/cue/common/proxy"
 )
-
-kind: #kind
-spec: {
-	#directUrl | #proxy
-}
 
 #kind: "TempoDatasource"
 
-#directUrl: {
-	directUrl: common.#url
+kind: #kind
+spec: {
+	commonProxy.#baseHTTPDatasourceSpec
 }
 
-#proxy: {
-	proxy: commonProxy.#HTTPProxy
-}
-
-#selector: common.#datasourceSelector & {
-	datasource?: {
-		kind: #kind
-	}
-}
+#selector: common.#datasourceSelector & {_kind: #kind}

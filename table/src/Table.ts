@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,12 +12,18 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialTableOptions, TableOptions } from './table-model';
-import { getTablePanelQueryOptions, TablePanel, TableProps } from './TablePanel';
-import { TableColumnsEditor } from './TableColumnsEditor';
-import { TableSettingsEditor } from './TableSettingsEditor';
-import { TableCellsEditor } from './TableCellsEditor';
-import { TableTransformsEditor } from './TableTransformsEditor';
+import {
+  getTablePanelQueryOptions,
+  TableCellsEditor,
+  TableColumnsEditor,
+  TablePanel,
+  TableProps,
+  TableSettingsEditor,
+  TableTransformsEditor,
+} from './components';
+import { TableItemSelectionActionsEditor } from './components/TableItemSelectionActionsEditor';
+import { createInitialTableOptions, TableOptions } from './models';
+import { TableExportAction } from './TableExportAction';
 
 /**
  * The core TimeSeriesTable panel plugin for Perses.
@@ -31,6 +37,13 @@ export const Table: PanelPlugin<TableOptions, TableProps> = {
     { label: 'Column Settings', content: TableColumnsEditor },
     { label: 'Cell Settings', content: TableCellsEditor },
     { label: 'Transforms', content: TableTransformsEditor },
+    { label: 'Item Actions', content: TableItemSelectionActionsEditor },
   ],
   createInitialOptions: createInitialTableOptions,
+  actions: [
+    {
+      component: TableExportAction,
+      location: 'header',
+    },
+  ],
 };

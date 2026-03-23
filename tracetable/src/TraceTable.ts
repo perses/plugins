@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+import { TraceTableItemSelectionActionsEditor } from './TraceTableItemSelectionActionsEditor';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table-model';
 
@@ -20,6 +21,7 @@ import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table
  */
 export const TraceTable: PanelPlugin<TraceTableOptions, TraceTablePanelProps> = {
   PanelComponent: TraceTablePanel,
+  panelOptionsEditorComponents: [{ label: 'Item Actions', content: TraceTableItemSelectionActionsEditor }],
   supportedQueryTypes: ['TraceQuery'],
   createInitialOptions: createInitialTraceTableOptions,
 };

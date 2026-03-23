@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,11 +14,11 @@
 package migrate
 
 import (
-	commonMigrate "github.com/perses/perses/cue/common/migrate"
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
 )
 
 #grafanaType: "piechart"
-#panel: _
+#panel:       _
 
 kind: "PieChart"
 spec: {
@@ -43,8 +43,20 @@ spec: {
 	if #panel.options.legend != _|_ if #showLegend {
 		legend: {
 			position: *(#panel.options.legend.placement & "right") | "bottom"
-			mode: *(#panel.options.legend.displayMode & "table")  | "list"
+			mode:     *(#panel.options.legend.displayMode & "table") | "list"
 		}
 	}
+
+	#showLabels: *#panel.options.displayLabels | null
+	if #showLabels != null {
+		showLabels: true
+	}
+
+	#colorMode: *#panel.fieldConfig.defaults.color.mode | null
+	if #colorMode == "shades" {
+		#mappedColor: *commonMigrate.#mapping.color[#panel.fieldConfig.defaults.color.fixedColor] | "#555555"
+		colorPalette: [#mappedColor]
+	}
+
 	radius: 50
 }

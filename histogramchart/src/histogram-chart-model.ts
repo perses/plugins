@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,6 +21,21 @@ export const DEFAULT_MAX_PERCENT = 100;
 export const DEFAULT_MIN_PERCENT_DECIMAL = 0;
 export const DEFAULT_MAX_PERCENT_DECIMAL = 1;
 
+// LogBase outlines the allowed log bases for the histogram x-axis.
+export type LOG_BASE = undefined | 2 | 10;
+
+export const LOG_BASE_CONFIG: Record<string, { label: string; log: LOG_BASE }> = {
+  none: { label: 'None', log: undefined },
+  '2': { label: '2', log: 2 },
+  '10': { label: '10', log: 10 },
+};
+
+// Options array for SettingsAutocomplete
+export const LOG_BASE_OPTIONS = Object.entries(LOG_BASE_CONFIG).map(([id, config]) => ({
+  id: id as string,
+  ...config,
+}));
+
 /**
  * The schema for a HistogramChart panel.
  */
@@ -36,6 +51,7 @@ export interface HistogramChartOptions {
   min?: number;
   max?: number;
   thresholds?: ThresholdOptions;
+  logBase?: LOG_BASE;
 }
 
 export type HistogramChartOptionsEditorProps = OptionsEditorProps<HistogramChartOptions>;

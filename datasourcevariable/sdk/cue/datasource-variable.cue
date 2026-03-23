@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,15 +22,15 @@ import (
 listVarBuilder
 
 // specify the constraints for this variable
-#pluginKind: datasourceVar.kind  
-#datasourcePluginKind: datasourceVar.spec.datasourcePluginKind  
+#pluginKind:           datasourceVar.kind
+#datasourcePluginKind: datasourceVar.spec.datasourcePluginKind
 
-variable: listVarBuilder.variable & {  
-    spec: {  
-        plugin: datasourceVar & {  
-            spec: {  
-                datasourcePluginKind: #datasourcePluginKind  
-            }  
-        }  
-    }  
-}  
+variable: listVarBuilder.variable & {
+	spec: {
+		plugin: datasourceVar & {
+			spec: {
+				datasourcePluginKind: #datasourcePluginKind
+			}
+		}
+	}
+}

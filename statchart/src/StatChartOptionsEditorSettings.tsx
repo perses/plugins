@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  SettingsAutocomplete,
   ThresholdsEditor,
   ThresholdsEditorProps,
 } from '@perses-dev/components';
@@ -34,8 +35,15 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
-import { ReactElement } from 'react';
-import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
+import { ReactElement, useCallback, useMemo } from 'react';
+import {
+  COLOR_MODE_LABELS,
+  ColorModeLabelItem,
+  SHOW_LEGEND_LABELS,
+  ShowLegendLabelItem,
+  StatChartOptions,
+  StatChartOptionsEditorProps,
+} from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
 
@@ -60,6 +68,17 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
       })
     );
   };
+
+  const handleShowLegendChange = useCallback(
+    (_: unknown, newShowLegend: ShowLegendLabelItem): void => {
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          draft.legendMode = newShowLegend.id;
+        })
+      );
+    },
+    [onChange, value]
+  );
 
   const handleUnitChange: FormatControlsProps['onChange'] = (newFormat) => {
     onChange(
@@ -96,9 +115,59 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
+  const handleColorModeChange = useCallback(
+    (_: unknown, newColorMode: ColorModeLabelItem): void => {
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          draft.colorMode = newColorMode.id;
+        })
+      );
+    },
+    [onChange, value]
+  );
+
+  const selectShowLegend = useMemo((): ReactElement => {
+    return (
+      <OptionsEditorControl
+        label="Show"
+        control={
+          <SettingsAutocomplete
+            onChange={handleShowLegendChange}
+            options={SHOW_LEGEND_LABELS}
+            disableClearable
+            value={
+              SHOW_LEGEND_LABELS.find((i) => i.id === value.legendMode) ??
+              SHOW_LEGEND_LABELS.find((i) => i.id === 'auto')!
+            }
+          />
+        }
+      />
+    );
+  }, [value.legendMode, handleShowLegendChange]);
+
+  const selectColorMode = useMemo((): ReactElement => {
+    return (
+      <OptionsEditorControl
+        label="Color mode"
+        control={
+          <SettingsAutocomplete
+            onChange={handleColorModeChange}
+            options={COLOR_MODE_LABELS.map(({ id, label }) => ({ id, label }))}
+            disableClearable
+            value={
+              COLOR_MODE_LABELS.find((i) => i.id === value.colorMode) ??
+              COLOR_MODE_LABELS.find((i) => i.id === 'value')!
+            }
+          />
+        }
+      />
+    );
+  }, [value.colorMode, handleColorModeChange]);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
+        <OptionsEditorGroup title="Legend">{selectShowLegend}</OptionsEditorGroup>
         <OptionsEditorGroup title="Misc">
           <OptionsEditorControl
             label="Sparkline"
@@ -108,6 +177,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <MetricLabelInput value={value.metricLabel} onChange={handleMetricLabelChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
+          {selectColorMode}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

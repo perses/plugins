@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationType, Definition, ThresholdOptions, FormatOptions, ValueMapping } from '@perses-dev/core';
 import { FontSizeOption } from '@perses-dev/components';
+import { CalculationType, Definition, FormatOptions, ThresholdOptions, ValueMapping } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
@@ -22,6 +22,33 @@ export interface StatChartDefinition extends Definition<StatChartOptions> {
   kind: 'StatChart';
 }
 
+export type ColorMode = 'none' | 'value' | 'background_solid';
+
+export type ColorModeLabelItem = {
+  id: ColorMode;
+  label: string;
+};
+
+export const COLOR_MODE_LABELS: ColorModeLabelItem[] = [
+  { id: 'none', label: 'None' },
+  { id: 'value', label: 'Text' },
+  { id: 'background_solid', label: 'Background' },
+];
+
+export type legendMode = 'auto' | 'on' | 'off';
+
+export type ShowLegendLabelItem = {
+  id: legendMode;
+  label: string;
+  description?: string;
+};
+
+export const SHOW_LEGEND_LABELS: ShowLegendLabelItem[] = [
+  { id: 'auto', label: 'Auto', description: 'Show legend for multi-series, hide legend for single series' },
+  { id: 'on', label: 'On', description: 'Always show legend' },
+  { id: 'off', label: 'Off', description: 'Always hide legend' },
+];
+
 export interface StatChartOptions {
   calculation: CalculationType;
   format: FormatOptions;
@@ -30,6 +57,8 @@ export interface StatChartOptions {
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
   mappings?: ValueMapping[];
+  colorMode?: ColorMode;
+  legendMode?: legendMode;
 }
 
 export interface StatChartSparklineOptions {
@@ -46,5 +75,6 @@ export function createInitialStatChartOptions(): StatChartOptions {
       unit: 'decimal',
     },
     sparkline: {},
+    legendMode: 'auto',
   };
 }

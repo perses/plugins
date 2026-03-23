@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,7 +15,7 @@ import { Virtuoso, ListRange } from 'react-virtuoso';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
-import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
 import { Span, Trace } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
@@ -24,6 +24,7 @@ import { ResizableDivider } from './ResizableDivider';
 
 export interface GanttTableProps {
   options: TracingGanttChartOptions;
+  customLinks?: CustomLinks;
   trace: Trace;
   viewport: Viewport;
   selectedSpan?: Span;
@@ -31,7 +32,7 @@ export interface GanttTableProps {
 }
 
 export function GanttTable(props: GanttTableProps): ReactElement {
-  const { options, trace, viewport, selectedSpan, onSpanClick } = props;
+  const { options, customLinks, trace, viewport, selectedSpan, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -44,6 +45,17 @@ export function GanttTable(props: GanttTableProps): ReactElement {
     }
     return rows;
   }, [trace.rootSpans, collapsedSpans]);
+
+  const selectedSpanIndex = useMemo(() => {
+    if (!selectedSpan) return undefined;
+
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i]?.spanId === selectedSpan.spanId) {
+        return i;
+      }
+    }
+    return undefined;
+  }, [rows, selectedSpan]);
 
   const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
 
@@ -70,9 +82,11 @@ export function GanttTable(props: GanttTableProps): ReactElement {
       <GanttTableHeader trace={trace} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
       <Virtuoso
         data={rows}
+        initialTopMostItemIndex={selectedSpanIndex ?? 0}
         itemContent={(_, span) => (
           <GanttTableRow
             options={options}
+            customLinks={customLinks}
             span={span}
             viewport={viewport}
             selected={span === selectedSpan}

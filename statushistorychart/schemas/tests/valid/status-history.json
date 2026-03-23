@@ -1,0 +1,9 @@
+{
+    "kind": "StatusHistoryChart",
+    "spec": {
+        "legend": {
+            "position": "bottom"
+        },
+        "sorting": "asc"
+    }
+}
