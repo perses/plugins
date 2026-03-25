@@ -13,7 +13,7 @@
 
 import { Box, Theme, Typography, useTheme } from '@mui/material';
 import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
-import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
+import { formatValue, QueryDataType, TimeSeriesData, transformData } from '@perses-dev/core';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import {
   ActionOptions,
@@ -26,6 +26,7 @@ import {
 import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
+import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -203,7 +204,7 @@ function generateColumnConfig(
 export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant' | 'range' } {
   // if any cell renders a panel plugin, perform a range query instead of an instant query
   return {
-    mode: (spec.columnSettings ?? []).some((c) => c.plugin) ? 'range' : 'instant',
+    mode: getTablePanelQueryMode(spec),
   };
 }
 
@@ -258,43 +259,10 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   );
 
   // TODO: handle other query types
-  const queryMode = getTablePanelQueryOptions(spec).mode;
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
-    // Transform query results to a tabular format:
-    // [ { timestamp: 123, value: 456, labelName1: labelValue1 }, ... ]
-    return queryResults
-      .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
-        data.data.series.map((ts: TimeSeries) => ({ data, ts, queryIndex }))
-      )
-      .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
-        if (ts.values[0] === undefined) {
-          return { ...ts.labels };
-        }
-
-        // If there are multiple queries, we need to add the query index to the value key and label key to avoid conflicts
-        const valueColumnName = queryResults.length === 1 ? 'value' : `value #${queryIndex + 1}`;
-        const labels =
-          queryResults.length === 1
-            ? ts.labels
-            : Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
-                if (key) acc[`${key} #${queryIndex + 1}`] = value;
-                return acc;
-              }, {} as Labels);
-
-        // If the cell visualization is a panel plugin, filter the data by the current series
-        const columnValue = (spec.columnSettings ?? []).find((x) => x.name === valueColumnName)?.plugin
-          ? { ...data, data: { ...data.data, series: data.data.series.filter((s) => s === ts) } }
-          : ts.values[0][1];
-
-        if (queryMode === 'instant') {
-          // Timestamp is not indexed as it will be the same for all queries
-          return { timestamp: ts.values[0][0], [valueColumnName]: columnValue, ...labels };
-        } else {
-          // Don't add a timestamp for range queries
-          return { [valueColumnName]: columnValue, ...labels };
-        }
-      });
-  }, [queryResults, queryMode, spec.columnSettings]);
+    // Transform query results to a tabular format using shared utility
+    return buildRawTableData(queryResults, spec);
+  }, [queryResults, spec]);
 
   // Transform will be applied by their orders on the original data
   const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);

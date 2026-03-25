@@ -12,45 +12,99 @@
 // limitations under the License.
 
 import React, { useCallback, useMemo } from 'react';
-import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilename } from '@perses-dev/plugin-system';
+import { escapeCsvValue, PanelData, sanitizeFilename } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
 import DownloadIcon from 'mdi-material-ui/Download';
+import { TimeSeriesData, transformData } from '@perses-dev/core';
 import { TableProps } from './components';
+import type { TableOptions } from './models';
+import { buildRawTableData } from './table-data-utils';
 
-export const TableExportAction: React.FC<TableProps> = ({ queryResults, definition }) => {
-  const exportableData = useMemo(() => {
-    return extractExportableData(queryResults);
-  }, [queryResults]);
+export interface ExportColumn {
+  key: string;
+  header: string;
+}
 
-  const canExport = useMemo(() => {
-    return isExportableData(exportableData);
-  }, [exportableData]);
+/**
+ * Converts raw query results into the same tabular structure that TablePanel
+ * renders, applying indexed column naming and configured transforms so the
+ * CSV output matches the visual table.
+ */
+export function buildTableData(
+  queryResults: Array<PanelData<TimeSeriesData>>,
+  spec: TableOptions
+): { data: Array<Record<string, unknown>>; columns: ExportColumn[] } {
+  // Use shared utility with forExport=true to get raw scalar values
+  const rawData = buildRawTableData(queryResults, spec, { forExport: true });
+
+  const transformed = transformData(rawData, spec.transforms ?? []);
+
+  const allKeys: string[] = [];
+  for (const entry of transformed) {
+    for (const key of Object.keys(entry)) {
+      if (!allKeys.includes(key)) allKeys.push(key);
+    }
+  }
+
+  const columnSettings = spec.columnSettings ?? [];
+  const columns: ExportColumn[] = [];
+  const customized = new Set<string>();
+
+  for (const col of columnSettings) {
+    if (customized.has(col.name)) continue;
+    customized.add(col.name);
+    if (col.hide) continue;
+    columns.push({ key: col.name, header: col.header ?? col.name });
+  }
+
+  if (!spec.defaultColumnHidden) {
+    for (const key of allKeys) {
+      if (!customized.has(key)) {
+        columns.push({ key, header: key });
+      }
+    }
+  }
+
+  return { data: transformed, columns };
+}
+
+export const TableExportAction: React.FC<TableProps> = ({ queryResults, spec, definition }) => {
+  const tableData = useMemo(() => buildTableData(queryResults, spec), [queryResults, spec]);
+
+  const canExport = tableData.data.length > 0 && tableData.columns.length > 0;
 
   const handleExport = useCallback(() => {
-    if (!exportableData || !canExport) return;
+    if (!canExport) return;
 
     try {
-      const title = definition?.spec?.display?.name || 'Time Series Data';
+      const title = definition?.spec?.display?.name || 'Table Data';
+      const { data, columns } = tableData;
 
-      const csvBlob = exportDataAsCSV({
-        data: exportableData,
-      });
+      const headerRow = columns.map((c) => escapeCsvValue(c.header)).join(',');
+      const dataRows = data.map((row) => columns.map((col) => escapeCsvValue(row[col.key])).join(','));
+
+      const csvString = [headerRow, ...dataRows].join('\n') + '\n';
+      const csvBlob = new Blob([csvString], { type: 'text/csv;charset=utf-8' });
 
       const baseFilename = sanitizeFilename(title);
       const filename = `${baseFilename}_data.csv`;
 
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(csvBlob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
+      const url = URL.createObjectURL(csvBlob);
+      try {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
     } catch (error) {
-      console.error('Time series export failed:', error);
+      console.error('Table CSV export failed:', error);
     }
-  }, [exportableData, canExport, definition]);
+  }, [canExport, tableData, definition]);
 
   if (!canExport) {
     return null;
@@ -58,7 +112,7 @@ export const TableExportAction: React.FC<TableProps> = ({ queryResults, definiti
 
   return (
     <InfoTooltip description="Export as CSV">
-      <IconButton size="small" onClick={handleExport} aria-label="Export time series data as CSV">
+      <IconButton size="small" onClick={handleExport} aria-label="Export table data as CSV">
         <DownloadIcon fontSize="inherit" />
       </IconButton>
     </InfoTooltip>
