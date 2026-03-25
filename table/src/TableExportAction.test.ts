@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { TimeSeriesData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
+import { escapeCsvValue, PanelData } from '@perses-dev/plugin-system';
 import { TableOptions } from './models';
-import { buildTableData, escapeCsvValue } from './TableExportAction';
+import { buildTableData } from './TableExportAction';
 
 function makePanelData(series: TimeSeriesData['series']): PanelData<TimeSeriesData> {
   return {

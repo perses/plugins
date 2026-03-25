@@ -12,22 +12,14 @@
 // limitations under the License.
 
 import React, { useCallback, useMemo } from 'react';
-import { PanelData, sanitizeFilename } from '@perses-dev/plugin-system';
+import { escapeCsvValue, PanelData, sanitizeFilename } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
 import DownloadIcon from 'mdi-material-ui/Download';
-import { Labels, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { getTablePanelQueryOptions, TableProps } from './components';
+import { TimeSeriesData, transformData } from '@perses-dev/core';
+import { TableProps } from './components';
 import type { TableOptions } from './models';
-
-export function escapeCsvValue(value: unknown): string {
-  if (value === null || value === undefined) return '';
-  const str = String(value);
-  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
-}
+import { buildRawTableData } from './table-data-utils';
 
 export interface ExportColumn {
   key: string;
@@ -38,43 +30,13 @@ export interface ExportColumn {
  * Converts raw query results into the same tabular structure that TablePanel
  * renders, applying indexed column naming and configured transforms so the
  * CSV output matches the visual table.
- *
- * NOTE: The row-building logic here intentionally mirrors TablePanel's rawData
- * useMemo (see TablePanel.tsx). If the table's data pipeline changes, this
- * function must be updated to match.
  */
 export function buildTableData(
   queryResults: Array<PanelData<TimeSeriesData>>,
   spec: TableOptions
 ): { data: Array<Record<string, unknown>>; columns: ExportColumn[] } {
-  const queryMode = getTablePanelQueryOptions(spec).mode;
-
-  const rawData: Array<Record<string, unknown>> = queryResults
-    .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
-      (data.data?.series ?? []).map((ts: TimeSeries) => ({ ts, queryIndex }))
-    )
-    .map(({ ts, queryIndex }: { ts: TimeSeries; queryIndex: number }) => {
-      if (ts.values[0] === undefined) {
-        return { ...ts.labels };
-      }
-
-      const valueColumnName = queryResults.length === 1 ? 'value' : `value #${queryIndex + 1}`;
-      const labels =
-        queryResults.length === 1
-          ? ts.labels
-          : Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
-              if (key) acc[`${key} #${queryIndex + 1}`] = value;
-              return acc;
-            }, {} as Labels);
-
-      // Always use the raw scalar value for export (skip embedded panel plugin objects)
-      const columnValue = ts.values[0][1];
-
-      if (queryMode === 'instant') {
-        return { timestamp: ts.values[0][0], [valueColumnName]: columnValue, ...labels };
-      }
-      return { [valueColumnName]: columnValue, ...labels };
-    });
+  // Use shared utility with forExport=true to get raw scalar values
+  const rawData = buildRawTableData(queryResults, spec, { forExport: true });
 
   const transformed = transformData(rawData, spec.transforms ?? []);
 
