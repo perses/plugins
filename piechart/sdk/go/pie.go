@@ -136,11 +136,7 @@ func create(options ...Option) (Builder, error) {
 		PluginSpec: PluginSpec{},
 	}
 
-	defaults := []Option{
-		Calculation(common.LastCalculation),
-	}
-
-	for _, opt := range append(defaults, options...) {
+	for _, opt := range options {
 		if err := opt(builder); err != nil {
 			return *builder, err
 		}
