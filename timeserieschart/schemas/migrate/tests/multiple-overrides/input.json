@@ -65,7 +65,7 @@
         "properties": [
           {
             "id": "custom.fillOpacity",
-            "value": 0
+            "value": "0"
           },
           {
             "id": "custom.lineWidth",
