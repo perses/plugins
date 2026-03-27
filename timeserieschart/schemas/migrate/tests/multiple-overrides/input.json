@@ -157,7 +157,7 @@
           },
           {
             "id": "unit",
-            "value": "reqps"
+            "value": "tps"
           }
         ]
       }
