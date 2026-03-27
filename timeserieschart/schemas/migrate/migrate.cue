@@ -212,6 +212,12 @@ spec: {
 					][0]
 					areaOpacity: #queryFillOpacity / 100
 				}
+				if property.id == "unit" {
+					#queryUnit: *commonMigrate.#mapping.unit[property.value] | null
+					if #queryUnit != null {
+						format: unit: #queryUnit
+					}
+				}
 			}
 		},
 	]

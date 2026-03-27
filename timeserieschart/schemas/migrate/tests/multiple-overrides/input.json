@@ -128,7 +128,7 @@
           },
           {
             "id": "unit",
-            "value": "tps"
+            "value": "reqps"
           },
           {
             "id": "custom.lineStyle",
@@ -157,7 +157,7 @@
           },
           {
             "id": "unit",
-            "value": "tps"
+            "value": "reqps"
           }
         ]
       }

@@ -40,13 +40,19 @@
       {
         "queryIndex": 3,
         "colorMode": "fixed",
-        "colorValue": "#3274D9"
+        "colorValue": "#3274D9",
+        "format": {
+          "unit": "requests/sec"
+        }
       },
       {
         "queryIndex": 4,
         "colorMode": "fixed",
         "colorValue": "#fade2a",
-        "lineStyle": "dashed"
+        "lineStyle": "dashed",
+        "format": {
+          "unit": "requests/sec"
+        }
       }
     ]
   }
