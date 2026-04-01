@@ -161,7 +161,11 @@ spec: {
 		visual: lineStyle: #lineStyleMapping[#lineStyle]
 	}
 
-	#fillOpacity: *#panel.fieldConfig.defaults.custom.fillOpacity | null
+	#fillOpacityRaw: *#panel.fieldConfig.defaults.custom.fillOpacity | null
+	#fillOpacity: [
+		if (#fillOpacityRaw & string) != _|_ {strconv.Atoi(#fillOpacityRaw)},
+		#fillOpacityRaw,
+	][0]
 	if #fillOpacity != null {
 		visual: areaOpacity: #fillOpacity / 100
 	}
@@ -202,7 +206,17 @@ spec: {
 					lineStyle: #lineStyleMapping[property.value.fill]
 				}
 				if property.id == "custom.fillOpacity" {
-					areaOpacity: property.value / 100
+					#queryFillOpacity: [
+						if (property.value & string) != _|_ {strconv.Atoi(property.value)},
+						property.value,
+					][0]
+					areaOpacity: #queryFillOpacity / 100
+				}
+				if property.id == "unit" {
+					#queryUnit: *commonMigrate.#mapping.unit[property.value] | null
+					if #queryUnit != null {
+						format: unit: #queryUnit
+					}
 				}
 			}
 		},
