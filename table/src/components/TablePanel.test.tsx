@@ -11,10 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, ItemActionsProvider, SelectionProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeSeriesData } from '@perses-dev/core';
-import { render, screen, waitFor, within } from '@testing-library/react';
-import { VirtuosoMockContext } from 'react-virtuoso';
 import {
   dynamicImportPluginLoader,
   PluginLoader,
@@ -23,8 +21,11 @@ import {
   VariableStateMap,
 } from '@perses-dev/plugin-system';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { VirtuosoMockContext } from 'react-virtuoso';
 import * as packagejson from '../../package.json';
-import { TimeSeriesTableProps, TableOptions } from '../models';
+import { TableOptions, TimeSeriesTableProps } from '../models';
 import {
   MOCK_TIME_SERIES_DATA_MULTIVALUE,
   MOCK_TIME_SERIES_DATA_SINGLEVALUE,
@@ -54,15 +55,19 @@ describe('TablePanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (data: TimeSeriesData, options?: TableOptions): void => {
     render(
-      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <ChartsProvider chartsTheme={testChartsTheme}>
-          <TablePanel
-            {...TEST_TIME_SERIES_TABLE_PROPS}
-            spec={options ?? {}}
-            queryResults={[{ definition: MOCK_TIME_SERIES_QUERY_DEFINITION, data }]}
-          />
-        </ChartsProvider>
-      </VirtuosoMockContext.Provider>
+      <SelectionProvider>
+        <ItemActionsProvider>
+          <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
+              <TablePanel
+                {...TEST_TIME_SERIES_TABLE_PROPS}
+                spec={options ?? {}}
+                queryResults={[{ definition: MOCK_TIME_SERIES_QUERY_DEFINITION, data }]}
+              />
+            </ChartsProvider>
+          </VirtuosoMockContext.Provider>
+        </ItemActionsProvider>
+      </SelectionProvider>
     );
   };
 
@@ -207,5 +212,130 @@ describe('TablePanel', () => {
       // in total, 3 tables should be visible
       expect(await screen.findAllByRole('table')).toHaveLength(3);
     });
+  });
+
+  describe('selection and actions', () => {
+    it(
+      'should render checkboxes when selection is enabled',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          selection: { enabled: true },
+        });
+
+        // Should have checkboxes in the table (header + rows)
+        const checkboxes = await screen.findAllByRole('checkbox');
+        expect(checkboxes.length).toBeGreaterThan(0);
+
+        // Should have a header checkbox for select all
+        const table = screen.getByRole('table');
+        const headerRow = within(table).getAllByRole('columnheader');
+        expect(headerRow.length).toBeGreaterThan(0);
+
+        // First column header should contain a checkbox
+        const firstHeader = headerRow[0];
+        if (firstHeader) {
+          expect(within(firstHeader).getByRole('checkbox')).toBeInTheDocument();
+        }
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should not render checkboxes when selection is disabled',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          selection: { enabled: false },
+        });
+
+        // Should not have any checkboxes
+        expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should not render checkboxes by default when selection is not specified',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE);
+
+        // Should not have any checkboxes by default
+        expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should allow selecting individual rows when selection is enabled',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          selection: { enabled: true },
+        });
+
+        const checkboxes = await screen.findAllByRole('checkbox');
+        // First checkbox is header, rest are row checkboxes
+        expect(checkboxes.length).toBeGreaterThan(1);
+
+        // Click on the second checkbox (first row)
+        const firstRowCheckbox = checkboxes[1];
+        if (firstRowCheckbox) {
+          userEvent.click(firstRowCheckbox);
+          expect(firstRowCheckbox).toBeChecked();
+        }
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should select all rows when clicking header checkbox',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          selection: { enabled: true },
+        });
+
+        const checkboxes = await screen.findAllByRole('checkbox');
+        // First checkbox is header
+        const headerCheckbox = checkboxes[0];
+        if (headerCheckbox) {
+          userEvent.click(headerCheckbox);
+          // After clicking header, all checkboxes should be checked
+          const allCheckboxes = screen.getAllByRole('checkbox');
+          allCheckboxes.forEach((checkbox) => {
+            expect(checkbox).toBeChecked();
+          });
+        }
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should render with actions enabled and display them with every row',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          selection: { enabled: true },
+          actions: {
+            enabled: true,
+            displayWithItem: true,
+            actionsList: [
+              {
+                type: 'event',
+                name: 'Test Action',
+                eventName: 'test-event',
+                batchMode: 'individual',
+                enabled: true,
+              },
+            ],
+          },
+        });
+
+        // Table should render with checkboxes
+        const checkboxes = await screen.findAllByRole('checkbox');
+        expect(checkboxes.length).toBeGreaterThan(0);
+
+        // Action button should not be visible until a row is selected
+        const actionButtons = screen.queryAllByRole('button', { name: 'Test Action' });
+        expect(actionButtons).toHaveLength(2); // 2 rows with action buttons
+      },
+      TEST_TIMEOUT
+    );
   });
 });

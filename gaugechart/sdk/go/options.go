@@ -44,3 +44,10 @@ func Max(max float64) Option { // nolint: revive
 		return nil
 	}
 }
+
+func Legend(legend LegendSpec) Option {
+	return func(builder *Builder) error {
+		builder.Legend = &legend
+		return nil
+	}
+}

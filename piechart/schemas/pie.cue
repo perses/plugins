@@ -19,18 +19,18 @@ import (
 
 kind: "PieChart"
 spec: close({
-	 // TODO: create a new common definition for this altered legend once perses/perses/cue/common has been moved outside of perses/perses
-	legend?:        {
+	// TODO: create a new common definition for this altered legend once perses/perses/cue/common has been moved outside of perses/perses
+	legend?: {
 		position: "bottom" | "right"
-		mode?: "list" | "table"
-		size?: "small" | "medium"
+		mode?:    "list" | "table"
+		size?:    "small" | "medium"
 		values?: [..."abs" | "relative"]
 	}
-	calculation:    common.#calculation
-	format?:        common.#format
-	sort?:          "asc" | "desc"
-	mode?:          "value" | "percentage"
-	showLabels?:    bool
-	radius:         number
-	colorPalette?: 	[...string]
+	calculation: common.#calculation
+	format?:     common.#format
+	sort?:       "asc" | "desc"
+	mode?:       "value" | "percentage"
+	showLabels?: bool
+	radius:      number
+	colorPalette?: [...string]
 })

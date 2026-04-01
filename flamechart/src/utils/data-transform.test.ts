@@ -17,7 +17,7 @@ import { filterStackTraceById, buildSamples } from './data-transform';
 import { getSpanColor } from './palette-gen';
 
 // define the structuredClone function
-global.structuredClone = (val) => JSON.parse(JSON.stringify(val));
+global.structuredClone = (val): unknown => JSON.parse(JSON.stringify(val));
 
 describe('filterStackTraceById', () => {
   const emptyJson: StackTrace = {} as StackTrace;

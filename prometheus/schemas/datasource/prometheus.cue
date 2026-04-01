@@ -17,28 +17,16 @@ import (
 	"github.com/perses/shared/cue/common"
 	commonProxy "github.com/perses/shared/cue/common/proxy"
 )
- 
+
 kind: #kind
 spec: {
-	#directUrl | #proxy
+	commonProxy.#baseHTTPDatasourceSpec
 	scrapeInterval?: =~#durationRegex
 	queryParams?: {[string]: string}
 }
 
 #kind: "PrometheusDatasource"
 
-#directUrl: {
-	directUrl: common.#url
-}
-
-#proxy: {
-	proxy: commonProxy.#HTTPProxy
-}
-
 #durationRegex: "^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"
 
-#selector: common.#datasourceSelector & {
-	datasource?: =~common.#variableSyntaxRegex | {
-		kind: #kind
-	}
-}
+#selector: common.#datasourceSelector & {_kind: #kind}

@@ -13,16 +13,22 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { LogsTableComponent } from './LogsTableComponent';
-import { LogsTableOptions, LogsTableProps } from './model';
+import { LogsTableItemSelectionActionsEditor } from './LogsTableItemSelectionActionsEditor';
 import { LogsTableSettingsEditor } from './LogsTableSettingsEditor';
+import { LogsTableOptions, LogsTableProps } from './model';
+import { LogsTableExportAction } from './LogsTableExportAction';
 
 export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
   PanelComponent: LogsTableComponent,
-  panelOptionsEditorComponents: [{ label: 'Settings', content: LogsTableSettingsEditor }],
+  panelOptionsEditorComponents: [
+    { label: 'Settings', content: LogsTableSettingsEditor },
+    { label: 'Item Actions', content: LogsTableItemSelectionActionsEditor },
+  ],
   supportedQueryTypes: ['LogQuery'],
   createInitialOptions: () => ({
     showTime: true,
     allowWrap: true,
     enableDetails: true,
   }),
+  actions: [{ component: LogsTableExportAction, location: 'header' }],
 };

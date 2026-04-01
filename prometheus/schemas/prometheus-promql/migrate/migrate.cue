@@ -17,7 +17,7 @@ import (
 	"regexp"
 )
 
-#promQLRegexp: =~ "^query_result\\(.*\\)$"
+#promQLRegexp: =~"^query_result\\(.*\\)$"
 
 #grafanaVar: {
 	type: "query"
@@ -29,7 +29,7 @@ import (
 }
 
 _outputPromQLVar: {
-	#query: string
+	#query:      string
 	#qResRegexp: "^query_result\\((.*by\\s*\\((\\w+).*)\\)$"
 
 	kind: "PrometheusPromQLVariable"

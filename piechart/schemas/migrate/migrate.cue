@@ -18,7 +18,7 @@ import (
 )
 
 #grafanaType: "piechart"
-#panel: _
+#panel:       _
 
 kind: "PieChart"
 spec: {
@@ -43,7 +43,7 @@ spec: {
 	if #panel.options.legend != _|_ if #showLegend {
 		legend: {
 			position: *(#panel.options.legend.placement & "right") | "bottom"
-			mode: *(#panel.options.legend.displayMode & "table")  | "list"
+			mode:     *(#panel.options.legend.displayMode & "table") | "list"
 		}
 	}
 

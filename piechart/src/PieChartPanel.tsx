@@ -1,4 +1,4 @@
-//Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,19 +15,17 @@ import { Box } from '@mui/material';
 import {
   ChartInstance,
   ContentWithLegend,
-  LegendItem,
   LegendProps,
   SelectedLegendItemState,
-  TableColumnConfig,
   useChartsTheme,
   useId,
 } from '@perses-dev/components';
-import { CalculationType, CalculationsMap, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
-import { comparisonLegends, ComparisonValues, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
+import { CalculationsMap, CalculationType, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
+import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { PieChartOptions } from './pie-chart-model';
-import { calculatePercentages, sortSeriesData } from './utils';
+import { PieChartLegendMapper, PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 import { getSeriesColor } from './colors';
 import { PieChartBase, PieChartData } from './PieChartBase';
 
@@ -35,7 +33,7 @@ export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode, legend: pieChartLegend, colorPalette: colorPalette },
+    spec: { calculation, sort, mode, format: formatOptions, legend: pieChartLegend, colorPalette: colorPalette },
     contentDimensions,
     queryResults,
   } = props;
@@ -48,12 +46,9 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
     return getSeriesColor(seriesNames, colorPalette);
   }, [colorPalette, seriesNames]);
 
-  const { pieChartData, legendItems, legendColumns } = useMemo(() => {
+  const pieChartData = useMemo((): Array<Required<PieChartData>> => {
     const calculate = CalculationsMap[calculation as CalculationType];
-    const pieChartData: PieChartData[] = [];
-    const legendItems: LegendItem[] = [];
-    const legendColumns: Array<TableColumnConfig<LegendItem>> = [];
-
+    const pieChartData: Array<Required<PieChartData>> = [];
     queryResults.forEach((result, queryIndex) => {
       const series = result?.data.series ?? [];
 
@@ -71,69 +66,23 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
         };
 
         pieChartData.push(seriesItem);
-        legendItems.push({
-          id: seriesId,
-          label: seriesData.formattedName ?? '',
-          color: seriesColor,
-          data: {},
-        });
       });
     });
 
-    const sortedPieChartData = sortSeriesData(pieChartData, sort);
+    return sortSeriesData(pieChartData, sort);
+  }, [calculation, chartId, colorList, queryResults, sort]);
 
-    // Reorder legend items to reflect the current sorting order of series
-    const valueById = new Map(sortedPieChartData.map((pd) => [pd.id ?? pd.name, pd.value ?? 0]));
-    legendItems.sort((a, b) => {
-      const av = valueById.get(a.id) ?? 0;
-      const bv = valueById.get(b.id) ?? 0;
-      return sort === 'asc' ? av - bv : bv - av;
-    });
-
-    if (pieChartLegend?.values?.length && pieChartLegend?.mode === 'table') {
-      const { values } = pieChartLegend;
-      [...values].sort().forEach((v) => {
-        /* First, create a column for the current legend value */
-        legendColumns.push({
-          accessorKey: `data.${v}`,
-          header: comparisonLegends[v as ComparisonValues]?.label || v,
-          headerDescription: comparisonLegends[v as ComparisonValues]?.description,
-          width: 90,
-          align: 'right',
-          cellDescription: true,
-          enableSorting: true,
-        });
-        /* Then, settle the legend items related to this legend value */
-        switch (v) {
-          case 'abs':
-            legendItems.forEach((li) => {
-              const { value: itemAbsoluteValue } = pieChartData.find((pd) => li.id === pd.id) || {};
-              if (typeof itemAbsoluteValue === 'number' && li.data) {
-                li.data['abs'] = itemAbsoluteValue;
-              }
-            });
-            break;
-          case 'relative':
-            legendItems.forEach((li) => {
-              const { value: itemPercentageValue } =
-                calculatePercentages(sortedPieChartData).find((ppd) => li.id === ppd.id) || {};
-              if (typeof itemPercentageValue === 'number' && li.data) {
-                li.data['relative'] = `${itemPercentageValue.toFixed(2)}%`;
-              }
-            });
-            break;
-          default:
-            break;
-        }
-      });
-    }
-
+  const { legendItems, legendColumns } = useMemo(() => {
+    const pieChartLegendMapper: PieChartLegendMapper =
+      pieChartLegend?.mode === 'table' ? new PieChartTableLegendMapper() : new PieChartListLegendMapper();
+    const values = pieChartLegend?.values;
+    const legendItems = pieChartLegendMapper.mapToLegendItems(pieChartData, values);
+    const legendColumns = pieChartLegendMapper.mapToLegendColumns(values, formatOptions);
     return {
-      pieChartData: mode === 'percentage' ? calculatePercentages(sortedPieChartData) : sortedPieChartData,
       legendItems,
       legendColumns,
     };
-  }, [calculation, sort, mode, queryResults, colorList, chartId, pieChartLegend]);
+  }, [formatOptions, pieChartData, pieChartLegend?.mode, pieChartLegend?.values]);
 
   const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
@@ -196,6 +145,8 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
                 data={pieChartData}
                 width={width}
                 height={height}
+                mode={mode}
+                formatOptions={formatOptions}
                 showLabels={Boolean(props.spec.showLabels)}
               />
             </Box>

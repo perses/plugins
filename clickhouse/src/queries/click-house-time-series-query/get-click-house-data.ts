@@ -13,17 +13,18 @@
 
 import { TimeSeries } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './click-house-query-types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { TimeSeriesEntry } from '../../model/click-house-data-types';
 import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
+import { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './click-house-query-types';
 
 function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
-  if (!response || !response.data || response.data.length === 0) {
+  const data = response?.data as TimeSeriesEntry[];
+  if (!response || !data || data.length === 0) {
     return [];
   }
 
-  const values: Array<[number, number]> = response.data.map((row: TimeSeriesEntry) => {
+  const values: Array<[number, number]> = data.map((row: TimeSeriesEntry) => {
     const timestamp = new Date(row.time).getTime();
     const value = Number(row.log_count);
     return [timestamp, value];

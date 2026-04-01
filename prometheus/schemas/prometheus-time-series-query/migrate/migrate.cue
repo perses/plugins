@@ -21,26 +21,26 @@ package migrate
 	datasource?: {
 		uid: string
 	}
-	expr: string
+	expr:          string
 	legendFormat?: string
-	interval?: string
+	interval?:     string
 	...
 }
 
 kind: "PrometheusTimeSeriesQuery"
 spec: {
-    if #target.datasource != _|_ {
-        datasource: {
-            kind: "PrometheusDatasource"
-            name: #target.datasource.uid
-        }
-    }
-    query:         #target.expr
-    #legendFormat: *#target.legendFormat | "__auto"
-    if #legendFormat != "__auto" {
-        seriesNameFormat: #legendFormat
-    }
-    if #target.interval != _|_ {
-        minStep: #target.interval
-    }
+	if #target.datasource != _|_ {
+		datasource: {
+			kind: "PrometheusDatasource"
+			name: #target.datasource.uid
+		}
+	}
+	query:         #target.expr
+	#legendFormat: *#target.legendFormat | "__auto"
+	if #legendFormat != "__auto" {
+		seriesNameFormat: #legendFormat
+	}
+	if #target.interval != _|_ {
+		minStep: #target.interval
+	}
 }

@@ -46,7 +46,10 @@
         "queryIndex": 4,
         "colorMode": "fixed",
         "colorValue": "#fade2a",
-        "lineStyle": "dashed"
+        "lineStyle": "dashed",
+        "format": {
+          "unit": "requests/sec"
+        }
       }
     ]
   }

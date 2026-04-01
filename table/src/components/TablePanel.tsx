@@ -11,19 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, Theme, Typography, useTheme } from '@mui/material';
+import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
+import { formatValue, QueryDataType, TimeSeriesData, transformData } from '@perses-dev/core';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
 import {
+  ActionOptions,
   PanelData,
   PanelProps,
   replaceVariablesInString,
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
-import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
-import { useTheme, Theme, Typography, Box } from '@mui/material';
-import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
+import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
+import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 function generateCellContentConfig(
@@ -32,17 +35,17 @@ function generateCellContentConfig(
   const plugin = column.plugin;
   if (plugin !== undefined) {
     return {
-      cell: (ctx) => {
+      cell: (ctx): ReactElement => {
         const panelData: PanelData<QueryDataType> | undefined = ctx.getValue();
         if (!panelData) return <></>;
         return <EmbeddedPanel kind={plugin.kind} spec={plugin.spec} queryResults={[panelData]} />;
       },
-      cellDescription: column.cellDescription ? () => `${column.cellDescription}` : () => '', // disable hover text
+      cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : (): string => '', // disable hover text
     };
   }
 
   return {
-    cell: (ctx) => {
+    cell: (ctx): ReactElement | string => {
       const cellValue = ctx.getValue();
       return typeof cellValue === 'number' && column.format ? formatValue(cellValue, column.format) : cellValue;
     },
@@ -63,7 +66,7 @@ function ColumnFilterDropdown({
   onFilterChange,
   theme,
 }: ColumnFilterDropdownProps): ReactElement {
-  const values = [...new Set(allValues)].filter((v) => v != null).sort();
+  const values = [...new Set(allValues)].filter((v) => v !== null).sort();
   if (values.length === 0) {
     return (
       <div
@@ -201,7 +204,7 @@ function generateColumnConfig(
 export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant' | 'range' } {
   // if any cell renders a panel plugin, perform a range query instead of an instant query
   return {
-    mode: (spec.columnSettings ?? []).some((c) => c.plugin) ? 'range' : 'instant',
+    mode: getTablePanelQueryMode(spec),
   };
 }
 
@@ -211,44 +214,55 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   const theme = useTheme();
   const allVariables = useAllVariableValues();
 
+  const selectionEnabled = spec.selection?.enabled ?? false;
+  const { selectionMap, setSelection, clearSelection } = useSelection<Record<string, unknown>, string>();
+
+  const itemActionsConfig = spec.actions ? (spec.actions as ActionOptions) : undefined;
+  const itemActionsListConfig =
+    itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : [];
+
+  const { getItemActionButtons, confirmDialog, actionButtons } = useSelectionItemActions({
+    actions: itemActionsListConfig,
+    variableState: allVariables,
+  });
+
+  const filteredDataRef = useRef<Array<Record<string, unknown>>>([]);
+
+  // Convert selectionMap to TanStack's RowSelectionState format
+  const rowSelection = useMemo((): RowSelectionState => {
+    const result: RowSelectionState = {};
+    selectionMap.forEach((_, id) => {
+      result[id] = true;
+    });
+    return result;
+  }, [selectionMap]);
+
+  const handleRowSelectionChange = useCallback(
+    (newRowSelection: RowSelectionState) => {
+      const newSelection: Array<{ id: string; item: Record<string, unknown> }> = [];
+      for (const [id, isSelected] of Object.entries(newRowSelection)) {
+        if (isSelected) {
+          const index = parseInt(id, 10);
+          if (filteredDataRef.current[index] !== undefined) {
+            newSelection.push({ id, item: filteredDataRef.current[index] });
+          }
+        }
+      }
+
+      if (newSelection.length === 0) {
+        clearSelection();
+      } else {
+        setSelection(newSelection);
+      }
+    },
+    [setSelection, clearSelection]
+  );
+
   // TODO: handle other query types
-  const queryMode = getTablePanelQueryOptions(spec).mode;
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
-    // Transform query results to a tabular format:
-    // [ { timestamp: 123, value: 456, labelName1: labelValue1 }, ... ]
-    return queryResults
-      .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
-        data.data.series.map((ts: TimeSeries) => ({ data, ts, queryIndex }))
-      )
-      .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
-        if (ts.values[0] === undefined) {
-          return { ...ts.labels };
-        }
-
-        // If there are multiple queries, we need to add the query index to the value key and label key to avoid conflicts
-        const valueColumnName = queryResults.length === 1 ? 'value' : `value #${queryIndex + 1}`;
-        const labels =
-          queryResults.length === 1
-            ? ts.labels
-            : Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
-                if (key) acc[`${key} #${queryIndex + 1}`] = value;
-                return acc;
-              }, {} as Labels);
-
-        // If the cell visualization is a panel plugin, filter the data by the current series
-        const columnValue = (spec.columnSettings ?? []).find((x) => x.name === valueColumnName)?.plugin
-          ? { ...data, data: { ...data.data, series: data.data.series.filter((s) => s === ts) } }
-          : ts.values[0][1];
-
-        if (queryMode === 'instant') {
-          // Timestamp is not indexed as it will be the same for all queries
-          return { timestamp: ts.values[0][0], [valueColumnName]: columnValue, ...labels };
-        } else {
-          // Don't add a timestamp for range queries
-          return { [valueColumnName]: columnValue, ...labels };
-        }
-      });
-  }, [queryResults, queryMode, spec.columnSettings]);
+    // Transform query results to a tabular format using shared utility
+    return buildRawTableData(queryResults, spec);
+  }, [queryResults, spec]);
 
   // Transform will be applied by their orders on the original data
   const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);
@@ -388,7 +402,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   };
 
   // update column filter
-  const updateColumnFilter = (columnId: string, values: Array<string | number>) => {
+  const updateColumnFilter = (columnId: string, values: Array<string | number>): void => {
     const newFilters = columnFilters.filter((f) => f.id !== columnId);
     if (values.length > 0) {
       newFilters.push({ id: columnId, value: values });
@@ -397,14 +411,14 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   };
 
   // Handle filter clicks
-  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string) => {
+  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string): void => {
     event.preventDefault();
     event.stopPropagation();
     setFilterAnchorEl({ ...filterAnchorEl, [columnId]: event.currentTarget });
     setOpenFilterColumn(columnId);
   };
 
-  const handleFilterClose = () => {
+  const handleFilterClose = (): void => {
     setFilterAnchorEl({});
     setOpenFilterColumn(null);
   };
@@ -413,7 +427,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   useEffect(() => {
     if (!openFilterColumn) return;
 
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (e: MouseEvent): void => {
       const target = e.target as Element;
       if (!target.closest('[data-filter-dropdown]') && !target.closest('button')) {
         handleFilterClose();
@@ -424,7 +438,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       document.addEventListener('click', handleClick);
     }, 100);
 
-    return () => {
+    return (): void => {
       clearTimeout(timer);
       document.removeEventListener('click', handleClick);
     };
@@ -451,6 +465,9 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
     return filtered;
   }, [data, columnFilters, spec.enableFiltering]);
+
+  // Keep ref in sync with filtered data for use in selection handler
+  filteredDataRef.current = filteredData;
 
   const [pagination, setPagination] = useState<PaginationState | undefined>(
     spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
@@ -486,6 +503,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   return (
     <>
+      {confirmDialog}
       {spec.enableFiltering && (
         <div
           style={{
@@ -592,6 +610,11 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         onSortingChange={setSorting}
         pagination={pagination}
         onPaginationChange={setPagination}
+        checkboxSelection={selectionEnabled}
+        rowSelection={rowSelection}
+        onRowSelectionChange={handleRowSelectionChange}
+        getItemActions={({ id, data }) => getItemActionButtons({ id, data: data as Record<string, unknown> })}
+        hasItemActions={actionButtons && actionButtons.length > 0}
       />
     </>
   );

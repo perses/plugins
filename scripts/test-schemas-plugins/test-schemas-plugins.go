@@ -20,7 +20,7 @@ import (
 
 	"github.com/perses/common/async"
 	"github.com/perses/perses/scripts/pkg/command"
-	"github.com/perses/perses/scripts/pkg/npm"
+	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
 

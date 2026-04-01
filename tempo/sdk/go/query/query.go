@@ -16,6 +16,8 @@ package query
 import (
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/query"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
 const PluginKind = "TempoTraceQuery"
@@ -51,14 +53,13 @@ type Builder struct {
 }
 
 func TraceQL(expr string, options ...Option) query.Option {
-	return func(builder *query.Builder) error {
-		plugin, err := create(expr, options...)
-		if err != nil {
-			return err
-		}
-
-		builder.Spec.Plugin.Kind = PluginKind
-		builder.Spec.Plugin.Spec = plugin
-		return nil
+	plg, err := create(expr, options...)
+	return query.Option{
+		Kind: plugin.KindTraceQuery,
+		Plugin: common.Plugin{
+			Kind: PluginKind,
+			Spec: plg,
+		},
+		Error: err,
 	}
 }

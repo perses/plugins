@@ -52,6 +52,13 @@ func WithDefaultPagination(enabled bool) Option {
 	}
 }
 
+func WithEnableFiltering(enabled bool) Option {
+	return func(builder *Builder) error {
+		builder.EnableFiltering = enabled
+		return nil
+	}
+}
+
 func WithColumnSettings(settings []ColumnSettings) Option {
 	return func(builder *Builder) error {
 		builder.ColumnSettings = settings

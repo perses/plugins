@@ -18,6 +18,9 @@ import { OptionsEditorProps } from '@perses-dev/plugin-system';
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal', shortValues: true };
 export const DEFAULT_SORT: SortOption = 'desc';
 export const DEFAULT_MODE: ModeOption = 'value';
+export const DEFAULT_ORIENTATION: 'horizontal' | 'vertical' = 'horizontal';
+export const DEFAULT_GROUP_BY: string[] = [];
+export const DEFAULT_IS_STACKED = false;
 
 /**
  * The schema for a BarChart panel.
@@ -34,6 +37,9 @@ export interface BarChartOptions {
   format?: FormatOptions;
   sort?: SortOption;
   mode?: ModeOption;
+  orientation?: 'horizontal' | 'vertical';
+  groupBy?: string[];
+  isStacked?: boolean;
 }
 
 export type BarChartOptionsEditorProps = OptionsEditorProps<BarChartOptions>;
@@ -47,5 +53,8 @@ export function createInitialBarChartOptions(): BarChartOptions {
     format: DEFAULT_FORMAT,
     sort: DEFAULT_SORT,
     mode: DEFAULT_MODE,
+    orientation: DEFAULT_ORIENTATION,
+    groupBy: DEFAULT_GROUP_BY,
+    isStacked: DEFAULT_IS_STACKED,
   };
 }

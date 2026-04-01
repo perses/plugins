@@ -35,7 +35,8 @@
     "timeseriestable",
     "tracetable",
     "tracingganttchart",
-    "victorialogs"
+    "victorialogs",
+    "e2e"
   ],
   "peerDependencies": {
     "@types/react-dom": "^18.3.0",
@@ -44,11 +45,11 @@
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "^0.21.6",
-    "@perses-dev/components": "^0.53.0-rc.1",
-    "@perses-dev/core": "^0.53.0-beta.4",
-    "@perses-dev/dashboards": "^0.53.0-rc.1",
-    "@perses-dev/explore": "^0.53.0-rc.1",
-    "@perses-dev/plugin-system": "^0.53.0-rc.1",
+    "@perses-dev/components": "^0.53.1",
+    "@perses-dev/core": "^0.53.0",
+    "@perses-dev/dashboards": "^0.53.1",
+    "@perses-dev/explore": "^0.53.1",
+    "@perses-dev/plugin-system": "^0.53.1",
     "@rsbuild/core": "^1.6.7",
     "@rsbuild/plugin-react": "^1.4.2",
     "@swc/cli": "^0.7.9",

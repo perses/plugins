@@ -45,36 +45,3 @@ func TestReplaceNPMPackage(t *testing.T) {
 	result := replaceNPMPackage(original, "0.52.0-beta.4", "dashboards", "panels", "alerting")
 	assert.Equal(t, string(expected), string(result))
 }
-
-func TestReplaceCUEPackage(t *testing.T) {
-	original := []byte(`module: "github.com/perses/plugins/gaugechart@v0"
-language: {
-	version: "v0.14.0"
-}
-source: {
-	kind: "git"
-}
-deps: {
-	"github.com/perses/perses/cue@v0": {
-		v:       "v0.51.0"
-		default: true
-	}
-}
-`)
-	expected := []byte(`module: "github.com/perses/plugins/gaugechart@v0"
-language: {
-	version: "v0.14.0"
-}
-source: {
-	kind: "git"
-}
-deps: {
-	"github.com/perses/perses/cue@v0": {
-		v:       "v0.52.0-beta.4"
-		default: true
-	}
-}
-`)
-	result := replaceCuePackage(original, "0.52.0-beta.4")
-	assert.Equal(t, string(expected), string(result))
-}

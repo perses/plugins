@@ -34,11 +34,21 @@ const (
 	PercentageMode Mode = "percentage"
 )
 
+type Orientation string
+
+const (
+	HorizontalOrientation Orientation = "horizontal"
+	VerticalOrientation   Orientation = "vertical"
+)
+
 type PluginSpec struct {
 	Calculation common.Calculation `json:"calculation" yaml:"calculation"`
 	Format      *common.Format     `json:"format,omitempty" yaml:"format,omitempty"`
 	Sort        Sort               `json:"sort,omitempty" yaml:"sort,omitempty"`
 	Mode        Mode               `json:"mode,omitempty" yaml:"mode,omitempty"`
+	Orientation Orientation        `json:"orientation,omitempty" yaml:"orientation,omitempty"`
+	GroupBy     []string           `json:"groupBy,omitempty" yaml:"groupBy,omitempty"`
+	IsStacked   bool               `json:"isStacked,omitempty" yaml:"isStacked,omitempty"`
 }
 
 type Option func(plugin *Builder) error

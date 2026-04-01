@@ -62,7 +62,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     throw new Error('Got unexpected non-Tempo datasource selector');
   };
 
-  const runQuery = (newQuery: string) => {
+  const runQuery = (newQuery: string): void => {
     onChange(
       produce(value, (draft) => {
         draft.query = newQuery;
@@ -113,9 +113,9 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
   );
 }
 
-function isSimpleTraceQLQuery(query: string) {
+function isSimpleTraceQLQuery(query: string): boolean {
   // if a query can be transformed to a filter and back to the original query, we can show the attribute filter toolbar
-  return query == '' || filterToTraceQL(traceQLToFilter(query)) === query;
+  return query === '' || filterToTraceQL(traceQLToFilter(query)) === query;
 }
 
 const limitOptions = [20, 50, 100, 500, 1000, 5000];
@@ -125,7 +125,7 @@ interface LimitSelectProps {
   setValue: (x: number) => void;
 }
 
-export function LimitSelect(props: LimitSelectProps) {
+export function LimitSelect(props: LimitSelectProps): ReactElement {
   const { value, setValue } = props;
 
   // the outer <Box> is required, because <FormControl> has display: inline-flex, which doesn't work with the parent <Stack> of the query editor

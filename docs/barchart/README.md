@@ -1,6 +1,8 @@
 # Bar Chart
 
-The Bar Chart plugin displays data as bar charts in Perses dashboards. This panel plugin is useful for comparing values across categories and showing data in a clear, categorical format.
+The Bar Chart plugin displays time series or tabular values as bars, making it easy to compare categories, rankings, and top-N views in Perses dashboards.
+
+![BarChart example](./barchart.png)
 
 See also technical docs related to this plugin:
 

@@ -198,9 +198,9 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers, queryParams } = queryOptions;
+  const { datasourceUrl, headers, queryParams, abortSignal: signal } = queryOptions;
   const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams, createSearchParams(params))}`;
-  return fetchJson<TResponse>(url, { method: 'GET', headers });
+  return fetchJson<TResponse>(url, { method: 'GET', headers, signal });
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(
@@ -220,7 +220,7 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
     signal,
     body: createSearchParams(params),
   };
-  return fetchResults<TResponse>(url, init);
+  return fetchJson<TResponse>(url, init);
 }
 
 // Request parameter values we know how to serialize
@@ -256,13 +256,4 @@ function createSearchParams<T extends RequestParams<T>>(params: T): URLSearchPar
     }
   }
   return searchParams;
-}
-
-/**
- * Fetch JSON and parse warnings for query inspector
- */
-export async function fetchResults<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
-  const response = await fetch(...args);
-  const json: T = await response.json();
-  return { ...json, rawResponse: response };
 }

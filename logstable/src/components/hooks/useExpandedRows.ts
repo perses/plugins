@@ -13,7 +13,13 @@
 
 import { useState, useCallback } from 'react';
 
-export const useExpandedRows = () => {
+export interface UseExpandedRowsReturn {
+  expandedRows: Set<number>;
+  toggleExpand: (index: number) => void;
+  clearExpanded: () => void;
+}
+
+export const useExpandedRows = (): UseExpandedRowsReturn => {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
   const toggleExpand = useCallback((index: number) => {

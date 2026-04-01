@@ -21,6 +21,6 @@ export interface ClickHouseTimeSeriesQuerySpec {
 // TODO: import this type from your datasource or an existing datasource plugin
 export type DatasourceQueryResponse = {
   status: string;
-  data: any;
+  data: unknown;
   warnings?: string[];
 };

@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { Alert, AlertProps } from '@mui/material';
 
-export function ClosableAlert(props: AlertProps) {
+export function ClosableAlert(props: AlertProps): ReactElement | null {
   const [isVisible, setVisible] = useState(true);
 
   const handleClose = useCallback(() => {

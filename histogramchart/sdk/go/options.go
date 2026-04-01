@@ -44,3 +44,10 @@ func Thresholds(thresholds common.Thresholds) Option {
 		return nil
 	}
 }
+
+func WithLogBase(logBase uint) Option {
+	return func(builder *Builder) error {
+		builder.LogBase = logBase
+		return nil
+	}
+}

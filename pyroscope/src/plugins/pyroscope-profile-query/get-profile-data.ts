@@ -39,7 +39,7 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     spec.datasource ?? defaultPyroscopeDatasource
   );
 
-  const buildQueryString = () => {
+  const buildQueryString = (): string => {
     let query: string = '';
     if (spec.service) {
       query = `service_name="${spec.service}"`;

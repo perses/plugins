@@ -1,0 +1,6 @@
+{
+  "kind": "HistogramChart",
+  "spec": {
+    "max": 10
+  }
+}

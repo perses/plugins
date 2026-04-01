@@ -17,7 +17,7 @@ import (
 	"regexp"
 )
 
-#labelValuesRegexp: =~ "^label_values\\(.*\\)$"
+#labelValuesRegexp: =~"^label_values\\(.*\\)$"
 
 #grafanaVar: {
 	type: "query"
