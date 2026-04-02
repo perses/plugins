@@ -1,8 +1,8 @@
 module github.com/perses/plugins/victorialogs
 
-go 1.25.5
+go 1.25.7
 
-require github.com/perses/perses v0.53.0
+require github.com/perses/perses v0.53.1
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
