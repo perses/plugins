@@ -26,7 +26,7 @@
   "dependencies": {},
   "peerDependencies": {
     "@perses-dev/components": "^0.53.1",
-    "@perses-dev/core": "^0.53.1",
+    "@perses-dev/core": "^0.53.0",
     "@perses-dev/plugin-system": "^0.53.1",
     "immer": "^10.1.1",
     "react": "^17.0.2 || ^18.0.0"

@@ -47,7 +47,7 @@ export function SplunkTimeSeriesQueryEditor(props: SplunkQueryEditorProps): Reac
     throw new Error('Got unexpected non SplunkQuery datasource selection');
   };
 
-  const handleQueryChange = (newQuery: string) => {
+  const handleQueryChange = (newQuery: string): void => {
     onChange(
       produce(value, (draft) => {
         draft.query = newQuery;
