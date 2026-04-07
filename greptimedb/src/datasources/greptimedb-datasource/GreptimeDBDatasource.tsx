@@ -20,7 +20,7 @@ const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasou
   spec,
   options
 ) => {
-  const { directUrl, proxy } = spec;
+  const { directUrl, headers, proxy } = spec;
   const { proxyUrl } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -30,7 +30,11 @@ const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasou
     );
   }
 
-  const specHeaders = proxy?.spec.headers || {};
+  // Support directUrl auth headers while keeping backward compatibility with proxy headers.
+  const specHeaders = {
+    ...(proxy?.spec.headers ?? {}),
+    ...(headers ?? {}),
+  };
 
   return {
     options: {

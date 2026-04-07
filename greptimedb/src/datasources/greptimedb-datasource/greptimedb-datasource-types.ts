@@ -16,6 +16,7 @@ import { DatasourceClient } from '@perses-dev/plugin-system';
 
 export interface GreptimeDBDatasourceSpec {
   directUrl?: string;
+  headers?: RequestHeaders;
   proxy?: HTTPProxy;
 }
 
