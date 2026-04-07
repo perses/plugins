@@ -13,7 +13,7 @@
 
 import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { QueryParamValues } from '@perses-dev/components';
-import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
+import { HTTPSettingsEditor, DatasourceEditorProps } from '@perses-dev/plugin-system';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement, useRef, useState } from 'react';
@@ -27,14 +27,10 @@ interface QueryParamEntry {
   value: string;
 }
 
-export interface PrometheusDatasourceEditorProps {
-  value: PrometheusDatasourceSpec;
-  onChange: (next: PrometheusDatasourceSpec) => void;
-  isReadonly?: boolean;
-}
+export type PrometheusDatasourceEditorProps = DatasourceEditorProps<PrometheusDatasourceSpec>;
 
 export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProps): ReactElement {
-  const { value, onChange, isReadonly } = props;
+  const { value, onChange, isReadonly, testConnection } = props;
 
   // Counter for generating unique IDs
   const nextIdRef = useRef(0);
@@ -171,6 +167,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         isReadonly={isReadonly}
         initialSpecDirect={initialSpecDirect}
         initialSpecProxy={initialSpecProxy}
+        testConnection={testConnection}
       />
       <Typography variant="h5" mt={2} mb={1}>
         Query Parameters
