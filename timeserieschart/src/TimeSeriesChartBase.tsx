@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, MouseEvent, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, MouseEvent, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
-import { toZonedTime } from 'date-fns-tz';
 import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
@@ -49,7 +48,6 @@ import {
   enableDataZoom,
   getClosestTimestamp,
   getFormattedAxis,
-  getFormattedAxisLabel,
   getPointInGrid,
   OnEventsType,
   restoreChart,
@@ -61,6 +59,7 @@ import {
   ZoomEventData,
 } from '@perses-dev/components';
 import { DatasetOption } from 'echarts/types/dist/shared';
+import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
 
 use([
   EChartsLineChart,
@@ -128,6 +127,12 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const { timeZone } = useTimeZone();
+
+  const getTimezoneAwareAxisFormatter = useCallback(
+    (rangeMs: number): ((value: number) => string) => createTimezoneAwareAxisFormatter(rangeMs, timeZone),
+    [timeZone]
+  );
+
   let timeScale: TimeScale;
   if (timeScaleProp === undefined) {
     const commonTimeScale = getCommonTimeScale(data);
@@ -204,11 +209,10 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     // Utilizes ECharts dataset so raw data is separate from series option style properties
     // https://apache.github.io/echarts-handbook/en/concepts/dataset/
     const dataset: DatasetOption[] = [];
-    const isLocalTimeZone = timeZone === 'local';
     data.map((d, index) => {
       const values = d.values.map(([timestamp, value]) => {
         const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
-        return [isLocalTimeZone ? timestamp : toZonedTime(timestamp, timeZone), val];
+        return [timestamp, val];
       });
       dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
     });
@@ -221,11 +225,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       series: updatedSeriesMapping,
       xAxis: {
         type: 'time',
-        min: isLocalTimeZone ? timeScale.startMs : toZonedTime(timeScale.startMs, timeZone),
-        max: isLocalTimeZone ? timeScale.endMs : toZonedTime(timeScale.endMs, timeZone),
+        min: timeScale.startMs,
+        max: timeScale.endMs,
         axisLabel: {
           hideOverlap: true,
-          formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
+          formatter: getTimezoneAwareAxisFormatter(timeScale.rangeMs ?? 0),
         },
         axisPointer: {
           snap: false, // important so shared crosshair does not lag
@@ -276,10 +280,10 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     noDataOption,
     __experimentalEChartsOptionsOverride,
     noDataVariant,
-    timeZone,
     isStackedBar,
     enablePinning,
     pinnedCrosshair,
+    getTimezoneAwareAxisFormatter,
   ]);
 
   // Update adjacent charts so tooltip is unpinned when current chart is clicked.
