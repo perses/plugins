@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange, isValidTraceId, Notice, otlptracev1, TraceSearchResult } from '@perses-dev/core';
-import { datasourceSelectValueToSelector, TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { getUnixTime } from 'date-fns';
 import {
   TEMPO_DATASOURCE_KIND,
@@ -40,6 +40,8 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     return { searchResult: [] };
   }
 
+  const query = replaceVariables(spec.query, context.variableState);
+
   const defaultTempoDatasource: TempoDatasourceSelector = {
     kind: TEMPO_DATASOURCE_KIND,
   };
@@ -56,17 +58,17 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
    * if the query is a valid traceId, fetch the trace by traceId
    * otherwise, execute a TraceQL query
    */
-  if (isValidTraceId(spec.query)) {
-    const response = await client.query({ traceId: spec.query });
+  if (isValidTraceId(query)) {
+    const response = await client.query({ traceId: query });
     return {
       trace: parseTraceResponse(response),
       metadata: {
-        executedQueryString: spec.query,
+        executedQueryString: query,
       },
     };
   } else {
     const params: SearchRequestParameters = {
-      q: spec.query,
+      q: query,
     };
 
     // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
@@ -100,7 +102,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     return {
       searchResult,
       metadata: {
-        executedQueryString: spec.query,
+        executedQueryString: query,
         hasMoreResults,
         notices,
       },
