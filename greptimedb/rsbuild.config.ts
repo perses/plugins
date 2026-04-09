@@ -25,6 +25,8 @@ export default createConfigForPlugin({
       './GreptimeDBDatasource': './src/datasources/greptimedb-datasource',
       './GreptimeDBTimeSeriesQuery': './src/queries/greptimedb-time-series-query',
       './GreptimeDBLogQuery': './src/queries/greptimedb-log-query',
+      './GreptimeDBTraceQuery': './src/queries/greptimedb-trace-query',
+      './GreptimeDBTraceExplorer': './src/explore',
     },
     shared: {
       react: { requiredVersion: '18.2.0', singleton: true },

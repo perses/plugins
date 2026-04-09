@@ -13,3 +13,4 @@
 
 export * from './greptimedb-time-series-query';
 export * from './greptimedb-log-query';
+export * from './greptimedb-trace-query';

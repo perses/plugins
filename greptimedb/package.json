@@ -71,6 +71,24 @@
           },
           "name": "GreptimeDBLogQuery"
         }
+      },
+      {
+        "kind": "TraceQuery",
+        "spec": {
+          "display": {
+            "name": "GreptimeDB Trace Query"
+          },
+          "name": "GreptimeDBTraceQuery"
+        }
+      },
+      {
+        "kind": "Explore",
+        "spec": {
+          "display": {
+            "name": "GreptimeDB Trace Explorer"
+          },
+          "name": "GreptimeDBTraceExplorer"
+        }
       }
     ]
   }

@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { getPluginModule } from './getPluginModule';
-export * from './queries';
-export * from './datasources';
-export * from './explore';
+package model
+
+import (
+	"strings"
+	ds "github.com/perses/plugins/greptimedb/schemas/datasources/greptimedb-datasource:model"
+)
+
+kind: "GreptimeDBTraceQuery"
+spec: close({
+	ds.#selector
+	query: strings.MinRunes(1)
+})

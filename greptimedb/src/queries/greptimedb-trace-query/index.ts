@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { getPluginModule } from './getPluginModule';
-export * from './queries';
-export * from './datasources';
-export * from './explore';
+export * from './GreptimeDBTraceQuery';
+export * from './GreptimeDBTraceQueryEditor';
+export * from './get-greptimedb-trace-data';
+export * from './greptimedb-trace-query-types';
+

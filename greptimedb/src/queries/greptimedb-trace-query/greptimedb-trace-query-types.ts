@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { getPluginModule } from './getPluginModule';
-export * from './queries';
-export * from './datasources';
-export * from './explore';
+import { DatasourceSelector } from '@perses-dev/core';
+
+export interface GreptimeDBTraceQuerySpec {
+  query: string;
+  datasource?: DatasourceSelector;
+}
