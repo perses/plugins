@@ -136,6 +136,25 @@ function buildTimeSeries(
   return Array.from(seriesMap.values()).filter((s) => s.values.length > 0);
 }
 
+function inferStepMsFromSeries(
+  series: Array<{ name: string; labels: Record<string, string>; values: Array<[number, number]> }>,
+  fallbackStepMs: number
+): number {
+  let minDeltaMs = Number.POSITIVE_INFINITY;
+
+  for (const s of series) {
+    const sortedTimestamps = [...s.values.map(([ts]) => ts)].sort((a, b) => a - b);
+    for (let i = 1; i < sortedTimestamps.length; i++) {
+      const delta = sortedTimestamps[i]! - sortedTimestamps[i - 1]!;
+      if (delta > 0 && delta < minDeltaMs) {
+        minDeltaMs = delta;
+      }
+    }
+  }
+
+  return Number.isFinite(minDeltaMs) ? minDeltaMs : fallbackStepMs;
+}
+
 export const getTimeSeriesData: TimeSeriesQueryPlugin<GreptimeDBTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
   context
@@ -167,10 +186,13 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<GreptimeDBTimeSeriesQueryS
   const tableColumns = records?.schema?.column_schemas ?? [];
   const tableRows = records?.rows ?? [];
 
+  const series = buildTimeSeries(records, end.getTime());
+  const stepMs = inferStepMsFromSeries(series, context.suggestedStepMs || 30 * 1000);
+
   return {
-    series: buildTimeSeries(records, end.getTime()),
+    series,
     timeRange: { start, end },
-    stepMs: 30 * 1000,
+    stepMs,
     metadata: {
       executedQueryString: query,
       records,
