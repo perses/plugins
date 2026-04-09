@@ -17,7 +17,7 @@ import { QueryDefinition } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { GreptimeDBTraceQuerySpec } from '../queries/greptimedb-trace-query/greptimedb-trace-query-types';
 import { linkToSpan, linkToTrace, resolveTraceLinkTemplate } from './links';
 
@@ -118,12 +118,13 @@ function isLikelyTraceDetailSQL(query: string): boolean {
 }
 
 export function GreptimeDBTraceExplorer(): ReactElement {
-  const {
-    data: { queries = [], spanId: selectedSpanId },
-    setData,
-  } = useExplorerManagerContext<TraceExplorerQueryParams>();
+  const { data, setData } = useExplorerManagerContext<TraceExplorerQueryParams>();
+  const { queries = [], spanId: selectedSpanId } = data;
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
+  useEffect(() => {
+    setQueryDefinitions(queries);
+  }, [queries]);
 
   const definitions = queries.length
     ? queries.map((query: QueryDefinition) => {
@@ -143,7 +144,7 @@ export function GreptimeDBTraceExplorer(): ReactElement {
         queryTypes={['TraceQuery']}
         onChange={(state) => setQueryDefinitions(state)}
         queries={queryDefinitions}
-        onQueryRun={() => setData({ queries: queryDefinitions })}
+        onQueryRun={() => setData({ ...data, queries: queryDefinitions })}
       />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
