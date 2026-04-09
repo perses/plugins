@@ -79,9 +79,7 @@ describe('GreptimeDBTraceQuery', () => {
             { name: 'status_code' },
           ],
         },
-        rows: [
-          ['abc123abc123abc123abc123abc123ab', 1700000000000, 100, 'frontend', 'GET /', 'STATUS_CODE_ERROR'],
-        ],
+        rows: [['abc123abc123abc123abc123abc123ab', 1700000000000, 100, 'frontend', 'GET /', 'STATUS_CODE_ERROR']],
       },
     };
     mockedQuery.mockResolvedValue(stubResponse);
@@ -158,7 +156,7 @@ describe('GreptimeDBTraceQuery', () => {
             'SPAN_KIND_CLIENT',
             'STATUS_CODE_ERROR',
             'db error',
-            '[{\"name\":\"exception\",\"time_unix_nano\":\"1700000000030000000\"}]',
+            '[{"name":"exception","time_unix_nano":"1700000000030000000"}]',
             '[]',
             'POST',
           ],

@@ -15,7 +15,12 @@ import { otlpcommonv1, otlptracev1, TraceSearchResult } from '@perses-dev/core';
 import { replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { GreptimeDBColumnSchema, GreptimeDBRecords, normalizeRecords, toTimestampMs } from '../greptimedb-query-data-model';
+import {
+  GreptimeDBColumnSchema,
+  GreptimeDBRecords,
+  normalizeRecords,
+  toTimestampMs,
+} from '../greptimedb-query-data-model';
 import { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
 
 type Row = unknown[];
@@ -130,7 +135,9 @@ function getNumber(value: unknown): number | undefined {
 }
 
 function isErrorStatus(value: unknown): boolean {
-  const normalized = String(value ?? '').trim().toUpperCase();
+  const normalized = String(value ?? '')
+    .trim()
+    .toUpperCase();
   return normalized === 'STATUS_CODE_ERROR' || normalized === 'ERROR' || normalized === '2';
 }
 
@@ -300,7 +307,9 @@ function toKeyValue(key: string, value: unknown): otlpcommonv1.KeyValue {
 }
 
 function parseStatusCode(value: unknown): otlptracev1.Status['code'] {
-  const normalized = String(value ?? '').trim().toUpperCase();
+  const normalized = String(value ?? '')
+    .trim()
+    .toUpperCase();
   if (!normalized) return undefined;
   if (normalized === 'STATUS_CODE_OK' || normalized === 'OK' || normalized === '1') {
     return otlptracev1.StatusCodeOk;
@@ -332,7 +341,8 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
 
     const parentSpanId = getString(getCell(row, map, ['parent_span_id', 'parentspanid', 'parentSpanId']));
     const name = getString(getCell(row, map, ['span_name', 'name', 'operation_name'])) ?? '(unknown span)';
-    const kind = (getString(getCell(row, map, ['span_kind', 'kind'])) ?? 'SPAN_KIND_UNSPECIFIED') as otlptracev1.Span['kind'];
+    const kind = (getString(getCell(row, map, ['span_kind', 'kind'])) ??
+      'SPAN_KIND_UNSPECIFIED') as otlptracev1.Span['kind'];
     const serviceName = getString(getCell(row, map, ['service_name'])) ?? 'unknown';
     const scopeName = getString(getCell(row, map, ['scope_name'])) ?? '';
     const scopeVersion = getString(getCell(row, map, ['scope_version'])) ?? '';

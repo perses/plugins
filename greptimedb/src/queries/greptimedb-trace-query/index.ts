@@ -15,4 +15,3 @@ export * from './GreptimeDBTraceQuery';
 export * from './GreptimeDBTraceQueryEditor';
 export * from './get-greptimedb-trace-data';
 export * from './greptimedb-trace-query-types';
-

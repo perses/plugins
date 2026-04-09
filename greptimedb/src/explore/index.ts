@@ -13,4 +13,3 @@
 
 export * from './GreptimeDBTraceExplorer';
 export * from './links';
-
