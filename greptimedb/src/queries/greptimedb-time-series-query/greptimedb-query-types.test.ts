@@ -128,4 +128,46 @@ describe('GreptimeDBTimeSeriesQuery', () => {
     expect(result.series[0]?.values).toHaveLength(1);
     expect(result.series[0]?.values?.[0]?.[1]).toBe(44931);
   });
+
+  it('should split rows into multiple series by labels', async () => {
+    greptimedbStubClient.query = jest.fn(async () => {
+      const stubResponse: GreptimeDBQueryResponse = {
+        status: 'success',
+        data: {
+          output: [
+            {
+              records: {
+                schema: {
+                  column_schemas: [
+                    { name: 'time', data_type: 'TimestampMillisecond' },
+                    { name: 'host', data_type: 'String' },
+                    { name: 'value', data_type: 'Float64' },
+                  ],
+                },
+                rows: [
+                  [1775722140000, 'host-c', 0.73],
+                  [1775722200000, 'host-c', 0.62],
+                  [1775722140000, 'host_b', 0.63],
+                  [1775722200000, 'host_b', 0.64],
+                ],
+                total_rows: 4,
+              },
+            },
+          ],
+          execution_time_ms: 8,
+        },
+      };
+      return stubResponse as GreptimeDBQueryResponse;
+    });
+
+    const result = await GreptimeDBTimeSeriesQuery.getTimeSeriesData(
+      {
+        query: "SELECT date_bin(INTERVAL '1 minute', ts) AS time, host, avg(cpu_usage) AS value FROM cpu_metrics_30",
+      },
+      createStubContext()
+    );
+
+    expect(result.series).toHaveLength(2);
+    expect(result.series.map((s) => s.name).sort()).toEqual(['host=host-c', 'host=host_b']);
+  });
 });

@@ -31,6 +31,15 @@ function isLikelyNumericType(dataType: string | undefined): boolean {
   );
 }
 
+function buildSeriesName(valueColumnName: string, labels: Record<string, string>): string {
+  const entries = Object.entries(labels);
+  if (entries.length === 0) {
+    return valueColumnName;
+  }
+
+  return entries.map(([k, v]) => `${k}=${v}`).join(',');
+}
+
 function buildTimeSeries(
   records: GreptimeDBRecords | undefined,
   fallbackTimestampMs: number
@@ -129,7 +138,7 @@ function buildTimeSeries(
     if (existing) {
       existing.values.push([tsMs, value]);
     } else {
-      seriesMap.set(key, { name: valueColumnName, labels, values: [[tsMs, value]] });
+      seriesMap.set(key, { name: buildSeriesName(valueColumnName, labels), labels, values: [[tsMs, value]] });
     }
   }
 
