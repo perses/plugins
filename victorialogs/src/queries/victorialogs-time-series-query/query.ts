@@ -79,9 +79,12 @@ function formatStepForVictoriaLogs(stepSeconds: number): string {
 
 function convertMatrixToTimeSeries(matrix: VictoriaLogsMatrixResult[]): TimeSeries[] {
   return matrix.map((series) => {
-    const { _stream, ...labels } = series.metric;
-    if (_stream) {
-      const match = _stream.match(/{([^}]+)}/);
+    const labels = { ...series.metric };
+    delete labels._stream;
+    delete labels.__name__;
+
+    if (series.metric._stream) {
+      const match = series.metric._stream.match(/{([^}]+)}/);
       if (match && match[1]) {
         match[1].split(',').forEach((labelPair) => {
           const [key, val] = labelPair.split('=').map((s) => s.trim().replace(/^"|"$/g, ''));
