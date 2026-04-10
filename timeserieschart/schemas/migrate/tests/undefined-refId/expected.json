@@ -1,0 +1,23 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+   "legend": {
+     "mode": "table",
+      "position": "bottom",
+      "values": [
+        "first",
+        "min",
+        "max",
+        "last"
+      ]
+    },
+    "visual": {
+      "connectNulls": false
+    },
+    "yAxis": {
+      "format": {
+        "unit": "decimal"
+      }
+    }
+  }
+}
