@@ -31,6 +31,7 @@ interface LogExplorerQueryParams {
 
 const PANEL_PREVIEW_HEIGHT = 700;
 const HISTOGRAM_HEIGHT = 200;
+const EMPTY_QUERIES: QueryDefinition[] = [];
 
 function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const { ref: boxRef } = useResizeObserver();
@@ -118,7 +119,7 @@ function VolumeHistogramPanel({ queries }: { queries: QueryDefinition[] }): Reac
 
 export function LogExplorer(): ReactElement {
   const {
-    data: { queries = [] },
+    data: { queries = EMPTY_QUERIES },
     setData,
   } = useExplorerManagerContext<LogExplorerQueryParams>();
 
@@ -147,7 +148,7 @@ export function LogExplorer(): ReactElement {
   useEffect(() => {
     const generateVolumeQueries = async () => {
       if (queries.length === 0) {
-        setVolumeQueries([]);
+        setVolumeQueries((prev) => (prev.length === 0 ? prev : []));
         return;
       }
 
