@@ -20,6 +20,7 @@ import {
 import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
 import { Stack } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/components';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { ClickQLEditor } from '../../components';
 import { queryExample } from '../../components/constants';
@@ -86,12 +87,7 @@ export function ClickHouseTimeSeriesQueryEditor(props: ClickHouseTimeSeriesQuery
         value={query}
         onChange={handleClickHouseQueryChange}
         onBlur={handleQueryBlur}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
-            event.preventDefault();
-            handleQueryExecute(query);
-          }
-        }}
+        onKeyDown={createModEnterHandler(() => handleQueryExecute(query))}
         placeholder="Enter ClickHouse SQL query"
       />
 

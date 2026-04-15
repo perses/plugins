@@ -20,6 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
+import { createModEnterHandler } from '@perses-dev/components';
 import { produce } from 'immer';
 import { LogQLEditor } from '../../components';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
@@ -103,12 +104,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
           value={query}
           onChange={handleLogsQueryChange}
           onBlur={handleQueryBlur}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
-              event.preventDefault();
-              handleQueryExecute(query);
-            }
-          }}
+          onKeyDown={createModEnterHandler(() => handleQueryExecute(query))}
           placeholder='Enter LogQL query (e.g. {job="mysql"} |= "error")'
           // height="120px"
         />
