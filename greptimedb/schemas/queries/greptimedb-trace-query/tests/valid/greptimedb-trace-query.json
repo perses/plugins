@@ -1,0 +1,10 @@
+{
+  "kind": "GreptimeDBTraceQuery",
+  "spec": {
+    "datasource": {
+      "kind": "GreptimeDBDatasource",
+      "name": "demo"
+    },
+    "query": "SELECT * FROM public.opentelemetry_traces LIMIT 100"
+  }
+}

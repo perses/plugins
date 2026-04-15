@@ -16,6 +16,7 @@
     "datasourcevariable",
     "flamechart",
     "gaugechart",
+    "greptimedb",
     "heatmapchart",
     "histogramchart",
     "logstable",
