@@ -13,17 +13,22 @@
 
 package model
 
+import "strings"
 import ds "github.com/perses/plugins/jaeger/schemas/datasource:model"
 
 kind: "JaegerTraceQuery"
 spec: close({
 	ds.#selector
-	traceId?:     string
-	service?:     string
-	operation?:   string
-	spanKind?:    string
-	tags?:        string
-	minDuration?: string
-	maxDuration?: string
+	traceId?:     strings.MinRunes(1)
+	service?:     strings.MinRunes(1)
+	operation?:   strings.MinRunes(1)
+	spanKind?:    strings.MinRunes(1)
+	tags?:        strings.MinRunes(1)
+	minDuration?: strings.MinRunes(1)
+	maxDuration?: strings.MinRunes(1)
 	limit?:       number
+
+	if traceId == _|_ {
+		service: strings.MinRunes(1)
+	}
 })

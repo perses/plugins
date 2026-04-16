@@ -11,13 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  TextFieldProps,
+} from '@mui/material';
 import { useId } from '@perses-dev/components';
-import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
+import {
+  DatasourceSelect,
+  DatasourceSelectProps,
+  useDatasourceClient,
+  useDatasourceSelectValueToSelector,
+} from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ChangeEvent, ReactElement } from 'react';
+import { ChangeEvent, ReactElement, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DEFAULT_JAEGER,
+  JaegerClient,
   isDefaultJaegerSelector,
   isJaegerDatasourceSelector,
   JAEGER_DATASOURCE_KIND,
@@ -37,7 +52,11 @@ const spanKindOptions = ['', 'internal', 'server', 'client', 'producer', 'consum
 export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const datasourceSelectValue = value.datasource ?? DEFAULT_JAEGER;
+  const selectedDatasource = useDatasourceSelectValueToSelector(datasourceSelectValue, JAEGER_DATASOURCE_KIND);
   const datasourceSelectLabelID = useId('jaeger-datasource-label');
+  const { data: client } = useDatasourceClient<JaegerClient>(selectedDatasource);
+  const serviceOptions = useServiceOptions(client);
+  const operationOptions = useOperationOptions(client, value.service);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isJaegerDatasourceSelector(next)) {
@@ -52,16 +71,16 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
     throw new Error('Got unexpected non-Jaeger datasource selector');
   };
 
-  const handleFieldChange =
-    (field: FieldKey) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-      const nextValue = event.target.value;
+  const updateField = useCallback(
+    (field: FieldKey, nextValue: string | undefined): void => {
       onChange(
         produce(value, (draft) => {
-          draft[field] = nextValue === '' ? undefined : nextValue;
+          draft[field] = nextValue;
         })
       );
-    };
+    },
+    [onChange, value]
+  );
 
   return (
     <Stack spacing={2}>
@@ -76,27 +95,26 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
         />
       </FormControl>
       <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-        <TextField
-          size="small"
+        <LazyTextField
           label="Trace ID"
-          value={value.traceId ?? ''}
-          onChange={handleFieldChange('traceId')}
+          value={value.traceId}
+          onCommit={(nextValue) => updateField('traceId', nextValue)}
           sx={{ minWidth: 260 }}
           helperText="Use this for direct trace lookup."
         />
-        <TextField
-          size="small"
+        <LazyAutocompleteTextField
           label="Service"
-          value={value.service ?? ''}
-          onChange={handleFieldChange('service')}
+          value={value.service}
+          options={serviceOptions}
+          onCommit={(nextValue) => updateField('service', nextValue)}
           sx={{ minWidth: 220 }}
           helperText="Required when Trace ID is empty."
         />
-        <TextField
-          size="small"
+        <LazyAutocompleteTextField
           label="Operation"
-          value={value.operation ?? ''}
-          onChange={handleFieldChange('operation')}
+          value={value.operation}
+          options={operationOptions}
+          onCommit={(nextValue) => updateField('operation', nextValue)}
           sx={{ minWidth: 240 }}
         />
         <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -144,28 +162,25 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
         </FormControl>
       </Stack>
       <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-        <TextField
-          size="small"
+        <LazyTextField
           label="Min Duration"
-          value={value.minDuration ?? ''}
-          onChange={handleFieldChange('minDuration')}
+          value={value.minDuration}
+          onCommit={(nextValue) => updateField('minDuration', nextValue)}
           sx={{ minWidth: 180 }}
           placeholder="e.g. 50ms"
         />
-        <TextField
-          size="small"
+        <LazyTextField
           label="Max Duration"
-          value={value.maxDuration ?? ''}
-          onChange={handleFieldChange('maxDuration')}
+          value={value.maxDuration}
+          onCommit={(nextValue) => updateField('maxDuration', nextValue)}
           sx={{ minWidth: 180 }}
           placeholder="e.g. 5s"
         />
       </Stack>
-      <TextField
-        size="small"
+      <LazyTextField
         label="Tags (JSON)"
-        value={value.tags ?? ''}
-        onChange={handleFieldChange('tags')}
+        value={value.tags}
+        onCommit={(nextValue) => updateField('tags', nextValue)}
         placeholder='{"http.status_code":"500"}'
         helperText="Jaeger expects a JSON object encoded as the tags query parameter."
         multiline
@@ -173,4 +188,157 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
       />
     </Stack>
   );
+}
+
+interface LazyTextFieldProps extends Omit<TextFieldProps, 'value' | 'onChange'> {
+  value?: string;
+  onCommit: (nextValue: string | undefined) => void;
+}
+
+function LazyTextField(props: LazyTextFieldProps): ReactElement {
+  const { value, onCommit, ...textFieldProps } = props;
+  const [draftValue, setDraftValue] = useState(value ?? '');
+
+  useEffect(() => {
+    setDraftValue(value ?? '');
+  }, [value]);
+
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    setDraftValue(event.target.value);
+  }, []);
+
+  const handleBlur = useCallback((): void => {
+    onCommit(toOptionalString(draftValue));
+  }, [draftValue, onCommit]);
+
+  return <TextField {...textFieldProps} size="small" value={draftValue} onChange={handleChange} onBlur={handleBlur} />;
+}
+
+interface LazyAutocompleteTextFieldProps extends Omit<TextFieldProps, 'value' | 'onChange'> {
+  value?: string;
+  options: string[];
+  onCommit: (nextValue: string | undefined) => void;
+}
+
+function LazyAutocompleteTextField(props: LazyAutocompleteTextFieldProps): ReactElement {
+  const { value, options, onCommit, ...textFieldProps } = props;
+  const [draftValue, setDraftValue] = useState(value ?? '');
+
+  useEffect(() => {
+    setDraftValue(value ?? '');
+  }, [value]);
+
+  const commitValue = useCallback(
+    (nextValue: string): void => {
+      const normalizedValue = nextValue;
+      setDraftValue(normalizedValue);
+      onCommit(toOptionalString(normalizedValue));
+    },
+    [onCommit]
+  );
+
+  const handleInputChange = useCallback((_event: SyntheticEvent, nextValue: string, reason: string): void => {
+    if (reason === 'input' || reason === 'clear') {
+      setDraftValue(nextValue);
+    }
+  }, []);
+
+  const handleChange = useCallback(
+    (_event: SyntheticEvent, nextValue: string | null): void => {
+      commitValue(nextValue ?? '');
+    },
+    [commitValue]
+  );
+
+  const handleBlur = useCallback((): void => {
+    onCommit(toOptionalString(draftValue));
+  }, [draftValue, onCommit]);
+
+  return (
+    <Autocomplete
+      freeSolo
+      options={options}
+      inputValue={draftValue}
+      onInputChange={handleInputChange}
+      onChange={handleChange}
+      renderInput={(params) => <TextField {...params} {...textFieldProps} size="small" onBlur={handleBlur} />}
+    />
+  );
+}
+
+function useServiceOptions(client: JaegerClient | undefined): string[] {
+  const [serviceOptions, setServiceOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!client) {
+      setServiceOptions([]);
+      return;
+    }
+
+    client
+      .searchServices()
+      .then((response) => {
+        if (ignore) {
+          return;
+        }
+
+        setServiceOptions(toSortedUniqueOptions(response.data ?? []));
+      })
+      .catch(() => {
+        if (!ignore) {
+          setServiceOptions([]);
+        }
+      });
+
+    return (): void => {
+      ignore = true;
+    };
+  }, [client]);
+
+  return serviceOptions;
+}
+
+function useOperationOptions(client: JaegerClient | undefined, service: string | undefined): string[] {
+  const [operationOptions, setOperationOptions] = useState<string[]>([]);
+  const normalizedService = useMemo(() => service?.trim(), [service]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!client || normalizedService === undefined || normalizedService === '') {
+      setOperationOptions([]);
+      return;
+    }
+
+    client
+      .searchOperations(normalizedService)
+      .then((response) => {
+        if (ignore) {
+          return;
+        }
+
+        setOperationOptions(toSortedUniqueOptions((response.data ?? []).map((operation) => operation.name)));
+      })
+      .catch(() => {
+        if (!ignore) {
+          setOperationOptions([]);
+        }
+      });
+
+    return (): void => {
+      ignore = true;
+    };
+  }, [client, normalizedService]);
+
+  return operationOptions;
+}
+
+function toOptionalString(value: string): string | undefined {
+  return value === '' ? undefined : value;
+}
+
+function toSortedUniqueOptions(values: string[]): string[] {
+  return Array.from(new Set(values.filter((value) => value !== ''))).sort((a, b) => a.localeCompare(b));
 }

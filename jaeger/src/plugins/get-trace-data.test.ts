@@ -175,7 +175,7 @@ describe('getTraceData', () => {
       tags: '{"http.status_code":"500"}',
       minDuration: '20ms',
       maxDuration: undefined,
-      limit: 25,
+      limit: 26,
       start: 1718100000000000,
       end: 1718103600000000,
     });
@@ -194,6 +194,7 @@ describe('getTraceData', () => {
         },
       },
     ]);
+    expect(result.metadata?.hasMoreResults).toBe(false);
   });
 
   it('rejects invalid tags and missing search service', async () => {
@@ -205,5 +206,35 @@ describe('getTraceData', () => {
     await expect(getTraceData({ operation: 'GET /api/cart' }, createContext(client))).rejects.toThrow(
       'Jaeger trace searches require a service when Trace ID is not provided.'
     );
+  });
+
+  it('keeps one extra search result only to detect additional matches', async () => {
+    const client = makeClient();
+    client.searchTraces = jest.fn(async () => ({
+      data: Array.from({ length: 3 }, (_, index) => ({
+        ...exampleTrace,
+        traceID: `7d73f3ae841bf59a74cf5b52a328cfc${index}`,
+      })),
+    }));
+
+    const result = await getTraceData({ service: 'frontend', limit: 2 }, createContext(client));
+
+    expect(client.searchTraces).toHaveBeenCalledWith({
+      service: 'frontend',
+      operation: undefined,
+      spanKind: undefined,
+      tags: undefined,
+      minDuration: undefined,
+      maxDuration: undefined,
+      limit: 3,
+      start: 1718100000000000,
+      end: 1718103600000000,
+    });
+    expect(result.searchResult).toHaveLength(2);
+    expect(result.metadata?.hasMoreResults).toBe(true);
+    expect(result.metadata?.notices).toContainEqual({
+      type: 'info',
+      message: 'Not all matching traces are currently displayed. Increase the result limit to view additional traces.',
+    });
   });
 });

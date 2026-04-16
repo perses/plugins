@@ -89,7 +89,7 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
     tags: resolvedSpec.tags,
     minDuration: resolvedSpec.minDuration,
     maxDuration: resolvedSpec.maxDuration,
-    limit: resolvedSpec.limit ?? DEFAULT_SEARCH_LIMIT,
+    limit: (resolvedSpec.limit ?? DEFAULT_SEARCH_LIMIT) + 1,
   };
 
   if (context.absoluteTimeRange) {
@@ -99,7 +99,9 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
   }
 
   const response = await client.searchTraces(searchParams);
-  const traces = response.data ?? [];
+  const limit = resolvedSpec.limit ?? DEFAULT_SEARCH_LIMIT;
+  const searchResult = (response.data ?? []).map(summarizeTrace);
+  const hasMoreResults = searchResult.length > limit;
   const notices: Notice[] = [];
   if (response.errors && response.errors.length > 0) {
     notices.push({
@@ -107,11 +109,19 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
       message: response.errors.map((error) => error.msg).join('; '),
     });
   }
+  if (hasMoreResults) {
+    notices.push({
+      type: 'info',
+      message: 'Not all matching traces are currently displayed. Increase the result limit to view additional traces.',
+    });
+    searchResult.splice(limit);
+  }
 
   return {
-    searchResult: traces.map(summarizeTrace),
+    searchResult,
     metadata: {
       executedQueryString: buildExecutedQueryString(resolvedSpec),
+      hasMoreResults,
       notices,
     },
   };
@@ -197,9 +207,7 @@ function trimToUndefined(value: string): string | undefined {
 function summarizeTrace(trace: JaegerTrace): TraceSearchResult {
   const spans = trace.spans ?? [];
   const rootSpan = findRootSpan(spans);
-  const startTimeUnixMs = spans.length > 0 ? Math.min(...spans.map((span) => span.startTime)) / 1000 : 0;
-  const endTimeUnixMs =
-    spans.length > 0 ? Math.max(...spans.map((span) => span.startTime + span.duration)) / 1000 : startTimeUnixMs;
+  const { startTimeUnixMs, endTimeUnixMs } = getTraceBounds(spans);
   const process = rootSpan ? resolveProcess(trace, rootSpan) : undefined;
 
   return {
@@ -209,6 +217,22 @@ function summarizeTrace(trace: JaegerTrace): TraceSearchResult {
     rootServiceName: process?.serviceName ?? 'unknown',
     rootTraceName: rootSpan?.operationName ?? trace.traceID,
     serviceStats: buildServiceStats(trace),
+  };
+}
+
+function getTraceBounds(spans: JaegerSpan[]): { startTimeUnixMs: number; endTimeUnixMs: number } {
+  if (spans.length === 0) {
+    return { startTimeUnixMs: 0, endTimeUnixMs: 0 };
+  }
+
+  const [startTime, endTime] = spans.reduce<[number, number]>(
+    (acc, span) => [Math.min(acc[0], span.startTime), Math.max(acc[1], span.startTime + span.duration)],
+    [spans[0]!.startTime, spans[0]!.startTime + spans[0]!.duration]
+  );
+
+  return {
+    startTimeUnixMs: startTime / 1000,
+    endTimeUnixMs: endTime / 1000,
   };
 }
 
