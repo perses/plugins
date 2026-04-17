@@ -14,6 +14,7 @@
 package model
 
 import "strings"
+
 import ds "github.com/perses/plugins/jaeger/schemas/datasource:model"
 
 kind: "JaegerTraceQuery"

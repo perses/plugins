@@ -66,6 +66,35 @@ describe('JaegerTraceQueryEditor', () => {
     );
   });
 
+  it('normalizes empty and whitespace-only optional fields from the incoming spec', async () => {
+    mockedUseDatasourceClient.mockReturnValue({
+      data: {
+        searchServices: jest.fn(async () => ({ data: [] })),
+        searchOperations: jest.fn(async () => ({ data: [] })),
+      },
+    } as never);
+
+    const onChange = jest.fn();
+    render(
+      <JaegerTraceQueryEditor
+        value={{
+          service: '',
+          operation: '   ',
+          minDuration: ' 50ms ',
+        }}
+        onChange={onChange}
+      />
+    );
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith({
+        minDuration: '50ms',
+        operation: undefined,
+        service: undefined,
+      })
+    );
+  });
+
   it('loads service and operation options from the datasource client', async () => {
     const searchServices = jest.fn(async () => ({ data: ['checkout', 'frontend'] }));
     const searchOperations = jest.fn(async () => ({

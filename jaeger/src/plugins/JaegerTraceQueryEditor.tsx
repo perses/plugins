@@ -48,6 +48,15 @@ type FieldKey = Exclude<keyof JaegerTraceQuerySpec, 'datasource' | 'limit'>;
 
 const limitOptions = [20, 50, 100, 200, 500];
 const spanKindOptions = ['', 'internal', 'server', 'client', 'producer', 'consumer'];
+const optionalStringFields: FieldKey[] = [
+  'traceId',
+  'service',
+  'operation',
+  'spanKind',
+  'tags',
+  'minDuration',
+  'maxDuration',
+];
 
 export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -57,6 +66,15 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
   const { data: client } = useDatasourceClient<JaegerClient>(selectedDatasource);
   const serviceOptions = useServiceOptions(client);
   const operationOptions = useOperationOptions(client, value.service);
+
+  useEffect(() => {
+    const normalizedValue = normalizeSpec(value);
+    if (normalizedValue === undefined) {
+      return;
+    }
+
+    onChange(normalizedValue);
+  }, [onChange, value]);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isJaegerDatasourceSelector(next)) {
@@ -75,7 +93,7 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
     (field: FieldKey, nextValue: string | undefined): void => {
       onChange(
         produce(value, (draft) => {
-          draft[field] = nextValue;
+          draft[field] = normalizeFieldValue(nextValue);
         })
       );
     },
@@ -336,9 +354,29 @@ function useOperationOptions(client: JaegerClient | undefined, service: string |
 }
 
 function toOptionalString(value: string): string | undefined {
-  return value === '' ? undefined : value;
+  return normalizeFieldValue(value);
 }
 
 function toSortedUniqueOptions(values: string[]): string[] {
   return Array.from(new Set(values.filter((value) => value !== ''))).sort((a, b) => a.localeCompare(b));
+}
+
+function normalizeFieldValue(value: string | undefined): string | undefined {
+  const trimmedValue = value?.trim();
+  return trimmedValue === undefined || trimmedValue === '' ? undefined : trimmedValue;
+}
+
+function normalizeSpec(value: JaegerTraceQuerySpec): JaegerTraceQuerySpec | undefined {
+  let changed = false;
+  const normalizedValue = produce(value, (draft) => {
+    for (const field of optionalStringFields) {
+      const nextValue = normalizeFieldValue(draft[field]);
+      if (draft[field] !== nextValue) {
+        draft[field] = nextValue;
+        changed = true;
+      }
+    }
+  });
+
+  return changed ? normalizedValue : undefined;
 }
