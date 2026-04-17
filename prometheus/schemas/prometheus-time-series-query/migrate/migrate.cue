@@ -14,13 +14,14 @@
 package migrate
 
 #target: {
-	// /!\ Best-effort conversion logic that may wrongly convert not-prometheus queries to PrometheusTimeSeriesQuery:
-	// Ideally we should rely on datasource.type = "prometheus" to identify prometheus queries. But in some cases,
-	// this information is not be available. Thus the condition relies on the presence of the "expr" field, that
-	// likely indicates that this is a prometheus query.
 	datasource?: {
-		uid: string
+		type?: "prometheus"
+		uid:   string
 	}
+	// /!\ Best-effort conversion logic that may wrongly convert not-prometheus queries to PrometheusTimeSeriesQuery:
+	// Ideally we should only rely on datasource.type = "prometheus" to identify prometheus queries. But in some cases,
+	// this information is not present. Thus, in addition to the check on the optional type above, the below condition
+	// relies on the presence of the "expr" field, that likely indicates that this is a prometheus query.
 	expr:          string
 	legendFormat?: string
 	interval?:     string
