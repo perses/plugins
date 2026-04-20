@@ -49,6 +49,7 @@ import {
   TimeChartSeriesMapping,
   getFormattedMultipleYAxes,
 } from '@perses-dev/components';
+import { useAnnotationsWithData } from '@perses-dev/dashboards';
 import {
   TimeSeriesChartOptions,
   DEFAULT_FORMAT,
@@ -157,6 +158,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
+  const annotations = useAnnotationsWithData();
+  console.log(annotations);
 
   // Populate series data based on query results
   const {
@@ -498,6 +501,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 height={height}
                 data={timeChartData}
                 seriesMapping={timeSeriesMapping}
+                annotations={annotations}
                 timeScale={timeScale}
                 yAxis={multipleYAxes ?? echartsYAxis}
                 format={format}

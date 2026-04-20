@@ -35,10 +35,11 @@
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
     "@perses-dev/components": "^0.53.1",
+    "@perses-dev/spec": "^0.2.0-beta.0",
     "@perses-dev/core": "^0.53.0",
-    "@perses-dev/dashboards": "^0.53.1",
+    "@perses-dev/dashboards": "file:../../shared/dashboards",
     "@perses-dev/explore": "^0.53.1",
-    "@perses-dev/plugin-system": "^0.53.1",
+    "@perses-dev/plugin-system": "file:../../shared/plugin-system",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
@@ -115,6 +116,15 @@
             "name": "Prometheus Explorer"
           },
           "name": "PrometheusExplorer"
+        }
+      },
+      {
+        "kind": "Annotation",
+        "spec": {
+          "display": {
+            "name": "Prometheus Annotation"
+          },
+          "name": "PrometheusPromQLAnnotation"
         }
       }
     ]
