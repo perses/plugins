@@ -11,9 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './annotations';
-export * from './components';
-export * from './explore';
-export { getPluginModule } from './getPluginModule';
-export * from './model';
-export * from './plugins';
+export * from './PrometheusPromQLAnnotation';
