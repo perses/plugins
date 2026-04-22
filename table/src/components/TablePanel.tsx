@@ -66,7 +66,11 @@ function ColumnFilterDropdown({
   onFilterChange,
   theme,
 }: ColumnFilterDropdownProps): ReactElement {
+  const [searchTerm, setSearchTerm] = useState('');
   const values = [...new Set(allValues)].filter((v) => v !== null).sort();
+  const filteredValues = searchTerm
+    ? values.filter((v) => String(v).toLowerCase().includes(searchTerm.toLowerCase()))
+    : values;
   if (values.length === 0) {
     return (
       <div
@@ -99,6 +103,23 @@ function ColumnFilterDropdown({
         overflowY: 'auto',
       }}
     >
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '6px 8px',
+          marginBottom: 8,
+          fontSize: 13,
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 4,
+          backgroundColor: theme.palette.background.default,
+          color: theme.palette.text.primary,
+          boxSizing: 'border-box',
+        }}
+      />
       <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 'bold' }}>
         <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
           <input
@@ -117,7 +138,7 @@ function ColumnFilterDropdown({
           borderTop: `1px solid ${theme.palette.divider}`,
         }}
       />
-      {values.map((value, index) => (
+      {filteredValues.map((value, index) => (
         <div key={`value-${index}`} style={{ marginBottom: 4 }}>
           <label
             style={{
