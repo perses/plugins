@@ -2,14 +2,8 @@ import { AnnotationData } from '@perses-dev/spec';
 import { AnnotationContext, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
 import { DatasourceSpec, parseDurationString } from '@perses-dev/core';
 import { milliseconds } from 'date-fns';
-import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../../plugins';
-import {
-  DEFAULT_PROM,
-  getPrometheusTimeRange,
-  getRangeStep,
-  PROM_DATASOURCE_KIND,
-  PrometheusClient,
-} from '../../model';
+import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
+import { DEFAULT_PROM, getPrometheusTimeRange, getRangeStep, PROM_DATASOURCE_KIND, PrometheusClient } from '../model';
 
 export const getAnnotationData = async (
   spec: PrometheusPromQLAnnotationOptions,

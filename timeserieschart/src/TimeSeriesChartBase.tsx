@@ -59,8 +59,8 @@ import {
   ZoomEventData,
 } from '@perses-dev/components';
 import { DatasetOption } from 'echarts/types/dist/shared';
-import { AnnotationDefinitionWithData } from '@perses-dev/dashboards';
 import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
+import { TimeSeriesAnnotation } from './utils/annotation';
 
 use([
   EChartsLineChart,
@@ -77,37 +77,22 @@ use([
   CanvasRenderer,
 ]);
 
-const DUMMY_ANNOTATIONS: AnnotationDefinitionWithData[] = [
+const DUMMY_ANNOTATIONS: TimeSeriesAnnotation[] = [
   {
-    definition: {
-      display: {
-        name: 'test',
-        color: 'red',
-      },
-      plugin: {},
-    },
-    data: {
-      start: Date.now() - 10 * 60 * 1000, // 10 minutes ago
-      end: Date.now(),
-      title: 'Test Annotation',
-      legend: 'Deployment v1.2.3',
-      tags: { environment: 'production', team: 'platform' },
-    },
+    name: 'test',
+    color: 'red',
+    start: Date.now() - 10 * 60 * 1000, // 10 minutes ago
+    end: Date.now(),
+    title: 'Test Annotation',
+    legend: 'Deployment v1.2.3',
+    tags: { environment: 'production', team: 'platform' },
   },
   {
-    definition: {
-      display: {
-        name: 'test21',
-        color: 'green',
-      },
-      plugin: {},
-    },
-    data: {
-      start: Date.now() - 30 * 60 * 1000, // 30 minutes ago (point annotation)
-      title: 'Single Event',
-      legend: 'Config Change',
-      tags: { type: 'config', user: 'admin' },
-    },
+    name: 'test',
+    start: Date.now() - 30 * 60 * 1000, // 30 minutes ago (point annotation)
+    title: 'Single Event',
+    legend: 'Config Change',
+    tags: { type: 'config', user: 'admin' },
   },
 ];
 
@@ -115,7 +100,7 @@ export interface TimeChartProps {
   height: number;
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
-  annotations?: AnnotationDefinitionWithData[];
+  annotations?: TimeSeriesAnnotation[];
   timeScale?: TimeScale;
   yAxis?: YAXisComponentOption | YAXisComponentOption[];
   format?: FormatOptions;
@@ -162,7 +147,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [hoveredAnnotation, setHoveredAnnotation] = useState<AnnotationData | null>(null);
+  const [hoveredAnnotation, setHoveredAnnotation] = useState<TimeSeriesAnnotation | null>(null);
   const [annotationTooltipPos, setAnnotationTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const { timeZone } = useTimeZone();
 
