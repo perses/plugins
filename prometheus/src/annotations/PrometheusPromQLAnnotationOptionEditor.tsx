@@ -5,10 +5,11 @@ import { FormControl, Stack } from '@mui/material';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
+  DatasourceSelectValue,
+  OptionsEditorProps,
   useDatasourceClient,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { PrometheusTimeSeriesQueryEditorProps, useQueryState } from '../../plugins';
 import {
   DEFAULT_PROM,
   isDefaultPromSelector,
@@ -16,15 +17,22 @@ import {
   PROM_DATASOURCE_KIND,
   PrometheusClient,
   PrometheusDatasourceSelector,
-} from '../../model';
+} from '../model';
 
-import { PromQLEditor } from '../PromQLEditor';
+import { PromQLEditor } from '../components';
 
-export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusTimeSeriesQueryEditorProps): ReactElement {
+export interface PrometheusAnnotationsQuerySpec {
+  expr: string;
+  datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
+}
+
+export type PrometheusAnnotationsQueryEditorProps = OptionsEditorProps<PrometheusAnnotationsQuerySpec>;
+
+export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotationsQueryEditorProps): ReactElement {
   const {
     onChange,
     value,
-    value: { query, datasource },
+    value: { expr, datasource },
     isReadonly,
   } = props;
 
@@ -39,8 +47,6 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusTimeSeri
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
-
-  const { handleQueryChange, handleQueryBlur } = useQueryState(props);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {
@@ -61,6 +67,14 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusTimeSeri
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
 
+  const handleExprChange = (next: string) => {
+    onChange(
+      produce(value, (draft) => {
+        draft.expr = next;
+      })
+    );
+  };
+
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
@@ -76,10 +90,9 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusTimeSeri
       </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
-        value={query}
+        value={expr}
         datasource={selectedDatasource}
-        onChange={handleQueryChange}
-        onBlur={handleQueryBlur}
+        onChange={handleExprChange}
         isReadOnly={isReadonly}
         treeViewMetadata={undefined}
       />
