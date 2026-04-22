@@ -62,6 +62,7 @@ import {
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 import { TimeSeriesChartBase } from './TimeSeriesChartBase';
+import { convertAnnotationToTimeSeriesAnnotation, TimeSeriesAnnotation } from './utils/annotation';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions, TimeSeriesData>;
 
@@ -154,7 +155,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
-  const annotations = useAnnotationsWithData();
+  const annotationsWithData = useAnnotationsWithData();
+  const annotations: TimeSeriesAnnotation[] = useMemo(
+    () => convertAnnotationToTimeSeriesAnnotation(annotationsWithData),
+    [annotationsWithData]
+  );
   console.log(annotations);
 
   // Populate series data based on query results

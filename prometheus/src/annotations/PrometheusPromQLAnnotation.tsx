@@ -1,5 +1,5 @@
 import { AnnotationPlugin, AnnotationQueryQueryPluginDependencies, parseVariables } from '@perses-dev/plugin-system';
-import { PrometheusPromQLAnnotationOptions } from '../../plugins';
+import { PrometheusPromQLAnnotationOptions } from '../plugins';
 import { PrometheusPromQLAnnotationOptionEditor } from './PrometheusPromQLAnnotationOptionEditor';
 import { getAnnotationData } from './get-annotation-data';
 
