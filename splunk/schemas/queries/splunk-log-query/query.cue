@@ -21,7 +21,7 @@ import (
 kind: "SplunkLogQuery"
 spec: close({
 	ds.#selector
-	query: strings.MinRunes(1)
+	query:          strings.MinRunes(1)
 	earliest_time?: string
-	latest_time?: string
+	latest_time?:   string
 })
