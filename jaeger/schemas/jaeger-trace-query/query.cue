@@ -30,6 +30,6 @@ spec: close({
 	limit?:       number
 
 	if traceId == _|_ {
-		service: strings.MinRunes(1)
+		service: _ // service must be present
 	}
 })

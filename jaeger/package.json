@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/jaeger-plugin",
-  "version": "0.57.1",
+  "version": "0.1.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
