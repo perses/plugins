@@ -20,7 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
-import { createModEnterHandler } from '@perses-dev/components';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import { produce } from 'immer';
 import { LogQLEditor } from '../../components';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';

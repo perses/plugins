@@ -20,7 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback, useState, useEffect } from 'react';
-import { createModEnterHandler } from '@perses-dev/components';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import { LogsQLEditor } from '../../components/logsql-editor';
 import { VICTORIALOGS_DATASOURCE_KIND, VictoriaLogsDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';

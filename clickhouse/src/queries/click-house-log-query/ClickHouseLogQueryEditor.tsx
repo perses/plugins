@@ -20,7 +20,7 @@ import {
 import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
 import { Stack } from '@mui/material';
-import { createModEnterHandler } from '@perses-dev/components';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { ClickQLEditor } from '../../components';
 import { queryExample } from '../../components/constants';

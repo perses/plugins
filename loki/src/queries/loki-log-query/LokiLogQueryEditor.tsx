@@ -23,7 +23,8 @@ import {
 import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { ReactElement, useCallback, useMemo } from 'react';
 import { produce } from 'immer';
-import { OptionsEditorControl, createModEnterHandler } from '@perses-dev/components';
+import { OptionsEditorControl } from '@perses-dev/components';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import { LogQLEditor } from '../../components';
 import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND, LokiDatasourceSelector, LokiClient } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
