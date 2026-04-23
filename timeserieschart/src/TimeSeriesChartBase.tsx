@@ -77,24 +77,24 @@ use([
   CanvasRenderer,
 ]);
 
-const DUMMY_ANNOTATIONS: TimeSeriesAnnotation[] = [
-  {
-    name: 'test',
-    color: 'red',
-    start: Date.now() - 10 * 60 * 1000, // 10 minutes ago
-    end: Date.now(),
-    title: 'Test Annotation',
-    legend: 'Deployment v1.2.3',
-    tags: { environment: 'production', team: 'platform' },
-  },
-  {
-    name: 'test',
-    start: Date.now() - 30 * 60 * 1000, // 30 minutes ago (point annotation)
-    title: 'Single Event',
-    legend: 'Config Change',
-    tags: { type: 'config', user: 'admin' },
-  },
-];
+// const DUMMY_ANNOTATIONS: TimeSeriesAnnotation[] = [
+//   {
+//     name: 'test',
+//     color: 'red',
+//     start: Date.now() - 10 * 60 * 1000, // 10 minutes ago
+//     end: Date.now(),
+//     title: 'Test Annotation',
+//     legend: 'Deployment v1.2.3',
+//     tags: { environment: 'production', team: 'platform' },
+//   },
+//   {
+//     name: 'test',
+//     start: Date.now() - 30 * 60 * 1000, // 30 minutes ago (point annotation)
+//     title: 'Single Event',
+//     legend: 'Config Change',
+//     tags: { type: 'config', user: 'admin' },
+//   },
+// ];
 
 export interface TimeChartProps {
   height: number;
@@ -123,6 +123,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     height,
     data,
     seriesMapping,
+    annotations,
     timeScale: timeScaleProp,
     yAxis,
     format,
@@ -222,8 +223,8 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mouseover: (params: any): void => {
         // Handle annotation hover for markPoint (triangle markers under X-axis)
-        if (params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
-          const annotations = DUMMY_ANNOTATIONS;
+        if (annotations && params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
+          //const annotations = DUMMY_ANNOTATIONS;
           const annotationIndex = params.data.annotationIndex;
           const matchedAnnotation = annotations[annotationIndex] || null;
           if (matchedAnnotation) {
@@ -240,11 +241,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
       },
     };
-  }, [onDataZoom, setTooltipPinnedCoords]);
+  }, [annotations, onDataZoom]);
 
   // Generate annotation series for ECharts markArea (range), markLine (point), and markPoint (markers under X-axis)
   const annotationSeries = useMemo(() => {
-    const annotations = DUMMY_ANNOTATIONS; // Using dummy annotations for testing
+    //const annotations = DUMMY_ANNOTATIONS; // Using dummy annotations for testing
     if (!annotations || annotations.length === 0) return [];
 
     const markAreaData: Array<[{ xAxis: number; itemStyle?: { color: string; opacity: number } }, { xAxis: number }]> =
@@ -366,7 +367,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     };
 
     return [series];
-  }, []);
+  }, [annotations]);
 
   const { noDataOption } = chartsTheme;
 
@@ -642,7 +643,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
               top: annotationTooltipPos.y + 10,
               backgroundColor: 'background.paper',
               border: '1px solid',
-              borderColor: 'divider', // TODO: hoveredAnnotation.color || 'divider',
+              borderColor: hoveredAnnotation.color || 'divider',
               borderRadius: 1,
               padding: 1.5,
               boxShadow: 3,
@@ -653,9 +654,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             }}
           >
             {hoveredAnnotation.title && (
-              <Box sx={{ fontWeight: 'bold', marginBottom: 0.5 /* TODO: hoveredAnnotation.color || 'divider' */ }}>
-                {hoveredAnnotation.title}
-              </Box>
+              <Box sx={{ fontWeight: 'bold', marginBottom: 0.5 }}>{hoveredAnnotation.title}</Box>
             )}
             {hoveredAnnotation.legend && (
               <Box sx={{ marginBottom: 0.5, fontSize: '0.875rem' }}>{hoveredAnnotation.legend}</Box>
