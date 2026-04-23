@@ -155,12 +155,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
+
   const annotationsWithData = useAnnotationsWithData();
+  console.log('annotationsWithData', annotationsWithData);
+
   const annotations: TimeSeriesAnnotation[] = useMemo(
     () => convertAnnotationToTimeSeriesAnnotation(annotationsWithData),
     [annotationsWithData]
   );
-  console.log(annotations);
+  console.log('annotations', annotations);
 
   // Populate series data based on query results
   const {
