@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetch, fetchJson, RequestHeaders } from '@perses-dev/core';
-import { DatasourceClient } from '@perses-dev/plugin-system';
+import { DatasourceClient, QueryParamValues } from '@perses-dev/plugin-system';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,
@@ -36,46 +36,31 @@ interface PrometheusClientOptions {
   headers?: RequestHeaders;
 }
 
+export interface ClientRequestOptions {
+  headers?: RequestHeaders;
+  signal?: AbortSignal;
+  queryParams?: QueryParamValues;
+}
+
 export interface PrometheusClient extends DatasourceClient {
   options: PrometheusClientOptions;
-  instantQuery(
-    params: InstantQueryRequestParameters,
-    headers?: RequestHeaders,
-    signal?: AbortSignal
-  ): Promise<InstantQueryResponse>;
-  rangeQuery(
-    params: RangeQueryRequestParameters,
-    headers?: RequestHeaders,
-    signal?: AbortSignal
-  ): Promise<RangeQueryResponse>;
-  labelNames(
-    params: LabelNamesRequestParameters,
-    headers?: RequestHeaders,
-    signal?: AbortSignal
-  ): Promise<LabelNamesResponse>;
-  labelValues(
-    params: LabelValuesRequestParameters,
-    headers?: RequestHeaders,
-    signal?: AbortSignal
-  ): Promise<LabelValuesResponse>;
+  instantQuery(params: InstantQueryRequestParameters, options?: ClientRequestOptions): Promise<InstantQueryResponse>;
+  rangeQuery(params: RangeQueryRequestParameters, options?: ClientRequestOptions): Promise<RangeQueryResponse>;
+  labelNames(params: LabelNamesRequestParameters, options?: ClientRequestOptions): Promise<LabelNamesResponse>;
+  labelValues(params: LabelValuesRequestParameters, options?: ClientRequestOptions): Promise<LabelValuesResponse>;
   metricMetadata(
     params: MetricMetadataRequestParameters,
-    headers?: RequestHeaders,
-    signal?: AbortSignal
+    options?: ClientRequestOptions
   ): Promise<MetricMetadataResponse>;
-  series(params: SeriesRequestParameters, headers?: RequestHeaders, signal?: AbortSignal): Promise<SeriesResponse>;
-  parseQuery(
-    params: ParseQueryRequestParameters,
-    headers?: RequestHeaders,
-    signal?: AbortSignal
-  ): Promise<ParseQueryResponse>;
+  series(params: SeriesRequestParameters, options?: ClientRequestOptions): Promise<SeriesResponse>;
+  parseQuery(params: ParseQueryRequestParameters, options?: ClientRequestOptions): Promise<ParseQueryResponse>;
 }
 
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
-  abortSignal?: AbortSignal;
-  queryParams?: Record<string, string>;
+  signal?: AbortSignal;
+  queryParams?: QueryParamValues;
 }
 
 /**
@@ -83,17 +68,31 @@ export interface QueryOptions {
  * Optionally merges with existing URLSearchParams.
  * Returns empty string if no parameters, otherwise returns query string with leading '?'.
  */
-function buildQueryString(queryParams?: Record<string, string>, initialParams?: URLSearchParams): string {
+function buildQueryString(queryParams?: QueryParamValues, initialParams?: URLSearchParams): string {
   const urlParams = initialParams || new URLSearchParams();
 
   if (queryParams) {
     Object.entries(queryParams).forEach(([key, value]) => {
-      urlParams.set(key, value);
+      if (initialParams?.has(key)) return;
+
+      if (Array.isArray(value)) {
+        value.forEach((v) => urlParams.append(key, v));
+      } else {
+        urlParams.set(key, value);
+      }
     });
   }
 
   const queryString = urlParams.toString();
   return queryString !== '' ? `?${queryString}` : '';
+}
+
+export function mergeQueryParams(
+  defaults?: QueryParamValues,
+  overrides?: QueryParamValues
+): QueryParamValues | undefined {
+  if (!defaults && !overrides) return undefined;
+  return { ...defaults, ...overrides };
 }
 
 /**
@@ -104,7 +103,7 @@ export function healthCheck(queryOptions: QueryOptions) {
     const url = `${queryOptions.datasourceUrl}/-/healthy${buildQueryString(queryOptions.queryParams)}`;
 
     try {
-      const resp = await fetch(url, { headers: queryOptions.headers, signal: queryOptions.abortSignal });
+      const resp = await fetch(url, { headers: queryOptions.headers, signal: queryOptions.signal });
       return resp.status === 200;
     } catch {
       return false;
@@ -198,7 +197,7 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers, queryParams, abortSignal: signal } = queryOptions;
+  const { datasourceUrl, headers, queryParams, signal } = queryOptions;
   const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams, createSearchParams(params))}`;
   return fetchJson<TResponse>(url, { method: 'GET', headers, signal });
 }
@@ -208,7 +207,7 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions
 ): Promise<TResponse> {
-  const { datasourceUrl, headers, abortSignal: signal, queryParams } = queryOptions;
+  const { datasourceUrl, headers, signal, queryParams } = queryOptions;
   const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams)}`;
 
   const init = {

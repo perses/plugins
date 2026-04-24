@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition } from '@perses-dev/core';
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import { BuiltinVariableDefinition, RequestHeaders } from '@perses-dev/core';
+import { DatasourcePlugin, QueryParamValues } from '@perses-dev/plugin-system';
 import {
   healthCheck,
   instantQuery,
@@ -20,12 +20,30 @@ import {
   labelNames,
   labelValues,
   PrometheusClient,
+  ClientRequestOptions,
+  QueryOptions,
   metricMetadata,
   series,
   parseQuery,
+  mergeQueryParams,
 } from '../model';
 import { PrometheusDatasourceSpec } from './types';
 import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
+
+function wrapClientMethod<P, R>(
+  fn: (params: P, opts: QueryOptions) => Promise<R>,
+  datasourceUrl: string,
+  specHeaders?: RequestHeaders,
+  specQueryParams?: QueryParamValues
+): (params: P, options?: ClientRequestOptions) => Promise<R> {
+  return (params: P, options?: ClientRequestOptions) =>
+    fn(params, {
+      datasourceUrl,
+      headers: options?.headers ?? specHeaders,
+      signal: options?.signal,
+      queryParams: mergeQueryParams(specQueryParams, options?.queryParams),
+    });
+}
 
 /**
  * Creates a PrometheusClient for a specific datasource spec.
@@ -48,20 +66,13 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
       datasourceUrl,
     },
     healthCheck: healthCheck({ datasourceUrl, headers: specHeaders, queryParams }),
-    instantQuery: (params, headers, abortSignal) =>
-      instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
-    rangeQuery: (params, headers, abortSignal) =>
-      rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
-    labelNames: (params, headers, abortSignal) =>
-      labelNames(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
-    labelValues: (params, headers, abortSignal) =>
-      labelValues(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
-    metricMetadata: (params, headers, abortSignal) =>
-      metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
-    series: (params, headers, abortSignal) =>
-      series(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
-    parseQuery: (params, headers, abortSignal) =>
-      parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders, abortSignal, queryParams }),
+    instantQuery: wrapClientMethod(instantQuery, datasourceUrl, specHeaders, queryParams),
+    rangeQuery: wrapClientMethod(rangeQuery, datasourceUrl, specHeaders, queryParams),
+    labelNames: wrapClientMethod(labelNames, datasourceUrl, specHeaders, queryParams),
+    labelValues: wrapClientMethod(labelValues, datasourceUrl, specHeaders, queryParams),
+    metricMetadata: wrapClientMethod(metricMetadata, datasourceUrl, specHeaders, queryParams),
+    series: wrapClientMethod(series, datasourceUrl, specHeaders, queryParams),
+    parseQuery: wrapClientMethod(parseQuery, datasourceUrl, specHeaders, queryParams),
   };
 };
 
