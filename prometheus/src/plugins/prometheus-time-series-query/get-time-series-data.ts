@@ -35,6 +35,7 @@ import {
   PROM_DATASOURCE_KIND,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
+import { interpolateDatasourceProxyParams } from '../interpolation';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
@@ -61,6 +62,8 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const datasource = (await context.datasourceStore.getDatasource(
     selectedDatasource
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
+  const interpolatedOptions = interpolateDatasourceProxyParams(datasource, context.variableState);
+
   const datasourceScrapeInterval = Math.trunc(
     milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
   );
@@ -118,27 +121,11 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   let response;
   switch (context.mode) {
     case 'instant':
-      response = await client.instantQuery(
-        {
-          query,
-          time: end,
-        },
-        undefined,
-        abortSignal
-      );
+      response = await client.instantQuery({ query, time: end }, { ...interpolatedOptions, signal: abortSignal });
       break;
     case 'range':
     default:
-      response = await client.rangeQuery(
-        {
-          query,
-          start,
-          end,
-          step,
-        },
-        undefined,
-        abortSignal
-      );
+      response = await client.rangeQuery({ query, start, end, step }, { ...interpolatedOptions, signal: abortSignal });
       break;
   }
 
