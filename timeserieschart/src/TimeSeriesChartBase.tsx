@@ -12,7 +12,10 @@
 // limitations under the License.
 
 import { forwardRef, MouseEvent, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { Box, Portal } from '@mui/material';
+import { Box, Divider, Portal, Stack, Typography } from '@mui/material';
+import Pin from 'mdi-material-ui/Pin';
+import PinOutline from 'mdi-material-ui/PinOutline';
+import useResizeObserver from 'use-resize-observer';
 import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
@@ -38,6 +41,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import {
+  assembleTransform,
   ChartInstance,
   ChartInstanceFocusOpts,
   clearHighlightedSeries,
@@ -49,12 +53,18 @@ import {
   getClosestTimestamp,
   getFormattedAxis,
   getPointInGrid,
+  getTooltipStyles,
   OnEventsType,
+  PIN_TOOLTIP_HELP_TEXT,
   restoreChart,
   TimeChartSeriesMapping,
   TimeChartTooltip,
+  TOOLTIP_BG_COLOR_FALLBACK,
+  TOOLTIP_MAX_WIDTH,
   TooltipConfig,
+  UNPIN_TOOLTIP_HELP_TEXT,
   useChartsContext,
+  useMousePosition,
   useTimeZone,
   ZoomEventData,
 } from '@perses-dev/components';
@@ -149,8 +159,9 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [hoveredAnnotation, setHoveredAnnotation] = useState<TimeSeriesAnnotation | null>(null);
-  const [annotationTooltipPos, setAnnotationTooltipPos] = useState<{ x: number; y: number } | null>(null);
-  const { timeZone } = useTimeZone();
+  const [pinnedAnnotation, setPinnedAnnotation] = useState<TimeSeriesAnnotation | null>(null);
+  const [pinnedAnnotationPos, setPinnedAnnotationPos] = useState<CursorCoordinates | null>(null);
+  const { timeZone, formatWithUserTimeZone } = useTimeZone();
 
   const getTimezoneAwareAxisFormatter = useCallback(
     (rangeMs: number): ((value: number) => string) => createTimezoneAwareAxisFormatter(rangeMs, timeZone),
@@ -222,22 +233,26 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mouseover: (params: any): void => {
-        // Handle annotation hover for markPoint (triangle markers under X-axis)
-        if (annotations && params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
-          //const annotations = DUMMY_ANNOTATIONS;
+        // Handle annotation hover for markPoint (triangles under X-axis) and markLine (vertical dashed lines)
+        if (
+          annotations &&
+          (params.componentType === 'markPoint' || params.componentType === 'markLine') &&
+          params.data?.annotationIndex !== undefined
+        ) {
           const annotationIndex = params.data.annotationIndex;
           const matchedAnnotation = annotations[annotationIndex] || null;
           if (matchedAnnotation) {
             setHoveredAnnotation(matchedAnnotation);
-            setAnnotationTooltipPos({ x: params.event?.offsetX || 0, y: params.event?.offsetY || 0 });
           }
         }
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mouseout: (params: any): void => {
-        if (params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
+        if (
+          (params.componentType === 'markPoint' || params.componentType === 'markLine') &&
+          params.data?.annotationIndex !== undefined
+        ) {
           setHoveredAnnotation(null);
-          setAnnotationTooltipPos(null);
         }
       },
     };
@@ -254,6 +269,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       xAxis: number;
       lineStyle?: { color: string; width: number; type: 'dashed' | 'solid' | 'dotted' };
       label?: { show: boolean };
+      annotationIndex?: number;
     }> = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const markPointData: any[] = [];
@@ -268,12 +284,14 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           xAxis: annotation.start,
           lineStyle: { color, width: 2, type: 'dashed' as const },
           label: { show: false },
+          annotationIndex: index,
         });
 
         markLineData.push({
           xAxis: annotation.end,
           lineStyle: { color, width: 2, type: 'dashed' as const },
           label: { show: false },
+          annotationIndex: index,
         });
 
         markAreaData.push([
@@ -313,6 +331,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           xAxis: annotation.start,
           lineStyle: { color, width: 2, type: 'dashed' as const },
           label: { show: false },
+          annotationIndex: index,
         });
 
         // Add point marker
@@ -346,11 +365,14 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       markLine:
         markLineData.length > 0
           ? {
-              silent: true, // Make line silent, only markers are interactive
+              silent: false, // Interactive so vertical line hover opens annotation tooltip
               symbol: ['none', 'none'],
               data: markLineData,
               lineStyle: {
                 type: 'dashed',
+              },
+              emphasis: {
+                disabled: true,
               },
             }
           : undefined,
@@ -484,6 +506,26 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       //   e.preventDefault(); // Prevent the default behaviour when right clicked
       // }}
       onClick={(e) => {
+        // If clicking while hovering an annotation, toggle the annotation tooltip pin
+        // instead of pinning the TimeChartTooltip, so pinned TimeChartTooltip is preserved.
+        if (hoveredAnnotation !== null && e.target instanceof HTMLCanvasElement) {
+          const pinnedPos: CursorCoordinates = {
+            page: { x: e.pageX, y: e.pageY },
+            client: { x: e.clientX, y: e.clientY },
+            plotCanvas: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY },
+            target: e.target,
+          };
+          setPinnedAnnotation((current) => {
+            if (current === hoveredAnnotation) {
+              setPinnedAnnotationPos(null);
+              return null;
+            }
+            setPinnedAnnotationPos(pinnedPos);
+            return hoveredAnnotation;
+          });
+          return;
+        }
+
         // Allows user to opt-in to multi tooltip pinning when Ctrl or Cmd key held down
         const isControlKeyPressed = e.ctrlKey || e.metaKey;
         if (isControlKeyPressed) {
@@ -605,8 +647,10 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
       }}
     >
-      {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead */}
+      {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead.
+          Keep the time chart tooltip visible when pinned even if user hovers an annotation. */}
       {showTooltip === true &&
+        (tooltipPinnedCoords !== null || hoveredAnnotation === null) &&
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
           <TimeChartTooltip
@@ -627,62 +671,19 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             }}
           />
         )}
-      {/* Annotation tooltip */}
-      {hoveredAnnotation && annotationTooltipPos && (
-        <Portal
-          container={
-            chartsTheme.tooltipPortalContainerId
-              ? document.querySelector(chartsTheme.tooltipPortalContainerId)
-              : undefined
-          }
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              left: annotationTooltipPos.x + 10,
-              top: annotationTooltipPos.y + 10,
-              backgroundColor: 'background.paper',
-              border: '1px solid',
-              borderColor: hoveredAnnotation.color || 'divider',
-              borderRadius: 1,
-              padding: 1.5,
-              boxShadow: 3,
-              zIndex: 1000,
-              pointerEvents: 'none',
-              minWidth: 180,
-              maxWidth: 300,
-            }}
-          >
-            {hoveredAnnotation.title && (
-              <Box sx={{ fontWeight: 'bold', marginBottom: 0.5 }}>{hoveredAnnotation.title}</Box>
-            )}
-            {hoveredAnnotation.legend && (
-              <Box sx={{ marginBottom: 0.5, fontSize: '0.875rem' }}>{hoveredAnnotation.legend}</Box>
-            )}
-            <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', marginBottom: 0.5 }}>
-              {new Date(hoveredAnnotation.start).toLocaleString()}
-              {hoveredAnnotation.end && ` - ${new Date(hoveredAnnotation.end).toLocaleString()}`}
-            </Box>
-            {hoveredAnnotation.tags && Object.keys(hoveredAnnotation.tags).length > 0 && (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, marginTop: 0.5 }}>
-                {Object.entries(hoveredAnnotation.tags).map(([key, value]) => (
-                  <Box
-                    key={key}
-                    sx={{
-                      backgroundColor: 'action.hover',
-                      borderRadius: 0.5,
-                      padding: '2px 6px',
-                      fontSize: '0.7rem',
-                      fontFamily: 'monospace',
-                    }}
-                  >
-                    {key}: {value}
-                  </Box>
-                ))}
-              </Box>
-            )}
-          </Box>
-        </Portal>
+      {/* Annotation tooltip - reuses TimeChartTooltip styling. Pinned takes priority over hovered. */}
+      {(pinnedAnnotation ?? hoveredAnnotation) && (
+        <AnnotationTooltip
+          annotation={(pinnedAnnotation ?? hoveredAnnotation) as TimeSeriesAnnotation}
+          containerId={chartsTheme.tooltipPortalContainerId}
+          formatWithUserTimeZone={formatWithUserTimeZone}
+          pinnedPos={pinnedAnnotation !== null ? pinnedAnnotationPos : null}
+          enablePinning={isPinningEnabled}
+          onUnpinClick={() => {
+            setPinnedAnnotation(null);
+            setPinnedAnnotationPos(null);
+          }}
+        />
       )}
       <EChart
         sx={{
@@ -698,3 +699,142 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     </Box>
   );
 });
+
+interface AnnotationTooltipProps {
+  annotation: TimeSeriesAnnotation;
+  containerId?: string;
+  formatWithUserTimeZone: (date: Date, formatString: string) => string;
+  pinnedPos: CursorCoordinates | null;
+  enablePinning?: boolean;
+  onUnpinClick?: () => void;
+}
+
+function AnnotationTooltip({
+  annotation,
+  containerId,
+  formatWithUserTimeZone,
+  pinnedPos,
+  enablePinning = true,
+  onUnpinClick,
+}: AnnotationTooltipProps): JSX.Element | null {
+  const mousePos = useMousePosition();
+  const { height, width, ref: tooltipRef } = useResizeObserver<HTMLDivElement>();
+
+  const isPinned = pinnedPos !== null;
+  if (!isPinned && mousePos === null) return null;
+
+  const containerElement = containerId ? document.querySelector(containerId) : undefined;
+  const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
+  const transform = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
+
+  const formatDate = (timeMs: number): { date: string; time: string } => {
+    const d = new Date(timeMs);
+    return {
+      date: formatWithUserTimeZone(d, 'MMM dd, yyyy - '),
+      time: formatWithUserTimeZone(d, 'HH:mm:ss'),
+    };
+  };
+
+  const start = formatDate(annotation.start);
+  const end = annotation.end !== undefined ? formatDate(annotation.end) : null;
+
+  return (
+    <Portal container={containerElement}>
+      <Box ref={tooltipRef} sx={(theme) => getTooltipStyles(theme, pinnedPos, maxHeight)} style={{ transform }}>
+        <Stack spacing={0.5}>
+          <Box
+            sx={(theme) => ({
+              width: '100%',
+              maxWidth: TOOLTIP_MAX_WIDTH,
+              padding: theme.spacing(1.5, 2, 0.5, 2),
+              backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
+              position: 'sticky',
+              top: 0,
+              left: 0,
+            })}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', paddingBottom: 0.5, width: '100%' }}>
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: annotation.color || '#FF6B6B',
+                  marginRight: 1,
+                  flexShrink: 0,
+                }}
+              />
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                <Typography variant="caption" sx={(theme) => ({ color: theme.palette.common.white })}>
+                  {start.date}
+                </Typography>
+                <Typography variant="caption">
+                  <strong>{start.time}</strong>
+                </Typography>
+                {end && (
+                  <>
+                    <Typography variant="caption" sx={(theme) => ({ color: theme.palette.common.white })}>
+                      {' → '}
+                      {end.date}
+                    </Typography>
+                    <Typography variant="caption">
+                      <strong>{end.time}</strong>
+                    </Typography>
+                  </>
+                )}
+              </Box>
+              {enablePinning && (
+                <Stack direction="row" alignItems="center" sx={{ marginLeft: 1, flexShrink: 0 }}>
+                  <Typography sx={{ marginRight: 0.5, fontSize: 11, verticalAlign: 'middle' }}>
+                    {isPinned ? UNPIN_TOOLTIP_HELP_TEXT : PIN_TOOLTIP_HELP_TEXT}
+                  </Typography>
+                  {isPinned ? (
+                    <Pin
+                      onClick={() => {
+                        if (onUnpinClick !== undefined) onUnpinClick();
+                      }}
+                      sx={{ fontSize: 16, cursor: 'pointer' }}
+                    />
+                  ) : (
+                    <PinOutline sx={{ fontSize: 16 }} />
+                  )}
+                </Stack>
+              )}
+            </Box>
+            <Divider sx={(theme) => ({ width: '100%', borderColor: theme.palette.grey['500'] })} />
+          </Box>
+          <Box sx={(theme) => ({ padding: theme.spacing(0.5, 2, 1.5, 2) })}>
+            {annotation.title && (
+              <Typography variant="caption" sx={{ display: 'block', fontWeight: 'bold', marginBottom: 0.5 }}>
+                {annotation.title}
+              </Typography>
+            )}
+            {annotation.legend && (
+              <Typography variant="caption" sx={{ display: 'block', marginBottom: 0.5 }}>
+                {annotation.legend}
+              </Typography>
+            )}
+            {annotation.tags && Object.keys(annotation.tags).length > 0 && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, marginTop: 0.5 }}>
+                {Object.entries(annotation.tags).map(([key, value]) => (
+                  <Box
+                    key={key}
+                    sx={(theme) => ({
+                      backgroundColor: theme.palette.grey['700'],
+                      borderRadius: '4px',
+                      padding: '2px 6px',
+                      fontSize: '0.7rem',
+                      fontFamily: 'monospace',
+                    })}
+                  >
+                    {key}: {value}
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        </Stack>
+      </Box>
+    </Portal>
+  );
+}
