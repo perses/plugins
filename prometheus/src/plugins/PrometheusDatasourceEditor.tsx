@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DurationString } from '@perses-dev/core';
-import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
+import { HTTPSettingsEditor, QueryParamValues } from '@perses-dev/plugin-system';
 import { Box, TextField, Typography, IconButton } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
@@ -41,11 +41,11 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   // Use local state to maintain an array of entries during editing, instead of
   // manipulating a map directly which causes weird UX.
   const [entries, setEntries] = useState<QueryParamEntry[]>(() => {
-    const queryParams = value.queryParams ?? {};
-    return Object.entries(queryParams).map(([key, value]) => ({
+    const queryParams: QueryParamValues = value.queryParams ?? {};
+    return Object.entries(queryParams).map(([key, val]) => ({
       id: String(nextIdRef.current++),
       key,
-      value,
+      value: Array.isArray(val) ? val.join(',') : val,
     }));
   });
 
@@ -63,12 +63,15 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   });
   const hasDuplicates = duplicateKeys.size > 0;
 
-  // Convert entries array to object and trigger onChange
+  // Convert entries array to object and trigger onChange.
+  // Values containing commas are stored as arrays to preserve the round-trip
+  // with the load-time join(',') in useState above.
   const syncToParent = (newEntries: QueryParamEntry[]): void => {
-    const newParams: Record<string, string> = {};
+    const newParams: Record<string, string | string[]> = {};
     newEntries.forEach(({ key, value }) => {
       if (key !== '') {
-        newParams[key] = value;
+        const parts = value.split(',');
+        newParams[key] = parts.length > 1 ? parts : value;
       }
     });
 
