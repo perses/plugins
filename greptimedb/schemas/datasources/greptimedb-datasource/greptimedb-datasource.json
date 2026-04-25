@@ -1,0 +1,6 @@
+{
+  "kind": "GreptimeDBDatasource",
+  "spec": {
+    "directUrl": "http://localhost:4000"
+  }
+}
