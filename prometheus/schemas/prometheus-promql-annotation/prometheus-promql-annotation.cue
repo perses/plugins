@@ -21,5 +21,8 @@ import (
 kind: "PrometheusPromQLAnnotation"
 spec: close({
 	promDs.#selector
-	expr:      strings.MinRunes(1)
+	expr:   strings.MinRunes(1)
+	title?:  string
+	legend?: string
+	tags?:   [string]
 })
