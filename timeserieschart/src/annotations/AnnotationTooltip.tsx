@@ -282,9 +282,6 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
             lineStyle: {
               type: 'dashed',
             },
-            emphasis: {
-              disabled: true,
-            },
           }
         : undefined,
     markPoint:

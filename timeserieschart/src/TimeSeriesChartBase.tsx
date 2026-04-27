@@ -206,18 +206,34 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mouseover: (params: any): void => {
         // Only markPoint (triangles under the X-axis) opens the annotation tooltip.
-        // Hovering markLine keeps the regular TimeSeries tooltip visible.
+        // Hovering markLine or anything else keeps the regular TimeSeries tooltip visible
+        // and clears any stale hovered annotation (mouseout is sometimes missed by ECharts).
         if (annotations && params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
-          const annotationIndex = params.data.annotationIndex;
-          const matchedAnnotation = annotations[annotationIndex] || null;
+          const matchedAnnotation = annotations[params.data.annotationIndex] || null;
           if (matchedAnnotation) {
             setHoveredAnnotation(matchedAnnotation);
+            return;
           }
         }
+        setHoveredAnnotation(null);
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mouseout: (params: any): void => {
-        if (params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
+        if (
+          annotations &&
+          params.componentType === 'markPoint' &&
+          params.data?.annotationIndex !== undefined &&
+          annotations
+        ) {
+          // Only clear if the mouseout corresponds to the currently hovered annotation, so that
+          // a quick move from one markPoint to another isn't cancelled by a late mouseout event.
+          const leaving = annotations[params.data.annotationIndex] || null;
+          setHoveredAnnotation((current) => (current === leaving ? null : current));
+        }
+      },
+      globalout: (): void => {
+        if (annotations) {
+          // Cursor left the chart canvas — guarantee the annotation tooltip is dismissed.
           setHoveredAnnotation(null);
         }
       },
@@ -461,6 +477,8 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         if (tooltipPinnedCoords === null) {
           setShowTooltip(false);
         }
+        // Defensive: clear hovered annotation in case ECharts missed a mouseout event.
+        setHoveredAnnotation(null);
         if (chartRef.current !== undefined) {
           clearHighlightedSeries(chartRef.current);
         }
@@ -507,7 +525,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             }}
           />
         )}
-      {/* Annotation tooltip - reuses TimeChartTooltip styling. Pinned takes priority over hovered. */}
+      {/* Pinned annotation takes priority over hovered. */}
       {(pinnedAnnotation ?? hoveredAnnotation) && (
         <AnnotationTooltip
           annotation={(pinnedAnnotation ?? hoveredAnnotation) as TimeSeriesAnnotation}
