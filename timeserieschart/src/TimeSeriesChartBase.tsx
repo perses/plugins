@@ -62,7 +62,6 @@ import {
 } from '@perses-dev/components';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { TimeScale, TimeSeries } from '@perses-dev/spec';
-import { AnnotationDefinitionWithData } from '@perses-dev/dashboards';
 import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
 import { TimeSeriesAnnotation } from './utils/annotation';
 import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
