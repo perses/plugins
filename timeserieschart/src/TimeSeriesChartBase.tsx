@@ -717,7 +717,7 @@ function AnnotationTooltip({
   const formatDate = (timeMs: number): { date: string; time: string } => {
     const d = new Date(timeMs);
     return {
-      date: formatWithUserTimeZone(d, 'MMM dd, yyyy - '),
+      date: formatWithUserTimeZone(d, 'MMM dd, yyyy'),
       time: formatWithUserTimeZone(d, 'HH:mm:ss'),
     };
   };
@@ -752,20 +752,14 @@ function AnnotationTooltip({
                 }}
               />
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                <Typography variant="caption" sx={(theme) => ({ color: theme.palette.common.white })}>
-                  {start.date}
-                </Typography>
                 <Typography variant="caption">
-                  <strong>{start.time}</strong>
+                  {start.date} - <strong>{start.time}</strong>
                 </Typography>
                 {end && (
                   <>
-                    <Typography variant="caption" sx={(theme) => ({ color: theme.palette.common.white })}>
-                      {' → '}
-                      {end.date}
-                    </Typography>
+                    <Typography variant="caption">{' → '}</Typography>
                     <Typography variant="caption">
-                      <strong>{end.time}</strong>
+                      {end.date} - <strong>{end.time}</strong>
                     </Typography>
                   </>
                 )}
