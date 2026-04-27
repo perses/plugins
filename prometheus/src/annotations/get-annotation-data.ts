@@ -84,8 +84,8 @@ export const getAnnotationData = async (
             }, {})
           : labels;
       result.push({
-        start: start,
-        end: end,
+        start: start * 1000,
+        end: end * 1000,
         title: title,
         legend: legend,
         tags: tags,

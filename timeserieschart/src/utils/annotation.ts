@@ -13,8 +13,6 @@ export function convertAnnotationToTimeSeriesAnnotation(annotations: AnnotationS
       result.push({
         ...annotation.definition.display,
         ...item,
-        start: item.start * 1000,
-        end: item.end ? item.end * 1000 : undefined,
       });
     }
   }
