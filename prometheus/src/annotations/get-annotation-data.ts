@@ -4,6 +4,7 @@ import { DatasourceSpec, parseDurationString } from '@perses-dev/core';
 import { milliseconds } from 'date-fns';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
 import { DEFAULT_PROM, getPrometheusTimeRange, getRangeStep, PROM_DATASOURCE_KIND, PrometheusClient } from '../model';
+import { formatSeriesName } from '../utils';
 
 export const getAnnotationData = async (
   spec: PrometheusPromQLAnnotationOptions,
@@ -69,12 +70,25 @@ export const getAnnotationData = async (
     const end = series.values[series.values.length - 1]?.[0];
 
     if (start !== undefined && end !== undefined) {
+      const labels = series.metric ?? {};
+      const title = spec.title ? formatSeriesName(spec.title, labels) : undefined;
+      const legend = spec.legend ? formatSeriesName(spec.legend, labels) : undefined;
+      // If spec.tags is provided, only expose the selected label names as tags.
+      // Otherwise, expose all labels.
+      const tags =
+        spec.tags && spec.tags.length > 0
+          ? spec.tags.reduce<Record<string, string>>((acc, name) => {
+              const v = labels[name];
+              if (v !== undefined) acc[name] = v;
+              return acc;
+            }, {})
+          : labels;
       result.push({
         start: start,
         end: end,
-        title: 'TODO title',
-        legend: 'TODO legend',
-        tags: { todo: 'tags' },
+        title: title,
+        legend: legend,
+        tags: tags,
       });
     }
   }

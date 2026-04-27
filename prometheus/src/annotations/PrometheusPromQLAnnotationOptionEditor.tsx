@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { useId } from '@perses-dev/components';
 import { produce } from 'immer';
-import { FormControl, Stack } from '@mui/material';
+import { Autocomplete, Chip, FormControl, Stack, TextField } from '@mui/material';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -24,6 +24,9 @@ import { PromQLEditor } from '../components';
 export interface PrometheusAnnotationsQuerySpec {
   expr: string;
   datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
+  title?: string;
+  legend?: string;
+  tags?: string[];
 }
 
 export type PrometheusAnnotationsQueryEditorProps = OptionsEditorProps<PrometheusAnnotationsQuerySpec>;
@@ -32,7 +35,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
   const {
     onChange,
     value,
-    value: { expr, datasource },
+    value: { expr, datasource, title, legend, tags },
     isReadonly,
   } = props;
 
@@ -67,10 +70,34 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
 
-  const handleExprChange = (next: string) => {
+  const handleExprChange = (next: string): void => {
     onChange(
       produce(value, (draft) => {
         draft.expr = next;
+      })
+    );
+  };
+
+  const handleTitleChange = (next: string): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.title = next || undefined;
+      })
+    );
+  };
+
+  const handleLegendChange = (next: string): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.legend = next || undefined;
+      })
+    );
+  };
+
+  const handleTagsChange = (next: string[]): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.tags = next.length > 0 ? next : undefined;
       })
     );
   };
@@ -95,6 +122,46 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
         onChange={handleExprChange}
         isReadOnly={isReadonly}
         treeViewMetadata={undefined}
+      />
+      <TextField
+        fullWidth
+        label="Title"
+        placeholder="Example: 'Deployment {{service}}'"
+        helperText="Title displayed in the annotation tooltip. Use {{label_name}} to interpolate label values."
+        value={title ?? ''}
+        onChange={(e) => handleTitleChange(e.target.value)}
+        slotProps={{
+          inputLabel: { shrink: isReadonly ? true : undefined },
+          input: { readOnly: isReadonly },
+        }}
+      />
+      <TextField
+        fullWidth
+        label="Legend"
+        placeholder="Example: '{{instance}}' will generate annotation legends like 'webserver-123'..."
+        helperText="Text displayed below the title in the annotation tooltip. Use {{label_name}} to interpolate label values."
+        value={legend ?? ''}
+        onChange={(e) => handleLegendChange(e.target.value)}
+        slotProps={{
+          inputLabel: { shrink: isReadonly ? true : undefined },
+          input: { readOnly: isReadonly },
+        }}
+      />
+      <Autocomplete
+        multiple
+        freeSolo
+        options={[]}
+        value={tags ?? []}
+        onChange={(_, next) => handleTagsChange(next as string[])}
+        readOnly={isReadonly}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Tags"
+            placeholder="Add label names..."
+            helperText="Label names to display as tags in the annotation tooltip. Leave empty to show all labels. Press Enter to add."
+          />
+        )}
       />
     </Stack>
   );

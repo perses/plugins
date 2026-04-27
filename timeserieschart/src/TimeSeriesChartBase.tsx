@@ -87,25 +87,6 @@ use([
   CanvasRenderer,
 ]);
 
-// const DUMMY_ANNOTATIONS: TimeSeriesAnnotation[] = [
-//   {
-//     name: 'test',
-//     color: 'red',
-//     start: Date.now() - 10 * 60 * 1000, // 10 minutes ago
-//     end: Date.now(),
-//     title: 'Test Annotation',
-//     legend: 'Deployment v1.2.3',
-//     tags: { environment: 'production', team: 'platform' },
-//   },
-//   {
-//     name: 'test',
-//     start: Date.now() - 30 * 60 * 1000, // 30 minutes ago (point annotation)
-//     title: 'Single Event',
-//     legend: 'Config Change',
-//     tags: { type: 'config', user: 'admin' },
-//   },
-// ];
-
 export interface TimeChartProps {
   height: number;
   data: TimeSeries[];
@@ -275,8 +256,8 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     const markPointData: any[] = [];
 
     annotations.forEach((annotation, index) => {
-      const color = '#FF6B6B'; // TODO
-      const opacity = 0.3; // TODO
+      const color = annotation.color ?? '#FF6B6B';
+      const opacity = 0.3;
 
       if (annotation.end !== undefined) {
         // Range annotation - use markArea and markLine (silent) + markers at start/end
@@ -306,11 +287,14 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         markPointData.push({
           coord: [annotation.start, 0],
           symbol: 'triangle',
-          symbolSize: [12, 10],
+          symbolSize: [12, 12],
           symbolRotate: 0,
-          symbolOffset: [0, '120%'], // Position below X-axis
+          symbolOffset: [0, 4], // Position below X-axis
           itemStyle: { color },
           annotationIndex: index,
+          emphasis: {
+            disabled: true,
+          },
           isStart: true,
         });
 
@@ -318,11 +302,14 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         markPointData.push({
           coord: [annotation.end, 0],
           symbol: 'triangle',
-          symbolSize: [12, 10],
+          symbolSize: [12, 12],
           symbolRotate: 0,
-          symbolOffset: [0, '120%'], // Position below X-axis
+          symbolOffset: [0, 4], // Position below X-axis
           itemStyle: { color },
           annotationIndex: index,
+          emphasis: {
+            disabled: true,
+          },
           isEnd: true,
         });
       } else {
@@ -759,7 +746,7 @@ function AnnotationTooltip({
                   width: 8,
                   height: 8,
                   borderRadius: '50%',
-                  backgroundColor: annotation.color || '#FF6B6B',
+                  backgroundColor: annotation.color ?? '#FF6B6B',
                   marginRight: 1,
                   flexShrink: 0,
                 }}

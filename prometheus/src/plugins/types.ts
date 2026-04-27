@@ -48,4 +48,7 @@ export type PrometheusPromQLVariableOptions = PrometheusVariableOptionsBase & {
 export interface PrometheusPromQLAnnotationOptions {
   datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
   expr: string;
+  title?: string;
+  legend?: string;
+  tags?: string[];
 }
