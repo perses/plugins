@@ -7,6 +7,9 @@ export function convertAnnotationToTimeSeriesAnnotation(annotations: AnnotationS
   const result: TimeSeriesAnnotation[] = [];
   for (const annotation of annotations) {
     for (const item of annotation.data) {
+      if (annotation.definition.display.hidden) {
+        continue;
+      }
       result.push({
         ...annotation.definition.display,
         ...item,
