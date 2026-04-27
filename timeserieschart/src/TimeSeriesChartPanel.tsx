@@ -157,13 +157,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   const { setTimeRange } = useTimeRange();
 
   const annotationsWithData = useAnnotationsWithData();
-  console.log('annotationsWithData', annotationsWithData);
 
   const annotations: TimeSeriesAnnotation[] = useMemo(
     () => convertAnnotationToTimeSeriesAnnotation(annotationsWithData),
     [annotationsWithData]
   );
-  console.log('annotations', annotations);
 
   // Populate series data based on query results
   const {
