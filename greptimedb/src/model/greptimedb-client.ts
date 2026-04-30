@@ -26,7 +26,7 @@ export interface GreptimeDBQueryResponse {
 }
 
 export interface GreptimeDBClient {
-  query: (params: { start: string; end: string; query: string }) => Promise<GreptimeDBQueryResponse>;
+  query: (params: GreptimeDBQueryRequestParameters) => Promise<GreptimeDBQueryResponse>;
 }
 
 export async function greptimedbQuery(
