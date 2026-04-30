@@ -19,9 +19,3 @@ export interface GreptimeDBTimeSeriesQuerySpec {
   // Legacy field kept for dashboard compatibility. Not used by query execution.
   timeColumn?: string;
 }
-
-export type DatasourceQueryResponse = {
-  status: string;
-  data: unknown;
-  warnings?: string[];
-};

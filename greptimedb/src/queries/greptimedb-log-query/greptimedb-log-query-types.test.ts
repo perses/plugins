@@ -28,10 +28,16 @@ greptimedbStubClient.query = jest.fn(async () => {
   const stubResponse: GreptimeDBQueryResponse = {
     status: 'success',
     data: {
-      schema: {
-        column_schemas: [{ name: 'ts' }, { name: 'message' }],
-      },
-      rows: [[1700000000000, 'hello']],
+      output: [
+        {
+          records: {
+            schema: {
+              column_schemas: [{ name: 'ts' }, { name: 'message' }],
+            },
+            rows: [[1700000000000, 'hello']],
+          },
+        },
+      ],
     },
   };
   return stubResponse as GreptimeDBQueryResponse;
@@ -89,6 +95,6 @@ describe('GreptimeDBLogQuery', () => {
   it('should run query and return GreptimeDB records', async () => {
     const client = getDatasourceClient();
     const resp = await client.query({ query: 'SELECT * FROM logs' });
-    expect(resp.data).toHaveProperty('rows');
+    expect(resp.data.output?.[0]?.records).toHaveProperty('rows');
   });
 });

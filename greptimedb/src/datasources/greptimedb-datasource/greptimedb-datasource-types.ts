@@ -13,6 +13,7 @@
 
 import { HTTPProxy, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
+import { GreptimeDBResponseData } from '../../model/greptimedb-data-types';
 
 export interface GreptimeDBDatasourceSpec {
   directUrl?: string;
@@ -33,7 +34,7 @@ interface GreptimeDBDatasourceClientOptions {
 
 export interface GreptimeDBDatasourceResponse {
   status: 'success' | 'error';
-  data: unknown;
+  data: GreptimeDBResponseData;
   error?: string;
 }
 
