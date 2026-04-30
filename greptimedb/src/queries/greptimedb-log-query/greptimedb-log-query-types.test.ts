@@ -11,10 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: This should be fixed globally in the test setup
 import { DatasourceSpec } from '@perses-dev/core';
-
-jest.mock('echarts/core');
 
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
