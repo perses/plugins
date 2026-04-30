@@ -14,6 +14,7 @@
 export interface GreptimeDBColumnSchema {
   name: string;
   data_type?: string;
+  semantic_type?: string;
 }
 
 export interface GreptimeDBRecords {
@@ -21,4 +22,15 @@ export interface GreptimeDBRecords {
     column_schemas?: GreptimeDBColumnSchema[];
   };
   rows?: unknown[][];
+  total_rows?: number;
+}
+
+export interface GreptimeDBOutputRecord {
+  records?: GreptimeDBRecords;
+  affectedrows?: number;
+}
+
+export interface GreptimeDBResponseData {
+  output?: GreptimeDBOutputRecord[];
+  execution_time_ms?: number;
 }

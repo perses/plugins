@@ -13,6 +13,7 @@
 
 import { RequestHeaders } from '@perses-dev/core';
 import { GreptimeDBDatasourceResponse, GreptimeDBQueryRequestParameters } from '../datasources/greptimedb-datasource';
+import { GreptimeDBResponseData } from './greptimedb-data-types';
 
 export interface GreptimeDBQueryOptions {
   datasourceUrl: string;
@@ -21,12 +22,12 @@ export interface GreptimeDBQueryOptions {
 
 export interface GreptimeDBQueryResponse {
   status: 'success' | 'error';
-  data: unknown;
+  data: GreptimeDBResponseData;
   error?: string;
 }
 
 export interface GreptimeDBClient {
-  query: (params: { start: string; end: string; query: string }) => Promise<GreptimeDBQueryResponse>;
+  query: (params: GreptimeDBQueryRequestParameters) => Promise<GreptimeDBQueryResponse>;
 }
 
 export async function greptimedbQuery(
@@ -58,17 +59,16 @@ export async function greptimedbQuery(
       console.error('GreptimeDB error response:', errorText);
       return {
         status: 'error',
-        data: [],
+        data: { output: [] },
         error: errorText,
       };
     }
 
     const body = await response.json();
-    const records = body?.output?.[0]?.records;
 
     return {
       status: body?.status ?? 'success',
-      data: records ?? body?.output ?? body,
+      data: body,
     };
   } catch (e) {
     throw new Error(`GreptimeDB query failed: ${e}`);

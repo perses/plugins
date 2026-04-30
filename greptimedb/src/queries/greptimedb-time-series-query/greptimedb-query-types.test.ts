@@ -11,11 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: This should be fixed globally in the test setup
 import { DatasourceSpec } from '@perses-dev/core';
-
-jest.mock('echarts/core');
-
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
@@ -31,10 +27,16 @@ greptimedbStubClient.query = jest.fn(async () => {
   const stubResponse: GreptimeDBQueryResponse = {
     status: 'success',
     data: {
-      schema: {
-        column_schemas: [{ name: 'ts' }, { name: 'value' }],
-      },
-      rows: [[1700000000000, 42]],
+      output: [
+        {
+          records: {
+            schema: {
+              column_schemas: [{ name: 'ts' }, { name: 'value' }],
+            },
+            rows: [[1700000000000, 42]],
+          },
+        },
+      ],
     },
   };
   return stubResponse as GreptimeDBQueryResponse;
@@ -94,7 +96,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
   it('should run query and return GreptimeDB records', async () => {
     const client = getDatasourceClient();
     const resp = await client.query({ query: 'SELECT * FROM metrics' });
-    expect(resp.data).toHaveProperty('rows');
+    expect(resp.data.output?.[0]?.records).toHaveProperty('rows');
   });
 
   it('should support stat query without time column', async () => {

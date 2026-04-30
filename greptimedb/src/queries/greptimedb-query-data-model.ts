@@ -13,6 +13,9 @@
 
 import { AbsoluteTimeRange } from '@perses-dev/core';
 import { replaceVariables, VariableStateMap } from '@perses-dev/plugin-system';
+import { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData } from '../model/greptimedb-data-types';
+
+export type { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData };
 
 /**
  * Supplement a variableState map with Perses builtin time-range variables
@@ -52,19 +55,6 @@ function formatDuration(ms: number): string {
   if (minutes > 0) result += `${minutes}m`;
   if (seconds > 0 || result === '') result += `${seconds}s`;
   return result;
-}
-
-export interface GreptimeDBColumnSchema {
-  name: string;
-  data_type?: string;
-  semantic_type?: string;
-}
-
-export interface GreptimeDBRecords {
-  schema?: {
-    column_schemas?: GreptimeDBColumnSchema[];
-  };
-  rows?: unknown[][];
 }
 
 function normalizeTimestampType(dataType: string | undefined): string | null {
@@ -120,16 +110,10 @@ export function toTimestampMs(value: unknown, dataType: string | undefined): num
   return Number.isNaN(ts) ? null : ts;
 }
 
-export function normalizeRecords(payload: unknown): GreptimeDBRecords | undefined {
+export function normalizeRecords(payload: GreptimeDBResponseData): GreptimeDBRecords | undefined {
   if (!payload || typeof payload !== 'object') return undefined;
 
-  // GreptimeDB HTTP API commonly returns: { output: [{ records: {...} }], execution_time_ms }
-  const maybeWrapped = payload as { output?: Array<{ records?: GreptimeDBRecords }> };
-  const wrappedRecords = maybeWrapped.output?.[0]?.records;
-  if (wrappedRecords) return wrappedRecords;
-
-  // Some clients already return the records object directly.
-  return payload as GreptimeDBRecords;
+  return payload.output?.[0]?.records;
 }
 
 export function findTimeColumnIndex(columnSchemas: GreptimeDBColumnSchema[]): number {

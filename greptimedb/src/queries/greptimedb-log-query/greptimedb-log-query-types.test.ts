@@ -11,10 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: This should be fixed globally in the test setup
 import { DatasourceSpec } from '@perses-dev/core';
-
-jest.mock('echarts/core');
 
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
@@ -31,10 +28,16 @@ greptimedbStubClient.query = jest.fn(async () => {
   const stubResponse: GreptimeDBQueryResponse = {
     status: 'success',
     data: {
-      schema: {
-        column_schemas: [{ name: 'ts' }, { name: 'message' }],
-      },
-      rows: [[1700000000000, 'hello']],
+      output: [
+        {
+          records: {
+            schema: {
+              column_schemas: [{ name: 'ts' }, { name: 'message' }],
+            },
+            rows: [[1700000000000, 'hello']],
+          },
+        },
+      ],
     },
   };
   return stubResponse as GreptimeDBQueryResponse;
@@ -92,6 +95,6 @@ describe('GreptimeDBLogQuery', () => {
   it('should run query and return GreptimeDB records', async () => {
     const client = getDatasourceClient();
     const resp = await client.query({ query: 'SELECT * FROM logs' });
-    expect(resp.data).toHaveProperty('rows');
+    expect(resp.data.output?.[0]?.records).toHaveProperty('rows');
   });
 });

@@ -69,17 +69,25 @@ describe('GreptimeDBTraceQuery', () => {
     const stubResponse: GreptimeDBQueryResponse = {
       status: 'success',
       data: {
-        schema: {
-          column_schemas: [
-            { name: 'trace_id' },
-            { name: 'timestamp', data_type: 'timestamp_millisecond' },
-            { name: 'duration_ms' },
-            { name: 'root_service_name' },
-            { name: 'root_trace_name' },
-            { name: 'status_code' },
-          ],
-        },
-        rows: [['abc123abc123abc123abc123abc123ab', 1700000000000, 100, 'frontend', 'GET /', 'STATUS_CODE_ERROR']],
+        output: [
+          {
+            records: {
+              schema: {
+                column_schemas: [
+                  { name: 'trace_id' },
+                  { name: 'timestamp', data_type: 'timestamp_millisecond' },
+                  { name: 'duration_ms' },
+                  { name: 'root_service_name' },
+                  { name: 'root_trace_name' },
+                  { name: 'status_code' },
+                ],
+              },
+              rows: [
+                ['abc123abc123abc123abc123abc123ab', 1700000000000, 100, 'frontend', 'GET /', 'STATUS_CODE_ERROR'],
+              ],
+            },
+          },
+        ],
       },
     };
     mockedQuery.mockResolvedValue(stubResponse);
@@ -106,60 +114,66 @@ describe('GreptimeDBTraceQuery', () => {
     const stubResponse: GreptimeDBQueryResponse = {
       status: 'success',
       data: {
-        schema: {
-          column_schemas: [
-            { name: 'trace_id' },
-            { name: 'span_id' },
-            { name: 'parent_span_id' },
-            { name: 'timestamp', data_type: 'timestamp_millisecond' },
-            { name: 'timestamp_end', data_type: 'timestamp_millisecond' },
-            { name: 'service_name' },
-            { name: 'scope_name' },
-            { name: 'scope_version' },
-            { name: 'span_name' },
-            { name: 'span_kind' },
-            { name: 'span_status_code' },
-            { name: 'span_status_message' },
-            { name: 'span_events' },
-            { name: 'span_links' },
-            { name: 'span_attributes.http.method' },
-          ],
-        },
-        rows: [
-          [
-            traceId,
-            'sid-root',
-            null,
-            1700000000000,
-            1700000000100,
-            'frontend',
-            'otel.scope',
-            '1.0.0',
-            'GET /',
-            'SPAN_KIND_SERVER',
-            'STATUS_CODE_OK',
-            '',
-            '[]',
-            '[]',
-            'GET',
-          ],
-          [
-            traceId,
-            'sid-child',
-            'sid-root',
-            1700000000020,
-            1700000000090,
-            'frontend',
-            'otel.scope',
-            '1.0.0',
-            'SELECT users',
-            'SPAN_KIND_CLIENT',
-            'STATUS_CODE_ERROR',
-            'db error',
-            '[{"name":"exception","time_unix_nano":"1700000000030000000"}]',
-            '[]',
-            'POST',
-          ],
+        output: [
+          {
+            records: {
+              schema: {
+                column_schemas: [
+                  { name: 'trace_id' },
+                  { name: 'span_id' },
+                  { name: 'parent_span_id' },
+                  { name: 'timestamp', data_type: 'timestamp_millisecond' },
+                  { name: 'timestamp_end', data_type: 'timestamp_millisecond' },
+                  { name: 'service_name' },
+                  { name: 'scope_name' },
+                  { name: 'scope_version' },
+                  { name: 'span_name' },
+                  { name: 'span_kind' },
+                  { name: 'span_status_code' },
+                  { name: 'span_status_message' },
+                  { name: 'span_events' },
+                  { name: 'span_links' },
+                  { name: 'span_attributes.http.method' },
+                ],
+              },
+              rows: [
+                [
+                  traceId,
+                  'sid-root',
+                  null,
+                  1700000000000,
+                  1700000000100,
+                  'frontend',
+                  'otel.scope',
+                  '1.0.0',
+                  'GET /',
+                  'SPAN_KIND_SERVER',
+                  'STATUS_CODE_OK',
+                  '',
+                  '[]',
+                  '[]',
+                  'GET',
+                ],
+                [
+                  traceId,
+                  'sid-child',
+                  'sid-root',
+                  1700000000020,
+                  1700000000090,
+                  'frontend',
+                  'otel.scope',
+                  '1.0.0',
+                  'SELECT users',
+                  'SPAN_KIND_CLIENT',
+                  'STATUS_CODE_ERROR',
+                  'db error',
+                  '[{"name":"exception","time_unix_nano":"1700000000030000000"}]',
+                  '[]',
+                  'POST',
+                ],
+              ],
+            },
+          },
         ],
       },
     };
@@ -186,10 +200,7 @@ describe('GreptimeDBTraceQuery', () => {
     mockedQuery.mockResolvedValue({
       status: 'success',
       data: {
-        schema: {
-          column_schemas: [{ name: 'trace_id' }],
-        },
-        rows: [],
+        output: [{ records: { schema: { column_schemas: [{ name: 'trace_id' }] }, rows: [] } }],
       },
     } as GreptimeDBQueryResponse);
 
@@ -213,10 +224,7 @@ describe('GreptimeDBTraceQuery', () => {
     mockedQuery.mockResolvedValue({
       status: 'success',
       data: {
-        schema: {
-          column_schemas: [{ name: 'trace_id' }],
-        },
-        rows: [],
+        output: [{ records: { schema: { column_schemas: [{ name: 'trace_id' }] }, rows: [] } }],
       },
     } as GreptimeDBQueryResponse);
 

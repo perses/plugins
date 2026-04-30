@@ -23,7 +23,7 @@ const mockedQuery = greptimedbQuery as jest.MockedFunction<typeof greptimedbQuer
 describe('GreptimeDBDatasource.createClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedQuery.mockResolvedValue({ status: 'success', data: [] });
+    mockedQuery.mockResolvedValue({ status: 'success', data: { output: [] } });
   });
 
   it('uses directUrl with spec.headers', async () => {
