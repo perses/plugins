@@ -25,7 +25,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { OptionsColorPicker, UnitSelector } from '@perses-dev/components';
+import { FormatControls, OptionsColorPicker } from '@perses-dev/components';
 import { FormatOptions } from '@perses-dev/core';
 import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -34,12 +34,12 @@ import CloseIcon from 'mdi-material-ui/Close';
 import { produce } from 'immer';
 import { useQueryCountContext } from '@perses-dev/plugin-system';
 import {
+  DEFAULT_AREA_OPACITY,
+  LINE_STYLE_CONFIG,
+  OPACITY_CONFIG,
+  QuerySettingsOptions,
   TimeSeriesChartOptions,
   TimeSeriesChartOptionsEditorProps,
-  QuerySettingsOptions,
-  DEFAULT_AREA_OPACITY,
-  OPACITY_CONFIG,
-  LINE_STYLE_CONFIG,
 } from './time-series-chart-model';
 
 const DEFAULT_COLOR_VALUE = '#555';
@@ -206,19 +206,19 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
-  const addUnit = (i: number): void => {
+  const addFormat = (i: number): void => {
     updateQuerySettings(i, (qs) => {
-      qs.format = { unit: 'decimal' };
+      qs.format = { unit: 'decimal', shortValues: true };
     });
   };
 
-  const removeUnit = (i: number): void => {
+  const removeFormat = (i: number): void => {
     updateQuerySettings(i, (qs) => {
       qs.format = undefined;
     });
   };
 
-  const handleUnitChange = (i: number, format?: FormatOptions): void => {
+  const handleFormatChange = (i: number, format?: FormatOptions): void => {
     updateQuerySettings(i, (qs) => {
       qs.format = format;
     });
@@ -285,9 +285,9 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             onRemoveLineStyle={() => removeLineStyle(i)}
             onAddAreaOpacity={() => addAreaOpacity(i)}
             onRemoveAreaOpacity={() => removeAreaOpacity(i)}
-            onAddUnit={() => addUnit(i)}
-            onRemoveUnit={() => removeUnit(i)}
-            onUnitChange={(format) => handleUnitChange(i, format)}
+            onAddFormat={() => addFormat(i)}
+            onRemoveFormat={() => removeFormat(i)}
+            onFormatChange={(format) => handleFormatChange(i, format)}
           />
         ))
       )}
@@ -317,9 +317,9 @@ interface QuerySettingsInputProps {
   onRemoveLineStyle: () => void;
   onAddAreaOpacity: () => void;
   onRemoveAreaOpacity: () => void;
-  onAddUnit: () => void;
-  onRemoveUnit: () => void;
-  onUnitChange: (format?: FormatOptions) => void;
+  onAddFormat: () => void;
+  onRemoveFormat: () => void;
+  onFormatChange: (format?: FormatOptions) => void;
 }
 
 function QuerySettingsInput({
@@ -338,9 +338,9 @@ function QuerySettingsInput({
   onRemoveLineStyle,
   onAddAreaOpacity,
   onRemoveAreaOpacity,
-  onAddUnit,
-  onRemoveUnit,
-  onUnitChange,
+  onAddFormat,
+  onRemoveFormat,
+  onFormatChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
@@ -354,9 +354,9 @@ function QuerySettingsInput({
     if (!colorMode) options.push({ key: 'color', label: 'Color', action: onAddColor });
     if (!lineStyle) options.push({ key: 'lineStyle', label: 'Line Style', action: onAddLineStyle });
     if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
-    if (format === undefined) options.push({ key: 'unit', label: 'Unit', action: onAddUnit });
+    if (format === undefined) options.push({ key: 'format', label: 'Format', action: onAddFormat });
     return options;
-  }, [colorMode, lineStyle, areaOpacity, format, onAddColor, onAddLineStyle, onAddAreaOpacity, onAddUnit]);
+  }, [colorMode, lineStyle, areaOpacity, format, onAddColor, onAddLineStyle, onAddAreaOpacity, onAddFormat]);
 
   const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     if (availableOptions.length === 1 && availableOptions[0]) {
@@ -378,8 +378,18 @@ function QuerySettingsInput({
   };
 
   return (
-    <Stack sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-      <Stack direction="row" alignItems="center" sx={{ flexWrap: 'wrap', gap: 2 }}>
+    <Stack
+      sx={{
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        p: 2,
+        display: 'flex',
+        flexWrap: 'nowrap',
+        flexDirection: 'row',
+      }}
+    >
+      <Stack direction="row" alignItems="center" sx={{ flexWrap: 'wrap', gap: 2, flexGrow: 1 }}>
         {/* Query Index Selection */}
         <TextField
           select
@@ -454,11 +464,11 @@ function QuerySettingsInput({
           </SettingsSection>
         )}
 
-        {/* Unit section */}
+        {/* Format section */}
         {format !== undefined && (
-          <SettingsSection label="Unit" onRemove={onRemoveUnit}>
-            <Box sx={{ minWidth: '180px' }}>
-              <UnitSelector value={format} onChange={onUnitChange} />
+          <SettingsSection label="Format" onRemove={onRemoveFormat}>
+            <Box sx={{ minWidth: '180px', display: 'flex', gap: 1, flexDirection: 'column' }}>
+              <FormatControls value={format} onChange={onFormatChange} />
             </Box>
           </SettingsSection>
         )}
@@ -493,15 +503,11 @@ function QuerySettingsInput({
             </Menu>
           </>
         )}
-
-        {/* Spacer to push delete button to the right */}
-        <Box sx={{ flexGrow: 1 }} />
-
-        {/* Delete Button for this query settings */}
-        <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
-          <DeleteIcon />
-        </IconButton>
       </Stack>
+      {/* Delete Button for this query settings */}
+      <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
+        <DeleteIcon />
+      </IconButton>
     </Stack>
   );
 }
