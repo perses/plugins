@@ -505,9 +505,11 @@ function QuerySettingsInput({
         )}
       </Stack>
       {/* Delete Button for this query settings */}
-      <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
-        <DeleteIcon />
-      </IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
+          <DeleteIcon />
+        </IconButton>
+      </Box>
     </Stack>
   );
 }
