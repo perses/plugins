@@ -162,6 +162,16 @@ export function createInitialTableOptions(): TableOptions {
 
 export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
 
+function parseRangeBound(rawValue: string): number | undefined {
+  const trimmed = rawValue.trim();
+  if (trimmed === '') {
+    return undefined;
+  }
+
+  const parsed = Number(trimmed);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
+
 /**
  * Formats the display text and colors based on cell settings
  */
@@ -293,8 +303,12 @@ export function renderConditionEditor(
           label: 'From',
           placeholder: 'Start of range',
           value: condition.spec?.min ?? '',
-          onChange: (e: { target: { value: string } }) =>
-            onChange({ ...condition, spec: { ...condition.spec, min: +e.target.value } } as RangeCondition),
+          onChange: (e: { target: { value: string } }) => {
+            const nextMin = parseRangeBound(e.target.value);
+            onChange({ ...condition, spec: { ...condition.spec, min: nextMin } } as RangeCondition);
+          },
+          type: 'number',
+          slotProps: { htmlInput: { step: 'any' } },
           fullWidth: true,
           size: size,
         }),
@@ -303,8 +317,12 @@ export function renderConditionEditor(
           label: 'To',
           placeholder: 'End of range (inclusive)',
           value: condition.spec?.max ?? '',
-          onChange: (e: { target: { value: string } }) =>
-            onChange({ ...condition, spec: { ...condition.spec, max: +e.target.value } } as RangeCondition),
+          onChange: (e: { target: { value: string } }) => {
+            const nextMax = parseRangeBound(e.target.value);
+            onChange({ ...condition, spec: { ...condition.spec, max: nextMax } } as RangeCondition);
+          },
+          type: 'number',
+          slotProps: { htmlInput: { step: 'any' } },
           fullWidth: true,
           size: size,
         }),
