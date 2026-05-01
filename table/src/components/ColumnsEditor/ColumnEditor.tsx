@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { Button, ButtonGroup, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
@@ -28,6 +28,7 @@ import { PluginKindSelect } from '@perses-dev/plugin-system';
 import { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
 import { DataLinkEditor } from './DataLinkEditorDialog';
+import { EmbeddedPanelOptionsEditor } from './EmbeddedPanelOptionsEditor';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
@@ -131,30 +132,37 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               }
             />
             <OptionsEditorControl
-              label="Display"
+              label="Cell display"
               control={
-                <ButtonGroup aria-label="Display" size="small">
-                  <Button
-                    variant={!column.plugin ? 'contained' : 'outlined'}
-                    onClick={() => onChange({ ...column, plugin: undefined })}
-                  >
-                    Text
-                  </Button>
-                  <Button
-                    variant={column.plugin ? 'contained' : 'outlined'}
-                    onClick={() => onChange({ ...column, plugin: { kind: 'StatChart', spec: {} } })}
-                  >
-                    Embedded Panel
-                  </Button>
-                </ButtonGroup>
+                <Stack spacing={1}>
+                  <ButtonGroup aria-label="Cell display" size="small">
+                    <Button
+                      variant={!column.plugin ? 'contained' : 'outlined'}
+                      onClick={() => onChange({ ...column, plugin: undefined })}
+                    >
+                      Text
+                    </Button>
+                    <Button
+                      variant={column.plugin ? 'contained' : 'outlined'}
+                      onClick={() => onChange({ ...column, plugin: { kind: 'GaugeChart', spec: {} } })}
+                    >
+                      Visualization
+                    </Button>
+                  </ButtonGroup>
+                  <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 360 }}>
+                    Visualizations reuse panel settings (thresholds, units, colors). Text mode uses value formatting
+                    below.
+                  </Typography>
+                </Stack>
               }
             />
             {column.plugin ? (
               <OptionsEditorControl
-                label="Panel Type"
+                label="Visualization type"
                 control={
                   <PluginKindSelect
                     pluginTypes={['Panel']}
+                    size="small"
                     value={{ type: 'Panel', kind: column.plugin.kind }}
                     onChange={(event) => onChange({ ...column, plugin: { kind: event.kind, spec: {} } })}
                   />
@@ -214,7 +222,23 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           </OptionsEditorGroup>
         </OptionsEditorColumn>
       </OptionsEditorGrid>
-      <Stack sx={{ px: 8 }}>
+      {column.plugin?.kind === 'GaugeChart' && (
+        <Stack sx={{ px: 8, mt: 4, width: '100%' }} spacing={2}>
+          <OptionsEditorGroup title="Visualization settings">
+            <EmbeddedPanelOptionsEditor
+              kind="GaugeChart"
+              spec={column.plugin.spec}
+              onChange={(nextSpec) =>
+                onChange({
+                  ...column,
+                  plugin: { kind: 'GaugeChart', spec: nextSpec },
+                })
+              }
+            />
+          </OptionsEditorGroup>
+        </Stack>
+      )}
+      <Stack sx={{ px: 8, mt: column.plugin?.kind === 'GaugeChart' ? 3 : 0 }}>
         <OptionsEditorGroup title="Conditional Cell Format">
           <ConditionalPanel
             cellSettings={column.cellSettings}
