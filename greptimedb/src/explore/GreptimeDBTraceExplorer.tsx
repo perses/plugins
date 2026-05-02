@@ -1,0 +1,163 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Box, Stack } from '@mui/material';
+import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
+import { QueryDefinition } from '@perses-dev/core';
+import { Panel } from '@perses-dev/dashboards';
+import { useExplorerManagerContext } from '@perses-dev/explore';
+import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
+import { ReactElement, useEffect, useState } from 'react';
+import { GreptimeDBTraceQuerySpec } from '../queries/greptimedb-trace-query/greptimedb-trace-query-types';
+import { linkToSpan, linkToTrace, resolveTraceLinkTemplate } from './links';
+
+interface TraceExplorerQueryParams {
+  queries?: QueryDefinition[];
+  spanId?: string;
+}
+
+interface SearchResultsPanelProps {
+  queries: QueryDefinition[];
+}
+
+function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
+  const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
+
+  if (queryResults.length === 0) {
+    return <></>;
+  }
+  if (isLoading || isFetching) {
+    return <LoadingOverlay />;
+  }
+
+  const queryError = queryResults.find((d) => d.error);
+  if (queryError) {
+    throw queryError.error;
+  }
+
+  const tracesFound = queryResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
+  if (!tracesFound) {
+    return <NoDataOverlay resource="traces" />;
+  }
+
+  const firstQuery = (queries[0]?.spec.plugin.spec as GreptimeDBTraceQuerySpec | undefined)?.query ?? '';
+  const resolvedTraceLink = resolveTraceLinkTemplate(linkToTrace, firstQuery);
+
+  return (
+    <Panel
+      sx={{ height: '100%' }}
+      panelOptions={{
+        hideHeader: true,
+      }}
+      definition={{
+        kind: 'Panel',
+        spec: {
+          queries,
+          display: { name: '' },
+          plugin: {
+            kind: 'TraceTable',
+            spec: {
+              links: {
+                trace: resolvedTraceLink,
+              },
+            },
+          },
+        },
+      }}
+    />
+  );
+}
+
+interface TracingGanttChartPanelProps {
+  queries: QueryDefinition[];
+  selectedSpanId?: string;
+}
+
+function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
+  const { queries, selectedSpanId } = props;
+  const firstQuery = (queries[0]?.spec.plugin.spec as GreptimeDBTraceQuerySpec | undefined)?.query;
+  const resolvedTraceLink = resolveTraceLinkTemplate(linkToTrace, firstQuery ?? '');
+  const resolvedSpanLink = resolveTraceLinkTemplate(linkToSpan, firstQuery ?? '');
+
+  return (
+    <Panel
+      panelOptions={{ showIcons: 'always' }}
+      definition={{
+        kind: 'Panel',
+        spec: {
+          queries,
+          display: { name: `Trace ${firstQuery ?? ''}` },
+          plugin: {
+            kind: 'TracingGanttChart',
+            spec: {
+              links: {
+                trace: resolvedTraceLink,
+                span: resolvedSpanLink,
+              },
+              selectedSpanId,
+            },
+          },
+        },
+      }}
+    />
+  );
+}
+
+function isLikelyTraceDetailSQL(query: string): boolean {
+  return /where[\s\S]*trace_id/i.test(query);
+}
+
+export function GreptimeDBTraceExplorer(): ReactElement {
+  const { data, setData } = useExplorerManagerContext<TraceExplorerQueryParams>();
+  const { queries = [], spanId: selectedSpanId } = data;
+
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
+  useEffect(() => {
+    setQueryDefinitions(queries);
+  }, [queries]);
+
+  const definitions = queries.length
+    ? queries.map((query: QueryDefinition) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      })
+    : [];
+
+  const firstQuery = (queries[0]?.spec.plugin.spec as GreptimeDBTraceQuerySpec | undefined)?.query ?? '';
+  const isSingleTrace = isLikelyTraceDetailSQL(firstQuery);
+
+  return (
+    <Stack gap={2} sx={{ width: '100%' }}>
+      <MultiQueryEditor
+        queryTypes={['TraceQuery']}
+        onChange={(state) => setQueryDefinitions(state)}
+        queries={queryDefinitions}
+        onQueryRun={() => setData({ ...data, queries: queryDefinitions })}
+      />
+
+      <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
+        <DataQueriesProvider definitions={definitions}>
+          <Box height={700}>
+            {isSingleTrace ? (
+              <TracingGanttChartPanel queries={queries} selectedSpanId={selectedSpanId} />
+            ) : (
+              <SearchResultsPanel queries={queries} />
+            )}
+          </Box>
+        </DataQueriesProvider>
+      </ErrorBoundary>
+    </Stack>
+  );
+}
