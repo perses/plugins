@@ -11,6 +11,7 @@
     "type-check": "turbo run type-check"
   },
   "workspaces": [
+    "alertmanager",
     "barchart",
     "clickhouse",
     "datasourcevariable",
