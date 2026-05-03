@@ -32,8 +32,8 @@ clickhouseStubClient.query = jest.fn(async () => {
   const stubResponse: ClickHouseQueryResponse = {
     status: 'success',
     data: [
-      { time: '2025-09-09 05:18:00', log_count: '277' },
-      { time: '2025-09-09 05:19:00', log_count: '156102' },
+      { time: '2025-09-09 05:18:00', avg_cpu: '2.5', max_memory: 277, service: 'api' },
+      { time: '2025-09-09 05:19:00', avg_cpu: '3.5', max_memory: 156102, service: 'api' },
     ],
   };
   return stubResponse as ClickHouseQueryResponse;
@@ -65,8 +65,8 @@ const createStubContext = (): TimeSeriesQueryContext => {
       setSavedDatasources: jest.fn(),
     },
     timeRange: {
-      end: new Date('01-01-2025'),
-      start: new Date('01-02-2025'),
+      end: new Date('2025-01-02T00:00:00.000Z'),
+      start: new Date('2025-01-01T00:00:00.000Z'),
     },
     variableState: {},
   };
@@ -90,11 +90,92 @@ describe('ClickHouseTimeSeriesQuery', () => {
     expect(initialOptions).toEqual({ query: '' });
   });
 
-  it('should run query and return ClickHouse data only', async () => {
-    const client = getDatasourceClient();
-    const resp = await client.query('SELECT count(*) FROM otel_logs');
-    expect(resp.data.length).toBeGreaterThan(0);
-    expect(resp.data[0]).toHaveProperty('time');
-    expect(resp.data[0]).toHaveProperty('log_count');
+  it('should run query with interpolated time range and return one series per numeric column', async () => {
+    const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      {
+        query:
+          "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+      },
+      createStubContext()
+    );
+
+    expect(clickhouseStubClient.query).toHaveBeenCalledWith({
+      start: '2025-01-01 00:00:00',
+      end: '2025-01-02 00:00:00',
+      query:
+        "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time",
+    });
+    expect(response.series).toEqual([
+      {
+        name: 'avg_cpu',
+        values: [
+          [new Date('2025-09-09 05:18:00').getTime(), 2.5],
+          [new Date('2025-09-09 05:19:00').getTime(), 3.5],
+        ],
+      },
+      {
+        name: 'max_memory',
+        values: [
+          [new Date('2025-09-09 05:18:00').getTime(), 277],
+          [new Date('2025-09-09 05:19:00').getTime(), 156102],
+        ],
+      },
+    ]);
+    expect(response.stepMs).toBe(60 * 1000);
+    expect(response.metadata?.executedQueryString).toBe(
+      "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time"
+    );
+  });
+
+  it('should infer daily query step from returned timestamps', async () => {
+    (clickhouseStubClient.query as jest.Mock).mockResolvedValueOnce({
+      status: 'success',
+      data: [
+        { time: '2026-01-01 22:00:00', flights: 80 },
+        { time: '2026-01-02 22:00:00', flights: 56 },
+        { time: '2026-01-03 22:00:00', flights: 32 },
+      ],
+    });
+
+    const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      {
+        query:
+          "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+      },
+      createStubContext()
+    );
+
+    expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
+    expect(response.series).toEqual([
+      {
+        name: 'flights',
+        values: [
+          [new Date('2026-01-01 22:00:00').getTime(), 80],
+          [new Date('2026-01-02 22:00:00').getTime(), 56],
+          [new Date('2026-01-03 22:00:00').getTime(), 32],
+        ],
+      },
+    ]);
+  });
+
+  it('should keep timezone daily buckets daily across daylight saving time changes', async () => {
+    (clickhouseStubClient.query as jest.Mock).mockResolvedValueOnce({
+      status: 'success',
+      data: [
+        { time: '2026-03-28 22:00:00', flights: 80 },
+        { time: '2026-03-29 21:00:00', flights: 56 },
+        { time: '2026-03-30 21:00:00', flights: 32 },
+      ],
+    });
+
+    const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      {
+        query:
+          "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+      },
+      createStubContext()
+    );
+
+    expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
   });
 });

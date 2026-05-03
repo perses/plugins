@@ -19,5 +19,5 @@ export interface ClickHouseTimeSeriesData extends TimeSeriesData {
 
 export interface TimeSeriesEntry {
   time: string;
-  log_count: number | string;
+  [key: string]: number | string | null | undefined;
 }
