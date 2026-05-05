@@ -11,30 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { memo, useCallback, useState, useRef, useEffect, ReactNode } from 'react';
 import {
   Box,
   Collapse,
-  useTheme,
   IconButton,
-  Tooltip,
-  Menu,
-  MenuItem,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
+  Tooltip,
+  useTheme,
 } from '@mui/material';
-import ChevronRight from 'mdi-material-ui/ChevronRight';
-import ContentCopy from 'mdi-material-ui/ContentCopy';
-import ChevronDown from 'mdi-material-ui/ChevronDown';
-import FormatQuoteClose from 'mdi-material-ui/FormatQuoteClose';
-import CodeJson from 'mdi-material-ui/CodeJson';
-import Check from 'mdi-material-ui/Check';
 import { LogEntry } from '@perses-dev/core';
+import Check from 'mdi-material-ui/Check';
+import ChevronDown from 'mdi-material-ui/ChevronDown';
+import ChevronRight from 'mdi-material-ui/ChevronRight';
+import CodeJson from 'mdi-material-ui/CodeJson';
+import ContentCopy from 'mdi-material-ui/ContentCopy';
+import FormatQuoteClose from 'mdi-material-ui/FormatQuoteClose';
+import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ansiToSanitizedHtml } from '../../utils/ansi';
+import { formatLogAsJson, formatLogEntry, formatLogMessage } from '../../utils/copyHelpers';
 import { useSeverityColor } from '../hooks/useSeverity';
-import { formatLogEntry, formatLogMessage, formatLogAsJson } from '../../utils/copyHelpers';
-import { LogTimestamp } from './LogTimestamp';
-import { LogRowContainer, LogRowContent, ExpandButton, LogText } from './LogsStyles';
 import { LogDetailsTable } from './LogDetailsTable';
+import { LogTimestamp } from './LogTimestamp';
+import { ExpandButton, LogRowContainer, LogRowContent, LogText } from './LogsStyles';
+import './ansiColors.css';
 
 const COPY_SUCCESS_DURATION_MS = 1500;
 
@@ -65,6 +67,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
 }) => {
   const theme = useTheme();
   const severityColor = useSeverityColor(log);
+  const ansiHtml = useMemo(() => (log ? ansiToSanitizedHtml(log.line) : null), [log]);
   const [isHovered, setIsHovered] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -194,9 +197,13 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
             alignItems: 'center',
           }}
         >
-          <LogText variant="body2" allowWrap={allowWrap}>
-            {log.line}
-          </LogText>
+          {ansiHtml ? (
+            <LogText variant="body2" allowWrap={allowWrap} dangerouslySetInnerHTML={{ __html: ansiHtml }} />
+          ) : (
+            <LogText variant="body2" allowWrap={allowWrap}>
+              {log.line}
+            </LogText>
+          )}
           <Tooltip title={copySuccess ? 'Copied!' : 'Copy options'}>
             <IconButton
               size="small"

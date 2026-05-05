@@ -127,4 +127,24 @@ describe('LogRow', () => {
 
     expect(onSelect).toHaveBeenCalledWith(0, expect.objectContaining({ type: 'mousedown' }));
   });
+
+  describe('ANSI rendering', () => {
+    it('should render ANSI colored log text as HTML', () => {
+      const ansiLog: LogEntry = {
+        timestamp: 1767225600,
+        line: '\x1b[31mERROR\x1b[0m connection refused',
+        labels: { level: 'error' },
+      };
+      render(<LogRow log={ansiLog} index={0} isExpanded={false} onToggle={jest.fn()} />);
+      const errorSpan = document.querySelector('.ansi-red-fg');
+      expect(errorSpan).toBeInTheDocument();
+      expect(errorSpan).toHaveTextContent('ERROR');
+    });
+
+    it('should render plain log text without dangerouslySetInnerHTML', () => {
+      renderLogRow(); // uses existing mockLog with plain text 'foo bar baz'
+      expect(screen.getByText('foo bar baz')).toBeInTheDocument();
+      expect(document.querySelector('[class*="ansi-"]')).toBeNull();
+    });
+  });
 });

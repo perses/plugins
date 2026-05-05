@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogEntry } from '@perses-dev/core';
+import { stripAnsi } from './ansi';
 
 /**
  * Formats a timestamp for display in copied text
@@ -44,14 +45,15 @@ export function formatLabels(labels: Record<string, string>): string {
 export function formatLogEntry(log: LogEntry): string {
   const timestamp = formatTimestamp(log.timestamp);
   const labels = formatLabels(log.labels || {});
-  return labels ? `${timestamp} ${labels} ${log.line}` : `${timestamp} ${log.line}`;
+  const cleanLine = stripAnsi(log.line);
+  return labels ? `${timestamp} ${labels} ${cleanLine}` : `${timestamp} ${cleanLine}`;
 }
 
 /**
  * Formats just the log message text (no timestamp or labels)
  */
 export function formatLogMessage(log: LogEntry): string {
-  return log.line;
+  return stripAnsi(log.line);
 }
 
 /**
