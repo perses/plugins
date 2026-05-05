@@ -76,6 +76,16 @@ export interface LokiClient {
   ) => Promise<LokiIndexStatsResponse>;
 }
 
+async function handleErrorResponse(response: Response): Promise<void> {
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const errorJson = await response.json();
+    throw new Error(`Loki query_range error: ${response.status} ${response.statusText} - ${JSON.stringify(errorJson)}`);
+  }
+  const errorText = await response.text();
+  throw new Error(`Loki query_range error: ${response.status} ${response.statusText} - ${errorText}`);
+}
+
 export async function query(params: LokiQueryParams, options: LokiApiOptions): Promise<LokiQueryResponse> {
   const url = buildUrl('/loki/api/v1/query', options.datasourceUrl);
   url.searchParams.append('query', params.query);
@@ -90,6 +100,11 @@ export async function query(params: LokiQueryParams, options: LokiApiOptions): P
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
 
@@ -145,6 +160,11 @@ export async function queryRange(
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
 
@@ -164,6 +184,11 @@ export async function labels(
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
 
@@ -184,6 +209,11 @@ export async function labelValues(
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
 
@@ -205,6 +235,11 @@ export async function series(
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
 
@@ -223,6 +258,11 @@ export async function volume(params: LokiVolumeParams, options: LokiApiOptions):
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
 
@@ -241,6 +281,11 @@ export async function volumeRange(params: LokiVolumeParams, options: LokiApiOpti
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
 
@@ -262,5 +307,10 @@ export async function indexStats(
       ...options.headers,
     },
   });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
   return response.json();
 }
