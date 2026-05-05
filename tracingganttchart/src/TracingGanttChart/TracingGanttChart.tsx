@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { Box, Stack, useTheme } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { otlptracev1 } from '@perses-dev/core';
 import { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
@@ -39,7 +39,6 @@ export interface TracingGanttChartProps {
 export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   const { options, customLinks, trace: otlpTrace } = props;
 
-  const theme = useTheme();
   const trace = useMemo(() => {
     try {
       return getTraceModel(otlpTrace);
@@ -60,6 +59,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   // setTableWidth() is only called by <ResizableDivider />
   const [tableWidth, setTableWidth] = useState<number>(0.82);
   const gap = 2;
+  const spacing = ganttChart.current ? parseFloat(getComputedStyle(ganttChart.current).columnGap) || 0 : 0;
 
   return (
     <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
@@ -79,8 +79,14 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
       </Stack>
       {selectedSpan && (
         <>
-          <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
-          <Box style={{ width: `${(1 - tableWidth) * 100}%` }} sx={{ overflow: 'auto' }}>
+          <ResizableDivider parentRef={ganttChart} spacing={spacing} onMove={setTableWidth} />
+          <Box
+            style={{
+              width: `${(1 - tableWidth) * 100}%`,
+              minWidth: `${(1 - tableWidth) * 100}%`,
+            }}
+            sx={{ overflow: 'auto' }}
+          >
             <DetailPane
               customLinks={customLinks}
               trace={trace}
