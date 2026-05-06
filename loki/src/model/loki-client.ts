@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { AbsoluteTimeRange } from '@perses-dev/core';
 import {
   LokiQueryResponse,
   LokiQueryRangeResponse,
@@ -39,6 +40,19 @@ export interface LokiQueryRangeParams {
   limit?: number;
 }
 
+export interface LokiLabelsParams {
+  start?: string;
+  end?: string;
+  query?: string;
+}
+
+export interface LokiLabelValuesParams {
+  labelName: string;
+  start?: string;
+  end?: string;
+  query?: string;
+}
+
 export interface LokiVolumeParams {
   query: string;
   start: string;
@@ -58,13 +72,8 @@ export interface LokiClient {
   };
   query: (params: LokiQueryParams, headers?: LokiRequestHeaders) => Promise<LokiQueryResponse>;
   queryRange: (params: LokiQueryRangeParams, headers?: LokiRequestHeaders) => Promise<LokiQueryRangeResponse>;
-  labels: (start?: string, end?: string, headers?: LokiRequestHeaders) => Promise<LokiLabelsResponse>;
-  labelValues: (
-    label: string,
-    start?: string,
-    end?: string,
-    headers?: LokiRequestHeaders
-  ) => Promise<LokiLabelValuesResponse>;
+  labels: (params: LokiLabelsParams, headers?: LokiRequestHeaders) => Promise<LokiLabelsResponse>;
+  labelValues: (params: LokiLabelValuesParams, headers?: LokiRequestHeaders) => Promise<LokiLabelValuesResponse>;
   series: (match: string[], start?: string, end?: string, headers?: LokiRequestHeaders) => Promise<LokiSeriesResponse>;
   volume: (params: LokiVolumeParams, headers?: LokiRequestHeaders) => Promise<LokiVolumeResponse>;
   volumeRange: (params: LokiVolumeParams, headers?: LokiRequestHeaders) => Promise<LokiVolumeResponse>;
@@ -77,7 +86,7 @@ export interface LokiClient {
 }
 
 async function handleErrorResponse(response: Response): Promise<void> {
-  const contentType = response.headers.get('content-type');
+  const contentType = response.headers?.get('content-type');
   if (contentType && contentType.includes('application/json')) {
     const errorJson = await response.json();
     throw new Error(`Loki query_range error: ${response.status} ${response.statusText} - ${JSON.stringify(errorJson)}`);
@@ -168,14 +177,11 @@ export async function queryRange(
   return response.json();
 }
 
-export async function labels(
-  start: string | undefined,
-  end: string | undefined,
-  options: LokiApiOptions
-): Promise<LokiLabelsResponse> {
+export async function labels(params: LokiLabelsParams, options: LokiApiOptions): Promise<LokiLabelsResponse> {
   const url = buildUrl('/loki/api/v1/labels', options.datasourceUrl);
-  if (start) url.searchParams.append('start', start);
-  if (end) url.searchParams.append('end', end);
+  if (params.start) url.searchParams.append('start', params.start);
+  if (params.end) url.searchParams.append('end', params.end);
+  if (params.query) url.searchParams.append('query', params.query);
 
   const response = await fetch(url.toString(), {
     method: 'GET',
@@ -193,14 +199,13 @@ export async function labels(
 }
 
 export async function labelValues(
-  label: string,
-  start: string | undefined,
-  end: string | undefined,
+  params: LokiLabelValuesParams,
   options: LokiApiOptions
 ): Promise<LokiLabelValuesResponse> {
-  const url = buildUrl(`/loki/api/v1/label/${label}/values`, options.datasourceUrl);
-  if (start) url.searchParams.append('start', start);
-  if (end) url.searchParams.append('end', end);
+  const url = buildUrl(`/loki/api/v1/label/${params.labelName}/values`, options.datasourceUrl);
+  if (params.start) url.searchParams.append('start', params.start);
+  if (params.end) url.searchParams.append('end', params.end);
+  if (params.query) url.searchParams.append('query', params.query);
 
   const response = await fetch(url.toString(), {
     method: 'GET',
@@ -313,4 +318,11 @@ export async function indexStats(
   }
 
   return response.json();
+}
+
+export function getLokiTimeRange(timeRange: AbsoluteTimeRange): { start: string; end: string } {
+  return {
+    start: toUnixSeconds(timeRange.start),
+    end: toUnixSeconds(timeRange.end),
+  };
 }

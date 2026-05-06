@@ -16,7 +16,7 @@ import { LogEntry, LogData } from '@perses-dev/core';
 import { LokiStreamResult } from '../../model/loki-client-types';
 import { LokiClient } from '../../model/loki-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { LokiLogQuerySpec, LokiLogQueryResponse } from './loki-log-query-types';
+import { LokiLogQuerySpec } from './loki-log-query-types';
 import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
 
 function convertStreamsToLogs(streams: LokiStreamResult[]): LogData {
@@ -56,7 +56,7 @@ export const getLokiLogData: LogQueryPlugin<LokiLogQuerySpec>['getLogData'] = as
 
   const { start, end } = context.timeRange;
 
-  const response: LokiLogQueryResponse = await client.queryRange({
+  const response = await client.queryRange({
     query,
     start: start.getTime().toString(),
     end: end.getTime().toString(),

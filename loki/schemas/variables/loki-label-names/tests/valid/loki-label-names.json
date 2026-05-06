@@ -1,0 +1,8 @@
+{
+  "kind": "LokiLabelNamesVariable",
+  "spec": {
+    "matchers": [
+      "{job=\"myapp\"}"
+    ]
+  }
+}

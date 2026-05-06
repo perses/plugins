@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeries, DurationString, parseDurationString } from '@perses-dev/core';
+import { DurationString, TimeSeries, parseDurationString } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { milliseconds } from 'date-fns';
 import { LokiClient } from '../../model/loki-client';
 import { LokiMatrixResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { LokiTimeSeriesQuerySpec, LokiTimeSeriesQueryResponse } from './loki-time-series-query-types';
+import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 
 export type LokiMatrixResponse = {
   resultType: 'matrix';
@@ -115,7 +115,7 @@ export const getLokiTimeSeriesData: TimeSeriesQueryPlugin<LokiTimeSeriesQuerySpe
   const stepString = formatStepForLoki(stepSeconds);
   const stepMs = stepSeconds * 1000;
 
-  const response: LokiTimeSeriesQueryResponse = await client.queryRange({
+  const response = await client.queryRange({
     query,
     start: start.getTime().toString(),
     end: end.getTime().toString(),

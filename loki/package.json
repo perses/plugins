@@ -74,6 +74,33 @@
           },
           "name": "LokiLogQuery"
         }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "Loki Label Values Variable"
+          },
+          "name": "LokiLabelValuesVariable"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "Loki Label Names Variable"
+          },
+          "name": "LokiLabelNamesVariable"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "Loki LogQL Variable"
+          },
+          "name": "LokiLogQLVariable"
+        }
       }
     ]
   }
