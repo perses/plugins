@@ -11,9 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Table, TableBody, TableRow, TableCell, useTheme, alpha } from '@mui/material';
 import { Labels } from '@perses-dev/core';
+import './ansiColors.css';
+import { ansiToSanitizedHtml } from '../../utils/ansi';
+
+const AnsiValue: React.FC<{ value: string }> = ({ value }) => {
+  const ansiHtml = useMemo(() => ansiToSanitizedHtml(value), [value]);
+  if (ansiHtml) {
+    return <span dangerouslySetInnerHTML={{ __html: ansiHtml }} />;
+  }
+  return <>{value}</>;
+};
 
 interface LogDetailsTableProps {
   log: Labels;
@@ -60,7 +70,7 @@ export const LogDetailsTable: React.FC<LogDetailsTableProps> = ({ log }) => {
                 width: '67%',
               }}
             >
-              {value !== undefined && value !== null && value !== '' ? value : '--'}
+              {value !== undefined && value !== null && value !== '' ? <AnsiValue value={value} /> : '--'}
             </TableCell>
           </TableRow>
         ))}
