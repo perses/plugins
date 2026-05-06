@@ -97,10 +97,12 @@ function InlineGaugeCellWithRange({
   value,
   range,
   fillColor,
+  format,
 }: {
   value?: number;
   range?: GaugeRange;
   fillColor?: string;
+  format?: ColumnSettings['format'];
 }): ReactElement {
   if (value === undefined) {
     return <></>;
@@ -131,7 +133,7 @@ function InlineGaugeCellWithRange({
         />
       </Box>
       <Typography variant="body2" sx={{ minWidth: 52, textAlign: 'right' }}>
-        {value.toFixed(2)} ms
+        {format ? formatValue(value, format) : value.toFixed(2)}
       </Typography>
     </Box>
   );
@@ -165,7 +167,14 @@ function generateCellContentConfig(
         if (plugin.kind === 'GaugeChart') {
           const gaugeValue = getGaugeNumericValue(cellValue);
           const gaugeFillColor = resolveGaugeFillColor(gaugeValue, globalCellSettings, column.cellSettings);
-          return <InlineGaugeCellWithRange value={gaugeValue} range={gaugeRange} fillColor={gaugeFillColor} />;
+          return (
+            <InlineGaugeCellWithRange
+              value={gaugeValue}
+              range={gaugeRange}
+              fillColor={gaugeFillColor}
+              format={column.format}
+            />
+          );
         }
         const panelData = isPanelData(cellValue) ? cellValue : createSyntheticPanelData(cellValue, column.name);
         if (!panelData) return <></>;
