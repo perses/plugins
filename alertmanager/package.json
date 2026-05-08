@@ -1,0 +1,115 @@
+{
+  "name": "@perses-dev/alert-manager-plugin",
+  "version": "0.1.0",
+  "homepage": "https://github.com/perses/plugins/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perses/plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/perses/plugins/issues"
+  },
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "cross-env LC_ALL=C TZ=UTC jest",
+    "type-check": "tsc --noEmit"
+  },
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "peerDependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@perses-dev/components": "^0.54.0-beta.1",
+    "@perses-dev/core": "^0.53.0",
+    "@perses-dev/spec": "^0.2.0-beta.1",
+    "@perses-dev/dashboards": "^0.54.0-beta.1",
+    "@perses-dev/explore": "^0.54.0-beta.1",
+    "@perses-dev/plugin-system": "^0.54.0-beta.1",
+    "@tanstack/react-query": "^4.39.1",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.17.21",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
+  },
+  "files": [
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
+  ],
+  "perses": {
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "Alert Manager Datasource"
+          },
+          "name": "AlertManagerDatasource"
+        }
+      },
+      {
+        "kind": "AlertsQuery",
+        "spec": {
+          "display": {
+            "name": "Alert Manager Alerts Query"
+          },
+          "name": "AlertManagerAlertsQuery"
+        }
+      },
+      {
+        "kind": "SilencesQuery",
+        "spec": {
+          "display": {
+            "name": "Alert Manager Silences Query"
+          },
+          "name": "AlertManagerSilencesQuery"
+        }
+      },
+      {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Alert Table"
+          },
+          "name": "AlertTable"
+        }
+      },
+      {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Silence Table"
+          },
+          "name": "SilenceTable"
+        }
+      },
+      {
+        "kind": "Explore",
+        "spec": {
+          "display": {
+            "name": "Alert Manager Alerts Explorer"
+          },
+          "name": "AlertManagerAlertsExplorer"
+        }
+      },
+      {
+        "kind": "Explore",
+        "spec": {
+          "display": {
+            "name": "Alert Manager Silences Explorer"
+          },
+          "name": "AlertManagerSilencesExplorer"
+        }
+      }
+    ]
+  }
+}
