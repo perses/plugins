@@ -13,7 +13,12 @@
 
 import { replaceVariables } from '@perses-dev/plugin-system';
 import { LogEntry, LogData } from '@perses-dev/core';
-import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
+import {
+  ClickHouseClient,
+  ClickHouseQueryResponse,
+  formatClickHouseDateTime,
+  replaceTimeRangePlaceholders,
+} from '../../model/click-house-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 import { LogQueryPlugin } from './log-query-plugin-interface';
@@ -83,18 +88,21 @@ export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLo
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;
+  const startTime = formatClickHouseDateTime(start);
+  const endTime = formatClickHouseDateTime(end);
+  const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
 
   const response: ClickHouseQueryResponse = await client.query({
-    start: start.getTime().toString(),
-    end: end.getTime().toString(),
-    query,
+    start: startTime,
+    end: endTime,
+    query: executedQueryString,
   });
 
   return {
     timeRange: { start, end },
     logs: convertStreamsToLogs(response.data as LogEntry[]),
     metadata: {
-      executedQueryString: query,
+      executedQueryString,
     },
   };
 };
