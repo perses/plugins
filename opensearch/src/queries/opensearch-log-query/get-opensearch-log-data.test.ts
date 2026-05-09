@@ -189,6 +189,34 @@ describe('buildBoundedPPL', () => {
       "source=logs-* | where `time` >= '2025-01-01T00:00:00.000Z' and `time` <= '2025-01-01T01:00:00.000Z' | head 10"
     );
   });
+
+  it('runs the bound BEFORE a stats command (otherwise @timestamp is gone)', () => {
+    const q = buildBoundedPPL('source=logs-* | stats count() by service', start, end);
+    expect(q).toBe(
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | stats count() by service"
+    );
+  });
+
+  it('runs the bound BEFORE a fields command that excludes @timestamp', () => {
+    const q = buildBoundedPPL('source=logs-* | fields service, body', start, end);
+    expect(q).toBe(
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | fields service, body"
+    );
+  });
+
+  it('runs the bound BEFORE a top command (which collapses to top-N rows without @timestamp)', () => {
+    const q = buildBoundedPPL('source=logs-* | top 3 service', start, end);
+    expect(q).toBe(
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | top 3 service"
+    );
+  });
+
+  it('appends a single where pipe when the user query has no other pipes', () => {
+    const q = buildBoundedPPL('source=logs-*', start, end);
+    expect(q).toBe(
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'"
+    );
+  });
 });
 
 describe('convertPPLToLogs', () => {
