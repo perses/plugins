@@ -162,27 +162,32 @@ describe('buildBoundedPPL', () => {
   const start = new Date('2025-01-01T00:00:00.000Z');
   const end = new Date('2025-01-01T01:00:00.000Z');
 
-  it('appends a time-range filter to the user query', () => {
+  it('injects the time-range filter immediately after the source clause', () => {
     const q = buildBoundedPPL('source=logs-* | where level="error"', start, end);
     expect(q).toBe(
-      "source=logs-* | where level=\"error\" | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'"
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where level=\"error\""
     );
   });
 
   it('prepends source=<index> when the user query does not declare one', () => {
     const q = buildBoundedPPL('where level="error"', start, end, 'logs-*');
-    expect(q.startsWith('source=logs-* | where level="error"')).toBe(true);
+    expect(q).toBe(
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where level=\"error\""
+    );
   });
 
-  it('leaves the user source clause alone when already present', () => {
+  it('leaves the user source clause alone when already present and ignores the spec.index hint', () => {
     const q = buildBoundedPPL('source=other-* | head 10', start, end, 'logs-*');
-    expect(q.startsWith('source=other-*')).toBe(true);
+    expect(q).toBe(
+      "source=other-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | head 10"
+    );
   });
 
-  it('uses a custom timestamp field name in the where clause', () => {
+  it('uses a custom timestamp field name in the injected where clause', () => {
     const q = buildBoundedPPL('source=logs-* | head 10', start, end, undefined, 'time');
-    expect(q).toContain("where `time` >= '2025-01-01T00:00:00.000Z'");
-    expect(q).toContain("and `time` <= '2025-01-01T01:00:00.000Z'");
+    expect(q).toBe(
+      "source=logs-* | where `time` >= '2025-01-01T00:00:00.000Z' and `time` <= '2025-01-01T01:00:00.000Z' | head 10"
+    );
   });
 });
 
