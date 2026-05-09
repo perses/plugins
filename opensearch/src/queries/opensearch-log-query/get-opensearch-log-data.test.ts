@@ -217,6 +217,35 @@ describe('buildBoundedPPL', () => {
       "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'"
     );
   });
+
+  it('preserves a comma-separated multi-source clause', () => {
+    const q = buildBoundedPPL('source=logs-2026.04,logs-2026.05 | head 10', start, end);
+    expect(q.startsWith('source=logs-2026.04,logs-2026.05 | where `@timestamp`')).toBe(true);
+    expect(q).toContain('| head 10');
+  });
+
+  it("preserves the optional 'search' keyword in front of source=", () => {
+    const q = buildBoundedPPL('search source=logs-* | head 10', start, end);
+    expect(q.startsWith('search source=logs-* | where `@timestamp`')).toBe(true);
+    expect(q).toContain('| head 10');
+  });
+
+  it('preserves whitespace around the source equals sign', () => {
+    const q = buildBoundedPPL('source = logs-* | head 10', start, end);
+    expect(q.startsWith('source = logs-* | where `@timestamp`')).toBe(true);
+    expect(q).toContain('| head 10');
+  });
+
+  it('keeps the user time filter intact when one is already present (PPL ANDs them, both run before stats)', () => {
+    const q = buildBoundedPPL(
+      "source=logs-* | where `@timestamp` >= '2024-12-31T00:00:00Z' | stats count() by service",
+      start,
+      end
+    );
+    expect(q).toBe(
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where `@timestamp` >= '2024-12-31T00:00:00Z' | stats count() by service"
+    );
+  });
 });
 
 describe('convertPPLToLogs', () => {
