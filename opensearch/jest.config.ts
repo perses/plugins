@@ -11,31 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
 import type { Config } from '@jest/types';
-
-const here = dirname(fileURLToPath(import.meta.url));
-const swcrc = JSON.parse(readFileSync(resolve(here, '../.cjs.swcrc'), 'utf-8'));
+import shared from '../jest.shared';
 
 const jestConfig: Config.InitialOptions = {
-  testEnvironment: 'jsdom',
-  roots: ['<rootDir>/src'],
+  ...shared,
+
   moduleNameMapper: {
-    '^echarts/(.*)$': 'echarts',
-    '^use-resize-observer$': 'use-resize-observer/polyfilled',
-    '\\.(css|less)$': '<rootDir>/../stylesMock.js',
+    ...(shared.moduleNameMapper ?? {}),
     '^react$': '<rootDir>/../node_modules/react',
     '^react-dom$': '<rootDir>/../node_modules/react-dom',
     '^react/jsx-runtime$': '<rootDir>/../node_modules/react/jsx-runtime',
     '^react-dom/(.*)$': '<rootDir>/../node_modules/react-dom/$1',
   },
-  transformIgnorePatterns: ['node_modules/(?!(lodash-es|yaml))'],
-  transform: {
-    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', { ...swcrc, exclude: [], swcrc: false }],
-  },
-  setupFilesAfterEnv: ['<rootDir>/src/setup-tests.ts'],
+
+  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
 };
 
 export default jestConfig;
