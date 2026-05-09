@@ -21,7 +21,9 @@ import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
 
 /**
  * Bound the query to the panel time range using a PPL `where` clause on @timestamp.
- * If the user already filters on @timestamp we append another clause — PPL ANDs them.
+ * The bound is injected immediately after the source clause so it runs before any
+ * pipe that drops the timestamp column from the schema (stats, fields, top, etc.).
+ * If the user already filters on @timestamp themselves, PPL ANDs the two clauses.
  */
 export function buildBoundedPPL(
   userQuery: string,
@@ -30,16 +32,24 @@ export function buildBoundedPPL(
   index?: string,
   timestampField: string = '@timestamp'
 ): string {
-  const trimmed = userQuery.trim();
-  let base = trimmed;
+  let trimmed = userQuery.trim();
 
-  if (index && !/^source\s*=/i.test(trimmed)) {
-    base = `source=${index} | ${trimmed}`;
+  if (index && !/^(?:search\s+)?source\s*=/i.test(trimmed)) {
+    trimmed = `source=${index} | ${trimmed}`;
   }
 
   const startIso = start.toISOString();
   const endIso = end.toISOString();
-  return `${base} | where \`${timestampField}\` >= '${startIso}' and \`${timestampField}\` <= '${endIso}'`;
+  const bound = `where \`${timestampField}\` >= '${startIso}' and \`${timestampField}\` <= '${endIso}'`;
+
+  const firstPipe = trimmed.indexOf('|');
+  if (firstPipe === -1) {
+    return `${trimmed} | ${bound}`;
+  }
+
+  const sourceClause = trimmed.slice(0, firstPipe).trimEnd();
+  const rest = trimmed.slice(firstPipe + 1).trimStart();
+  return `${sourceClause} | ${bound} | ${rest}`;
 }
 
 function pickIndex(cols: Array<{ name: string }>, candidates: string[]): number {
