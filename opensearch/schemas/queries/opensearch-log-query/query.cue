@@ -22,7 +22,7 @@ kind: "OpenSearchLogQuery"
 spec: close({
 	ds.#selector
 	query:           strings.MinRunes(1)
-	index?:          string
-	timestampField?: string
-	messageField?:   string
+	index?:          strings.MinRunes(1)
+	timestampField?: strings.MinRunes(1)
+	messageField?:   strings.MinRunes(1)
 })
