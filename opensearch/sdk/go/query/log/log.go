@@ -14,6 +14,9 @@
 package log
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/query"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -28,6 +31,39 @@ type PluginSpec struct {
 	Index          string               `json:"index,omitempty" yaml:"index,omitempty"`
 	TimestampField string               `json:"timestampField,omitempty" yaml:"timestampField,omitempty"`
 	MessageField   string               `json:"messageField,omitempty" yaml:"messageField,omitempty"`
+}
+
+func (s *PluginSpec) UnmarshalJSON(data []byte) error {
+	type plain PluginSpec
+	var tmp PluginSpec
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*s = tmp
+	return nil
+}
+
+func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp PluginSpec
+	type plain PluginSpec
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*s = tmp
+	return nil
+}
+
+func (s *PluginSpec) validate() error {
+	if len(s.Query) == 0 {
+		return fmt.Errorf("query cannot be empty")
+	}
+	return nil
 }
 
 type Option func(plugin *Builder) error

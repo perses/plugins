@@ -69,3 +69,22 @@ func TestOpenSearchLogQueryOmitsEmptyOptionalFields(t *testing.T) {
 		}
 	}
 }
+
+func TestPluginSpecRejectsEmptyQueryOnUnmarshal(t *testing.T) {
+	raw := []byte(`{"query":""}`)
+	var spec PluginSpec
+	if err := json.Unmarshal(raw, &spec); err == nil {
+		t.Fatalf("expected error unmarshalling spec with empty query, got nil")
+	}
+}
+
+func TestPluginSpecAcceptsNonEmptyQueryOnUnmarshal(t *testing.T) {
+	raw := []byte(`{"query":"source=logs-*"}`)
+	var spec PluginSpec
+	if err := json.Unmarshal(raw, &spec); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if spec.Query != "source=logs-*" {
+		t.Errorf("query mismatch: %q", spec.Query)
+	}
+}
