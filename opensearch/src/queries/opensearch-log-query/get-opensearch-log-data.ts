@@ -101,7 +101,8 @@ export function convertPPLToLogs(response: OpenSearchPPLResponse, options: Conve
 function parseTimestamp(v: unknown): number {
   if (v === null || v === undefined) return 0;
   if (typeof v === 'number') {
-    // OpenSearch typically returns epoch millis; normalize to seconds.
+    // Heuristic: anything past year ~5138 in seconds-since-epoch (1e11s) must
+    // really be milliseconds-since-epoch. OpenSearch usually returns ms here.
     return v > 1e11 ? v / 1000 : v;
   }
   const parsed = Date.parse(String(v));
