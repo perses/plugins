@@ -35,9 +35,22 @@ export class OpenSearchPPLError extends Error {
     public readonly body: string,
     message?: string
   ) {
-    super(message ?? `OpenSearch PPL request failed (${status}): ${body}`);
+    super(message ?? buildShortMessage(status, body));
     this.name = 'OpenSearchPPLError';
   }
+}
+
+function buildShortMessage(status: number, body: string): string {
+  try {
+    const parsed = JSON.parse(body) as { error?: { reason?: string; details?: string } };
+    const reason = parsed?.error?.reason ?? parsed?.error?.details;
+    if (reason) {
+      return `OpenSearch PPL request failed (${status}): ${reason}`;
+    }
+  } catch {
+    // body wasn't JSON — fall through to the bare-status form
+  }
+  return `OpenSearch PPL request failed (${status})`;
 }
 
 function buildUrl(path: string, datasourceUrl: string): URL {

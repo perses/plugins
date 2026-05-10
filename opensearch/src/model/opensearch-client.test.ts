@@ -78,4 +78,28 @@ describe('opensearch-client', () => {
     const [url] = mock.mock.calls[0] as [string];
     expect(url).toContain('/api/datasources/proxy/1/_plugins/_ppl');
   });
+
+  describe('OpenSearchPPLError.message', () => {
+    it('uses error.reason from a JSON body when present', () => {
+      const err = new OpenSearchPPLError(400, '{"error":{"reason":"bad PPL","type":"SyntaxCheckException"}}');
+      expect(err.message).toBe('OpenSearch PPL request failed (400): bad PPL');
+      expect(err.body).toBe('{"error":{"reason":"bad PPL","type":"SyntaxCheckException"}}');
+    });
+
+    it('falls back to error.details when reason is absent', () => {
+      const err = new OpenSearchPPLError(400, '{"error":{"details":"timestamp:2026-... in unsupported format"}}');
+      expect(err.message).toBe('OpenSearch PPL request failed (400): timestamp:2026-... in unsupported format');
+    });
+
+    it('omits the body entirely when the body is not JSON', () => {
+      const err = new OpenSearchPPLError(502, '<html>Bad Gateway</html>');
+      expect(err.message).toBe('OpenSearch PPL request failed (502)');
+      expect(err.body).toBe('<html>Bad Gateway</html>');
+    });
+
+    it('omits the body when JSON has no error field', () => {
+      const err = new OpenSearchPPLError(500, '{"status":"weird"}');
+      expect(err.message).toBe('OpenSearch PPL request failed (500)');
+    });
+  });
 });
