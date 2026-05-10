@@ -18,7 +18,7 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { Alert, InputLabel, Stack, TextField } from '@mui/material';
+import { InputLabel, Stack, TextField } from '@mui/material';
 import { ReactElement } from 'react';
 import { produce } from 'immer';
 import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND, OpenSearchDatasourceSelector } from '../../model';
@@ -26,22 +26,10 @@ import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
 import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 
-type OpenSearchQueryEditorProps = OptionsEditorProps<OpenSearchLogQuerySpec> & {
-  queryError?: { message: string; body?: string };
-};
-
-function tryParseReason(body?: string): string | undefined {
-  if (!body) return undefined;
-  try {
-    const parsed = JSON.parse(body);
-    return parsed?.error?.reason ?? parsed?.error?.details ?? undefined;
-  } catch {
-    return undefined;
-  }
-}
+type OpenSearchQueryEditorProps = OptionsEditorProps<OpenSearchLogQuerySpec>;
 
 export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): ReactElement {
-  const { onChange, value, queryError } = props;
+  const { onChange, value } = props;
   const { datasource } = value;
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
@@ -85,11 +73,6 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
 
   return (
     <Stack spacing={1.5} paddingBottom={1}>
-      {queryError ? (
-        <Alert severity="error" data-testid="opensearch-query-error">
-          {tryParseReason(queryError.body) ?? queryError.message}
-        </Alert>
-      ) : null}
       <div>
         <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Datasource</InputLabel>
         <DatasourceSelect

@@ -49,15 +49,4 @@ describe('OpenSearchLogQueryEditor', () => {
     fireEvent.change(screen.getByPlaceholderText('message'), { target: { value: '' } });
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ messageField: undefined }));
   });
-
-  it('renders the query error alert when a queryError prop is passed', () => {
-    render(
-      <OpenSearchLogQueryEditor
-        value={{ query: '' }}
-        onChange={jest.fn()}
-        queryError={{ message: 'fail', body: '{"error":{"reason":"bad PPL"}}' }}
-      />
-    );
-    expect(screen.getByTestId('opensearch-query-error')).toHaveTextContent('bad PPL');
-  });
 });
