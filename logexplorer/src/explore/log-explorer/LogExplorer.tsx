@@ -14,14 +14,16 @@
 import { Box, Stack } from '@mui/material';
 import {
   DataQueriesProvider,
+  LogQueryContext,
   MultiQueryEditor,
+  useAllVariableValues,
+  useDatasourceStore,
   useListPluginMetadata,
   usePluginRegistry,
   useTimeRange,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
-import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 
@@ -34,10 +36,8 @@ const HISTOGRAM_HEIGHT = 200;
 const EMPTY_QUERIES: QueryDefinition[] = [];
 
 function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
-  const { ref: boxRef } = useResizeObserver();
   const height = PANEL_PREVIEW_HEIGHT;
 
-  // map QueryDefinition to Definition<UnknownSpec>
   const definitions = useMemo(
     () =>
       queries.length
@@ -50,7 +50,7 @@ function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactEleme
   );
 
   return (
-    <Box ref={boxRef} height={height}>
+    <Box height={height}>
       <DataQueriesProvider definitions={definitions}>
         <Panel
           panelOptions={{
@@ -67,9 +67,6 @@ function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactEleme
 }
 
 function VolumeHistogramPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
-  const { ref: boxRef } = useResizeObserver();
-
-  // map QueryDefinition to Definition<UnknownSpec>
   const definitions = useMemo(
     () =>
       queries.length
@@ -82,7 +79,7 @@ function VolumeHistogramPanel({ queries }: { queries: QueryDefinition[] }): Reac
   );
 
   return (
-    <Box ref={boxRef} height={HISTOGRAM_HEIGHT}>
+    <Box height={HISTOGRAM_HEIGHT}>
       <DataQueriesProvider definitions={definitions}>
         <Panel
           panelOptions={{
@@ -125,6 +122,18 @@ export function LogExplorer(): ReactElement {
 
   const { getPlugin } = usePluginRegistry();
   const { absoluteTimeRange } = useTimeRange();
+  const datasourceStore = useDatasourceStore();
+  const variableState = useAllVariableValues();
+
+  const logQueryContext: LogQueryContext = useMemo(
+    () => ({
+      timeRange: absoluteTimeRange,
+      variableState,
+      datasourceStore,
+      refreshKey: '',
+    }),
+    [absoluteTimeRange, variableState, datasourceStore]
+  );
 
   // Get all datasource plugins that support LogQuery
   const { data: datasourcePlugins } = useListPluginMetadata(['Datasource']);
@@ -133,7 +142,6 @@ export function LogExplorer(): ReactElement {
     () =>
       datasourcePlugins
         ?.filter((plugin) => {
-          // Check if plugin spec has the supportedQueryTypes property
           const pluginSpec = plugin.spec as { supportedQueryTypes?: string[] };
           return pluginSpec?.supportedQueryTypes?.includes('LogQuery');
         })
@@ -141,12 +149,10 @@ export function LogExplorer(): ReactElement {
     [datasourcePlugins]
   );
 
-  // State for volume queries
   const [volumeQueries, setVolumeQueries] = useState<QueryDefinition[]>([]);
 
-  // Generate volume queries from log queries
   useEffect(() => {
-    const generateVolumeQueries = async () => {
+    const generateVolumeQueries = async (): Promise<void> => {
       if (queries.length === 0) {
         setVolumeQueries((prev) => (prev.length === 0 ? prev : []));
         return;
@@ -161,17 +167,8 @@ export function LogExplorer(): ReactElement {
           const pluginKind = query.spec.plugin.kind;
           const plugin = await getPlugin('LogQuery', pluginKind);
 
-          // Check if plugin has createVolumeQuery method
-          if (plugin && 'createVolumeQuery' in plugin && typeof plugin.createVolumeQuery === 'function') {
-            // Pass timeRange context for dynamic interval calculation
-            const context = {
-              timeRange: {
-                start: absoluteTimeRange.start,
-                end: absoluteTimeRange.end,
-              },
-            };
-            const volumeQuery = plugin.createVolumeQuery(query.spec.plugin.spec, context);
-            return volumeQuery;
+          if (plugin?.createVolumeQuery) {
+            return plugin.createVolumeQuery(query.spec.plugin.spec, logQueryContext);
           }
         } catch (error) {
           console.error(`[LogExplorer] Failed to create volume query for ${query.spec.plugin.kind}:`, error);
@@ -186,7 +183,7 @@ export function LogExplorer(): ReactElement {
     };
 
     generateVolumeQueries();
-  }, [queries, getPlugin, absoluteTimeRange]);
+  }, [queries, getPlugin, logQueryContext]);
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
@@ -195,9 +192,7 @@ export function LogExplorer(): ReactElement {
         filteredQueryPlugins={logDatasourcePlugins}
         queries={queries}
         onChange={(state) => setData({ queries: state })}
-        onQueryRun={() => {
-          // Query run is handled automatically via onChange
-        }}
+        onQueryRun={() => setData({ queries })}
       />
       {volumeQueries.length > 0 && <VolumeHistogramPanel queries={volumeQueries} />}
       <LogsTablePanel queries={queries} />
