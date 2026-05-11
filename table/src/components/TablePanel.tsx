@@ -172,7 +172,7 @@ function generateCellContentConfig(
               value={gaugeValue}
               range={gaugeRange}
               fillColor={gaugeFillColor}
-              format={column.format}
+              format={plugin.spec?.format ?? column.format}
             />
           );
         }
