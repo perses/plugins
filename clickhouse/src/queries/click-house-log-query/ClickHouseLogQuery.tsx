@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/core';
-import { parseVariables } from '@perses-dev/plugin-system';
+import { parseVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
 import { getClickHouseLogData } from './get-click-house-log-data';
 import { ClickHouseLogQueryEditor } from './ClickHouseLogQueryEditor';
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
-import { LogQueryPlugin } from './log-query-plugin-interface';
 
 export const ClickHouseLogQuery: LogQueryPlugin<ClickHouseLogQuerySpec> = {
   getLogData: getClickHouseLogData,
@@ -29,18 +27,6 @@ export const ClickHouseLogQuery: LogQueryPlugin<ClickHouseLogQuerySpec> = {
       variables: allVariables,
     };
   },
-  createVolumeQuery: (spec: ClickHouseLogQuerySpec): QueryDefinition | null => {
-    // Only create volume query if there's a valid query
-    if (!spec.query || !spec.query.trim()) {
-      return null;
-    }
-
-    // For ClickHouse, we need to transform the SQL query into a volume aggregation
-    // This is a simplified approach that may need refinement based on actual query patterns
-    // For now, returning null to indicate volume queries need more sophisticated parsing
-    // TODO: Implement proper SQL parsing and transformation for volume queries
-    // Example target: SELECT toStartOfInterval(timestamp, INTERVAL 1 minute) as time, level, count() FROM ... GROUP BY time, level
-
-    return null;
-  },
+  // TODO: Implement proper SQL parsing for volume queries
+  createVolumeQuery: () => null,
 };
