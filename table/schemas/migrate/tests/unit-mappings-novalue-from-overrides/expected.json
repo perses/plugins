@@ -1,0 +1,73 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "cellSettings": [
+          {
+            "condition": {
+              "kind": "Misc",
+              "spec": {
+                "value": "null"
+              }
+            },
+            "text": "False"
+          },
+          {
+            "condition": {
+              "kind": "Value",
+              "spec": {
+                "value": "0"
+              }
+            },
+            "text": "False"
+          },
+          {
+            "condition": {
+              "kind": "Value",
+              "spec": {
+                "value": "1"
+              }
+            },
+            "text": "True"
+          }
+        ],
+        "header": "Enabled",
+        "name": "value #3"
+      },
+      {
+        "cellSettings": [
+          {
+            "condition": {
+              "kind": "Misc",
+              "spec": {
+                "value": "null"
+              }
+            },
+            "text": "0 B"
+          }
+        ],
+        "header": "Memory",
+        "name": "value #2"
+      },
+      {
+        "format": {
+          "unit": "percent"
+        },
+        "header": "CPU %",
+        "name": "value #1"
+      },
+      {
+        "hide": true,
+        "name": "timestamp"
+      }
+    ],
+    "density": "compact",
+    "transforms": [
+      {
+        "kind": "MergeSeries",
+        "spec": {}
+      }
+    ]
+  }
+}

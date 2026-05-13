@@ -24,12 +24,22 @@ import (
 #grafanaType: "table" | "table-old"
 #panel:       _
 
+// Build "Value #X" → "value #N" mapping from the targets array.
+// In Grafana, multi-query table panels name value columns by refId (e.g. "Value #A", "Value #B").
+// In Perses, the equivalent columns are named by 1-based query index (e.g. "value #1", "value #2").
+_valueColumnRenameMap: {
+	for i, target in (*#panel.targets | []) if target.refId != _|_ {
+		"Value #\(target.refId)": "value #\(i+1)"
+	}
+}
+
 // Function to rename anonymous fields that Perses names differently than Grafana
 _renameAnonymousFields: {
 	#var: string
 	output: [
 		if #var == "Time" {"timestamp"},
 		if #var == "Value" {"value"},
+		if (*_valueColumnRenameMap[#var] | null) != null {_valueColumnRenameMap[#var]},
 		#var,
 	][0]
 }
@@ -124,6 +134,19 @@ spec: {
 							}
 						}
 					}
+					if property.id == "unit" {
+						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": units: "\(property.value)": true
+					}
+					if property.id == "noValue" {
+						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": noValues: "\(property.value)": true
+					}
+					if property.id == "mappings" {
+						for mapping in property.value if mapping.type == "value" {
+							for key, option in mapping.options {
+								"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": valueMappings: "\(key)": option
+							}
+						}
+					}
 					// NB: enrich this part when this is done https://github.com/perses/perses/issues/2852
 				}
 			}
@@ -146,6 +169,44 @@ spec: {
 					}
 					if settings.dataLinks != _|_ {
 						dataLink: {_getLastValue & {#map: settings.dataLinks}}.output
+					}
+
+					// Unit override → format (only emit if unit is recognized by Perses)
+					if settings.units != _|_ if len(settings.units) > 0 {
+						_unitStr: {_getLastKey & {#map: settings.units}}.output
+						_resolvedUnit: *commonMigrate.#mapping.unit[_unitStr] | null
+						if _resolvedUnit != null {
+							format: unit: _resolvedUnit
+						}
+					}
+
+					// noValue + valueMappings → cellSettings
+					_noValueEntries: [
+						if settings.noValues != _|_ if len(settings.noValues) > 0 {{
+							condition: {
+								kind: "Misc"
+								spec: value: "null"
+							}
+							text: {_getLastKey & {#map: settings.noValues}}.output
+						}},
+					]
+					_mappingEntries: [
+						for key, option in (*settings.valueMappings | {}) {{
+							condition: {
+								kind: "Value"
+								spec: value: key
+							}
+							if option.text != _|_ {
+								text: option.text
+							}
+							if option.color != _|_ {
+								backgroundColor: *commonMigrate.#mapping.color[option.color] | option.color
+							}
+						}},
+					]
+					_columnCellSettings: list.Concat([_noValueEntries, _mappingEntries])
+					if len(_columnCellSettings) > 0 {
+						cellSettings: _columnCellSettings
 					}
 				}
 			}
