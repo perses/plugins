@@ -156,7 +156,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         headerAlign: 'left',
         align: 'left',
         flex: 2,
-        minWidth: 145,
+        minWidth: 90,
         display: 'flex',
         valueGetter: (_, trace): number =>
           Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
@@ -168,19 +168,18 @@ export function DataTable(props: DataTableProps): ReactElement {
             totalErrorCount += stats.errorCount ?? 0;
           }
           return (
-            <>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1, my: 1 }}>
               <Typography display="inline">{totalSpanCount} spans</Typography>
               {totalErrorCount > 0 && (
                 <Chip
                   label={`${totalErrorCount} error${totalErrorCount === 1 ? '' : 's'}`}
-                  sx={{ marginLeft: '5px' }}
                   icon={<InformationIcon />}
                   variant="outlined"
                   size="small"
                   color="error"
                 />
               )}
-            </>
+            </Box>
           );
         },
       },
@@ -205,8 +204,8 @@ export function DataTable(props: DataTableProps): ReactElement {
         type: 'number',
         headerAlign: 'left',
         align: 'left',
-        flex: 3,
-        minWidth: 240,
+        flex: 2,
+        minWidth: 110,
         display: 'flex',
         renderCell: ({ row }): ReactElement => (
           <Tooltip title={UTC_DATE_FORMATTER(new Date(row.startTimeUnixMs))} placement="top" arrow>
