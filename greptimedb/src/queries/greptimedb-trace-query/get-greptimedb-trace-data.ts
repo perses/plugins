@@ -256,7 +256,7 @@ function buildSearchResult(records: GreptimeDBRecords | undefined): TraceSearchR
     .sort((a, b) => b.startTimeUnixMs - a.startTimeUnixMs);
 }
 
-function toNanoString(value: unknown, dataType?: string): string | undefined {
+export function toNanoString(value: unknown, dataType?: string): string | undefined {
   if (value === undefined || value === null) return undefined;
   const raw = getNumber(value);
   if (raw !== undefined) {
