@@ -192,7 +192,10 @@ describe('GreptimeDBTraceQuery', () => {
       end: '0',
     });
     expect(result.trace?.resourceSpans?.[0]?.scopeSpans?.[0]?.spans).toHaveLength(2);
-    expect(result.trace?.resourceSpans?.[0]?.scopeSpans?.[0]?.spans?.[1]?.status?.code).toBe('STATUS_CODE_ERROR');
+    const spans = result.trace?.resourceSpans?.[0]?.scopeSpans?.[0]?.spans;
+    expect(spans?.[0]?.startTimeUnixNano).toBe('1700000000000000000');
+    expect(spans?.[0]?.endTimeUnixNano).toBe('1700000000100000000');
+    expect(spans?.[1]?.status?.code).toBe('STATUS_CODE_ERROR');
     expect(result.searchResult).toBeUndefined();
   });
 

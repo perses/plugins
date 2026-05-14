@@ -22,6 +22,7 @@ import {
   toTimestampMs,
 } from '../greptimedb-query-data-model';
 import { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
+import { isLikelyTraceDetailSQL } from './trace-query-sql';
 
 type Row = unknown[];
 type ColumnIndexMap = Record<string, number>;
@@ -106,10 +107,6 @@ function isTraceDetailsResult(records: GreptimeDBRecords | undefined): boolean {
   const map = buildColumnIndexMap(columns);
   // Trace detail queries should return span-level columns for gantt visualization.
   return map.trace_id !== undefined && map.span_id !== undefined;
-}
-
-function isLikelyTraceDetailSQL(query: string): boolean {
-  return /where[\s\S]*trace_id\s*=/i.test(query);
 }
 
 function getCell(row: Row, map: ColumnIndexMap, names: string[]): unknown {
@@ -264,19 +261,19 @@ function toNanoString(value: unknown, dataType?: string): string | undefined {
   const raw = getNumber(value);
   if (raw !== undefined) {
     const normalized = (dataType ?? '').toLowerCase();
-    if (normalized.includes('nanosecond')) return String(Math.trunc(raw));
-    if (normalized.includes('microsecond')) return String(Math.trunc(raw * 1000));
-    if (normalized.includes('millisecond')) return String(Math.trunc(raw * 1_000_000));
-    if (normalized.includes('second')) return String(Math.trunc(raw * 1_000_000_000));
+    if (normalized.includes('nanosecond')) return String(BigInt(Math.trunc(raw)));
+    if (normalized.includes('microsecond')) return String(BigInt(Math.trunc(raw)) * 1000n);
+    if (normalized.includes('millisecond')) return String(BigInt(Math.trunc(raw)) * 1_000_000n);
+    if (normalized.includes('second')) return String(BigInt(Math.trunc(raw)) * 1_000_000_000n);
 
-    if (raw > 1_000_000_000_000_000) return String(Math.trunc(raw));
-    if (raw > 1_000_000_000_000) return String(Math.trunc(raw * 1_000_000));
-    if (raw > 1_000_000_000) return String(Math.trunc(raw * 1_000_000_000));
-    return String(Math.trunc(raw * 1_000_000));
+    if (raw > 1_000_000_000_000_000) return String(BigInt(Math.trunc(raw)));
+    if (raw > 1_000_000_000_000) return String(BigInt(Math.trunc(raw)) * 1_000_000n);
+    if (raw > 1_000_000_000) return String(BigInt(Math.trunc(raw)) * 1_000_000_000n);
+    return String(BigInt(Math.trunc(raw)) * 1_000_000n);
   }
 
   const dateMs = new Date(String(value)).getTime();
-  if (!Number.isNaN(dateMs)) return String(Math.trunc(dateMs * 1_000_000));
+  if (!Number.isNaN(dateMs)) return String(BigInt(Math.trunc(dateMs)) * 1_000_000n);
   return undefined;
 }
 
@@ -356,7 +353,7 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
     const endTimeUnixNano =
       (endIndex !== undefined ? toNanoString(row[endIndex], columns[endIndex]?.data_type) : undefined) ??
       (durationIndex !== undefined
-        ? String(parseInt(startTimeUnixNano, 10) + parseInt(toNanoString(row[durationIndex]) ?? '0', 10))
+        ? String(BigInt(startTimeUnixNano) + BigInt(toNanoString(row[durationIndex]) ?? '0'))
         : startTimeUnixNano);
 
     const spanAttributes = spanColumns

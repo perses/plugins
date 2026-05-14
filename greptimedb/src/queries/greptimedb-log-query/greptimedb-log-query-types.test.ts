@@ -24,24 +24,8 @@ const datasource: GreptimeDBDatasourceSpec = {
 
 const greptimedbStubClient = GreptimeDBDatasource.createClient(datasource, {});
 
-greptimedbStubClient.query = jest.fn(async () => {
-  const stubResponse: GreptimeDBQueryResponse = {
-    status: 'success',
-    data: {
-      output: [
-        {
-          records: {
-            schema: {
-              column_schemas: [{ name: 'ts' }, { name: 'message' }],
-            },
-            rows: [[1700000000000, 'hello']],
-          },
-        },
-      ],
-    },
-  };
-  return stubResponse as GreptimeDBQueryResponse;
-});
+const mockedQuery = jest.fn();
+greptimedbStubClient.query = mockedQuery;
 
 const getDatasourceClient: jest.Mock = jest.fn(() => {
   return greptimedbStubClient;
@@ -67,8 +51,8 @@ const createStubContext = (): GreptimeDBQueryContext => {
       setSavedDatasources: jest.fn(),
     },
     timeRange: {
-      end: new Date('01-01-2025'),
-      start: new Date('01-02-2025'),
+      start: new Date('2025-01-01T00:00:00.000Z'),
+      end: new Date('2025-01-02T00:00:00.000Z'),
     },
     variableState: {},
   };
@@ -76,6 +60,11 @@ const createStubContext = (): GreptimeDBQueryContext => {
 };
 
 describe('GreptimeDBLogQuery', () => {
+  beforeEach(() => {
+    mockedQuery.mockReset();
+    getDatasourceClient.mockClear();
+  });
+
   it('should properly resolve variable dependencies', () => {
     if (!GreptimeDBLogQuery.dependsOn) throw new Error('dependsOn is not defined');
     const { variables } = GreptimeDBLogQuery.dependsOn(
@@ -92,9 +81,54 @@ describe('GreptimeDBLogQuery', () => {
     expect(initialOptions).toEqual({ query: '' });
   });
 
-  it('should run query and return GreptimeDB records', async () => {
-    const client = getDatasourceClient();
-    const resp = await client.query({ query: 'SELECT * FROM logs' });
-    expect(resp.data.output?.[0]?.records).toHaveProperty('rows');
+  it('should map GreptimeDB records into log entries', async () => {
+    mockedQuery.mockResolvedValue({
+      status: 'success',
+      data: {
+        output: [
+          {
+            records: {
+              schema: {
+                column_schemas: [
+                  { name: 'ts', data_type: 'TimestampMillisecond' },
+                  { name: 'message' },
+                  { name: 'level' },
+                ],
+              },
+              rows: [
+                [1700000000000, 'hello', 'info'],
+                [1700000001000, null, ''],
+              ],
+            },
+          },
+        ],
+      },
+    } as GreptimeDBQueryResponse);
+
+    const result = await GreptimeDBLogQuery.getLogData(
+      {
+        query: 'SELECT * FROM logs',
+      },
+      createStubContext()
+    );
+
+    expect(result.logs.totalCount).toBe(2);
+    expect(result.logs.entries).toHaveLength(2);
+    expect(result.logs.entries[0]).toEqual({
+      timestamp: 1700000000,
+      labels: {
+        message: 'hello',
+        level: 'info',
+      },
+      line: 'message=hello level=info',
+    });
+    expect(result.logs.entries[1]).toEqual({
+      timestamp: 1700000001,
+      labels: {
+        message: '',
+        level: '',
+      },
+      line: 'message=-- level=--',
+    });
   });
 });
