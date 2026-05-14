@@ -19,6 +19,7 @@ import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
 import { ReactElement, useEffect, useState } from 'react';
 import { GreptimeDBTraceQuerySpec } from '../queries/greptimedb-trace-query/greptimedb-trace-query-types';
+import { isLikelyTraceDetailSQL } from '../queries/greptimedb-trace-query/trace-query-sql';
 import { linkToSpan, linkToTrace, resolveTraceLinkTemplate } from './links';
 
 interface TraceExplorerQueryParams {
@@ -111,10 +112,6 @@ function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElemen
       }}
     />
   );
-}
-
-function isLikelyTraceDetailSQL(query: string): boolean {
-  return /where[\s\S]*trace_id/i.test(query);
 }
 
 export function GreptimeDBTraceExplorer(): ReactElement {

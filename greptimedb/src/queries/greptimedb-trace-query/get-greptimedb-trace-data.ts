@@ -22,6 +22,7 @@ import {
   toTimestampMs,
 } from '../greptimedb-query-data-model';
 import { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
+import { isLikelyTraceDetailSQL } from './trace-query-sql';
 
 type Row = unknown[];
 type ColumnIndexMap = Record<string, number>;
@@ -106,10 +107,6 @@ function isTraceDetailsResult(records: GreptimeDBRecords | undefined): boolean {
   const map = buildColumnIndexMap(columns);
   // Trace detail queries should return span-level columns for gantt visualization.
   return map.trace_id !== undefined && map.span_id !== undefined;
-}
-
-function isLikelyTraceDetailSQL(query: string): boolean {
-  return /where[\s\S]*trace_id\s*=/i.test(query);
 }
 
 function getCell(row: Row, map: ColumnIndexMap, names: string[]): unknown {
