@@ -261,19 +261,19 @@ function toNanoString(value: unknown, dataType?: string): string | undefined {
   const raw = getNumber(value);
   if (raw !== undefined) {
     const normalized = (dataType ?? '').toLowerCase();
-    if (normalized.includes('nanosecond')) return String(Math.trunc(raw));
-    if (normalized.includes('microsecond')) return String(Math.trunc(raw * 1000));
-    if (normalized.includes('millisecond')) return String(Math.trunc(raw * 1_000_000));
-    if (normalized.includes('second')) return String(Math.trunc(raw * 1_000_000_000));
+    if (normalized.includes('nanosecond')) return String(BigInt(Math.trunc(raw)));
+    if (normalized.includes('microsecond')) return String(BigInt(Math.trunc(raw)) * 1000n);
+    if (normalized.includes('millisecond')) return String(BigInt(Math.trunc(raw)) * 1_000_000n);
+    if (normalized.includes('second')) return String(BigInt(Math.trunc(raw)) * 1_000_000_000n);
 
-    if (raw > 1_000_000_000_000_000) return String(Math.trunc(raw));
-    if (raw > 1_000_000_000_000) return String(Math.trunc(raw * 1_000_000));
-    if (raw > 1_000_000_000) return String(Math.trunc(raw * 1_000_000_000));
-    return String(Math.trunc(raw * 1_000_000));
+    if (raw > 1_000_000_000_000_000) return String(BigInt(Math.trunc(raw)));
+    if (raw > 1_000_000_000_000) return String(BigInt(Math.trunc(raw)) * 1_000_000n);
+    if (raw > 1_000_000_000) return String(BigInt(Math.trunc(raw)) * 1_000_000_000n);
+    return String(BigInt(Math.trunc(raw)) * 1_000_000n);
   }
 
   const dateMs = new Date(String(value)).getTime();
-  if (!Number.isNaN(dateMs)) return String(Math.trunc(dateMs * 1_000_000));
+  if (!Number.isNaN(dateMs)) return String(BigInt(Math.trunc(dateMs)) * 1_000_000n);
   return undefined;
 }
 
@@ -353,7 +353,7 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
     const endTimeUnixNano =
       (endIndex !== undefined ? toNanoString(row[endIndex], columns[endIndex]?.data_type) : undefined) ??
       (durationIndex !== undefined
-        ? String(parseInt(startTimeUnixNano, 10) + parseInt(toNanoString(row[durationIndex]) ?? '0', 10))
+        ? String(BigInt(startTimeUnixNano) + BigInt(toNanoString(row[durationIndex]) ?? '0'))
         : startTimeUnixNano);
 
     const spanAttributes = spanColumns
