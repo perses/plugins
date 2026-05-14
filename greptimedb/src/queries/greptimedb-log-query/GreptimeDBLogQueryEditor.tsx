@@ -19,7 +19,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
-import { Stack } from '@mui/material';
+import { Stack, useTheme } from '@mui/material';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { GreptimeDBQLEditor } from '../../components';
 import { queryExample } from '../../components/constants';
@@ -29,6 +29,7 @@ import { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
 type GreptimeDBLogQueryEditorProps = OptionsEditorProps<GreptimeDBLogQuerySpec>;
 
 export function GreptimeDBLogQueryEditor(props: GreptimeDBLogQueryEditorProps): ReactElement {
+  const theme = useTheme();
   const { onChange, value } = props;
   const { datasource } = value;
 
@@ -64,8 +65,8 @@ export function GreptimeDBLogQueryEditor(props: GreptimeDBLogQueryEditorProps): 
 
   const examplesStyle = {
     fontSize: '11px',
-    color: '#777',
-    backgroundColor: '#f5f5f5',
+    color: theme.palette.text.secondary,
+    backgroundColor: theme.palette.background.code,
     padding: '8px',
     borderRadius: '4px',
     fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
@@ -99,7 +100,7 @@ export function GreptimeDBLogQueryEditor(props: GreptimeDBLogQueryEditorProps): 
           style={{
             cursor: 'pointer',
             fontSize: '12px',
-            color: '#666',
+            color: theme.palette.text.secondary,
             marginBottom: '8px',
           }}
         >
