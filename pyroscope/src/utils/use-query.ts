@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useDatasourceClient } from '@perses-dev/plugin-system';
+import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 import { DatasourceSelector, StatusError } from '@perses-dev/core';
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
@@ -21,6 +21,7 @@ import {
   SearchProfileTypesResponse,
   PyroscopeClient,
 } from '../model';
+import { getUnixTimeRange } from '../plugins';
 
 export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<SearchLabelNamesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
@@ -39,12 +40,18 @@ export function useLabelValues(
   labelName: string
 ): UseQueryResult<SearchLabelValuesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
     queryKey: ['searchLabelValues', labelName, 'datasource', datasource],
     queryFn: async () => {
-      return await client!.searchLabelValues({}, { 'content-type': 'application/json' }, { name: labelName });
+      return await client!.searchLabelValues(
+        {},
+        { 'content-type': 'application/json' },
+        { name: labelName, from: start, until: end }
+      );
     },
   });
 }
@@ -53,24 +60,28 @@ export function useProfileTypes(
   datasource: DatasourceSelector
 ): UseQueryResult<SearchProfileTypesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchProfileTypesResponse, StatusError>({
     enabled: !!client,
     queryKey: ['searchProfileTypes', 'datasource', datasource],
     queryFn: async () => {
-      return await client!.searchProfileTypes({}, { 'content-type': 'application/json' }, {});
+      return await client!.searchProfileTypes({}, { 'content-type': 'application/json' }, { from: start, until: end });
     },
   });
 }
 
 export function useServices(datasource: DatasourceSelector): UseQueryResult<SearchLabelValuesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
     queryKey: ['searchServices', 'datasource', datasource],
     queryFn: async () => {
-      return await client!.searchServices({}, { 'content-type': 'application/json' });
+      return await client!.searchServices({}, { 'content-type': 'application/json' }, { from: start, until: end });
     },
   });
 }

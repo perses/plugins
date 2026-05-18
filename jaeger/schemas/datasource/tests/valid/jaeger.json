@@ -1,0 +1,6 @@
+{
+  "kind": "JaegerDatasource",
+  "spec": {
+    "directUrl": "http://localhost:16686"
+  }
+}

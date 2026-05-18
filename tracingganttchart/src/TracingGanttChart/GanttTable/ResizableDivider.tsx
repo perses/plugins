@@ -36,8 +36,12 @@ export function ResizableDivider(props: ResizableDividerProps): ReactElement {
   const handleMouseMove = useEvent((e: MouseEvent) => {
     if (!parentRef.current) return;
 
-    const offsetX = e.clientX - parentRef.current.getBoundingClientRect().left + spacing;
-    const leftPercent = offsetX / parentRef.current.getBoundingClientRect().width;
+    const parentRect = parentRef.current.getBoundingClientRect();
+
+    // The parent can be a flex row, for example: [leftPercent] [gap] [divider] [gap] [1-leftPercent].
+    // Without considering spacing, leftPercent would be wrong because it ignores the flex gap between the divider and the element.
+    const offsetX = e.clientX - parentRect.left + spacing;
+    const leftPercent = offsetX / parentRect.width;
 
     if (0.05 <= leftPercent && leftPercent <= 0.95) {
       onMove(leftPercent);
@@ -81,6 +85,7 @@ export function ResizableDivider(props: ResizableDividerProps): ReactElement {
 const ResizableDividerBox = styled(Box)(({ theme }) => ({
   position: 'relative',
   width: '1px',
+  minWidth: '1px',
   height: '100%',
   backgroundColor: theme.palette.divider,
   cursor: 'col-resize',

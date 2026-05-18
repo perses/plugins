@@ -1,0 +1,23 @@
+{
+  "datasource": {
+    "uid": "loki"
+  },
+  "options": {
+    "enableLogDetails": false,
+    "showLabels": false,
+    "showTime": false,
+    "sortOrder": "Descending",
+    "wrapLogMessage": false
+  },
+  "targets": [
+    {
+      "datasource": {
+        "uid": "loki"
+      },
+      "expr": "{job=\"nginx\"}",
+      "refId": "A"
+    }
+  ],
+  "title": "Logs",
+  "type": "logs"
+}

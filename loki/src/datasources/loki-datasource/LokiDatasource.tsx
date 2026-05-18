@@ -43,9 +43,8 @@ const createClient: DatasourcePlugin<LokiDatasourceSpec, LokiClient>['createClie
     },
     query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders }),
     queryRange: (params, headers) => queryRange(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labels: (start, end, headers) => labels(start, end, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelValues: (label, start, end, headers) =>
-      labelValues(label, start, end, { datasourceUrl, headers: headers ?? specHeaders }),
+    labels: (params, headers) => labels(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
     series: (match, start, end, headers) =>
       series(match, start, end, { datasourceUrl, headers: headers ?? specHeaders }),
     volume: (params, headers) => volume(params, { datasourceUrl, headers: headers ?? specHeaders }),

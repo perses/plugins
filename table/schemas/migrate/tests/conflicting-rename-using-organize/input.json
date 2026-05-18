@@ -1,0 +1,30 @@
+{
+  "type": "table",
+  "options": {
+    "cellHeight": "sm"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "mappings": []
+    },
+    "overrides": []
+  },
+  "transformations": [
+    {
+      "id": "organize",
+      "options": {
+        "renameByName": {
+          "instance": "instance"
+        }
+      }
+    },
+    {
+      "id": "organize",
+      "options": {
+        "renameByName": {
+          "instance": "Instance"
+        }
+      }
+    }
+  ]
+}

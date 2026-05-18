@@ -25,6 +25,9 @@ export default createConfigForPlugin({
       './LokiDatasource': './src/datasources/loki-datasource',
       './LokiTimeSeriesQuery': './src/queries/loki-time-series-query',
       './LokiLogQuery': './src/queries/loki-log-query',
+      './LokiLabelValuesVariable': './src/variables/LokiLabelValuesVariable.tsx',
+      './LokiLabelNamesVariable': './src/variables/LokiLabelNamesVariable.tsx',
+      './LokiLogQLVariable': './src/variables/LokiLogQLVariable.tsx',
     },
     shared: {
       react: { requiredVersion: '18.2.0', singleton: true },

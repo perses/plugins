@@ -53,11 +53,18 @@ table.WithColumnSettings([]table.ColumnSettings{
 			Unit:          &common.DecimalUnit,
 			DecimalPlaces: 2,
 		},
+		DataLink: &table.DataLink{
+			URL:        "http://example.com/details/${__data.fields[\"metric_name\"]}",
+			OpenNewTab: true,
+			Title:      "View details",
+		},
 	},
 })
 ```
 
 Configure individual columns. Available align options: `LeftAlign`, `CenterAlign`, `RightAlign`. Available sort options: `AscSort`, `DescSort`.
+
+The `DataLink` field allows adding a clickable link to cells in the column. It supports variable substitution in the URL (e.g., `${__data.fields["column_name"]}`).
 
 ### WithCellSettings
 

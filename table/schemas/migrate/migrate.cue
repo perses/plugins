@@ -59,16 +59,34 @@ spec: {
 		}
 
 		// Retrieve the settings defined in transformations
-		_columnSettingsFromTansform: {
+		// We collect possible values first, then resolve to the last one to mimic Grafana precedence.
+		_columnSettingsFromTransformRaw: {
 			for transformation in (*#panel.transformations | []) if transformation.id == "organize" {
 				for columnName, columnIndex in (*transformation.options.indexByName | {}) {
-					"\({_renameAnonymousFields & {#var: columnName}}.output)": index: columnIndex
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": indexes: "\(columnIndex)": true
 				}
 				for columnName, hidden in (*transformation.options.excludeByName | {}) {
-					"\({_renameAnonymousFields & {#var: columnName}}.output)": hide: hidden
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": hides: "\(hidden)": true
 				}
 				for columnName, displayName in (*transformation.options.renameByName | {}) {
-					"\({_renameAnonymousFields & {#var: columnName}}.output)": header: displayName
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": headers: "\(displayName)": true
+				}
+			}
+		}
+		_columnSettingsFromTransform: {
+			for name, settings in _columnSettingsFromTransformRaw {
+				"\(name)": {
+					if settings.indexes != _|_ if len(settings.indexes) > 0 {
+						_index: {_getLastKey & {#map: settings.indexes}}.output
+						index: strconv.Atoi(_index)
+					}
+					if settings.hides != _|_ if len(settings.hides) > 0 {
+						_hide: {_getLastKey & {#map: settings.hides}}.output
+						hide: _hide == "true"
+					}
+					if settings.headers != _|_ if len(settings.headers) > 0 {
+						header: {_getLastKey & {#map: settings.headers}}.output
+					}
 				}
 			}
 		}
@@ -78,7 +96,7 @@ spec: {
 			#var: string
 			output: [
 				// Check if the column was renamed by a transform
-				for k, v in _columnSettingsFromTansform if #var == (*v.header | null) {k},
+				for k, v in _columnSettingsFromTransform if #var == (*v.header | null) {k},
 				{_renameAnonymousFields & {#var: this.#var}}.output,
 			][0]
 		}
@@ -131,7 +149,7 @@ spec: {
 					}
 				}
 			}
-			for name, settings in _columnSettingsFromTansform {
+			for name, settings in _columnSettingsFromTransform {
 				"\(name)": [
 					// We have to hande potential name conflicts due to the overrides.
 					// In Grafana field overrides take precedence over the organize transformations.

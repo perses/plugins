@@ -1,5 +1,6 @@
 {
   "datasource": {
+    "type": "prometheus",
     "uid": "${datasource}"
   },
   "editorMode": "code",

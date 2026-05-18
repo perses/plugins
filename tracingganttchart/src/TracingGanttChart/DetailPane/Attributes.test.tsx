@@ -126,4 +126,30 @@ describe('Attributes', () => {
     expect(screen.getByText('300ms')).toBeInTheDocument(); // start
     expect(screen.getByText('150ms')).toBeInTheDocument(); // duration
   });
+
+  it('render kind', () => {
+    renderTraceAttributes({ trace, span: trace.rootSpans[0]! });
+    expect(screen.getByText('kind')).toBeInTheDocument();
+    expect(screen.getByText('SPAN_KIND_SERVER')).toBeInTheDocument();
+  });
+
+  it('render status code and message', () => {
+    renderTraceAttributes({ trace, span: trace.rootSpans[0]!.childSpans[0]! });
+    expect(screen.getByText('status code')).toBeInTheDocument();
+    expect(screen.getByText('STATUS_CODE_ERROR')).toBeInTheDocument();
+    expect(screen.getByText('status message')).toBeInTheDocument();
+    expect(screen.getByText('Forbidden')).toBeInTheDocument();
+  });
+
+  it('does not render status when unset', () => {
+    renderTraceAttributes({ trace, span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]! });
+    expect(screen.queryByText('status code')).not.toBeInTheDocument();
+    expect(screen.queryByText('status message')).not.toBeInTheDocument();
+  });
+
+  it('render scope', () => {
+    renderTraceAttributes({ trace, span: trace.rootSpans[0]! });
+    expect(screen.getByText('scope name')).toBeInTheDocument();
+    expect(screen.getByText('k6')).toBeInTheDocument();
+  });
 });

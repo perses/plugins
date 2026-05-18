@@ -34,21 +34,44 @@ export function TraceAttributes(props: TraceAttributesProps): ReactElement {
         <AttributeItem name="span ID" value={span.spanId} />
         <AttributeItem name="start" value={formatDuration(span.startTimeUnixMs - trace.startTimeUnixMs)} />
         <AttributeItem name="duration" value={formatDuration(span.endTimeUnixMs - span.startTimeUnixMs)} />
+        {span.kind && <AttributeItem name="kind" value={span.kind} />}
+        {span.status.code && <AttributeItem name="status code" value={span.status.code} />}
+        {span.status.message && <AttributeItem name="status message" value={span.status.message} />}
       </List>
-      <Divider />
+
       {span.attributes.length > 0 && (
         <>
+          <Divider />
           <AttributeList
             customLinks={customLinks}
             attributes={span.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
           />
-          <Divider />
         </>
       )}
-      <AttributeList
-        customLinks={customLinks}
-        attributes={span.resource.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
-      />
+
+      {span.resource.attributes.length > 0 && (
+        <>
+          <Divider />
+          <AttributeList
+            customLinks={customLinks}
+            attributes={span.resource.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
+          />
+        </>
+      )}
+
+      {(span.scope.name || span.scope.version || (span.scope.attributes && span.scope.attributes.length > 0)) && (
+        <>
+          <Divider />
+          <List>
+            {span.scope.name && <AttributeItem name="scope name" value={span.scope.name} />}
+            {span.scope.version && <AttributeItem name="scope version" value={span.scope.version} />}
+            <AttributeItems
+              customLinks={customLinks}
+              attributes={(span.scope.attributes ?? []).toSorted((a, b) => a.key.localeCompare(b.key))}
+            />
+          </List>
+        </>
+      )}
     </>
   );
 }

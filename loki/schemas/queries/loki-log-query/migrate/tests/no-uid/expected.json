@@ -1,0 +1,6 @@
+{
+  "kind": "LokiLogQuery",
+  "spec": {
+    "query": "{job=\"nginx\"} |= \"error\""
+  }
+}

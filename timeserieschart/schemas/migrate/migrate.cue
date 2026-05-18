@@ -196,8 +196,8 @@ spec: {
 			for override in (*#panel.fieldConfig.overrides | [])
 			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp" || override.matcher.id == "byFrameRefID") && override.matcher.options != _|_
 			for property in override.properties
-			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && (target.legendFormat == override.matcher.options || target.legendFormat =~ strings.Trim(override.matcher.options, "/")) ||
-				(override.matcher.id == "byFrameRefID" && target.refId == override.matcher.options) {
+			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && ((*target.legendFormat | null) == override.matcher.options || (*target.legendFormat | null) =~ strings.Trim(override.matcher.options, "/")) ||
+				(override.matcher.id == "byFrameRefID" && (*target.refId | null) == override.matcher.options) {
 				if property.id == "color" if (*property.value.fixedColor | null) != null {
 					colorMode:  "fixed"
 					colorValue: *commonMigrate.#mapping.color[property.value.fixedColor] | property.value.fixedColor

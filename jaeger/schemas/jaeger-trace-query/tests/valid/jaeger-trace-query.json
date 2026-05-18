@@ -1,0 +1,12 @@
+{
+  "kind": "JaegerTraceQuery",
+  "spec": {
+    "datasource": {
+      "kind": "JaegerDatasource",
+      "name": "MyDemoDatasource"
+    },
+    "service": "frontend",
+    "operation": "GET /api/cart",
+    "limit": 100
+  }
+}

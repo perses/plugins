@@ -1,0 +1,10 @@
+{
+  "kind": "LokiLogQuery",
+  "spec": {
+    "datasource": {
+      "kind": "LokiDatasource",
+      "name": "loki"
+    },
+    "query": "{container=\"nginx\"}"
+  }
+}

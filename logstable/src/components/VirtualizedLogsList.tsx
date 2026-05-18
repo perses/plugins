@@ -17,7 +17,7 @@ import CloseIcon from 'mdi-material-ui/Close';
 import { Virtuoso } from 'react-virtuoso';
 import { LogEntry } from '@perses-dev/core';
 import { useSelection } from '@perses-dev/components';
-import { useSelectionItemActions } from '@perses-dev/dashboards';
+import { formatForDisplay, useSelectionItemActions } from '@perses-dev/dashboards';
 import { ActionOptions, useAllVariableValues } from '@perses-dev/plugin-system';
 import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogsTableOptions } from '../model';
@@ -26,8 +26,8 @@ import { LogRow } from './LogRow';
 const PERSES_LOGSTABLE_HINTS_DISMISSED = 'PERSES_LOGSTABLE_HINTS_DISMISSED';
 const COPY_TOAST_DURATION_MS = 5000;
 
-// Detect Mac for keyboard shortcuts display
-const isMac = /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent);
+// Platform-aware modifier key display using TanStack's formatForDisplay
+const modKeyDisplay = formatForDisplay('Mod');
 
 interface VirtualizedLogsListProps {
   logs: LogEntry[];
@@ -324,7 +324,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
               <Box component="span" sx={{ opacity: 0.8 }}>
-                {isMac ? '⌘' : 'Ctrl'}+Click to select
+                {modKeyDisplay}+Click to select
               </Box>
               <Box component="span" sx={{ opacity: 0.6 }}>
                 •
@@ -336,7 +336,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
                 •
               </Box>
               <Box component="span" sx={{ opacity: 0.8 }}>
-                {isMac ? '⌘' : 'Ctrl'}+C to copy
+                {modKeyDisplay}+C to copy
               </Box>
               <Box component="span" sx={{ opacity: 0.6 }}>
                 •

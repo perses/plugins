@@ -17,6 +17,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/perses/common/async"
@@ -33,18 +34,28 @@ func main() {
 	t := tag.Flag()
 	flag.Parse()
 
+	buildPlugin := func(path string) (string, error) {
+		return path, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", path), "--skip.npm-install=true")
+	}
+
 	if *t != "" {
 		pluginPath, _ := tag.Parse(t)
 		pluginsToBuild = append(pluginsToBuild, async.Async(func() (string, error) {
-			return pluginPath, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", pluginPath), "--skip.npm-install=true")
+			return buildPlugin(pluginPath)
 		}))
 	} else {
 		logrus.Info("no tag provided, building all plugins")
 
+		maxConcurrency := runtime.NumCPU()
+		semaphore := make(chan struct{}, maxConcurrency)
+		logrus.Infof("building with concurrency limited to %d (number of CPUs)", maxConcurrency)
+
 		for _, workspace := range workspaces {
 			logrus.Infof("Building plugin %s", workspace)
 			pluginsToBuild = append(pluginsToBuild, async.Async(func() (string, error) {
-				return workspace, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", workspace), "--skip.npm-install=true")
+				semaphore <- struct{}{}
+				defer func() { <-semaphore }()
+				return buildPlugin(workspace)
 			}))
 		}
 	}

@@ -27,8 +27,9 @@ const PluginKind = "Table"
 type Density string
 
 const (
-	CompactDensity  Density = "auto"
-	StandardDensity Density = "always"
+	CompactDensity     Density = "compact"
+	StandardDensity    Density = "standard"
+	ComfortableDensity Density = "comfortable"
 )
 
 type Align string
@@ -46,6 +47,12 @@ const (
 	DescSort Sort = "desc"
 )
 
+type DataLink struct {
+	URL        string `json:"url" yaml:"url"`
+	Title      string `json:"title,omitempty" yaml:"title,omitempty"`
+	OpenNewTab bool   `json:"openNewTab" yaml:"openNewTab"`
+}
+
 type ColumnSettings struct {
 	Name              string         `json:"name" yaml:"name"`
 	Header            string         `json:"header,omitempty" yaml:"header,omitempty"`
@@ -58,6 +65,7 @@ type ColumnSettings struct {
 	Width             float64        `json:"width,omitempty" yaml:"width,omitempty"`
 	Hide              bool           `json:"hide,omitempty" yaml:"hide,omitempty"`
 	CellSettings      []CellSettings `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	DataLink          *DataLink      `json:"dataLink,omitempty" yaml:"dataLink,omitempty"`
 }
 
 type ValueConditionSpec struct {
