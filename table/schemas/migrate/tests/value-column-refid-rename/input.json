@@ -1,0 +1,100 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "custom": {
+        "align": "auto",
+        "cellOptions": {
+          "type": "auto"
+        },
+        "inspect": false
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
+      }
+    },
+    "overrides": []
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 0
+  },
+  "id": 1,
+  "options": {
+    "cellHeight": "sm",
+    "showHeader": true
+  },
+  "pluginVersion": "10.1.8",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "expr": "metric_a",
+      "format": "table",
+      "instant": true,
+      "refId": "A"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "expr": "metric_b",
+      "format": "table",
+      "instant": true,
+      "refId": "B"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROM}"
+      },
+      "expr": "metric_c",
+      "format": "table",
+      "instant": true,
+      "refId": "C"
+    }
+  ],
+  "title": "Multi-query table with refId rename",
+  "transformations": [
+    {
+      "id": "merge",
+      "options": {}
+    },
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {
+          "Time": true,
+          "Value #B": true
+        },
+        "indexByName": {
+          "Value #A": 1,
+          "Value #C": 0
+        },
+        "renameByName": {
+          "Value #A": "First Metric",
+          "Value #C": "Third Metric"
+        }
+      }
+    }
+  ],
+  "type": "table"
+}
