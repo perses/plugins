@@ -13,31 +13,33 @@
 
 import { toNanoString } from './get-greptimedb-trace-data';
 
-describe('toNanoString', () => {
+describe('toNanoString (GreptimeDB SQL columns with data_type)', () => {
   it('should return undefined for nullish values', () => {
-    expect(toNanoString(null, 'TimestampMillisecond')).toBeUndefined();
-    expect(toNanoString(undefined, 'TimestampMillisecond')).toBeUndefined();
+    expect(toNanoString(null, 'TimestampNanosecond')).toBeUndefined();
+    expect(toNanoString(undefined, 'TimestampNanosecond')).toBeUndefined();
   });
 
-  it('should convert typed numeric timestamps to nanoseconds', () => {
-    expect(toNanoString(1_000_000_000, 'TimestampNanosecond')).toBe('1000000000');
-    expect(toNanoString(1_000_000_000, 'TimestampMicrosecond')).toBe('1000000000000');
+  it('should scale Timestamp* columns (opentelemetry_traces timestamp / timestamp_end)', () => {
+    expect(toNanoString(1_700_000_000_000_000_000, 'TimestampNanosecond')).toBe('1700000000000000000');
+    expect(toNanoString(1_700_000_000_000_000, 'TimestampMicrosecond')).toBe('1700000000000000000');
     expect(toNanoString(1_700_000_000_000, 'TimestampMillisecond')).toBe('1700000000000000000');
     expect(toNanoString(1_700_000_000, 'TimestampSecond')).toBe('1700000000000000000');
   });
 
-  it('should infer units for numeric timestamps without data type', () => {
-    expect(toNanoString(1_700_000_000_000_000, undefined)).toBe('1700000000000000');
-    expect(toNanoString(1_700_000_000_000, undefined)).toBe('1700000000000000000');
-    expect(toNanoString(1_700_000_000, undefined)).toBe('1700000000000000000');
+  it('should not scale Int64 duration_nano', () => {
+    expect(toNanoString(4_169_970, 'Int64')).toBe('4169970');
+    expect(toNanoString(4_169_970, 'UInt64')).toBe('4169970');
   });
 
-  it('should parse numeric strings and date strings', () => {
-    expect(toNanoString('1700000000000', 'TimestampMillisecond')).toBe('1700000000000000000');
-    expect(toNanoString('2023-11-14T22:13:20.000Z', 'TimestampMillisecond')).toBe('1700000000000000000');
+  it('should parse numeric strings from SQL API', () => {
+    expect(toNanoString('1700000000000000000', 'TimestampNanosecond')).toBe('1700000000000000000');
   });
 
-  it('should return undefined for invalid date strings', () => {
-    expect(toNanoString('not-a-timestamp', 'TimestampMillisecond')).toBeUndefined();
+  it('should return undefined for non-numeric strings', () => {
+    expect(toNanoString('2023-11-14T22:13:20.000Z', 'TimestampNanosecond')).toBeUndefined();
+  });
+
+  it('should throw for unsupported data_type on numeric values', () => {
+    expect(() => toNanoString(1, 'String')).toThrow('Unsupported GreptimeDB data_type');
   });
 });
