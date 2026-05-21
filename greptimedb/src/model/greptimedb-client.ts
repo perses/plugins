@@ -30,6 +30,16 @@ export interface GreptimeDBClient {
   query: (params: GreptimeDBQueryRequestParameters) => Promise<GreptimeDBQueryResponse>;
 }
 
+async function readErrorResponse(response: Response): Promise<string> {
+  const contentType = response.headers?.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const errorJson = await response.json();
+    return `GreptimeDB error: ${response.status} ${response.statusText} - ${JSON.stringify(errorJson)}`;
+  }
+  const errorText = await response.text();
+  return `GreptimeDB error: ${response.status} ${response.statusText} - ${errorText}`;
+}
+
 export async function greptimedbQuery(
   params: GreptimeDBQueryRequestParameters,
   queryOptions: GreptimeDBQueryOptions
@@ -55,12 +65,12 @@ export async function greptimedbQuery(
   try {
     const response = await fetch(url.toString(), init);
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('GreptimeDB error response:', errorText);
+      const errorMessage = await readErrorResponse(response);
+      console.error('GreptimeDB error response:', errorMessage);
       return {
         status: 'error',
         data: { output: [] },
-        error: errorText,
+        error: errorMessage,
       };
     }
 
