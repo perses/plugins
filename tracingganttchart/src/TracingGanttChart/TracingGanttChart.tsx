@@ -22,7 +22,8 @@ import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { getTraceModel, Span } from './trace';
-import { TraceDetails } from './TraceDetails';
+import { TraceHeaderBar } from './TraceHeaderBar';
+import { useSpanSearch } from './Search';
 
 export interface TracingGanttChartProps {
   options: TracingGanttChartOptions;
@@ -53,6 +54,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(() =>
     options.selectedSpanId ? trace.spanById.get(options.selectedSpanId) : undefined
   );
+  const search = useSpanSearch(trace);
 
   const ganttChart = useRef<HTMLDivElement>(null);
   // tableWidth only comes to effect if the detail pane is visible.
@@ -64,7 +66,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   return (
     <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
       <Stack sx={{ flexGrow: 1, gap }}>
-        <TraceDetails trace={trace} />
+        <TraceHeaderBar trace={trace} search={search} />
         <MiniGanttChart options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
         <GanttTableProvider>
           <GanttTable
@@ -74,6 +76,8 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
             viewport={viewport}
             selectedSpan={selectedSpan}
             onSpanClick={setSelectedSpan}
+            matchingSpanIds={search.matchingSpanIds}
+            focusedSpanId={search.matchingSpanIds[search.focusedMatchIndex]}
           />
         </GanttTableProvider>
       </Stack>

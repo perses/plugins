@@ -17,14 +17,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { otlptracev1 } from '@perses-dev/core';
 import * as exampleTrace from '../test/traces/example_otlp.json';
 import { getTraceModel } from './trace';
-import { TraceDetails, TraceDetailsProps } from './TraceDetails';
+import { TraceHeaderBar, TraceHeaderBarProps } from './TraceHeaderBar';
 
-describe('TraceDetails', () => {
+describe('TraceHeaderBar', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
-  const renderComponent = (props: TraceDetailsProps): RenderResult => {
+  const renderComponent = (props: TraceHeaderBarProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <TraceDetails {...props} />
+        <TraceHeaderBar {...props} />
       </MemoryRouter>
     );
   };

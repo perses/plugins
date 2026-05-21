@@ -24,7 +24,8 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "color-hash": "^2.0.2"
+    "color-hash": "^2.0.2",
+    "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
