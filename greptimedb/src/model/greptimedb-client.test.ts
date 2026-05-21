@@ -50,9 +50,7 @@ describe('readErrorResponse (via greptimedbQuery)', () => {
     const result = await greptimedbQuery({ query: 'SELECT 1' }, queryOptions);
 
     expect(result.status).toBe('error');
-    expect(result.error).toBe(
-      `GreptimeDB error: 400 Bad Request - ${JSON.stringify(GREPTIMEDB_SQL_ERROR_JSON)}`
-    );
+    expect(result.error).toBe(`GreptimeDB error: 400 Bad Request - ${JSON.stringify(GREPTIMEDB_SQL_ERROR_JSON)}`);
   });
 
   it('formats non-JSON errors via response.text()', async () => {

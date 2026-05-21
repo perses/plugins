@@ -103,11 +103,13 @@ function buildColumnIndexMap(columns: GreptimeDBColumnSchema[] | undefined): Col
 
 /** GreptimeDB /v1/sql includes data_type on every column_schemas entry. */
 function getColumnDataType(columns: GreptimeDBColumnSchema[], index: number): string {
-  const dataType = columns[index].data_type;
+  const column = columns[index];
+  if (!column) {
+    throw new Error(`GreptimeDB SQL response missing column at index ${index}`);
+  }
+  const dataType = column.data_type;
   if (!dataType) {
-    throw new Error(
-      `GreptimeDB SQL response missing data_type for column "${columns[index]?.name ?? String(index)}"`
-    );
+    throw new Error(`GreptimeDB SQL response missing data_type for column "${column.name}"`);
   }
   return dataType;
 }
@@ -271,9 +273,7 @@ function buildSearchResult(records: GreptimeDBRecords | undefined): TraceSearchR
 
 function isIntegerGreptimeDataType(dataType: string): boolean {
   const normalized = dataType.toLowerCase();
-  return (
-    normalized.includes('int') || normalized.includes('uint') || normalized === 'bigint'
-  );
+  return normalized.includes('int') || normalized.includes('uint') || normalized === 'bigint';
 }
 
 /**
@@ -381,9 +381,7 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
     const durationIndex = map.duration_nano ?? map.duration_ns;
 
     const startTimeUnixNano =
-      (startIndex !== undefined
-        ? (toNanoString(row[startIndex], getColumnDataType(columns, startIndex)) ?? '0')
-        : '0');
+      startIndex !== undefined ? (toNanoString(row[startIndex], getColumnDataType(columns, startIndex)) ?? '0') : '0';
     const endTimeUnixNano =
       (endIndex !== undefined
         ? (toNanoString(row[endIndex], getColumnDataType(columns, endIndex)) ?? '0')
@@ -408,8 +406,7 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
     // span_events / span_links: JSON columns (data_type Json). Only events need OTLP time parsing.
     const spanEvents = parseJsonArray(getCell(row, map, ['span_events'])).map((event) => {
       const e = event as Record<string, unknown>;
-      const eventTime =
-        otlpEventTimeToNanoString(e.timeUnixNano ?? e.time_unix_nano) ?? startTimeUnixNano;
+      const eventTime = otlpEventTimeToNanoString(e.timeUnixNano ?? e.time_unix_nano) ?? startTimeUnixNano;
       const eventName = getString(e.name) ?? 'event';
       const attrs = e.attributes as Record<string, unknown> | undefined;
       const attributes = attrs

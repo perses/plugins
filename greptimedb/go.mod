@@ -1,6 +1,6 @@
 module github.com/perses/plugins/greptimedb
 
-go 1.26.0
+go 1.25.7
 
 require github.com/perses/perses v0.53.1
 
