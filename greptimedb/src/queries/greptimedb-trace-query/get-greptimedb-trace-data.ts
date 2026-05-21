@@ -101,6 +101,19 @@ function buildColumnIndexMap(columns: GreptimeDBColumnSchema[] | undefined): Col
   return map;
 }
 
+/** GreptimeDB /v1/sql includes data_type on every column_schemas entry. */
+function getColumnDataType(columns: GreptimeDBColumnSchema[], index: number): string {
+  const column = columns[index];
+  if (!column) {
+    throw new Error(`GreptimeDB SQL response missing column at index ${index}`);
+  }
+  const dataType = column.data_type;
+  if (!dataType) {
+    throw new Error(`GreptimeDB SQL response missing data_type for column "${column.name}"`);
+  }
+  return dataType;
+}
+
 function isTraceDetailsResult(records: GreptimeDBRecords | undefined): boolean {
   const columns = records?.schema?.column_schemas ?? [];
   if (columns.length === 0) return false;
@@ -147,9 +160,9 @@ function getDurationMs(row: Row, columns: GreptimeDBColumnSchema[] | undefined, 
 
   const startIndex = map.timestamp ?? map.start_time ?? map.start_time_unix_nano;
   const endIndex = map.timestamp_end ?? map.end_time ?? map.end_time_unix_nano;
-  if (startIndex !== undefined && endIndex !== undefined) {
-    const startMs = toTimestampMs(row[startIndex], columns?.[startIndex]?.data_type);
-    const endMs = toTimestampMs(row[endIndex], columns?.[endIndex]?.data_type);
+  if (columns && startIndex !== undefined && endIndex !== undefined) {
+    const startMs = toTimestampMs(row[startIndex], getColumnDataType(columns, startIndex));
+    const endMs = toTimestampMs(row[endIndex], getColumnDataType(columns, endIndex));
     if (startMs !== null && endMs !== null) return Math.max(0, endMs - startMs);
   }
   return 0;
@@ -167,7 +180,8 @@ function getStartMs(row: Row, columns: GreptimeDBColumnSchema[] | undefined, map
   for (const c of candidates) {
     const idx = map[c];
     if (idx === undefined) continue;
-    const ts = toTimestampMs(row[idx], columns?.[idx]?.data_type);
+    if (!columns) continue;
+    const ts = toTimestampMs(row[idx], getColumnDataType(columns, idx));
     if (ts !== null) return ts;
   }
   return undefined;
@@ -178,7 +192,8 @@ function getEndMs(row: Row, columns: GreptimeDBColumnSchema[] | undefined, map: 
   for (const c of candidates) {
     const idx = map[c];
     if (idx === undefined) continue;
-    const ts = toTimestampMs(row[idx], columns?.[idx]?.data_type);
+    if (!columns) continue;
+    const ts = toTimestampMs(row[idx], getColumnDataType(columns, idx));
     if (ts !== null) return ts;
   }
   return undefined;
@@ -256,25 +271,42 @@ function buildSearchResult(records: GreptimeDBRecords | undefined): TraceSearchR
     .sort((a, b) => b.startTimeUnixMs - a.startTimeUnixMs);
 }
 
-export function toNanoString(value: unknown, dataType?: string): string | undefined {
+function isIntegerGreptimeDataType(dataType: string): boolean {
+  const normalized = dataType.toLowerCase();
+  return normalized.includes('int') || normalized.includes('uint') || normalized === 'bigint';
+}
+
+/**
+ * span_events JSON only: OTLP timeUnixNano is already nanoseconds (not a GreptimeDB TIMESTAMP column).
+ * @see https://docs.greptime.com/user-guide/traces/data-model/
+ */
+function otlpEventTimeToNanoString(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   const raw = getNumber(value);
-  if (raw !== undefined) {
-    const normalized = (dataType ?? '').toLowerCase();
-    if (normalized.includes('nanosecond')) return String(BigInt(Math.trunc(raw)));
-    if (normalized.includes('microsecond')) return String(BigInt(Math.trunc(raw)) * 1000n);
-    if (normalized.includes('millisecond')) return String(BigInt(Math.trunc(raw)) * 1_000_000n);
-    if (normalized.includes('second')) return String(BigInt(Math.trunc(raw)) * 1_000_000_000n);
-
-    if (raw > 1_000_000_000_000_000) return String(BigInt(Math.trunc(raw)));
-    if (raw > 1_000_000_000_000) return String(BigInt(Math.trunc(raw)) * 1_000_000n);
-    if (raw > 1_000_000_000) return String(BigInt(Math.trunc(raw)) * 1_000_000_000n);
-    return String(BigInt(Math.trunc(raw)) * 1_000_000n);
-  }
-
+  if (raw !== undefined) return String(BigInt(Math.trunc(raw)));
   const dateMs = new Date(String(value)).getTime();
   if (!Number.isNaN(dateMs)) return String(BigInt(Math.trunc(dateMs)) * 1_000_000n);
   return undefined;
+}
+
+/**
+ * SQL column values only (timestamp, timestamp_end, duration_nano, …).
+ * Requires data_type from getColumnDataType. GreptimeDB /v1/sql returns numeric cells (and numeric strings).
+ * - Timestamp* (TIMESTAMP(9) on opentelemetry_traces) → scale to nanoseconds.
+ * - Int64/UInt64 (duration_nano) → already nanoseconds, no scaling.
+ */
+export function toNanoString(value: unknown, dataType: string): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  const raw = getNumber(value);
+  if (raw === undefined) return undefined;
+
+  const normalized = dataType.toLowerCase();
+  if (normalized.includes('nanosecond')) return String(BigInt(Math.trunc(raw)));
+  if (normalized.includes('microsecond')) return String(BigInt(Math.trunc(raw)) * 1000n);
+  if (normalized.includes('millisecond')) return String(BigInt(Math.trunc(raw)) * 1_000_000n);
+  if (normalized.includes('second')) return String(BigInt(Math.trunc(raw)) * 1_000_000_000n);
+  if (isIntegerGreptimeDataType(dataType)) return String(BigInt(Math.trunc(raw)));
+  throw new Error(`Unsupported GreptimeDB data_type: ${dataType}`);
 }
 
 function parseJsonArray(value: unknown): unknown[] {
@@ -349,11 +381,16 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
     const durationIndex = map.duration_nano ?? map.duration_ns;
 
     const startTimeUnixNano =
-      (startIndex !== undefined ? toNanoString(row[startIndex], columns[startIndex]?.data_type) : undefined) ?? '0';
+      startIndex !== undefined ? (toNanoString(row[startIndex], getColumnDataType(columns, startIndex)) ?? '0') : '0';
     const endTimeUnixNano =
-      (endIndex !== undefined ? toNanoString(row[endIndex], columns[endIndex]?.data_type) : undefined) ??
+      (endIndex !== undefined
+        ? (toNanoString(row[endIndex], getColumnDataType(columns, endIndex)) ?? '0')
+        : undefined) ??
       (durationIndex !== undefined
-        ? String(BigInt(startTimeUnixNano) + BigInt(toNanoString(row[durationIndex]) ?? '0'))
+        ? String(
+            BigInt(startTimeUnixNano) +
+              BigInt(toNanoString(row[durationIndex], getColumnDataType(columns, durationIndex)) ?? '0')
+          )
         : startTimeUnixNano);
 
     const spanAttributes = spanColumns
@@ -366,9 +403,10 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
       })
       .filter((v): v is otlpcommonv1.KeyValue => v !== undefined);
 
+    // span_events / span_links: JSON columns (data_type Json). Only events need OTLP time parsing.
     const spanEvents = parseJsonArray(getCell(row, map, ['span_events'])).map((event) => {
       const e = event as Record<string, unknown>;
-      const eventTime = toNanoString(e.timeUnixNano ?? e.time_unix_nano ?? e.timestamp ?? e.time) ?? startTimeUnixNano;
+      const eventTime = otlpEventTimeToNanoString(e.timeUnixNano ?? e.time_unix_nano) ?? startTimeUnixNano;
       const eventName = getString(e.name) ?? 'event';
       const attrs = e.attributes as Record<string, unknown> | undefined;
       const attributes = attrs

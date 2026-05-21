@@ -23,6 +23,12 @@ import (
 kind: #kind
 spec: {
 	commonProxy.#baseHTTPDatasourceSpec
+
+	// headers are forwarded on GreptimeDB SQL API requests (e.g. Authorization).
+	// Used with directUrl when the Perses server is not proxying traffic; the host app may inject
+	// headers at datasource init instead of storing credentials in dashboard JSON.
+	// When using proxy, prefer proxy.spec.headers or proxy.spec.secret for sensitive values.
+	headers?: {[string]: string}
 }
 
 #selector: common.#datasourceSelector & {_kind: #kind}
