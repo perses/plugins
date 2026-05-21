@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/core';
+import { fetch, RequestHeaders } from '@perses-dev/core';
 import { GreptimeDBDatasourceResponse, GreptimeDBQueryRequestParameters } from '../datasources/greptimedb-datasource';
 import { GreptimeDBResponseData } from './greptimedb-data-types';
 
