@@ -18,9 +18,17 @@ import { otlptracev1 } from '@perses-dev/core';
 import * as exampleTrace from '../test/traces/example_otlp.json';
 import { getTraceModel } from './trace';
 import { TraceHeaderBar, TraceHeaderBarProps } from './TraceHeaderBar';
+import { SpanSearch } from './Search';
 
 describe('TraceHeaderBar', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
+  const search: SpanSearch = {
+    searchQuery: '',
+    setSearchQuery: () => {},
+    matchingSpanIds: [],
+    focusedMatchIndex: 0,
+    setFocusedMatchIndex: () => {},
+  };
   const renderComponent = (props: TraceHeaderBarProps): RenderResult => {
     return render(
       <MemoryRouter>
@@ -30,7 +38,7 @@ describe('TraceHeaderBar', () => {
   };
 
   it('render trace details', () => {
-    renderComponent({ trace });
+    renderComponent({ trace, search });
     expect(screen.getByRole('heading', { name: 'shop-backend: testRootSpan (1s)' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /Trace ID: 5B8EFFF798038103D269B633813FC60C/ })).toBeInTheDocument();
   });
