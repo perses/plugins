@@ -1,0 +1,10 @@
+{
+  "kind": "GreptimeDBLogQuery",
+  "spec": {
+    "datasource": {
+      "kind": "GreptimeDBDatasource",
+      "name": "demo"
+    },
+    "query": "SELECT * FROM greptime.public.logs LIMIT 100"
+  }
+}
