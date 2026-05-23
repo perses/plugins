@@ -1,0 +1,10 @@
+{
+  "kind": "GreptimeDBTimeSeriesQuery",
+  "spec": {
+    "datasource": {
+      "kind": "GreptimeDBDatasource",
+      "name": "demo"
+    },
+    "query": "SELECT ts, value FROM greptime.public.metrics ORDER BY ts"
+  }
+}

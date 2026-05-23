@@ -13,7 +13,7 @@
 
 import { Box, Theme, Typography, useTheme } from '@mui/material';
 import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
-import { formatValue, QueryDataType, TimeSeriesData, transformData } from '@perses-dev/core';
+import { CalculationsMap, formatValue, QueryDataType, TimeSeriesData, transformData } from '@perses-dev/core';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import {
   ActionOptions,
@@ -25,18 +25,158 @@ import {
 } from '@perses-dev/plugin-system';
 import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
+import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
+function parseNumericCellValue(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return undefined;
+}
+
+function isPanelData(value: unknown): value is PanelData<QueryDataType> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const candidate = value as { definition?: unknown; data?: unknown };
+  return candidate.definition !== undefined && candidate.data !== undefined;
+}
+
+function createSyntheticPanelData(value: unknown, columnName: string): PanelData<TimeSeriesData> | undefined {
+  const numericValue = parseNumericCellValue(value);
+  if (numericValue === undefined) {
+    return undefined;
+  }
+
+  const now = Date.now();
+  return {
+    definition: {
+      kind: 'TimeSeriesQuery',
+      spec: { plugin: { kind: 'PrometheusTimeSeriesQuery', spec: { query: '' } } },
+    },
+    data: {
+      timeRange: { start: new Date(now), end: new Date(now) },
+      stepMs: 1,
+      series: [{ name: columnName, values: [[now, numericValue]], labels: {} }],
+    },
+  };
+}
+
+function getGaugeNumericValue(value: unknown): number | undefined {
+  if (isPanelData(value)) {
+    const series = (value.data as TimeSeriesData)?.series;
+    const firstSeries = series?.[0];
+    if (!firstSeries?.values?.length) {
+      return undefined;
+    }
+    const calc = CalculationsMap['last-number'];
+    if (typeof calc !== 'function') {
+      return undefined;
+    }
+    const calculatedValue = calc(firstSeries.values);
+    return typeof calculatedValue === 'number' ? calculatedValue : undefined;
+  }
+
+  return parseNumericCellValue(value);
+}
+
+interface GaugeRange {
+  min: number;
+  max: number;
+}
+
+function InlineGaugeCellWithRange({
+  value,
+  range,
+  fillColor,
+  format,
+}: {
+  value?: number;
+  range?: GaugeRange;
+  fillColor?: string;
+  format?: ColumnSettings['format'];
+}): ReactElement {
+  if (value === undefined) {
+    return <></>;
+  }
+
+  let percent = 0;
+  if (range !== undefined) {
+    if (range.max === range.min) {
+      percent = 100;
+    } else {
+      percent = ((value - range.min) / (range.max - range.min)) * 100;
+    }
+  }
+  percent = Math.max(0, Math.min(100, percent));
+
+  const trackColor = 'rgba(127,127,127,0.20)';
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+      <Box sx={{ flexGrow: 1, borderRadius: 1, backgroundColor: trackColor, height: 24, overflow: 'hidden' }}>
+        <Box
+          sx={{
+            width: `${percent}%`,
+            height: '100%',
+            backgroundColor: fillColor ?? 'success.main',
+            borderRadius: 1,
+          }}
+        />
+      </Box>
+      <Typography variant="body2" sx={{ minWidth: 52, textAlign: 'right' }}>
+        {format ? formatValue(value, format) : value.toFixed(2)}
+      </Typography>
+    </Box>
+  );
+}
+
+function resolveGaugeFillColor(
+  value: unknown,
+  globalCellSettings: CellSettings[],
+  columnCellSettings: CellSettings[] | undefined
+): string | undefined {
+  let cellConfig = evaluateConditionalFormatting(value, globalCellSettings);
+  if (columnCellSettings?.length) {
+    const columnCellConfig = evaluateConditionalFormatting(value, columnCellSettings);
+    if (columnCellConfig) {
+      cellConfig = columnCellConfig;
+    }
+  }
+  return cellConfig?.backgroundColor ?? cellConfig?.textColor;
+}
+
 function generateCellContentConfig(
-  column: ColumnSettings
+  column: ColumnSettings,
+  gaugeRange?: GaugeRange,
+  globalCellSettings: CellSettings[] = []
 ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
   if (plugin !== undefined) {
     return {
       cell: (ctx): ReactElement => {
-        const panelData: PanelData<QueryDataType> | undefined = ctx.getValue();
+        const cellValue = ctx.getValue();
+        if (plugin.kind === 'GaugeChart') {
+          const gaugeValue = getGaugeNumericValue(cellValue);
+          const gaugeFillColor = resolveGaugeFillColor(gaugeValue, globalCellSettings, column.cellSettings);
+          return (
+            <InlineGaugeCellWithRange
+              value={gaugeValue}
+              range={gaugeRange}
+              fillColor={gaugeFillColor}
+              format={plugin.spec?.format ?? column.format}
+            />
+          );
+        }
+        const panelData = isPanelData(cellValue) ? cellValue : createSyntheticPanelData(cellValue, column.name);
         if (!panelData) return <></>;
         return <EmbeddedPanel kind={plugin.kind} spec={plugin.spec} queryResults={[panelData]} />;
       },
@@ -190,7 +330,9 @@ function ColumnFilterDropdown({
 function generateColumnConfig(
   name: string,
   columnSettings: ColumnSettings[],
-  allVariables: VariableStateMap
+  allVariables: VariableStateMap,
+  gaugeRangeByColumn: Record<string, GaugeRange>,
+  globalCellSettings: CellSettings[] = []
 ): TableColumnConfig<unknown> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
@@ -211,7 +353,7 @@ function generateColumnConfig(
         width,
         align,
         dataLink: modifiedDataLink,
-        ...generateCellContentConfig(column),
+        ...generateCellContentConfig(column, gaugeRangeByColumn[name], globalCellSettings),
       };
     }
   }
@@ -314,6 +456,30 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return uniqueValues;
   }, [data, keys]);
 
+  const gaugeRangeByColumn = useMemo(() => {
+    const result: Record<string, GaugeRange> = {};
+
+    for (const key of keys) {
+      let min = Number.POSITIVE_INFINITY;
+      let max = Number.NEGATIVE_INFINITY;
+
+      for (const row of data) {
+        const numericValue = getGaugeNumericValue(row[key]);
+        if (numericValue === undefined) {
+          continue;
+        }
+        min = Math.min(min, numericValue);
+        max = Math.max(max, numericValue);
+      }
+
+      if (min !== Number.POSITIVE_INFINITY && max !== Number.NEGATIVE_INFINITY) {
+        result[key] = { min, max };
+      }
+    }
+
+    return result;
+  }, [data, keys]);
+
   // Generate columns and map each column accessor to its settings index and data key
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
@@ -323,7 +489,13 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     for (const columnSetting of spec.columnSettings ?? []) {
       if (customizedColumns.has(columnSetting.name)) continue; // Skip duplicates
 
-      const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings ?? [], allVariables);
+      const columnConfig = generateColumnConfig(
+        columnSetting.name,
+        spec.columnSettings ?? [],
+        allVariables,
+        gaugeRangeByColumn,
+        spec.cellSettings ?? []
+      );
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
         customizedColumns.add(columnSetting.name);
@@ -334,7 +506,13 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     if (!spec.defaultColumnHidden) {
       for (const key of keys) {
         if (!customizedColumns.has(key)) {
-          const columnConfig = generateColumnConfig(key, spec.columnSettings ?? [], allVariables);
+          const columnConfig = generateColumnConfig(
+            key,
+            spec.columnSettings ?? [],
+            allVariables,
+            gaugeRangeByColumn,
+            spec.cellSettings ?? []
+          );
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
           }
@@ -343,7 +521,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return columns;
-  }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables]);
+  }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables, gaugeRangeByColumn, spec.cellSettings]);
 
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {

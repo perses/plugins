@@ -27,8 +27,9 @@ const PluginKind = "Table"
 type Density string
 
 const (
-	CompactDensity  Density = "auto"
-	StandardDensity Density = "always"
+	CompactDensity     Density = "compact"
+	StandardDensity    Density = "standard"
+	ComfortableDensity Density = "comfortable"
 )
 
 type Align string
