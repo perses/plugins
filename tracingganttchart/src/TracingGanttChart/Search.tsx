@@ -33,10 +33,12 @@ export function SearchBar(props: SearchBarProps): ReactElement {
   const hasMatches = matchCount > 0;
 
   function handlePrev(): void {
+    if (!hasMatches) return;
     setFocusedMatchIndex((focusedMatchIndex - 1 + matchCount) % matchCount);
   }
 
   function handleNext(): void {
+    if (!hasMatches) return;
     setFocusedMatchIndex((focusedMatchIndex + 1) % matchCount);
   }
 
