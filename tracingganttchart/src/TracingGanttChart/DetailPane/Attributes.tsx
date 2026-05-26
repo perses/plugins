@@ -168,7 +168,7 @@ export function AttributeItem(props: AttributeItemProps): ReactElement {
   );
 }
 
-function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
+export function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
   if ('stringValue' in value) return value.stringValue || '<empty string>';
   if ('intValue' in value) return value.intValue;
   if ('doubleValue' in value) return String(value.doubleValue);
@@ -177,5 +177,5 @@ function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
     const values = value.arrayValue.values;
     return values && values.length > 0 ? values.map(renderAttributeValue).join(', ') : '<empty array>';
   }
-  return 'unknown';
+  return '<unknown type>';
 }

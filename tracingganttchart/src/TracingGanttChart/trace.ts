@@ -123,6 +123,18 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
   return { trace, rootSpans, spanById, startTimeUnixMs, endTimeUnixMs };
 }
 
+/**
+ * Recursively iterates all spans depth-first.
+ * Return false from the callback to skip a span's children.
+ */
+export function forEachSpan(spans: Span[], fn: (span: Span) => boolean | void): void {
+  for (const span of spans) {
+    if (fn(span) !== false) {
+      forEachSpan(span.childSpans, fn);
+    }
+  }
+}
+
 function parseResource(resource?: otlpresourcev1.Resource): Resource {
   let serviceName = 'unknown';
   for (const attr of resource?.attributes ?? []) {

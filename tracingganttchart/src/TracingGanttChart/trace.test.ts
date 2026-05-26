@@ -17,7 +17,7 @@ import * as missingRootSpanTrace from '../test/traces/pushbytes_no_root_span_otl
 import * as incompleteTrace from '../test/traces/pushbytes_incomplete_otlp.json';
 import * as asyncTrace from '../test/traces/async_jaeger.json';
 import { JaegerTrace, jaegerTraceToOTLP } from '../test/convert/jaeger';
-import { getTraceModel, Span } from './trace';
+import { forEachSpan, getTraceModel, Span } from './trace';
 
 describe('trace', () => {
   it('computes a GanttTrace model from a trace', (): void => {
@@ -47,6 +47,25 @@ describe('trace', () => {
     const ganttTrace = getTraceModel(incompleteTrace as otlptracev1.TracesData);
     expect(ganttTrace.rootSpans[0]!.name).toEqual('distributor.ConsumeTraces');
     expect(ganttTrace.rootSpans[1]!.name).toEqual('tempopb.Pusher/PushBytesV2');
+  });
+});
+
+describe('forEachSpan', () => {
+  it('iterates all spans depth-first', () => {
+    const names: string[] = [];
+    forEachSpan([spanTree], (span) => {
+      names.push(span.name);
+    });
+    expect(names).toEqual(['testRootSpan', 'testChildSpan2', 'testChildSpan3']);
+  });
+
+  it('skips children when callback returns false', () => {
+    const names: string[] = [];
+    forEachSpan([spanTree], (span) => {
+      names.push(span.name);
+      if (span.spanId === 'sid2') return false;
+    });
+    expect(names).toEqual(['testRootSpan', 'testChildSpan2']);
   });
 });
 
