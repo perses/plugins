@@ -18,7 +18,7 @@ import EyeIcon from 'mdi-material-ui/EyeOutline';
 import CloseIcon from 'mdi-material-ui/Close';
 import Chip from '@mui/material/Chip';
 import { emphasize, styled } from '@mui/material/styles';
-import { formatValue } from '@perses-dev/core';
+import { formatValue } from '@perses-dev/components';
 
 export interface CustomBreadcrumbProps {
   totalValue: string;

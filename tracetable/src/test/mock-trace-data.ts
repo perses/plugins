@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TraceData } from '@perses-dev/core';
+import { TraceData } from '@perses-dev/spec';
 
 /**
  * Mock data we get from getTraceData() in @perses/tempo-plugin.

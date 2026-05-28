@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { replaceVariable } from '@perses-dev/plugin-system';
-import { formatDuration, msToPrometheusDuration } from '@perses-dev/core';
+import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
 
 /*
  * Replace variable placeholders in a PromQL query
@@ -25,7 +25,7 @@ import { formatDuration, msToPrometheusDuration } from '@perses-dev/core';
  */
 export function replacePromBuiltinVariables(query: string, minStepMs: number, intervalMs: number): string {
   let updatedQuery = replaceVariable(query, '__interval_ms', intervalMs.toString());
-  updatedQuery = replaceVariable(updatedQuery, '__interval', formatDuration(msToPrometheusDuration(intervalMs)));
+  updatedQuery = replaceVariable(updatedQuery, '__interval', formatDuration(convertTimeToDuration(intervalMs)));
 
   // The $__rate_interval variable is meant to be used with the rate() promQL function.
   // It is defined as max($__interval + Min step, 4 * Min step)
@@ -33,7 +33,7 @@ export function replacePromBuiltinVariables(query: string, minStepMs: number, in
   updatedQuery = replaceVariable(
     updatedQuery,
     '__rate_interval',
-    formatDuration(msToPrometheusDuration(rateIntervalMs))
+    formatDuration(convertTimeToDuration(rateIntervalMs))
   );
 
   return updatedQuery;

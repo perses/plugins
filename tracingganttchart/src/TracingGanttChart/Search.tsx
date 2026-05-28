@@ -16,7 +16,7 @@ import ChevronUp from 'mdi-material-ui/ChevronUp';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import Close from 'mdi-material-ui/Close';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
-import { otlpcommonv1 } from '@perses-dev/core';
+import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import { renderAttributeValue } from './DetailPane/Attributes';
 import { Span, Trace, forEachSpan } from './trace';
 

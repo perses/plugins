@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString } from '@perses-dev/core';
+import { DurationString } from '@perses-dev/spec';
 import ASTNode from '../components/promql/ast';
 
 // Just reuse dashboard model's type and re-export

@@ -17,7 +17,8 @@ import { Box, CircularProgress, List, ListItem, Stack, Tooltip, Typography, useT
 import CircleIcon from 'mdi-material-ui/Circle';
 import { ReactElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import AlertCircle from 'mdi-material-ui/AlertCircle';
-import { StatusError } from '@perses-dev/core';
+
+import { StatusError } from '@perses-dev/client';
 import { PrometheusDatasourceSelector } from '../model';
 import ASTNode, { nodeType } from './promql/ast';
 import { escapeString, getNodeChildren } from './promql/utils';

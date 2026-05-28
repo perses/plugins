@@ -17,8 +17,7 @@ import { DatasetComponent, GridComponent, LegendComponent, TitleComponent, Toolt
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box, useTheme } from '@mui/material';
 import { ReactElement } from 'react';
-import { EChart, ModeOption, useChartsTheme } from '@perses-dev/components';
-import { FormatOptions } from '@perses-dev/core';
+import { EChart, FormatOptions, ModeOption, useChartsTheme } from '@perses-dev/components';
 import { getLabelFormatter, getTooltipFormatter } from './utils';
 
 use([

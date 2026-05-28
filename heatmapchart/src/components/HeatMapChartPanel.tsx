@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { Stack, Typography } from '@mui/material';
-import { TimeScale, TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
+import { TimeScale, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 import { DEFAULT_FORMAT, HeatMapChartOptions, LOG_BASE } from '../heat-map-chart-model';
 import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils';
 import { HeatMapChart, HeatMapDataItem } from './HeatMapChart';

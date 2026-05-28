@@ -13,8 +13,8 @@
 
 import { ReactElement, useMemo } from 'react';
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
-import { otlpcommonv1 } from '@perses-dev/core';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import * as oltpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import { Span, Trace } from '../trace';
 import { formatDuration } from '../utils';
 import { CustomLinks } from '../../gantt-chart-model';
@@ -78,7 +78,7 @@ export function TraceAttributes(props: TraceAttributesProps): ReactElement {
 
 export interface AttributeListProps {
   customLinks?: CustomLinks;
-  attributes: otlpcommonv1.KeyValue[];
+  attributes: oltpcommonv1.KeyValue[];
 }
 
 export function AttributeList(props: AttributeListProps): ReactElement {
@@ -93,7 +93,7 @@ export function AttributeList(props: AttributeListProps): ReactElement {
 
 interface AttributeItemsProps {
   customLinks?: CustomLinks;
-  attributes: otlpcommonv1.KeyValue[];
+  attributes: oltpcommonv1.KeyValue[];
 }
 
 export function AttributeItems(props: AttributeItemsProps): ReactElement {
@@ -168,7 +168,7 @@ export function AttributeItem(props: AttributeItemProps): ReactElement {
   );
 }
 
-export function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
+export function renderAttributeValue(value: oltpcommonv1.AnyValue): string {
   if ('stringValue' in value) return value.stringValue || '<empty string>';
   if ('intValue' in value) return value.intValue;
   if ('doubleValue' in value) return String(value.doubleValue);

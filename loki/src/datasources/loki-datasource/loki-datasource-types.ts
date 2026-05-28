@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPProxy } from '@perses-dev/core';
+import { HTTPProxy } from '@perses-dev/spec';
 
 export interface LokiDatasourceSpec {
   directUrl?: string;

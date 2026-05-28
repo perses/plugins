@@ -12,11 +12,11 @@
 // limitations under the License.
 
 // TODO: This should be fixed globally in the test setup
-import { DatasourceSpec } from '@perses-dev/core';
 
 jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
+import { DatasourceSpec } from '@perses-dev/spec';
 import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';

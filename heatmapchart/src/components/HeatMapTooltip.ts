@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { css, Theme } from '@mui/material';
-import { getDateAndTime } from '@perses-dev/components';
-import { FormatOptions, formatValue } from '@perses-dev/core';
+import { FormatOptions, formatValue, getDateAndTime } from '@perses-dev/components';
 import { HeatMapData } from './HeatMapChart';
 
 interface CustomTooltipProps {

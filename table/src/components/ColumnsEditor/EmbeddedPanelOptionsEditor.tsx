@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { CircularProgress, Stack, Typography } from '@mui/material';
-import { UnknownSpec } from '@perses-dev/core';
 import { OptionsEditorTabs, PanelPlugin, usePlugin } from '@perses-dev/plugin-system';
+import { UnknownSpec } from '@perses-dev/spec';
 import merge from 'lodash/merge';
 import { ReactElement, useEffect, useMemo, useRef } from 'react';
 

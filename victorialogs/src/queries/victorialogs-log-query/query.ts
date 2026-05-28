@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { replaceVariables } from '@perses-dev/plugin-system';
-import { LogEntry, LogData } from '@perses-dev/core';
+import { LogData, LogEntry } from '@perses-dev/spec';
 import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsClient } from '../../model/client';
 import { DEFAULT_DATASOURCE } from '../constants';
