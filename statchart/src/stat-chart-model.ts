@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FontSizeOption } from '@perses-dev/components';
-import { CalculationType, Definition, FormatOptions, ThresholdOptions, ValueMapping } from '@perses-dev/core';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { FontSizeOption, FormatOptions, ThresholdOptions, ValueMapping } from '@perses-dev/components';
+import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Definition } from '@perses-dev/spec';
 
 /**
  * The schema for a StatChart panel.

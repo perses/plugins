@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { InfoTooltip } from '@perses-dev/components';
-import { otlptracev1 } from '@perses-dev/core';
+
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
 import { ReactElement, useCallback } from 'react';
 import { HeaderIconButton } from '@perses-dev/dashboards';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { TracingGanttChartPanelProps } from './TracingGanttChartPanel';
 
 export function DownloadTraceAction(props: TracingGanttChartPanelProps): ReactElement | null {

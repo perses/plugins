@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeries, HTTPAllowedEndpoint } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
+import { HTTPAllowedEndpoint, TimeSeries } from '@perses-dev/spec';
 import { SplunkClient } from '../../model/splunk-client';
 import { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
 import { DEFAULT_DATASOURCE } from '../constants';

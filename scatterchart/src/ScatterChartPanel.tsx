@@ -13,9 +13,9 @@
 
 import { PanelProps } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
-import { TraceData, TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
+import { TraceData, TraceSearchResult } from '@perses-dev/spec';
 import { Scatterplot } from './Scatterplot';
 import { ScatterChartOptions } from './scatter-chart-model';
 

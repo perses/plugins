@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TransformsEditor } from '@perses-dev/components';
-import { Transform } from '@perses-dev/core';
+import { Transform, TransformsEditor } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { TableSettingsEditorProps } from '../models';
 

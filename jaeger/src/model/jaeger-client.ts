@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
+import { RequestHeaders } from '@perses-dev/client';
 import { JaegerApiResponse, JaegerOperation, JaegerSearchRequestParameters, JaegerTrace } from './api-types';
 
 interface JaegerClientOptions {

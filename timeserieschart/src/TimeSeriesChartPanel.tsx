@@ -16,22 +16,13 @@ import { Box, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
-  getTimeSeriesValues,
-  DEFAULT_LEGEND,
-  getCalculations,
-  formatValue,
-  StepOptions,
-  TimeSeries,
-  TimeSeriesValueTuple,
-  TimeSeriesData,
-  CalculationType,
-} from '@perses-dev/core';
-import {
   LEGEND_VALUE_CONFIG,
   PanelProps,
   useTimeRange,
   validateLegendSpec,
   legendValues,
+  getCalculations,
+  CalculationType,
 } from '@perses-dev/plugin-system';
 import {
   ChartInstance,
@@ -48,7 +39,12 @@ import {
   DEFAULT_TOOLTIP_CONFIG,
   TimeChartSeriesMapping,
   getFormattedMultipleYAxes,
+  DEFAULT_LEGEND,
+  StepOptions,
+  formatValue,
+  getTimeSeriesValues,
 } from '@perses-dev/components';
+import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import {
   TimeSeriesChartOptions,
   DEFAULT_FORMAT,

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { replaceVariables } from '@perses-dev/plugin-system';
-import { LogEntry, LogData } from '@perses-dev/core';
+import { LogData, LogEntry } from '@perses-dev/spec';
 import { LokiStreamResult } from '../../model/loki-client-types';
 import { LokiClient } from '../../model/loki-client';
 import { DEFAULT_DATASOURCE } from '../constants';

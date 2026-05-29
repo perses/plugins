@@ -12,8 +12,14 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { EChart, ModeOption, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
-import { FormatOptions, formatValue } from '@perses-dev/core';
+import {
+  EChart,
+  FormatOptions,
+  ModeOption,
+  formatValue,
+  getFormattedAxis,
+  useChartsTheme,
+} from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';

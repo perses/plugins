@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { otlptracev1 } from '@perses-dev/core';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as exampleTrace from '../test/traces/example_otlp.json';
 import * as missingRootSpanTrace from '../test/traces/pushbytes_no_root_span_otlp.json';
 import * as incompleteTrace from '../test/traces/pushbytes_incomplete_otlp.json';

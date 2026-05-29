@@ -14,7 +14,7 @@
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
-import { otlptracev1 } from '@perses-dev/core';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
 import { GanttTableProvider } from './GanttTableProvider';

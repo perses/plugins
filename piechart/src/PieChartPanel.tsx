@@ -15,15 +15,16 @@ import { Box } from '@mui/material';
 import {
   ChartInstance,
   ContentWithLegend,
+  DEFAULT_LEGEND,
   LegendProps,
   SelectedLegendItemState,
   useChartsTheme,
   useId,
 } from '@perses-dev/components';
-import { CalculationsMap, CalculationType, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
-import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
+import { CalculationsMap, CalculationType, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
+import { TimeSeriesData } from '@perses-dev/spec';
 import { PieChartOptions } from './pie-chart-model';
 import { PieChartLegendMapper, PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 import { getSeriesColor } from './colors';

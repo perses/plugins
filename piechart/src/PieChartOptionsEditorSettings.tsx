@@ -15,6 +15,7 @@ import merge from 'lodash/merge';
 import {
   CalculationSelector,
   CalculationSelectorProps,
+  CalculationType,
   LegendOptionsEditor,
   LegendOptionsEditorProps,
 } from '@perses-dev/plugin-system';
@@ -34,8 +35,9 @@ import {
   SortOption,
   OptionsEditorControl,
   useChartsTheme,
+  FormatOptions,
+  isPercentUnit,
 } from '@perses-dev/components';
-import { CalculationType, isPercentUnit, FormatOptions } from '@perses-dev/core';
 import {
   Button,
   FormControl,

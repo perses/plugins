@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
 import { DatasourceSelectValue, isVariableDatasource } from '@perses-dev/plugin-system';
+import { DatasourceSelector } from '@perses-dev/spec';
 
 export const TEMPO_DATASOURCE_KIND = 'TempoDatasource' as const;
 

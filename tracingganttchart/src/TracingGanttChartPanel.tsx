@@ -15,7 +15,7 @@ import { PanelProps } from '@perses-dev/plugin-system';
 import { NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
-import { TraceData } from '@perses-dev/core';
+import { TraceData } from '@perses-dev/spec';
 import { CustomLinks, TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 

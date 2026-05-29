@@ -12,20 +12,20 @@
 // limitations under the License.
 
 import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/material';
-import {
-  QueryDefinition,
-  ServiceStats,
-  TraceData,
-  TraceSearchResult,
-  formatDuration,
-  msToPrometheusDuration,
-} from '@perses-dev/core';
 import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme, useSelection } from '@perses-dev/components';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import {
+  convertTimeToDuration,
+  formatDuration,
+  QueryDefinition,
+  ServiceStats,
+  TraceData,
+  TraceSearchResult,
+} from '@perses-dev/spec';
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -194,7 +194,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         display: 'flex',
         renderCell: ({ row }): ReactElement => (
           <Typography display="inline">
-            {row.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(row.durationMs))}
+            {row.durationMs < 1 ? '<1ms' : formatDuration(convertTimeToDuration(row.durationMs))}
           </Typography>
         ),
       },

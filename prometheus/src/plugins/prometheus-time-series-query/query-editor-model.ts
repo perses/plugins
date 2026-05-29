@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { DurationString } from '@perses-dev/core';
+import { DurationString } from '@perses-dev/spec';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export type PrometheusTimeSeriesQueryEditorProps = OptionsEditorProps<PrometheusTimeSeriesQuerySpec>;

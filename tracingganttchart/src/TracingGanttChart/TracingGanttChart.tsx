@@ -13,7 +13,7 @@
 
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, Stack } from '@mui/material';
-import { otlptracev1 } from '@perses-dev/core';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';

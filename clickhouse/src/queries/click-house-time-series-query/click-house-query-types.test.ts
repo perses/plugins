@@ -12,11 +12,11 @@
 // limitations under the License.
 
 // TODO: This should be fixed globally in the test setup
-import { DatasourceSpec } from '@perses-dev/core';
 
 jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
+import { DatasourceSpec } from '@perses-dev/spec';
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
 import { ClickHouseTimeSeriesQuery } from './ClickHouseQuery';
