@@ -24,14 +24,19 @@ interface GanttTableRowProps {
   customLinks?: CustomLinks;
   span: Span;
   viewport: Viewport;
+  /** this span is opened in the attribute pane */
   selected?: boolean;
+  /** this span is matched in the search results */
+  matched?: boolean;
+  /** this span is focused by clicking prev/next in the search bar */
+  focused?: boolean;
   nameColumnWidth: number;
   divider: React.ReactNode;
   onClick: (span: Span) => void;
 }
 
 export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowProps) {
-  const { options, customLinks, span, viewport, selected, nameColumnWidth, divider, onClick } = props;
+  const { options, customLinks, span, viewport, selected, matched, focused, nameColumnWidth, divider, onClick } = props;
   const theme = useTheme();
 
   const handleOnClick = (): void => {
@@ -41,9 +46,22 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
     onClick(span);
   };
 
+  let backgroundColor: string | undefined;
+  if (selected) {
+    backgroundColor = theme.palette.action.focus;
+  } else if (focused) {
+    backgroundColor = theme.palette.action.selected;
+  } else if (matched) {
+    backgroundColor = theme.palette.action.hover;
+  }
+
   return (
     <RowContainer
-      sx={{ backgroundColor: selected ? theme.palette.action.selected : 'inherit' }}
+      sx={{
+        backgroundColor,
+        // overwrite hover if background color is set (selected, focused or matched)
+        '&:hover': backgroundColor ? { backgroundColor } : undefined,
+      }}
       direction="row"
       onClick={handleOnClick}
     >

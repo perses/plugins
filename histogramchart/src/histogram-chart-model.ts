@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, FormatOptions, ThresholdOptions } from '@perses-dev/core';
+import { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Definition } from '@perses-dev/spec';
 
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 export const DEFAULT_THRESHOLDS: ThresholdOptions = { defaultColor: '#56b4e9' };

@@ -23,10 +23,10 @@ import {
 } from 'echarts/components';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { TimeScale } from '@perses-dev/core';
 import { EChartsCoreOption, TitleComponentOption } from 'echarts';
 import { FC } from 'react';
 import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { TimeScale } from '@perses-dev/spec';
 import { getFormattedStatusHistoryAxisLabel } from './utils/get-formatted-axis-label';
 import { generateTooltipHTML } from './StatusHistoryTooltip';
 

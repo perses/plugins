@@ -15,7 +15,8 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { styled } from '@mui/material';
-import { formatDuration, msToPrometheusDuration } from '@perses-dev/core';
+
+import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
 import ASTNode, {
   VectorSelector,
   matchType,
@@ -102,13 +103,13 @@ const formatAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, off
       <>
         {' '}
         <PromQLKeyword>offset</PromQLKeyword>{' '}
-        <PromQLDuration>{formatDuration(msToPrometheusDuration(offset))}</PromQLDuration>
+        <PromQLDuration>{formatDuration(convertTimeToDuration(offset))}</PromQLDuration>
       </>
     ) : (
       <>
         {' '}
         <PromQLKeyword>offset</PromQLKeyword>{' '}
-        <PromQLDuration>-{formatDuration(msToPrometheusDuration(-offset))}</PromQLDuration>
+        <PromQLDuration>-{formatDuration(convertTimeToDuration(-offset))}</PromQLDuration>
       </>
     )}
   </>
@@ -138,7 +139,7 @@ const formatSelector = (node: VectorSelector | MatrixSelector): ReactElement => 
       )}
       {node.type === nodeType.matrixSelector && (
         <>
-          [<PromQLDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromQLDuration>]
+          [<PromQLDuration>{formatDuration(convertTimeToDuration(node.range))}</PromQLDuration>]
         </>
       )}
       {formatAtAndOffset(node.timestamp, node.startOrEnd, node.offset)}
@@ -193,8 +194,8 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
       return (
         <>
           {showChildren && formatNode(node.expr, showChildren, childMaxDepth)}[
-          <PromQLDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromQLDuration>:
-          {node.step !== 0 && <PromQLDuration>{formatDuration(msToPrometheusDuration(node.step))}</PromQLDuration>}]
+          <PromQLDuration>{formatDuration(convertTimeToDuration(node.range))}</PromQLDuration>:
+          {node.step !== 0 && <PromQLDuration>{formatDuration(convertTimeToDuration(node.step))}</PromQLDuration>}]
           {formatAtAndOffset(node.timestamp, node.startOrEnd, node.offset)}
         </>
       );

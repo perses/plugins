@@ -14,8 +14,8 @@
 import { useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
-import { CalculationType, CalculationsMap, TimeSeriesData } from '@perses-dev/core';
-import { PanelProps } from '@perses-dev/plugin-system';
+import { CalculationsMap, CalculationType, PanelProps } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/spec';
 import { BarChartOptions } from './bar-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
 import { BarChartBase, BarChartData, StackedBarChartData, StackedBarChartSeries } from './BarChartBase';

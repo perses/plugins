@@ -14,21 +14,16 @@
 import type { YAXisComponentOption } from 'echarts';
 import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 import {
-  StepOptions,
-  TimeScale,
-  TimeSeries,
-  TimeSeriesValueTuple,
-  getCommonTimeScale,
-  TimeSeriesData,
-} from '@perses-dev/core';
-import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
   EChartsDataFormat,
   EChartsValues,
   TimeSeriesOption,
+  StepOptions,
+  getCommonTimeScale,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
+import { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,

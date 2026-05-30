@@ -11,17 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch } from '@perses-dev/core';
 import { greptimedbQuery } from './greptimedb-client';
 
-jest.mock('@perses-dev/core', () => {
-  const actual = jest.requireActual<typeof import('@perses-dev/core')>('@perses-dev/core');
-  return {
-    ...actual,
-    fetch: jest.fn(),
-  };
-});
-
+global.fetch = jest.fn();
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 const queryOptions = { datasourceUrl: 'http://greptimedb.test' };

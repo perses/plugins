@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeries } from '@perses-dev/core';
+import { CalculationsMap, CalculationType, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
+import { TimeSeries } from '@perses-dev/spec';
 
 export const calculateValue = (
   calculation: CalculationType,

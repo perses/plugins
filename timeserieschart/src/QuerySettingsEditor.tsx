@@ -25,8 +25,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { FormatControls, OptionsColorPicker } from '@perses-dev/components';
-import { FormatOptions } from '@perses-dev/core';
+import { FormatControls, FormatOptions, OptionsColorPicker } from '@perses-dev/components';
 import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';

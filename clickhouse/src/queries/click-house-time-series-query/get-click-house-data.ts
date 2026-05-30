@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeries } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
+import { TimeSeries } from '@perses-dev/spec';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { TimeSeriesEntry } from '../../model/click-house-data-types';
 import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';

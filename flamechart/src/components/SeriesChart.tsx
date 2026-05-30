@@ -13,12 +13,12 @@
 
 import { ReactElement, useMemo, useRef } from 'react';
 import { Stack, useTheme } from '@mui/material';
-import { ProfileData, Timeline } from '@perses-dev/core';
 import { useChartsTheme, EChart, ZoomEventData, OnEventsType, enableDataZoom } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import type { EChartsCoreOption, LineSeriesOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { CallbackDataParams } from 'echarts/types/dist/shared';
+import { ProfileData, Timeline } from '@perses-dev/spec';
 import { formatItemValue } from '../utils/format';
 import { getSeriesTooltip } from '../utils/series-tooltip';
 import { SeriesSample } from '../utils/data-model';

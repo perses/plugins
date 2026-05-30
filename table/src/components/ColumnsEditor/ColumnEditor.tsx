@@ -16,13 +16,13 @@ import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
   FormatControls,
+  FormatOptions,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   SortSelectorButtons,
 } from '@perses-dev/components';
-import { FormatOptions } from '@perses-dev/core';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
 
 import { ColumnSettings } from '../../models';

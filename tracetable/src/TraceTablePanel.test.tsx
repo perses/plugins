@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { TraceData } from '@perses-dev/core';
 import { PanelData, ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VariableProvider } from '@perses-dev/dashboards';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { TraceData } from '@perses-dev/spec';
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from './test/mock-trace-data';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 
@@ -62,6 +62,7 @@ describe('TraceTablePanel', () => {
     expect(lastRow).toHaveTextContent('13 spans'); // span count
     expect(lastRow).toHaveTextContent('2 errors'); // span count
     expect(lastRow).toHaveTextContent('100ms'); // duration
+    // TODO IMPORTANT: https://github.com/perses/perses/issues/4090
     expect(lastRow).toHaveTextContent('December 18, 2023 at 4:07:25 PM'); // start time
   });
 });

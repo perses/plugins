@@ -14,23 +14,31 @@
 import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router-dom';
-import { otlptracev1 } from '@perses-dev/core';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as exampleTrace from '../test/traces/example_otlp.json';
 import { getTraceModel } from './trace';
-import { TraceDetails, TraceDetailsProps } from './TraceDetails';
+import { TraceHeaderBar, TraceHeaderBarProps } from './TraceHeaderBar';
+import { SpanSearch } from './Search';
 
-describe('TraceDetails', () => {
+describe('TraceHeaderBar', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
-  const renderComponent = (props: TraceDetailsProps): RenderResult => {
+  const search: SpanSearch = {
+    searchQuery: '',
+    setSearchQuery: () => {},
+    matchingSpanIds: [],
+    focusedMatchIndex: 0,
+    setFocusedMatchIndex: () => {},
+  };
+  const renderComponent = (props: TraceHeaderBarProps): RenderResult => {
     return render(
       <MemoryRouter>
-        <TraceDetails {...props} />
+        <TraceHeaderBar {...props} />
       </MemoryRouter>
     );
   };
 
   it('render trace details', () => {
-    renderComponent({ trace });
+    renderComponent({ trace, search });
     expect(screen.getByRole('heading', { name: 'shop-backend: testRootSpan (1s)' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /Trace ID: 5B8EFFF798038103D269B633813FC60C/ })).toBeInTheDocument();
   });

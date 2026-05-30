@@ -11,8 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegendItem, ModeOption, SortOption, TableColumnConfig } from '@perses-dev/components';
-import { FormatOptions, formatValue } from '@perses-dev/core';
+import {
+  FormatOptions,
+  formatValue,
+  LegendItem,
+  ModeOption,
+  SortOption,
+  TableColumnConfig,
+} from '@perses-dev/components';
 import { format } from 'echarts';
 import { comparisonLegends, ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
 import { PieChartData } from './PieChartBase';

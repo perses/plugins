@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { otlpcommonv1, otlpresourcev1, otlptracev1 } from '@perses-dev/core';
+import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import * as otlpresourcev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/resource/v1/resource';
 import { sortedIndexBy } from 'lodash';
 
 /** holds the trace and computed properties required for the Gantt chart */
@@ -121,6 +123,18 @@ export function getTraceModel(trace: otlptracev1.TracesData): Trace {
   }
 
   return { trace, rootSpans, spanById, startTimeUnixMs, endTimeUnixMs };
+}
+
+/**
+ * Recursively iterates all spans depth-first.
+ * Return false from the callback to skip a span's children.
+ */
+export function forEachSpan(spans: Span[], fn: (span: Span) => boolean | void): void {
+  for (const span of spans) {
+    if (fn(span) !== false) {
+      forEachSpan(span.childSpans, fn);
+    }
+  }
 }
 
 function parseResource(resource?: otlpresourcev1.Resource): Resource {

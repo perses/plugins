@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { SplunkTimeSeriesResults } from '../../model/splunk-client-types';
 
 export interface SplunkTimeSeriesQuerySpec {

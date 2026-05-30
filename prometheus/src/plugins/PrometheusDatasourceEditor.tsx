@@ -13,11 +13,11 @@
 
 import { Box, IconButton, TextField, Typography } from '@mui/material';
 import { QueryParamValues } from '@perses-dev/components';
-import { DurationString } from '@perses-dev/core';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement, useRef, useState } from 'react';
+import { DurationString } from '@perses-dev/spec';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
 
 interface QueryParamEntry {

@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { QueryParamValues } from '@perses-dev/components';
-import { fetch, fetchJson, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
+import { fetchJson, RequestHeaders } from '@perses-dev/client';
 import {
   InstantQueryRequestParameters,
   InstantQueryResponse,

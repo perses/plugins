@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/core';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
 import { ReactElement, useState } from 'react';
+import { QueryDefinition } from '@perses-dev/spec';
 import { DEFAULT_PROM } from '../model/prometheus-selectors';
 import { FinderQueryParams } from './PrometheusMetricsFinder/types';
 import { PrometheusMetricsFinder } from './PrometheusMetricsFinder';

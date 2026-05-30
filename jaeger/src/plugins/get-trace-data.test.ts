@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec } from '@perses-dev/core';
 import { replaceVariables, TraceQueryContext } from '@perses-dev/plugin-system';
+import { DatasourceSpec } from '@perses-dev/spec';
 import { JaegerClient } from '../model';
 import { JaegerDatasource } from './jaeger-datasource';
 import { getTraceData, jaegerTraceToOTLP } from './get-trace-data';

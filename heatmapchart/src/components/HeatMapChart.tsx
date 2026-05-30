@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { formatValue, FormatOptions, TimeScale } from '@perses-dev/core';
-import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { EChart, FormatOptions, formatValue, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomChart } from 'echarts/charts';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { useTheme } from '@mui/material';
 import { CustomSeriesRenderItemReturn } from 'echarts/types/dist/echarts';
+import { TimeScale } from '@perses-dev/spec';
 import { LOG_BASE } from '../heat-map-chart-model';
 import { getFormattedHeatmapAxisLabel } from '../utils';
 import { generateTooltipHTML } from './HeatMapTooltip';

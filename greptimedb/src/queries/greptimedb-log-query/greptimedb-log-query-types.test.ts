@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec } from '@perses-dev/core';
-
+import { DatasourceSpec } from '@perses-dev/spec';
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { GreptimeDBLogQuery } from './GreptimeDBLogQuery';

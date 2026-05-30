@@ -22,7 +22,6 @@ import {
   Tooltip,
   useTheme,
 } from '@mui/material';
-import { LogEntry } from '@perses-dev/core';
 import Check from 'mdi-material-ui/Check';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
@@ -30,6 +29,7 @@ import CodeJson from 'mdi-material-ui/CodeJson';
 import ContentCopy from 'mdi-material-ui/ContentCopy';
 import FormatQuoteClose from 'mdi-material-ui/FormatQuoteClose';
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { LogEntry } from '@perses-dev/spec';
 import { ansiToSanitizedHtml } from '../../utils/ansi';
 import { formatLogAsJson, formatLogEntry, formatLogMessage } from '../../utils/copyHelpers';
 import { useSeverityColor } from '../hooks/useSeverity';

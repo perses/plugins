@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { Box, Skeleton, Stack } from '@mui/material';
-import { useChartsTheme } from '@perses-dev/components';
-import { CalculationsMap, DEFAULT_CALCULATION, FormatOptions, formatValue, TimeSeriesData } from '@perses-dev/core';
-import { PanelProps } from '@perses-dev/plugin-system';
+import { FormatOptions, formatValue, useChartsTheme } from '@perses-dev/components';
+import { CalculationsMap, DEFAULT_CALCULATION, PanelProps } from '@perses-dev/plugin-system';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
+import { TimeSeriesData } from '@perses-dev/spec';
 import {
   DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,

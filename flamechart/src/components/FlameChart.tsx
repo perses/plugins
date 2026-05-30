@@ -19,12 +19,12 @@ import {
 } from 'echarts';
 import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
 import { ReactElement, useState, useMemo, MouseEvent } from 'react';
-import { ProfileData } from '@perses-dev/core';
 import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
+import { ProfileData } from '@perses-dev/spec';
 import { buildSamples, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
 import { FlameChartSample as Sample } from '../utils/data-model';

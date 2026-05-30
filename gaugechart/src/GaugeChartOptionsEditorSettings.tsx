@@ -19,9 +19,9 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  ThresholdOptions,
   ThresholdsEditor,
 } from '@perses-dev/components';
-import { ThresholdOptions } from '@perses-dev/core';
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';

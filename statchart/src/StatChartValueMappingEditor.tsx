@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ValueMapping } from '@perses-dev/core';
-import { ValueMappingsEditor } from '@perses-dev/components';
+import { ValueMapping, ValueMappingsEditor } from '@perses-dev/components';
 import { FC } from 'react';
 import { StatChartOptions } from './stat-chart-model';
 

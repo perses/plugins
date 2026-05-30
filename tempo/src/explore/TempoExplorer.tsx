@@ -13,11 +13,11 @@
 
 import { Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
-import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
+import { isValidTraceId, QueryDefinition } from '@perses-dev/spec';
 import { TempoTraceQuerySpec } from '../model';
 import { ClosableAlert } from '../components/ClosableAlert';
 import { linkToSpan, linkToTrace } from './links';
