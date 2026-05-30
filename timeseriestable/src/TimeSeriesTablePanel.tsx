@@ -15,8 +15,8 @@ import { Box } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { PanelProps } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/core';
 
+import { TimeSeriesData } from '@perses-dev/spec';
 import { TimeSeriesTableOptions } from './model';
 import { DataTable } from './components';
 

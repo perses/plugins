@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { QueryParamValues } from '@perses-dev/components';
-import { BuiltinVariableDefinition, RequestHeaders } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
+import { RequestHeaders } from '@perses-dev/client';
 import {
   ClientRequestOptions,
   healthCheck,

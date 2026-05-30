@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/perses/perses/go-sdk/datasource"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/spec/go/datasource/proxy/http"
 )
 
 const (

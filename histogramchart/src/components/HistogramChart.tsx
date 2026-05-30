@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { FormatOptions, BucketTuple, ThresholdOptions } from '@perses-dev/core';
-import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
+import { EChart, FormatOptions, getFormattedAxis, ThresholdOptions, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
 import { CustomSeriesRenderItemReturn } from 'echarts/types/dist/echarts';
+import { BucketTuple } from '@perses-dev/spec';
 import { getColorFromThresholds } from '../utils';
 import { LOG_BASE } from '../histogram-chart-model';
 

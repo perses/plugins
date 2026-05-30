@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPProxy, RequestHeaders } from '@perses-dev/core';
+import { RequestHeaders } from '@perses-dev/client';
 import { DatasourceClient } from '@perses-dev/plugin-system';
+import { HTTPProxy } from '@perses-dev/spec';
 
 export interface ClickHouseDatasourceSpec {
   directUrl?: string;

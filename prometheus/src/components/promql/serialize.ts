@@ -13,7 +13,7 @@
 
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/promql/serialize.ts
 
-import { formatDuration, msToPrometheusDuration } from '@perses-dev/core';
+import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
 import ASTNode, {
   VectorSelector,
   matchType,
@@ -29,8 +29,8 @@ const serializeAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, 
     offset === 0
       ? ''
       : offset > 0
-        ? ` offset ${formatDuration(msToPrometheusDuration(offset))}`
-        : ` offset -${formatDuration(msToPrometheusDuration(-offset))}`
+        ? ` offset ${formatDuration(convertTimeToDuration(offset))}`
+        : ` offset -${formatDuration(convertTimeToDuration(-offset))}`
   }`;
 
 const serializeSelector = (node: VectorSelector | MatrixSelector): string => {
@@ -38,7 +38,7 @@ const serializeSelector = (node: VectorSelector | MatrixSelector): string => {
     .filter((m) => !(m.name === '__name__' && m.type === matchType.equal && m.value === node.name))
     .map((m) => `${m.name}${m.type}"${escapeString(m.value)}"`);
 
-  const range = node.type === nodeType.matrixSelector ? `[${formatDuration(msToPrometheusDuration(node.range))}]` : '';
+  const range = node.type === nodeType.matrixSelector ? `[${formatDuration(convertTimeToDuration(node.range))}]` : '';
   const atAndOffset = serializeAtAndOffset(node.timestamp, node.startOrEnd, node.offset);
 
   return `${node.name}${matchers.length > 0 ? `{${matchers.join(',')}}` : ''}${range}${atAndOffset}`;
@@ -67,8 +67,8 @@ const serializeNode = (node: ASTNode, indent = 0, pretty = false, initialIndent 
       }${serializeNode(node.expr, childIndent, pretty)}${childListSeparator}${ind})`;
 
     case nodeType.subquery:
-      return `${initialInd}${serializeNode(node.expr, indent, pretty)}[${formatDuration(msToPrometheusDuration(node.range))}:${
-        node.step !== 0 ? formatDuration(msToPrometheusDuration(node.step)) : ''
+      return `${initialInd}${serializeNode(node.expr, indent, pretty)}[${formatDuration(convertTimeToDuration(node.range))}:${
+        node.step !== 0 ? formatDuration(convertTimeToDuration(node.step)) : ''
       }]${serializeAtAndOffset(node.timestamp, node.startOrEnd, node.offset)}`;
 
     case nodeType.parenExpr:

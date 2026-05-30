@@ -13,10 +13,10 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { escapeCsvValue, PanelData, sanitizeFilename } from '@perses-dev/plugin-system';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, transformData } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
 import DownloadIcon from 'mdi-material-ui/Download';
-import { TimeSeriesData, transformData } from '@perses-dev/core';
+import { TimeSeriesData } from '@perses-dev/spec';
 import { TableProps } from './components';
 import type { TableOptions } from './models';
 import { buildRawTableData } from './table-data-utils';

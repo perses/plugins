@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange } from '@perses-dev/core';
 import { replaceVariables, VariableStateMap } from '@perses-dev/plugin-system';
+import { AbsoluteTimeRange } from '@perses-dev/spec';
 import { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData } from '../model/greptimedb-data-types';
 
 export type { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData };

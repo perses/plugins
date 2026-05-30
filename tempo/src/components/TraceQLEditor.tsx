@@ -14,8 +14,8 @@
 import { ReactElement, useMemo } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import { isValidTraceId } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
+import { isValidTraceId } from '@perses-dev/spec';
 import { TempoClient } from '../model';
 import { TraceQLExtension } from './TraceQLExtension';
 

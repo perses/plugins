@@ -15,8 +15,8 @@ import { Box, Stack } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
 import { Panel } from '@perses-dev/dashboards';
-import { QueryDefinition } from '@perses-dev/core';
 import { useExplorerManagerContext } from '@perses-dev/explore';
+import { QueryDefinition } from '@perses-dev/spec';
 
 interface ProfilesExplorerQueryParams {
   queries?: QueryDefinition[];

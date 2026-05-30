@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { EChart, OnEventsType, useChartsTheme } from '@perses-dev/components';
+import { EChart, formatValue, OnEventsType, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import {
@@ -25,7 +25,6 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption, ScatterSeriesOption } from 'echarts';
-import { formatValue } from '@perses-dev/core';
 import {
   replaceVariablesInString,
   useAllVariableValues,

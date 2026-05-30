@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { QueryParamValues } from '@perses-dev/components';
-import { DurationString, HTTPProxy } from '@perses-dev/core';
 import { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import { DurationString, HTTPProxy } from '@perses-dev/spec';
 import { PrometheusDatasourceSelector } from '../model';
 
 export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';

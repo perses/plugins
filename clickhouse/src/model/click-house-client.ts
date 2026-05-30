@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/core';
+import { RequestHeaders } from '@perses-dev/client';
 
 export interface ClickHouseQueryParams {
   query: string;

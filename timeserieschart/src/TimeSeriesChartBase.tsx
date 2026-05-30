@@ -15,7 +15,7 @@ import { forwardRef, MouseEvent, useCallback, useEffect, useImperativeHandle, us
 import { Box } from '@mui/material';
 import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
-import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
+
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -46,7 +46,9 @@ import {
   DEFAULT_TOOLTIP_CONFIG,
   EChart,
   enableDataZoom,
+  FormatOptions,
   getClosestTimestamp,
+  getCommonTimeScale,
   getFormattedAxis,
   getPointInGrid,
   OnEventsType,
@@ -59,6 +61,7 @@ import {
   ZoomEventData,
 } from '@perses-dev/components';
 import { DatasetOption } from 'echarts/types/dist/shared';
+import { TimeScale, TimeSeries } from '@perses-dev/spec';
 import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
 
 use([

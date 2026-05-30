@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   DatasourceSpec,
   DurationString,
@@ -18,9 +20,7 @@ import {
   parseDurationString,
   TimeSeries,
   TimeSeriesData,
-} from '@perses-dev/core';
-import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import { fromUnixTime, milliseconds } from 'date-fns';
+} from '@perses-dev/spec';
 import {
   parseValueTuple,
   PrometheusClient,

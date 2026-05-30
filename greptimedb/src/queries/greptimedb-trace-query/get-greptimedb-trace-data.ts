@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { otlpcommonv1, otlptracev1, TraceSearchResult } from '@perses-dev/core';
 import { replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { TraceSearchResult } from '@perses-dev/spec';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import {

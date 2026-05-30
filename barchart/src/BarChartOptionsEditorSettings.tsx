@@ -24,6 +24,8 @@ import {
 import {
   FormatControls,
   FormatControlsProps,
+  FormatOptions,
+  isPercentUnit,
   ModeOption,
   ModeSelector,
   ModeSelectorProps,
@@ -34,8 +36,12 @@ import {
   SortSelector,
   SortSelectorProps,
 } from '@perses-dev/components';
-import { CalculationType, DEFAULT_CALCULATION, FormatOptions, isPercentUnit } from '@perses-dev/core';
-import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
+import {
+  CalculationSelector,
+  CalculationSelectorProps,
+  CalculationType,
+  DEFAULT_CALCULATION,
+} from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import { MouseEventHandler, ReactElement } from 'react';

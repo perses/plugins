@@ -13,7 +13,7 @@
 
 import { PersesChartsTheme } from '@perses-dev/components';
 import { Theme } from '@mui/material';
-import { otlptracev1 } from '@perses-dev/core';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { getConsistentCategoricalColor, getConsistentColor } from './palette';
 import { Span } from './trace';
 

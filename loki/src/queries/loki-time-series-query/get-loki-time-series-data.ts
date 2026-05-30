@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, TimeSeries, parseDurationString } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { milliseconds } from 'date-fns';
+import { DurationString, parseDurationString, TimeSeries } from '@perses-dev/spec';
 import { LokiClient } from '../../model/loki-client';
 import { LokiMatrixResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';

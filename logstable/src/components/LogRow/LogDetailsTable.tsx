@@ -13,8 +13,8 @@
 
 import React, { useMemo } from 'react';
 import { Table, TableBody, TableRow, TableCell, useTheme, alpha } from '@mui/material';
-import { Labels } from '@perses-dev/core';
 import './ansiColors.css';
+import { Labels } from '@perses-dev/spec';
 import { ansiToSanitizedHtml } from '../../utils/ansi';
 
 const AnsiValue: React.FC<{ value: string }> = ({ value }) => {

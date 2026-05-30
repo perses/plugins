@@ -15,7 +15,7 @@ import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-traceql';
 import { CompletionContext } from '@codemirror/autocomplete';
 import { Extension } from '@uiw/react-codemirror';
-import { AbsoluteTimeRange } from '@perses-dev/core';
+import { AbsoluteTimeRange } from '@perses-dev/spec';
 import { TempoClient } from '../model/tempo-client';
 import { traceQLHighlight } from './highlight';
 import { complete } from './complete';

@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, DurationString, parseDurationString } from '@perses-dev/core';
 import { milliseconds, getUnixTime } from 'date-fns';
+import { AbsoluteTimeRange, DurationString, parseDurationString } from '@perses-dev/spec';
 import { UnixTimestampSeconds } from './api-types';
 
 export interface PrometheusTimeRange {

@@ -12,11 +12,18 @@
 // limitations under the License.
 
 import { Box, Theme, Typography, useTheme } from '@mui/material';
-import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
-import { CalculationsMap, formatValue, QueryDataType, TimeSeriesData, transformData } from '@perses-dev/core';
+import {
+  formatValue,
+  Table,
+  TableCellConfigs,
+  TableColumnConfig,
+  transformData,
+  useSelection,
+} from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import {
   ActionOptions,
+  CalculationsMap,
   PanelData,
   PanelProps,
   replaceVariablesInString,
@@ -25,6 +32,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';

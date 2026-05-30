@@ -15,10 +15,10 @@ import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'reac
 import { Box, useTheme, Popover, Button, ButtonGroup, IconButton } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { Virtuoso } from 'react-virtuoso';
-import { LogEntry } from '@perses-dev/core';
 import { useSelection } from '@perses-dev/components';
 import { formatForDisplay, useSelectionItemActions } from '@perses-dev/dashboards';
 import { ActionOptions, useAllVariableValues } from '@perses-dev/plugin-system';
+import { LogEntry } from '@perses-dev/spec';
 import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogsTableOptions } from '../model';
 import { LogRow } from './LogRow';

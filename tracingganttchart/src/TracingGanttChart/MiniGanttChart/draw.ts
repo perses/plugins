@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Span, Trace } from '../trace';
+import { Span, Trace, forEachSpan } from '../trace';
 import { minSpanWidthPx } from '../utils';
 
 const MIN_BAR_HEIGHT = 1;
@@ -47,13 +47,7 @@ export function drawSpans(
     );
     ctx.fill();
     y += yChange;
-
-    for (const childSpan of span.childSpans) {
-      drawSpan(childSpan);
-    }
   };
 
-  for (const rootSpan of trace.rootSpans) {
-    drawSpan(rootSpan);
-  }
+  forEachSpan(trace.rootSpans, drawSpan);
 }

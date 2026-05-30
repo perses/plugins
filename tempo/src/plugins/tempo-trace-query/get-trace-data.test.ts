@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec } from '@perses-dev/core';
 import { TraceQueryContext, replaceVariables } from '@perses-dev/plugin-system';
+import { DatasourceSpec } from '@perses-dev/spec';
 import { TempoDatasourceSpec } from '../tempo-datasource-types';
 import { TempoDatasource } from '../tempo-datasource';
 import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';

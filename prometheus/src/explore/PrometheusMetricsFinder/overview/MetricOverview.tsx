@@ -13,11 +13,12 @@
 
 import { Checkbox, FormControlLabel, Skeleton, Stack, StackProps, Tab, Tabs, Tooltip } from '@mui/material';
 import { ReactElement, useMemo, useState } from 'react';
-import { DatasourceSelector, Definition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+
 import { Panel } from '@perses-dev/dashboards';
 import useResizeObserver from 'use-resize-observer';
 import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
+import { DatasourceSelector, Definition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { computeFilterExpr, LabelFilter } from '../types';
 import { useMetricMetadata } from '../utils';
 import { OverviewTab } from './tabs/OverviewTab';
