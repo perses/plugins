@@ -26,11 +26,12 @@ import (
 const PluginKind = "OpenSearchLogQuery"
 
 type PluginSpec struct {
-	Datasource     *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Query          string               `json:"query" yaml:"query"`
-	Index          string               `json:"index,omitempty" yaml:"index,omitempty"`
-	TimestampField string               `json:"timestampField,omitempty" yaml:"timestampField,omitempty"`
-	MessageField   string               `json:"messageField,omitempty" yaml:"messageField,omitempty"`
+	Datasource        *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query             string               `json:"query" yaml:"query"`
+	Index             string               `json:"index,omitempty" yaml:"index,omitempty"`
+	TimestampField    string               `json:"timestampField,omitempty" yaml:"timestampField,omitempty"`
+	MessageField      string               `json:"messageField,omitempty" yaml:"messageField,omitempty"`
+	DisableTimeFilter bool                 `json:"disableTimeFilter,omitempty" yaml:"disableTimeFilter,omitempty"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {

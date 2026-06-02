@@ -18,3 +18,12 @@ export const DEFAULT_DATASOURCE = { kind: DATASOURCE_KIND };
 // so these are used as reasonable fallbacks when mapping rows to log entries.
 export const DEFAULT_TIMESTAMP_FIELDS = ['@timestamp', 'timestamp', 'time'];
 export const DEFAULT_MESSAGE_FIELDS = ['message', 'log', 'body'];
+
+// OpenSearch PPL reference documentation.
+export const PPL_DOCS_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/';
+
+// A handful of copy-pasteable PPL examples shown in the editor's "Query Examples" disclosure.
+export const PPL_QUERY_EXAMPLES = `source=logs-* | where level="error" | head 20
+source=logs-* | fields @timestamp, service, message | head 50
+source=logs-* | stats count() by service
+source=logs-* | where traceId='$traceId'`;

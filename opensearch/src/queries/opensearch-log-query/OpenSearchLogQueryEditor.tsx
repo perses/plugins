@@ -18,15 +18,27 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { InputLabel, Stack, TextField } from '@mui/material';
+import { Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
 import { ReactElement } from 'react';
 import { produce } from 'immer';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND, OpenSearchDatasourceSelector } from '../../model';
-import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE, PPL_DOCS_URL, PPL_QUERY_EXAMPLES } from '../constants';
 import { useQueryState } from '../query-editor-model';
 import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 
 type OpenSearchQueryEditorProps = OptionsEditorProps<OpenSearchLogQuerySpec>;
+
+const examplesStyle: React.CSSProperties = {
+  fontSize: '11px',
+  color: '#777',
+  backgroundColor: '#f5f5f5',
+  padding: '8px',
+  borderRadius: '4px',
+  fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+  whiteSpace: 'pre-wrap',
+  lineHeight: '1.3',
+};
 
 export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -71,6 +83,24 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       );
     };
 
+  const handleDisableTimeFilterChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const checked = e.target.checked;
+    onChange(
+      produce(value, (draft) => {
+        draft.disableTimeFilter = checked ? true : undefined;
+      })
+    );
+  };
+
+  // Commit the local query immediately (Mod+Enter), matching the loki/clickhouse editors.
+  const handleQueryExecute = (): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.query = query;
+      })
+    );
+  };
+
   return (
     <Stack spacing={1.5} paddingBottom={1}>
       <div>
@@ -92,6 +122,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
           value={value.index ?? ''}
           onChange={handleIndexChange}
           placeholder="e.g. logs-*"
+          helperText="Ignored when the PPL query starts with source=."
         />
       </div>
 
@@ -121,6 +152,13 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
         />
       </div>
 
+      <FormControlLabel
+        control={
+          <Checkbox size="small" checked={value.disableTimeFilter ?? false} onChange={handleDisableTimeFilterChange} />
+        }
+        label="Disable automatic time filtering"
+      />
+
       <div>
         <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>PPL Query</InputLabel>
         <TextField
@@ -131,10 +169,25 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
           onBlur={handleQueryBlur}
+          onKeyDown={createModEnterHandler(handleQueryExecute)}
           placeholder='e.g. source=logs-* | where level="error"'
           inputProps={{ style: { fontFamily: 'monospace' } }}
         />
+        <Typography variant="caption" sx={{ display: 'block', marginTop: '4px', color: 'text.secondary' }}>
+          Uses OpenSearch{' '}
+          <Link href={PPL_DOCS_URL} target="_blank" rel="noopener noreferrer">
+            PPL
+          </Link>
+          . Requires the PPL plugin enabled on the OpenSearch cluster.
+        </Typography>
       </div>
+
+      <details>
+        <summary style={{ cursor: 'pointer', fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+          Query Examples
+        </summary>
+        <div style={examplesStyle}>{PPL_QUERY_EXAMPLES}</div>
+      </details>
     </Stack>
   );
 }

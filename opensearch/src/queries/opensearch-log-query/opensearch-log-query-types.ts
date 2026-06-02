@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 
 export interface OpenSearchLogQuerySpec {
@@ -20,6 +20,8 @@ export interface OpenSearchLogQuerySpec {
   index?: string;
   timestampField?: string;
   messageField?: string;
+  /** When true, the panel time range is NOT injected as a `where` clause on the timestamp field. */
+  disableTimeFilter?: boolean;
 }
 
 export type OpenSearchLogQueryResponse = OpenSearchPPLResponse;

@@ -51,3 +51,10 @@ func MessageField(field string) Option {
 		return nil
 	}
 }
+
+func DisableTimeFilter(disable bool) Option {
+	return func(builder *Builder) error {
+		builder.DisableTimeFilter = disable
+		return nil
+	}
+}

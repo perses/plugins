@@ -170,21 +170,21 @@ describe('buildBoundedPPL', () => {
   });
 
   it('prepends source=<index> when the user query does not declare one', () => {
-    const q = buildBoundedPPL('where level="error"', start, end, 'logs-*');
+    const q = buildBoundedPPL('where level="error"', start, end, { index: 'logs-*' });
     expect(q).toBe(
       "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where level=\"error\""
     );
   });
 
   it('leaves the user source clause alone when already present and ignores the spec.index hint', () => {
-    const q = buildBoundedPPL('source=other-* | head 10', start, end, 'logs-*');
+    const q = buildBoundedPPL('source=other-* | head 10', start, end, { index: 'logs-*' });
     expect(q).toBe(
       "source=other-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | head 10"
     );
   });
 
   it('uses a custom timestamp field name in the injected where clause', () => {
-    const q = buildBoundedPPL('source=logs-* | head 10', start, end, undefined, 'time');
+    const q = buildBoundedPPL('source=logs-* | head 10', start, end, { timestampField: 'time' });
     expect(q).toBe(
       "source=logs-* | where `time` >= '2025-01-01T00:00:00.000Z' and `time` <= '2025-01-01T01:00:00.000Z' | head 10"
     );
@@ -245,6 +245,16 @@ describe('buildBoundedPPL', () => {
     expect(q).toBe(
       "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where `@timestamp` >= '2024-12-31T00:00:00Z' | stats count() by service"
     );
+  });
+
+  it('skips the time-range filter when disableTimeFilter is true', () => {
+    const q = buildBoundedPPL('source=logs-* | where level="error"', start, end, { disableTimeFilter: true });
+    expect(q).toBe('source=logs-* | where level="error"');
+  });
+
+  it('still applies the source=<index> prefix when disableTimeFilter is true', () => {
+    const q = buildBoundedPPL('where level="error"', start, end, { index: 'logs-*', disableTimeFilter: true });
+    expect(q).toBe('source=logs-* | where level="error"');
   });
 });
 

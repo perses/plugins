@@ -63,7 +63,7 @@ func TestOpenSearchLogQueryOmitsEmptyOptionalFields(t *testing.T) {
 	var out map[string]any
 	_ = json.Unmarshal(raw, &out)
 
-	for _, f := range []string{"index", "timestampField", "messageField", "datasource"} {
+	for _, f := range []string{"index", "timestampField", "messageField", "datasource", "disableTimeFilter"} {
 		if _, present := out[f]; present {
 			t.Errorf("expected %s to be omitted, got: %v", f, out[f])
 		}
@@ -86,5 +86,20 @@ func TestPluginSpecAcceptsNonEmptyQueryOnUnmarshal(t *testing.T) {
 	}
 	if spec.Query != "source=logs-*" {
 		t.Errorf("query mismatch: %q", spec.Query)
+	}
+}
+
+func TestOpenSearchLogQueryDisableTimeFilter(t *testing.T) {
+	q := OpenSearchLogQuery("source=logs-*", DisableTimeFilter(true))
+	raw, err := json.Marshal(q.Plugin.Spec)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if out["disableTimeFilter"] != true {
+		t.Errorf("disableTimeFilter mismatch: %v", out["disableTimeFilter"])
 	}
 }

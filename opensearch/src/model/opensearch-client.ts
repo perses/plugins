@@ -43,9 +43,14 @@ export class OpenSearchPPLError extends Error {
 function buildShortMessage(status: number, body: string): string {
   try {
     const parsed = JSON.parse(body) as { error?: { reason?: string; details?: string } };
-    const reason = parsed?.error?.reason ?? parsed?.error?.details;
-    if (reason) {
-      return `OpenSearch PPL request failed (${status}): ${reason}`;
+    const reason = parsed?.error?.reason;
+    const details = parsed?.error?.details;
+    // OpenSearch often puts a generic phrase in `reason` ("Invalid Query") and the
+    // actionable text in `details` ("can't resolve Symbol(name=@timestamp)"). Surface
+    // both so the user can diagnose the failure.
+    const suffix = reason && details && reason !== details ? `${reason} — ${details}` : (reason ?? details);
+    if (suffix) {
+      return `OpenSearch PPL request failed (${status}): ${suffix}`;
     }
   } catch {
     // body wasn't JSON — fall through to the bare-status form

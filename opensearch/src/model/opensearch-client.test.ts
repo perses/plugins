@@ -101,5 +101,25 @@ describe('opensearch-client', () => {
       const err = new OpenSearchPPLError(500, '{"status":"weird"}');
       expect(err.message).toBe('OpenSearch PPL request failed (500)');
     });
+
+    it('combines reason and details when both are present and differ', () => {
+      const err = new OpenSearchPPLError(
+        400,
+        '{"error":{"reason":"Invalid Query","details":"can\'t resolve Symbol(name=@timestamp)"}}'
+      );
+      expect(err.message).toBe(
+        "OpenSearch PPL request failed (400): Invalid Query — can't resolve Symbol(name=@timestamp)"
+      );
+    });
+
+    it('does not duplicate text when reason equals details', () => {
+      const err = new OpenSearchPPLError(400, '{"error":{"reason":"same text","details":"same text"}}');
+      expect(err.message).toBe('OpenSearch PPL request failed (400): same text');
+    });
+
+    it('uses reason alone when details is an empty string', () => {
+      const err = new OpenSearchPPLError(400, '{"error":{"reason":"Invalid Query","details":""}}');
+      expect(err.message).toBe('OpenSearch PPL request failed (400): Invalid Query');
+    });
   });
 });

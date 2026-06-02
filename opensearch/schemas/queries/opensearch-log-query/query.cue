@@ -21,8 +21,9 @@ import (
 kind: "OpenSearchLogQuery"
 spec: close({
 	ds.#selector
-	query:           strings.MinRunes(1)
-	index?:          strings.MinRunes(1)
-	timestampField?: strings.MinRunes(1)
-	messageField?:   strings.MinRunes(1)
+	query:              strings.MinRunes(1)
+	index?:             strings.MinRunes(1)
+	timestampField?:    strings.MinRunes(1)
+	messageField?:      strings.MinRunes(1)
+	disableTimeFilter?: bool
 })

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { replaceVariables } from '@perses-dev/plugin-system';
-import { LogEntry, LogData } from '@perses-dev/core';
+import { LogEntry, LogData } from '@perses-dev/spec';
 import { OpenSearchClient } from '../../model/opensearch-client';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { DEFAULT_DATASOURCE, DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../constants';
@@ -25,17 +25,28 @@ import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
  * pipe that drops the timestamp column from the schema (stats, fields, top, etc.).
  * If the user already filters on @timestamp themselves, PPL ANDs the two clauses.
  */
+interface BoundedPPLOptions {
+  index?: string;
+  timestampField?: string;
+  disableTimeFilter?: boolean;
+}
+
 export function buildBoundedPPL(
   userQuery: string,
   start: Date,
   end: Date,
-  index?: string,
-  timestampField: string = '@timestamp'
+  { index, timestampField = '@timestamp', disableTimeFilter = false }: BoundedPPLOptions = {}
 ): string {
   let trimmed = userQuery.trim();
 
   if (index && !/^(?:search\s+)?source\s*=/i.test(trimmed)) {
     trimmed = `source=${index} | ${trimmed}`;
+  }
+
+  // Skip the auto-injected time-range clause when the caller manages their own time
+  // bounds, or when the target index has no usable timestamp field.
+  if (disableTimeFilter) {
+    return trimmed;
   }
 
   const startIso = start.toISOString();
@@ -138,7 +149,11 @@ export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLo
   )) as OpenSearchClient;
 
   const { start, end } = context.timeRange;
-  const boundedQuery = buildBoundedPPL(query, start, end, resolvedIndex, spec.timestampField);
+  const boundedQuery = buildBoundedPPL(query, start, end, {
+    index: resolvedIndex,
+    timestampField: spec.timestampField,
+    disableTimeFilter: spec.disableTimeFilter,
+  });
 
   const response = await client.ppl({ query: boundedQuery });
 
