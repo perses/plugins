@@ -127,6 +127,7 @@ type QuerySettingsItem struct {
 	LineStyle   string         `json:"lineStyle,omitempty" yaml:"lineStyle,omitempty"`
 	AreaOpacity float64        `json:"areaOpacity,omitempty" yaml:"areaOpacity,omitempty"`
 	Format      *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
+	Stack       *bool          `json:"stack,omitempty" yaml:"stack,omitempty"`
 }
 
 type Option func(plugin *Builder) error

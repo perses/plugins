@@ -42,8 +42,8 @@ import {
   DEFAULT_LEGEND,
   StepOptions,
   formatValue,
-  getTimeSeriesValues,
 } from '@perses-dev/components';
+import { getTimeSeriesValues } from '@perses-dev/core';
 import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import {
   TimeSeriesChartOptions,
