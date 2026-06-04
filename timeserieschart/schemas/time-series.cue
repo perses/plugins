@@ -66,6 +66,7 @@ spec: close({
 	lineStyle?:   #lineStyle
 	areaOpacity?: #areaOpacity
 	format?:      common.#format
+	stack?:       bool
 }]
 
 #lineStyle: "solid" | "dashed" | "dotted"
