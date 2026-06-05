@@ -23,7 +23,7 @@ import {
   useTimeRange,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo, useState } from 'react';
-import { QueryDefinition } from '@perses-dev/core';
+import { QueryDefinition } from '@perses-dev/spec';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { useQuery } from '@tanstack/react-query';
@@ -159,7 +159,7 @@ export function LogExplorer(): ReactElement {
         queries.map(async (query) => {
           if (query.kind !== 'LogQuery') return null;
           try {
-            const plugin = await getPlugin('LogQuery', query.spec.plugin.kind);
+            const plugin = await getPlugin({ kind: 'LogQuery', name: query.spec.plugin.kind });
             return plugin?.createVolumeQuery?.(query.spec.plugin.spec, logQueryContext) ?? null;
           } catch (error) {
             console.error(`[LogExplorer] Failed to create volume query for ${query.spec.plugin.kind}:`, error);
