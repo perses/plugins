@@ -22,10 +22,11 @@ import {
   usePluginRegistry,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
+import { useQuery } from '@tanstack/react-query';
 
 interface LogExplorerQueryParams {
   queries?: QueryDefinition[];
@@ -120,6 +121,8 @@ export function LogExplorer(): ReactElement {
     setData,
   } = useExplorerManagerContext<LogExplorerQueryParams>();
 
+  const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
+
   const { getPlugin } = usePluginRegistry();
   const { absoluteTimeRange } = useTimeRange();
   const datasourceStore = useDatasourceStore();
@@ -149,50 +152,33 @@ export function LogExplorer(): ReactElement {
     [datasourcePlugins]
   );
 
-  const [volumeQueries, setVolumeQueries] = useState<QueryDefinition[]>([]);
-
-  useEffect(() => {
-    const generateVolumeQueries = async (): Promise<void> => {
-      if (queries.length === 0) {
-        setVolumeQueries((prev) => (prev.length === 0 ? prev : []));
-        return;
-      }
-
-      const volumeQueryPromises = queries.map(async (query) => {
-        if (query.kind !== 'LogQuery') {
-          return null;
-        }
-
-        try {
-          const pluginKind = query.spec.plugin.kind;
-          const plugin = await getPlugin('LogQuery', pluginKind);
-
-          if (plugin?.createVolumeQuery) {
-            return plugin.createVolumeQuery(query.spec.plugin.spec, logQueryContext);
+  const { data: volumeQueries = EMPTY_QUERIES } = useQuery({
+    queryKey: ['logexplorer-volume-queries', queries, logQueryContext],
+    queryFn: async (): Promise<QueryDefinition[]> => {
+      const results = await Promise.all(
+        queries.map(async (query) => {
+          if (query.kind !== 'LogQuery') return null;
+          try {
+            const plugin = await getPlugin('LogQuery', query.spec.plugin.kind);
+            return plugin?.createVolumeQuery?.(query.spec.plugin.spec, logQueryContext) ?? null;
+          } catch (error) {
+            console.error(`[LogExplorer] Failed to create volume query for ${query.spec.plugin.kind}:`, error);
+            return null;
           }
-        } catch (error) {
-          console.error(`[LogExplorer] Failed to create volume query for ${query.spec.plugin.kind}:`, error);
-        }
-
-        return null;
-      });
-
-      const results = await Promise.all(volumeQueryPromises);
-      const validVolumeQueries = results.filter((q: QueryDefinition | null): q is QueryDefinition => q !== null);
-      setVolumeQueries(validVolumeQueries);
-    };
-
-    generateVolumeQueries();
-  }, [queries, getPlugin, logQueryContext]);
+        })
+      );
+      return results.filter((q): q is QueryDefinition => q !== null);
+    },
+  });
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor
         queryTypes={['LogQuery']}
         filteredQueryPlugins={logDatasourcePlugins}
-        queries={queries}
-        onChange={(state) => setData({ queries: state })}
-        onQueryRun={() => setData({ queries })}
+        queries={queryDefinitions}
+        onChange={(state) => setQueryDefinitions(state)}
+        onQueryRun={() => setData({ queries: queryDefinitions })}
       />
       {volumeQueries.length > 0 && <VolumeHistogramPanel queries={volumeQueries} />}
       <LogsTablePanel queries={queries} />
