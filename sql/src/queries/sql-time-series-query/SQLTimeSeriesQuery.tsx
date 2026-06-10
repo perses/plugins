@@ -11,28 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { TimeSeriesData, TimeSeries } from '@perses-dev/core';
+import { TimeSeriesQueryPlugin, replaceVariables, parseVariables } from '@perses-dev/plugin-system';
+import { TimeSeries } from '@perses-dev/spec';
 import { replaceSQLBuiltinVariables } from '../../model/replace-sql-builtin-variables';
 import { SQLTimeSeriesQuerySpec } from './sql-time-series-query-types';
 import { SQLTimeSeriesQueryEditor } from './SQLTimeSeriesQueryEditor';
 
-async function getTimeSeriesData(
-  spec: SQLTimeSeriesQuerySpec,
-  context: any,
-  abortSignal?: AbortSignal
-): Promise<TimeSeriesData> {
-  const { timeRange, datasourceStore } = context;
-
+const getTimeSeriesData: TimeSeriesQueryPlugin<SQLTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
+  spec,
+  context,
+  abortSignal
+) => {
   if (!spec.query) {
     return { series: [] };
   }
 
-  // Determine datasource selector
   const datasourceSelector = spec.datasource || { kind: 'SQLDatasource' };
 
-  // Get datasource client for proxy URL
-  const datasourceClient = await datasourceStore.getDatasourceClient(datasourceSelector);
+  const datasourceClient = await context.datasourceStore.getDatasourceClient(datasourceSelector);
 
   if (!datasourceClient) {
     throw new Error('No datasource configured for SQL query. Please select a SQL datasource.');
@@ -44,15 +40,14 @@ async function getTimeSeriesData(
     throw new Error('No datasource URL available. Ensure the SQL datasource is properly configured.');
   }
 
-  // Calculate an interval based on time range
-  const rangeDuration = (timeRange.end.getTime() - timeRange.start.getTime()) / 1000;
+  const rangeDuration = (context.timeRange.end.getTime() - context.timeRange.start.getTime()) / 1000;
   const interval = spec.minStep || Math.max(1, Math.floor(rangeDuration / 1000));
   const intervalMs = interval * 1000;
 
-  // Process SQL macros and builtin variables
-  const processedQuery = replaceSQLBuiltinVariables(spec.query, timeRange, intervalMs);
+  const queryWithVariables = replaceVariables(spec.query, context.variableState);
+  const timeFormat = spec.timeFormat === 'unix' ? 'unix' : 'iso8601';
+  const processedQuery = replaceSQLBuiltinVariables(queryWithVariables, context.timeRange, intervalMs, timeFormat);
 
-  // Execute query via backend proxy
   const response = await fetch(datasourceUrl, {
     method: 'POST',
     headers: {
@@ -69,44 +64,43 @@ async function getTimeSeriesData(
     throw new Error(`SQL query failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
-  const result = await response.json();
+  const result: { columns: Array<{ name: string; type: string }>; rows: Array<Record<string, unknown>> } =
+    await response.json();
 
-  // Transform result to time series data
   const series = transformToTimeSeries(result, spec);
 
   return {
     series,
-    timeRange,
+    timeRange: context.timeRange,
     stepMs: intervalMs,
   };
-}
+};
 
-function transformToTimeSeries(result: any, spec: SQLTimeSeriesQuerySpec): TimeSeries[] {
+function transformToTimeSeries(
+  result: { columns: Array<{ name: string; type: string }>; rows: Array<Record<string, unknown>> },
+  spec: SQLTimeSeriesQuerySpec
+): TimeSeries[] {
   const { columns, rows } = result;
 
   if (!rows || rows.length === 0) {
     return [];
   }
 
-  // Auto-detect time column if not specified
   const timeColumn = spec.timeColumn || detectTimeColumn(columns);
   if (!timeColumn) {
     throw new Error('No time column found in query result');
   }
 
-  // Detect value columns (numeric columns that are not time or labels)
   const labelColumns = spec.labelColumns || [];
   const valueColumns =
     spec.valueColumns ||
-    columns.map((col: any) => col.name).filter((name: string) => name !== timeColumn && !labelColumns.includes(name));
+    columns.map((col) => col.name).filter((name) => name !== timeColumn && !labelColumns.includes(name));
 
-  // Group rows by label combination
   const seriesMap = new Map<string, TimeSeries>();
 
   for (const row of rows) {
     const timeValue = parseTimeValue(row[timeColumn], spec.timeFormat);
 
-    // Create label set for this row
     const labels: Record<string, string> = {};
     for (const labelCol of labelColumns) {
       if (row[labelCol] !== undefined && row[labelCol] !== null) {
@@ -114,7 +108,6 @@ function transformToTimeSeries(result: any, spec: SQLTimeSeriesQuerySpec): TimeS
       }
     }
 
-    // Process each value column
     for (const valueCol of valueColumns) {
       const seriesKey = JSON.stringify({ ...labels, __name__: valueCol });
 
@@ -127,7 +120,7 @@ function transformToTimeSeries(result: any, spec: SQLTimeSeriesQuerySpec): TimeS
       }
 
       const series = seriesMap.get(seriesKey)!;
-      const value = parseFloat(row[valueCol]);
+      const value = parseFloat(String(row[valueCol]));
 
       if (!isNaN(value)) {
         series.values.push([timeValue, value]);
@@ -135,10 +128,9 @@ function transformToTimeSeries(result: any, spec: SQLTimeSeriesQuerySpec): TimeS
     }
   }
 
-  // Sort all series by time
   const seriesArray = Array.from(seriesMap.values());
   for (const series of seriesArray) {
-    series.values.sort((a: any, b: any) => a[0] - b[0]);
+    series.values.sort((a, b) => a[0] - b[0]);
   }
 
   return seriesArray;
@@ -157,19 +149,19 @@ function detectTimeColumn(columns: Array<{ name: string; type: string }>): strin
   return null;
 }
 
-function parseTimeValue(value: any, format: string = 'iso8601'): number {
+function parseTimeValue(value: unknown, format: string = 'iso8601'): number {
   if (value instanceof Date) {
     return value.getTime();
   }
 
   switch (format) {
     case 'unix':
-      return parseInt(value, 10) * 1000;
+      return parseInt(String(value), 10) * 1000;
     case 'unix_ms':
-      return parseInt(value, 10);
+      return parseInt(String(value), 10);
     case 'iso8601':
     default:
-      return new Date(value).getTime();
+      return new Date(String(value)).getTime();
   }
 }
 
@@ -181,4 +173,9 @@ export const SQLTimeSeriesQuery: TimeSeriesQueryPlugin<SQLTimeSeriesQuerySpec> =
     query: '',
     timeFormat: 'iso8601',
   }),
+  dependsOn: (spec) => {
+    return {
+      variables: parseVariables(spec.query),
+    };
+  },
 };

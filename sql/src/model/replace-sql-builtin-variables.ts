@@ -11,79 +11,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange } from '@perses-dev/core';
+import { AbsoluteTimeRange } from '@perses-dev/spec';
+
+export type TimeFormat = 'iso8601' | 'unix';
 
 /**
- * Replace SQL builtin variable placeholders in a SQL query
+ * Replace SQL builtin variable placeholders in a SQL query.
  *
  * @param query The SQL query that contains variable placeholders
  * @param timeRange The absolute time range for the query
  * @param intervalMs The interval between data points in milliseconds
+ * @param timeFormat How to format time values: 'iso8601' (quoted ISO string) or 'unix' (seconds since epoch)
  *
  * @returns SQL query with variable placeholders replaced by their values
  */
-export function replaceSQLBuiltinVariables(query: string, timeRange: AbsoluteTimeRange, intervalMs: number): string {
-  let updatedQuery = query;
-
-  // Replace $__timeFrom and ${__timeFrom}
-  const timeFromISO = timeRange.start.toISOString();
-  updatedQuery = updatedQuery.replace(/\$__timeFrom\b/g, `'${timeFromISO}'`);
-  updatedQuery = updatedQuery.replace(/\$\{__timeFrom\}/g, `'${timeFromISO}'`);
-
-  // Replace $__timeTo and ${__timeTo}
-  const timeToISO = timeRange.end.toISOString();
-  updatedQuery = updatedQuery.replace(/\$__timeTo\b/g, `'${timeToISO}'`);
-  updatedQuery = updatedQuery.replace(/\$\{__timeTo\}/g, `'${timeToISO}'`);
-
-  // Replace $__interval and ${__interval}
-  const intervalSeconds = Math.floor(intervalMs / 1000);
-  updatedQuery = updatedQuery.replace(/\$__interval\b/g, intervalSeconds.toString());
-  updatedQuery = updatedQuery.replace(/\$\{__interval\}/g, intervalSeconds.toString());
-
-  // Replace $__interval_ms and ${__interval_ms}
-  updatedQuery = updatedQuery.replace(/\$__interval_ms\b/g, intervalMs.toString());
-  updatedQuery = updatedQuery.replace(/\$\{__interval_ms\}/g, intervalMs.toString());
-
-  // Replace $__timeFilter(column) macro
-  const timeFilterRegex = /\$__timeFilter\((\w+)\)/g;
-  updatedQuery = updatedQuery.replace(timeFilterRegex, (_, column) => {
-    return `${column} BETWEEN '${timeFromISO}' AND '${timeToISO}'`;
-  });
-
-  return updatedQuery;
-}
-
-/**
- * Replace Unix timestamp format (seconds since epoch)
- */
-export function replaceSQLBuiltinVariablesUnix(
+export function replaceSQLBuiltinVariables(
   query: string,
   timeRange: AbsoluteTimeRange,
-  intervalMs: number
+  intervalMs: number,
+  timeFormat: TimeFormat = 'iso8601'
 ): string {
   let updatedQuery = query;
 
-  // Unix timestamps in seconds
   const timeFromUnix = Math.floor(timeRange.start.getTime() / 1000);
   const timeToUnix = Math.floor(timeRange.end.getTime() / 1000);
 
-  updatedQuery = updatedQuery.replace(/\$__timeFrom\b/g, timeFromUnix.toString());
-  updatedQuery = updatedQuery.replace(/\$\{__timeFrom\}/g, timeFromUnix.toString());
-  updatedQuery = updatedQuery.replace(/\$__timeTo\b/g, timeToUnix.toString());
-  updatedQuery = updatedQuery.replace(/\$\{__timeTo\}/g, timeToUnix.toString());
+  const timeFromValue =
+    timeFormat === 'unix' ? timeFromUnix.toString() : `'${timeRange.start.toISOString()}'`;
+  const timeToValue =
+    timeFormat === 'unix' ? timeToUnix.toString() : `'${timeRange.end.toISOString()}'`;
 
-  // Replace interval
+  updatedQuery = updatedQuery.replace(/\$__timeFrom\b/g, timeFromValue);
+  updatedQuery = updatedQuery.replace(/\$\{__timeFrom\}/g, timeFromValue);
+  updatedQuery = updatedQuery.replace(/\$__timeTo\b/g, timeToValue);
+  updatedQuery = updatedQuery.replace(/\$\{__timeTo\}/g, timeToValue);
+
   const intervalSeconds = Math.floor(intervalMs / 1000);
   updatedQuery = updatedQuery.replace(/\$__interval\b/g, intervalSeconds.toString());
   updatedQuery = updatedQuery.replace(/\$\{__interval\}/g, intervalSeconds.toString());
   updatedQuery = updatedQuery.replace(/\$__interval_ms\b/g, intervalMs.toString());
   updatedQuery = updatedQuery.replace(/\$\{__interval_ms\}/g, intervalMs.toString());
 
-  // Replace $__timeFilter(column) macro with numeric comparison
-  const timeFilterRegex = /\$__timeFilter\((\w+)\)/g;
-  updatedQuery = updatedQuery.replace(timeFilterRegex, (_, column) => {
-    return `${column} BETWEEN ${timeFromUnix} AND ${timeToUnix}`;
-  });
+  const timeFilterRegex = /\$__timeFilter\(([\w."'`]+(?:\.[\w."'`]+)*)\)/g;
+  if (timeFormat === 'unix') {
+    updatedQuery = updatedQuery.replace(timeFilterRegex, (_, column) => {
+      return `${column} BETWEEN ${timeFromUnix} AND ${timeToUnix}`;
+    });
+  } else {
+    updatedQuery = updatedQuery.replace(timeFilterRegex, (_, column) => {
+      return `${column} BETWEEN '${timeRange.start.toISOString()}' AND '${timeRange.end.toISOString()}'`;
+    });
+  }
 
   return updatedQuery;
 }
