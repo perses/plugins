@@ -11,4 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './sql-client';
+export * from './replace-sql-builtin-variables';

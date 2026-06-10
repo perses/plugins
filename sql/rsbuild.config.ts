@@ -4,7 +4,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'SQL',
   rsbuildConfig: {
-    server: { port: 3001 },
+    server: { port: 3122 },
     plugins: [pluginReact()],
   },
   moduleFederation: {
@@ -29,6 +29,7 @@ export default createConfigForPlugin({
       '@hookform/resolvers': { singleton: true },
       '@tanstack/react-query': { singleton: true },
       'react-hook-form': { singleton: true },
+      'react-router-dom': { singleton: true },
       'use-resize-observer': { singleton: true },
     },
   },

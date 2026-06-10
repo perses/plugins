@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/core';
+import { QueryDefinition } from '@perses-dev/spec';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { useExplorerManagerContext } from '@perses-dev/explore';
@@ -27,24 +27,22 @@ interface SQLExplorerQueryParams {
 const PANEL_PREVIEW_HEIGHT = 700;
 const FILTERED_QUERY_PLUGINS = ['SQLTimeSeriesQuery'];
 
+function toQueryDefinitions(queries: QueryDefinition[]) {
+  return queries.map((query) => ({
+    kind: query.spec.plugin.kind,
+    spec: query.spec.plugin.spec,
+  }));
+}
+
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const { width, ref: boxRef } = useResizeObserver();
   const height = PANEL_PREVIEW_HEIGHT;
 
   const suggestedStepMs = useSuggestedStepMs(width);
 
-  const definitions = queries.length
-    ? queries.map((query) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
-
   return (
     <Box ref={boxRef} height={height}>
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
+      <DataQueriesProvider definitions={toQueryDefinitions(queries)} options={{ suggestedStepMs, mode: 'range' }}>
         <Panel
           panelOptions={{
             hideHeader: true,
@@ -62,16 +60,9 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElem
 function DataTable({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const height = PANEL_PREVIEW_HEIGHT;
 
-  const definitions = queries.map((query) => {
-    return {
-      kind: query.spec.plugin.kind,
-      spec: query.spec.plugin.spec,
-    };
-  });
-
   return (
     <Box height={height}>
-      <DataQueriesProvider definitions={definitions} options={{ mode: 'instant' }}>
+      <DataQueriesProvider definitions={toQueryDefinitions(queries)} options={{ mode: 'instant' }}>
         <Panel
           panelOptions={{
             hideHeader: true,
@@ -106,30 +97,15 @@ export function SQLExplorer(): ReactElement {
         <Tab value="graph" label="Graph" />
       </Tabs>
       <Stack gap={1}>
-        {tab === 'table' && (
-          <Stack>
-            <MultiQueryEditor
-              queryTypes={['TimeSeriesQuery']}
-              onChange={(state) => setQueryDefinitions(state)}
-              queries={queryDefinitions}
-              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
-              filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
-            />
-            <DataTable queries={queries} />
-          </Stack>
-        )}
-        {tab === 'graph' && (
-          <Stack>
-            <MultiQueryEditor
-              queryTypes={['TimeSeriesQuery']}
-              onChange={(state) => setQueryDefinitions(state)}
-              queries={queryDefinitions}
-              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
-              filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
-            />
-            <TimeSeriesPanel queries={queries} />
-          </Stack>
-        )}
+        <MultiQueryEditor
+          queryTypes={['TimeSeriesQuery']}
+          onChange={(state) => setQueryDefinitions(state)}
+          queries={queryDefinitions}
+          onQueryRun={() => setData({ tab, queries: queryDefinitions })}
+          filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
+        />
+        {tab === 'table' && <DataTable queries={queries} />}
+        {tab === 'graph' && <TimeSeriesPanel queries={queries} />}
       </Stack>
     </Stack>
   );
