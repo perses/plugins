@@ -118,6 +118,15 @@
           },
           "name": "PrometheusExplorer"
         }
+      },
+      {
+        "kind": "Annotation",
+        "spec": {
+          "display": {
+            "name": "Prometheus PromQL Annotation"
+          },
+          "name": "PrometheusPromQLAnnotation"
+        }
       }
     ]
   }

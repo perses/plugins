@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationData } from '@perses-dev/spec';
+import { AnnotationData, DatasourceSpec, parseDurationString } from '@perses-dev/spec';
 import { AnnotationContext, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import { DatasourceSpec, parseDurationString } from '@perses-dev/core';
 import { milliseconds } from 'date-fns';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
 import { DEFAULT_PROM, getPrometheusTimeRange, getRangeStep, PROM_DATASOURCE_KIND, PrometheusClient } from '../model';
 import { formatSeriesName } from '../utils';
+import { interpolateDatasourceProxyParams } from '../plugins/interpolation';
 
 export const getAnnotationData = async (
   spec: PrometheusPromQLAnnotationOptions,
@@ -42,6 +42,7 @@ export const getAnnotationData = async (
   const datasource = (await context.datasourceStore.getDatasource(
     datasourceSelector
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
+  const interpolatedOptions = interpolateDatasourceProxyParams(datasource, context.variableState);
 
   const datasourceScrapeInterval = Math.trunc(
     milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
@@ -73,8 +74,7 @@ export const getAnnotationData = async (
       end: alignedEnd,
       step: step,
     },
-    undefined,
-    abortSignal
+    { ...interpolatedOptions, signal: abortSignal }
   );
 
   const result: AnnotationData[] = [];
