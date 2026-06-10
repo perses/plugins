@@ -13,17 +13,19 @@
 
 package model
 
+import (
+	ds "github.com/perses/plugins/sql/schemas/datasource:model"
+)
+
+#kind: "SQLTimeSeriesQuery"
+
 kind: #kind
-spec: {
-	datasource?: {
-		kind: "SQLDatasource"
-	}
+spec: close({
+	ds.#selector
 	query:         string
 	minStep?:      int
 	timeColumn?:   string
 	labelColumns?: [...string]
 	valueColumns?: [...string]
 	timeFormat?:   string
-}
-
-#kind: "SQLTimeSeriesQuery"
+})

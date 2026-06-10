@@ -13,7 +13,7 @@
 
 import { Stack, TextField } from '@mui/material';
 import { OptionsEditorProps, DatasourceSelect } from '@perses-dev/plugin-system';
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { SQLTimeSeriesQuerySpec } from './sql-time-series-query-types';
 
 export function SQLTimeSeriesQueryEditor({ value, onChange }: OptionsEditorProps<SQLTimeSeriesQuerySpec>) {
@@ -61,7 +61,7 @@ export function SQLTimeSeriesQueryEditor({ value, onChange }: OptionsEditorProps
         label="Min Step (seconds)"
         placeholder="15"
         value={value.minStep || ''}
-        onChange={(e) => onChange({ ...value, minStep: parseInt(e.target.value, 10) })}
+        onChange={(e) => onChange({ ...value, minStep: parseInt(e.target.value, 10) || undefined })}
         helperText="Minimum interval for data aggregation"
       />
     </Stack>
