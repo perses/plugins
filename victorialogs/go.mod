@@ -3,7 +3,7 @@ module github.com/perses/plugins/victorialogs
 go 1.26.2
 
 require (
-	github.com/perses/perses v0.54.0-beta.0
+	github.com/perses/perses v0.54.0-beta.1
 	github.com/perses/spec v0.2.0-beta.2
 )
 
