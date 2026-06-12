@@ -54,13 +54,15 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn: (spec: PrometheusLabelValuesVariableOptions) => {
+  dependsOn: (spec: PrometheusLabelValuesVariableOptions, ctx: GetVariableOptionsContext) => {
     const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
     const labelVariables = parseVariables(spec.labelName);
     const datasourceVariables =
       spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];
+    const allAvailableVariables = Object.keys(ctx.variables || {});
+
     return {
-      variables: [...matcherVariables, ...labelVariables, ...datasourceVariables],
+      variables: [...matcherVariables, ...labelVariables, ...datasourceVariables, ...allAvailableVariables],
     };
   },
   OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
