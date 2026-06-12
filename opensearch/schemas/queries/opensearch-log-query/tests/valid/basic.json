@@ -1,0 +1,13 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": {
+    "datasource": {
+      "kind": "OpenSearchDatasource",
+      "name": "opensearch"
+    },
+    "query": "source=otel-logs-* | where traceId='abc123'",
+    "index": "otel-logs-*",
+    "timestampField": "@timestamp",
+    "messageField": "body"
+  }
+}
