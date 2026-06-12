@@ -13,6 +13,7 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
+import { getCommonTimeScale } from '@perses-dev/components';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
@@ -20,7 +21,6 @@ import {
   EChartsValues,
   TimeSeriesOption,
   StepOptions,
-  getCommonTimeScale,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
 import { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
@@ -69,11 +69,13 @@ export function getTimeSeries(
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
   paletteColor: string,
-  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number },
+  querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number; stack?: boolean },
   yAxisIndex?: number
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
+  const shouldStack =
+    querySettings?.stack !== undefined ? querySettings.stack : visual.stack === 'all';
 
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
   const minuteMs = 60000;
@@ -90,7 +92,7 @@ export function getTimeSeries(
       datasetIndex,
       name: formattedName,
       color: paletteColor,
-      stack: visual.stack === 'all' ? visual.stack : undefined,
+      stack: shouldStack ? 'all' : undefined,
       yAxisIndex: yAxisIndex,
       label: {
         show: false,
@@ -106,7 +108,7 @@ export function getTimeSeries(
     name: formattedName,
     connectNulls: visual.connectNulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
-    stack: visual.stack === 'all' ? visual.stack : undefined,
+    stack: shouldStack ? 'all' : undefined,
     yAxisIndex: yAxisIndex,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
