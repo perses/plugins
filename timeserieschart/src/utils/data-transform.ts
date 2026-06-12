@@ -13,7 +13,7 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
-import { getCommonTimeScale } from '@perses-dev/core';
+import { getCommonTimeScale } from '@perses-dev/components';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
