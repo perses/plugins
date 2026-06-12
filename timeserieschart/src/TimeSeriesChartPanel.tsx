@@ -45,6 +45,7 @@ import {
   getTimeSeriesValues,
 } from '@perses-dev/components';
 import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import { useAnnotationsWithData } from '@perses-dev/dashboards';
 import {
   TimeSeriesChartOptions,
   DEFAULT_FORMAT,
@@ -61,6 +62,7 @@ import {
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 import { TimeSeriesChartBase } from './TimeSeriesChartBase';
+import { convertAnnotationToTimeSeriesAnnotation, TimeSeriesAnnotation } from './utils/annotation';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions, TimeSeriesData>;
 
@@ -153,6 +155,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
+
+  const annotationsWithData = useAnnotationsWithData();
+
+  const annotations: TimeSeriesAnnotation[] = useMemo(
+    () => convertAnnotationToTimeSeriesAnnotation(annotationsWithData),
+    [annotationsWithData]
+  );
 
   // Populate series data based on query results
   const {
@@ -494,6 +503,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 height={height}
                 data={timeChartData}
                 seriesMapping={timeSeriesMapping}
+                annotations={annotations}
                 timeScale={timeScale}
                 yAxis={multipleYAxes ?? echartsYAxis}
                 format={format}
