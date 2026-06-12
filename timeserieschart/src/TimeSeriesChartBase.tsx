@@ -37,7 +37,7 @@ import {
   TooltipComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { getCommonTimeScale } from '@perses-dev/core';
+import { getCommonTimeScale } from '@perses-dev/components';
 import {
   ChartInstance,
   ChartInstanceFocusOpts,
