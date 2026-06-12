@@ -43,7 +43,7 @@ import {
   StepOptions,
   formatValue,
 } from '@perses-dev/components';
-import { getTimeSeriesValues } from '@perses-dev/core';
+import { getTimeSeriesValues } from '@perses-dev/components';
 import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import {
   TimeSeriesChartOptions,
