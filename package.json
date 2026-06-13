@@ -2,6 +2,9 @@
   "name": "perses-plugins",
   "description": "Monorepo for the Perses plugins",
   "version": "0.1.0",
+  "bugs": {
+    "url": "https://github.com/perses/plugins/issues"
+  },
   "scripts": {
     "dev": "turbo run dev --concurrency 20",
     "build": "turbo run build",
