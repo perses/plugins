@@ -45,7 +45,7 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<SQLTimeSeriesQuerySpec>['getTimeS
   const intervalMs = interval * 1000;
 
   const queryWithVariables = replaceVariables(spec.query, context.variableState);
-  const timeFormat = spec.timeFormat === 'unix' ? 'unix' : 'iso8601';
+  const timeFormat = (spec.timeFormat === 'unix' || spec.timeFormat === 'unix_ms') ? spec.timeFormat : 'iso8601';
   const processedQuery = replaceSQLBuiltinVariables(queryWithVariables, context.timeRange, intervalMs, timeFormat);
 
   const response = await fetch(datasourceUrl, {
@@ -100,6 +100,9 @@ function transformToTimeSeries(
 
   for (const row of rows) {
     const timeValue = parseTimeValue(row[timeColumn], spec.timeFormat);
+    if (!isFinite(timeValue)) {
+      continue;
+    }
 
     const labels: Record<string, string> = {};
     for (const labelCol of labelColumns) {

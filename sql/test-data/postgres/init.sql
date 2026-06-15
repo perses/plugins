@@ -3,6 +3,9 @@
 -- Enable TimescaleDB extension
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
+-- Enable pgcrypto for gen_random_uuid() used in sample data
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Create system metrics table (IoT/Monitoring use case)
 CREATE TABLE system_metrics (
     timestamp TIMESTAMPTZ NOT NULL,

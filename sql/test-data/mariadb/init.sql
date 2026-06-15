@@ -1,4 +1,4 @@
--- MySQL initialization script for SQL Plugin testing
+-- MariaDB initialization script for SQL Plugin testing
 
 -- Create system metrics table
 CREATE TABLE system_metrics (

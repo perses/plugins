@@ -11,45 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export type SQLDriver = 'postgres' | 'mysql' | 'mariadb';
+export type { SQLProxySpec, MySQLConfig, PostgresConfig } from '@perses-dev/spec';
+import type { SQLProxySpec, PostgresConfig } from '@perses-dev/spec';
 
-export type SSLMode = 'disable' | 'require' | 'verify-ca' | 'verify-full';
-
-export interface MySQLConfig {
-  params?: Record<string, string>;
-  maxAllowedPacket?: number;
-  timeout?: string;
-  readTimeout?: string;
-  writeTimeout?: string;
-}
-
-export interface PostgresConfig {
-  maxConns?: number;
-  connectTimeout?: string;
-  prepareThreshold?: number;
-  sslMode?: SSLMode;
-  options?: string;
-}
-
-export interface SQLProxySpec {
-  // Database driver type
-  driver: SQLDriver;
-
-  // Database host (hostname:port)
-  host: string;
-
-  // Database name
-  database: string;
-
-  // Secret name for credentials and TLS
-  secret?: string;
-
-  // MySQL/MariaDB specific config
-  mysql?: MySQLConfig;
-
-  // PostgreSQL specific config
-  postgres?: PostgresConfig;
-}
+export type SQLDriver = SQLProxySpec['driver'];
+export type SSLMode = NonNullable<PostgresConfig['sslMode']>;
 
 export interface SQLDatasourceSpec {
   proxy: {

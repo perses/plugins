@@ -89,7 +89,7 @@ ORDER BY time
 
 The plugin automatically replaces these macros in your queries:
 
-- **`$__timeFilter(column)`**: Generates `column >= 'start' AND column <= 'end'`
+- **`$__timeFilter(column)`**: Generates `column BETWEEN 'start' AND 'end'`
 - **`$__timeFrom`**: Start timestamp of the time range
 - **`$__timeTo`**: End timestamp of the time range  
 - **`$__interval`**: Calculated interval in seconds (for time bucketing)
@@ -115,7 +115,7 @@ SELECT
   category,
   COUNT(*) AS count
 FROM transactions
-WHERE created_at >= '2026-01-25T10:00:00Z' AND created_at <= '2026-01-25T11:00:00Z'
+WHERE created_at BETWEEN '2026-01-25T10:00:00Z' AND '2026-01-25T11:00:00Z'
   AND status = 'completed'
 GROUP BY time, category
 ORDER BY time
