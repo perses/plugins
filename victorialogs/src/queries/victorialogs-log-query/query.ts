@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables } from '@perses-dev/plugin-system';
+import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
 import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsClient } from '../../model/client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { VictoriaLogsLogQuerySpec } from './types';
-import { LogQueryPlugin, LogQueryContext } from './interface';
 
 function convertStreamToLogs(data: VictoriaLogsStreamQueryRangeResponse, defaultTime: string): LogData {
   const entries: LogEntry[] = [];
