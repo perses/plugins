@@ -18,11 +18,59 @@ import {
   parseVariables,
   datasourceSelectValueToSelector,
   isVariableDatasource,
+  DatasourceStore,
 } from '@perses-dev/plugin-system';
+import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+import { parseVariablesAndFormat, InterpolationFormat } from '@perses-dev/components';
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
 import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import { resolvePrometheusDatasource } from './interpolation';
-import { PrometheusLabelValuesVariableOptions } from './types';
+import { PrometheusLabelValuesVariableOptions, PrometheusDatasourceSpec } from './types';
+
+interface ExtendedDatasourceStore extends DatasourceStore {
+  getDatasourceSpecSync?: (selector: DatasourceSelector) => DatasourceSpec | undefined;
+}
+
+function extractQueryParamVariables(datasourceSpec: DatasourceSpec<PrometheusDatasourceSpec>): string[] {
+  try {
+    const queryParams = datasourceSpec.plugin.spec.queryParams;
+
+    if (!queryParams) return [];
+
+    const variables: string[] = [];
+    Object.values(queryParams).forEach((value) => {
+      if (typeof value === 'string') {
+        const variablesMap = parseVariablesAndFormat(value);
+        variablesMap.forEach((format, varName) => {
+          if (format === InterpolationFormat.QUERYPARAM) {
+            variables.push(varName);
+          }
+        });
+      }
+    });
+
+    return variables;
+  } catch {
+    return [];
+  }
+}
+
+function getQueryParamVariablesFromCache(
+  datasourceSelector: DatasourceSelector,
+  datasourceStore: DatasourceStore
+): string[] {
+  try {
+    const extendedStore = datasourceStore as ExtendedDatasourceStore;
+    if (!extendedStore.getDatasourceSpecSync) return [];
+
+    const datasourceSpec = extendedStore.getDatasourceSpecSync(datasourceSelector) as
+      | DatasourceSpec<PrometheusDatasourceSpec>
+      | undefined;
+    return datasourceSpec ? extractQueryParamVariables(datasourceSpec) : [];
+  } catch {
+    return [];
+  }
+}
 
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
   getVariableOptions: async (spec: PrometheusLabelValuesVariableOptions, ctx: GetVariableOptionsContext) => {
@@ -33,6 +81,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
         ctx.variables,
         await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND)
       ) ?? DEFAULT_PROM;
+
     const { client, requestOptions } = await resolvePrometheusDatasource(
       ctx.datasourceStore,
       datasourceSelector,
@@ -54,13 +103,25 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn: (spec: PrometheusLabelValuesVariableOptions) => {
+  dependsOn: (spec: PrometheusLabelValuesVariableOptions, ctx?: GetVariableOptionsContext) => {
     const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
     const labelVariables = parseVariables(spec.labelName);
     const datasourceVariables =
       spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];
+
+    let queryParamVariables: string[] = [];
+    if (ctx?.datasourceStore && ctx?.variables) {
+      const datasourceValue = spec.datasource ?? DEFAULT_PROM;
+      const datasourceSelector: DatasourceSelector =
+        typeof datasourceValue === 'string' ? { kind: PROM_DATASOURCE_KIND, name: datasourceValue } : datasourceValue;
+      queryParamVariables = getQueryParamVariablesFromCache(datasourceSelector, ctx.datasourceStore);
+    }
+
+    const allDependencies = [...matcherVariables, ...labelVariables, ...datasourceVariables, ...queryParamVariables];
+    const uniqueDependencies = Array.from(new Set(allDependencies));
+
     return {
-      variables: [...matcherVariables, ...labelVariables, ...datasourceVariables],
+      variables: uniqueDependencies,
     };
   },
   OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
