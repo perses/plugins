@@ -53,16 +53,6 @@ export function PyroscopeExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
-  // map ProfileQueryDefinition to Definition<UnknownSpec>
-  const definitions = queries.length
-    ? queries.map((query: QueryDefinition) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
-
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor
@@ -71,7 +61,7 @@ export function PyroscopeExplorer(): ReactElement {
         queries={queryDefinitions}
         onQueryRun={() => setData({ queries: queryDefinitions })}
       />
-      <DataQueriesProvider definitions={definitions}>
+      <DataQueriesProvider definitions={queries}>
         <Box height={980}>
           <FlameGraphPanel queries={queries} />
         </Box>

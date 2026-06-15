@@ -22,7 +22,7 @@ import {
   usePluginRegistry,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/spec';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
@@ -39,20 +39,9 @@ const EMPTY_QUERIES: QueryDefinition[] = [];
 function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const height = PANEL_PREVIEW_HEIGHT;
 
-  const definitions = useMemo(
-    () =>
-      queries.length
-        ? queries.map((query) => ({
-            kind: query.spec.plugin.kind,
-            spec: query.spec.plugin.spec,
-          }))
-        : [],
-    [queries]
-  );
-
   return (
     <Box height={height}>
-      <DataQueriesProvider definitions={definitions}>
+      <DataQueriesProvider definitions={queries}>
         <Panel
           panelOptions={{
             hideHeader: true,
@@ -68,20 +57,9 @@ function LogsTablePanel({ queries }: { queries: QueryDefinition[] }): ReactEleme
 }
 
 function VolumeHistogramPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
-  const definitions = useMemo(
-    () =>
-      queries.length
-        ? queries.map((query) => ({
-            kind: query.spec.plugin.kind,
-            spec: query.spec.plugin.spec,
-          }))
-        : [],
-    [queries]
-  );
-
   return (
     <Box height={HISTOGRAM_HEIGHT}>
-      <DataQueriesProvider definitions={definitions}>
+      <DataQueriesProvider definitions={queries}>
         <Panel
           panelOptions={{
             hideHeader: true,

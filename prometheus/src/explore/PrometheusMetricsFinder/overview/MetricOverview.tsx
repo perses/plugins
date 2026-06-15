@@ -18,7 +18,7 @@ import { Panel } from '@perses-dev/dashboards';
 import useResizeObserver from 'use-resize-observer';
 import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
-import { DatasourceSelector, Definition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
+import { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
 import { computeFilterExpr, LabelFilter } from '../types';
 import { useMetricMetadata } from '../utils';
 import { OverviewTab } from './tabs/OverviewTab';
@@ -46,37 +46,27 @@ export function OverviewPanel({
 
   const [rateEnabled, setRateEnabled] = useState(true);
 
-  const { queries, definitions }: { queries: QueryDefinition[]; definitions: Array<Definition<UnknownSpec>> } =
-    useMemo(() => {
-      const expr =
-        type === 'counter' || (rateEnabled && (type === undefined || type === 'summary' || type === 'histogram'))
-          ? `rate({__name__="${metricName}", ${computeFilterExpr(filters)}}[5m])`
-          : `{__name__="${metricName}", ${computeFilterExpr(filters)}}`;
+  const queries: QueryDefinition[] = useMemo(() => {
+    const expr =
+      type === 'counter' || (rateEnabled && (type === undefined || type === 'summary' || type === 'histogram'))
+        ? `rate({__name__="${metricName}", ${computeFilterExpr(filters)}}[5m])`
+        : `{__name__="${metricName}", ${computeFilterExpr(filters)}}`;
 
-      const queries = [
-        {
-          kind: 'TimeSeriesQuery',
-          spec: {
-            plugin: {
-              kind: 'PrometheusTimeSeriesQuery',
-              spec: {
-                datasource: datasource,
-                query: expr,
-              },
+    return [
+      {
+        kind: 'TimeSeriesQuery',
+        spec: {
+          plugin: {
+            kind: 'PrometheusTimeSeriesQuery',
+            spec: {
+              datasource: datasource,
+              query: expr,
             },
           },
         },
-      ];
-
-      const definitions = queries.map((query) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      });
-
-      return { queries, definitions };
-    }, [datasource, filters, metricName, rateEnabled, type]);
+      },
+    ];
+  }, [datasource, filters, metricName, rateEnabled, type]);
 
   if (isLoading) {
     return (
@@ -96,7 +86,7 @@ export function OverviewPanel({
           onChange={(_, checked) => setRateEnabled(checked)}
         />
       )}
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
+      <DataQueriesProvider definitions={queries} options={{ suggestedStepMs, mode: 'range' }}>
         <Panel
           panelOptions={{
             hideHeader: true,
