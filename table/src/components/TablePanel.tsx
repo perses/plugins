@@ -13,6 +13,7 @@
 
 import { Box, Theme, Typography, useTheme } from '@mui/material';
 import {
+  FormatOptions,
   formatValue,
   Table,
   TableCellConfigs,
@@ -36,6 +37,8 @@ import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
+
+type FilterValuesType<T> = Array<{ original: T; formatted: T }>;
 
 function parseNumericCellValue(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -202,7 +205,7 @@ function generateCellContentConfig(
 }
 
 interface ColumnFilterDropdownProps {
-  allValues: Array<string | number>;
+  allValues: FilterValuesType<string | number>;
   selectedValues: Array<string | number>;
   onFilterChange: (values: Array<string | number>) => void;
   theme: Theme;
@@ -273,7 +276,7 @@ function ColumnFilterDropdown({
           <input
             type="checkbox"
             checked={selectedValues.length === values.length && values.length > 0}
-            onChange={(e) => onFilterChange(e.target.checked ? values : [])}
+            onChange={(e) => onFilterChange(e.target.checked ? values.map((v) => v.original) : [])}
             style={{ marginRight: 8 }}
           />
           <span style={{ color: theme.palette.text.primary }}>Select All ({values.length})</span>
@@ -305,12 +308,12 @@ function ColumnFilterDropdown({
           >
             <input
               type="checkbox"
-              checked={selectedValues.includes(value)}
+              checked={selectedValues.includes(value.original)}
               onChange={(e) => {
                 if (e.target.checked) {
-                  onFilterChange([...selectedValues, value]);
+                  onFilterChange([...selectedValues, value.original]);
                 } else {
-                  onFilterChange(selectedValues.filter((v) => v !== value));
+                  onFilterChange(selectedValues.filter((v) => v !== value.original));
                 }
               }}
               style={{ marginRight: 8 }}
@@ -321,7 +324,7 @@ function ColumnFilterDropdown({
                 color: theme.palette.text.primary,
               }}
             >
-              {value === null || value === undefined || value === '' ? '(empty)' : String(value)}
+              {value === null || value === undefined || value.formatted === '' ? '(empty)' : String(value.formatted)}
             </span>
           </label>
         </div>
@@ -452,17 +455,48 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return result;
   }, [data]);
 
-  // fetch unique values for each column of filtering
+  const columnsFormat = useMemo(() => {
+    const columnsFormat: Record<string, FormatOptions> = {};
+    const settings = spec?.columnSettings;
+    if (settings) {
+      for (let i = 0; i < settings.length; i++) {
+        const { name, format } = settings[i] || {};
+        if (name && format) {
+          columnsFormat[name] = format;
+        }
+      }
+    }
+
+    return columnsFormat;
+  }, [spec]);
+
   const columnUniqueValues = useMemo(() => {
-    const uniqueValues: Record<string, Array<string | number>> = {};
+    const uniqueValues: Record<string, FilterValuesType<string | number>> = {};
 
-    keys.forEach((key) => {
-      const values = data.map((row) => row[key]).filter((val) => val !== null && val !== undefined && val !== '');
-      uniqueValues[key] = Array.from(new Set(values as Array<string | number>));
-    });
+    for (const key of keys) {
+      const formatOption = columnsFormat?.[key];
+      uniqueValues[key] = [];
+      const usedValues: Map<string, true> = new Map();
+      for (const row of data) {
+        const val = row[key];
+        if (val === '' || val === null || val === undefined) {
+          continue;
+        }
+        if (usedValues.get(String(val))) {
+          continue;
+        }
 
+        if (typeof val === 'string' || typeof val === 'number') {
+          uniqueValues[key].push({
+            original: val,
+            formatted: formatOption && typeof val === 'number' ? formatValue(val, formatOption) : val,
+          });
+          usedValues.set(String(val), true);
+        }
+      }
+    }
     return uniqueValues;
-  }, [data, keys]);
+  }, [data, keys, columnsFormat]);
 
   const gaugeRangeByColumn = useMemo(() => {
     const result: Record<string, GaugeRange> = {};
