@@ -13,7 +13,7 @@
 
 import { AbsoluteTimeRange } from '@perses-dev/spec';
 
-export type TimeFormat = 'iso8601' | 'unix';
+export type TimeFormat = 'iso8601' | 'unix' | 'unix_ms';
 
 /**
  * Replace SQL builtin variable placeholders in a SQL query.
@@ -35,11 +35,21 @@ export function replaceSQLBuiltinVariables(
 
   const timeFromUnix = Math.floor(timeRange.start.getTime() / 1000);
   const timeToUnix = Math.floor(timeRange.end.getTime() / 1000);
+  const timeFromUnixMs = timeRange.start.getTime();
+  const timeToUnixMs = timeRange.end.getTime();
 
-  const timeFromValue =
-    timeFormat === 'unix' ? timeFromUnix.toString() : `'${timeRange.start.toISOString()}'`;
-  const timeToValue =
-    timeFormat === 'unix' ? timeToUnix.toString() : `'${timeRange.end.toISOString()}'`;
+  let timeFromValue: string;
+  let timeToValue: string;
+  if (timeFormat === 'unix') {
+    timeFromValue = timeFromUnix.toString();
+    timeToValue = timeToUnix.toString();
+  } else if (timeFormat === 'unix_ms') {
+    timeFromValue = timeFromUnixMs.toString();
+    timeToValue = timeToUnixMs.toString();
+  } else {
+    timeFromValue = `'${timeRange.start.toISOString()}'`;
+    timeToValue = `'${timeRange.end.toISOString()}'`;
+  }
 
   updatedQuery = updatedQuery.replace(/\$__timeFrom\b/g, timeFromValue);
   updatedQuery = updatedQuery.replace(/\$\{__timeFrom\}/g, timeFromValue);
@@ -56,6 +66,10 @@ export function replaceSQLBuiltinVariables(
   if (timeFormat === 'unix') {
     updatedQuery = updatedQuery.replace(timeFilterRegex, (_, column) => {
       return `${column} BETWEEN ${timeFromUnix} AND ${timeToUnix}`;
+    });
+  } else if (timeFormat === 'unix_ms') {
+    updatedQuery = updatedQuery.replace(timeFilterRegex, (_, column) => {
+      return `${column} BETWEEN ${timeFromUnixMs} AND ${timeToUnixMs}`;
     });
   } else {
     updatedQuery = updatedQuery.replace(timeFilterRegex, (_, column) => {

@@ -41,17 +41,17 @@ describe('replaceSQLBuiltinVariables', () => {
     it('should replace $__timeFrom with unix timestamp', () => {
       const query = 'SELECT * FROM metrics WHERE timestamp >= $__timeFrom';
       const result = replaceSQLBuiltinVariables(query, timeRange, intervalMs, 'unix');
-      expect(result).toBe('SELECT * FROM metrics WHERE timestamp >= 1705903200');
+      expect(result).toBe('SELECT * FROM metrics WHERE timestamp >= 1706004000');
     });
     it('should replace $__timeTo with unix timestamp', () => {
       const query = 'SELECT * FROM metrics WHERE timestamp <= $__timeTo';
       const result = replaceSQLBuiltinVariables(query, timeRange, intervalMs, 'unix');
-      expect(result).toBe('SELECT * FROM metrics WHERE timestamp <= 1705906800');
+      expect(result).toBe('SELECT * FROM metrics WHERE timestamp <= 1706007600');
     });
     it('should replace $__timeFilter(column) with numeric BETWEEN clause', () => {
       const query = 'SELECT * FROM metrics WHERE $__timeFilter(timestamp)';
       const result = replaceSQLBuiltinVariables(query, timeRange, intervalMs, 'unix');
-      expect(result).toBe('SELECT * FROM metrics WHERE timestamp BETWEEN 1705903200 AND 1705906800');
+      expect(result).toBe('SELECT * FROM metrics WHERE timestamp BETWEEN 1706004000 AND 1706007600');
     });
   });
   describe('interval variables', () => {

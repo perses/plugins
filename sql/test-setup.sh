@@ -86,6 +86,16 @@ verify_data() {
             UNION ALL SELECT 'transactions', COUNT(*) FROM transactions \
         ) t;" 2>/dev/null || echo -e "${RED}  Failed to query MySQL${NC}"
 
+    # MariaDB
+    echo -e "${YELLOW}MariaDB:${NC}"
+    docker exec perses-sql-test-mariadb mariadb -u perses -pperses_test_password perses_test -sN -e "\
+        SELECT CONCAT('  ', table_name, ': ', row_count) FROM ( \
+            SELECT 'system_metrics' as table_name, COUNT(*) as row_count FROM system_metrics \
+            UNION ALL SELECT 'sensor_readings', COUNT(*) FROM sensor_readings \
+            UNION ALL SELECT 'http_requests', COUNT(*) FROM http_requests \
+            UNION ALL SELECT 'transactions', COUNT(*) FROM transactions \
+        ) t;" 2>/dev/null || echo -e "${RED}  Failed to query MariaDB${NC}"
+
     echo -e "${GREEN}✓${NC} Test data verified"
 }
 

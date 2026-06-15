@@ -1,7 +1,7 @@
 services:
   # PostgreSQL with TimescaleDB for time-series testing
   postgres:
-    image: timescale/timescaledb:latest-pg16
+    image: timescale/timescaledb:2.17.2-pg16
     container_name: perses-sql-test-postgres
     environment:
       POSTGRES_DB: perses_test
@@ -64,7 +64,7 @@ services:
 
   # Adminer for database management UI
   adminer:
-    image: adminer:latest
+    image: adminer:4.8.1
     container_name: perses-sql-test-adminer
     ports:
       - "8080:8080"
