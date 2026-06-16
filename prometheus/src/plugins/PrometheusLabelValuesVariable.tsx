@@ -30,18 +30,13 @@ function extractDatasourceVariables(datasourceSpec: DatasourceSpec<PrometheusDat
   try {
     const spec = datasourceSpec.plugin.spec;
 
-    // Pure function to extract variables from a string value
-    const extractFromString = (value: string): string[] => {
-      return parseVariables(value);
-    };
-
     // Pure function to extract variables from string or array values
     const extractFromValue = (value: string | string[]): string[] => {
       if (typeof value === 'string') {
-        return extractFromString(value);
+        return parseVariables(value);
       } else if (Array.isArray(value)) {
         return value.flatMap((item) => {
-          return typeof item === 'string' ? extractFromString(item) : [];
+          return typeof item === 'string' ? parseVariables(item) : [];
         });
       }
       return [];
@@ -58,21 +53,21 @@ function extractDatasourceVariables(datasourceSpec: DatasourceSpec<PrometheusDat
 
     // Extract variables from directUrl
     if (spec.directUrl) {
-      allVariables.push(...extractFromString(spec.directUrl));
+      allVariables.push(...extractFromValue(spec.directUrl));
     }
 
     // Extract variables from proxy configuration
     if (spec.proxy?.spec) {
       // Extract from proxy URL
       if (spec.proxy.spec.url) {
-        allVariables.push(...extractFromString(spec.proxy.spec.url));
+        allVariables.push(...extractFromValue(spec.proxy.spec.url));
       }
 
       // Extract from proxy headers
       if (spec.proxy.spec.headers) {
         Object.values(spec.proxy.spec.headers).forEach((value) => {
           if (typeof value === 'string') {
-            allVariables.push(...extractFromString(value));
+            allVariables.push(...extractFromValue(value));
           }
         });
       }
