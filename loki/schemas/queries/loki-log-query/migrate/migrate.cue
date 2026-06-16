@@ -20,16 +20,16 @@ package migrate
 	expr: string
 	...
 }
-                                                                                                                     
+
 if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-    kind: "LokiLogQuery"                                                                                                                                                                      
-    spec: {                                                                                                                                                                                   
-        if #target.datasource.uid != _|_ {                                                                                                                                                    
-            datasource: {                                                                                                                                                                     
-                kind: "LokiDatasource"                                                                                                                                                        
-                name: #target.datasource.uid                                                                                                                                                  
-            }                                                                                                                                                                                 
-        }                                                                                                                                                                                     
-        query: #target.expr                                                                                                                                                                   
-    }                                                                                                                                                                                         
-}    
+    kind: "LokiLogQuery"
+	spec: {
+		if #target.datasource.uid != _|_ {
+			datasource: {
+				kind: "LokiDatasource"
+				name: #target.datasource.uid
+			}
+		}
+		query: #target.expr
+	}
+}
