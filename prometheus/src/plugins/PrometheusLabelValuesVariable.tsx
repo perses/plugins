@@ -21,70 +21,64 @@ import {
   DatasourceStore,
 } from '@perses-dev/plugin-system';
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
-import { parseVariablesAndFormat } from '@perses-dev/components';
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
 import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import { resolvePrometheusDatasource } from './interpolation';
 import { PrometheusLabelValuesVariableOptions, PrometheusDatasourceSpec } from './types';
 
-interface ExtendedDatasourceStore extends DatasourceStore {
-  getDatasourceSpecSync?: (selector: DatasourceSelector) => DatasourceSpec | undefined;
-}
-
 function extractDatasourceVariables(datasourceSpec: DatasourceSpec<PrometheusDatasourceSpec>): string[] {
   try {
-    const variables: string[] = [];
     const spec = datasourceSpec.plugin.spec;
 
-    // Helper function to extract variables from a string value
-    const extractFromString = (value: string): void => {
-      const variablesMap = parseVariablesAndFormat(value);
-      variablesMap.forEach((format, varName) => {
-        variables.push(varName);
-      });
+    // Pure function to extract variables from a string value
+    const extractFromString = (value: string): string[] => {
+      return parseVariables(value);
     };
 
-    // Helper function to extract variables from string or array values
-    const extractFromValue = (value: string | string[]): void => {
+    // Pure function to extract variables from string or array values
+    const extractFromValue = (value: string | string[]): string[] => {
       if (typeof value === 'string') {
-        extractFromString(value);
+        return extractFromString(value);
       } else if (Array.isArray(value)) {
-        value.forEach((item) => {
-          if (typeof item === 'string') {
-            extractFromString(item);
-          }
+        return value.flatMap((item) => {
+          return typeof item === 'string' ? extractFromString(item) : [];
         });
       }
+      return [];
     };
+
+    const allVariables: string[] = [];
 
     // Extract variables from queryParams
     if (spec.queryParams) {
-      Object.values(spec.queryParams).forEach(extractFromValue);
+      Object.values(spec.queryParams).forEach((value) => {
+        allVariables.push(...extractFromValue(value));
+      });
     }
 
     // Extract variables from directUrl
     if (spec.directUrl) {
-      extractFromString(spec.directUrl);
+      allVariables.push(...extractFromString(spec.directUrl));
     }
 
     // Extract variables from proxy configuration
     if (spec.proxy?.spec) {
       // Extract from proxy URL
       if (spec.proxy.spec.url) {
-        extractFromString(spec.proxy.spec.url);
+        allVariables.push(...extractFromString(spec.proxy.spec.url));
       }
 
       // Extract from proxy headers
       if (spec.proxy.spec.headers) {
         Object.values(spec.proxy.spec.headers).forEach((value) => {
           if (typeof value === 'string') {
-            extractFromString(value);
+            allVariables.push(...extractFromString(value));
           }
         });
       }
     }
 
-    return Array.from(new Set(variables)); // Remove duplicates
+    return Array.from(new Set(allVariables)); // Remove duplicates
   } catch {
     return [];
   }
@@ -95,10 +89,9 @@ function getDatasourceVariablesFromCache(
   datasourceStore: DatasourceStore
 ): string[] {
   try {
-    const extendedStore = datasourceStore as ExtendedDatasourceStore;
-    if (!extendedStore.getDatasourceSpecSync) return [];
+    if (!datasourceStore.getDatasourceSpecSync) return [];
 
-    const datasourceSpec = extendedStore.getDatasourceSpecSync(datasourceSelector) as
+    const datasourceSpec = datasourceStore.getDatasourceSpecSync(datasourceSelector) as
       | DatasourceSpec<PrometheusDatasourceSpec>
       | undefined;
     return datasourceSpec ? extractDatasourceVariables(datasourceSpec) : [];
