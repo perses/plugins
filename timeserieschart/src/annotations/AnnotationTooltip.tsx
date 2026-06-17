@@ -166,7 +166,7 @@ export function AnnotationTooltip({
  * markLine (vertical dashed lines) and markPoint (triangle markers under the X-axis).
  */
 export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | undefined): LineSeriesOption[] {
-  if (!annotations || annotations.length === 0) return [];
+  if (!annotations?.length) return [];
 
   const markAreaData: Array<[{ xAxis: number; itemStyle?: { color: string; opacity: number } }, { xAxis: number }]> =
     [];
@@ -207,35 +207,23 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
         { xAxis: annotation.end },
       ]);
 
-      // Add start marker
-      markPointData.push({
-        coord: [annotation.start, 0],
-        symbol: 'triangle',
-        symbolSize: [12, 12],
-        symbolRotate: 0,
-        symbolOffset: [0, 4], // Position below X-axis
-        itemStyle: { color },
-        annotationIndex: index,
-        emphasis: {
-          disabled: true,
-        },
-        isStart: true,
-      });
-
-      // Add end marker
-      markPointData.push({
-        coord: [annotation.end, 0],
-        symbol: 'triangle',
-        symbolSize: [12, 12],
-        symbolRotate: 0,
-        symbolOffset: [0, 4], // Position below X-axis
-        itemStyle: { color },
-        annotationIndex: index,
-        emphasis: {
-          disabled: true,
-        },
-        isEnd: true,
-      });
+      // Add start and end markers
+      for (const isStart of [true, false]) {
+        markPointData.push({
+          coord: [isStart ? annotation.start : annotation.end, 0],
+          symbol: 'triangle',
+          symbolSize: [12, 12],
+          symbolRotate: 0,
+          symbolOffset: [0, 4], // Position below X-axis
+          itemStyle: { color },
+          annotationIndex: index,
+          emphasis: {
+            disabled: true,
+          },
+          isStart: isStart,
+          isEnd: !isStart,
+        });
+      }
     } else {
       // Point annotation - use markLine (silent) + single marker
       markLineData.push({
