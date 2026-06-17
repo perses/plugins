@@ -16,13 +16,14 @@ package migrate
 #target: {
 	datasource: {
 		type?: string
+		...
 	}
 	expr: string
 	...
 }
 
 if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-    kind: "LokiLogQuery"
+	kind: "LokiLogQuery"
 	spec: {
 		if #target.datasource.uid != _|_ {
 			datasource: {
