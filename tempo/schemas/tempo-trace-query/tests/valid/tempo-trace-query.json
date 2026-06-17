@@ -1,10 +1,9 @@
-
 {
   "kind": "TempoTraceQuery",
   "spec": {
     "datasource": {
-        "kind": "TempoDatasource",
-        "name": "MyDemoDatasource"
+      "kind": "TempoDatasource",
+      "name": "MyDemoDatasource"
     },
     "query": "{}",
     "limit": 100

@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { Collapse, Divider, List, ListItemButton, ListItemText } from '@mui/material';
-import { Fragment, ReactElement, useState } from 'react';
-import ChevronUp from 'mdi-material-ui/ChevronUp';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
-import { formatDuration } from '../utils';
-import { Trace, Span, Event } from '../trace';
+import ChevronUp from 'mdi-material-ui/ChevronUp';
+import { Fragment, ReactElement, useState } from 'react';
+
 import { CustomLinks } from '../../gantt-chart-model';
+import { Trace, Span, Event } from '../trace';
+import { formatDuration } from '../utils';
 import { AttributeItems, AttributeItem } from './Attributes';
 
 export interface SpanEventListProps {

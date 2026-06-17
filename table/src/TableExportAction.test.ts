@@ -13,6 +13,7 @@
 
 import { PanelData } from '@perses-dev/plugin-system';
 import { TimeSeriesData } from '@perses-dev/spec';
+
 import { TableOptions } from './models';
 import { buildTableData } from './TableExportAction';
 

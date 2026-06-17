@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
-import * as otlpTrace from './test/traces/example_otlp.json';
+
 import { getFilename } from './PanelActions';
+import * as otlpTrace from './test/traces/example_otlp.json';
 
 describe('PanelActions', () => {
   it('renders trace filename', () => {

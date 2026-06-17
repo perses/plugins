@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LegacyTimeSeries } from '@perses-dev/components';
+
 import { TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
 import { convertPercentThreshold, convertPanelYAxis, roundDown } from './data-transform';
 

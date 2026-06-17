@@ -13,10 +13,11 @@
 
 import { Box, useTheme } from '@mui/material';
 import { ReactElement } from 'react';
-import { TicksHeader } from '../Ticks';
-import { Viewport, rowHeight } from '../utils';
+
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { TicksHeader } from '../Ticks';
 import { Trace } from '../trace';
+import { Viewport, rowHeight } from '../utils';
 import { Canvas } from './Canvas';
 
 interface MiniGanttChartProps {

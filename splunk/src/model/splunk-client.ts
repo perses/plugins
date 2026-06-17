@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/client';
+
 import {
   SplunkJobCreateResponse,
   SplunkJobStatusResponse,

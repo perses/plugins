@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { IconButton, InputAdornment, Stack, TextField } from '@mui/material';
-import ChevronUp from 'mdi-material-ui/ChevronUp';
+import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
+import ChevronUp from 'mdi-material-ui/ChevronUp';
 import Close from 'mdi-material-ui/Close';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
-import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+
 import { renderAttributeValue } from './DetailPane/Attributes';
 import { Span, Trace, forEachSpan } from './trace';
 

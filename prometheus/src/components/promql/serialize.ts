@@ -14,6 +14,7 @@
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/promql/serialize.ts
 
 import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
+
 import ASTNode, {
   VectorSelector,
   matchType,

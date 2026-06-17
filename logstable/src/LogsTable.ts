@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
 import { LogsTableComponent } from './LogsTableComponent';
+import { LogsTableExportAction } from './LogsTableExportAction';
 import { LogsTableItemSelectionActionsEditor } from './LogsTableItemSelectionActionsEditor';
 import { LogsTableSettingsEditor } from './LogsTableSettingsEditor';
 import { LogsTableOptions, LogsTableProps } from './model';
-import { LogsTableExportAction } from './LogsTableExportAction';
 
 export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
   PanelComponent: LogsTableComponent,

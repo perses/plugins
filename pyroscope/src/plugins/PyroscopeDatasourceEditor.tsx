@@ -13,6 +13,7 @@
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import React, { ReactElement } from 'react';
+
 import { PyroscopeDatasourceSpec } from './pyroscope-datasource-types';
 
 export interface PyroscopeDatasourceEditorProps {

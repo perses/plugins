@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LinkEditorForm } from '@perses-dev/components';
-import { ReactElement } from 'react';
 import { IconButton, Stack, Typography } from '@mui/material';
-import PlusIcon from 'mdi-material-ui/Plus';
+import { LinkEditorForm } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { ReactElement } from 'react';
+
 import { ColumnEditorProps } from './ColumnEditor';
 
 export type Props = Pick<ColumnEditorProps, 'onChange' | 'column'>;

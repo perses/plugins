@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import { Box, styled, useTheme } from '@mui/material';
-import useResizeObserver from 'use-resize-observer';
-import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback, ReactElement } from 'react';
-import { useEvent } from '@perses-dev/plugin-system';
 import { useChartsTheme } from '@perses-dev/components';
-import { Ticks } from '../Ticks';
-import { getSpanColor, Viewport } from '../utils';
+import { useEvent } from '@perses-dev/plugin-system';
+import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback, ReactElement } from 'react';
+import useResizeObserver from 'use-resize-observer';
+
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { Ticks } from '../Ticks';
 import { Span, Trace } from '../trace';
+import { getSpanColor, Viewport } from '../utils';
 import { drawSpans } from './draw';
 
 const CANVAS_HEIGHT = 60;

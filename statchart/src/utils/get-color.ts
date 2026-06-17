@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { applyValueMapping, PersesChartsTheme, ThresholdOptions, ValueMapping } from '@perses-dev/components';
+
 import { StatChartOptions } from '../stat-chart-model';
 
 type StatChartValue = number | string | null;

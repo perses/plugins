@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useState } from 'react';
 import {
   Autocomplete,
   Button,
@@ -30,15 +29,17 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import PlusIcon from 'mdi-material-ui/Plus';
-import CheckIcon from 'mdi-material-ui/Check';
-import CloseIcon from 'mdi-material-ui/Close';
 import { ErrorAlert } from '@perses-dev/components';
 import { DatasourceSelector } from '@perses-dev/spec';
-import { LabelFilter, LabelValueCounter, Operator } from '../../types';
-import { ListboxComponent } from '../../filter/FilterInputs';
-import { useMetricMetadata, useSeriesStates } from '../../utils';
+import CheckIcon from 'mdi-material-ui/Check';
+import CloseIcon from 'mdi-material-ui/Close';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { ReactElement, useMemo, useState } from 'react';
+
 import { MetricChip } from '../../display/MetricChip';
+import { ListboxComponent } from '../../filter/FilterInputs';
+import { LabelFilter, LabelValueCounter, Operator } from '../../types';
+import { useMetricMetadata, useSeriesStates } from '../../utils';
 
 export interface LabelValuesRowProps extends StackProps {
   label: string;

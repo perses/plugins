@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
+import { Panel } from '@perses-dev/dashboards';
+import { useExplorerManagerContext } from '@perses-dev/explore';
 import {
   DataQueriesProvider,
   LogQueryContext,
@@ -22,11 +24,9 @@ import {
   usePluginRegistry,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useMemo, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/spec';
-import { Panel } from '@perses-dev/dashboards';
-import { useExplorerManagerContext } from '@perses-dev/explore';
 import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useMemo, useState } from 'react';
 
 interface LogExplorerQueryParams {
   queries?: QueryDefinition[];

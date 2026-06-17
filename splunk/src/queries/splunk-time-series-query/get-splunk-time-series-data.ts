@@ -13,10 +13,11 @@
 
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { HTTPAllowedEndpoint, TimeSeries } from '@perses-dev/spec';
-import { SplunkClient } from '../../model/splunk-client';
+
 import { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
-import { DEFAULT_DATASOURCE } from '../constants';
 import { SplunkJobCreateResponse, SplunkJobStatusResponse, SplunkResultsResponse } from '../../model';
+import { SplunkClient } from '../../model/splunk-client';
+import { DEFAULT_DATASOURCE } from '../constants';
 import { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
 
 function convertResultsToTimeSeries(

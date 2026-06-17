@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { InfoTooltip } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
-import DownloadIcon from 'mdi-material-ui/Download';
+import { InfoTooltip } from '@perses-dev/components';
 import { sanitizeFilename } from '@perses-dev/plugin-system';
+import DownloadIcon from 'mdi-material-ui/Download';
 import { useCallback, useMemo } from 'react';
+
 import { LogsTableProps } from './model';
 
 export const LogsTableExportAction: React.FC<LogsTableProps> = ({ queryResults, definition }) => {

@@ -23,6 +23,7 @@ import {
   TableDensity,
 } from '@perses-dev/components';
 import { ChangeEvent, ReactElement } from 'react';
+
 import { TableSettingsEditorProps } from '../models';
 
 interface DefaultColumnsDimensionsControlProps {

@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { parseVariables } from '@perses-dev/plugin-system';
+
 import { getSplunkLogData } from './get-splunk-log-data';
-import { SplunkLogQueryEditor } from './SplunkLogQueryEditor';
-import { SplunkLogQuerySpec } from './splunk-log-query-types';
 import { LogQueryPlugin } from './log-query-plugin-interface';
+import { SplunkLogQuerySpec } from './splunk-log-query-types';
+import { SplunkLogQueryEditor } from './SplunkLogQueryEditor';
 
 export const SplunkLogQuery: LogQueryPlugin<SplunkLogQuerySpec> = {
   getLogData: getSplunkLogData,

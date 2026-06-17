@@ -13,9 +13,10 @@
 
 import { Stack, Typography } from '@mui/material';
 import { PanelProps } from '@perses-dev/plugin-system';
+import { TimeScale, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
-import { TimeScale, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
+
 import { DEFAULT_FORMAT, HeatMapChartOptions, LOG_BASE } from '../heat-map-chart-model';
 import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils';
 import { HeatMapChart, HeatMapDataItem } from './HeatMapChart';

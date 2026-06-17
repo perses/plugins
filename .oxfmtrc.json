@@ -1,0 +1,15 @@
+{
+  "printWidth": 120,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "sortImports": {},
+  "ignorePatterns": [
+    "**/dist",
+    "**/lib",
+    "**/*.md",
+    "**/*.mdx",
+    "package-lock.json",
+    ".github/perses-ci",
+    ".github/perses-ci/**"
+  ]
+}

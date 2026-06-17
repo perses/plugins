@@ -26,12 +26,13 @@ import {
   useTheme,
 } from '@mui/material';
 import { FormatControls, FormatOptions, OptionsColorPicker } from '@perses-dev/components';
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { useQueryCountContext } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import CloseIcon from 'mdi-material-ui/Close';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import CloseIcon from 'mdi-material-ui/Close';
-import { produce } from 'immer';
-import { useQueryCountContext } from '@perses-dev/plugin-system';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+
 import {
   DEFAULT_AREA_OPACITY,
   LINE_STYLE_CONFIG,
@@ -331,8 +332,8 @@ function QuerySettingsInput({
   onAreaOpacityChange,
   onDelete,
   inputRef,
-  onAddColor: onAddColor,
-  onRemoveColor: onRemoveColor,
+  onAddColor,
+  onRemoveColor,
   onAddLineStyle,
   onRemoveLineStyle,
   onAddAreaOpacity,

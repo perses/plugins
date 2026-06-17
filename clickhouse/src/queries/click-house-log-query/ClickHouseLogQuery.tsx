@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { parseVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
-import { getClickHouseLogData } from './get-click-house-log-data';
-import { ClickHouseLogQueryEditor } from './ClickHouseLogQueryEditor';
+
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
+import { ClickHouseLogQueryEditor } from './ClickHouseLogQueryEditor';
+import { getClickHouseLogData } from './get-click-house-log-data';
 
 export const ClickHouseLogQuery: LogQueryPlugin<ClickHouseLogQuerySpec> = {
   getLogData: getClickHouseLogData,

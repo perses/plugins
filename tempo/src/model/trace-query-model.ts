@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelectValue } from '@perses-dev/plugin-system';
+
 import { TempoDatasourceSelector } from './tempo-selectors';
 /**
  * The spec/options for the TempoTraceQuery plugin.

@@ -73,7 +73,7 @@ interface PluginConfigOptions {
  * });
  * ```
  */
-export function createConfigForPlugin(options: PluginConfigOptions) {
+export function createConfigForPlugin(options: PluginConfigOptions): RsbuildConfig {
   const { name, rsbuildConfig = {}, moduleFederation = {} } = options;
 
   const mfConfig: ModuleFederationOptions = {

@@ -22,6 +22,7 @@ import { VariableProvider } from '@perses-dev/dashboards';
 import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
+
 import { LogsTablePanel } from './LogsTablePanel';
 import { LogsQueryData, LogsTableProps } from './model';
 import { MOCK_LOGS_QUERY_DEFINITION, MOCK_LOGS_QUERY_RESULT, MOCK_LOGS_QUERY_RESULTS } from './test/mock-query-results';

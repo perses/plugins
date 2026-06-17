@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AttributeField, FieldExpression, FieldOp, IntrinsicField, Static, parser } from '@grafana/lezer-traceql';
+
 import { DurationField, Filter } from './filter';
 
 interface Matcher {

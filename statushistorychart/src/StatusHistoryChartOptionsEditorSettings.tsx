@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
-import { produce } from 'immer';
+import { Button } from '@mui/material';
 import {
   OptionsEditorGroup,
   OptionsEditorGrid,
@@ -21,8 +20,10 @@ import {
   SortOption,
   SortSelectorProps,
 } from '@perses-dev/components';
-import { Button } from '@mui/material';
+import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
 import { ReactElement } from 'react';
+
 import { StatusHistoryChartOptions, StatusHistroyChartEditorProps } from './status-history-model.js';
 
 export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChartEditorProps): ReactElement {

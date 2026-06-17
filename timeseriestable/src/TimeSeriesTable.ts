@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
-import { TimeSeriesTablePanel, TimeSeriesTableProps } from './TimeSeriesTablePanel';
+
 import { TimeSeriesTableItemSelectionActionsEditor } from './components';
 import { TimeSeriesTableOptions } from './model';
+import { TimeSeriesTablePanel, TimeSeriesTableProps } from './TimeSeriesTablePanel';
 
 /**
  * The core TimeSeriesTable panel plugin for Perses.

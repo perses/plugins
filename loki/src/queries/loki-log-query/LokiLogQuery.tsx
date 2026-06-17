@@ -13,9 +13,10 @@
 
 import { QueryDefinition } from '@perses-dev/core';
 import { LogQueryPlugin, LogQueryContext, calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
+
 import { getLokiLogData } from './get-loki-log-data';
-import { LokiLogQueryEditor } from './LokiLogQueryEditor';
 import { LokiLogQuerySpec } from './loki-log-query-types';
+import { LokiLogQueryEditor } from './LokiLogQueryEditor';
 
 export const LokiLogQuery: LogQueryPlugin<LokiLogQuerySpec> = {
   getLogData: getLokiLogData,

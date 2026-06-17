@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { parseVariables, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { GreptimeDBTimeSeriesQuerySpec } from './greptimedb-query-types';
+
 import { getTimeSeriesData } from './get-greptimedb-data';
+import { GreptimeDBTimeSeriesQuerySpec } from './greptimedb-query-types';
 import { GreptimeDBTimeSeriesQueryEditor } from './GreptimeDBQueryEditor';
 
 export const GreptimeDBTimeSeriesQuery: TimeSeriesQueryPlugin<GreptimeDBTimeSeriesQuerySpec> = {

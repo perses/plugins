@@ -13,6 +13,7 @@
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { LokiDatasourceSpec } from './loki-datasource-types';
 
 export interface LokiDatasourceEditorProps {

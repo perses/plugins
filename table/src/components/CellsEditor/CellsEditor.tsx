@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
 import { CellSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
 

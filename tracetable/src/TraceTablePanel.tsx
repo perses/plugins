@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import { PanelProps } from '@perses-dev/plugin-system';
 import { TraceData } from '@perses-dev/spec';
+import { ReactElement } from 'react';
+
 import { DataTable } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 

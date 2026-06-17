@@ -13,8 +13,9 @@
 
 import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
-import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
+
 import { VictoriaLogsClient } from '../../model/client';
+import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { VictoriaLogsLogQuerySpec } from './types';
 

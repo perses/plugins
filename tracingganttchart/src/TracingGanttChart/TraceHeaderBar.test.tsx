@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, RenderResult } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
-import { MemoryRouter } from 'react-router-dom';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import { screen } from '@testing-library/dom';
+import { render, RenderResult } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
 import * as exampleTrace from '../test/traces/example_otlp.json';
+import { SpanSearch } from './Search';
 import { getTraceModel } from './trace';
 import { TraceHeaderBar, TraceHeaderBarProps } from './TraceHeaderBar';
-import { SpanSearch } from './Search';
 
 describe('TraceHeaderBar', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);

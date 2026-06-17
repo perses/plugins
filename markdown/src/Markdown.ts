@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
 import { createInitialMarkdownPanelOptions, MarkdownPanelOptions } from './markdown-panel-model';
 import { MarkdownPanel } from './MarkdownPanel';
 import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';

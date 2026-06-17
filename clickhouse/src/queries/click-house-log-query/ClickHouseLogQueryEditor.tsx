@@ -11,19 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Stack } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
   isVariableDatasource,
   OptionsEditorProps,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
-import { Stack } from '@mui/material';
-import { createModEnterHandler } from '@perses-dev/dashboards';
-import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
+import { ReactElement, useCallback } from 'react';
+
 import { ClickQLEditor } from '../../components';
 import { queryExample } from '../../components/constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 

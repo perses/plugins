@@ -13,8 +13,9 @@
 
 import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
-import { LokiStreamResult } from '../../model/loki-client-types';
+
 import { LokiClient } from '../../model/loki-client';
+import { LokiStreamResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { LokiLogQuerySpec } from './loki-log-query-types';
 

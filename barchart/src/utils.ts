@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { SortOption } from '@perses-dev/components';
+
 import { DEFAULT_SORT } from './bar-chart-model';
 import { BarChartData } from './BarChartBase';
 

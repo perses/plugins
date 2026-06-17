@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { EditorView } from '@codemirror/view';
 import { useTheme, InputLabel, Stack } from '@mui/material';
+import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { ReactElement } from 'react';
 
 export type ClickQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;

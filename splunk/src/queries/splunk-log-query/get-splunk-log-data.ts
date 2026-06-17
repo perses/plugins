@@ -13,17 +13,18 @@
 
 import { replaceVariables } from '@perses-dev/plugin-system';
 import { HTTPAllowedEndpoint, LogData, LogEntry } from '@perses-dev/spec';
-import { SplunkClient } from '../../model/splunk-client';
+
 import { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
-import { DEFAULT_DATASOURCE } from '../constants';
+import { SplunkClient } from '../../model/splunk-client';
 import {
   SplunkIndexResponse,
   SplunkJobCreateResponse,
   SplunkJobStatusResponse,
   SplunkResultsResponse,
 } from '../../model/splunk-client-types';
-import { SplunkLogQuerySpec } from './splunk-log-query-types';
+import { DEFAULT_DATASOURCE } from '../constants';
 import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
+import { SplunkLogQuerySpec } from './splunk-log-query-types';
 
 function convertResultsToLogs(
   results:

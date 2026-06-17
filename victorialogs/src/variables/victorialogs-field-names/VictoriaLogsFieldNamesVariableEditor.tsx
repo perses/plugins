@@ -20,6 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import {
   DEFAULT_VICTORIALOGS,
   isDefaultVictoriaLogsSelector,

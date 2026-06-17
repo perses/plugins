@@ -13,6 +13,7 @@
 
 import { ActionOptions, ItemSelectionActionsEditor, SelectionOptions } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { LogsTableSettingsEditorProps } from './model';
 
 export function LogsTableItemSelectionActionsEditor({ value, onChange }: LogsTableSettingsEditorProps): ReactElement {

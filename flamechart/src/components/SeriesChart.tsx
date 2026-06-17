@@ -11,17 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useRef } from 'react';
 import { Stack, useTheme } from '@mui/material';
 import { useChartsTheme, EChart, ZoomEventData, OnEventsType, enableDataZoom } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
+import { ProfileData, Timeline } from '@perses-dev/spec';
 import type { EChartsCoreOption, LineSeriesOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { CallbackDataParams } from 'echarts/types/dist/shared';
-import { ProfileData, Timeline } from '@perses-dev/spec';
+import { ReactElement, useMemo, useRef } from 'react';
+
+import { SeriesSample } from '../utils/data-model';
 import { formatItemValue } from '../utils/format';
 import { getSeriesTooltip } from '../utils/series-tooltip';
-import { SeriesSample } from '../utils/data-model';
 
 const LINE_WIDTH = 1.25;
 const POINT_SIZE_OFFSET = 2;

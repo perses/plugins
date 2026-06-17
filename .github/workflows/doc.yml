@@ -12,7 +12,7 @@ on:
 
 jobs:
   docs-fmt:
-    name: "Check docs format"
+    name: 'Check docs format'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -25,5 +25,3 @@ jobs:
         run: go install github.com/bwplotka/mdox@latest
       - name: check docs
         run: make checkdocs
-
-

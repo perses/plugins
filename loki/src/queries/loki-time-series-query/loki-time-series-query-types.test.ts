@@ -17,9 +17,10 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
+
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
+import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
 import { LokiTimeSeriesQuery } from './LokiTimeSeriesQuery';
 
 const datasource: LokiDatasourceSpec = {

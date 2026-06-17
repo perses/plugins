@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'react';
 import { Box, useTheme, Popover, Button, ButtonGroup, IconButton } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
-import { Virtuoso } from 'react-virtuoso';
 import { useSelection } from '@perses-dev/components';
 import { formatForDisplay, useSelectionItemActions } from '@perses-dev/dashboards';
 import { ActionOptions, useAllVariableValues } from '@perses-dev/plugin-system';
 import { LogEntry } from '@perses-dev/spec';
-import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
+import CloseIcon from 'mdi-material-ui/Close';
+import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'react';
+import { Virtuoso } from 'react-virtuoso';
+
 import { LogsTableOptions } from '../model';
+import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogRow } from './LogRow';
 
 const PERSES_LOGSTABLE_HINTS_DISMISSED = 'PERSES_LOGSTABLE_HINTS_DISMISSED';

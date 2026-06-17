@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import { ReactElement, useMemo } from 'react';
+
 import { LogQLExtension, CompletionConfig } from './logql-extension';
 
 export type LogQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> & {

@@ -31,9 +31,10 @@ import {
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
+import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
+
 import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
@@ -291,6 +292,8 @@ function ColumnFilterDropdown({
       />
       {filteredValues.map((value, index) => (
         <div key={`value-${index}`} style={{ marginBottom: 4 }}>
+          {/* Decorative hover styling on the label that wraps the interactive checkbox below. */}
+          {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <label
             style={{
               display: 'flex',

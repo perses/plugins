@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
+
 import { RawFilterInput, RawFilterInputProps } from './FilterInputs';
 
 describe('FilterInputs', () => {

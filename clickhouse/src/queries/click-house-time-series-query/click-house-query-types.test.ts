@@ -17,6 +17,7 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
 import { ClickHouseTimeSeriesQuery } from './ClickHouseQuery';

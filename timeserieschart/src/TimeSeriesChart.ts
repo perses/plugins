@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
+
 import { TimeSeriesChartGeneralSettings } from './GeneralSettingsEditor';
 import { QuerySettingsEditor } from './QuerySettingsEditor';
+import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 import { TimeSeriesExportAction } from './TimeSeriesExportAction';
 

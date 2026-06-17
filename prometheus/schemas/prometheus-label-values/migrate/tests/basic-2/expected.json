@@ -2,8 +2,6 @@
   "kind": "PrometheusLabelValuesVariable",
   "spec": {
     "labelName": "stack",
-    "matchers": [
-      "thanos_build_info"
-    ]
+    "matchers": ["thanos_build_info"]
   }
 }

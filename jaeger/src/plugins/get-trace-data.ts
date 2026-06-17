@@ -18,8 +18,9 @@ import {
   VariableStateMap,
 } from '@perses-dev/plugin-system';
 import { AbsoluteTimeRange, Notice, TraceSearchResult } from '@perses-dev/spec';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import {
   DEFAULT_JAEGER,
   DEFAULT_SEARCH_LIMIT,

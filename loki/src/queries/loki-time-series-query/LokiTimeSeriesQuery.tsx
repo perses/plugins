@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+
 import { getLokiTimeSeriesData } from './get-loki-time-series-data';
-import { LokiQueryEditor } from './LokiTimeSeriesQueryEditor';
 import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
+import { LokiQueryEditor } from './LokiTimeSeriesQueryEditor';
 
 export const LokiTimeSeriesQuery: TimeSeriesQueryPlugin<LokiTimeSeriesQuerySpec> = {
   getTimeSeriesData: getLokiTimeSeriesData,
