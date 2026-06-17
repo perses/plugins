@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
+import { useDatasourceClient, useTimeRange, useVariableValues, useDatasourceStore } from '@perses-dev/plugin-system';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { DatasourceSelector } from '@perses-dev/spec';
@@ -28,6 +28,7 @@ import {
   SeriesRequestParameters,
   SeriesResponse,
 } from '../../model';
+import { getInterpolatedRequestOptions } from '../../plugins/interpolation';
 import { computeFilterExpr, LabelFilter, LabelValueCounter } from './types';
 
 // Retrieve metric metadata from the Prometheus API
@@ -41,6 +42,8 @@ export function useMetricMetadata(
   error: StatusError | null;
 } {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
+  const datasourceStore = useDatasourceStore();
+  const variableState = useVariableValues();
 
   // histograms and summaries timeseries desc are not always added to prefixed timeseries
   const name = metricName.replace(/(_count|_sum|_bucket)$/, '');
@@ -51,7 +54,9 @@ export function useMetricMetadata(
     queryFn: async () => {
       const params: MetricMetadataRequestParameters = { metric: name };
 
-      return await client!.metricMetadata(params);
+      const interpolatedOptions = await getInterpolatedRequestOptions(datasourceStore, datasource, variableState);
+
+      return await client!.metricMetadata(params, interpolatedOptions);
     },
   });
 
@@ -76,6 +81,8 @@ export function useLabels(
     absoluteTimeRange: { start, end },
   } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
+  const datasourceStore = useDatasourceStore();
+  const variableState = useVariableValues();
 
   return useQuery<LabelValuesResponse, StatusError>({
     enabled: !!client,
@@ -89,7 +96,9 @@ export function useLabels(
         params['match[]'] = [`{${computeFilterExpr(filters)}}`];
       }
 
-      return await client!.labelNames(params);
+      const interpolatedOptions = await getInterpolatedRequestOptions(datasourceStore, datasource, variableState);
+
+      return await client!.labelNames(params, interpolatedOptions);
     },
   });
 }
@@ -104,6 +113,8 @@ export function useLabelValues(
     absoluteTimeRange: { start, end },
   } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
+  const datasourceStore = useDatasourceStore();
+  const variableState = useVariableValues();
 
   return useQuery<LabelValuesResponse, StatusError>({
     enabled: !!client,
@@ -118,7 +129,9 @@ export function useLabelValues(
         params['match[]'] = [`{${computeFilterExpr(filters)}}`];
       }
 
-      return await client!.labelValues(params);
+      const interpolatedOptions = await getInterpolatedRequestOptions(datasourceStore, datasource, variableState);
+
+      return await client!.labelValues(params, interpolatedOptions);
     },
   });
 }
@@ -140,6 +153,8 @@ export function useSeriesStates(
     absoluteTimeRange: { start, end },
   } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
+  const datasourceStore = useDatasourceStore();
+  const variableState = useVariableValues();
 
   const {
     data: seriesData,
@@ -156,7 +171,9 @@ export function useSeriesStates(
         end: end.valueOf() / 1000,
       };
 
-      return await client!.series(params);
+      const interpolatedOptions = await getInterpolatedRequestOptions(datasourceStore, datasource, variableState);
+
+      return await client!.series(params, interpolatedOptions);
     },
   });
 
