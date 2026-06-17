@@ -18,11 +18,82 @@ import {
   parseVariables,
   datasourceSelectValueToSelector,
   isVariableDatasource,
+  DatasourceStore,
 } from '@perses-dev/plugin-system';
+import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
 import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import { resolvePrometheusDatasource } from './interpolation';
-import { PrometheusLabelValuesVariableOptions } from './types';
+import { PrometheusLabelValuesVariableOptions, PrometheusDatasourceSpec } from './types';
+
+function extractDatasourceVariables(datasourceSpec: DatasourceSpec<PrometheusDatasourceSpec>): string[] {
+  try {
+    const spec = datasourceSpec.plugin.spec;
+
+    // Pure function to extract variables from string or array values
+    const extractFromValue = (value: string | string[]): string[] => {
+      if (typeof value === 'string') {
+        return parseVariables(value);
+      } else if (Array.isArray(value)) {
+        return value.flatMap((item) => {
+          return typeof item === 'string' ? parseVariables(item) : [];
+        });
+      }
+      return [];
+    };
+
+    const allVariables: string[] = [];
+
+    // Extract variables from queryParams
+    if (spec.queryParams) {
+      Object.values(spec.queryParams).forEach((value) => {
+        allVariables.push(...extractFromValue(value));
+      });
+    }
+
+    // Extract variables from directUrl
+    if (spec.directUrl) {
+      allVariables.push(...extractFromValue(spec.directUrl));
+    }
+
+    // Extract variables from proxy configuration
+    if (spec.proxy?.spec) {
+      // Extract from proxy URL
+      if (spec.proxy.spec.url) {
+        allVariables.push(...extractFromValue(spec.proxy.spec.url));
+      }
+
+      // Extract from proxy headers
+      if (spec.proxy.spec.headers) {
+        Object.values(spec.proxy.spec.headers).forEach((value) => {
+          if (typeof value === 'string') {
+            allVariables.push(...extractFromValue(value));
+          }
+        });
+      }
+    }
+
+    return Array.from(new Set(allVariables)); // Remove duplicates
+  } catch {
+    return [];
+  }
+}
+
+function getDatasourceVariablesFromCache(
+  datasourceSelector: DatasourceSelector,
+  datasourceStore: DatasourceStore
+): string[] {
+  try {
+    if (!datasourceStore.getDatasourceSpecSync) return [];
+
+    const datasourceSpec = datasourceStore.getDatasourceSpecSync(datasourceSelector) as
+      | DatasourceSpec<PrometheusDatasourceSpec>
+      | undefined;
+    return datasourceSpec ? extractDatasourceVariables(datasourceSpec) : [];
+  } catch {
+    return [];
+  }
+}
 
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
   getVariableOptions: async (spec: PrometheusLabelValuesVariableOptions, ctx: GetVariableOptionsContext) => {
@@ -33,6 +104,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
         ctx.variables,
         await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND)
       ) ?? DEFAULT_PROM;
+
     const { client, requestOptions } = await resolvePrometheusDatasource(
       ctx.datasourceStore,
       datasourceSelector,
@@ -54,13 +126,30 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn: (spec: PrometheusLabelValuesVariableOptions) => {
+  dependsOn: (spec: PrometheusLabelValuesVariableOptions, ctx?: GetVariableOptionsContext) => {
     const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
     const labelVariables = parseVariables(spec.labelName);
     const datasourceVariables =
       spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];
+
+    let datasourceVariablesFromCache: string[] = [];
+    if (ctx?.datasourceStore && ctx?.variables) {
+      const datasourceValue = spec.datasource ?? DEFAULT_PROM;
+      const datasourceSelector: DatasourceSelector =
+        typeof datasourceValue === 'string' ? { kind: PROM_DATASOURCE_KIND, name: datasourceValue } : datasourceValue;
+      datasourceVariablesFromCache = getDatasourceVariablesFromCache(datasourceSelector, ctx.datasourceStore);
+    }
+
+    const allDependencies = [
+      ...matcherVariables,
+      ...labelVariables,
+      ...datasourceVariables,
+      ...datasourceVariablesFromCache,
+    ];
+    const uniqueDependencies = Array.from(new Set(allDependencies));
+
     return {
-      variables: [...matcherVariables, ...labelVariables, ...datasourceVariables],
+      variables: uniqueDependencies,
     };
   },
   OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
