@@ -14,61 +14,17 @@
 package datasource
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/perses/perses/go-sdk/datasource"
-	"github.com/perses/spec/go/datasource/proxy/http"
+	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
 const PluginKind = "JaegerDatasource"
-
-type PluginSpec struct {
-	DirectURL string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy     *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-}
-
-func (s *PluginSpec) UnmarshalJSON(data []byte) error {
-	type plain PluginSpec
-	var tmp PluginSpec
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*s = tmp
-	return nil
-}
-
-func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp PluginSpec
-	type plain PluginSpec
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*s = tmp
-	return nil
-}
-
-func (s *PluginSpec) validate() error {
-	if len(s.DirectURL) == 0 && s.Proxy == nil {
-		return fmt.Errorf("directUrl or proxy cannot be empty")
-	}
-	if len(s.DirectURL) > 0 && s.Proxy != nil {
-		return fmt.Errorf("at most directUrl or proxy must be configured")
-	}
-	return nil
-}
 
 type Option func(plugin *Builder) error
 
 func create(options ...Option) (Builder, error) {
 	builder := &Builder{
-		PluginSpec: PluginSpec{},
+		HTTPDatasourceSpec: datasourceSpec.HTTPDatasourceSpec{},
 	}
 
 	for _, opt := range options {
@@ -81,7 +37,7 @@ func create(options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	PluginSpec `json:",inline" yaml:",inline"`
+	datasourceSpec.HTTPDatasourceSpec `json:",inline" yaml:",inline"`
 }
 
 func Jaeger(options ...Option) datasource.Option {
@@ -92,7 +48,7 @@ func Jaeger(options ...Option) datasource.Option {
 		}
 
 		builder.Spec.Plugin.Kind = PluginKind
-		builder.Spec.Plugin.Spec = plugin.PluginSpec
+		builder.Spec.Plugin.Spec = plugin.HTTPDatasourceSpec
 		return nil
 	}
 }

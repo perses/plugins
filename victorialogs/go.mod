@@ -3,8 +3,8 @@ module github.com/perses/plugins/victorialogs
 go 1.26.2
 
 require (
-	github.com/perses/perses v0.54.0-beta.1
-	github.com/perses/spec v0.2.0-beta.2
+	github.com/perses/perses v0.54.0-beta.1.0.20260617122921-ba4a6bd301ae
+	github.com/perses/spec v0.2.0-beta.3.0.20260616092155-57c6e9ee3c07
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/perses/common v0.31.0 // indirect
+	github.com/perses/common v0.31.1 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.68.1 // indirect
@@ -28,8 +28,8 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
