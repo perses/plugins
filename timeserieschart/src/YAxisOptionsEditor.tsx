@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Switch, TextField } from '@mui/material';
-
 import { OptionsEditorControl, OptionsEditorGroup, FormatControls, SettingsAutocomplete } from '@perses-dev/components';
 import { ReactElement } from 'react';
+
 import {
   DEFAULT_FORMAT,
   DEFAULT_Y_AXIS,

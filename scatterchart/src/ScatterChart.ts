@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
 import { createInitialScatterChartOptions, ScatterChartOptions } from './scatter-chart-model';
 import { ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 

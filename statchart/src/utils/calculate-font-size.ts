@@ -56,7 +56,7 @@ export function useOptimalFontSize({
   }
 
   const textStyle = echartsTheme.textStyle;
-  const fontSize = Number(textStyle?.fontSize) ?? 12;
+  const fontSize = Number(textStyle?.fontSize ?? 12);
   const fontFamily = textStyle?.fontFamily ?? 'Lato';
 
   // set the font on the canvas context

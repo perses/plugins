@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Autocomplete, Chip, IconButton, TextField, Typography } from '@mui/material';
 /* eslint-disable jsx-a11y/no-autofocus */
 import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Autocomplete, Chip, IconButton, TextField, Typography } from '@mui/material';
-import { ReactElement, useCallback, useState } from 'react';
 import PlusCircleIcon from 'mdi-material-ui/PlusCircle';
+import { ReactElement, useCallback, useState } from 'react';
 
 type StaticListOption = string | VariableOption;
 

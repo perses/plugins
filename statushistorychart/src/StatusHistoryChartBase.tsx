@@ -12,6 +12,9 @@
 // limitations under the License.
 
 import { Box, SxProps, Typography, useTheme } from '@mui/material';
+import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import { TimeScale } from '@perses-dev/spec';
+import { EChartsCoreOption, TitleComponentOption } from 'echarts';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
 import {
   GridComponent,
@@ -23,12 +26,10 @@ import {
 } from 'echarts/components';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { EChartsCoreOption, TitleComponentOption } from 'echarts';
 import { FC } from 'react';
-import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
-import { TimeScale } from '@perses-dev/spec';
-import { getFormattedStatusHistoryAxisLabel } from './utils/get-formatted-axis-label';
+
 import { generateTooltipHTML } from './StatusHistoryTooltip';
+import { getFormattedStatusHistoryAxisLabel } from './utils/get-formatted-axis-label';
 
 use([
   EChartsHeatmapChart,

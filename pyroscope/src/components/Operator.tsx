@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { Select, MenuItem } from '@mui/material';
+import { ReactElement } from 'react';
 
 export interface OperatorProps {
   value: string;

@@ -13,6 +13,7 @@
 
 import { DatasourceSelectValue } from '@perses-dev/plugin-system';
 import { DurationString } from '@perses-dev/spec';
+
 import { PrometheusDatasourceSelector } from '../../model';
 /**
  * The spec/options for the PrometheusTimeSeriesQuery plugin.

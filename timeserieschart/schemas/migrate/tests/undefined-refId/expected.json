@@ -1,15 +1,10 @@
 {
   "kind": "TimeSeriesChart",
   "spec": {
-   "legend": {
-     "mode": "table",
+    "legend": {
+      "mode": "table",
       "position": "bottom",
-      "values": [
-        "first",
-        "min",
-        "max",
-        "last"
-      ]
+      "values": ["first", "min", "max", "last"]
     },
     "visual": {
       "connectNulls": false

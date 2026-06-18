@@ -12,17 +12,17 @@
 // limitations under the License.
 
 import { Checkbox, FormControlLabel, Skeleton, Stack, StackProps, Tab, Tabs, Tooltip } from '@mui/material';
-import { ReactElement, useMemo, useState } from 'react';
-
 import { Panel } from '@perses-dev/dashboards';
-import useResizeObserver from 'use-resize-observer';
 import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
 import { DatasourceSelector, Definition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
+import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
+import { ReactElement, useMemo, useState } from 'react';
+import useResizeObserver from 'use-resize-observer';
+
 import { computeFilterExpr, LabelFilter } from '../types';
 import { useMetricMetadata } from '../utils';
-import { OverviewTab } from './tabs/OverviewTab';
 import { JobTab } from './tabs/JobTab';
+import { OverviewTab } from './tabs/OverviewTab';
 import { SimilarTab } from './tabs/SimilarTab';
 
 export interface OverviewPanelProps extends StackProps {

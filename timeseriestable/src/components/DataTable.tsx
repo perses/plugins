@@ -26,8 +26,9 @@ import {
 import { useSelection } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import { ActionOptions, PanelData, useAllVariableValues } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { BucketTuple, HistogramValue, TimeSeries, TimeSeriesData, TimeSeriesHistogramTuple } from '@perses-dev/spec';
+import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+
 import { TimeSeriesTableOptions } from '../model';
 import { EmbeddedPanel } from './EmbeddedPanel';
 import { SeriesName } from './SeriesName';

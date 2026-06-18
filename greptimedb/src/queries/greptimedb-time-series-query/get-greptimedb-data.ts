@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import {

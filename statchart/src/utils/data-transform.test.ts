@@ -13,6 +13,7 @@
 
 import { testChartsTheme, ThresholdOptions } from '@perses-dev/components';
 import { LineSeriesOption } from 'echarts';
+
 import { StatChartOptions, StatChartSparklineOptions } from '../stat-chart-model';
 import { convertSparkline } from './data-transform';
 import { getStatChartColor } from './get-color';

@@ -19,11 +19,12 @@ import {
   PluginRegistry,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { TimeSeriesData } from '@perses-dev/spec';
+
 import { TableOptions, TimeSeriesTableProps } from '../models';
 import {
   MOCK_TIME_SERIES_DATA_MULTIVALUE,

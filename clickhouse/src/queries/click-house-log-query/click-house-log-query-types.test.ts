@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
+
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources/click-house-datasource';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
 import { ClickHouseLogQuery } from './ClickHouseLogQuery';

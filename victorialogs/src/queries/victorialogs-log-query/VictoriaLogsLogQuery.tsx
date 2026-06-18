@@ -13,9 +13,10 @@
 
 import { QueryDefinition } from '@perses-dev/core';
 import { LogQueryPlugin, LogQueryContext, calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
+
 import { getVictoriaLogsLogData } from './query';
-import { VictoriaLogsLogQueryEditor } from './VictoriaLogsLogQueryEditor';
 import { VictoriaLogsLogQuerySpec } from './types';
+import { VictoriaLogsLogQueryEditor } from './VictoriaLogsLogQueryEditor';
 
 export const VictoriaLogsLogQuery: LogQueryPlugin<VictoriaLogsLogQuerySpec> = {
   getLogData: getVictoriaLogsLogData,

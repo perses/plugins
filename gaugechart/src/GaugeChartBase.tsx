@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { EChart, FormatOptions, formatValue, useChartsTheme, useDeepMemo } from '@perses-dev/components';
-import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+import { use, EChartsCoreOption } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { ReactElement } from 'react';
 

@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { milliseconds } from 'date-fns';
 import { DurationString, parseDurationString, TimeSeries } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
+
 import { LokiClient } from '../../model/loki-client';
 import { LokiMatrixResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';

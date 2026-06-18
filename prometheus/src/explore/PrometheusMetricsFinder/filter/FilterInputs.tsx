@@ -12,16 +12,6 @@
 // limitations under the License.
 
 import {
-  cloneElement,
-  forwardRef,
-  HTMLAttributes,
-  ReactElement,
-  SyntheticEvent,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import {
   Autocomplete,
   CircularProgress,
   IconButton,
@@ -32,9 +22,20 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import DeleteIcon from 'mdi-material-ui/Delete';
-import { Virtuoso } from 'react-virtuoso';
 import { DatasourceSelector } from '@perses-dev/spec';
+import DeleteIcon from 'mdi-material-ui/Delete';
+import {
+  cloneElement,
+  forwardRef,
+  HTMLAttributes,
+  ReactElement,
+  SyntheticEvent,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { Virtuoso } from 'react-virtuoso';
+
 import { LabelFilter, Operator } from '../types';
 import { useLabels, useLabelValues } from '../utils';
 

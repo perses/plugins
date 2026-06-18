@@ -13,6 +13,7 @@
 
 import { PersesChartsTheme } from '@perses-dev/components';
 import { LineSeriesOption } from 'echarts/charts';
+
 import { StatChartSparklineOptions } from '../stat-chart-model';
 
 export function convertSparkline(

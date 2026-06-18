@@ -13,9 +13,10 @@
 
 import { Box, Stack, useTheme } from '@mui/material';
 import { ReactElement } from 'react';
-import { Viewport, rowHeight } from '../utils';
+
 import { TicksHeader } from '../Ticks';
 import { Trace } from '../trace';
+import { Viewport, rowHeight } from '../utils';
 
 interface GanttTableHeaderProps {
   trace: Trace;

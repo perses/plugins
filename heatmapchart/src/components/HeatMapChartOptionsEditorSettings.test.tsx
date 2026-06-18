@@ -15,6 +15,7 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { act } from 'react';
+
 import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
 import { HeatMapChartOptionsEditorSettings } from './HeatMapChartOptionsEditorSettings';
 

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ValueMapping, ValueMappingsEditor } from '@perses-dev/components';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { FC } from 'react';
+
 import { StatChartOptions } from './stat-chart-model';
 
 export type StatChartValueMappingEditorProps = OptionsEditorProps<StatChartOptions>;

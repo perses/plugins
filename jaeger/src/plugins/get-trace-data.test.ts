@@ -13,9 +13,10 @@
 
 import { replaceVariables, TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { JaegerClient } from '../model';
-import { JaegerDatasource } from './jaeger-datasource';
 import { getTraceData, jaegerTraceToOTLP } from './get-trace-data';
+import { JaegerDatasource } from './jaeger-datasource';
 
 jest.mock('@perses-dev/plugin-system', () => {
   const actual = jest.requireActual('@perses-dev/plugin-system');

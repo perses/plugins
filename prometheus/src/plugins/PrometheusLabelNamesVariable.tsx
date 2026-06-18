@@ -19,9 +19,10 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
-import { stringArrayToVariableOptions, PrometheusLabelNamesVariableEditor } from './prometheus-variables';
 import { resolvePrometheusDatasource } from './interpolation';
+import { stringArrayToVariableOptions, PrometheusLabelNamesVariableEditor } from './prometheus-variables';
 import { PrometheusLabelNamesVariableOptions } from './types';
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {

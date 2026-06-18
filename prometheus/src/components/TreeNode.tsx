@@ -14,17 +14,17 @@
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/pages/query/TreeNode.tsx
 
 import { Box, CircularProgress, List, ListItem, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { StatusError } from '@perses-dev/client';
+import AlertCircle from 'mdi-material-ui/AlertCircle';
 import CircleIcon from 'mdi-material-ui/Circle';
 import { ReactElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import AlertCircle from 'mdi-material-ui/AlertCircle';
 
-import { StatusError } from '@perses-dev/client';
 import { PrometheusDatasourceSelector } from '../model';
 import ASTNode, { nodeType } from './promql/ast';
-import { escapeString, getNodeChildren } from './promql/utils';
 import { formatNode } from './promql/format';
-import serializeNode from './promql/serialize';
 import { functionSignatures } from './promql/functionSignatures';
+import serializeNode from './promql/serialize';
+import { escapeString, getNodeChildren } from './promql/utils';
 import { useInstantQuery } from './query';
 
 // The indentation factor for each level of the tree.

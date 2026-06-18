@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { Box, Typography } from '@mui/material';
-import { LogsTableProps } from './model';
+import { ReactElement } from 'react';
+
 import { LogsList } from './components/LogsList';
+import { LogsTableProps } from './model';
 
 export function LogsTableComponent(props: LogsTableProps): ReactElement | null {
   const { queryResults, spec } = props;

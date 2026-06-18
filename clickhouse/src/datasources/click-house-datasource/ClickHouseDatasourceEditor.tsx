@@ -13,6 +13,7 @@
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { ClickHouseDatasourceSpec } from './click-house-datasource-types';
 
 export interface ClickHouseDatasourceEditorProps {

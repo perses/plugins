@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceClient } from '@perses-dev/plugin-system';
 import { RequestHeaders } from '@perses-dev/client';
+import { DatasourceClient } from '@perses-dev/plugin-system';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import {
   QueryRequestParameters,
   SearchRequestParameters,

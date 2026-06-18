@@ -14,6 +14,7 @@
 import { interpolateHeaders, interpolateQueryParams, VariableStateMap } from '@perses-dev/components';
 import { DatasourceStore } from '@perses-dev/plugin-system';
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+
 import { ClientRequestOptions, PrometheusClient } from '../model';
 import { PrometheusDatasourceSpec } from './types';
 

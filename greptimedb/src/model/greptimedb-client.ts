@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { RequestHeaders } from '@perses-dev/client';
+
 import { GreptimeDBDatasourceResponse, GreptimeDBQueryRequestParameters } from '../datasources/greptimedb-datasource';
 import { GreptimeDBResponseData } from './greptimedb-data-types';
 

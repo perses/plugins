@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
+import { Box } from '@mui/material';
 import {
   EChart,
   FormatOptions,
@@ -20,11 +20,11 @@ import {
   getFormattedAxis,
   useChartsTheme,
 } from '@perses-dev/components';
-import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { use, EChartsCoreOption } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { Box } from '@mui/material';
+import { ReactElement, useMemo } from 'react';
 
 use([
   EChartsBarChart,

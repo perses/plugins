@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import { TempoClient, query, search, searchTagValues, searchTags, searchWithFallback } from '../model/tempo-client';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasourceEditor } from './TempoDatasourceEditor';

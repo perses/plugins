@@ -11,18 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TitleComponentOption } from 'echarts';
-import { useChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps, useMediaQuery, useTheme } from '@mui/material';
-import { FC, useState, useEffect, useMemo } from 'react';
+import { useChartsTheme } from '@perses-dev/components';
 import { PanelProps } from '@perses-dev/plugin-system';
 import { ProfileData, StackTrace } from '@perses-dev/spec';
+import { TitleComponentOption } from 'echarts';
+import { FC, useState, useEffect, useMemo } from 'react';
+
 import { FlameChartOptions } from '../flame-chart-model';
 import { filterStackTraceById, getMaxDepth } from '../utils/data-transform';
 import { FlameChart } from './FlameChart';
+import { SeriesChart } from './SeriesChart';
 import { Settings } from './Settings';
 import { TableChart } from './TableChart';
-import { SeriesChart } from './SeriesChart';
 
 const LARGE_PANEL_THRESHOLD = 600;
 const DEFAULT_SERIES_CHART_HEIGHT = 200;

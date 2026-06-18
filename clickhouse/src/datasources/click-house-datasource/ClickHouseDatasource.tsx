@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import { query } from '../../model/click-house-client';
 import { ClickHouseDatasourceSpec, ClickHouseDatasourceClient } from './click-house-datasource-types';
 import { ClickHouseDatasourceEditor } from './ClickHouseDatasourceEditor';

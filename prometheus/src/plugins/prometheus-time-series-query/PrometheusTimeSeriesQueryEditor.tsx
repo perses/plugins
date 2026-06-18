@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { produce } from 'immer';
+import { FormControl, Stack, TextField } from '@mui/material';
+import { useId } from '@perses-dev/components';
+import { PanelEditorContext } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -23,10 +25,10 @@ import {
   useSuggestedStepMs,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { useId } from '@perses-dev/components';
-import { FormControl, Stack, TextField } from '@mui/material';
+import { produce } from 'immer';
 import { ReactElement, useContext, useMemo } from 'react';
-import { PanelEditorContext } from '@perses-dev/dashboards';
+
+import { PromQLEditor } from '../../components';
 import {
   DEFAULT_PROM,
   DurationString,
@@ -40,7 +42,6 @@ import {
   PrometheusDatasourceSelector,
 } from '../../model';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
-import { PromQLEditor } from '../../components';
 import {
   PrometheusTimeSeriesQueryEditorProps,
   useQueryState,
@@ -76,7 +77,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const minStepPlaceholder =
     minStep ??
-    (datasourceResource && (datasourceResource?.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
+    (datasourceResource && (datasourceResource.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
     DEFAULT_SCRAPE_INTERVAL;
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {

@@ -13,8 +13,9 @@
 
 import { Box, styled } from '@mui/material';
 import { ReactElement } from 'react';
-import { Viewport, formatDuration } from './utils';
+
 import { Trace } from './trace';
+import { Viewport, formatDuration } from './utils';
 
 export interface TicksHeaderProps {
   trace: Trace;

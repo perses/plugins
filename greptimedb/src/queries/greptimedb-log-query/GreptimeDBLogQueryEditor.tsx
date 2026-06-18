@@ -11,18 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Stack, useTheme } from '@mui/material';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
   isVariableDatasource,
   OptionsEditorProps,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useCallback } from 'react';
 import { produce } from 'immer';
-import { Stack, useTheme } from '@mui/material';
-import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
+import { ReactElement, useCallback } from 'react';
+
 import { GreptimeDBQLEditor } from '../../components';
 import { queryExample } from '../../components/constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
 import { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
 

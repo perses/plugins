@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Box, Chip, IconButton, Tab, Tabs, Typography } from '@mui/material';
-import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
-import { Span, Trace } from '../trace';
+import { ReactElement, useState } from 'react';
+
 import { CustomLinks } from '../../gantt-chart-model';
+import { Span, Trace } from '../trace';
 import { TraceAttributes } from './Attributes';
 import { SpanEventList } from './SpanEvents';
 import { SpanLinkList } from './SpanLinks';

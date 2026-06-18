@@ -21,9 +21,10 @@ import {
   DatasourceStore,
 } from '@perses-dev/plugin-system';
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
-import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import { resolvePrometheusDatasource } from './interpolation';
+import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import { PrometheusLabelValuesVariableOptions, PrometheusDatasourceSpec } from './types';
 
 function extractDatasourceVariables(datasourceSpec: DatasourceSpec<PrometheusDatasourceSpec>): string[] {

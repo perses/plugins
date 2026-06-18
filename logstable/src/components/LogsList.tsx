@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { LogEntry } from '@perses-dev/spec';
+import React from 'react';
+
 import { LogsTableOptions } from '../model';
 import { EmptyLogsState } from './EmptyLogsState';
 import { useExpandedRows } from './hooks/useExpandedRows';

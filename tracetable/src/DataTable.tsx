@@ -12,12 +12,10 @@
 // limitations under the License.
 
 import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/material';
-import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
-import { useSelectionItemActions } from '@perses-dev/dashboards';
-import InformationIcon from 'mdi-material-ui/Information';
-import { useChartsTheme, useSelection } from '@perses-dev/components';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import { useChartsTheme, useSelection } from '@perses-dev/components';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
+import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import {
   convertTimeToDuration,
   formatDuration,
@@ -26,8 +24,11 @@ import {
   TraceData,
   TraceSearchResult,
 } from '@perses-dev/spec';
-import { getServiceColor } from './utils/utils';
+import InformationIcon from 'mdi-material-ui/Information';
+import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+
 import { TraceTableOptions } from './trace-table-model';
+import { getServiceColor } from './utils/utils';
 
 const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   dateStyle: 'long',

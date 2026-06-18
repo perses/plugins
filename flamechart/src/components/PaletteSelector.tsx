@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
+import { ReactElement } from 'react';
 
 const PALETTE_OPTIONS: Array<{ id: PaletteOption; label: string }> = [
   { id: 'package-name', label: 'By Package Name' },

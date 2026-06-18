@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/spec';
+
 import { LokiQueryRangeMatrixResponse } from '../../model/loki-client-types';
 
 export interface LokiTimeSeriesQuerySpec {

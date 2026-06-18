@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { IconButton, Stack, Typography } from '@mui/material';
+import { useTimeZone } from '@perses-dev/components';
 import MagnifyIcon from 'mdi-material-ui/Magnify';
 import { ReactElement, useMemo, useState } from 'react';
-import { useTimeZone } from '@perses-dev/components';
-import { formatDuration } from './utils';
-import { Trace } from './trace';
+
 import { SearchBar, SpanSearch } from './Search';
+import { Trace } from './trace';
+import { formatDuration } from './utils';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',

@@ -69,9 +69,7 @@
     "footer": {
       "countRows": false,
       "fields": "",
-      "reducer": [
-        "sum"
-      ],
+      "reducer": ["sum"],
       "show": false
     },
     "showHeader": true

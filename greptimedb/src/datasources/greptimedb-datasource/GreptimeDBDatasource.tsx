@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import { greptimedbQuery } from '../../model/greptimedb-client';
 import { GreptimeDBDatasourceClient, GreptimeDBDatasourceSpec } from './greptimedb-datasource-types';
 import { GreptimeDBDatasourceEditor } from './GreptimeDBDatasourceEditor';

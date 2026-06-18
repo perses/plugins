@@ -1,10 +1,9 @@
-
 {
   "kind": "PyroscopeProfileQuery",
   "spec": {
     "datasource": {
-        "kind": "PyroscopeDatasource",
-        "name": "MyDemoDatasource"
+      "kind": "PyroscopeDatasource",
+      "name": "MyDemoDatasource"
     },
     "maxNodes": 3,
     "profileType": "idk"

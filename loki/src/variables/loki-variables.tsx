@@ -23,6 +23,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, ChangeEvent, FocusEvent } from 'react';
+
 import { LogQLEditor } from '../components';
 import {
   DEFAULT_LOKI,

@@ -13,6 +13,7 @@
 
 import { replaceVariables, VariableStateMap } from '@perses-dev/plugin-system';
 import { AbsoluteTimeRange } from '@perses-dev/spec';
+
 import { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData } from '../model/greptimedb-data-types';
 
 export type { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData };

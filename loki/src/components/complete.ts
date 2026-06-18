@@ -14,7 +14,6 @@
 import { Completion, CompletionContext, CompletionResult, insertCompletionText } from '@codemirror/autocomplete';
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-import { SyntaxNode, Tree } from '@lezer/common';
 import {
   Selector,
   Matchers,
@@ -27,7 +26,9 @@ import {
   String as StringType,
   Pipe,
 } from '@grafana/lezer-logql';
+import { SyntaxNode, Tree } from '@lezer/common';
 import { EditorView } from '@uiw/react-codemirror';
+
 import { toUnixSeconds } from '../model';
 import { CompletionConfig } from './logql-extension';
 

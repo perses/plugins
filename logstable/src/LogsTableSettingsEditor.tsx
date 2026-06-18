@@ -19,6 +19,7 @@ import {
 } from '@perses-dev/components';
 import { LegendOptionsEditor, LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { LogsTableOptions } from './model';
 
 type LogsTableSettingsEditorProps = OptionsEditorProps<LogsTableOptions>;

@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Button } from '@mui/material';
-import { produce } from 'immer';
 import {
   OptionsEditorGroup,
   OptionsEditorGrid,
@@ -21,7 +20,9 @@ import {
   ThresholdsEditorProps,
 } from '@perses-dev/components';
 import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
 import { ReactElement } from 'react';
+
 import {
   TimeSeriesChartOptions,
   DEFAULT_VISUAL,

@@ -28,12 +28,13 @@ import {
 } from '@mui/material';
 import { Fuzzy, FuzzyMatchingInterval } from '@nexucis/fuzzy';
 import { useExplorerQueryParams } from '@perses-dev/explore';
+import { DatasourceSelector } from '@perses-dev/spec';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import CogIcon from 'mdi-material-ui/Cog';
 import Magnify from 'mdi-material-ui/Magnify';
 import { MouseEvent, ReactElement, useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { DatasourceSelector } from '@perses-dev/spec';
+
 import { DEFAULT_PROM } from '../../model';
 import { MetricList } from './display/list/MetricList';
 import { FinderFilters } from './filter/FinderFilters';

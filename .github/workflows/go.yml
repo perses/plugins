@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   test-go:
-    name: "test-go"
+    name: 'test-go'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -22,7 +22,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: 'v0.14.0'
       - name: test
         run: make test
   golangci:
@@ -44,7 +44,7 @@ jobs:
           version: v2.12.2
       - run: make golangci-lint
   checklicense:
-    name: "check license headers"
+    name: 'check license headers'
     runs-on: ubuntu-latest
     steps:
       - name: checkout

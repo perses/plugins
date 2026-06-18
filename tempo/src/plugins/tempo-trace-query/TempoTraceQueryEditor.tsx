@@ -21,6 +21,9 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, useState } from 'react';
+
+import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
+import { AttributeFilters } from '../../components/AttributeFilters';
 import {
   TempoClient,
   DEFAULT_TEMPO,
@@ -28,8 +31,6 @@ import {
   isTempoDatasourceSelector,
   TEMPO_DATASOURCE_KIND,
 } from '../../model';
-import { AttributeFilters } from '../../components/AttributeFilters';
-import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
 import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {

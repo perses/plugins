@@ -19,9 +19,10 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { VictoriaLogsClient, DEFAULT_VICTORIALOGS, VICTORIALOGS_DATASOURCE_KIND } from '../../model';
-import { fieldItemsToVariableOptions, getVictoriaLogsTimeRange } from '../utils';
 import { VictoriaLogsFieldNamesVariableOptions } from '../types';
+import { fieldItemsToVariableOptions, getVictoriaLogsTimeRange } from '../utils';
 import { VictoriaLogsFieldNamesVariableEditor } from './VictoriaLogsFieldNamesVariableEditor';
 
 export const VictoriaLogsFieldNamesVariable: VariablePlugin<VictoriaLogsFieldNamesVariableOptions> = {

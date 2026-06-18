@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirror-promql';
 import { EditorView } from '@codemirror/view';
 import { useTheme, CircularProgress, InputLabel, Stack, IconButton, Tooltip } from '@mui/material';
+import { ErrorAlert } from '@perses-dev/components';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirror-promql';
+import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import CloseIcon from 'mdi-material-ui/Close';
 import FileTreeIcon from 'mdi-material-ui/FileTree';
 import { ReactElement, useMemo, useState } from 'react';
-import { ErrorAlert } from '@perses-dev/components';
-import CloseIcon from 'mdi-material-ui/Close';
-import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
+
 import { PrometheusDatasourceSelector } from '../model';
 import { replacePromBuiltinVariables } from '../plugins/prometheus-time-series-query/replace-prom-builtin-variables';
 import { useParseQuery } from './query';

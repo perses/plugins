@@ -1,10 +1,9 @@
-
 {
   "kind": "PrometheusTimeSeriesQuery",
   "spec": {
     "datasource": {
-        "kind": "PrometheusDatasource",
-        "name": "MyDemoDatasource"
+      "kind": "PrometheusDatasource",
+      "name": "MyDemoDatasource"
     },
     "query": "max by (job, instance) (up)",
     "seriesNameFormat": "{{ job }}/{{ instance }}",

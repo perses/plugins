@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceClient } from '@perses-dev/plugin-system';
 import { RequestHeaders } from '@perses-dev/client';
+import { DatasourceClient } from '@perses-dev/plugin-system';
+
 import { JaegerApiResponse, JaegerOperation, JaegerSearchRequestParameters, JaegerTrace } from './api-types';
 
 interface JaegerClientOptions {

@@ -8,9 +8,7 @@
     },
     "links": {
       "trace": "/datasource/${datasourceName}/trace/${traceId}",
-      "attributes": [
-        { "name": "k8s.pod.name", "link": "/namespace/${k8s_namespace_name}/pod/${k8s_pod_name}" }
-      ]
+      "attributes": [{ "name": "k8s.pod.name", "link": "/namespace/${k8s_namespace_name}/pod/${k8s_pod_name}" }]
     }
   }
 }

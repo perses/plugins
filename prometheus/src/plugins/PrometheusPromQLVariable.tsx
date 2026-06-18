@@ -19,14 +19,15 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { DEFAULT_PROM, PROM_DATASOURCE_KIND } from '../model';
+import { resolvePrometheusDatasource } from './interpolation';
 import {
   capturingMatrix,
   capturingVector,
   stringArrayToVariableOptions,
   PrometheusPromQLVariableEditor,
 } from './prometheus-variables';
-import { resolvePrometheusDatasource } from './interpolation';
 import { PrometheusPromQLVariableOptions } from './types';
 
 export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOptions> = {

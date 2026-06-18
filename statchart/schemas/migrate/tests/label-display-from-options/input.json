@@ -44,9 +44,7 @@
   "options": {
     "reduceOptions": {
       "values": false,
-      "calcs": [
-        "lastNotNull"
-      ],
+      "calcs": ["lastNotNull"],
       "fields": "/^version$/"
     },
     "orientation": "auto",

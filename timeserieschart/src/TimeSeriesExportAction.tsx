@@ -13,9 +13,10 @@
 
 import { IconButton } from '@mui/material';
 import { InfoTooltip } from '@perses-dev/components';
+import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilename } from '@perses-dev/plugin-system';
 import DownloadIcon from 'mdi-material-ui/Download';
 import React, { useCallback, useMemo } from 'react';
-import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilename } from '@perses-dev/plugin-system';
+
 import { TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
 export const TimeSeriesExportAction: React.FC<TimeSeriesChartProps> = ({ queryResults, definition }) => {
