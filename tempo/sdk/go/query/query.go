@@ -16,8 +16,7 @@ package query
 import (
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/query"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/plugin"
 )
 
 const PluginKind = "TempoTraceQuery"
@@ -56,7 +55,7 @@ func TraceQL(expr string, options ...Option) query.Option {
 	plg, err := create(expr, options...)
 	return query.Option{
 		Kind: plugin.KindTraceQuery,
-		Plugin: common.Plugin{
+		Plugin: plugin.Plugin{
 			Kind: PluginKind,
 			Spec: plg,
 		},

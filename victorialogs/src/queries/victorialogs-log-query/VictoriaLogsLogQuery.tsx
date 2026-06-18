@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables } from '@perses-dev/plugin-system';
+import { QueryDefinition } from '@perses-dev/core';
+import { LogQueryPlugin, LogQueryContext, calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
 import { getVictoriaLogsLogData } from './query';
 import { VictoriaLogsLogQueryEditor } from './VictoriaLogsLogQueryEditor';
 import { VictoriaLogsLogQuerySpec } from './types';
-import { LogQueryPlugin } from './interface';
 
 export const VictoriaLogsLogQuery: LogQueryPlugin<VictoriaLogsLogQuerySpec> = {
   getLogData: getVictoriaLogsLogData,
@@ -26,6 +26,28 @@ export const VictoriaLogsLogQuery: LogQueryPlugin<VictoriaLogsLogQuerySpec> = {
     const allVariables = [...new Set([...queryVariables])];
     return {
       variables: allVariables,
+    };
+  },
+  createVolumeQuery: (spec: VictoriaLogsLogQuerySpec, ctx: LogQueryContext): QueryDefinition | null => {
+    if (!spec.query || !spec.query.trim()) {
+      return null;
+    }
+
+    const interval = calculateVolumeInterval(ctx.timeRange.end.getTime() - ctx.timeRange.start.getTime());
+    const volumeQuery = `${spec.query} | stats by (_time:${interval}, _stream) count() as volume`;
+
+    return {
+      kind: 'TimeSeriesQuery',
+      spec: {
+        plugin: {
+          kind: 'VictoriaLogsTimeSeriesQuery',
+          spec: {
+            query: volumeQuery,
+            datasource: spec.datasource,
+            step: interval,
+          },
+        },
+      },
     };
   },
 };

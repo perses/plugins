@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LogQueryContext } from '@perses-dev/plugin-system';
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources/click-house-datasource';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
-import { ClickHouseQueryContext } from './log-query-plugin-interface';
 import { ClickHouseLogQuery } from './ClickHouseLogQuery';
 
 const datasource: ClickHouseDatasourceSpec = {
@@ -35,8 +35,8 @@ const getDatasourceClient: jest.Mock = jest.fn(() => {
   return clickhouseStubClient;
 });
 
-const createStubContext = (): ClickHouseQueryContext => {
-  const stubLogContext: ClickHouseQueryContext = {
+const createStubContext = (): LogQueryContext => {
+  const stubLogContext: LogQueryContext = {
     datasourceStore: {
       getDatasource: jest.fn(),
       getDatasourceClient: getDatasourceClient,
@@ -51,6 +51,7 @@ const createStubContext = (): ClickHouseQueryContext => {
       start: new Date('01-02-2025'),
     },
     variableState: {},
+    refreshKey: '',
   };
   return stubLogContext;
 };

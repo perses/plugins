@@ -16,8 +16,7 @@ package timeseries
 import (
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/query"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/plugin"
 )
 
 const PluginKind = "SplunkTimeSeriesQuery"
@@ -59,7 +58,7 @@ func SplunkTimeSeriesQuery(spl string, options ...Option) query.Option {
 	plg, err := create(spl, options...)
 	return query.Option{
 		Kind: plugin.KindTimeSeriesQuery,
-		Plugin: common.Plugin{
+		Plugin: plugin.Plugin{
 			Kind: PluginKind,
 			Spec: plg,
 		},

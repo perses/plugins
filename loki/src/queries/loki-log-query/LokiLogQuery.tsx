@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables } from '@perses-dev/plugin-system';
+import { QueryDefinition } from '@perses-dev/core';
+import { LogQueryPlugin, LogQueryContext, calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
 import { getLokiLogData } from './get-loki-log-data';
 import { LokiLogQueryEditor } from './LokiLogQueryEditor';
 import { LokiLogQuerySpec } from './loki-log-query-types';
-import { LogQueryPlugin } from './log-query-plugin-interface';
 
 export const LokiLogQuery: LogQueryPlugin<LokiLogQuerySpec> = {
   getLogData: getLokiLogData,
@@ -26,6 +26,28 @@ export const LokiLogQuery: LogQueryPlugin<LokiLogQuerySpec> = {
     const allVariables = [...new Set([...queryVariables])];
     return {
       variables: allVariables,
+    };
+  },
+  createVolumeQuery: (spec: LokiLogQuerySpec, ctx: LogQueryContext): QueryDefinition | null => {
+    if (!spec.query || !spec.query.trim()) {
+      return null;
+    }
+
+    const interval = calculateVolumeInterval(ctx.timeRange.end.getTime() - ctx.timeRange.start.getTime());
+    const volumeQuery = `sum by (level, detected_level) (count_over_time(${spec.query}[${interval}]))`;
+
+    return {
+      kind: 'TimeSeriesQuery',
+      spec: {
+        plugin: {
+          kind: 'LokiTimeSeriesQuery',
+          spec: {
+            query: volumeQuery,
+            datasource: spec.datasource,
+            step: interval,
+          },
+        },
+      },
     };
   },
 };

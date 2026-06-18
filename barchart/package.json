@@ -1,6 +1,7 @@
 {
   "name": "@perses-dev/bar-chart-plugin",
-  "version": "0.12.0",
+  "version": "0.13.0-beta.0",
+  "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -27,8 +28,8 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.54.0-beta.3",
-    "@perses-dev/plugin-system": "^0.54.0-beta.3",
+    "@perses-dev/components": "^0.54.0-beta.7",
+    "@perses-dev/plugin-system": "^0.54.0-beta.7",
     "@perses-dev/spec": "^0.2.0-beta.2",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

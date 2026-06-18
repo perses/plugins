@@ -48,3 +48,12 @@ export function interpolateDatasourceProxyParams(
     queryParams: rawQueryParams ? interpolateQueryParams(rawQueryParams, variableState) : undefined,
   };
 }
+
+export async function getInterpolatedRequestOptions(
+  datasourceStore: DatasourceStore,
+  datasource: DatasourceSelector,
+  variableState: VariableStateMap
+): Promise<ClientRequestOptions> {
+  const datasourceSpec = (await datasourceStore.getDatasource(datasource)) as DatasourceSpec<PrometheusDatasourceSpec>;
+  return interpolateDatasourceProxyParams(datasourceSpec, variableState);
+}
