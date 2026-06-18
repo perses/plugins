@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	github.com/perses/perses v0.54.0-beta.1
-	github.com/perses/spec v0.2.0-beta.2
+	github.com/perses/spec v0.2.0-beta.3
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/perses/common v0.31.0 // indirect
+	github.com/perses/common v0.31.1 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.68.1 // indirect
