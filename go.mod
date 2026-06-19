@@ -1,10 +1,10 @@
 module github.com/perses/plugins
 
-go 1.26.0
+go 1.26.2
 
 require (
 	github.com/perses/common v0.31.1
-	github.com/perses/perses v0.53.1
+	github.com/perses/perses v0.54.0-beta.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 )
