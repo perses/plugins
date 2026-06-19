@@ -133,7 +133,7 @@ show_info() {
     echo "    Database:  perses_test"
     echo ""
     echo -e "${BLUE}Web UI:${NC}"
-    echo "  Adminer:     http://localhost:8080"
+    echo "  Adminer:     http://localhost:8081"
     echo ""
     echo -e "${BLUE}Useful Commands:${NC}"
     echo "  make test              - Run all tests"
