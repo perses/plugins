@@ -15,14 +15,14 @@ package model
 
 import (
 	"github.com/perses/shared/cue/common"
-	commonProxy "github.com/perses/shared/cue/common/proxy"
+	"github.com/perses/spec/cue/datasource"
 )
 
 #kind: "SplunkDatasource"
 
 kind: #kind
 spec: {
-	commonProxy.#baseHTTPDatasourceSpec
+	datasource.#HTTPDatasourceSpec
 }
 
 #selector: common.#datasourceSelector & {_kind: #kind}
