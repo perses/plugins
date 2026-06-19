@@ -19,6 +19,7 @@ import type { LineSeriesOption } from 'echarts';
 import {
   assembleTransform,
   CursorCoordinates,
+  getDateAndTime,
   getTooltipStyles,
   PIN_TOOLTIP_HELP_TEXT,
   TOOLTIP_BG_COLOR_FALLBACK,
@@ -26,6 +27,7 @@ import {
   UNPIN_TOOLTIP_HELP_TEXT,
   useMousePosition,
 } from '@perses-dev/components';
+import { DEFAULT_ANNOTATION_COLOR } from '@perses-dev/plugin-system';
 import { TimeSeriesAnnotation } from '../utils/annotation';
 
 export interface AnnotationTooltipProps {
@@ -55,16 +57,8 @@ export function AnnotationTooltip({
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
   const transform = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
-  const formatDate = (timeMs: number): { date: string; time: string } => {
-    const d = new Date(timeMs);
-    return {
-      date: formatWithUserTimeZone(d, 'MMM dd, yyyy'),
-      time: formatWithUserTimeZone(d, 'HH:mm:ss'),
-    };
-  };
-
-  const start = formatDate(annotation.start);
-  const end = annotation.end !== undefined ? formatDate(annotation.end) : null;
+  const start = getDateAndTime(annotation.start, formatWithUserTimeZone);
+  const end = annotation.end !== undefined ? getDateAndTime(annotation.end, formatWithUserTimeZone) : null;
 
   return (
     <Portal container={containerElement}>
@@ -87,20 +81,20 @@ export function AnnotationTooltip({
                   width: 8,
                   height: 8,
                   borderRadius: '50%',
-                  backgroundColor: annotation.color ?? '#FF6B6B',
+                  backgroundColor: annotation.color ?? DEFAULT_ANNOTATION_COLOR,
                   marginRight: 1,
                   flexShrink: 0,
                 }}
               />
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 <Typography variant="caption">
-                  {start.date} - <strong>{start.time}</strong>
+                  {start.formattedDate} - <strong>{start.formattedTime}</strong>
                 </Typography>
                 {end && (
                   <>
                     <Typography variant="caption">{' → '}</Typography>
                     <Typography variant="caption">
-                      {end.date} - <strong>{end.time}</strong>
+                      {end.formattedDate} - <strong>{end.formattedTime}</strong>
                     </Typography>
                   </>
                 )}
@@ -180,7 +174,7 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
   const markPointData: any[] = [];
 
   annotations.forEach((annotation, index) => {
-    const color = annotation.color ?? '#FF6B6B';
+    const color = annotation.color ?? DEFAULT_ANNOTATION_COLOR;
     const opacity = 0.3;
 
     if (annotation.end !== undefined) {

@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationPlugin, AnnotationQueryQueryPluginDependencies, parseVariables } from '@perses-dev/plugin-system';
+import { AnnotationPlugin, AnnotationQueryPluginDependencies, parseVariables } from '@perses-dev/plugin-system';
 import { PrometheusPromQLAnnotationOptions } from '../plugins';
 import { PrometheusPromQLAnnotationOptionEditor } from './PrometheusPromQLAnnotationOptionEditor';
 import { getAnnotationData } from './get-annotation-data';
 
 export const PrometheusPromQLAnnotation: AnnotationPlugin<PrometheusPromQLAnnotationOptions> = {
   getAnnotationData: getAnnotationData,
-  dependsOn: (spec: PrometheusPromQLAnnotationOptions): AnnotationQueryQueryPluginDependencies => {
+  dependsOn: (spec: PrometheusPromQLAnnotationOptions): AnnotationQueryPluginDependencies => {
     const queryVariables = parseVariables(spec.expr);
     return {
       variables: [...queryVariables],
