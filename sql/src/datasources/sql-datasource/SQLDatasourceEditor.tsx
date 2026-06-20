@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Stack, TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText } from '@mui/material';
-import { useWatch } from 'react-hook-form';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { SQLDatasourceSpec, SQLProxySpec, SQLDriver, SSLMode } from './sql-datasource-types';
 
@@ -32,11 +31,9 @@ const SSL_MODES: Array<{ value: SSLMode; label: string }> = [
 export function SQLDatasourceEditor(props: OptionsEditorProps<SQLDatasourceSpec>) {
   const { value, onChange } = props;
 
-  // Access the actual config through proxy.spec
   const config = value?.proxy?.spec || ({} as SQLProxySpec);
 
-  // Use useWatch to watch the driver field
-  const driver = useWatch({ name: 'proxy.spec.driver', defaultValue: config.driver || 'postgres' });
+  const driver = config.driver || 'postgres';
 
   const handleChange = (field: keyof SQLProxySpec, fieldValue: unknown) => {
     onChange({

@@ -74,7 +74,7 @@ verify_data() {
             UNION ALL SELECT 'sensor_readings', COUNT(*) FROM sensor_readings \
             UNION ALL SELECT 'http_requests', COUNT(*) FROM http_requests \
             UNION ALL SELECT 'transactions', COUNT(*) FROM transactions \
-        ) t;" 2>/dev/null || echo -e "${RED}  Failed to query PostgreSQL${NC}"
+        ) t;" || { echo -e "${RED}  Failed to query PostgreSQL${NC}"; exit 1; }
 
     # MySQL
     echo -e "${YELLOW}MySQL:${NC}"
@@ -84,7 +84,7 @@ verify_data() {
             UNION ALL SELECT 'sensor_readings', COUNT(*) FROM sensor_readings \
             UNION ALL SELECT 'http_requests', COUNT(*) FROM http_requests \
             UNION ALL SELECT 'transactions', COUNT(*) FROM transactions \
-        ) t;" 2>/dev/null || echo -e "${RED}  Failed to query MySQL${NC}"
+        ) t;" || { echo -e "${RED}  Failed to query MySQL${NC}"; exit 1; }
 
     # MariaDB
     echo -e "${YELLOW}MariaDB:${NC}"
@@ -94,7 +94,7 @@ verify_data() {
             UNION ALL SELECT 'sensor_readings', COUNT(*) FROM sensor_readings \
             UNION ALL SELECT 'http_requests', COUNT(*) FROM http_requests \
             UNION ALL SELECT 'transactions', COUNT(*) FROM transactions \
-        ) t;" 2>/dev/null || echo -e "${RED}  Failed to query MariaDB${NC}"
+        ) t;" || { echo -e "${RED}  Failed to query MariaDB${NC}"; exit 1; }
 
     echo -e "${GREEN}✓${NC} Test data verified"
 }

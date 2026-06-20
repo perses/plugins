@@ -11,23 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const path = require('path');
-const fs = require('fs');
+import type { Config } from '@jest/types';
+import shared from '../jest.shared';
 
-const swcrcPath = path.join(__dirname, '..', '.cjs.swcrc');
-const swcrc = JSON.parse(fs.readFileSync(swcrcPath, 'utf-8'));
+const jestConfig: Config.InitialOptions = {
+  ...shared,
 
-module.exports = {
-  testEnvironment: 'jsdom',
-  roots: ['<rootDir>/src'],
-  moduleNameMapper: {
-    '^echarts/(.*)$': 'echarts',
-    '^use-resize-observer$': 'use-resize-observer/polyfilled',
-    '\\.(css|less)$': '<rootDir>/../stylesMock.js',
-  },
-  transformIgnorePatterns: ['node_modules/(?!(lodash-es|yaml|@perses-dev))'],
-  transform: {
-    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', { ...swcrc, exclude: [], swcrc: false }],
-  },
-  setupFilesAfterEnv: ['<rootDir>/src/setup-tests.ts'],
+  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
 };
+
+export default jestConfig;

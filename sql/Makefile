@@ -18,7 +18,7 @@ db-up: ## Start all test databases
 	@echo "PostgreSQL: localhost:5432"
 	@echo "MySQL:      localhost:3306"
 	@echo "MariaDB:    localhost:3307"
-	@echo "Adminer UI: http://localhost:8080"
+	@echo "Adminer UI: http://localhost:8081"
 
 db-down: ## Stop all test databases
 	docker-compose -f docker-compose.test.yaml down
