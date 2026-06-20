@@ -171,6 +171,8 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         isReadonly={isReadonly}
         initialSpecDirect={initialSpecDirect}
         initialSpecProxy={initialSpecProxy}
+        datasourcePluginKind="PrometheusDatasource"
+        healthCheckPath="/api/v1/status/buildinfo"
       />
       <Typography variant="h5" mt={2} mb={1}>
         Query Parameters
