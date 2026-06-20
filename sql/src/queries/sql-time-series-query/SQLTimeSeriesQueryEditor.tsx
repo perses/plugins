@@ -12,26 +12,34 @@
 // limitations under the License.
 
 import { Stack, TextField } from '@mui/material';
-import { OptionsEditorProps, DatasourceSelect } from '@perses-dev/plugin-system';
-import { DatasourceSelector } from '@perses-dev/spec';
+import {
+  DatasourceSelect,
+  DatasourceSelectProps,
+  isVariableDatasource,
+  OptionsEditorProps,
+} from '@perses-dev/plugin-system';
 import { SQLTimeSeriesQuerySpec } from './sql-time-series-query-types';
 
-export function SQLTimeSeriesQueryEditor({ value, onChange }: OptionsEditorProps<SQLTimeSeriesQuerySpec>) {
-  const handleDatasourceChange = (newDatasource: DatasourceSelector | string | undefined) => {
-    // Convert string to DatasourceSelector if needed
-    const datasourceValue: DatasourceSelector | undefined =
-      typeof newDatasource === 'string'
-        ? { kind: 'SQLDatasource', name: newDatasource }
-        : (newDatasource as DatasourceSelector | undefined);
+const DATASOURCE_KIND = 'SQLDatasource';
 
-    onChange({ ...value, datasource: datasourceValue });
+export function SQLTimeSeriesQueryEditor({ value, onChange }: OptionsEditorProps<SQLTimeSeriesQuerySpec>) {
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasource) => {
+    if (isVariableDatasource(newDatasource)) {
+      onChange({ ...value, datasource: newDatasource });
+      return;
+    }
+    if (newDatasource.kind === DATASOURCE_KIND) {
+      onChange({ ...value, datasource: newDatasource });
+      return;
+    }
+    throw new Error('Got unexpected non SQLDatasource selection');
   };
 
   return (
     <Stack spacing={2}>
       <DatasourceSelect
-        datasourcePluginKind="SQLDatasource"
-        value={value?.datasource || { kind: 'SQLDatasource' }}
+        datasourcePluginKind={DATASOURCE_KIND}
+        value={value?.datasource ?? { kind: DATASOURCE_KIND }}
         onChange={handleDatasourceChange}
       />
 
