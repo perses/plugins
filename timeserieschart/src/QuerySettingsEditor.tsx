@@ -223,6 +223,18 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
+  const addNegativeY = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.negativeY = true;
+    });
+  };
+
+  const removeNegativeY = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.negativeY = undefined;
+    });
+  };
+
   const queryCount = useQueryCountContext();
 
   // Compute the list of query indexes for which query settings are not already defined.
@@ -287,6 +299,8 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             onAddFormat={() => addFormat(i)}
             onRemoveFormat={() => removeFormat(i)}
             onFormatChange={(format) => handleFormatChange(i, format)}
+            onAddNegativeY={() => addNegativeY(i)}
+            onRemoveNegativeY={() => removeNegativeY(i)}
           />
         ))
       )}
@@ -319,10 +333,12 @@ interface QuerySettingsInputProps {
   onAddFormat: () => void;
   onRemoveFormat: () => void;
   onFormatChange: (format?: FormatOptions) => void;
+  onAddNegativeY: () => void;
+  onRemoveNegativeY: () => void;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format },
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format, negativeY },
   availableQueryIndexes,
   onQueryIndexChange,
   onColorModeChange,
@@ -340,6 +356,8 @@ function QuerySettingsInput({
   onAddFormat,
   onRemoveFormat,
   onFormatChange,
+  onAddNegativeY,
+  onRemoveNegativeY,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
@@ -354,8 +372,20 @@ function QuerySettingsInput({
     if (!lineStyle) options.push({ key: 'lineStyle', label: 'Line Style', action: onAddLineStyle });
     if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
     if (format === undefined) options.push({ key: 'format', label: 'Format', action: onAddFormat });
+    if (!negativeY) options.push({ key: 'negativeY', label: 'Negative Y', action: onAddNegativeY });
     return options;
-  }, [colorMode, lineStyle, areaOpacity, format, onAddColor, onAddLineStyle, onAddAreaOpacity, onAddFormat]);
+  }, [
+    colorMode,
+    lineStyle,
+    areaOpacity,
+    format,
+    negativeY,
+    onAddColor,
+    onAddLineStyle,
+    onAddAreaOpacity,
+    onAddFormat,
+    onAddNegativeY,
+  ]);
 
   const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     if (availableOptions.length === 1 && availableOptions[0]) {
@@ -469,6 +499,15 @@ function QuerySettingsInput({
             <Box sx={{ minWidth: '180px', display: 'flex', gap: 1, flexDirection: 'column' }}>
               <FormatControls value={format} onChange={onFormatChange} />
             </Box>
+          </SettingsSection>
+        )}
+
+        {/* Negative Y section (presence-only flag) */}
+        {negativeY && (
+          <SettingsSection label="Negative Y" onRemove={onRemoveNegativeY}>
+            <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1, py: 0.5 }}>
+              Series rendered below the X axis
+            </Typography>
           </SettingsSection>
         )}
 

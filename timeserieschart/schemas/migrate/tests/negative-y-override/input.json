@@ -1,0 +1,51 @@
+{
+  "id": 1,
+  "type": "timeseries",
+  "title": "Negative Y override",
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "drawStyle": "line",
+        "lineWidth": 1,
+        "fillOpacity": 0,
+        "stacking": {
+          "mode": "none",
+          "group": "A"
+        }
+      }
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byFrameRefID",
+          "options": "B"
+        },
+        "properties": [
+          {
+            "id": "custom.transform",
+            "value": "negative-Y"
+          }
+        ]
+      }
+    ]
+  },
+  "targets": [
+    {
+      "expr": "up",
+      "legendFormat": "up",
+      "refId": "A"
+    },
+    {
+      "expr": "rate(node_network_receive_bytes_total[1m])",
+      "legendFormat": "rx",
+      "refId": "B"
+    }
+  ],
+  "options": {
+    "legend": {
+      "showLegend": true,
+      "displayMode": "list",
+      "placement": "bottom"
+    }
+  }
+}

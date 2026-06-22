@@ -1,0 +1,20 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "position": "bottom",
+      "mode": "list"
+    },
+    "visual": {
+      "lineWidth": 1,
+      "areaOpacity": 0,
+      "display": "line"
+    },
+    "querySettings": [
+      {
+        "queryIndex": 1,
+        "negativeY": true
+      }
+    ]
+  }
+}
