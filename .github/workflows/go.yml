@@ -22,7 +22,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: "v0.16.1"
       - name: test
         run: make test
   golangci:

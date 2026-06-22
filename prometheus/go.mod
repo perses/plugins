@@ -3,7 +3,7 @@ module github.com/perses/plugins/prometheus
 go 1.26.2
 
 require (
-	github.com/perses/perses v0.54.0-beta.1.0.20260617122921-ba4a6bd301ae
+	github.com/perses/perses v0.54.0-beta.2
 	github.com/perses/spec v0.2.0-beta.6
 )
 
