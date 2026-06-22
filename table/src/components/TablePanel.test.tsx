@@ -411,8 +411,7 @@ describe('TablePanel', () => {
         const naCells = await screen.findAllByRole('cell', { name: 'N/A' });
         expect(naCells.length).toBeGreaterThanOrEqual(1);
 
-        // Verify genuine zero (value #1 = 0) would NOT become N/A — 0 is a valid number, not null
-        // ns-a value #1 = 100, ns-b value #1 = 200 — both are real values, no N/A expected for value #1
+        // Verify real numeric values are preserved (not replaced with N/A)
         expect(await screen.findByRole('cell', { name: '100' })).toBeInTheDocument();
         expect(await screen.findByRole('cell', { name: '200' })).toBeInTheDocument();
       },

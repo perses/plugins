@@ -570,24 +570,20 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   // filter data based on the current filters
   const filteredData = useMemo(() => {
-    let filtered = [...data];
-
-    // apply column filters if enabled
-    if (spec.enableFiltering && columnFilters.length > 0) {
-      filtered = filtered.filter((row) => {
-        return columnFilters.every((filter) => {
-          const value = row[filter.id];
-          const filterValues = filter.value as Array<string | number>;
-
-          if (!filterValues || filterValues.length === 0) return true; // No filter values means no filtering
-
-          // Check if the row value is in the selected filter values
-          return filterValues.includes(value as string | number);
-        });
-      });
+    if (!spec.enableFiltering || columnFilters.length === 0) {
+      return data;
     }
 
-    return filtered;
+    return data.filter((row) => {
+      return columnFilters.every((filter) => {
+        const value = row[filter.id];
+        const filterValues = filter.value as Array<string | number>;
+
+        if (!filterValues || filterValues.length === 0) return true;
+
+        return filterValues.includes(value as string | number);
+      });
+    });
   }, [data, columnFilters, spec.enableFiltering]);
 
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
