@@ -15,7 +15,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/perses/plugins/scripts/npm"
 	"github.com/sirupsen/logrus"
@@ -42,6 +44,12 @@ func tidyGoModule(workspace string) error {
 
 func main() {
 	for _, workspace := range npm.MustGetWorkspaces(".") {
+		schemasPath := filepath.Join(workspace, "schemas")
+		if _, err := os.Stat(schemasPath); os.IsNotExist(err) {
+			// No schemas, skip go validation
+			logrus.Infof("skipping tidying module for %s (no schemas)", workspace)
+			continue
+		}
 		logrus.Infof("Tidying module in workspace %s..", workspace)
 		if retrieveDepErr := tidyCueModule(workspace); retrieveDepErr != nil {
 			logrus.WithError(retrieveDepErr).Fatalf("unable to resolve the module dependencies for plugin %s", workspace)
