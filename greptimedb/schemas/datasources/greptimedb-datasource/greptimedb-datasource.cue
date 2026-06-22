@@ -15,14 +15,14 @@ package model
 
 import (
 	"github.com/perses/shared/cue/common"
-	commonProxy "github.com/perses/shared/cue/common/proxy"
+	"github.com/perses/spec/cue/datasource"
 )
 
 #kind: "GreptimeDBDatasource"
 
 kind: #kind
 spec: {
-	commonProxy.#baseHTTPDatasourceSpec
+	datasource.#HTTPDatasourceSpec
 
 	// headers are forwarded on GreptimeDB SQL API requests (e.g. Authorization).
 	// Used with directUrl when the Perses server is not proxying traffic; the host app may inject
