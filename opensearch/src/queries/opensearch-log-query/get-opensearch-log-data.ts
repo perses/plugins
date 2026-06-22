@@ -20,10 +20,11 @@ import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
 
 /**
- * Bound the query to the panel time range using a PPL `where` clause on @timestamp.
+ * Bound the query to the panel time range using a PPL `where` clause on the
+ * configured timestamp field (`@timestamp` by default).
  * The bound is injected immediately after the source clause so it runs before any
  * pipe that drops the timestamp column from the schema (stats, fields, top, etc.).
- * If the user already filters on @timestamp themselves, PPL ANDs the two clauses.
+ * If the user already filters on the timestamp field themselves, PPL ANDs the two clauses.
  */
 interface BoundedPPLOptions {
   index?: string;
@@ -44,7 +45,7 @@ export function buildBoundedPPL(
   }
 
   // Skip the auto-injected time-range clause when the caller manages their own time
-  // bounds, or when the target index has no usable timestamp field.
+  // bounds (disableTimeFilter).
   if (disableTimeFilter) {
     return trimmed;
   }
