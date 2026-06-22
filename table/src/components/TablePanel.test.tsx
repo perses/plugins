@@ -367,11 +367,7 @@ describe('TablePanel', () => {
           <ItemActionsProvider>
             <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
               <ChartsProvider chartsTheme={testChartsTheme}>
-                <TablePanel
-                  {...TEST_TIME_SERIES_TABLE_PROPS}
-                  spec={options ?? {}}
-                  queryResults={queryResults}
-                />
+                <TablePanel {...TEST_TIME_SERIES_TABLE_PROPS} spec={options ?? {}} queryResults={queryResults} />
               </ChartsProvider>
             </VirtuosoMockContext.Provider>
           </ItemActionsProvider>
@@ -386,9 +382,7 @@ describe('TablePanel', () => {
         { name: 'value #1', header: 'Value 1' },
         { name: 'value #2', header: 'Value 2' },
       ],
-      cellSettings: [
-        { condition: { kind: 'Misc', spec: { value: 'null' } }, text: 'N/A' },
-      ],
+      cellSettings: [{ condition: { kind: 'Misc', spec: { value: 'null' } }, text: 'N/A' }],
       transforms: [
         { kind: 'MergeSeries', spec: {} },
         { kind: 'JoinByColumnValue', spec: { columns: ['namespace'] } },
