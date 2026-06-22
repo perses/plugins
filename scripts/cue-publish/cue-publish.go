@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/perses/perses/scripts/pkg/command"
@@ -40,6 +41,12 @@ func main() {
 	}
 
 	pluginName, version := tag.Parse(t)
+	schemasPath := filepath.Join(pluginName, "schemas")
+	if _, err := os.Stat(schemasPath); os.IsNotExist(err) {
+		// No schemas, skip cue publication.
+		logrus.Infof("skipping cue mod publish for %s (no schemas)", pluginName)
+		return
+	}
 	version = "v" + version
 	module := fmt.Sprintf("%s/%s@%s", modulePrefix, pluginName, version)
 
