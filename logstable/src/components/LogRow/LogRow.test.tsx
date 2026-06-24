@@ -13,6 +13,7 @@
 
 import { render, screen, waitFor, fireEvent, RenderResult } from '@testing-library/react';
 import { LogEntry } from '@perses-dev/spec';
+import { ResolvedColumn } from '../column-resolution';
 import { LogRow } from './LogRow';
 
 // Mock clipboard API
@@ -21,6 +22,20 @@ Object.assign(navigator, {
     writeText: jest.fn(() => Promise.resolve()),
   },
 });
+
+const defaultResolvedColumns: ResolvedColumn[] = [
+  {
+    name: 'timestamp',
+    header: 'Timestamp',
+    type: 'timestamp',
+    enableSorting: true,
+    sortMode: 'timestamp',
+    allowWrap: false,
+  },
+  { name: 'line', header: 'Log line', type: 'line', enableSorting: false, sortMode: 'alphabetical', allowWrap: false },
+];
+
+const defaultGridTemplate = '16px 190px 1fr min-content';
 
 describe('LogRow', () => {
   const mockLog: LogEntry = {
@@ -38,6 +53,8 @@ describe('LogRow', () => {
         onToggle={jest.fn()}
         isSelected={isSelected}
         onSelect={onSelect}
+        resolvedColumns={defaultResolvedColumns}
+        gridTemplateColumns={defaultGridTemplate}
       />
     );
   };
@@ -135,7 +152,16 @@ describe('LogRow', () => {
         line: '\x1b[31mERROR\x1b[0m connection refused',
         labels: { level: 'error' },
       };
-      render(<LogRow log={ansiLog} index={0} isExpanded={false} onToggle={jest.fn()} />);
+      render(
+        <LogRow
+          log={ansiLog}
+          index={0}
+          isExpanded={false}
+          onToggle={jest.fn()}
+          resolvedColumns={defaultResolvedColumns}
+          gridTemplateColumns={defaultGridTemplate}
+        />
+      );
       const errorSpan = document.querySelector('.ansi-red-fg');
       expect(errorSpan).toBeInTheDocument();
       expect(errorSpan).toHaveTextContent('ERROR');
@@ -145,6 +171,110 @@ describe('LogRow', () => {
       renderLogRow(); // uses existing mockLog with plain text 'foo bar baz'
       expect(screen.getByText('foo bar baz')).toBeInTheDocument();
       expect(document.querySelector('[class*="ansi-"]')).toBeNull();
+    });
+  });
+
+  describe('dynamic columns', () => {
+    it('should render label column cells', () => {
+      const columnsWithLabel: ResolvedColumn[] = [
+        {
+          name: 'region',
+          header: 'Region',
+          type: 'label',
+          enableSorting: true,
+          sortMode: 'alphabetical',
+          allowWrap: false,
+        },
+        {
+          name: 'line',
+          header: 'Log line',
+          type: 'line',
+          enableSorting: false,
+          sortMode: 'alphabetical',
+          allowWrap: false,
+        },
+      ];
+      render(
+        <LogRow
+          log={mockLog}
+          index={0}
+          isExpanded={false}
+          onToggle={jest.fn()}
+          resolvedColumns={columnsWithLabel}
+          gridTemplateColumns="16px 150px 1fr min-content"
+        />
+      );
+      // 'bar' is the value of the region label, and also appears in the log line.
+      // Use getAllByText to confirm at least one element renders the label value.
+      const elements = screen.getAllByText((content, element) => {
+        return element?.tagName === 'SPAN' && content === 'bar';
+      });
+      expect(elements.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should render em-dash for missing label values', () => {
+      const columnsWithMissingLabel: ResolvedColumn[] = [
+        {
+          name: 'nonexistent',
+          header: 'Missing',
+          type: 'label',
+          enableSorting: true,
+          sortMode: 'alphabetical',
+          allowWrap: false,
+        },
+        {
+          name: 'line',
+          header: 'Log line',
+          type: 'line',
+          enableSorting: false,
+          sortMode: 'alphabetical',
+          allowWrap: false,
+        },
+      ];
+      render(
+        <LogRow
+          log={mockLog}
+          index={0}
+          isExpanded={false}
+          onToggle={jest.fn()}
+          resolvedColumns={columnsWithMissingLabel}
+          gridTemplateColumns="16px 150px 1fr min-content"
+        />
+      );
+      expect(screen.getByText('—')).toBeInTheDocument();
+    });
+
+    it('should render timestamp column', () => {
+      render(
+        <LogRow
+          log={mockLog}
+          index={0}
+          isExpanded={false}
+          onToggle={jest.fn()}
+          resolvedColumns={defaultResolvedColumns}
+          gridTemplateColumns={defaultGridTemplate}
+        />
+      );
+      // LogTimestamp renders a <time> element
+      expect(document.querySelector('time')).toBeInTheDocument();
+    });
+  });
+
+  describe('expanded details panel', () => {
+    it('should render LogDetailsTable when expanded', () => {
+      render(
+        <LogRow
+          log={mockLog}
+          index={0}
+          isExpanded={true}
+          onToggle={jest.fn()}
+          resolvedColumns={defaultResolvedColumns}
+          gridTemplateColumns={defaultGridTemplate}
+        />
+      );
+      // LogDetailsTable renders label keys as table cells
+      expect(screen.getByText('level')).toBeInTheDocument();
+      expect(screen.getByText('service')).toBeInTheDocument();
     });
   });
 });

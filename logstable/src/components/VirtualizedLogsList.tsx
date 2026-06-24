@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useMemo, ReactNode } from 'react';
 import { Box, useTheme, Popover, Button, ButtonGroup, IconButton } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { Virtuoso } from 'react-virtuoso';
@@ -21,6 +21,9 @@ import { ActionOptions, useAllVariableValues } from '@perses-dev/plugin-system';
 import { LogEntry } from '@perses-dev/spec';
 import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogsTableOptions } from '../model';
+import { resolveColumns, buildGridTemplate, ResolvedColumn } from './column-resolution';
+import { SortState, compareLogsByColumn } from './logs-table-sorting';
+import { LogsTableHeader } from './LogsTableHeader';
 import { LogRow } from './LogRow';
 
 const PERSES_LOGSTABLE_HINTS_DISMISSED = 'PERSES_LOGSTABLE_HINTS_DISMISSED';
@@ -36,6 +39,43 @@ interface VirtualizedLogsListProps {
   onToggleExpand: (index: number) => void;
 }
 
+/**
+ * Determines initial sort state from column definitions.
+ * Uses the first column with a `sort` value, or defaults to timestamp desc.
+ */
+function getInitialSortState(
+  columns: LogsTableOptions['columns'],
+  resolvedColumns: ResolvedColumn[]
+): SortState | null {
+  // Check if any column definition has an explicit sort
+  if (columns) {
+    for (const col of columns) {
+      if (col.sort) {
+        const resolved = resolvedColumns.find((rc) => rc.name === col.name);
+        if (resolved) {
+          return {
+            columnName: col.name,
+            direction: col.sort,
+            mode: resolved.sortMode,
+          };
+        }
+      }
+    }
+  }
+
+  // Default: sort by timestamp descending if timestamp column exists
+  const timestampCol = resolvedColumns.find((rc) => rc.name === 'timestamp');
+  if (timestampCol) {
+    return {
+      columnName: 'timestamp',
+      direction: 'desc',
+      mode: 'timestamp',
+    };
+  }
+
+  return null;
+}
+
 export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
   logs,
   spec,
@@ -45,6 +85,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
   const theme = useTheme();
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [scrollParent, setScrollParent] = useState<HTMLDivElement | null>(null);
   const selectedRowsRef = useRef<Set<number>>(selectedRows);
   const [copyPopoverAnchor, setCopyPopoverAnchor] = useState<{ x: number; y: number } | null>(null);
   const [lastCopiedFormat, setLastCopiedFormat] = useState<'full' | 'message' | 'json'>('full');
@@ -63,13 +104,46 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
 
   const allVariables = useAllVariableValues();
   const itemActionsConfig = spec.actions ? (spec.actions as ActionOptions) : undefined;
-  const itemActionsListConfig =
-    itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : [];
+  const itemActionsListConfig = useMemo(
+    () => (itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : []),
+    [itemActionsConfig]
+  );
 
   const { getItemActionButtons, confirmDialog } = useSelectionItemActions<number>({
     actions: itemActionsListConfig,
     variableState: allVariables,
   });
+
+  // Column resolution
+  const resolvedColumns = useMemo(
+    () => resolveColumns(spec.columns, spec.showTime, spec.allowWrap),
+    [spec.columns, spec.showTime, spec.allowWrap]
+  );
+
+  const gridTemplate = useMemo(
+    () => buildGridTemplate(resolvedColumns, spec.enableDetails ?? true),
+    [resolvedColumns, spec.enableDetails]
+  );
+
+  // Sorting
+  const [sortState, setSortState] = useState<SortState | null>(() =>
+    getInitialSortState(spec.columns, resolvedColumns)
+  );
+
+  const handleSortClick = useCallback((column: ResolvedColumn) => {
+    setSortState((prev) => {
+      if (prev?.columnName === column.name) {
+        if (prev.direction === 'asc') return { ...prev, direction: 'desc' as const };
+        return null;
+      }
+      return { columnName: column.name, direction: 'asc' as const, mode: column.sortMode };
+    });
+  }, []);
+
+  const sortedLogs = useMemo(() => {
+    if (!sortState) return logs;
+    return [...logs].sort((a, b) => compareLogsByColumn(a, b, sortState));
+  }, [logs, sortState]);
 
   useEffect(() => {
     selectedRowsRef.current = selectedRows;
@@ -84,13 +158,13 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     } else {
       const selectionItems = Array.from(selectedRows)
         .map((index) => {
-          const log = logs[index];
+          const log = sortedLogs[index];
           return log ? { id: index, item: log } : null;
         })
         .filter((entry): entry is { id: number; item: LogEntry } => entry !== null);
       setSelection(selectionItems);
     }
-  }, [selectedRows, logs, selectionEnabled, setSelection, clearSelection]);
+  }, [selectedRows, sortedLogs, selectionEnabled, setSelection, clearSelection]);
 
   const handleDismissHints = useCallback(() => {
     setIsHintsDismissed(true);
@@ -131,7 +205,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     async (format: 'full' | 'message' | 'json') => {
       const selectedLogs = Array.from(selectedRowsRef.current)
         .sort((a, b) => a - b)
-        .map((index) => logs[index])
+        .map((index) => sortedLogs[index])
         .filter((log) => log !== undefined);
 
       let text: string;
@@ -146,7 +220,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
       await navigator.clipboard.writeText(text);
       showCopyPopover(format, selectedLogs.length);
     },
-    [logs, showCopyPopover]
+    [sortedLogs, showCopyPopover]
   );
 
   const handleRowSelect = useCallback(
@@ -194,29 +268,45 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     [selectedRows, lastSelectedIndex]
   );
 
-  const renderLogRow = (index: number): ReactNode | null => {
-    const log = logs[index];
-    if (!log) return null;
+  const renderLogRow = useCallback(
+    (index: number): ReactNode | null => {
+      const log = sortedLogs[index];
+      if (!log) return null;
 
-    const itemActionButtons: ReactNode[] = itemActionsListConfig?.length
-      ? getItemActionButtons({ id: index, data: log as unknown as Record<string, unknown> })
-      : [];
+      const itemActionButtons: ReactNode[] = itemActionsListConfig?.length
+        ? getItemActionButtons({ id: index, data: log as unknown as Record<string, unknown> })
+        : [];
 
-    return (
-      <LogRow
-        isExpandable={spec.enableDetails}
-        log={log}
-        index={index}
-        isExpanded={expandedRows.has(index)}
-        onToggle={onToggleExpand}
-        allowWrap={spec.allowWrap}
-        showTime={spec.showTime}
-        isSelected={selectedRows.has(index)}
-        onSelect={handleRowSelect}
-        itemActionButtons={itemActionButtons}
-      />
-    );
-  };
+      return (
+        <LogRow
+          isExpandable={spec.enableDetails}
+          log={log}
+          index={index}
+          isExpanded={expandedRows.has(index)}
+          onToggle={onToggleExpand}
+          allowWrap={spec.allowWrap}
+          isSelected={selectedRows.has(index)}
+          onSelect={handleRowSelect}
+          itemActionButtons={itemActionButtons}
+          resolvedColumns={resolvedColumns}
+          gridTemplateColumns={gridTemplate}
+        />
+      );
+    },
+    [
+      sortedLogs,
+      itemActionsListConfig,
+      getItemActionButtons,
+      spec.enableDetails,
+      spec.allowWrap,
+      expandedRows,
+      onToggleExpand,
+      selectedRows,
+      handleRowSelect,
+      resolvedColumns,
+      gridTemplate,
+    ]
+  );
 
   const handleCopy = (e: React.ClipboardEvent<HTMLDivElement>): void => {
     const selection = window.getSelection();
@@ -233,7 +323,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
       e.preventDefault();
       const selectedLogs = Array.from(currentSelectedRows)
         .sort((a, b) => a - b)
-        .map((index) => logs[index])
+        .map((index) => sortedLogs[index])
         .filter((log) => log !== undefined);
       const formattedText = formatLogEntries(selectedLogs);
       e.clipboardData.setData('text/plain', formattedText);
@@ -246,10 +336,10 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
       // Cmd/Ctrl+A: Select all logs
       if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
         e.preventDefault();
-        const allIndices = new Set(logs.map((_, index) => index));
+        const allIndices = new Set(sortedLogs.map((_, index) => index));
         setSelectedRows(allIndices);
-        if (logs.length > 0) {
-          setLastSelectedIndex(logs.length - 1);
+        if (sortedLogs.length > 0) {
+          setLastSelectedIndex(sortedLogs.length - 1);
         }
       }
 
@@ -263,7 +353,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
           e.preventDefault();
           const selectedLogs = Array.from(selectedRowsRef.current)
             .sort((a, b) => a - b)
-            .map((index) => logs[index])
+            .map((index) => sortedLogs[index])
             .filter((log) => log !== undefined);
           const formattedText = formatLogEntries(selectedLogs);
           await navigator.clipboard.writeText(formattedText);
@@ -282,7 +372,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     return (): void => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [logs, selectedRows, showCopyPopover]);
+  }, [sortedLogs, selectedRows, showCopyPopover]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -359,12 +449,25 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
             </IconButton>
           </Box>
         )}
-        <Virtuoso
-          style={{ height: '100%', flexGrow: 1 }}
-          initialItemCount={spec.showAll ? logs.length : undefined}
-          totalCount={logs.length}
-          itemContent={renderLogRow}
-        />
+        <Box ref={setScrollParent} sx={{ overflow: 'auto', flexGrow: 1 }}>
+          <LogsTableHeader
+            resolvedColumns={resolvedColumns}
+            gridTemplateColumns={gridTemplate}
+            isExpandable={spec.enableDetails ?? true}
+            actionCount={itemActionsListConfig?.length ?? 0}
+            sortState={sortState}
+            onSortClick={handleSortClick}
+          />
+          {scrollParent && (
+            <Virtuoso
+              customScrollParent={scrollParent}
+              defaultItemHeight={24}
+              initialItemCount={spec.showAll ? sortedLogs.length : undefined}
+              totalCount={sortedLogs.length}
+              itemContent={renderLogRow}
+            />
+          )}
+        </Box>
         <Popover
           open={Boolean(copyPopoverAnchor)}
           anchorReference="anchorPosition"

@@ -125,12 +125,12 @@ describe('LogsTablePanel', () => {
     fireEvent.mouseDown(firstRow, { metaKey: true });
     fireEvent.mouseDown(secondRow, { metaKey: true });
 
-    // Copy with onCopy event
-    const virtuosoScroller = screen.getByTestId('virtuoso-scroller');
+    // Copy with onCopy event — fire on the outer container which has the onCopy handler
+    const container = items.closest('[class*="MuiBox-root"]')!;
     const mockClipboardData = {
       setData: jest.fn(),
     };
-    fireEvent.copy(virtuosoScroller, { clipboardData: mockClipboardData });
+    fireEvent.copy(container, { clipboardData: mockClipboardData });
 
     // Should have copied both logs
     expect(mockClipboardData.setData).toHaveBeenCalledWith('text/plain', expect.stringMatching(/foo.*bar/s));

@@ -30,10 +30,12 @@ import ContentCopy from 'mdi-material-ui/ContentCopy';
 import FormatQuoteClose from 'mdi-material-ui/FormatQuoteClose';
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LogEntry } from '@perses-dev/spec';
+import { ResolvedColumn } from '../column-resolution';
 import { ansiToSanitizedHtml } from '../../utils/ansi';
 import { formatLogAsJson, formatLogEntry, formatLogMessage } from '../../utils/copyHelpers';
 import { useSeverityColor } from '../hooks/useSeverity';
 import { LogDetailsTable } from './LogDetailsTable';
+import { LogLabelCell } from './LogLabelCell';
 import { LogTimestamp } from './LogTimestamp';
 import { ExpandButton, LogRowContainer, LogRowContent, LogText } from './LogsStyles';
 import './ansiColors.css';
@@ -46,11 +48,12 @@ interface LogRowProps {
   isExpanded: boolean;
   onToggle: (index: number) => void;
   isExpandable?: boolean;
-  showTime?: boolean;
   allowWrap?: boolean;
   isSelected?: boolean;
   onSelect?: (index: number, event: React.MouseEvent) => void;
   itemActionButtons?: ReactNode[];
+  resolvedColumns: ResolvedColumn[];
+  gridTemplateColumns: string;
 }
 
 const DefaultLogRow: React.FC<LogRowProps> = ({
@@ -59,11 +62,12 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
   index,
   onToggle,
   isExpandable = true,
-  showTime = false,
   allowWrap = false,
   isSelected = false,
   onSelect,
   itemActionButtons,
+  resolvedColumns,
+  gridTemplateColumns,
 }) => {
   const theme = useTheme();
   const severityColor = useSeverityColor(log);
@@ -148,7 +152,52 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
 
   if (!log) return null;
 
-  const hasRowActions = itemActionButtons && itemActionButtons.length > 0;
+  const renderColumn = (column: ResolvedColumn): ReactNode => {
+    switch (column.type) {
+      case 'timestamp':
+        return (
+          <Box key={column.name} sx={{ minWidth: column.width ?? 160, overflow: 'hidden' }}>
+            <LogTimestamp timestamp={log.timestamp} />
+          </Box>
+        );
+      case 'line':
+        return (
+          <Box
+            key={column.name}
+            sx={{
+              display: 'flex',
+              gap: '10px',
+              alignItems: 'center',
+              minWidth: column.width ?? 150,
+              overflow: 'hidden',
+            }}
+          >
+            {ansiHtml ? (
+              <LogText
+                variant="body2"
+                allowWrap={column.allowWrap ?? allowWrap}
+                dangerouslySetInnerHTML={{ __html: ansiHtml }}
+              />
+            ) : (
+              <LogText variant="body2" allowWrap={column.allowWrap ?? allowWrap}>
+                {log.line}
+              </LogText>
+            )}
+          </Box>
+        );
+      case 'label':
+        return (
+          <LogLabelCell
+            key={column.name}
+            value={log.labels[column.name]}
+            allowWrap={column.allowWrap}
+            minWidth={column.width}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <LogRowContainer
@@ -165,9 +214,8 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
     >
       <LogRowContent
         onMouseDown={handleRowMouseDown}
-        isExpandable={isExpandable}
+        gridTemplateColumns={gridTemplateColumns}
         isHighlighted={Boolean(anchorEl)}
-        hasRowActions={hasRowActions}
         isSelected={isSelected}
       >
         {isExpandable && (
@@ -187,23 +235,18 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
           </Box>
         )}
 
-        <LogTimestamp timestamp={log.timestamp} />
+        {resolvedColumns.map(renderColumn)}
 
         <Box
           sx={{
             display: 'flex',
-            gap: '10px',
-            marginLeft: '36px',
+            gap: '4px',
             alignItems: 'center',
+            opacity: isHovered || Boolean(anchorEl) || copySuccess ? 1 : 0,
+            pointerEvents: isHovered || Boolean(anchorEl) || copySuccess ? 'auto' : 'none',
+            transition: 'opacity 0.08s ease',
           }}
         >
-          {ansiHtml ? (
-            <LogText variant="body2" allowWrap={allowWrap} dangerouslySetInnerHTML={{ __html: ansiHtml }} />
-          ) : (
-            <LogText variant="body2" allowWrap={allowWrap}>
-              {log.line}
-            </LogText>
-          )}
           <Tooltip title={copySuccess ? 'Copied!' : 'Copy options'}>
             <IconButton
               size="small"
@@ -211,11 +254,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
               aria-label="Copy log options"
               sx={{
                 padding: '4px',
-                marginLeft: 'auto',
                 color: copySuccess ? theme.palette.success.main : theme.palette.text.secondary,
-                opacity: isHovered || Boolean(anchorEl) || copySuccess ? 1 : 0,
-                pointerEvents: isHovered || Boolean(anchorEl) || copySuccess ? 'auto' : 'none',
-                transition: 'opacity 0.08s ease, color 0.2s ease',
                 '&:hover': {
                   color: copySuccess ? theme.palette.success.main : theme.palette.primary.main,
                   backgroundColor: theme.palette.action.hover,
@@ -235,52 +274,26 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
               )}
             </IconButton>
           </Tooltip>
-          {hasRowActions && (
-            <Box
-              sx={{
-                display: 'flex',
-                gap: '4px',
-                alignItems: 'center',
-                opacity: isHovered || Boolean(anchorEl) ? 1 : 0,
-                pointerEvents: isHovered || Boolean(anchorEl) ? 'auto' : 'none',
-                transition: 'opacity 0.08s ease',
-              }}
-            >
-              {itemActionButtons}
-            </Box>
-          )}
+          {itemActionButtons?.map((btn, i) => (
+            <React.Fragment key={i}>{btn}</React.Fragment>
+          ))}
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleCloseMenu}
             onClick={(e) => e.stopPropagation()}
             aria-label="Copy format options"
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             slotProps={{
               paper: {
-                sx: {
-                  mt: 0.5,
-                  minWidth: 180,
-                  boxShadow: theme.shadows[3],
-                },
+                sx: { mt: 0.5, minWidth: 180, boxShadow: theme.shadows[3] },
               },
             }}
           >
             <MenuItem
               onClick={() => handleCopy('full')}
-              sx={{
-                py: 1,
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                },
-              }}
+              sx={{ py: 1, '&:hover': { backgroundColor: theme.palette.action.hover } }}
             >
               <ListItemIcon>
                 <ContentCopy fontSize="small" />
@@ -288,20 +301,12 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
               <ListItemText
                 primary="Copy log"
                 secondary="Timestamp + labels + message"
-                slotProps={{
-                  primary: { fontSize: '14px' },
-                  secondary: { fontSize: '11px' },
-                }}
+                slotProps={{ primary: { fontSize: '14px' }, secondary: { fontSize: '11px' } }}
               />
             </MenuItem>
             <MenuItem
               onClick={() => handleCopy('message')}
-              sx={{
-                py: 1,
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                },
-              }}
+              sx={{ py: 1, '&:hover': { backgroundColor: theme.palette.action.hover } }}
             >
               <ListItemIcon>
                 <FormatQuoteClose fontSize="small" />
@@ -309,20 +314,12 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
               <ListItemText
                 primary="Copy message"
                 secondary="Message text only"
-                slotProps={{
-                  primary: { fontSize: '14px' },
-                  secondary: { fontSize: '11px' },
-                }}
+                slotProps={{ primary: { fontSize: '14px' }, secondary: { fontSize: '11px' } }}
               />
             </MenuItem>
             <MenuItem
               onClick={() => handleCopy('json')}
-              sx={{
-                py: 1,
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                },
-              }}
+              sx={{ py: 1, '&:hover': { backgroundColor: theme.palette.action.hover } }}
             >
               <ListItemIcon>
                 <CodeJson fontSize="small" />
@@ -330,10 +327,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
               <ListItemText
                 primary="Copy as JSON"
                 secondary="Full log entry"
-                slotProps={{
-                  primary: { fontSize: '14px' },
-                  secondary: { fontSize: '11px' },
-                }}
+                slotProps={{ primary: { fontSize: '14px' }, secondary: { fontSize: '11px' } }}
               />
             </MenuItem>
           </Menu>
@@ -341,24 +335,8 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
       </LogRowContent>
 
       <Collapse in={isExpanded} timeout={200}>
-        <Box sx={{ padding: '8px' }}>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: !showTime ? '1fr' : '8px minmax(160px, max-content) 1fr',
-              gap: '12px',
-            }}
-          >
-            {showTime && (
-              <>
-                <Box />
-                <Box />
-              </>
-            )}
-            <Box>
-              <LogDetailsTable log={log.labels} />
-            </Box>
-          </Box>
+        <Box sx={{ padding: '8px', paddingLeft: isExpandable ? '36px' : '8px' }}>
+          <LogDetailsTable log={log.labels} />
         </Box>
       </Collapse>
     </LogRowContainer>

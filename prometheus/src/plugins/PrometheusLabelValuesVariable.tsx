@@ -87,7 +87,8 @@ function getDatasourceVariablesFromCache(
     if (!datasourceStore.getDatasourceSpecSync) return [];
 
     const datasourceSpec = datasourceStore.getDatasourceSpecSync(datasourceSelector) as
-      DatasourceSpec<PrometheusDatasourceSpec> | undefined;
+      | DatasourceSpec<PrometheusDatasourceSpec>
+      | undefined;
     return datasourceSpec ? extractDatasourceVariables(datasourceSpec) : [];
   } catch {
     return [];
