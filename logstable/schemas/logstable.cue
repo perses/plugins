@@ -21,7 +21,17 @@ kind: "LogsTable"
 spec: close({
 	allowWrap?:     bool
 	enableDetails?: bool
-	showTime?:      bool
-	selection?:     common.#selection
-	actions?:       common.#actions
+	// Deprecated: use columns instead. Only effective when columns is not set.
+	showTime?: bool
+	columns?: [...close({
+		name:           string
+		header?:        string
+		enableSorting?: bool
+		sort?:          "asc" | "desc"
+		sortMode?:      "alphabetical" | "numeric" | "timestamp"
+		allowWrap?:     bool
+		width?:         number
+	})]
+	selection?: common.#selection
+	actions?:   common.#actions
 })
