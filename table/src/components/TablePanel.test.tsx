@@ -26,6 +26,9 @@ import { VirtuosoMockContext } from 'react-virtuoso';
 import { TimeSeriesData } from '@perses-dev/spec';
 import { TableOptions, TimeSeriesTableProps } from '../models';
 import {
+  MOCK_MULTI_QUERY_DATA_Q1,
+  MOCK_MULTI_QUERY_DATA_Q2,
+  MOCK_MULTI_QUERY_DATA_WITH_ZERO,
   MOCK_TIME_SERIES_DATA_MULTIVALUE,
   MOCK_TIME_SERIES_DATA_SINGLEVALUE,
   MOCK_TIME_SERIES_QUERY_DEFINITION,
@@ -347,6 +350,113 @@ describe('TablePanel', () => {
         // Action button should not be visible until a row is selected
         const actionButtons = screen.queryAllByRole('button', { name: 'Test Action' });
         expect(actionButtons).toHaveLength(2); // 2 rows with action buttons
+      },
+      TEST_TIMEOUT
+    );
+  });
+
+  describe('cellSettings with filtered data', () => {
+    // Helper that supports multiple query results (simulates multi-query panels like Memory Quota Table)
+    const renderMultiQueryPanel = (queryData: TimeSeriesData[], options?: TableOptions): void => {
+      const queryResults = queryData.map((data) => ({
+        definition: MOCK_TIME_SERIES_QUERY_DEFINITION,
+        data,
+      }));
+      render(
+        <SelectionProvider>
+          <ItemActionsProvider>
+            <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+              <ChartsProvider chartsTheme={testChartsTheme}>
+                <TablePanel {...TEST_TIME_SERIES_TABLE_PROPS} spec={options ?? {}} queryResults={queryResults} />
+              </ChartsProvider>
+            </VirtuosoMockContext.Provider>
+          </ItemActionsProvider>
+        </SelectionProvider>
+      );
+    };
+
+    const MULTI_QUERY_TABLE_OPTIONS: TableOptions = {
+      columnSettings: [
+        { name: 'timestamp', hide: true },
+        { name: 'namespace', header: 'Namespace' },
+        { name: 'value #1', header: 'Value 1' },
+        { name: 'value #2', header: 'Value 2' },
+      ],
+      cellSettings: [{ condition: { kind: 'Misc', spec: { value: 'null' } }, text: 'N/A' }],
+      transforms: [
+        { kind: 'MergeSeries', spec: {} },
+        { kind: 'JoinByColumnValue', spec: { columns: ['namespace'] } },
+      ],
+      enableFiltering: true,
+    };
+
+    it(
+      'should show N/A for null values and preserve real values in unfiltered multi-query table',
+      async () => {
+        // Q1 has ns-a and ns-b, Q2 has only ns-a → ns-b's value #2 is null
+        renderMultiQueryPanel([MOCK_MULTI_QUERY_DATA_Q1, MOCK_MULTI_QUERY_DATA_Q2], MULTI_QUERY_TABLE_OPTIONS);
+
+        // ns-a should have both values — verify value #2 = 50 is NOT shown as N/A
+        expect(await screen.findByRole('cell', { name: 'ns-a' })).toBeInTheDocument();
+        expect(await screen.findByRole('cell', { name: '50' })).toBeInTheDocument();
+
+        // ns-b should show N/A for the missing value #2
+        expect(await screen.findByRole('cell', { name: 'ns-b' })).toBeInTheDocument();
+        const naCells = await screen.findAllByRole('cell', { name: 'N/A' });
+        expect(naCells.length).toBeGreaterThanOrEqual(1);
+
+        // Verify real numeric values are preserved (not replaced with N/A)
+        expect(await screen.findByRole('cell', { name: '100' })).toBeInTheDocument();
+        expect(await screen.findByRole('cell', { name: '200' })).toBeInTheDocument();
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should show N/A for null values after filtering to a row with missing data',
+      async () => {
+        renderMultiQueryPanel([MOCK_MULTI_QUERY_DATA_Q1, MOCK_MULTI_QUERY_DATA_Q2], MULTI_QUERY_TABLE_OPTIONS);
+
+        // Wait for initial render
+        await screen.findByRole('cell', { name: 'ns-b' });
+
+        // Apply filter to show only ns-b (which has null for value #2)
+        const filterButtons = screen.getAllByRole('button', { name: '▼' });
+        // First filter button corresponds to the first visible column (namespace)
+        await userEvent.click(filterButtons[0]!);
+
+        // Select ns-b in the filter dropdown
+        const nsBCheckbox = await screen.findByRole('checkbox', { name: 'ns-b' });
+        await userEvent.click(nsBCheckbox);
+
+        // After filtering to ns-b only, N/A should still appear for the missing value #2
+        await waitFor(() => {
+          const naCells = screen.getAllByRole('cell', { name: 'N/A' });
+          expect(naCells.length).toBeGreaterThanOrEqual(1);
+        });
+
+        // ns-b's value #1 = 200 should still render correctly (not become N/A)
+        expect(screen.getByRole('cell', { name: '200' })).toBeInTheDocument();
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should NOT show N/A for genuine zero values',
+      async () => {
+        // Q1 has ns-a=100 and ns-b=200, ZERO query has ns-a=50 and ns-b=0
+        // ns-b's value #2 is 0 (a real number), not null — must NOT show N/A
+        renderMultiQueryPanel([MOCK_MULTI_QUERY_DATA_Q1, MOCK_MULTI_QUERY_DATA_WITH_ZERO], MULTI_QUERY_TABLE_OPTIONS);
+
+        // Both namespaces should be present
+        expect(await screen.findByRole('cell', { name: 'ns-a' })).toBeInTheDocument();
+        expect(await screen.findByRole('cell', { name: 'ns-b' })).toBeInTheDocument();
+
+        // ns-b's value #2 = 0 should render as 0, not N/A
+        expect(await screen.findByRole('cell', { name: '0' })).toBeInTheDocument();
+
+        // No N/A should appear — all cells have real values (100, 200, 50, 0)
+        expect(screen.queryAllByRole('cell', { name: 'N/A' })).toHaveLength(0);
       },
       TEST_TIMEOUT
     );

@@ -45,3 +45,11 @@ export type PrometheusPromQLVariableOptions = PrometheusVariableOptionsBase & {
   // Note: This field is not part of the Prometheus API.
   labelName: string;
 };
+
+export interface PrometheusPromQLAnnotationOptions {
+  datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
+  expr: string;
+  title?: string;
+  legend?: string;
+  tags?: string[];
+}
