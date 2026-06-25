@@ -18,21 +18,19 @@ import {
   isVariableDatasource,
   OptionsEditorProps,
 } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import { SQLTimeSeriesQuerySpec } from './sql-time-series-query-types';
 
 const DATASOURCE_KIND = 'SQLDatasource';
 
-export function SQLTimeSeriesQueryEditor({ value, onChange }: OptionsEditorProps<SQLTimeSeriesQuerySpec>) {
+export function SQLTimeSeriesQueryEditor({
+  value,
+  onChange,
+}: OptionsEditorProps<SQLTimeSeriesQuerySpec>): ReactElement {
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasource) => {
-    if (isVariableDatasource(newDatasource)) {
+    if (!isVariableDatasource(newDatasource) && newDatasource.kind === DATASOURCE_KIND) {
       onChange({ ...value, datasource: newDatasource });
-      return;
     }
-    if (newDatasource.kind === DATASOURCE_KIND) {
-      onChange({ ...value, datasource: newDatasource });
-      return;
-    }
-    throw new Error('Got unexpected non SQLDatasource selection');
   };
 
   return (

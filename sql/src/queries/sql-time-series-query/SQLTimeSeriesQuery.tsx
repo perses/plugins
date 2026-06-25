@@ -13,6 +13,7 @@
 
 import { TimeSeriesQueryPlugin, replaceVariables, parseVariables } from '@perses-dev/plugin-system';
 import { TimeSeries } from '@perses-dev/spec';
+import { SQLDatasourceClient } from '../../datasources/sql-datasource/sql-datasource-types';
 import { replaceSQLBuiltinVariables } from '../../model/replace-sql-builtin-variables';
 import { SQLTimeSeriesQuerySpec } from './sql-time-series-query-types';
 import { SQLTimeSeriesQueryEditor } from './SQLTimeSeriesQueryEditor';
@@ -28,7 +29,7 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<SQLTimeSeriesQuerySpec>['getTimeS
 
   const datasourceSelector = spec.datasource || { kind: 'SQLDatasource' };
 
-  const datasourceClient = await context.datasourceStore.getDatasourceClient(datasourceSelector);
+  const datasourceClient = await context.datasourceStore.getDatasourceClient<SQLDatasourceClient>(datasourceSelector);
 
   if (!datasourceClient) {
     throw new Error('No datasource configured for SQL query. Please select a SQL datasource.');
@@ -45,7 +46,7 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<SQLTimeSeriesQuerySpec>['getTimeS
   const intervalMs = interval * 1000;
 
   const queryWithVariables = replaceVariables(spec.query, context.variableState);
-  const timeFormat = (spec.timeFormat === 'unix' || spec.timeFormat === 'unix_ms') ? spec.timeFormat : 'iso8601';
+  const timeFormat = spec.timeFormat === 'unix' || spec.timeFormat === 'unix_ms' ? spec.timeFormat : 'iso8601';
   const processedQuery = replaceSQLBuiltinVariables(queryWithVariables, context.timeRange, intervalMs, timeFormat);
 
   const response = await fetch(datasourceUrl, {

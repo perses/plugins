@@ -27,7 +27,7 @@ interface SQLExplorerQueryParams {
 const PANEL_PREVIEW_HEIGHT = 700;
 const FILTERED_QUERY_PLUGINS = ['SQLTimeSeriesQuery'];
 
-function toQueryDefinitions(queries: QueryDefinition[]) {
+function toQueryDefinitions(queries: QueryDefinition[]): Array<{ kind: string; spec: Record<string, unknown> }> {
   return queries.map((query) => ({
     kind: query.spec.plugin.kind,
     spec: query.spec.plugin.spec,
