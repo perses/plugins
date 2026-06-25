@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables } from '@perses-dev/plugin-system';
+import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogEntry, LogData } from '@perses-dev/spec';
 import { OpenSearchClient } from '../../model/opensearch-client';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { DEFAULT_DATASOURCE, DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../constants';
 import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
-import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
 
 /**
  * Bound the query to the panel time range using a PPL `where` clause on the
@@ -30,6 +29,17 @@ interface BoundedPPLOptions {
   index?: string;
   timestampField?: string;
   disableTimeFilter?: boolean;
+}
+
+/**
+ * Escape a user-supplied identifier (timestamp field name) for safe interpolation
+ * inside a PPL backtick-quoted identifier. A backtick in the value would otherwise
+ * close the quoting early and let the rest of the string be parsed as PPL, producing
+ * an invalid — or potentially injected — query. PPL escapes a literal backtick by
+ * doubling it.
+ */
+function escapeIdentifier(name: string): string {
+  return name.replace(/`/g, '``');
 }
 
 export function buildBoundedPPL(
@@ -52,7 +62,10 @@ export function buildBoundedPPL(
 
   const startIso = start.toISOString();
   const endIso = end.toISOString();
-  const bound = `where \`${timestampField}\` >= '${startIso}' and \`${timestampField}\` <= '${endIso}'`;
+  // timestampField is user-editable, so escape it before embedding it in the
+  // backtick-quoted identifier (the ISO bounds are machine-generated and safe).
+  const tsField = escapeIdentifier(timestampField);
+  const bound = `where \`${tsField}\` >= '${startIso}' and \`${tsField}\` <= '${endIso}'`;
 
   const firstPipe = trimmed.indexOf('|');
   if (firstPipe === -1) {
@@ -107,6 +120,9 @@ export function convertPPLToLogs(response: OpenSearchPPLResponse, options: Conve
     return { timestamp, line, labels };
   });
 
+  // A PPL response carries no separate "total hits" field, so totalCount reflects
+  // the number of rows actually returned by the query (bounded by any `head`/limit
+  // the user added), not a grand total of matching documents.
   return { entries, totalCount: entries.length };
 }
 
@@ -134,7 +150,8 @@ function rowToObject(
 
 export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLogData'] = async (
   spec: OpenSearchLogQuerySpec,
-  context: LogQueryContext
+  context: LogQueryContext,
+  abortSignal?: AbortSignal
 ) => {
   if (!spec.query) {
     return {
@@ -156,7 +173,7 @@ export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLo
     disableTimeFilter: spec.disableTimeFilter,
   });
 
-  const response = await client.ppl({ query: boundedQuery });
+  const response = await client.ppl({ query: boundedQuery }, undefined, abortSignal);
 
   return {
     logs: convertPPLToLogs(response, {

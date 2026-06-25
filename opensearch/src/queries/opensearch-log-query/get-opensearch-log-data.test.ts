@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LogQueryContext } from '@perses-dev/plugin-system';
 import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
 import { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { OpenSearchLogQuery } from './OpenSearchLogQuery';
-import { LogQueryContext } from './log-query-plugin-interface';
 import { buildBoundedPPL, convertPPLToLogs } from './get-opensearch-log-data';
 
 const datasource: OpenSearchDatasourceSpec = {
@@ -59,6 +59,7 @@ function createStubContext(): LogQueryContext {
       end: new Date('2025-01-01T01:00:00.000Z'),
     },
     variableState: {},
+    refreshKey: '',
   };
 }
 
@@ -187,6 +188,15 @@ describe('buildBoundedPPL', () => {
     const q = buildBoundedPPL('source=logs-* | head 10', start, end, { timestampField: 'time' });
     expect(q).toBe(
       "source=logs-* | where `time` >= '2025-01-01T00:00:00.000Z' and `time` <= '2025-01-01T01:00:00.000Z' | head 10"
+    );
+  });
+
+  it('escapes backticks in a user-supplied timestamp field to prevent breaking out of the identifier', () => {
+    const q = buildBoundedPPL('source=logs-* | head 10', start, end, { timestampField: '`inject` x' });
+    // each backtick is doubled so the value stays a single backtick-quoted identifier
+    const quoted = '```inject`` x`';
+    expect(q).toBe(
+      `source=logs-* | where ${quoted} >= '2025-01-01T00:00:00.000Z' and ${quoted} <= '2025-01-01T01:00:00.000Z' | head 10`
     );
   });
 

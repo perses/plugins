@@ -26,7 +26,11 @@ export interface OpenSearchClient {
   options: {
     datasourceUrl: string;
   };
-  ppl: (params: OpenSearchPPLParams, headers?: OpenSearchRequestHeaders) => Promise<OpenSearchPPLResponse>;
+  ppl: (
+    params: OpenSearchPPLParams,
+    headers?: OpenSearchRequestHeaders,
+    signal?: AbortSignal
+  ) => Promise<OpenSearchPPLResponse>;
 }
 
 export class OpenSearchPPLError extends Error {
@@ -75,7 +79,11 @@ function buildUrl(path: string, datasourceUrl: string): URL {
   return new URL(fullPath, window.location.origin);
 }
 
-export async function ppl(params: OpenSearchPPLParams, options: OpenSearchApiOptions): Promise<OpenSearchPPLResponse> {
+export async function ppl(
+  params: OpenSearchPPLParams,
+  options: OpenSearchApiOptions,
+  signal?: AbortSignal
+): Promise<OpenSearchPPLResponse> {
   const url = buildUrl('/_plugins/_ppl', options.datasourceUrl);
 
   const response = await fetch(url.toString(), {
@@ -85,6 +93,7 @@ export async function ppl(params: OpenSearchPPLParams, options: OpenSearchApiOpt
       ...options.headers,
     },
     body: JSON.stringify({ query: params.query }),
+    signal,
   });
 
   if (!response.ok) {

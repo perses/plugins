@@ -31,7 +31,7 @@ const createClient: DatasourcePlugin<OpenSearchDatasourceSpec, OpenSearchClient>
     options: {
       datasourceUrl,
     },
-    ppl: (params, headers) => ppl(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    ppl: (params, headers, signal) => ppl(params, { datasourceUrl, headers: headers ?? specHeaders }, signal),
   };
 };
 
