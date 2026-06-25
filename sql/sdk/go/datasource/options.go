@@ -11,21 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package datasource
 
 import (
-	ds "github.com/perses/plugins/sql/schemas/datasource:model"
+	sqlSpec "github.com/perses/spec/go/datasource/proxy/sql"
 )
 
-#kind: "SQLTimeSeriesQuery"
-
-kind: #kind
-spec: close({
-	ds.#selector
-	query:       string
-	minStep?:    int
-	timeColumn?: string
-	labelColumns?: [...string]
-	valueColumns?: [...string]
-	timeFormat?: string
-})
+func WithProxy(config sqlSpec.Config) Option {
+	return func(builder *Builder) error {
+		builder.Proxy = &sqlSpec.Proxy{
+			Kind: sqlSpec.ProxyKindName,
+			Spec: config,
+		}
+		return nil
+	}
+}

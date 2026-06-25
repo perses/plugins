@@ -13,6 +13,7 @@
 
 import { Stack, TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText } from '@mui/material';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import { SQLDatasourceSpec, SQLProxySpec, SQLDriver, SSLMode } from './sql-datasource-types';
 
 const SQL_DRIVERS: Array<{ value: SQLDriver; label: string }> = [
@@ -28,14 +29,14 @@ const SSL_MODES: Array<{ value: SSLMode; label: string }> = [
   { value: 'verify-full', label: 'Verify Full' },
 ];
 
-export function SQLDatasourceEditor(props: OptionsEditorProps<SQLDatasourceSpec>) {
+export function SQLDatasourceEditor(props: OptionsEditorProps<SQLDatasourceSpec>): ReactElement {
   const { value, onChange } = props;
 
   const config = value?.proxy?.spec || ({} as SQLProxySpec);
 
   const driver = config.driver || 'postgres';
 
-  const handleChange = (field: keyof SQLProxySpec, fieldValue: unknown) => {
+  const handleChange = (field: keyof SQLProxySpec, fieldValue: unknown): void => {
     onChange({
       proxy: {
         kind: 'SQLProxy',
@@ -47,7 +48,7 @@ export function SQLDatasourceEditor(props: OptionsEditorProps<SQLDatasourceSpec>
     });
   };
 
-  const handleNestedChange = (parent: 'mysql' | 'postgres', field: string, fieldValue: unknown) => {
+  const handleNestedChange = (parent: 'mysql' | 'postgres', field: string, fieldValue: unknown): void => {
     onChange({
       proxy: {
         kind: 'SQLProxy',

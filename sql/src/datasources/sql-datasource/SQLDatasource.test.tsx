@@ -50,12 +50,12 @@ describe('SQLDatasource', () => {
         },
       };
 
-      const options = {
+      const options: { proxyUrl?: string } = {
         proxyUrl: undefined,
       };
 
       expect(() => {
-        SQLDatasource.createClient(spec, options as any);
+        SQLDatasource.createClient(spec, options);
       }).toThrow('No proxy URL available for SQL datasource');
     });
   });

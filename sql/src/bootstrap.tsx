@@ -39,4 +39,4 @@ if (container) {
 }
 
 // Make plugin module available
-(window as any).getPluginModule = getPluginModule;
+(window as Window & { getPluginModule?: typeof getPluginModule }).getPluginModule = getPluginModule;

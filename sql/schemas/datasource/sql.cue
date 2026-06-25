@@ -25,4 +25,4 @@ spec: {
 	commonProxy.#baseSQLDatasourceSpec
 }
 
-#selector: common.#datasourceSelector & { _kind: #kind }
+#selector: common.#datasourceSelector & {_kind: #kind}
