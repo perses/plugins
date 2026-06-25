@@ -26,6 +26,7 @@ import { VirtuosoMockContext } from 'react-virtuoso';
 import { TimeSeriesData } from '@perses-dev/spec';
 import { TableOptions, TimeSeriesTableProps } from '../models';
 import {
+  MOCK_MULTI_QUERY_DATA_EMPTY,
   MOCK_MULTI_QUERY_DATA_Q1,
   MOCK_MULTI_QUERY_DATA_Q2,
   MOCK_MULTI_QUERY_DATA_WITH_ZERO,
@@ -457,6 +458,45 @@ describe('TablePanel', () => {
 
         // No N/A should appear — all cells have real values (100, 200, 50, 0)
         expect(screen.queryAllByRole('cell', { name: 'N/A' })).toHaveLength(0);
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
+      'should show N/A for columns defined in columnSettings but with no data in any query',
+      async () => {
+        // Simulates Request Hard column: defined in columnSettings as value #3,
+        // but the third query returns no data at all (e.g. no ResourceQuotas on cluster)
+        const options: TableOptions = {
+          columnSettings: [
+            { name: 'timestamp', hide: true },
+            { name: 'namespace', header: 'Namespace' },
+            { name: 'value #1', header: 'Value 1' },
+            { name: 'value #2', header: 'Value 2' },
+            { name: 'value #3', header: 'Value 3 (empty query)' },
+          ],
+          cellSettings: [{ condition: { kind: 'Misc', spec: { value: 'null' } }, text: 'N/A' }],
+          transforms: [
+            { kind: 'MergeSeries', spec: {} },
+            { kind: 'JoinByColumnValue', spec: { columns: ['namespace'] } },
+          ],
+          enableFiltering: true,
+        };
+
+        // Q1 has data, Q2 has partial data, Q3 is completely empty
+        renderMultiQueryPanel(
+          [MOCK_MULTI_QUERY_DATA_Q1, MOCK_MULTI_QUERY_DATA_Q2, MOCK_MULTI_QUERY_DATA_EMPTY],
+          options
+        );
+
+        // Both namespaces should be present
+        expect(await screen.findByRole('cell', { name: 'ns-a' })).toBeInTheDocument();
+        expect(await screen.findByRole('cell', { name: 'ns-b' })).toBeInTheDocument();
+
+        // Value 3 column should show N/A for all rows since no query produced data for it
+        const naCells = await screen.findAllByRole('cell', { name: 'N/A' });
+        // At minimum: ns-b missing value #2 (1) + both rows missing value #3 (2) = 3 N/A cells
+        expect(naCells.length).toBeGreaterThanOrEqual(3);
       },
       TEST_TIMEOUT
     );
