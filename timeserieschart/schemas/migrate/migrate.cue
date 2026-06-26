@@ -192,7 +192,7 @@ spec: {
 	// migrate fixedColor overrides to querySettings when applicable
 	#querySettings: [
 		for i, target in (*#panel.targets | []) {
-			queryName: "Query #\(i+1)"
+			queryIndex: "Query #\(i+1)"
 			for override in (*#panel.fieldConfig.overrides | [])
 			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp" || override.matcher.id == "byFrameRefID") && override.matcher.options != _|_
 			for property in override.properties
