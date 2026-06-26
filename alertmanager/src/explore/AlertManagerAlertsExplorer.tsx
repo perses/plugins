@@ -32,13 +32,6 @@ export function AlertManagerAlertsExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
-  const definitions = queries.length
-    ? queries.map((query: QueryDefinition) => ({
-        kind: query.spec.plugin.kind,
-        spec: query.spec.plugin.spec,
-      }))
-    : [];
-
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor
@@ -47,7 +40,7 @@ export function AlertManagerAlertsExplorer(): ReactElement {
         queries={queryDefinitions}
         onQueryRun={() => setData({ queries: queryDefinitions })}
       />
-      <DataQueriesProvider definitions={definitions}>
+      <DataQueriesProvider definitions={queries}>
         <Box height={PANEL_PREVIEW_HEIGHT}>
           <Panel
             panelOptions={{ hideHeader: true }}

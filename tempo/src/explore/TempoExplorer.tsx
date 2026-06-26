@@ -148,16 +148,6 @@ export function TempoExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
-  // map TraceQueryDefinition to Definition<UnknownSpec>
-  const definitions = queries.length
-    ? queries.map((query: QueryDefinition) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
-
   const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
   const isSingleTrace = isValidTraceId(firstQuery ?? '');
 
@@ -171,7 +161,7 @@ export function TempoExplorer(): ReactElement {
       />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
-        <DataQueriesProvider definitions={definitions}>
+        <DataQueriesProvider definitions={queries}>
           <Box height={700}>
             {isSingleTrace ? (
               <TracingGanttChartPanel queries={queries} selectedSpanId={selectedSpanId} />
