@@ -47,7 +47,7 @@
     "react-dom": "^17.0.2 || ^18.0.0"
   },
   "devDependencies": {
-    "@module-federation/rsbuild-plugin": "^2.3.3",
+    "@module-federation/rsbuild-plugin": "^2.6.0",
     "@perses-dev/client": "^0.54.0-beta.8",
     "@perses-dev/components": "^0.54.0-beta.8",
     "@perses-dev/dashboards": "^0.54.0-beta.8",

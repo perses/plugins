@@ -25,7 +25,7 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "dompurify": "^3.4.8",
+    "dompurify": "^3.4.11",
     "marked": "^15.0.6"
   },
   "peerDependencies": {
