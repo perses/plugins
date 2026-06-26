@@ -22,7 +22,7 @@ import {
   usePluginRegistry,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useMemo } from 'react';
 import { QueryDefinition } from '@perses-dev/spec';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
