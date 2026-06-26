@@ -235,7 +235,6 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   }, [queryNames, querySettingsList]);
 
-  // TODO; hide add button if no more query index is available
   const firstAvailableQueryName = useMemo(() => {
     return availableQueryNames[0] ?? NO_INDEX_AVAILABLE;
   }, [availableQueryNames]);

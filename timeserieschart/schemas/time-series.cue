@@ -63,11 +63,11 @@ spec: close({
 
 #querySettings: [...{
 	queryName:    strings.MinRunes(1)
-	colorMode?:    "fixed" | "fixed-single"       // NB: "palette" could be added later
-	colorValue?:   =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
-	lineStyle?:    #lineStyle
-	areaOpacity?:  #areaOpacity
-	format?:       common.#format
+	colorMode?:   "fixed" | "fixed-single"       // NB: "palette" could be added later
+	colorValue?:  =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
+	lineStyle?:   #lineStyle
+	areaOpacity?: #areaOpacity
+	format?:      common.#format
 }]
 
 #lineStyle: "solid" | "dashed" | "dotted"
