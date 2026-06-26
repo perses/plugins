@@ -24,6 +24,7 @@
     "logstable",
     "loki",
     "markdown",
+    "opensearch",
     "piechart",
     "prometheus",
     "pyroscope",
