@@ -40,6 +40,13 @@ describe('convertPercentThreshold', () => {
     const value = convertPercentThreshold(50, MOCK_ECHART_TIME_SERIES_DATA);
     expect(value).toEqual(0.5 * MAX_VALUE);
   });
+
+  it('should use absolute values when finding the max so negated series (negativeY) still resolve correctly', () => {
+    // Simulates a series that was negated for display (querySettings.negativeY = true)
+    const negatedSeries: LegacyTimeSeries[] = [{ data: [-10, -30, -80, -50] }, { data: [-20, -MAX_VALUE, -17, -30] }];
+    const value = convertPercentThreshold(50, negatedSeries);
+    expect(value).toEqual(0.5 * MAX_VALUE);
+  });
 });
 
 describe('convertPanelYAxis', () => {

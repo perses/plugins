@@ -1,0 +1,19 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "visual": {
+      "display": "line",
+      "stack": "all",
+      "areaOpacity": 0.3
+    },
+    "querySettings": [
+      {
+        "queryIndex": 0
+      },
+      {
+        "queryIndex": 1,
+        "negativeY": true
+      }
+    ]
+  }
+}

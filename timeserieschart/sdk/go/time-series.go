@@ -127,6 +127,10 @@ type QuerySettingsItem struct {
 	LineStyle   string         `json:"lineStyle,omitempty" yaml:"lineStyle,omitempty"`
 	AreaOpacity float64        `json:"areaOpacity,omitempty" yaml:"areaOpacity,omitempty"`
 	Format      *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
+	// NegativeY, when true, renders the query's series below the X axis (values
+	// are negated for display only; legend calculations and CSV export keep the
+	// original values).
+	NegativeY bool `json:"negativeY,omitempty" yaml:"negativeY,omitempty"`
 }
 
 type Option func(plugin *Builder) error

@@ -66,6 +66,7 @@ spec: close({
 	lineStyle?:   #lineStyle
 	areaOpacity?: #areaOpacity
 	format?:      common.#format
+	negativeY?:   bool // render the query's series below the X axis
 }]
 
 #lineStyle: "solid" | "dashed" | "dotted"

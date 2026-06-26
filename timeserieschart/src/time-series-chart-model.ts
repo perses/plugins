@@ -46,6 +46,12 @@ export interface QuerySettingsOptions {
   lineStyle?: LineStyleType;
   areaOpacity?: number;
   format?: FormatOptions;
+  /**
+   * If true, the query's series values are negated for display so they render
+   * below the X axis. The original (positive) values are preserved for legend
+   * calculations and CSV export, matching Grafana's `transform: "negative-Y"` behavior.
+   */
+  negativeY?: boolean;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
