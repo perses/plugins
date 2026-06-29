@@ -120,7 +120,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: defaultQueryName(0),
+        queryName: defaultQueryName(0),
         colorMode: 'fixed',
         colorValue: '#000',
       },
@@ -143,7 +143,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: defaultQueryName(0),
+        queryName: defaultQueryName(0),
         colorMode: 'fixed',
         colorValue: '#000',
       },
@@ -166,7 +166,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: defaultQueryName(0),
+        queryName: defaultQueryName(0),
         colorMode: 'fixed-single',
         colorValue: '#000',
       },
@@ -189,7 +189,7 @@ describe('getSeriesColor', () => {
       seriesName: testSeriesName,
       seriesIndex: 0,
       querySettings: {
-        queryIndex: defaultQueryName(0),
+        queryName: defaultQueryName(0),
         colorMode: 'fixed-single',
         colorValue: '#000',
       },

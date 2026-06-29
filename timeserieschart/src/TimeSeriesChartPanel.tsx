@@ -212,10 +212,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       // queries & querySettings indices do not necessarily match, so we have to check the tail value of the $ref attribute
       let querySettings: QuerySettingsOptions | undefined;
       for (const item of querySettingsList ?? []) {
-        if (item.queryIndex === result.definition.spec.name || item.queryIndex === defaultQueryName(queryIndex)) {
+        const matchesByName =
+          item.queryName !== undefined &&
+          (item.queryName === result.definition.spec.name || item.queryName === defaultQueryName(queryIndex));
+        // queryIndex is deprecated but still supported for backward compatibility.
+        const matchesByIndex = item.queryIndex !== undefined && item.queryIndex === queryIndex;
+        if (matchesByName || matchesByIndex) {
           querySettings = item;
           // We don't break the loop here just in case there are multiple querySettings defined for the
-          // same queryIndex, because in that case we want the last one to take precedence.
+          // same query, because in that case we want the last one to take precedence.
         }
       }
 

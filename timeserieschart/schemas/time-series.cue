@@ -62,7 +62,9 @@ spec: close({
 }
 
 #querySettings: [...{
-	queryIndex:   strings.MinRunes(1)
+	queryName?: strings.MinRunes(1)
+	// queryIndex is deprecated, use queryName instead. Kept for backward compatibility.
+	queryIndex?:  int & >=0
 	colorMode?:   "fixed" | "fixed-single"       // NB: "palette" could be added later
 	colorValue?:  =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
 	lineStyle?:   #lineStyle

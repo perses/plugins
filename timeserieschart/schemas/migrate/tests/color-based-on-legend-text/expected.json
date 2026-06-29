@@ -7,28 +7,28 @@
     },
     "querySettings": [
       {
-        "queryIndex": "Query #1",
+        "queryName": "Query #1",
         "colorMode": "fixed",
         "colorValue": "#EAB839"
       },
       {
-        "queryIndex": "Query #2",
+        "queryName": "Query #2",
         "colorMode": "fixed",
         "colorValue": "#0A437C"
       },
       {
-        "queryIndex": "Query #3",
+        "queryName": "Query #3",
         "colorMode": "fixed",
         "colorValue": "#890F02",
         "areaOpacity": 1
       },
       {
-        "queryIndex": "Query #5",
+        "queryName": "Query #5",
         "colorMode": "fixed",
         "colorValue": "#6D1F62"
       },
       {
-        "queryIndex": "Query #6",
+        "queryName": "Query #6",
         "colorMode": "fixed",
         "colorValue": "#052B51"
       }
