@@ -36,19 +36,9 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElem
 
   const suggestedStepMs = useSuggestedStepMs(width);
 
-  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
-  const definitions = queries.length
-    ? queries.map((query) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
-
   return (
     <Box ref={boxRef} height={height}>
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
+      <DataQueriesProvider definitions={queries} options={{ suggestedStepMs, mode: 'range' }}>
         <Panel
           panelOptions={{
             hideHeader: true,
@@ -66,17 +56,9 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElem
 function MetricDataTable({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const height = PANEL_PREVIEW_HEIGHT;
 
-  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
-  const definitions = queries.map((query) => {
-    return {
-      kind: query.spec.plugin.kind,
-      spec: query.spec.plugin.spec,
-    };
-  });
-
   return (
     <Box height={height}>
-      <DataQueriesProvider definitions={definitions} options={{ mode: 'instant' }}>
+      <DataQueriesProvider definitions={queries} options={{ mode: 'instant' }}>
         <Panel
           panelOptions={{
             hideHeader: true,

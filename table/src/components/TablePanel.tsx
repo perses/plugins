@@ -452,8 +452,16 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       }
     }
 
+    // Include column names from columnSettings so that columns with no data
+    // are still extended with undefined for cellSettings evaluation (e.g. N/A for null)
+    for (const col of spec.columnSettings ?? []) {
+      if (!result.includes(col.name)) {
+        result.push(col.name);
+      }
+    }
+
     return result;
-  }, [data]);
+  }, [data, spec.columnSettings]);
 
   const columnsFormat = useMemo(() => {
     const columnsFormat: Record<string, FormatOptions> = {};
@@ -565,6 +573,27 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return columns;
   }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables, gaugeRangeByColumn, spec.cellSettings]);
 
+  // Filtering state — declared before cellConfigs so filteredData is available for cell config evaluation
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  // filter data based on the current filters
+  const filteredData = useMemo(() => {
+    if (!spec.enableFiltering || columnFilters.length === 0) {
+      return data;
+    }
+
+    return data.filter((row) => {
+      return columnFilters.every((filter) => {
+        const value = row[filter.id];
+        const filterValues = filter.value as Array<string | number>;
+
+        if (!filterValues || filterValues.length === 0) return true;
+
+        return filterValues.includes(value as string | number);
+      });
+    });
+  }, [data, columnFilters, spec.enableFiltering]);
+
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {
     // If there are no cell settings globally or per column, return an empty object
@@ -575,7 +604,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     const result: TableCellConfigs = {};
 
     let index = 0;
-    for (const row of data) {
+    for (const row of filteredData) {
       // Transforming key to object to extend the row with undefined values if the key is not present
       // for checking the cell config "Misc" condition with "null"
       const keysAsObj = keys.reduce(
@@ -614,7 +643,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return result;
-  }, [data, keys, spec.cellSettings, spec.columnSettings]);
+  }, [filteredData, keys, spec.cellSettings, spec.columnSettings]);
 
   function generateDefaultSortingState(): SortingState {
     return (
@@ -631,8 +660,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
 
-  // Filtering state
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [filterAnchorEl, setFilterAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
   const [openFilterColumn, setOpenFilterColumn] = useState<string | null>(null);
 
@@ -684,28 +711,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       document.removeEventListener('click', handleClick);
     };
   }, [openFilterColumn]);
-
-  // filter data based on the current filters
-  const filteredData = useMemo(() => {
-    let filtered = [...data];
-
-    // apply column filters if enabled
-    if (spec.enableFiltering && columnFilters.length > 0) {
-      filtered = filtered.filter((row) => {
-        return columnFilters.every((filter) => {
-          const value = row[filter.id];
-          const filterValues = filter.value as Array<string | number>;
-
-          if (!filterValues || filterValues.length === 0) return true; // No filter values means no filtering
-
-          // Check if the row value is in the selected filter values
-          return filterValues.includes(value as string | number);
-        });
-      });
-    }
-
-    return filtered;
-  }, [data, columnFilters, spec.enableFiltering]);
 
   // Keep ref in sync with filtered data for use in selection handler
   filteredDataRef.current = filteredData;

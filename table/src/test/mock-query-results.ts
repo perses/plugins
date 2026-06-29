@@ -275,6 +275,65 @@ export const MOCK_NULL_QUERY_RESULT = [
   },
 ];
 
+// Two queries where Query 1 covers both namespaces but Query 2 only covers one.
+// After MergeSeries + JoinByColumnValue, ns-b will have null for value #2.
+export const MOCK_MULTI_QUERY_DATA_Q1: TimeSeriesData = {
+  timeRange: { start: new Date(1666625535000), end: new Date(1666625535000) },
+  stepMs: 24379,
+  series: [
+    {
+      name: 'namespace="ns-a"',
+      values: [[1666479357903, 100]],
+      labels: { namespace: 'ns-a' },
+    },
+    {
+      name: 'namespace="ns-b"',
+      values: [[1666479357903, 200]],
+      labels: { namespace: 'ns-b' },
+    },
+  ],
+};
+
+export const MOCK_MULTI_QUERY_DATA_Q2: TimeSeriesData = {
+  timeRange: { start: new Date(1666625535000), end: new Date(1666625535000) },
+  stepMs: 24379,
+  series: [
+    {
+      name: 'namespace="ns-a"',
+      values: [[1666479357903, 50]],
+      labels: { namespace: 'ns-a' },
+    },
+    // ns-b intentionally absent — simulates missing data
+  ],
+};
+
+// Query where a namespace has genuine zero value (not null).
+// Used to verify 0 is rendered as 0, not as N/A.
+export const MOCK_MULTI_QUERY_DATA_WITH_ZERO: TimeSeriesData = {
+  timeRange: { start: new Date(1666625535000), end: new Date(1666625535000) },
+  stepMs: 24379,
+  series: [
+    {
+      name: 'namespace="ns-a"',
+      values: [[1666479357903, 50]],
+      labels: { namespace: 'ns-a' },
+    },
+    {
+      name: 'namespace="ns-b"',
+      values: [[1666479357903, 0]],
+      labels: { namespace: 'ns-b' },
+    },
+  ],
+};
+
+// Query that returns no data at all — simulates a metric like cpu_request_hard
+// when no ResourceQuotas exist on the cluster.
+export const MOCK_MULTI_QUERY_DATA_EMPTY: TimeSeriesData = {
+  timeRange: { start: new Date(1666625535000), end: new Date(1666625535000) },
+  stepMs: 24379,
+  series: [],
+};
+
 export const MOCK_TIME_SERIES_QUERY_DEFINITION = {
   kind: 'TimeSeriesQuery',
   spec: {
