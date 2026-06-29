@@ -326,6 +326,14 @@ export const MOCK_MULTI_QUERY_DATA_WITH_ZERO: TimeSeriesData = {
   ],
 };
 
+// Query that returns no data at all — simulates a metric like cpu_request_hard
+// when no ResourceQuotas exist on the cluster.
+export const MOCK_MULTI_QUERY_DATA_EMPTY: TimeSeriesData = {
+  timeRange: { start: new Date(1666625535000), end: new Date(1666625535000) },
+  stepMs: 24379,
+  series: [],
+};
+
 export const MOCK_TIME_SERIES_QUERY_DEFINITION = {
   kind: 'TimeSeriesQuery',
   spec: {

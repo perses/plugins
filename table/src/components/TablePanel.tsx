@@ -452,8 +452,16 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       }
     }
 
+    // Include column names from columnSettings so that columns with no data
+    // are still extended with undefined for cellSettings evaluation (e.g. N/A for null)
+    for (const col of spec.columnSettings ?? []) {
+      if (!result.includes(col.name)) {
+        result.push(col.name);
+      }
+    }
+
     return result;
-  }, [data]);
+  }, [data, spec.columnSettings]);
 
   const columnsFormat = useMemo(() => {
     const columnsFormat: Record<string, FormatOptions> = {};
