@@ -15,9 +15,8 @@ package migrate
 
 #target: {
 	datasource: {
-		type?: "loki"
-		uid: string
-		...
+		type: "loki"
+		uid?: string
 	}
 	expr: string
 	...
