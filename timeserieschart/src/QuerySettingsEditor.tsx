@@ -31,7 +31,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import CloseIcon from 'mdi-material-ui/Close';
 import { produce } from 'immer';
-import { useQueryCountContext } from '@perses-dev/plugin-system';
+import { useDataQueriesContext } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
   LINE_STYLE_CONFIG,
@@ -223,7 +223,8 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
-  const queryCount = useQueryCountContext();
+  const { queryDefinitions } = useDataQueriesContext();
+  const queryCount = queryDefinitions.length;
 
   // Compute the list of query indexes for which query settings are not already defined.
   // This is to avoid already-booked indexes to still be selectable in the dropdown(s)
