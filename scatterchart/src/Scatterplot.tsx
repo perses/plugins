@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
-import { EChart, formatValue, OnEventsType, useChartsTheme } from '@perses-dev/components';
+import { ReactElement, useCallback, useMemo } from 'react';
+import { EChart, formatValue, OnEventsType, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import {
@@ -32,6 +32,7 @@ import {
   useTimeRange,
 } from '@perses-dev/plugin-system';
 import { EChartTraceValue } from './ScatterChartPanel';
+import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
 
 use([
   DatasetComponent,
@@ -44,6 +45,16 @@ use([
   CanvasRenderer,
 ]);
 
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  fractionalSecondDigits: 3,
+};
+
 export interface ScatterplotProps {
   width: number;
   height: number;
@@ -51,17 +62,21 @@ export interface ScatterplotProps {
   link?: string;
 }
 
-const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'long',
-  timeStyle: 'medium',
-}).format;
-
 export function Scatterplot(props: ScatterplotProps): ReactElement {
   const { width, height, options, link: linkTemplate } = props;
   const chartsTheme = useChartsTheme();
   const { absoluteTimeRange } = useTimeRange();
+  const { timeZone, dateFormatOptionsWithUserTimeZone } = useTimeZone();
+
+  const dateFormatter = useMemo(() => {
+    const dateFormatOptions = dateFormatOptionsWithUserTimeZone(DATE_FORMAT_OPTIONS);
+    return new Intl.DateTimeFormat(undefined, dateFormatOptions).format;
+  }, [dateFormatOptionsWithUserTimeZone]);
   const variableValues = useAllVariableValues();
   const { navigate } = useRouterContext();
+
+  const rangeMs = absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf();
+  const getAxisFormatter = useCallback(() => createTimezoneAwareAxisFormatter(rangeMs, timeZone), [rangeMs, timeZone]);
 
   // Apache EChart Options Docs: https://echarts.apache.org/en/option.html
   const eChartOptions: EChartsCoreOption = {
@@ -78,6 +93,10 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
       type: 'time',
       min: absoluteTimeRange.start,
       max: absoluteTimeRange.end,
+      axisLabel: {
+        hideOverlap: true,
+        formatter: getAxisFormatter(),
+      },
     },
     yAxis: {
       scale: true,
@@ -103,7 +122,7 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
         return [
           `<b>Service name</b>: ${data.rootServiceName}<br/>`,
           `<b>Span name</b>: ${data.rootTraceName}<br/>`,
-          `<b>Time</b>: ${DATE_FORMATTER(data.startTime)}<br/>`,
+          `<b>Time</b>: ${dateFormatter(data.startTime)}<br/>`,
           `<b>Duration</b>: ${formatValue(data.durationMs, { unit: 'milliseconds' })}<br/>`,
           `<b>Span count</b>: ${data.spanCount} (${data.errorCount} errors)<br/>`,
         ].join('');
