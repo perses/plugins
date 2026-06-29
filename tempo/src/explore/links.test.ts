@@ -13,7 +13,7 @@
 
 import { linkToTrace, linkToSpan } from './links';
 
-function parseLink(link: string) {
+function parseLink(link: string): { explorer: string | null; data: unknown; tz: string | null } {
   const params = new URLSearchParams(link.split('?')[1]);
   return {
     explorer: params.get('explorer'),
