@@ -63,6 +63,6 @@ describe('TraceTablePanel', () => {
     expect(lastRow).toHaveTextContent('2 errors'); // span count
     expect(lastRow).toHaveTextContent('100ms'); // duration
     // TODO IMPORTANT: https://github.com/perses/perses/issues/4090
-    expect(lastRow).toHaveTextContent('December 18, 2023 at 4:07:25 PM'); // start time
+    expect(lastRow).toHaveTextContent('December 18, 2023 at 4:07:25.000 PM'); // start time
   });
 });
