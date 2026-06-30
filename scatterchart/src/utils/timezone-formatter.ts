@@ -14,7 +14,6 @@
 import { formatWithTimeZone } from '@perses-dev/components';
 
 const DAY_MS = 86400000;
-const MONTH_MS = 2629440000;
 const YEAR_MS = 31536000000;
 
 /**
@@ -29,21 +28,22 @@ export function createTimezoneAwareAxisFormatter(rangeMs: number, timeZone: stri
       return formatWithTimeZone(timeStamp, 'yyyy', timeZone);
     }
 
-    // more than 2 years
-    if (rangeMs > YEAR_MS * 2) {
+    // more than 6 months
+    if (rangeMs > DAY_MS * 180) {
       return formatWithTimeZone(timeStamp, 'MMM yyyy', timeZone);
     }
 
-    // between 10 days to 6 months
-    if (rangeMs > DAY_MS * 10 && rangeMs < MONTH_MS * 6) {
+    // more than 10 days
+    if (rangeMs > DAY_MS * 10) {
       return formatWithTimeZone(timeStamp, 'dd.MM', timeZone);
     }
 
-    // between 2 and 10 days
-    if (rangeMs > DAY_MS * 2 && rangeMs <= DAY_MS * 10) {
+    // more than 2 days
+    if (rangeMs > DAY_MS * 2) {
       return formatWithTimeZone(timeStamp, 'dd.MM HH:mm', timeZone);
     }
 
+    // less or equal 2 days
     return formatWithTimeZone(timeStamp, 'HH:mm', timeZone);
   };
 }
