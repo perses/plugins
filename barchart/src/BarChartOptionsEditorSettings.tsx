@@ -26,6 +26,7 @@ import {
   FormatControlsProps,
   FormatOptions,
   isPercentUnit,
+  isUnitWithShortValues,
   ModeOption,
   ModeSelector,
   ModeSelectorProps,
@@ -44,6 +45,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 import { MouseEventHandler, ReactElement } from 'react';
 import {
   BarChartOptions,
@@ -106,7 +108,11 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   };
 
   // ensures decimalPlaces defaults to correct value
-  const format = merge({}, DEFAULT_FORMAT, value.format);
+  const format = merge(
+    {},
+    !value.format || isUnitWithShortValues(value.format) ? DEFAULT_FORMAT : omit(DEFAULT_FORMAT, ['shortValues']),
+    value.format
+  );
   const groupBy = value.groupBy ?? DEFAULT_GROUP_BY;
   const isStacked = value.isStacked ?? DEFAULT_IS_STACKED;
 
