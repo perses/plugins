@@ -67,13 +67,13 @@ export function TraceHeaderBar(props: TraceHeaderBarProps): ReactElement {
           </IconButton>
         </Stack>
         <Stack direction="row" sx={{ rowGap: 1, columnGap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography component="span">
+          <Typography variant="h4" sx={{ fontWeight: 'normal' }}>
             <strong>Start:</strong>{' '}
             <Tooltip title={dateFormatterUTC(trace.startTimeUnixMs)} placement="top" arrow>
               <Typography component="span">{dateFormatter(trace.startTimeUnixMs)}</Typography>
             </Tooltip>
           </Typography>
-          <Typography component="span">
+          <Typography variant="h4" sx={{ fontWeight: 'normal' }}>
             <strong>Trace ID:</strong> {rootSpan.traceId}
           </Typography>
         </Stack>
