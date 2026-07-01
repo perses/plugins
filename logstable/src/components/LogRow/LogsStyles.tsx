@@ -24,14 +24,11 @@ export const LogRowContainer = styled(Box, {
 }));
 
 export const LogRowContent = styled(Box, {
-  shouldForwardProp: (prop) =>
-    prop !== 'isExpandable' && prop !== 'isHighlighted' && prop !== 'isSelected' && prop !== 'hasRowActions',
-})<{ isExpandable: boolean; isHighlighted?: boolean; isSelected?: boolean; hasRowActions?: boolean }>(
-  ({ theme, isExpandable, isHighlighted, isSelected, hasRowActions }) => ({
+  shouldForwardProp: (prop) => prop !== 'gridTemplateColumns' && prop !== 'isHighlighted' && prop !== 'isSelected',
+})<{ gridTemplateColumns: string; isHighlighted?: boolean; isSelected?: boolean }>(
+  ({ theme, gridTemplateColumns, isHighlighted, isSelected }) => ({
     display: 'grid',
-    gridTemplateColumns: isExpandable
-      ? `16px minmax(160px, max-content) 1fr ${hasRowActions ? 'min-content' : ''}`
-      : `minmax(160px, max-content) 1fr ${hasRowActions ? 'min-content' : ''}`,
+    gridTemplateColumns,
     alignItems: 'flex-start',
     padding: '4px 8px',
     cursor: 'default',
@@ -75,5 +72,7 @@ export const LogText = styled(Typography, {
     : {
         wordBreak: 'normal',
         whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
       }),
 }));

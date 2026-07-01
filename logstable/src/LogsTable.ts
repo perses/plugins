@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+import { LogsTableColumnsEditor } from './LogsTableColumnsEditor';
 import { LogsTableComponent } from './LogsTableComponent';
 import { LogsTableItemSelectionActionsEditor } from './LogsTableItemSelectionActionsEditor';
 import { LogsTableSettingsEditor } from './LogsTableSettingsEditor';
@@ -23,11 +24,11 @@ export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
   PanelComponent: LogsTableComponent,
   panelOptionsEditorComponents: [
     { label: 'Settings', content: LogsTableSettingsEditor },
+    { label: 'Columns', content: LogsTableColumnsEditor },
     { label: 'Item Actions', content: LogsTableItemSelectionActionsEditor },
   ],
   supportedQueryTypes: ['LogQuery'],
   createInitialOptions: () => ({
-    showTime: true,
     allowWrap: true,
     enableDetails: true,
   }),
