@@ -56,7 +56,7 @@ export function TraceHeaderBar(props: TraceHeaderBarProps): ReactElement {
 
   return (
     <Stack direction="column" sx={{ gap: 1 }}>
-      <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+      <Stack direction="row" sx={{ gap: 1, justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
           <Typography variant="h3">
             {rootSpan.resource.serviceName}: {rootSpan.name} (
@@ -66,17 +66,17 @@ export function TraceHeaderBar(props: TraceHeaderBarProps): ReactElement {
             <MagnifyIcon fontSize="small" />
           </IconButton>
         </Stack>
-        <Typography variant="h4">
-          <Typography component="span" sx={{ px: 1 }}>
+        <Stack direction="row" sx={{ rowGap: 1, columnGap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography component="span">
             <strong>Start:</strong>{' '}
             <Tooltip title={dateFormatterUTC(trace.startTimeUnixMs)} placement="top" arrow>
               <Typography component="span">{dateFormatter(trace.startTimeUnixMs)}</Typography>
             </Tooltip>
           </Typography>
-          <Typography component="span" sx={{ px: 1 }}>
+          <Typography component="span">
             <strong>Trace ID:</strong> {rootSpan.traceId}
           </Typography>
-        </Typography>
+        </Stack>
       </Stack>
       {showSearch && <SearchBar search={search} />}
     </Stack>
