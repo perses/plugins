@@ -16,19 +16,21 @@ package migrate
 #target: {
 	datasource: {
 		type: "loki"
-		...
+		uid?: string
 	}
 	expr: string
 	...
 }
 
-kind: "LokiLogQuery"
-spec: {
-	if #target.datasource.uid != _|_ {
-		datasource: {
-			kind: "LokiDatasource"
-			name: #target.datasource.uid
+if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
+	kind: "LokiLogQuery"
+	spec: {
+		if #target.datasource.uid != _|_ {
+			datasource: {
+				kind: "LokiDatasource"
+				name: #target.datasource.uid
+			}
 		}
+		query: #target.expr
 	}
-	query: #target.expr
 }
