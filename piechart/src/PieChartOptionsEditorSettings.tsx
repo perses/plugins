@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 import {
   CalculationSelector,
   CalculationSelectorProps,
@@ -37,6 +38,7 @@ import {
   useChartsTheme,
   FormatOptions,
   isPercentUnit,
+  isUnitWithShortValues,
 } from '@perses-dev/components';
 import {
   Button,
@@ -125,7 +127,11 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   };
 
   // ensures decimalPlaces defaults to correct value
-  const format = merge({}, DEFAULT_FORMAT, value.format);
+  const format = merge(
+    {},
+    !value.format || isUnitWithShortValues(value.format) ? DEFAULT_FORMAT : omit(DEFAULT_FORMAT, ['shortValues']),
+    value.format
+  );
 
   type ColorScheme = 'default' | 'theme' | 'gradient';
 
