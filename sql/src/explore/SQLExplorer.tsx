@@ -27,13 +27,6 @@ interface SQLExplorerQueryParams {
 const PANEL_PREVIEW_HEIGHT = 700;
 const FILTERED_QUERY_PLUGINS = ['SQLTimeSeriesQuery'];
 
-function toQueryDefinitions(queries: QueryDefinition[]): Array<{ kind: string; spec: Record<string, unknown> }> {
-  return queries.map((query) => ({
-    kind: query.spec.plugin.kind,
-    spec: query.spec.plugin.spec,
-  }));
-}
-
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const { width, ref: boxRef } = useResizeObserver();
   const height = PANEL_PREVIEW_HEIGHT;
@@ -42,7 +35,7 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElem
 
   return (
     <Box ref={boxRef} height={height}>
-      <DataQueriesProvider definitions={toQueryDefinitions(queries)} options={{ suggestedStepMs, mode: 'range' }}>
+      <DataQueriesProvider definitions={queries} options={{ suggestedStepMs, mode: 'range' }}>
         <Panel
           panelOptions={{
             hideHeader: true,
@@ -62,7 +55,7 @@ function DataTable({ queries }: { queries: QueryDefinition[] }): ReactElement {
 
   return (
     <Box height={height}>
-      <DataQueriesProvider definitions={toQueryDefinitions(queries)} options={{ mode: 'instant' }}>
+      <DataQueriesProvider definitions={queries} options={{ mode: 'instant' }}>
         <Panel
           panelOptions={{
             hideHeader: true,
