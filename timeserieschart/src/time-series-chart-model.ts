@@ -40,11 +40,7 @@ export interface TimeSeriesChartOptions {
 }
 
 export interface QuerySettingsOptions {
-  queryName?: string;
-  /**
-   * @deprecated Use `queryName` instead.
-   */
-  queryIndex?: number;
+  queryIndex: number;
   colorMode?: 'fixed' | 'fixed-single';
   colorValue?: string;
   lineStyle?: LineStyleType;

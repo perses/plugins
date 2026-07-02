@@ -121,9 +121,7 @@ const (
 )
 
 type QuerySettingsItem struct {
-	QueryName string `json:"queryName,omitempty" yaml:"queryName,omitempty"`
-	// Deprecated: use QueryName instead.
-	QueryIndex  uint           `json:"queryIndex,omitempty" yaml:"queryIndex,omitempty"`
+	QueryIndex  uint           `json:"queryIndex" yaml:"queryIndex"`
 	ColorMode   ColorMode      `json:"colorMode,omitempty" yaml:"colorMode,omitempty"`
 	ColorValue  string         `json:"colorValue,omitempty" yaml:"colorValue,omitempty"`
 	LineStyle   string         `json:"lineStyle,omitempty" yaml:"lineStyle,omitempty"`

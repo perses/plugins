@@ -31,7 +31,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import CloseIcon from 'mdi-material-ui/Close';
 import { produce } from 'immer';
-import { generateQueryNames, useDataQueriesContext, defaultQueryName } from '@perses-dev/plugin-system';
+import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
   LINE_STYLE_CONFIG,
@@ -42,68 +42,35 @@ import {
 } from './time-series-chart-model';
 
 const DEFAULT_COLOR_VALUE = '#555';
-const NO_QUERY_AVAILABLE = '-1'; // sentinel value used to represent the fact that no query is available
-
-/**
- * Resolves the effective query name from a settings entry.
- * Falls back to the deprecated `queryIndex` field when `queryName` is absent.
- */
-function resolveQueryName(querySettings: QuerySettingsOptions, queryNames: string[]): string {
-  if (querySettings.queryName !== undefined) {
-    return querySettings.queryName;
-  }
-  if (querySettings.queryIndex !== undefined) {
-    return queryNames[querySettings.queryIndex] ?? defaultQueryName(querySettings.queryIndex);
-  }
-  return '';
-}
-
-/**
- * Normalizes a settings entry so it always persists via `queryName`.
- * Converts the deprecated `queryIndex` to `queryName` and removes the old field.
- */
-function normalizeToQueryName(querySettings: QuerySettingsOptions, queryNames: string[]): QuerySettingsOptions {
-  if (querySettings.queryIndex === undefined) {
-    return querySettings;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { queryIndex, ...rest } = querySettings;
-  return { ...rest, queryName: rest.queryName ?? queryNames[queryIndex] ?? defaultQueryName(queryIndex) };
-}
+const NO_INDEX_AVAILABLE = -1; // invalid array index value used to represent the fact that no query index is available
 
 export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
   const querySettingsList = value.querySettings;
 
+  const handleQuerySettingsChange = (newQuerySettings: QuerySettingsOptions[]): void => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.querySettings = newQuerySettings;
+      })
+    );
+  };
+  // Every time a new query settings input is added, we want to focus the recently added input
   const recentlyAddedInputRef = useRef<HTMLInputElement | null>(null);
   const focusRef = useRef(false);
-
-  const { queryDefinitions } = useDataQueriesContext();
-  const queryNames: string[] = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
-
-  // Every time a new query settings input is added, focus it
   useEffect(() => {
     if (!recentlyAddedInputRef.current || !focusRef.current) return;
     recentlyAddedInputRef.current?.focus();
     focusRef.current = false;
   }, [querySettingsList?.length]);
 
-  // Any entry still using the deprecated `queryIndex` is normalized to `queryName`, remove when queryIndex is removed
-  const handleQuerySettingsChange = (newQuerySettings: QuerySettingsOptions[]): void => {
-    onChange(
-      produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.querySettings = newQuerySettings.map((qs) => normalizeToQueryName(qs, queryNames));
-      })
-    );
-  };
-
-  const handleQueryNameChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
+  const handleQueryIndexChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {
       handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           const querySettings = draft?.[i];
           if (querySettings) {
-            querySettings.queryName = e.target.value;
+            querySettings.queryIndex = parseInt(e.target.value);
           }
         })
       );
@@ -256,20 +223,24 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
-  // Compute the list of query names for which query settings are not already defined.
-  // This is to avoid already-booked queries to still be selectable in the dropdown(s)
-  const availableQueryNames = useMemo(() => {
-    return queryNames.filter((name) => {
-      return !querySettingsList?.some((qs) => resolveQueryName(qs, queryNames) === name);
-    });
-  }, [queryNames, querySettingsList]);
+  const { queryDefinitions } = useDataQueriesContext();
+  const queryCount = queryDefinitions.length;
+  const queryNames = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
 
-  const firstAvailableQueryName = useMemo(() => {
-    return availableQueryNames[0] ?? NO_QUERY_AVAILABLE;
-  }, [availableQueryNames]);
+  // Compute the list of query indexes for which query settings are not already defined.
+  // This is to avoid already-booked indexes to still be selectable in the dropdown(s)
+  const availableQueryIndexes = useMemo(() => {
+    const bookedQueryIndexes = querySettingsList?.map((querySettings) => querySettings.queryIndex) ?? [];
+    const allQueryIndexes = Array.from({ length: queryCount }, (_, i) => i);
+    return allQueryIndexes.filter((_, queryIndex) => !bookedQueryIndexes.includes(queryIndex));
+  }, [querySettingsList, queryCount]);
+
+  const firstAvailableQueryIndex = useMemo(() => {
+    return availableQueryIndexes[0] ?? NO_INDEX_AVAILABLE;
+  }, [availableQueryIndexes]);
 
   const defaultQuerySettings: QuerySettingsOptions = {
-    queryName: firstAvailableQueryName,
+    queryIndex: firstAvailableQueryIndex,
   };
 
   const addQuerySettingsInput = (): void => {
@@ -287,7 +258,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
   return (
     <Stack>
-      {queryDefinitions.length === 0 ? (
+      {queryCount === 0 ? (
         <Typography mb={2} fontStyle="italic">
           No query defined
         </Typography>
@@ -296,11 +267,11 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           <QuerySettingsInput
             inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
             key={i}
-            queryName={resolveQueryName(querySettings, queryNames)}
             querySettings={querySettings}
-            availableQueryNames={availableQueryNames}
-            onQueryNameChange={(e) => {
-              handleQueryNameChange(e, i);
+            availableQueryIndexes={availableQueryIndexes}
+            queryNames={queryNames}
+            onQueryIndexChange={(e) => {
+              handleQueryIndexChange(e, i);
             }}
             onColorModeChange={(e) => handleColorModeChange(e, i)}
             onColorValueChange={(color) => handleColorValueChange(color, i)}
@@ -321,7 +292,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           />
         ))
       )}
-      {queryDefinitions.length > 0 && firstAvailableQueryName !== NO_QUERY_AVAILABLE && (
+      {queryCount > 0 && firstAvailableQueryIndex !== NO_INDEX_AVAILABLE && (
         <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={addQuerySettingsInput}>
           Add Query Settings
         </Button>
@@ -332,9 +303,9 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
 interface QuerySettingsInputProps {
   querySettings: QuerySettingsOptions;
-  queryName: string;
-  availableQueryNames: string[];
-  onQueryNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  availableQueryIndexes: number[];
+  queryNames: string[];
+  onQueryIndexChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorModeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorValueChange: (colorValue: string) => void;
   onLineStyleChange: (lineStyle: string) => void;
@@ -354,10 +325,10 @@ interface QuerySettingsInputProps {
 }
 
 function QuerySettingsInput({
-  querySettings: { colorMode, colorValue, lineStyle, areaOpacity, format },
-  queryName,
-  availableQueryNames,
-  onQueryNameChange,
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format },
+  availableQueryIndexes,
+  queryNames,
+  onQueryIndexChange,
   onColorModeChange,
   onColorValueChange,
   onLineStyleChange,
@@ -374,8 +345,8 @@ function QuerySettingsInput({
   onRemoveFormat,
   onFormatChange,
 }: QuerySettingsInputProps): ReactElement {
-  // current query name should also be selectable
-  const selectableQueryNames = availableQueryNames.slice().sort((a, b) => a.localeCompare(b));
+  // current query index should also be selectable
+  const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
 
   // State for dropdown menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -426,15 +397,14 @@ function QuerySettingsInput({
         <TextField
           select
           inputRef={inputRef}
-          value={queryName}
+          value={queryIndex}
           label="Query"
-          onChange={onQueryNameChange}
+          onChange={onQueryIndexChange}
           sx={{ minWidth: '75px' }}
         >
-          <MenuItem value={queryName}>{queryName}</MenuItem>
-          {selectableQueryNames.map((qn) => (
-            <MenuItem key={`query-${qn}`} value={qn}>
-              {qn}
+          {selectableQueryIndexes.map((qi) => (
+            <MenuItem key={`query-${qi}`} value={qi}>
+              {queryNames[qi] ?? `#${qi + 1}`}
             </MenuItem>
           ))}
         </TextField>
@@ -447,7 +417,7 @@ function QuerySettingsInput({
               <MenuItem value="fixed">Fixed</MenuItem>
             </TextField>
             <OptionsColorPicker
-              label={queryName}
+              label={queryNames[queryIndex] ?? `Query n°${queryIndex + 1}`}
               color={colorValue || DEFAULT_COLOR_VALUE}
               onColorChange={onColorValueChange}
             />
@@ -482,7 +452,7 @@ function QuerySettingsInput({
         {/* Area Opacity section */}
         {areaOpacity !== undefined && (
           <SettingsSection label="Opacity" onRemove={onRemoveAreaOpacity}>
-            {/* Spacer as I don't want to add a prop to SettingsSection for left-padding just for that case. */}
+            {/* Spacer as I don't want to add a prop to SettingsSection for left-padding just for that case.. */}
             <Box />
             <Slider
               value={areaOpacity}
@@ -539,7 +509,10 @@ function QuerySettingsInput({
       </Stack>
       {/* Delete Button for this query settings */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <IconButton aria-label={`delete settings for query '${queryName}'`} onClick={onDelete}>
+        <IconButton
+          aria-label={`delete settings for ${queryNames[queryIndex] ?? `query n°${queryIndex + 1}`}`}
+          onClick={onDelete}
+        >
           <DeleteIcon />
         </IconButton>
       </Box>

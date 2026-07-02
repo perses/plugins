@@ -4,7 +4,11 @@
     "legend": {
       "position": "right",
       "mode": "table",
-      "values": ["min", "max", "mean"]
+      "values": [
+        "min",
+        "max",
+        "mean"
+      ]
     },
     "yAxis": {
       "format": {
@@ -21,25 +25,25 @@
     },
     "querySettings": [
       {
-        "queryName": "Query #2",
+        "queryIndex": 1,
         "colorMode": "fixed",
         "colorValue": "#5794F2",
         "lineStyle": "dashed",
         "areaOpacity": 0
       },
       {
-        "queryName": "Query #3",
+        "queryIndex": 2,
         "colorMode": "fixed",
         "colorValue": "#F2495C",
         "areaOpacity": 0
       },
       {
-        "queryName": "Query #4",
+        "queryIndex": 3,
         "colorMode": "fixed",
         "colorValue": "#3274D9"
       },
       {
-        "queryName": "Query #5",
+        "queryIndex": 4,
         "colorMode": "fixed",
         "colorValue": "#fade2a",
         "lineStyle": "dashed",

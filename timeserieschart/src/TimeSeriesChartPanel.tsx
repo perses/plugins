@@ -23,7 +23,6 @@ import {
   legendValues,
   getCalculations,
   CalculationType,
-  defaultQueryName,
 } from '@perses-dev/plugin-system';
 import {
   ChartInstance,
@@ -200,27 +199,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
     for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
       const result = queryResults[queryIndex];
-      if (result === undefined) {
-        console.warn(
-          'Something went wrong with the query result mapping, result is undefined for query index',
-          queryIndex
-        );
-        continue;
-      }
 
       // Retrieve querySettings for this query, if exists.
       // queries & querySettings indices do not necessarily match, so we have to check the tail value of the $ref attribute
       let querySettings: QuerySettingsOptions | undefined;
       for (const item of querySettingsList ?? []) {
-        const matchesByName =
-          item.queryName !== undefined &&
-          (item.queryName === result.definition.spec.name || item.queryName === defaultQueryName(queryIndex));
-        // queryIndex is deprecated but still supported for backward compatibility.
-        const matchesByIndex = item.queryIndex !== undefined && item.queryIndex === queryIndex;
-        if (matchesByName || matchesByIndex) {
+        if (item.queryIndex === queryIndex) {
           querySettings = item;
           // We don't break the loop here just in case there are multiple querySettings defined for the
-          // same query, because in that case we want the last one to take precedence.
+          // same queryIndex, because in that case we want the last one to take precedence.
         }
       }
 
@@ -243,7 +230,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
             seriesName: formattedSeriesName,
             seriesIndex,
             querySettings: querySettings,
-            queryHasMultipleResults: (result.data?.series?.length ?? 0) > 1,
+            queryHasMultipleResults: (queryResults[queryIndex]?.data?.series?.length ?? 0) > 1,
           });
 
           // We add a unique id for the chart to disambiguate items across charts
