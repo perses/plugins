@@ -86,15 +86,13 @@ const makeClient = (): JaegerClient => {
   return client;
 };
 
-const getDatasource: jest.Mock = jest.fn(
-  (): DatasourceSpec<typeof datasource> => ({
-    default: false,
-    plugin: {
-      kind: 'JaegerDatasource',
-      spec: datasource,
-    },
-  })
-);
+const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<typeof datasource> => ({
+  default: false,
+  plugin: {
+    kind: 'JaegerDatasource',
+    spec: datasource,
+  },
+}));
 
 function createContext(client: JaegerClient): TraceQueryContext {
   return {
