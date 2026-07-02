@@ -20,7 +20,7 @@ import {
   EChartsValues,
   TimeSeriesOption,
   StepOptions,
-  getCommonTimeScale
+  getCommonTimeScale,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
 import { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
@@ -74,8 +74,7 @@ export function getTimeSeries(
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
-  const shouldStack =
-    querySettings?.stack !== undefined ? querySettings.stack : visual.stack === 'all';
+  const shouldStack = querySettings?.stack !== undefined ? querySettings.stack : visual.stack === 'all';
 
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
   const minuteMs = 60000;

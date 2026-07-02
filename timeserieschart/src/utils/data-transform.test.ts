@@ -157,26 +157,45 @@ describe('getTimeSeries stack behavior', () => {
     querySettingsStack: boolean | undefined;
     expectStacked: boolean;
   }> = [
-    { label: 'global=none + query=unset → not stacked', globalStack: undefined, querySettingsStack: undefined, expectStacked: false },
-    { label: 'global=none + query=true  → stacked',     globalStack: undefined, querySettingsStack: true,      expectStacked: true },
-    { label: 'global=none + query=false → not stacked', globalStack: undefined, querySettingsStack: false,     expectStacked: false },
-    { label: 'global=all  + query=unset → stacked',     globalStack: 'all',     querySettingsStack: undefined, expectStacked: true },
-    { label: 'global=all  + query=true  → stacked',     globalStack: 'all',     querySettingsStack: true,      expectStacked: true },
-    { label: 'global=all  + query=false → not stacked', globalStack: 'all',     querySettingsStack: false,     expectStacked: false },
+    {
+      label: 'global=none + query=unset → not stacked',
+      globalStack: undefined,
+      querySettingsStack: undefined,
+      expectStacked: false,
+    },
+    {
+      label: 'global=none + query=true  → stacked',
+      globalStack: undefined,
+      querySettingsStack: true,
+      expectStacked: true,
+    },
+    {
+      label: 'global=none + query=false → not stacked',
+      globalStack: undefined,
+      querySettingsStack: false,
+      expectStacked: false,
+    },
+    {
+      label: 'global=all  + query=unset → stacked',
+      globalStack: 'all',
+      querySettingsStack: undefined,
+      expectStacked: true,
+    },
+    { label: 'global=all  + query=true  → stacked', globalStack: 'all', querySettingsStack: true, expectStacked: true },
+    {
+      label: 'global=all  + query=false → not stacked',
+      globalStack: 'all',
+      querySettingsStack: false,
+      expectStacked: false,
+    },
   ];
 
   describe.each(['line', 'bar'] as const)('display: %s', (display) => {
     it.each(STACK_CASES)('$label', ({ globalStack, querySettingsStack, expectStacked }) => {
       const visual: TimeSeriesChartVisualOptions = { display, stack: globalStack };
-      const series = getTimeSeries(
-        'series-id',
-        0,
-        'series',
-        visual,
-        TIME_SCALE,
-        '#000000',
-        { stack: querySettingsStack }
-      );
+      const series = getTimeSeries('series-id', 0, 'series', visual, TIME_SCALE, '#000000', {
+        stack: querySettingsStack,
+      });
 
       expect(series.type).toEqual(display);
       expect(series.stack).toEqual(expectStacked ? 'all' : undefined);

@@ -384,7 +384,18 @@ function QuerySettingsInput({
     if (format === undefined) options.push({ key: 'format', label: 'Format', action: onAddFormat });
     if (stack === undefined) options.push({ key: 'stack', label: 'Stack', action: onAddStack });
     return options;
-  }, [colorMode, lineStyle, areaOpacity, format, stack, onAddColor, onAddLineStyle, onAddAreaOpacity, onAddFormat, onAddStack]);
+  }, [
+    colorMode,
+    lineStyle,
+    areaOpacity,
+    format,
+    stack,
+    onAddColor,
+    onAddLineStyle,
+    onAddAreaOpacity,
+    onAddFormat,
+    onAddStack,
+  ]);
 
   const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     if (availableOptions.length === 1 && availableOptions[0]) {
