@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/victorialogs-plugin",
-  "version": "0.4.0-beta.1",
+  "version": "0.4.0-beta.2",
   "license": "Apache-2.0",
   "scripts": {
     "dev": "rsbuild dev",
