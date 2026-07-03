@@ -130,13 +130,6 @@ export function getTimeSeries(
         type: visual.lineStyle,
       },
     },
-    selectedMode: 'single',
-    select: {
-      itemStyle: {
-        borderColor: paletteColor,
-        borderWidth: pointRadius + 0.5,
-      },
-    },
     blur: {
       lineStyle: {
         width: lineWidth,
