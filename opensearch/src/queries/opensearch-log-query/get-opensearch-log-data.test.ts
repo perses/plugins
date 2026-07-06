@@ -16,7 +16,7 @@ import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
 import { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { OpenSearchLogQuery } from './OpenSearchLogQuery';
-import { buildBoundedPPL, convertPPLToLogs } from './get-opensearch-log-data';
+import { buildBoundedPPL, convertPPLToLogs, parseTimestamp } from './get-opensearch-log-data';
 
 const datasource: OpenSearchDatasourceSpec = {
   directUrl: '/test',
@@ -86,6 +86,13 @@ describe('OpenSearchLogQuery', () => {
 
   it('returns empty log data for an empty query without calling the client', async () => {
     const result = await OpenSearchLogQuery.getLogData({ query: '' }, createStubContext());
+    expect(result.logs.entries).toEqual([]);
+    expect(result.logs.totalCount).toBe(0);
+    expect(stubClient.ppl).not.toHaveBeenCalled();
+  });
+
+  it('treats a whitespace-only query as empty and does not call the client', async () => {
+    const result = await OpenSearchLogQuery.getLogData({ query: '   ' }, createStubContext());
     expect(result.logs.entries).toEqual([]);
     expect(result.logs.totalCount).toBe(0);
     expect(stubClient.ppl).not.toHaveBeenCalled();
@@ -265,6 +272,57 @@ describe('buildBoundedPPL', () => {
   it('still applies the source=<index> prefix when disableTimeFilter is true', () => {
     const q = buildBoundedPPL('where level="error"', start, end, { index: 'logs-*', disableTimeFilter: true });
     expect(q).toBe('source=logs-* | where level="error"');
+  });
+
+  it('preserves wildcards and multi-index commas in a sanitized index prefix', () => {
+    const q = buildBoundedPPL('head 10', start, end, { index: 'logs-2026.*,otel-*', disableTimeFilter: true });
+    expect(q).toBe('source=logs-2026.*,otel-* | head 10');
+  });
+
+  it('strips pipes/backticks/quotes from the index so it cannot inject an extra PPL stage', () => {
+    const q = buildBoundedPPL('head 10', start, end, { index: 'logs-* | delete `x`', disableTimeFilter: true });
+    // whitespace, pipe, backticks and quotes removed → the value stays a single source clause
+    expect(q).toBe('source=logs-*deletex | head 10');
+    expect(q).not.toContain('| delete');
+  });
+
+  it('does not emit a dangling pipe when the query is just a source clause with a trailing pipe', () => {
+    const q = buildBoundedPPL('source=logs-* |', start, end);
+    expect(q).toBe(
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'"
+    );
+    expect(q.trimEnd().endsWith('|')).toBe(false);
+  });
+});
+
+describe('parseTimestamp', () => {
+  // 2025-01-01T00:00:00Z expressed in each epoch unit; all normalize to seconds.
+  const seconds = 1735689600;
+
+  it('passes through seconds unchanged', () => {
+    expect(parseTimestamp(seconds)).toBe(seconds);
+  });
+
+  it('converts milliseconds to seconds', () => {
+    expect(parseTimestamp(seconds * 1e3)).toBe(seconds);
+  });
+
+  it('converts microseconds to seconds', () => {
+    expect(parseTimestamp(seconds * 1e6)).toBe(seconds);
+  });
+
+  it('converts nanoseconds to seconds (does not land far in the future)', () => {
+    expect(parseTimestamp(seconds * 1e9)).toBe(seconds);
+  });
+
+  it('parses ISO-8601 string timestamps to seconds', () => {
+    expect(parseTimestamp('2025-01-01T00:00:00.000Z')).toBe(seconds);
+  });
+
+  it('returns 0 for null, undefined, and unparseable values', () => {
+    expect(parseTimestamp(null)).toBe(0);
+    expect(parseTimestamp(undefined)).toBe(0);
+    expect(parseTimestamp('not-a-date')).toBe(0);
   });
 });
 

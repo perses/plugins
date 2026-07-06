@@ -18,7 +18,7 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
 import { ReactElement } from 'react';
 import { produce } from 'immer';
 import { createModEnterHandler } from '@perses-dev/dashboards';
@@ -29,16 +29,16 @@ import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 
 type OpenSearchQueryEditorProps = OptionsEditorProps<OpenSearchLogQuerySpec>;
 
-const examplesStyle: React.CSSProperties = {
+const examplesSx = {
   fontSize: '11px',
-  color: '#777',
-  backgroundColor: '#f5f5f5',
+  color: 'text.secondary',
+  backgroundColor: 'action.hover',
   padding: '8px',
-  borderRadius: '4px',
+  borderRadius: 1,
   fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
   whiteSpace: 'pre-wrap',
-  lineHeight: '1.3',
-};
+  lineHeight: 1.3,
+} as const;
 
 export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -183,10 +183,13 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       </div>
 
       <details>
-        <summary style={{ cursor: 'pointer', fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+        <Box
+          component="summary"
+          sx={{ cursor: 'pointer', fontSize: '12px', color: 'text.secondary', marginBottom: '8px' }}
+        >
           Query Examples
-        </summary>
-        <div style={examplesStyle}>{PPL_QUERY_EXAMPLES}</div>
+        </Box>
+        <Box sx={examplesSx}>{PPL_QUERY_EXAMPLES}</Box>
       </details>
     </Stack>
   );

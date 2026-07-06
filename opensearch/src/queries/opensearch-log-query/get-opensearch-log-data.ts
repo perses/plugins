@@ -42,6 +42,23 @@ function escapeIdentifier(name: string): string {
   return name.replace(/`/g, '``');
 }
 
+/**
+ * Sanitize a user-supplied index name/pattern before embedding it in a `source=`
+ * clause. Unlike the timestamp field, `source=` is not backtick-quoted and must
+ * keep wildcards (`*`) and multi-index commas intact, so we can't just quote it.
+ * Instead we strip the characters that could terminate the clause and inject an
+ * extra PPL stage (backtick, pipe, quotes) or that are simply invalid in an index
+ * name (whitespace) — e.g. `logs-* | delete` would otherwise smuggle in a pipe.
+ */
+function sanitizeIndex(index: string): string {
+  return index.replace(/[`|'"\s]/g, '');
+}
+
+/** Join PPL stages with ` | `, dropping any empty segments so we never emit a dangling pipe. */
+function joinPPLStages(stages: string[]): string {
+  return stages.filter((stage) => stage.trim().length > 0).join(' | ');
+}
+
 export function buildBoundedPPL(
   userQuery: string,
   start: Date,
@@ -51,7 +68,7 @@ export function buildBoundedPPL(
   let trimmed = userQuery.trim();
 
   if (index && !/^(?:search\s+)?source\s*=/i.test(trimmed)) {
-    trimmed = `source=${index} | ${trimmed}`;
+    trimmed = `source=${sanitizeIndex(index)} | ${trimmed}`;
   }
 
   // Skip the auto-injected time-range clause when the caller manages their own time
@@ -69,12 +86,14 @@ export function buildBoundedPPL(
 
   const firstPipe = trimmed.indexOf('|');
   if (firstPipe === -1) {
-    return `${trimmed} | ${bound}`;
+    return joinPPLStages([trimmed, bound]);
   }
 
   const sourceClause = trimmed.slice(0, firstPipe).trimEnd();
   const rest = trimmed.slice(firstPipe + 1).trimStart();
-  return `${sourceClause} | ${bound} | ${rest}`;
+  // `rest` can be empty (e.g. a trailing pipe or an empty query), so join through a
+  // filter to avoid producing an invalid `... | ` dangling stage.
+  return joinPPLStages([sourceClause, bound, rest]);
 }
 
 function pickIndex(cols: Array<{ name: string }>, candidates: string[]): number {
@@ -126,12 +145,17 @@ export function convertPPLToLogs(response: OpenSearchPPLResponse, options: Conve
   return { entries, totalCount: entries.length };
 }
 
-function parseTimestamp(v: unknown): number {
+export function parseTimestamp(v: unknown): number {
   if (v === null || v === undefined) return 0;
   if (typeof v === 'number') {
-    // Heuristic: anything past year ~5138 in seconds-since-epoch (1e11s) must
-    // really be milliseconds-since-epoch. OpenSearch usually returns ms here.
-    return v > 1e11 ? v / 1000 : v;
+    // Numeric epochs arrive in seconds, milliseconds, microseconds, or nanoseconds
+    // (logs frequently carry ns precision). Detect the unit by magnitude — a value
+    // past year ~5138 for a given unit must really be a finer unit — and normalize
+    // to seconds. Without the µs/ns tiers those values would parse far in the future.
+    if (v >= 1e17) return v / 1e9; // nanoseconds → seconds
+    if (v >= 1e14) return v / 1e6; // microseconds → seconds
+    if (v >= 1e11) return v / 1e3; // milliseconds → seconds
+    return v; // seconds
   }
   const parsed = Date.parse(String(v));
   return Number.isNaN(parsed) ? 0 : parsed / 1000;
@@ -153,7 +177,9 @@ export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLo
   context: LogQueryContext,
   abortSignal?: AbortSignal
 ) => {
-  if (!spec.query) {
+  // Treat a blank or whitespace-only query as "no query": trimming it would leave
+  // an empty string that produces invalid PPL, so short-circuit before hitting the API.
+  if (!spec.query?.trim()) {
     return {
       logs: { entries: [], totalCount: 0 },
       timeRange: { start: context.timeRange.start, end: context.timeRange.end },
