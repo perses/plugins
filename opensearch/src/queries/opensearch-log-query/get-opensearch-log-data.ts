@@ -147,17 +147,35 @@ export function convertPPLToLogs(response: OpenSearchPPLResponse, options: Conve
 
 export function parseTimestamp(v: unknown): number {
   if (v === null || v === undefined) return 0;
-  if (typeof v === 'number') {
-    // Numeric epochs arrive in seconds, milliseconds, microseconds, or nanoseconds
-    // (logs frequently carry ns precision). Detect the unit by magnitude — a value
-    // past year ~5138 for a given unit must really be a finer unit — and normalize
-    // to seconds. Without the µs/ns tiers those values would parse far in the future.
-    if (v >= 1e17) return v / 1e9; // nanoseconds → seconds
-    if (v >= 1e14) return v / 1e6; // microseconds → seconds
-    if (v >= 1e11) return v / 1e3; // milliseconds → seconds
-    return v; // seconds
+
+  // Numeric epochs arrive in seconds, milliseconds, microseconds, or nanoseconds
+  // (logs frequently carry ns precision). They come as a JS number, or — when the
+  // value exceeds Number.MAX_SAFE_INTEGER (a ns epoch is ~1e18, well past 2^53) — as
+  // a numeric string so it survives JSON parsing without silent overflow.
+  // We emit seconds (LogEntry is second-resolution), so we only need the correct
+  // magnitude, not sub-second precision: a float's rounding at the ns scale is far
+  // below one second and is discarded anyway, so BigInt isn't required here.
+  const numeric = typeof v === 'number' ? v : /^\d+$/.test(String(v)) ? Number(v) : NaN;
+  if (!Number.isNaN(numeric)) {
+    // Detect the unit by magnitude — a value past year ~5138 for a given unit must
+    // really be a finer unit — and normalize to seconds. Without the µs/ns tiers
+    // those values would parse far in the future.
+    if (numeric >= 1e17) return numeric / 1e9; // nanoseconds → seconds
+    if (numeric >= 1e14) return numeric / 1e6; // microseconds → seconds
+    if (numeric >= 1e11) return numeric / 1e3; // milliseconds → seconds
+    return numeric; // seconds
   }
-  const parsed = Date.parse(String(v));
+
+  // OpenSearch PPL returns timestamp/datetime fields as space-separated UTC strings
+  // with no timezone designator (e.g. "2020-08-26 13:49:00"). Date.parse treats a
+  // zoneless date-time as *local* time, which would shift the value by the browser's
+  // offset, so normalize it to explicit UTC (replace the space with `T`, append `Z`)
+  // before parsing. Strings that already carry a zone (…Z / ±hh:mm) or are date-only
+  // are left untouched — the spec parses those as UTC already.
+  const str = String(v).trim();
+  const zonelessDateTime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d+)?$/;
+  const iso = zonelessDateTime.test(str) ? `${str.replace(' ', 'T')}Z` : str;
+  const parsed = Date.parse(iso);
   return Number.isNaN(parsed) ? 0 : parsed / 1000;
 }
 

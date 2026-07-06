@@ -315,8 +315,27 @@ describe('parseTimestamp', () => {
     expect(parseTimestamp(seconds * 1e9)).toBe(seconds);
   });
 
+  // A ns epoch (~1.7e18) is past Number.MAX_SAFE_INTEGER, so a well-behaved API sends
+  // it as a numeric string. We still only emit seconds, so the sub-second remainder is
+  // expected to drop — what matters is that the magnitude is right (not year ~57000).
+  it('handles numeric-string epochs that overflow JS safe integers', () => {
+    expect(Math.floor(parseTimestamp('1735689600123456789'))).toBe(seconds); // nanoseconds
+    expect(parseTimestamp(String(seconds * 1e6))).toBe(seconds); // microseconds
+    expect(parseTimestamp(String(seconds * 1e3))).toBe(seconds); // milliseconds
+    expect(parseTimestamp(String(seconds))).toBe(seconds); // seconds
+  });
+
   it('parses ISO-8601 string timestamps to seconds', () => {
     expect(parseTimestamp('2025-01-01T00:00:00.000Z')).toBe(seconds);
+  });
+
+  // OpenSearch PPL returns timestamp fields as space-separated UTC strings without a
+  // zone designator; these must be read as UTC (not the browser's local time).
+  it('treats OpenSearch zoneless "YYYY-MM-DD HH:MM:SS" strings as UTC', () => {
+    expect(parseTimestamp('2025-01-01 00:00:00')).toBe(seconds);
+    expect(parseTimestamp('2025-01-01 00:00:00.000')).toBe(seconds);
+    // same instant expressed with an explicit zone must resolve identically
+    expect(parseTimestamp('2025-01-01 00:00:00')).toBe(parseTimestamp('2025-01-01T00:00:00Z'));
   });
 
   it('returns 0 for null, undefined, and unparseable values', () => {
