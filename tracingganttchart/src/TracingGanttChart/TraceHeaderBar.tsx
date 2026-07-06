@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Stack, Typography } from '@mui/material';
+import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import MagnifyIcon from 'mdi-material-ui/Magnify';
 import { ReactElement, useMemo, useState } from 'react';
 import { useTimeZone } from '@perses-dev/components';
@@ -27,8 +27,12 @@ const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: 'numeric',
   second: 'numeric',
   fractionalSecondDigits: 3,
-  timeZoneName: 'short',
 };
+const dateFormatterUTC = new Intl.DateTimeFormat(undefined, {
+  ...DATE_FORMAT_OPTIONS,
+  timeZone: 'UTC',
+  timeZoneName: 'short',
+}).format;
 
 export interface TraceHeaderBarProps {
   trace: Trace;
@@ -41,7 +45,7 @@ export function TraceHeaderBar(props: TraceHeaderBarProps): ReactElement {
   const { dateFormatOptionsWithUserTimeZone } = useTimeZone();
   const dateFormatter = useMemo(() => {
     const dateFormatOptions = dateFormatOptionsWithUserTimeZone(DATE_FORMAT_OPTIONS);
-    return new Intl.DateTimeFormat(undefined, dateFormatOptions);
+    return new Intl.DateTimeFormat(undefined, dateFormatOptions).format;
   }, [dateFormatOptionsWithUserTimeZone]);
   const [showSearch, setShowSearch] = useState(false);
 
@@ -52,7 +56,7 @@ export function TraceHeaderBar(props: TraceHeaderBarProps): ReactElement {
 
   return (
     <Stack direction="column" sx={{ gap: 1 }}>
-      <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+      <Stack direction="row" sx={{ gap: 1, justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
           <Typography variant="h3">
             {rootSpan.resource.serviceName}: {rootSpan.name} (
@@ -62,14 +66,17 @@ export function TraceHeaderBar(props: TraceHeaderBarProps): ReactElement {
             <MagnifyIcon fontSize="small" />
           </IconButton>
         </Stack>
-        <Typography variant="h4">
-          <Typography component="span" sx={{ px: 1 }}>
-            <strong>Start:</strong> {dateFormatter.format(trace.startTimeUnixMs)}
+        <Stack direction="row" sx={{ rowGap: 1, columnGap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography variant="h4" sx={{ fontWeight: 'normal' }}>
+            <strong>Start:</strong>{' '}
+            <Tooltip title={dateFormatterUTC(trace.startTimeUnixMs)} placement="top" arrow>
+              <Typography component="span">{dateFormatter(trace.startTimeUnixMs)}</Typography>
+            </Tooltip>
           </Typography>
-          <Typography component="span" sx={{ px: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 'normal' }}>
             <strong>Trace ID:</strong> {rootSpan.traceId}
           </Typography>
-        </Typography>
+        </Stack>
       </Stack>
       {showSearch && <SearchBar search={search} />}
     </Stack>

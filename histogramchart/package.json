@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/histogram-chart-plugin",
-  "version": "0.12.0-beta.1",
+  "version": "0.12.0-beta.2",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
@@ -25,8 +25,8 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "peerDependencies": {
-    "@perses-dev/components": "^0.54.0-beta.8",
-    "@perses-dev/plugin-system": "^0.54.0-beta.8",
+    "@perses-dev/components": "^0.54.0-beta.11",
+    "@perses-dev/plugin-system": "^0.54.0-beta.11",
     "@perses-dev/spec": "^0.2.0-beta.6",
     "echarts": "5.5.0",
     "lodash": "^4.17.21",

@@ -11,60 +11,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const linkToTraceParams = new URLSearchParams({
-  explorer: 'Tempo-TempoExplorer',
-  data: JSON.stringify({
-    queries: [
-      {
-        kind: 'TraceQuery',
-        spec: {
-          plugin: {
-            kind: 'TempoTraceQuery',
-            spec: {
-              query: 'TRACEID',
-              datasource: {
-                kind: 'TempoDatasource',
-                name: 'DATASOURCENAME',
+function buildExploreLink(timeZone: string, extraData?: Record<string, unknown>): string {
+  const params = new URLSearchParams({
+    explorer: 'Tempo-TempoExplorer',
+    data: JSON.stringify({
+      queries: [
+        {
+          kind: 'TraceQuery',
+          spec: {
+            plugin: {
+              kind: 'TempoTraceQuery',
+              spec: {
+                query: '${traceId}',
+                datasource: {
+                  kind: 'TempoDatasource',
+                  name: '${datasourceName}',
+                },
               },
             },
           },
         },
-      },
-    ],
-  }),
-});
+      ],
+      ...extraData,
+    }),
+    tz: timeZone,
+  });
 
-const linkToSpanParams = new URLSearchParams({
-  explorer: 'Tempo-TempoExplorer',
-  data: JSON.stringify({
-    queries: [
-      {
-        kind: 'TraceQuery',
-        spec: {
-          plugin: {
-            kind: 'TempoTraceQuery',
-            spec: {
-              query: 'TRACEID',
-              datasource: {
-                kind: 'TempoDatasource',
-                name: 'DATASOURCENAME',
-              },
-            },
-          },
-        },
-      },
-    ],
-    spanId: 'SPANID',
-  }),
-});
+  // Unescape ${...} template variables so they survive as literal text for runtime interpolation.
+  return `/explore?${params}`.replace(/%24%7B(\w+)%7D/g, '${$1}');
+}
 
-// add ${...} syntax after the URL is URL-encoded, because the characters ${} must not be URL-encoded
-export const linkToTrace = `/explore?${linkToTraceParams}`
-  .replace('DATASOURCENAME', '${datasourceName}')
-  .replace('TRACEID', '${traceId}');
+export function linkToTrace(timeZone: string): string {
+  return buildExploreLink(timeZone);
+}
 
-// add ${...} syntax after the URL is URL-encoded, because the characters ${} must not be URL-encoded
-export const linkToSpan = `/explore?${linkToSpanParams}`
-  .replace('DATASOURCENAME', '${datasourceName}')
-  .replace('TRACEID', '${traceId}')
-  .replace('SPANID', '${spanId}');
+export function linkToSpan(timeZone: string): string {
+  return buildExploreLink(timeZone, { spanId: '${spanId}' });
+}

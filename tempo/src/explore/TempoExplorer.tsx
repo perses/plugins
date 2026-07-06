@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay, useTimeZone } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
@@ -32,6 +32,7 @@ interface SearchResultsPanelProps {
 }
 
 function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
+  const { timeZone } = useTimeZone();
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
   // no query executed, show empty panel
@@ -75,7 +76,7 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
               plugin: {
                 kind: 'ScatterChart',
                 spec: {
-                  link: linkToTrace,
+                  link: linkToTrace(timeZone),
                 },
               },
             },
@@ -96,7 +97,7 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement 
               kind: 'TraceTable',
               spec: {
                 links: {
-                  trace: linkToTrace,
+                  trace: linkToTrace(timeZone),
                 },
               },
             },
@@ -114,6 +115,7 @@ interface TracingGanttChartPanelProps {
 
 function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
   const { queries, selectedSpanId } = props;
+  const { timeZone } = useTimeZone();
   const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
 
   return (
@@ -128,8 +130,8 @@ function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElemen
             kind: 'TracingGanttChart',
             spec: {
               links: {
-                trace: linkToTrace,
-                span: linkToSpan,
+                trace: linkToTrace(timeZone),
+                span: linkToSpan(timeZone),
               },
               selectedSpanId,
             },
@@ -148,16 +150,6 @@ export function TempoExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
-  // map TraceQueryDefinition to Definition<UnknownSpec>
-  const definitions = queries.length
-    ? queries.map((query: QueryDefinition) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
-
   const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
   const isSingleTrace = isValidTraceId(firstQuery ?? '');
 
@@ -171,7 +163,7 @@ export function TempoExplorer(): ReactElement {
       />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
-        <DataQueriesProvider definitions={definitions}>
+        <DataQueriesProvider definitions={queries}>
           <Box height={700}>
             {isSingleTrace ? (
               <TracingGanttChartPanel queries={queries} selectedSpanId={selectedSpanId} />

@@ -15,7 +15,7 @@ import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/mat
 import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import InformationIcon from 'mdi-material-ui/Information';
-import { useChartsTheme, useSelection } from '@perses-dev/components';
+import { useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import {
@@ -29,14 +29,19 @@ import {
 import { getServiceColor } from './utils/utils';
 import { TraceTableOptions } from './trace-table-model';
 
-const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'long',
-  timeStyle: 'medium',
-}).format;
-const UTC_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'long',
-  timeStyle: 'long',
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  fractionalSecondDigits: 3,
+};
+const dateFormatterUTC = new Intl.DateTimeFormat(undefined, {
+  ...DATE_FORMAT_OPTIONS,
   timeZone: 'UTC',
+  timeZoneName: 'short',
 }).format;
 
 export type TraceLink = (params: { query: QueryDefinition; traceId: string }) => string;
@@ -55,6 +60,12 @@ export function DataTable(props: DataTableProps): ReactElement {
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
   const variableValues = useAllVariableValues();
+  const { dateFormatOptionsWithUserTimeZone } = useTimeZone();
+
+  const dateFormatter = useMemo(() => {
+    const dateFormatOptions = dateFormatOptionsWithUserTimeZone(DATE_FORMAT_OPTIONS);
+    return new Intl.DateTimeFormat(undefined, dateFormatOptions).format;
+  }, [dateFormatOptionsWithUserTimeZone]);
 
   const selectionEnabled = options.selection?.enabled ?? false;
   const { selectionMap, setSelection, clearSelection } = useSelection<Row, string>();
@@ -208,9 +219,9 @@ export function DataTable(props: DataTableProps): ReactElement {
         minWidth: 110,
         display: 'flex',
         renderCell: ({ row }): ReactElement => (
-          <Tooltip title={UTC_DATE_FORMATTER(new Date(row.startTimeUnixMs))} placement="top" arrow>
-            <Typography display="inline" key={`st-${row.traceId}`}>
-              {DATE_FORMATTER(new Date(row.startTimeUnixMs))}
+          <Tooltip title={dateFormatterUTC(row.startTimeUnixMs)} placement="top" arrow>
+            <Typography component="span" key={`st-${row.traceId}`}>
+              {dateFormatter(row.startTimeUnixMs)}
             </Typography>
           </Tooltip>
         ),
@@ -229,7 +240,7 @@ export function DataTable(props: DataTableProps): ReactElement {
           ]
         : []),
     ],
-    [serviceColorGenerator, actionsList, getItemActionButtons]
+    [serviceColorGenerator, actionsList, getItemActionButtons, dateFormatter]
   );
 
   return (

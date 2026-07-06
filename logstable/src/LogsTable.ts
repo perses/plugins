@@ -16,6 +16,7 @@ import { LogsTableComponent } from './LogsTableComponent';
 import { LogsTableItemSelectionActionsEditor } from './LogsTableItemSelectionActionsEditor';
 import { LogsTableSettingsEditor } from './LogsTableSettingsEditor';
 import { LogsTableOptions, LogsTableProps } from './model';
+import { LogsTableCsvExportAction } from './LogsTableCsvExportAction';
 import { LogsTableExportAction } from './LogsTableExportAction';
 
 export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
@@ -30,5 +31,8 @@ export const LogsTable: PanelPlugin<LogsTableOptions, LogsTableProps> = {
     allowWrap: true,
     enableDetails: true,
   }),
-  actions: [{ component: LogsTableExportAction, location: 'header' }],
+  actions: [
+    { component: LogsTableExportAction, location: 'header' },
+    { component: LogsTableCsvExportAction, location: 'header' },
+  ],
 };
