@@ -52,7 +52,7 @@ function buildShortMessage(status: number, body: string): string {
     // OpenSearch often puts a generic phrase in `reason` ("Invalid Query") and the
     // actionable text in `details` ("can't resolve Symbol(name=@timestamp)"). Surface
     // both so the user can diagnose the failure.
-    const suffix = reason && details && reason !== details ? `${reason} — ${details}` : (reason ?? details);
+    const suffix = reason && details && reason !== details ? `${reason} — ${details}` : reason || details;
     if (suffix) {
       return `OpenSearch PPL request failed (${status}): ${suffix}`;
     }

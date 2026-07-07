@@ -121,5 +121,13 @@ describe('opensearch-client', () => {
       const err = new OpenSearchPPLError(400, '{"error":{"reason":"Invalid Query","details":""}}');
       expect(err.message).toBe('OpenSearch PPL request failed (400): Invalid Query');
     });
+
+    it('falls through to details when reason is an empty string', () => {
+      const err = new OpenSearchPPLError(
+        400,
+        '{"error":{"reason":"","details":"can\'t resolve Symbol(name=@timestamp)"}}'
+      );
+      expect(err.message).toBe("OpenSearch PPL request failed (400): can't resolve Symbol(name=@timestamp)");
+    });
   });
 });
