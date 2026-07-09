@@ -26,12 +26,18 @@ import { getUnixTimeRange } from '../plugins';
 
 export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<SearchLabelNamesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelNamesResponse, StatusError>({
     enabled: !!client,
     queryKey: ['searchLabelNames', 'datasource', datasource],
     queryFn: async () => {
-      return await client!.searchLabelNames({}, { 'content-type': 'application/json' }, {});
+      return await client!.searchLabelNames(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * 1000, end: end * 1000 }
+      );
     },
   });
 }
@@ -51,7 +57,7 @@ export function useLabelValues(
       return await client!.searchLabelValues(
         {},
         { 'content-type': 'application/json' },
-        { name: labelName, from: start, until: end }
+        { name: labelName, start: start * 1000, end: end * 1000 }
       );
     },
   });
@@ -68,7 +74,11 @@ export function useProfileTypes(
     enabled: !!client,
     queryKey: ['searchProfileTypes', 'datasource', datasource],
     queryFn: async () => {
-      return await client!.searchProfileTypes({}, { 'content-type': 'application/json' }, { from: start, until: end });
+      return await client!.searchProfileTypes(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * 1000, end: end * 1000 }
+      );
     },
   });
 }
@@ -82,7 +92,11 @@ export function useServices(datasource: DatasourceSelector): UseQueryResult<Sear
     enabled: !!client,
     queryKey: ['searchServices', 'datasource', datasource],
     queryFn: async () => {
-      return await client!.searchServices({}, { 'content-type': 'application/json' }, { from: start, until: end });
+      return await client!.searchServices(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * 1000, end: end * 1000 }
+      );
     },
   });
 }
