@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, DatasourceSelectProps, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { useId } from '@perses-dev/components';
 import { produce } from 'immer';
 import { FormControl, InputLabel, Stack, TextField, useTheme } from '@mui/material';
@@ -21,6 +21,7 @@ import {
   isDefaultPyroscopeSelector,
   isPyroscopeDatasourceSelector,
   PYROSCOPE_DATASOURCE_KIND,
+  PyroscopeDatasourceSelector,
 } from '../../model';
 import { ProfileTypeSelector, Service, Filters } from '../../components';
 import {
@@ -34,7 +35,11 @@ import {
 export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
-  const selectedDatasource = datasource ?? DEFAULT_PYROSCOPE;
+  const datasourceSelectValue = datasource ?? DEFAULT_PYROSCOPE;
+  const selectedDatasource = useDatasourceSelectValueToSelector(
+    datasourceSelectValue,
+    PYROSCOPE_DATASOURCE_KIND
+  ) as PyroscopeDatasourceSelector;
   const datasourceSelectLabelID = useId('pyroscope-datasource-label');
 
   const { maxNodes, handleMaxNodesChange, maxNodesHasError } = useMaxNodesState(props);
@@ -67,7 +72,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
         </InputLabel>
         <DatasourceSelect
           datasourcePluginKind={PYROSCOPE_DATASOURCE_KIND}
-          value={selectedDatasource}
+          value={datasourceSelectValue}
           onChange={handleDatasourceChange}
           labelId={datasourceSelectLabelID}
           label="Pyroscope Datasource"

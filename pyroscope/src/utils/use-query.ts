@@ -31,7 +31,7 @@ export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<Se
 
   return useQuery<SearchLabelNamesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelNames', 'datasource', datasource],
+    queryKey: ['searchLabelNames', client],
     queryFn: async () => {
       return await client!.searchLabelNames(
         {},
@@ -52,7 +52,7 @@ export function useLabelValues(
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelValues', labelName, 'datasource', datasource],
+    queryKey: ['searchLabelValues', labelName, client],
     queryFn: async () => {
       return await client!.searchLabelValues(
         {},
@@ -72,7 +72,7 @@ export function useProfileTypes(
 
   return useQuery<SearchProfileTypesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchProfileTypes', 'datasource', datasource],
+    queryKey: ['searchProfileTypes', client],
     queryFn: async () => {
       return await client!.searchProfileTypes(
         {},
@@ -90,7 +90,7 @@ export function useServices(datasource: DatasourceSelector): UseQueryResult<Sear
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchServices', 'datasource', datasource],
+    queryKey: ['searchServices', client],
     queryFn: async () => {
       return await client!.searchServices(
         {},

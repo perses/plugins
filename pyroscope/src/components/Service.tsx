@@ -24,7 +24,6 @@ export interface ServiceProps {
 
 export function Service(props: ServiceProps): ReactElement {
   const { datasource, value, onChange } = props;
-
   const { data: servicesOptions, isLoading: isServicesOptionsLoading } = useServices(datasource);
 
   function handleServiceChange(_event: SyntheticEvent, newValue: string | null): void {
