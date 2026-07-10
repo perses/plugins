@@ -73,19 +73,25 @@ export interface ServiceStats {
 }
 
 /**
- * Request parameters of Tempo HTTP API endpoint GET /api/traces/<traceID>
- * https://grafana.com/docs/tempo/latest/api_docs/#query
+ * Request parameters of Tempo HTTP API endpoint GET /api/v2/traces/<traceID>
+ * https://grafana.com/docs/tempo/latest/api_docs/#query-v2
  */
 export interface QueryRequestParameters {
   traceId: string;
 }
 
 /**
- * Response of Tempo HTTP API endpoint GET /api/traces/<traceID>
- * OTEL trace proto: https://github.com/open-telemetry/opentelemetry-proto-go/blob/main/otlp/trace/v1/trace.pb.go
+ * Response of Tempo HTTP API endpoint GET /api/v2/traces/<traceID>
+ * https://github.com/grafana/tempo/blob/v2.10.7/pkg/tempopb/tempo.pb.go#L260
  */
 export interface QueryResponse {
-  batches: otlptracev1.ResourceSpan[];
+  trace: TraceResponse;
+  status?: 'PARTIAL' | 'COMPLETE';
+  message?: string;
+}
+
+export interface TraceResponse {
+  resourceSpans: otlptracev1.ResourceSpan[];
 }
 
 /**

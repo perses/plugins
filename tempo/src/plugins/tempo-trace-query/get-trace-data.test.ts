@@ -189,7 +189,7 @@ describe('getTraceData', () => {
   it('should use the replaced query when it resolves to a valid traceId', async () => {
     const traceId = 'a'.repeat(32); // valid 32-char hex trace ID
     const mockResponse = {
-      batches: [],
+      trace: { resourceSpans: [] },
     };
     const mockClient = createMockClient({ traces: [] });
     mockClient.query = jest.fn(async () => mockResponse);
@@ -205,6 +205,35 @@ describe('getTraceData', () => {
     expect(mockedReplaceVariables).toHaveBeenCalledWith('$traceId', stubContext.variableState);
     expect(mockClient.query).toHaveBeenCalledWith({ traceId });
     expect(result.trace).toBeDefined();
+  });
+
+  it('should surface response message as a warning notice', async () => {
+    const traceId = 'b'.repeat(32);
+    const mockResponse = {
+      trace: { resourceSpans: [] },
+      message: 'trace exceeds max size',
+    };
+    const mockClient = createMockClient({ traces: [] });
+    mockClient.query = jest.fn(async () => mockResponse);
+    const stubContext = createStubContext(mockClient);
+
+    const result = await getTraceData({ query: traceId }, stubContext);
+
+    expect(result.metadata?.notices).toEqual([{ type: 'warning', message: 'trace exceeds max size' }]);
+  });
+
+  it('should not include notices when response has no message', async () => {
+    const traceId = 'c'.repeat(32);
+    const mockResponse = {
+      trace: { resourceSpans: [] },
+    };
+    const mockClient = createMockClient({ traces: [] });
+    mockClient.query = jest.fn(async () => mockResponse);
+    const stubContext = createStubContext(mockClient);
+
+    const result = await getTraceData({ query: traceId }, stubContext);
+
+    expect(result.metadata?.notices).toEqual([]);
   });
 
   it('should replace multiple variables in a complex TraceQL query', async () => {

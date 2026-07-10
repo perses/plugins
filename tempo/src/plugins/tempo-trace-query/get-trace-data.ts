@@ -61,10 +61,17 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
    */
   if (isValidTraceId(query)) {
     const response = await client.query({ traceId: query });
+
+    const notices: Notice[] = [];
+    if (response.message) {
+      notices.push({ type: 'warning', message: response.message });
+    }
+
     return {
       trace: parseTraceResponse(response),
       metadata: {
         executedQueryString: query,
+        notices,
       },
     };
   } else {
@@ -112,9 +119,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
 };
 
 function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
-  const trace = {
-    resourceSpans: response.batches,
-  };
+  const trace = response.trace;
 
   // Tempo returns Trace ID and Span ID base64-encoded.
   // The OTLP spec defines the encoding in the hex format:

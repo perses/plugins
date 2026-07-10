@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourceClient } from '@perses-dev/plugin-system';
-import { RequestHeaders } from '@perses-dev/client';
+import { fetchJson, RequestHeaders, UserFriendlyError } from '@perses-dev/client';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import {
   QueryRequestParameters,
@@ -46,17 +46,7 @@ export interface QueryOptions {
   headers?: RequestHeaders;
 }
 
-export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>): Promise<T> => {
-  const response = await fetch(...args);
-  try {
-    return await response.json();
-  } catch (e) {
-    console.error('Invalid response from server', e);
-    throw new Error('Invalid response from server');
-  }
-};
-
-function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
+async function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
   apiURI: string,
   params: TRequest,
   queryOptions: QueryOptions
@@ -70,10 +60,22 @@ function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
   }
   const init = {
     method: 'GET',
-    headers,
+    headers: {
+      Accept: 'application/json',
+      ...headers,
+    },
   };
 
-  return executeRequest<TResponse>(url, init);
+  try {
+    return await fetchJson<TResponse>(url, init);
+  } catch (e) {
+    // fetchJson() puts the entire response body in the error message,
+    // which can be a full HTML page. Replace with a short status message.
+    if (e instanceof Error && 'status' in e && /^\s*</.test(e.message)) {
+      throw new UserFriendlyError(`Invalid response from server`, e.status as number);
+    }
+    throw e;
+  }
 }
 
 type RequestParams<T> = { [K in keyof T]: string | number };
@@ -102,15 +104,44 @@ export function search(params: SearchRequestParameters, queryOptions: QueryOptio
   return fetchWithGet<SearchRequestParameters, SearchResponse>('/api/search', params, queryOptions);
 }
 
-/**
- * Returns an entire trace.
- */
-export function query(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryResponse> {
-  return fetchWithGet<Record<string, never>, QueryResponse>(
+interface QueryV1Response {
+  batches: otlptracev1.ResourceSpan[];
+}
+
+function queryV1(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryV1Response> {
+  return fetchWithGet<Record<string, never>, QueryV1Response>(
     `/api/traces/${encodeURIComponent(params.traceId)}`,
     {},
     queryOptions
   );
+}
+
+/**
+ * Returns an entire trace.
+ * Throws an 404 if trace is not found.
+ */
+export async function query(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryResponse> {
+  try {
+    const response = await fetchWithGet<Record<string, never>, QueryResponse>(
+      `/api/v2/traces/${encodeURIComponent(params.traceId)}`,
+      {},
+      queryOptions
+    );
+
+    // Unlike /api/traces, /api/v2/traces returns an empty trace instead of returning a 404 error.
+    if (!response.trace.resourceSpans) {
+      throw new UserFriendlyError('Trace not found', 404);
+    }
+    return response;
+  } catch (e) {
+    // Existing datasources may only have /api/traces in their allowed endpoints list.
+    // Fall back to the v1 API on 403 errors for backwards compatibility.
+    if (e instanceof Error && 'status' in e && e.status === 403) {
+      const response = await queryV1(params, queryOptions);
+      return { trace: { resourceSpans: response.batches } };
+    }
+    throw e;
+  }
 }
 
 /**
@@ -150,7 +181,7 @@ export async function searchWithFallback(
         const searchTraceIDResponse = await query({ traceId: trace.traceID }, queryOptions);
 
         // For every trace, get the full trace, and find the number of spans and errors.
-        for (const batch of searchTraceIDResponse.batches) {
+        for (const batch of searchTraceIDResponse.trace.resourceSpans) {
           let serviceName = 'unknown';
           for (const attr of batch.resource?.attributes ?? []) {
             if (attr.key === 'service.name' && 'stringValue' in attr.value) {
