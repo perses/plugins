@@ -11,26 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+export type OpenSearchRequestHeaders = Record<string, string>;
 
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
-	}
-	expr: string
-	...
+export interface OpenSearchPPLColumn {
+  name: string;
+  type: string;
 }
 
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
-		}
-		query: #target.expr
-	}
+export interface OpenSearchPPLResponse {
+  schema: OpenSearchPPLColumn[];
+  datarows: Array<Array<string | number | boolean | null>>;
+  total?: number;
+  size?: number;
+}
+
+export interface OpenSearchErrorResponse {
+  error?: {
+    type?: string;
+    reason?: string;
+    details?: string;
+  };
+  status?: number;
 }

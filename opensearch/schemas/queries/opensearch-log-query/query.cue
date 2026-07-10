@@ -11,26 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+package model
 
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
-	}
-	expr: string
-	...
-}
+import (
+	"strings"
+	ds "github.com/perses/plugins/opensearch/schemas/datasources:model"
+)
 
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
-		}
-		query: #target.expr
-	}
-}
+kind: "OpenSearchLogQuery"
+spec: close({
+	ds.#selector
+	query:              strings.MinRunes(1)
+	index?:             strings.MinRunes(1)
+	timestampField?:    strings.MinRunes(1)
+	messageField?:      strings.MinRunes(1)
+	disableTimeFilter?: bool
+})

@@ -52,6 +52,7 @@ export interface QuerySettingsOptions {
    * calculations and CSV export, matching Grafana's `transform: "negative-Y"` behavior.
    */
   negativeY?: boolean;
+  stack?: boolean;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;

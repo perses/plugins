@@ -11,26 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+package model
 
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
-	}
-	expr: string
-	...
+import (
+	"github.com/perses/shared/cue/common"
+	commonProxy "github.com/perses/shared/cue/common/proxy"
+)
+
+#kind: "OpenSearchDatasource"
+
+kind: #kind
+spec: {
+	commonProxy.#baseHTTPDatasourceSpec
 }
 
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
-		}
-		query: #target.expr
-	}
-}
+#selector: common.#datasourceSelector & {_kind: #kind}

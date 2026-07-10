@@ -11,26 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+import { DatasourceSelector } from '@perses-dev/spec';
+import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
-	}
-	expr: string
-	...
+export interface OpenSearchLogQuerySpec {
+  query: string;
+  datasource?: DatasourceSelector;
+  index?: string;
+  timestampField?: string;
+  messageField?: string;
+  /** When true, the panel time range is NOT injected as a `where` clause on the timestamp field. */
+  disableTimeFilter?: boolean;
 }
 
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
-		}
-		query: #target.expr
-	}
-}
+export type OpenSearchLogQueryResponse = OpenSearchPPLResponse;

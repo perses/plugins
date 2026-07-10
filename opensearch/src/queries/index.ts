@@ -11,26 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
-
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
-	}
-	expr: string
-	...
-}
-
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
-		}
-		query: #target.expr
-	}
-}
+export * from './opensearch-log-query';

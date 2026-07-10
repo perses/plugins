@@ -462,8 +462,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
 
-  // Used to opt in to ECharts trigger item which show subgroup data accurately
-  const isStackedBar = visual.display === 'bar' && visual.stack === 'all';
+  // Used to opt in to ECharts trigger item which show subgroup data accurately.
+  // Derived from the actual series mapping rather than `visual.stack` alone so that
+  // bar charts stacked only via per-query overrides also use the right tooltip mode.
+  const isStackedBar =
+    visual.display === 'bar' && timeSeriesMapping.some((s) => s?.type === 'bar' && s.stack === 'all');
 
   // Turn on tooltip pinning by default but opt out for stacked bar or if explicitly set in tooltip panel spec
   let enablePinning = true;

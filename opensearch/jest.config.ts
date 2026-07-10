@@ -11,26 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+import type { Config } from '@jest/types';
+import shared from '../jest.shared';
 
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
-	}
-	expr: string
-	...
-}
+const jestConfig: Config.InitialOptions = {
+  ...shared,
 
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
-		}
-		query: #target.expr
-	}
-}
+  moduleNameMapper: {
+    ...(shared.moduleNameMapper ?? {}),
+    '^react$': '<rootDir>/../node_modules/react',
+    '^react-dom$': '<rootDir>/../node_modules/react-dom',
+    '^react/jsx-runtime$': '<rootDir>/../node_modules/react/jsx-runtime',
+    '^react-dom/(.*)$': '<rootDir>/../node_modules/react-dom/$1',
+  },
+
+  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+};
+
+export default jestConfig;

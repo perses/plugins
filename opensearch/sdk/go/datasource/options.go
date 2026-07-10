@@ -11,26 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+package datasource
 
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
+import (
+	"github.com/perses/perses/go-sdk/http"
+)
+
+func DirectURL(url string) Option {
+	return func(builder *Builder) error {
+		builder.DirectURL = url
+		return nil
 	}
-	expr: string
-	...
 }
 
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
+func HTTPProxy(url string, options ...http.Option) Option {
+	return func(builder *Builder) error {
+		p, err := http.New(url, options...)
+		if err != nil {
+			return err
 		}
-		query: #target.expr
+		builder.Proxy = &p.Proxy
+		return nil
 	}
 }

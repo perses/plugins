@@ -11,26 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+import { HTTPProxy } from '@perses-dev/spec';
 
-#target: {
-	datasource: {
-		type: "loki"
-		uid?: string
-	}
-	expr: string
-	...
-}
-
-if #target.datasource.type != _|_ if #target.datasource.type == "loki" {
-	kind: "LokiLogQuery"
-	spec: {
-		if #target.datasource.uid != _|_ {
-			datasource: {
-				kind: "LokiDatasource"
-				name: #target.datasource.uid
-			}
-		}
-		query: #target.expr
-	}
+export interface OpenSearchDatasourceSpec {
+  directUrl?: string;
+  proxy?: HTTPProxy;
 }

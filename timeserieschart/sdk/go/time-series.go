@@ -130,7 +130,8 @@ type QuerySettingsItem struct {
 	// NegativeY, when true, renders the query's series below the X axis (values
 	// are negated for display only; legend calculations and CSV export keep the
 	// original values).
-	NegativeY bool `json:"negativeY,omitempty" yaml:"negativeY,omitempty"`
+	NegativeY bool  `json:"negativeY,omitempty" yaml:"negativeY,omitempty"`
+	Stack     *bool `json:"stack,omitempty" yaml:"stack,omitempty"`
 }
 
 type Option func(plugin *Builder) error

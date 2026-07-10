@@ -19,6 +19,7 @@ import {
   MenuItem,
   Slider,
   Stack,
+  Switch,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -217,6 +218,24 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
+  const addStack = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.stack = false;
+    });
+  };
+
+  const removeStack = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.stack = undefined;
+    });
+  };
+
+  const handleStackChange = (i: number, checked: boolean): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.stack = checked;
+    });
+  };
+
   const handleFormatChange = (i: number, format?: FormatOptions): void => {
     updateQuerySettings(i, (qs) => {
       qs.format = format;
@@ -303,6 +322,9 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             onFormatChange={(format) => handleFormatChange(i, format)}
             onAddNegativeY={() => addNegativeY(i)}
             onRemoveNegativeY={() => removeNegativeY(i)}
+            onAddStack={() => addStack(i)}
+            onRemoveStack={() => removeStack(i)}
+            onStackChange={(checked) => handleStackChange(i, checked)}
           />
         ))
       )}
@@ -338,10 +360,13 @@ interface QuerySettingsInputProps {
   onFormatChange: (format?: FormatOptions) => void;
   onAddNegativeY: () => void;
   onRemoveNegativeY: () => void;
+  onAddStack: () => void;
+  onRemoveStack: () => void;
+  onStackChange: (checked: boolean) => void;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format, negativeY },
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format, negativeY, stack },
   availableQueryIndexes,
   queryNames,
   onQueryIndexChange,
@@ -362,6 +387,9 @@ function QuerySettingsInput({
   onFormatChange,
   onAddNegativeY,
   onRemoveNegativeY,
+  onAddStack,
+  onRemoveStack,
+  onStackChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
@@ -377,6 +405,7 @@ function QuerySettingsInput({
     if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
     if (format === undefined) options.push({ key: 'format', label: 'Format', action: onAddFormat });
     if (!negativeY) options.push({ key: 'negativeY', label: 'Negative Y', action: onAddNegativeY });
+    if (stack === undefined) options.push({ key: 'stack', label: 'Stack', action: onAddStack });
     return options;
   }, [
     colorMode,
@@ -384,11 +413,13 @@ function QuerySettingsInput({
     areaOpacity,
     format,
     negativeY,
+    stack,
     onAddColor,
     onAddLineStyle,
     onAddAreaOpacity,
     onAddFormat,
     onAddNegativeY,
+    onAddStack,
   ]);
 
   const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
@@ -512,6 +543,18 @@ function QuerySettingsInput({
             <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1, py: 0.5 }}>
               Series rendered below the X axis
             </Typography>
+          </SettingsSection>
+        )}
+
+        {/* Stack section */}
+        {stack !== undefined && (
+          <SettingsSection label="Stack" onRemove={onRemoveStack}>
+            <Switch
+              checked={stack}
+              onChange={(e) => onStackChange(e.target.checked)}
+              slotProps={{ input: { 'aria-label': 'stack override' } }}
+            />
+            <Box sx={{ flexGrow: 1 }} />
           </SettingsSection>
         )}
 
