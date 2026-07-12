@@ -70,12 +70,24 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<SQLTimeSeriesQuerySpec>['getTimeS
 
   const series = transformToTimeSeries(result, spec);
 
+  // Detect actual step from the data if we have enough points; otherwise fall back to computed interval.
+  const detectedStepMs = detectStepMs(series, intervalMs);
+
   return {
     series,
     timeRange: context.timeRange,
-    stepMs: intervalMs,
+    stepMs: detectedStepMs,
   };
 };
+
+function detectStepMs(series: TimeSeries[], fallbackMs: number): number {
+  for (const s of series) {
+    if (s.values.length >= 2) {
+      return s.values[1][0] - s.values[0][0];
+    }
+  }
+  return fallbackMs;
+}
 
 function transformToTimeSeries(
   result: { columns: Array<{ name: string; type: string }>; rows: Array<Record<string, unknown>> },

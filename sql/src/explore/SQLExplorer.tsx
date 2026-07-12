@@ -19,6 +19,13 @@ import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
 import { ReactElement, useState } from 'react';
 
+// DataQueriesProvider expects definitions in the shape { kind: pluginKind, spec: pluginSpec },
+// but MultiQueryEditor stores them as QueryDefinition { kind, spec: { plugin: { kind, spec } } }.
+// Unwrap the inner plugin to get the format DataQueriesProvider actually consumes.
+function toPluginDefinitions(queries: QueryDefinition[]): QueryDefinition[] {
+  return queries.map((q) => q.spec?.plugin ?? q);
+}
+
 interface SQLExplorerQueryParams {
   tab?: string;
   queries?: QueryDefinition[];
@@ -35,7 +42,7 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElem
 
   return (
     <Box ref={boxRef} height={height}>
-      <DataQueriesProvider definitions={queries} options={{ suggestedStepMs, mode: 'range' }}>
+      <DataQueriesProvider definitions={toPluginDefinitions(queries)} options={{ suggestedStepMs, mode: 'range' }}>
         <Panel
           panelOptions={{
             hideHeader: true,
@@ -55,7 +62,7 @@ function DataTable({ queries }: { queries: QueryDefinition[] }): ReactElement {
 
   return (
     <Box height={height}>
-      <DataQueriesProvider definitions={queries} options={{ mode: 'instant' }}>
+      <DataQueriesProvider definitions={toPluginDefinitions(queries)} options={{ mode: 'instant' }}>
         <Panel
           panelOptions={{
             hideHeader: true,

@@ -39,6 +39,8 @@ export function SQLTimeSeriesQueryEditor({
         datasourcePluginKind={DATASOURCE_KIND}
         value={value?.datasource ?? { kind: DATASOURCE_KIND }}
         onChange={handleDatasourceChange}
+        label="SQL Datasource"
+        notched
       />
 
       <TextField
