@@ -129,7 +129,7 @@ export async function query(params: QueryRequestParameters, queryOptions: QueryO
     );
 
     // Unlike /api/traces, /api/v2/traces returns an empty trace instead of returning a 404 error.
-    if (!response.trace.resourceSpans) {
+    if (!response.trace?.resourceSpans) {
       throw new UserFriendlyError('Trace not found', 404);
     }
     return response;
