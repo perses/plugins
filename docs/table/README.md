@@ -44,7 +44,7 @@ Perses supports formatting modifiers to control how values are embedded into lin
 For example,
 
 ```
-${__data.fields["column_name:csv"]}
+${__data.fields["column_name"]:csv}
 ```
 
 The following interpolations are supported by Perses
@@ -65,7 +65,11 @@ The following interpolations are supported by Perses
   - text
   - queryparam
 
+Cell values embedded into links are URL encoded by default. Use the `raw` format to skip encoding for complete URLs:
 
+```
+${__data.fields["url"]:raw}
+```
 
 ## Transformations
 
