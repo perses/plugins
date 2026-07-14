@@ -104,44 +104,23 @@ export function search(params: SearchRequestParameters, queryOptions: QueryOptio
   return fetchWithGet<SearchRequestParameters, SearchResponse>('/api/search', params, queryOptions);
 }
 
-interface QueryV1Response {
-  batches: otlptracev1.ResourceSpan[];
-}
-
-function queryV1(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryV1Response> {
-  return fetchWithGet<Record<string, never>, QueryV1Response>(
-    `/api/traces/${encodeURIComponent(params.traceId)}`,
-    {},
-    queryOptions
-  );
-}
-
 /**
  * Returns an entire trace.
  * Throws an 404 if trace is not found.
  */
 export async function query(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryResponse> {
-  try {
-    const response = await fetchWithGet<Record<string, never>, QueryResponse>(
-      `/api/v2/traces/${encodeURIComponent(params.traceId)}`,
-      {},
-      queryOptions
-    );
+  const response = await fetchWithGet<Record<string, never>, QueryResponse>(
+    `/api/v2/traces/${encodeURIComponent(params.traceId)}`,
+    {},
+    queryOptions
+  );
 
-    // Unlike /api/traces, /api/v2/traces returns an empty trace instead of returning a 404 error.
-    if (!response.trace?.resourceSpans) {
-      throw new UserFriendlyError('Trace not found', 404);
-    }
-    return response;
-  } catch (e) {
-    // Existing datasources may only have /api/traces in their allowed endpoints list.
-    // Fall back to the v1 API on 403 errors for backwards compatibility.
-    if (e instanceof Error && 'status' in e && e.status === 403) {
-      const response = await queryV1(params, queryOptions);
-      return { trace: { resourceSpans: response.batches } };
-    }
-    throw e;
+  // /api/v2/traces returns an empty trace if trace is not found.
+  // Throw a 404 instead.
+  if (!response.trace?.resourceSpans) {
+    throw new UserFriendlyError('Trace not found', 404);
   }
+  return response;
 }
 
 /**
