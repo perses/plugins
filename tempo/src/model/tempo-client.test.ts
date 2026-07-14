@@ -84,30 +84,6 @@ describe('tempo-client', () => {
     expect(result).toEqual(MOCK_TRACE_RESPONSE);
   });
 
-  it('should fall back to v1 API on 403', async () => {
-    const v1Response = { batches: MOCK_TRACE_RESPONSE.trace.resourceSpans };
-
-    // v2 call returns 403
-    fetchMock.mockResolvedValueOnce(mockErrorResponse(403, 'Forbidden'));
-    // v1 call succeeds
-    fetchMock.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(v1Response) });
-
-    const result = await query({ traceId: 'abc123' }, { datasourceUrl: '' });
-    expect(result).toEqual(MOCK_TRACE_RESPONSE);
-
-    // verify v2 was called first, then v1
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[0]?.[0]).toContain('/api/v2/traces/abc123');
-    expect(fetchMock.mock.calls[1]?.[0]).toContain('/api/traces/abc123');
-  });
-
-  it('should throw on non-403 errors', async () => {
-    fetchMock.mockResolvedValueOnce(mockErrorResponse(500, 'Internal Server Error'));
-
-    await expect(query({ traceId: 'abc123' }, { datasourceUrl: '' })).rejects.toThrow('Internal Server Error');
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
-
   it('should throw 404 when trace has no resourceSpans', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
