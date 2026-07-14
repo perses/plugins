@@ -85,13 +85,9 @@ export interface QueryRequestParameters {
  * https://github.com/grafana/tempo/blob/v2.10.7/pkg/tempopb/tempo.pb.go#L260
  */
 export interface QueryResponse {
-  trace: TraceResponse;
+  trace: otlptracev1.TracesData;
   status?: 'PARTIAL' | 'COMPLETE';
   message?: string;
-}
-
-export interface TraceResponse {
-  resourceSpans: otlptracev1.ResourceSpan[];
 }
 
 /**
