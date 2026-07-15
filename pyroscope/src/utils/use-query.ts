@@ -24,14 +24,23 @@ import {
 } from '../model';
 import { getUnixTimeRange } from '../plugins';
 
+// Pyroscope need timestamp in milliseconds, but the time range from Perses is in seconds.
+const MILLISECONDS = 1_000;
+
 export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<SearchLabelNamesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelNamesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelNames', 'datasource', datasource],
+    queryKey: ['searchLabelNames', client],
     queryFn: async () => {
-      return await client!.searchLabelNames({}, { 'content-type': 'application/json' }, {});
+      return await client!.searchLabelNames(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+      );
     },
   });
 }
@@ -46,12 +55,12 @@ export function useLabelValues(
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelValues', labelName, 'datasource', datasource],
+    queryKey: ['searchLabelValues', labelName, client],
     queryFn: async () => {
       return await client!.searchLabelValues(
         {},
         { 'content-type': 'application/json' },
-        { name: labelName, from: start, until: end }
+        { name: labelName, start: start * MILLISECONDS, end: end * MILLISECONDS }
       );
     },
   });
@@ -66,9 +75,13 @@ export function useProfileTypes(
 
   return useQuery<SearchProfileTypesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchProfileTypes', 'datasource', datasource],
+    queryKey: ['searchProfileTypes', client],
     queryFn: async () => {
-      return await client!.searchProfileTypes({}, { 'content-type': 'application/json' }, { from: start, until: end });
+      return await client!.searchProfileTypes(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+      );
     },
   });
 }
@@ -80,9 +93,13 @@ export function useServices(datasource: DatasourceSelector): UseQueryResult<Sear
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchServices', 'datasource', datasource],
+    queryKey: ['searchServices', client],
     queryFn: async () => {
-      return await client!.searchServices({}, { 'content-type': 'application/json' }, { from: start, until: end });
+      return await client!.searchServices(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+      );
     },
   });
 }
