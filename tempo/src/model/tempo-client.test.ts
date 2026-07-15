@@ -12,13 +12,8 @@
 // limitations under the License.
 
 import { UserFriendlyError } from '@perses-dev/client';
-import {
-  MOCK_SEARCH_RESPONSE_MIXED_VPARQUET3_AND_4,
-  MOCK_SEARCH_RESPONSE_VPARQUET3,
-  MOCK_SEARCH_RESPONSE_VPARQUET4,
-  MOCK_TRACE_RESPONSE,
-} from '../test';
-import { query, search, searchTagValues, searchWithFallback } from './tempo-client';
+import { MOCK_TRACE_RESPONSE } from '../test';
+import { query, search, searchTagValues } from './tempo-client';
 
 const fetchMock = (global.fetch = jest.fn());
 
@@ -38,43 +33,6 @@ function mockErrorResponse(status: number, statusText: string, overrides?: Recor
 describe('tempo-client', () => {
   beforeEach(() => {
     fetchMock.mockReset();
-  });
-
-  it('should return query results as-is when serviceStats are present', async () => {
-    fetchMock.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_VPARQUET4) });
-
-    const results = await searchWithFallback({ q: '{}' }, { datasourceUrl: '' });
-    expect(results).toEqual(MOCK_SEARCH_RESPONSE_VPARQUET4);
-  });
-
-  it('should augment query results with serviceStats if they are not present', async () => {
-    fetchMock.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_VPARQUET3) });
-    fetchMock.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(MOCK_TRACE_RESPONSE) });
-
-    const results = await searchWithFallback({ q: '{}' }, { datasourceUrl: '' });
-    expect(results).toEqual(MOCK_SEARCH_RESPONSE_VPARQUET4);
-  });
-
-  it('should augment query results with serviceStats if they are partially present', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_MIXED_VPARQUET3_AND_4),
-    });
-    fetchMock.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(MOCK_TRACE_RESPONSE) });
-
-    const results = await searchWithFallback({ q: '{}' }, { datasourceUrl: '' });
-
-    // in the mock response, the first trace contains serviceStats but the second trace does not contain serviceStats
-    expect(results.traces[0]?.serviceStats).toEqual({
-      telemetrygen: { spanCount: 2 },
-    });
-    expect(results.traces[1]?.serviceStats).toEqual({
-      'article-service': { spanCount: 2 },
-      'auth-service': { spanCount: 1 },
-      'cart-service': { spanCount: 2 },
-      postgres: { spanCount: 1 },
-      'shop-backend': { spanCount: 4 },
-    });
   });
 
   it('should return v2 query response', async () => {
