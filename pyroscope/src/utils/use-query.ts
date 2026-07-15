@@ -24,6 +24,9 @@ import {
 } from '../model';
 import { getUnixTimeRange } from '../plugins';
 
+// Pyroscope need timestamp in milliseconds, but the time range from Perses is in seconds.
+const MILLISECONDS = 1_000;
+
 export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<SearchLabelNamesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
   const { absoluteTimeRange } = useTimeRange();
@@ -36,7 +39,7 @@ export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<Se
       return await client!.searchLabelNames(
         {},
         { 'content-type': 'application/json' },
-        { start: start * 1000, end: end * 1000 }
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
       );
     },
   });
@@ -57,7 +60,7 @@ export function useLabelValues(
       return await client!.searchLabelValues(
         {},
         { 'content-type': 'application/json' },
-        { name: labelName, start: start * 1000, end: end * 1000 }
+        { name: labelName, start: start * MILLISECONDS, end: end * MILLISECONDS }
       );
     },
   });
@@ -77,7 +80,7 @@ export function useProfileTypes(
       return await client!.searchProfileTypes(
         {},
         { 'content-type': 'application/json' },
-        { start: start * 1000, end: end * 1000 }
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
       );
     },
   });
@@ -95,7 +98,7 @@ export function useServices(datasource: DatasourceSelector): UseQueryResult<Sear
       return await client!.searchServices(
         {},
         { 'content-type': 'application/json' },
-        { start: start * 1000, end: end * 1000 }
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
       );
     },
   });
