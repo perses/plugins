@@ -83,7 +83,7 @@ const getTimeSeriesData: TimeSeriesQueryPlugin<SQLTimeSeriesQuerySpec>['getTimeS
 function detectStepMs(series: TimeSeries[], fallbackMs: number): number {
   for (const s of series) {
     if (s.values.length >= 2) {
-      return s.values[1][0] - s.values[0][0];
+      return (s.values[1] as [number, number | null])[0] - (s.values[0] as [number, number | null])[0];
     }
   }
   return fallbackMs;

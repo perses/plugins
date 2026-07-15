@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/spec';
+import { Definition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { useExplorerManagerContext } from '@perses-dev/explore';
@@ -22,8 +22,8 @@ import { ReactElement, useState } from 'react';
 // DataQueriesProvider expects definitions in the shape { kind: pluginKind, spec: pluginSpec },
 // but MultiQueryEditor stores them as QueryDefinition { kind, spec: { plugin: { kind, spec } } }.
 // Unwrap the inner plugin to get the format DataQueriesProvider actually consumes.
-function toPluginDefinitions(queries: QueryDefinition[]): QueryDefinition[] {
-  return queries.map((q) => q.spec?.plugin ?? q);
+function toPluginDefinitions(queries: QueryDefinition[]): Definition<UnknownSpec>[] {
+  return queries.map((q) => q.spec.plugin);
 }
 
 interface SQLExplorerQueryParams {
