@@ -287,9 +287,21 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
               }
             }
 
+            // When negativeY is set on this query, negate the rendered values so the
+            // series renders below the X axis. The original (positive) values are
+            // preserved in `timeSeries.values` (used for legend calculations) and in
+            // `queryResults` (used for CSV export).
+            const baseValues: TimeSeriesValueTuple[] = getTimeSeriesValues(timeSeries, timeScale);
+            const renderedValues: TimeSeriesValueTuple[] = querySettings?.negativeY
+              ? baseValues.map((tuple: TimeSeriesValueTuple): TimeSeriesValueTuple => {
+                  const [t, v] = tuple;
+                  return [t, v === null ? null : -v];
+                })
+              : baseValues;
+
             timeChartData.push({
               name: formattedSeriesName,
-              values: getTimeSeriesValues(timeSeries, timeScale),
+              values: renderedValues,
             });
           }
 

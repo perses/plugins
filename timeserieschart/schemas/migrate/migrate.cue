@@ -189,10 +189,15 @@ spec: {
 		visual: stack: "all"
 	}
 
+	#panelTransform: *#panel.fieldConfig.defaults.custom.transform | null
+
 	// migrate fixedColor overrides to querySettings when applicable
 	#querySettings: [
 		for i, target in (*#panel.targets | []) {
 			queryIndex: i
+			if #panelTransform == "negative-Y" {
+				negativeY: true
+			}
 			for override in (*#panel.fieldConfig.overrides | [])
 			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp" || override.matcher.id == "byFrameRefID") && override.matcher.options != _|_
 			for property in override.properties
@@ -217,6 +222,9 @@ spec: {
 					if #queryUnit != null {
 						format: unit: #queryUnit
 					}
+				}
+				if property.id == "custom.transform" if property.value == "negative-Y" {
+					negativeY: true
 				}
 			}
 		},

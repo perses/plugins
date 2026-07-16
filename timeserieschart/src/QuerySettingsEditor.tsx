@@ -242,6 +242,18 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
+  const addNegativeY = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.negativeY = true;
+    });
+  };
+
+  const removeNegativeY = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.negativeY = undefined;
+    });
+  };
+
   const { queryDefinitions } = useDataQueriesContext();
   const queryCount = queryDefinitions.length;
   const queryNames = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
@@ -308,6 +320,8 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             onAddFormat={() => addFormat(i)}
             onRemoveFormat={() => removeFormat(i)}
             onFormatChange={(format) => handleFormatChange(i, format)}
+            onAddNegativeY={() => addNegativeY(i)}
+            onRemoveNegativeY={() => removeNegativeY(i)}
             onAddStack={() => addStack(i)}
             onRemoveStack={() => removeStack(i)}
             onStackChange={(checked) => handleStackChange(i, checked)}
@@ -344,13 +358,15 @@ interface QuerySettingsInputProps {
   onAddFormat: () => void;
   onRemoveFormat: () => void;
   onFormatChange: (format?: FormatOptions) => void;
+  onAddNegativeY: () => void;
+  onRemoveNegativeY: () => void;
   onAddStack: () => void;
   onRemoveStack: () => void;
   onStackChange: (checked: boolean) => void;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format, stack },
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format, negativeY, stack },
   availableQueryIndexes,
   queryNames,
   onQueryIndexChange,
@@ -369,6 +385,8 @@ function QuerySettingsInput({
   onAddFormat,
   onRemoveFormat,
   onFormatChange,
+  onAddNegativeY,
+  onRemoveNegativeY,
   onAddStack,
   onRemoveStack,
   onStackChange,
@@ -386,6 +404,7 @@ function QuerySettingsInput({
     if (!lineStyle) options.push({ key: 'lineStyle', label: 'Line Style', action: onAddLineStyle });
     if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
     if (format === undefined) options.push({ key: 'format', label: 'Format', action: onAddFormat });
+    if (!negativeY) options.push({ key: 'negativeY', label: 'Negative Y', action: onAddNegativeY });
     if (stack === undefined) options.push({ key: 'stack', label: 'Stack', action: onAddStack });
     return options;
   }, [
@@ -393,11 +412,13 @@ function QuerySettingsInput({
     lineStyle,
     areaOpacity,
     format,
+    negativeY,
     stack,
     onAddColor,
     onAddLineStyle,
     onAddAreaOpacity,
     onAddFormat,
+    onAddNegativeY,
     onAddStack,
   ]);
 
@@ -513,6 +534,15 @@ function QuerySettingsInput({
             <Box sx={{ minWidth: '180px', display: 'flex', gap: 1, flexDirection: 'column' }}>
               <FormatControls value={format} onChange={onFormatChange} />
             </Box>
+          </SettingsSection>
+        )}
+
+        {/* Negative Y section (presence-only flag) */}
+        {negativeY && (
+          <SettingsSection label="Negative Y" onRemove={onRemoveNegativeY}>
+            <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1, py: 0.5 }}>
+              Series rendered below the X axis
+            </Typography>
           </SettingsSection>
         )}
 

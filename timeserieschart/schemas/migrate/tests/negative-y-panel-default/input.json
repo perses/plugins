@@ -1,0 +1,39 @@
+{
+  "id": 2,
+  "type": "timeseries",
+  "title": "Negative Y panel default",
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "drawStyle": "line",
+        "lineWidth": 1,
+        "fillOpacity": 0,
+        "transform": "negative-Y",
+        "stacking": {
+          "mode": "none",
+          "group": "A"
+        }
+      }
+    },
+    "overrides": []
+  },
+  "targets": [
+    {
+      "expr": "metric_one",
+      "legendFormat": "one",
+      "refId": "A"
+    },
+    {
+      "expr": "metric_two",
+      "legendFormat": "two",
+      "refId": "B"
+    }
+  ],
+  "options": {
+    "legend": {
+      "showLegend": true,
+      "displayMode": "list",
+      "placement": "bottom"
+    }
+  }
+}
