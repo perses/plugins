@@ -28,9 +28,8 @@ Then in [`perses`](https://github.com/perses/perses) repository:
 
 This will allow you to use the updates from perses core in your plugin so you can test the changes.
 
-1. In perses/perses create a [snapshot](https://github.com/perses/perses/blob/30758a963337564ab58c78646a1134e51d74e146/RELEASE.md?plain=1#L109-L146). Snapshots will be released in npm:
+1. In perses/shared create a [snapshot](https://github.com/perses/perses/blob/30758a963337564ab58c78646a1134e51d74e146/RELEASE.md?plain=1#L109-L146). Snapshots will be released in npm:
 - https://www.npmjs.com/package/@perses-dev/components/
-- https://www.npmjs.com/package/@perses-dev/core
 - https://www.npmjs.com/package/@perses-dev/plugin-system
 - https://www.npmjs.com/package/@perses-dev/dashboards
 - https://www.npmjs.com/package/@perses-dev/explore

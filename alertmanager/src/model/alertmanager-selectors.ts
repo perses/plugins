@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector, QueryDefinition } from '@perses-dev/core';
+import { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
 import { DatasourceSelectValue, isVariableDatasource } from '@perses-dev/plugin-system';
 
 export const ALERTMANAGER_DATASOURCE_KIND = 'AlertManagerDatasource' as const;
