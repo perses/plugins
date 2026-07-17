@@ -133,3 +133,26 @@ export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps): {
 
   return { minStep, handleMinStepChange, handleMinStepBlur };
 }
+
+/**
+ * Hook to manage `instant` state. Since a checkbox/switch commits immediately, changes are propagated to the spec on
+ * toggle rather than on blur.
+ */
+export function useInstantState(props: PrometheusTimeSeriesQueryEditorProps): {
+  instant: boolean;
+  handleInstantChange: (instant: boolean) => void;
+} {
+  const { onChange, value } = props;
+
+  const instant = value.instant ?? false;
+
+  const handleInstantChange = (next: boolean): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.instant = next;
+      })
+    );
+  };
+
+  return { instant, handleInstantChange };
+}

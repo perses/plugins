@@ -17,7 +17,7 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { RangeQueryResponse } from '../../model';
+import { RangeQueryResponse, InstantQueryResponse } from '../../model';
 import { PrometheusDatasource } from '../prometheus-datasource';
 import { PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuery } from './';
@@ -46,6 +46,25 @@ promStubClient.rangeQuery = jest.fn(async () => {
     },
   };
   return stubRepsonse;
+});
+
+// Mock instant query
+promStubClient.instantQuery = jest.fn(async () => {
+  const stubResponse: InstantQueryResponse = {
+    status: 'success',
+    data: {
+      resultType: 'vector',
+      result: [
+        {
+          metric: {
+            __name__: 'up',
+          },
+          value: [1686141338.877, '10'],
+        },
+      ],
+    },
+  };
+  return stubResponse;
 });
 
 const getDatasourceClient: jest.Mock = jest.fn(() => {
@@ -113,5 +132,22 @@ describe('PrometheusTimeSeriesQuery', () => {
     );
 
     expect(results.series[0]?.formattedName).toEqual('bar - format');
+  });
+
+  it('should use instantQuery when spec.instant is true', async () => {
+    const ctx = createStubContext();
+    (promStubClient.instantQuery as jest.Mock).mockClear();
+    (promStubClient.rangeQuery as jest.Mock).mockClear();
+
+    await PrometheusTimeSeriesQuery.getTimeSeriesData(
+      {
+        query: 'up',
+        instant: true,
+      },
+      ctx
+    );
+
+    expect(promStubClient.instantQuery).toHaveBeenCalledTimes(1);
+    expect(promStubClient.rangeQuery).not.toHaveBeenCalled();
   });
 });
