@@ -17,7 +17,7 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
+import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse, LokiQueryResponse } from '../../model/loki-client-types';
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
 import { LokiTimeSeriesQuery } from './LokiTimeSeriesQuery';
@@ -48,6 +48,23 @@ lokiStubClient.queryRange = jest.fn(async () => {
   return stubResponse as LokiQueryRangeResponse;
 });
 
+// Mock instant query
+lokiStubClient.query = jest.fn(async () => {
+  const stubResponse: LokiQueryResponse = {
+    status: 'success',
+    data: {
+      resultType: 'vector',
+      result: [
+        {
+          metric: { __name__: 'loki_count', service: 'api' },
+          value: [1686141338, '99'],
+        },
+      ],
+    },
+  };
+  return stubResponse;
+});
+
 const getDatasourceClient: jest.Mock = jest.fn(() => {
   return lokiStubClient;
 });
@@ -62,7 +79,7 @@ const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<LokiDatasourceSpec> 
   };
 });
 
-const createStubContext = (): TimeSeriesQueryContext => {
+const createStubContext = (overrides?: Partial<TimeSeriesQueryContext>): TimeSeriesQueryContext => {
   const stubTimeSeriesContext: TimeSeriesQueryContext = {
     datasourceStore: {
       getDatasource: getDatasource,
@@ -74,10 +91,11 @@ const createStubContext = (): TimeSeriesQueryContext => {
       setSavedDatasources: jest.fn(),
     },
     timeRange: {
-      end: new Date('01-01-2025'),
-      start: new Date('01-02-2025'),
+      end: new Date('2025-01-01T00:00:00Z'),
+      start: new Date('2024-12-25T00:00:00Z'),
     },
     variableState: {},
+    ...overrides,
   };
   return stubTimeSeriesContext;
 };
@@ -97,5 +115,52 @@ describe('LokiTimeSeriesQuery', () => {
   it('should create initial options with empty query', () => {
     const initialOptions = LokiTimeSeriesQuery.createInitialOptions();
     expect(initialOptions).toEqual({ query: '' });
+  });
+
+  describe('instant mode', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should call client.query() with end time as unix seconds and return vector series', async () => {
+      const context = createStubContext({ mode: 'instant' });
+      const result = await LokiTimeSeriesQuery.getTimeSeriesData(
+        { query: 'count_over_time({service="api"} [1h])' },
+        context
+      );
+
+      expect(lokiStubClient.query).toHaveBeenCalledTimes(1);
+      expect(lokiStubClient.queryRange).not.toHaveBeenCalled();
+      const callArgs = (lokiStubClient.query as jest.Mock).mock.calls[0][0];
+      expect(callArgs.time).toBe(Math.floor(context.timeRange.end.getTime() / 1000).toString());
+      expect(result.series).toHaveLength(1);
+      expect(result.series[0]?.values[0]?.[1]).toBe(99);
+    });
+
+    it('should return empty series with warning notice for streams resultType', async () => {
+      (lokiStubClient.query as jest.Mock).mockResolvedValueOnce({
+        status: 'success',
+        data: {
+          resultType: 'streams',
+          result: [{ stream: { service: 'api' }, values: [['1686141338000000000', 'log line']] }],
+        },
+      } as LokiQueryResponse);
+
+      const context = createStubContext({ mode: 'instant' });
+      const result = await LokiTimeSeriesQuery.getTimeSeriesData({ query: '{service="api"}' }, context);
+
+      expect(result.series).toHaveLength(0);
+      expect(result.metadata?.notices?.[0]?.type).toBe('warning');
+      expect(result.metadata?.notices?.[0]?.message).toBe("log streams are not supported in 'instant' mode");
+    });
+  });
+
+  it('should use queryRange when mode is not set', async () => {
+    jest.clearAllMocks();
+    const context = createStubContext();
+    await LokiTimeSeriesQuery.getTimeSeriesData({ query: 'count_over_time({service="api"} [1h])' }, context);
+
+    expect(lokiStubClient.queryRange).toHaveBeenCalledTimes(1);
+    expect(lokiStubClient.query).not.toHaveBeenCalled();
   });
 });
