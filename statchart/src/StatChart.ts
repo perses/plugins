@@ -23,6 +23,9 @@ import { StatChartPanel, StatChartPanelProps } from './StatChartPanel';
 export const StatChart: PanelPlugin<StatChartOptions, StatChartPanelProps> = {
   PanelComponent: StatChartPanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
+  queryOptions: {
+    mode: 'instant',
+  },
   panelOptionsEditorComponents: [
     {
       label: 'Settings',
