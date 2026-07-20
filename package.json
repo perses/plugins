@@ -41,6 +41,7 @@
     "tracetable",
     "tracingganttchart",
     "victorialogs",
+    "canvas",
     "e2e"
   ],
   "peerDependencies": {
