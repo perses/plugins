@@ -1,6 +1,8 @@
 {
   "name": "@perses-dev/alert-manager-plugin",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.0",
+  "description": "Alert Manager plugin for Perses",
+  "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -26,12 +28,11 @@
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@perses-dev/components": "^0.54.0-beta.11",
-    "@perses-dev/core": "^0.53.0",
-    "@perses-dev/spec": "^0.2.0-beta.6",
-    "@perses-dev/dashboards": "^0.54.0-beta.11",
-    "@perses-dev/explore": "^0.54.0-beta.11",
-    "@perses-dev/plugin-system": "^0.54.0-beta.11",
+    "@perses-dev/components": "^0.54.0-rc.0",
+    "@perses-dev/spec": "^0.2.0-beta.9",
+    "@perses-dev/dashboards": "^0.54.0-rc.0",
+    "@perses-dev/explore": "^0.54.0-rc.0",
+    "@perses-dev/plugin-system": "^0.54.0-rc.0",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.21",

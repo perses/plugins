@@ -21,8 +21,8 @@ type FetchResponse = {
 };
 
 const fetchMock = jest.fn();
-jest.mock('@perses-dev/core', () => ({
-  ...jest.requireActual('@perses-dev/core'),
+jest.mock('@perses-dev/client', () => ({
+  ...jest.requireActual('@perses-dev/client'),
   fetch: (...args: unknown[]): Promise<FetchResponse> => fetchMock(...args),
 }));
 

@@ -13,14 +13,12 @@
 
 import { DatasourceClient } from '@perses-dev/plugin-system';
 import { fetchJson, RequestHeaders, UserFriendlyError } from '@perses-dev/client';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import {
   QueryRequestParameters,
   SearchRequestParameters,
   SearchTagsRequestParameters,
   SearchTagsResponse,
   QueryResponse,
-  ServiceStats,
   SearchResponse,
   SearchTagValuesRequestParameters,
   SearchTagValuesResponse,
@@ -36,7 +34,6 @@ export interface TempoClient extends DatasourceClient {
   // https://grafana.com/docs/tempo/latest/api_docs/
   query(params: QueryRequestParameters, headers?: RequestHeaders): Promise<QueryResponse>;
   search(params: SearchRequestParameters, headers?: RequestHeaders): Promise<SearchResponse>;
-  searchWithFallback(params: SearchRequestParameters, headers?: RequestHeaders): Promise<SearchResponse>;
   searchTags(params: SearchTagsRequestParameters, headers?: RequestHeaders): Promise<SearchTagsResponse>;
   searchTagValues(params: SearchTagValuesRequestParameters, headers?: RequestHeaders): Promise<SearchTagValuesResponse>;
 }
@@ -121,73 +118,6 @@ export async function query(params: QueryRequestParameters, queryOptions: QueryO
     throw new UserFriendlyError('Trace not found', 404);
   }
   return response;
-}
-
-/**
- * Returns a summary report of traces that satisfy the query.
- *
- * If the serviceStats field is missing in the response, fetches all traces
- * and calculates the serviceStats.
- *
- * Tempo computes the serviceStats field during ingestion since vParquet4,
- * this fallback is required for older block formats.
- */
-export async function searchWithFallback(
-  params: SearchRequestParameters,
-  queryOptions: QueryOptions
-): Promise<SearchResponse> {
-  // Get a list of traces that satisfy the query.
-  const searchResponse = await search(params, queryOptions);
-  if (!searchResponse.traces || searchResponse.traces.length === 0) {
-    return { traces: [] };
-  }
-
-  // exit early if fallback is not required (serviceStats are contained in the response)
-  if (searchResponse.traces.every((t) => t.serviceStats)) {
-    return searchResponse;
-  }
-
-  // calculate serviceStats (number of spans and errors) per service
-  return {
-    traces: await Promise.all(
-      searchResponse.traces.map(async (trace) => {
-        if (trace.serviceStats) {
-          // fallback not required, serviceStats are contained in the response
-          return trace;
-        }
-
-        const serviceStats: Record<string, ServiceStats> = {};
-        const searchTraceIDResponse = await query({ traceId: trace.traceID }, queryOptions);
-
-        // For every trace, get the full trace, and find the number of spans and errors.
-        for (const batch of searchTraceIDResponse.trace.resourceSpans) {
-          let serviceName = 'unknown';
-          for (const attr of batch.resource?.attributes ?? []) {
-            if (attr.key === 'service.name' && 'stringValue' in attr.value) {
-              serviceName = attr.value.stringValue;
-              break;
-            }
-          }
-
-          const stats = serviceStats[serviceName] ?? { spanCount: 0 };
-          for (const scopeSpan of batch.scopeSpans) {
-            stats.spanCount += scopeSpan.spans.length;
-            for (const span of scopeSpan.spans) {
-              if (span.status?.code === otlptracev1.StatusCodeError) {
-                stats.errorCount = (stats.errorCount ?? 0) + 1;
-              }
-            }
-          }
-          serviceStats[serviceName] = stats;
-        }
-
-        return {
-          ...trace,
-          serviceStats,
-        };
-      })
-    ),
-  };
 }
 
 /**

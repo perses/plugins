@@ -91,7 +91,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     const limit = spec.limit ?? DEFAULT_SEARCH_LIMIT;
     params.limit = limit + 1;
 
-    const response = await client.searchWithFallback(params);
+    const response = await client.search(params);
     const searchResult = parseSearchResponse(response);
     const hasMoreResults = searchResult.length > limit;
 

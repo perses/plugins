@@ -131,13 +131,6 @@ export function getTimeSeries(
         type: visual.lineStyle,
       },
     },
-    selectedMode: 'single',
-    select: {
-      itemStyle: {
-        borderColor: paletteColor,
-        borderWidth: pointRadius + 0.5,
-      },
-    },
     blur: {
       lineStyle: {
         width: lineWidth,
@@ -207,8 +200,10 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
       series.values.forEach((valueTuple: TimeSeriesValueTuple) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, value] = valueTuple;
-        if (typeof value === 'number' && value > max) {
-          max = value;
+        // Use the absolute value so percent thresholds compute correctly against
+        // negated series (e.g. when `querySettings[].negativeY` is enabled).
+        if (typeof value === 'number' && Math.abs(value) > max) {
+          max = Math.abs(value);
         }
       });
     });
@@ -216,8 +211,8 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
     (data as LegacyTimeSeries[]).forEach((series) => {
       if (series.data !== undefined) {
         series.data.forEach((value: EChartsValues) => {
-          if (typeof value === 'number' && value > max) {
-            max = value;
+          if (typeof value === 'number' && Math.abs(value) > max) {
+            max = Math.abs(value);
           }
         });
       }
