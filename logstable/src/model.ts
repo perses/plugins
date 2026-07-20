@@ -27,13 +27,29 @@ export interface LogsQueryData {
   logs?: LogData;
 }
 
+export type SortDirection = 'asc' | 'desc';
+
+export type LogsColumnSortMode = 'alphabetical' | 'numeric' | 'timestamp';
+
+export interface LogsColumnDefinition {
+  name: string;
+  header?: string;
+  enableSorting?: boolean;
+  sort?: SortDirection;
+  sortMode?: LogsColumnSortMode;
+  allowWrap?: boolean;
+  width?: number;
+}
+
 export interface LogsTableOptions {
   legend?: LegendSpecOptions;
   thresholds?: ThresholdOptions;
   allowWrap?: boolean;
   enableDetails?: boolean;
+  /** @deprecated Use `columns` instead. Only effective when `columns` is undefined — controls whether the default timestamp column is included. When `columns` is defined, this property is ignored. */
   showTime?: boolean;
   showAll?: boolean;
+  columns?: LogsColumnDefinition[];
   selection?: SelectionOptions;
   actions?: ActionOptions;
 }

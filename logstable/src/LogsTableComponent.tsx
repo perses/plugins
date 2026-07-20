@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import { LogsTableProps } from './model';
 import { LogsList } from './components/LogsList';
@@ -19,10 +19,7 @@ import { LogsList } from './components/LogsList';
 export function LogsTableComponent(props: LogsTableProps): ReactElement | null {
   const { queryResults, spec } = props;
 
-  // all queries results must be included
-  const logs = queryResults
-    .flatMap((result) => result?.data.logs?.entries ?? [])
-    .sort((a, b) => b.timestamp - a.timestamp);
+  const logs = useMemo(() => queryResults.flatMap((result) => result?.data.logs?.entries ?? []), [queryResults]);
 
   if (!logs.length) {
     return (

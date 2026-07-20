@@ -59,7 +59,7 @@
     "@rsbuild/core": "^1.6.7",
     "@rsbuild/plugin-react": "^1.4.2",
     "@swc/cli": "^0.8.1",
-    "@swc/core": "^1.15.3",
+    "@swc/core": "^1.15.33",
     "@swc/jest": "^0.2.39",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

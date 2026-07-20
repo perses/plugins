@@ -26,9 +26,11 @@ export const LogTimestamp: React.FC<LogTimestampProps> = ({ timestamp }) => {
   return (
     <time
       style={{
+        display: 'block',
         fontSize: '12px',
         whiteSpace: 'nowrap',
-        minWidth: 'max-content',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
       }}
       dateTime={date.toISOString()}
     >
