@@ -35,7 +35,7 @@ jobs:
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.1
         with:
-          cli-version: "v0.54.0-beta.2"
+          cli-version: "v0.54.0-rc.0"
       - uses: actions/cache@v6
         id: cache
         with:
