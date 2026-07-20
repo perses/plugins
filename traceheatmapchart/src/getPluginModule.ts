@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
+import { PluginModuleResource, PluginModuleSpec } from '@perses-dev/plugin-system';
+import packageJson from '../package.json';
 
-import (
-	"slices"
-
-	"github.com/perses/perses/scripts/pkg/npm"
-)
-
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e", "traceheatmapchart"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
-	return slices.DeleteFunc(workspaces, func(w string) bool {
-		return slices.Contains(excludedWorkspaces, w)
-	})
+/**
+ * Returns the plugin module information from package.json
+ */
+export function getPluginModule(): PluginModuleResource {
+  const { name, version, perses } = packageJson;
+  return {
+    kind: 'PluginModule',
+    metadata: {
+      name,
+      version,
+    },
+    spec: perses as PluginModuleSpec,
+  };
 }

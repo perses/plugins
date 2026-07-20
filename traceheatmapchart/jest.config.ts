@@ -11,18 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
+import type { Config } from '@jest/types';
+import shared from '../jest.shared';
 
-import (
-	"slices"
+const jestConfig: Config.InitialOptions = {
+  ...shared,
 
-	"github.com/perses/perses/scripts/pkg/npm"
-)
+  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+};
 
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e", "traceheatmapchart"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
-	return slices.DeleteFunc(workspaces, func(w string) bool {
-		return slices.Contains(excludedWorkspaces, w)
-	})
-}
+export default jestConfig;
