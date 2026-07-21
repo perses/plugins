@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/spec';
-import { LokiQueryRangeMatrixResponse } from '../../model/loki-client-types';
+import { LokiQueryRangeMatrixResponse, LokiQueryResponse } from '../../model/loki-client-types';
 
 export interface LokiTimeSeriesQuerySpec {
   query: string;
@@ -20,4 +20,4 @@ export interface LokiTimeSeriesQuerySpec {
   step?: string;
 }
 
-export type LokiTimeSeriesQueryResponse = LokiQueryRangeMatrixResponse;
+export type LokiTimeSeriesQueryResponse = LokiQueryRangeMatrixResponse | LokiQueryResponse;
