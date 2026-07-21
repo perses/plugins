@@ -78,3 +78,32 @@ export function createInitialStatChartOptions(): StatChartOptions {
     legendMode: 'auto',
   };
 }
+
+/**
+ * Calculations that only need the most recent point of a series. Everything else
+ * (`mean`, `sum`, `min`, `max`, `first`, `first-number`) is computed over the whole
+ * series in `StatChartPanel`, so it needs range data to be correct.
+ */
+const LATEST_POINT_CALCULATIONS: ReadonlySet<CalculationType> = new Set<CalculationType>(['last', 'last-number']);
+
+/**
+ * A stat panel usually shows a single aggregate value, for which an instant query is
+ * enough and much cheaper than a range query — especially against backends that split
+ * range queries into many sub-queries.
+ *
+ * It cannot always be instant though:
+ *  - the sparkline draws the series itself, so it needs range data;
+ *  - calculations other than `last`/`last-number` aggregate over the series, and with a
+ *    single instant point they would silently collapse to that point.
+ *
+ * Requesting instant unconditionally breaks both (see perses/plugins#738, reverted for
+ * the sparkline case), so the mode is derived from the spec.
+ */
+export function getStatChartQueryMode(spec: StatChartOptions): 'instant' | 'range' {
+  if (spec.sparkline !== undefined) return 'range';
+  return LATEST_POINT_CALCULATIONS.has(spec.calculation) ? 'instant' : 'range';
+}
+
+export function getStatChartQueryOptions(spec: StatChartOptions): { mode: 'instant' | 'range' } {
+  return { mode: getStatChartQueryMode(spec) };
+}

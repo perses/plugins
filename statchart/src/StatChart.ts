@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialStatChartOptions, StatChartOptions } from './stat-chart-model';
+import { createInitialStatChartOptions, getStatChartQueryOptions, StatChartOptions } from './stat-chart-model';
 import { StatChartValueMappingEditor } from './StatChartValueMappingEditor';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 import { StatChartPanel, StatChartPanelProps } from './StatChartPanel';
@@ -23,6 +23,7 @@ import { StatChartPanel, StatChartPanelProps } from './StatChartPanel';
 export const StatChart: PanelPlugin<StatChartOptions, StatChartPanelProps> = {
   PanelComponent: StatChartPanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
+  queryOptions: getStatChartQueryOptions,
   panelOptionsEditorComponents: [
     {
       label: 'Settings',
