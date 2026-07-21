@@ -7,15 +7,15 @@ source: {
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.54.0-beta.2"
+		v:       "v0.54.0-rc.0"
 		default: true
 	}
 	"github.com/perses/shared/cue@v0": {
-		v:       "v0.54.0-beta.9"
+		v:       "v0.54.0-rc.1"
 		default: true
 	}
 	"github.com/perses/spec/cue@v0": {
-		v:       "v0.2.0-beta.9"
+		v:       "v0.2.0-rc.0"
 		default: true
 	}
 }
