@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/opensearch-plugin",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.0-rc.1",
   "description": "OpenSearch plugin for Perses",
   "license": "Apache-2.0",
   "scripts": {
