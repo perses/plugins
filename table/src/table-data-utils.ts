@@ -59,7 +59,10 @@ export function buildRawTableData(
       (data.data?.series ?? []).map((ts: TimeSeries) => ({ data, ts, queryIndex }))
     )
     .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
-      if (ts.values[0] === undefined) {
+      // Pick the last (most recent) data point. For range responses the last
+      // value covers the window ending at the selected time range's end.
+      const lastPoint = ts.values[ts.values.length - 1];
+      if (lastPoint === undefined) {
         return { ...ts.labels };
       }
 
@@ -77,19 +80,17 @@ export function buildRawTableData(
       // For rendering: plugin columns get embedded PanelData objects
       let columnValue: unknown;
       if (forExport) {
-        columnValue = ts.values[0][1];
+        columnValue = lastPoint[1];
       } else {
         const hasPlugin = (spec.columnSettings ?? []).find((x) => x.name === valueColumnName)?.plugin;
         columnValue = hasPlugin
           ? { ...data, data: { ...data.data, series: data.data.series.filter((s) => s === ts) } }
-          : ts.values[0][1];
+          : lastPoint[1];
       }
 
       if (queryMode === 'instant') {
-        // Timestamp is not indexed as it will be the same for all queries
-        return { timestamp: ts.values[0][0], [valueColumnName]: columnValue, ...labels };
+        return { timestamp: lastPoint[0], [valueColumnName]: columnValue, ...labels };
       } else {
-        // Don't add a timestamp for range queries
         return { [valueColumnName]: columnValue, ...labels };
       }
     });
