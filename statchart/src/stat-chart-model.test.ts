@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationType } from '@perses-dev/core';
+import { CalculationType } from '@perses-dev/plugin-system';
 import { createInitialStatChartOptions, getStatChartQueryMode, StatChartOptions } from './stat-chart-model';
 
 function options(overrides: Partial<StatChartOptions> = {}): StatChartOptions {
