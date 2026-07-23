@@ -37,12 +37,15 @@ import {
 import { TablePanel } from './TablePanel';
 
 /* mock all variables */
+const MOCK_VARIABLE_STATE_MAP: VariableStateMap = {
+  myproject: { loading: false, value: 'my_project' },
+  __range: { loading: false, value: '1h' },
+};
 jest.mock('@perses-dev/plugin-system', () => ({
   ...jest.requireActual('@perses-dev/plugin-system'),
-  useAllVariableValues: (): VariableStateMap => ({
-    myproject: { loading: false, value: 'my_project' },
-    __range: { loading: false, value: '1h' },
-  }),
+  // Return a stable reference (like the real hook, which memoizes) so consumers
+  // that depend on it in a useMemo/useEffect dependency array don't recompute/rerun on every render.
+  useAllVariableValues: (): VariableStateMap => MOCK_VARIABLE_STATE_MAP,
 }));
 
 const TEST_TIMEOUT = 15000; // Github Actions is slow
