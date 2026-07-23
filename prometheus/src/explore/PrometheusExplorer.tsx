@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Tab, Tabs } from '@mui/material';
+import { Box, Stack, Tab, Tabs, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import useResizeObserver from 'use-resize-observer';
@@ -33,27 +33,63 @@ const FILTERED_QUERY_PLUGINS = ['PrometheusTimeSeriesQuery'];
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const { width, ref: boxRef } = useResizeObserver();
   const height = PANEL_PREVIEW_HEIGHT;
+  const [stacked, setStacked] = useState(false);
 
   const suggestedStepMs = useSuggestedStepMs(width);
 
+  const chartSpec = stacked
+    ? { legend: { position: 'bottom', mode: 'list' }, visual: { stack: 'all', areaOpacity: 0.3 } }
+    : { legend: { position: 'bottom', mode: 'list' } };
+
   return (
-    <Box ref={boxRef} height={height}>
-      <DataQueriesProvider definitions={queries} options={{ suggestedStepMs, mode: 'range' }}>
-        <Panel
-          panelOptions={{
-            hideHeader: true,
-          }}
-          definition={{
-            kind: 'Panel',
-            spec: {
-              queries: queries,
-              display: { name: '' },
-              plugin: { kind: 'TimeSeriesChart', spec: { legend: { position: 'bottom', mode: 'list' } } },
+    <Stack>
+      <ToggleButtonGroup
+        value={stacked ? 'stacked' : 'unstacked'}
+        exclusive
+        onChange={(_, value) => setStacked(value === 'stacked')}
+        size="small"
+        sx={{
+          alignSelf: 'flex-end',
+          mt: 2,
+          backgroundColor: 'background.lighter',
+          borderRadius: 1,
+          p: 0.5,
+          '& .MuiToggleButton-root': {
+            border: 'none',
+            borderRadius: '4px !important',
+            px: 2,
+            color: 'text.secondary',
+            '&.Mui-selected': {
+              backgroundColor: 'background.default',
+              color: 'text.primary',
             },
-          }}
-        />
-      </DataQueriesProvider>
-    </Box>
+            '&:hover': {
+              backgroundColor: 'action.hover',
+            },
+          },
+        }}
+      >
+        <ToggleButton value="unstacked">Unstacked</ToggleButton>
+        <ToggleButton value="stacked">Stacked</ToggleButton>
+      </ToggleButtonGroup>
+      <Box ref={boxRef} height={height}>
+        <DataQueriesProvider definitions={queries} options={{ suggestedStepMs, mode: 'range' }}>
+          <Panel
+            panelOptions={{
+              hideHeader: true,
+            }}
+            definition={{
+              kind: 'Panel',
+              spec: {
+                queries: queries,
+                display: { name: '' },
+                plugin: { kind: 'TimeSeriesChart', spec: chartSpec },
+              },
+            }}
+          />
+        </DataQueriesProvider>
+      </Box>
+    </Stack>
   );
 }
 
