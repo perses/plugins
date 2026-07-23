@@ -45,7 +45,11 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElem
           }}
           definition={{
             kind: 'Panel',
-            spec: { queries: queries, display: { name: '' }, plugin: { kind: 'TimeSeriesChart', spec: {} } },
+            spec: {
+              queries: queries,
+              display: { name: '' },
+              plugin: { kind: 'TimeSeriesChart', spec: { legend: { position: 'bottom', mode: 'list' } } },
+            },
           }}
         />
       </DataQueriesProvider>
