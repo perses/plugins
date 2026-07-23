@@ -23,9 +23,14 @@ function options(overrides: Partial<StatChartOptions> = {}): StatChartOptions {
 }
 
 describe('getStatChartQueryMode', () => {
-  it('uses instant when there is no sparkline and the calculation only needs the latest point', () => {
+  it('uses instant for `last`, the one calculation an instant query reproduces exactly', () => {
     expect(getStatChartQueryMode(options({ calculation: 'last' }))).toBe('instant');
-    expect(getStatChartQueryMode(options({ calculation: 'last-number' }))).toBe('instant');
+  });
+
+  // `last-number` is the last *non-null* value, so with trailing nulls it must look
+  // back past the latest point — which an instant query cannot do. It needs range.
+  it('uses range for `last-number`', () => {
+    expect(getStatChartQueryMode(options({ calculation: 'last-number' }))).toBe('range');
   });
 
   // Regression: requesting instant unconditionally broke the sparkline, which draws the

@@ -80,11 +80,17 @@ export function createInitialStatChartOptions(): StatChartOptions {
 }
 
 /**
- * Calculations that only need the most recent point of a series. Everything else
- * (`mean`, `sum`, `min`, `max`, `first`, `first-number`) is computed over the whole
- * series in `StatChartPanel`, so it needs range data to be correct.
+ * Only `last` is safe to compute from a single instant point: it is literally the
+ * most recent value of the series, which is exactly what an instant query returns.
+ *
+ * Everything else needs the full series, so it must use a range query:
+ *  - `mean`, `sum`, `min`, `max` aggregate over all points;
+ *  - `first` / `first-number` need the *start* of the window, not the latest point;
+ *  - `last-number` is the last *non-null* value (`Last numeric value`), so when the
+ *    most recent point is null it must fall back to an earlier one — which an instant
+ *    query cannot see, giving a different result than the range query.
  */
-const LATEST_POINT_CALCULATIONS: ReadonlySet<CalculationType> = new Set<CalculationType>(['last', 'last-number']);
+const INSTANT_SAFE_CALCULATIONS: ReadonlySet<CalculationType> = new Set<CalculationType>(['last']);
 
 /**
  * A stat panel usually shows a single aggregate value, for which an instant query is
@@ -101,7 +107,7 @@ const LATEST_POINT_CALCULATIONS: ReadonlySet<CalculationType> = new Set<Calculat
  */
 export function getStatChartQueryMode(spec: StatChartOptions): 'instant' | 'range' {
   if (spec.sparkline !== undefined) return 'range';
-  return LATEST_POINT_CALCULATIONS.has(spec.calculation) ? 'instant' : 'range';
+  return INSTANT_SAFE_CALCULATIONS.has(spec.calculation) ? 'instant' : 'range';
 }
 
 export function getStatChartQueryOptions(spec: StatChartOptions): { mode: 'instant' | 'range' } {
