@@ -26,6 +26,7 @@ spec: close({
 	seriesNameFormat?: string
 	minStep?:          =~ds.#durationRegex | =~common.#variableSyntaxRegex
 	resolution?:       number
+	instant?:          bool
 })
 
 #variableSyntaxRegex: "^\\$\\w+$"

@@ -28,6 +28,7 @@ type PluginSpec struct {
 	SeriesNameFormat string               `json:"seriesNameFormat,omitempty" yaml:"seriesNameFormat,omitempty"`
 	MinStep          common.Duration      `json:"minStep,omitempty" yaml:"minStep,omitempty"`
 	Resolution       int                  `json:"resolution,omitempty" yaml:"resolution,omitempty"`
+	Instant          bool                 `json:"instant,omitempty" yaml:"instant,omitempty"`
 }
 
 type Option func(plugin *Builder) error

@@ -25,6 +25,7 @@ package migrate
 	expr:          string
 	legendFormat?: string
 	interval?:     string
+	instant?:      bool
 	...
 }
 
@@ -43,5 +44,8 @@ spec: {
 	}
 	if #target.interval != _|_ {
 		minStep: #target.interval
+	}
+	if #target.instant != _|_ {
+		instant: #target.instant
 	}
 }
