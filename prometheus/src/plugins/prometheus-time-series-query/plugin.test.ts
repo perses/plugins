@@ -150,4 +150,39 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(promStubClient.instantQuery).toHaveBeenCalledTimes(1);
     expect(promStubClient.rangeQuery).not.toHaveBeenCalled();
   });
+
+  it('should use rangeQuery when spec.instant is false even if context mode is instant', async () => {
+    const ctx = createStubContext();
+    ctx.mode = 'instant';
+    (promStubClient.instantQuery as jest.Mock).mockClear();
+    (promStubClient.rangeQuery as jest.Mock).mockClear();
+
+    await PrometheusTimeSeriesQuery.getTimeSeriesData(
+      {
+        query: 'up',
+        instant: false,
+      },
+      ctx
+    );
+
+    expect(promStubClient.rangeQuery).toHaveBeenCalledTimes(1);
+    expect(promStubClient.instantQuery).not.toHaveBeenCalled();
+  });
+
+  it('should use instantQuery when spec.instant is unset and context mode is instant', async () => {
+    const ctx = createStubContext();
+    ctx.mode = 'instant';
+    (promStubClient.instantQuery as jest.Mock).mockClear();
+    (promStubClient.rangeQuery as jest.Mock).mockClear();
+
+    await PrometheusTimeSeriesQuery.getTimeSeriesData(
+      {
+        query: 'up',
+      },
+      ctx
+    );
+
+    expect(promStubClient.instantQuery).toHaveBeenCalledTimes(1);
+    expect(promStubClient.rangeQuery).not.toHaveBeenCalled();
+  });
 });

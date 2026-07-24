@@ -174,7 +174,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           value={minStep ?? ''}
           onChange={(e) => handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined)}
           onBlur={handleMinStepBlur}
-          disabled={instant}
+          disabled={instant === true}
           sx={{ width: '250px' }}
           slotProps={{
             inputLabel: { shrink: isReadonly ? true : undefined },
@@ -182,11 +182,14 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           }}
         />
         <ButtonGroup disabled={isReadonly} sx={{ '& .MuiButton-root': { px: 2, py: 2 } }}>
-          <Button variant={!instant ? 'contained' : 'outlined'} onClick={() => handleInstantChange(false)}>
+          <Button variant={instant === false ? 'contained' : 'outlined'} onClick={() => handleInstantChange(false)}>
             Range
           </Button>
-          <Button variant={instant ? 'contained' : 'outlined'} onClick={() => handleInstantChange(true)}>
+          <Button variant={instant === true ? 'contained' : 'outlined'} onClick={() => handleInstantChange(true)}>
             Instant
+          </Button>
+          <Button variant={instant === undefined ? 'contained' : 'outlined'} onClick={() => handleInstantChange(undefined)}>
+            Auto
           </Button>
         </ButtonGroup>
       </Stack>

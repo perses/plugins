@@ -119,7 +119,9 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   // Make the request to Prom
 
   let response;
-  const isInstant = spec.instant === true || context.mode === 'instant';
+  // `spec.instant` is a per-query override: `true` forces instant, `false` forces range.
+  // When left unset (Auto), defer to the panel-provided `context.mode`.
+  const isInstant = spec.instant ?? context.mode === 'instant';
   if (isInstant) {
     response = await client.instantQuery({ query, time: end }, { ...interpolatedOptions, signal: abortSignal });
   } else {

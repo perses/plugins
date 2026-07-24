@@ -139,14 +139,14 @@ export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps): {
  * toggle rather than on blur.
  */
 export function useInstantState(props: PrometheusTimeSeriesQueryEditorProps): {
-  instant: boolean;
-  handleInstantChange: (instant: boolean) => void;
+  instant: boolean | undefined;
+  handleInstantChange: (instant: boolean | undefined) => void;
 } {
   const { onChange, value } = props;
 
-  const instant = value.instant ?? false;
+  const instant = value.instant;
 
-  const handleInstantChange = (next: boolean): void => {
+  const handleInstantChange = (next: boolean | undefined): void => {
     onChange(
       produce(value, (draft) => {
         draft.instant = next;
