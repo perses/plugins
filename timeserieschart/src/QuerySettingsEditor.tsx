@@ -170,7 +170,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
   const addColor = (i: number): void => {
     updateQuerySettings(i, (qs) => {
-      qs.colorMode = 'fixed-single';
+      qs.colorMode = 'fixed';
       qs.colorValue = DEFAULT_COLOR_VALUE;
     });
   };
@@ -474,8 +474,8 @@ function QuerySettingsInput({
         {colorMode && (
           <SettingsSection label="Color" onRemove={onRemoveColor}>
             <TextField select value={colorMode} onChange={onColorModeChange} size="small" sx={{ flexGrow: 1 }}>
-              <MenuItem value="fixed-single">Fixed (single)</MenuItem>
               <MenuItem value="fixed">Fixed</MenuItem>
+              <MenuItem value="fixed-single">Fixed (single series)</MenuItem>
             </TextField>
             <OptionsColorPicker
               label={queryNames[queryIndex] ?? `Query n°${queryIndex + 1}`}
