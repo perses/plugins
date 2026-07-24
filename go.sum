@@ -2,8 +2,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/perses/common v0.31.2 h1:klsl0KfWn6wVVG4rDJvsTvFO8Owf5ed4nj2VjbQST60=
 github.com/perses/common v0.31.2/go.mod h1:KgLB0ojBFzg93UwTNK8uAE1yuGexBiwqHiAvTFcHRDI=
-github.com/perses/perses v0.54.0-rc.0 h1:gaeJNjmFbaCuperlin8ADsE9gwobtB361VXnVe11p8c=
-github.com/perses/perses v0.54.0-rc.0/go.mod h1:nWVDiwHO2pRWfhlMuQVBZeYf+O/b1mn/z9K6hkY4kyo=
+github.com/perses/perses v0.54.0-rc.1 h1:lsM8LEZkFaS31utLU15KcARYO/cVM1WAGDDOewolZ7g=
+github.com/perses/perses v0.54.0-rc.1/go.mod h1:vZTQu+tq9kOtI5E0i/Q+484aIPRhuONgErRThMSTx4Q=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=

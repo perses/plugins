@@ -155,12 +155,14 @@ spec: {
 							}
 						},
 						if mapping.type == "special" {
+							#match: *mapping.options.match | "null"
+
 							kind: "Misc"
 							spec: {
 								value: [//switch
-									if mapping.options.match == "nan" {"NaN"},
-									if mapping.options.match == "null+nan" {"null"},
-									mapping.options.match,
+									if #match == "nan" {"NaN"},
+									if #match == "null+nan" {"null"},
+									#match,
 								][0]
 								result: #result
 							}
