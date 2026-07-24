@@ -188,7 +188,10 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           <Button variant={instant === true ? 'contained' : 'outlined'} onClick={() => handleInstantChange(true)}>
             Instant
           </Button>
-          <Button variant={instant === undefined ? 'contained' : 'outlined'} onClick={() => handleInstantChange(undefined)}>
+          <Button
+            variant={instant === undefined ? 'contained' : 'outlined'}
+            onClick={() => handleInstantChange(undefined)}
+          >
             Auto
           </Button>
         </ButtonGroup>
