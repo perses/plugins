@@ -11,18 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
-
-import (
-	"slices"
-
-	"github.com/perses/perses/scripts/pkg/npm"
-)
-
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e", "traceheatmapchart"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
-	return slices.DeleteFunc(workspaces, func(w string) bool {
-		return slices.Contains(excludedWorkspaces, w)
-	})
-}
+/// <reference types="@rsbuild/core/types" />

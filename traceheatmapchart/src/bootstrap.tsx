@@ -11,18 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
-import (
-	"slices"
-
-	"github.com/perses/perses/scripts/pkg/npm"
-)
-
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e", "traceheatmapchart"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
-	return slices.DeleteFunc(workspaces, func(w string) bool {
-		return slices.Contains(excludedWorkspaces, w)
-	})
-}
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(<React.StrictMode></React.StrictMode>);

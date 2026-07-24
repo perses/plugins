@@ -11,18 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
+import { ExponentialBase } from './traceheatmap-duration-bucket-util';
 
-import (
-	"slices"
-
-	"github.com/perses/perses/scripts/pkg/npm"
-)
-
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e", "traceheatmapchart"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
-	return slices.DeleteFunc(workspaces, func(w string) bool {
-		return slices.Contains(excludedWorkspaces, w)
-	})
+export interface BucketSettings {
+  base: ExponentialBase;
 }
+
+export interface TraceheatmapOptions {
+  bucketSettings: BucketSettings;
+}
+
+export const createInitialTraceheatmapChartOptions = (): TraceheatmapOptions => ({
+  bucketSettings: { base: 2 },
+});

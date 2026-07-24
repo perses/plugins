@@ -11,18 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
+import '@testing-library/jest-dom';
 
-import (
-	"slices"
-
-	"github.com/perses/perses/scripts/pkg/npm"
-)
-
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e", "traceheatmapchart"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
-	return slices.DeleteFunc(workspaces, func(w string) bool {
-		return slices.Contains(excludedWorkspaces, w)
-	})
-}
+// Always mock e-charts during tests since we don't have a proper canvas in jsdom
+jest.mock('echarts/core');

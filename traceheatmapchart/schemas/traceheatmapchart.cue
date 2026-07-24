@@ -11,18 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package npm
+package model
 
-import (
-	"slices"
+kind: "Traceheatmapchart"
 
-	"github.com/perses/perses/scripts/pkg/npm"
-)
+spec: close({
+	bucketSettings: #bucketSettings
+})
 
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e", "traceheatmapchart"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
-	return slices.DeleteFunc(workspaces, func(w string) bool {
-		return slices.Contains(excludedWorkspaces, w)
-	})
+#bucketSettings: {
+	base: *2 | 10
 }
