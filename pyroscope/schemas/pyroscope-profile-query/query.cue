@@ -14,6 +14,7 @@
 package model
 
 import (
+	"strings"
 	ds "github.com/perses/plugins/pyroscope/schemas/datasource:model"
 )
 
@@ -21,7 +22,7 @@ kind: "PyroscopeProfileQuery"
 spec: close({
 	ds.#selector
 	maxNodes?:   number
-	profileType: string
+	profileType: strings.MinRunes(1)
 	filters?: [...{
 		labelName:  string
 		labelValue: string

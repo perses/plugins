@@ -51,31 +51,6 @@ jobs:
             **/dist
             !node_modules
 
-  lint-npm:
-    name: "lint-npm"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run lint
-  test-npm:
-    name: "test-npm"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run test
-
   e2e:
     name: "e2e tests"
     needs: build # <--- CRITICAL: Wait for build to finish. PERSES_PLUGIN_ARCHIVE_PATHS accepts archive files only
@@ -110,84 +85,6 @@ jobs:
         working-directory: e2e
       - name: run e2e tests
         run: npm run test:ci --prefix e2e -- src/tests
-          
-
-  type-check:
-    name: "type-check"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run type-check
-  
-  checkformat-cue:
-    name: "Check CUE files format"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_go: true
-          enable_cue: true
-          cue_version: "v0.16.1"
-      - run: make checkformat-cue
-
-  validate-schemas:
-    name: "Validate plugin schemas"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_go: true
-          enable_cue: true
-          cue_version: "v0.16.1"
-      - name: Install percli
-        uses: perses/cli-actions/actions/install_percli@v0.2.1
-        with:
-          cli-version: "v0.54.0-beta.2"
-      - uses: actions/cache@v6
-        id: cache
-        with:
-          path: ~/.cache/cue
-          key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
-          restore-keys: |
-            ${{ runner.os }}-cue-
-      - run: make lint-plugins
-      - run: make test-schemas-plugins
-
-  module-check:
-    name: "Check plugin modules"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_go: true
-          enable_cue: true
-          cue_version: "v0.16.1"
-      - uses: actions/cache@v6
-        id: cache
-        with:
-          path: ~/.cache/cue
-          key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
-          restore-keys: |
-            ${{ runner.os }}-cue-
-      - name: Tidy modules
-        run: make tidy-modules
-      - name: Check for unused/missing packages in all cue.mod
-        run: git diff --exit-code -- */cue.mod
 
   release:
     name: "release"

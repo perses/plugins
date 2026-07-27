@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/core';
+import { QueryDefinition } from '@perses-dev/spec';
 import { LogQueryPlugin, LogQueryContext, calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
 import { getVictoriaLogsLogData } from './query';
 import { VictoriaLogsLogQueryEditor } from './VictoriaLogsLogQueryEditor';

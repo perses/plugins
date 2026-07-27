@@ -14,9 +14,14 @@
 import { ProfileQueryPlugin } from '@perses-dev/plugin-system';
 import { getUnixTime } from 'date-fns';
 import { AbsoluteTimeRange, ProfileData, StackTrace } from '@perses-dev/spec';
-import { PyroscopeProfileQuerySpec, PYROSCOPE_DATASOURCE_KIND, PyroscopeDatasourceSelector } from '../../model';
-import { PyroscopeClient } from '../../model/pyroscope-client';
-import { SearchProfilesParameters, SearchProfilesResponse } from '../../model/api-types';
+import {
+  PyroscopeProfileQuerySpec,
+  PYROSCOPE_DATASOURCE_KIND,
+  PyroscopeDatasourceSelector,
+  PyroscopeClient,
+  SearchProfilesParameters,
+  SearchProfilesResponse,
+} from '../../model';
 import { computeFilterExpr } from '../../utils/types';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {

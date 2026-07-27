@@ -39,7 +39,7 @@ export function TempoDatasourceEditor(props: TempoDatasourceEditorProps): ReactE
             method: 'GET',
           },
           {
-            endpointPattern: '/api/traces',
+            endpointPattern: '/api/v2/traces',
             method: 'GET',
           },
           {

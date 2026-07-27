@@ -26,7 +26,7 @@ const datasource: TempoDatasourceSpec = {
 
 const tempoStubClient = TempoDatasource.createClient(datasource, {});
 tempoStubClient.query = jest.fn(async () => MOCK_TRACE_RESPONSE_SMALL);
-tempoStubClient.searchWithFallback = jest.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
+tempoStubClient.search = jest.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
 
 const getDatasourceClient: jest.Mock = jest.fn(() => {
   return tempoStubClient;

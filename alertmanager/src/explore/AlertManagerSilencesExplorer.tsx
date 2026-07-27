@@ -17,7 +17,7 @@ import BellOffIcon from 'mdi-material-ui/BellOff';
 import { DataQueriesProvider, MultiQueryEditor, useDatasourceClient } from '@perses-dev/plugin-system';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
-import { DatasourceSelector, QueryDefinition } from '@perses-dev/core';
+import { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
 import { useSnackbar } from '@perses-dev/components';
 import { useQueryClient } from '@tanstack/react-query';
 import { SilenceForm } from '../components/SilenceForm';

@@ -35,7 +35,7 @@ const datasource: TempoDatasourceSpec = {
 
 const createMockClient = (searchResponse: SearchResponse): TempoClient => {
   const client = TempoDatasource.createClient(datasource, {});
-  client.searchWithFallback = jest.fn(async () => searchResponse);
+  client.search = jest.fn(async () => searchResponse);
   return client;
 };
 
@@ -99,7 +99,7 @@ describe('getTraceData', () => {
     const result = await getTraceData({ query: '{}' }, stubContext);
 
     // Verify client was called with limit+1
-    expect(mockClient.searchWithFallback).toHaveBeenCalledWith(
+    expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: DEFAULT_SEARCH_LIMIT + 1,
       })
@@ -130,7 +130,7 @@ describe('getTraceData', () => {
     const result = await getTraceData({ query: '{}', limit: customLimit }, stubContext);
 
     // Verify client was called with customLimit+1
-    expect(mockClient.searchWithFallback).toHaveBeenCalledWith(
+    expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: customLimit + 1,
       })
@@ -178,7 +178,7 @@ describe('getTraceData', () => {
 
     const result = await getTraceData({ query: '{resource.service.name="$serviceName"}' }, stubContext);
 
-    expect(mockClient.searchWithFallback).toHaveBeenCalledWith(
+    expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         q: '{resource.service.name="frontend"}',
       })
@@ -189,7 +189,7 @@ describe('getTraceData', () => {
   it('should use the replaced query when it resolves to a valid traceId', async () => {
     const traceId = 'a'.repeat(32); // valid 32-char hex trace ID
     const mockResponse = {
-      batches: [],
+      trace: { resourceSpans: [] },
     };
     const mockClient = createMockClient({ traces: [] });
     mockClient.query = jest.fn(async () => mockResponse);
@@ -205,6 +205,35 @@ describe('getTraceData', () => {
     expect(mockedReplaceVariables).toHaveBeenCalledWith('$traceId', stubContext.variableState);
     expect(mockClient.query).toHaveBeenCalledWith({ traceId });
     expect(result.trace).toBeDefined();
+  });
+
+  it('should surface response message as a warning notice', async () => {
+    const traceId = 'b'.repeat(32);
+    const mockResponse = {
+      trace: { resourceSpans: [] },
+      message: 'trace exceeds max size',
+    };
+    const mockClient = createMockClient({ traces: [] });
+    mockClient.query = jest.fn(async () => mockResponse);
+    const stubContext = createStubContext(mockClient);
+
+    const result = await getTraceData({ query: traceId }, stubContext);
+
+    expect(result.metadata?.notices).toEqual([{ type: 'warning', message: 'trace exceeds max size' }]);
+  });
+
+  it('should not include notices when response has no message', async () => {
+    const traceId = 'c'.repeat(32);
+    const mockResponse = {
+      trace: { resourceSpans: [] },
+    };
+    const mockClient = createMockClient({ traces: [] });
+    mockClient.query = jest.fn(async () => mockResponse);
+    const stubContext = createStubContext(mockClient);
+
+    const result = await getTraceData({ query: traceId }, stubContext);
+
+    expect(result.metadata?.notices).toEqual([]);
   });
 
   it('should replace multiple variables in a complex TraceQL query', async () => {
@@ -236,7 +265,7 @@ describe('getTraceData', () => {
     const result = await getTraceData({ query: rawQuery }, stubContext);
 
     expect(mockedReplaceVariables).toHaveBeenCalledWith(rawQuery, stubContext.variableState);
-    expect(mockClient.searchWithFallback).toHaveBeenCalledWith(
+    expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         q: replacedQuery,
       })
