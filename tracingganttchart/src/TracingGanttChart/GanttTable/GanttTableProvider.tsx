@@ -14,8 +14,8 @@
 import { createContext, ReactElement, useContext, useState } from 'react';
 
 interface GanttTableContextType {
-  collapsedSpans: string[];
-  setCollapsedSpans: (s: string[]) => void;
+  collapsedSpans: Set<string>;
+  setCollapsedSpans: React.Dispatch<React.SetStateAction<Set<string>>>;
   visibleSpans: string[];
   setVisibleSpans: (s: string[]) => void;
   /** can be a spanId, an empty string for the root span or undefined for no hover */
@@ -36,7 +36,7 @@ interface GanttTableProviderProps {
 
 export function GanttTableProvider(props: GanttTableProviderProps): ReactElement {
   const { children } = props;
-  const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
+  const [collapsedSpans, setCollapsedSpans] = useState<Set<string>>(new Set());
   const [visibleSpans, setVisibleSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
 

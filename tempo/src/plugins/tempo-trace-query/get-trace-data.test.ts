@@ -11,20 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec } from '@perses-dev/core';
-import { TraceQueryContext } from '@perses-dev/plugin-system';
+import { TraceQueryContext, replaceVariables } from '@perses-dev/plugin-system';
+import { DatasourceSpec } from '@perses-dev/spec';
 import { TempoDatasourceSpec } from '../tempo-datasource-types';
 import { TempoDatasource } from '../tempo-datasource';
 import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
+import { TempoClient } from '../../model';
 import { getTraceData } from './get-trace-data';
+
+jest.mock('@perses-dev/plugin-system', () => {
+  const actual = jest.requireActual('@perses-dev/plugin-system');
+  return {
+    ...actual,
+    replaceVariables: jest.fn((query: string) => query),
+  };
+});
+
+const mockedReplaceVariables = replaceVariables as jest.MockedFunction<typeof replaceVariables>;
 
 const datasource: TempoDatasourceSpec = {
   directUrl: '/test',
 };
 
-const createMockClient = (searchResponse: SearchResponse) => {
+const createMockClient = (searchResponse: SearchResponse): TempoClient => {
   const client = TempoDatasource.createClient(datasource, {});
-  client.searchWithFallback = jest.fn(async () => searchResponse);
+  client.search = jest.fn(async () => searchResponse);
   return client;
 };
 
@@ -59,6 +70,11 @@ const createStubContext = (mockClient: ReturnType<typeof createMockClient>): Tra
 };
 
 describe('getTraceData', () => {
+  beforeEach(() => {
+    mockedReplaceVariables.mockReset();
+    mockedReplaceVariables.mockImplementation((query: string) => query);
+  });
+
   it('should fetch DEFAULT_SEARCH_LIMIT+1 results and not show notice when results are within limit', async () => {
     const mockResponse: SearchResponse = {
       traces: [
@@ -83,7 +99,7 @@ describe('getTraceData', () => {
     const result = await getTraceData({ query: '{}' }, stubContext);
 
     // Verify client was called with limit+1
-    expect(mockClient.searchWithFallback).toHaveBeenCalledWith(
+    expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: DEFAULT_SEARCH_LIMIT + 1,
       })
@@ -114,7 +130,7 @@ describe('getTraceData', () => {
     const result = await getTraceData({ query: '{}', limit: customLimit }, stubContext);
 
     // Verify client was called with customLimit+1
-    expect(mockClient.searchWithFallback).toHaveBeenCalledWith(
+    expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: customLimit + 1,
       })
@@ -130,5 +146,131 @@ describe('getTraceData', () => {
 
     // Verify results are trimmed to exactly customLimit
     expect(result.searchResult).toHaveLength(customLimit);
+  });
+
+  it('should call replaceVariables with the query and variableState', async () => {
+    const mockResponse: SearchResponse = {
+      traces: [],
+    };
+    const mockClient = createMockClient(mockResponse);
+    const variableState = {
+      serviceName: { value: 'frontend', loading: false },
+    };
+    const stubContext = createStubContext(mockClient);
+    stubContext.variableState = variableState;
+
+    await getTraceData({ query: '{resource.service.name="$serviceName"}' }, stubContext);
+
+    expect(mockedReplaceVariables).toHaveBeenCalledWith('{resource.service.name="$serviceName"}', variableState);
+  });
+
+  it('should use the replaced query in the search request', async () => {
+    const mockResponse: SearchResponse = {
+      traces: [],
+    };
+    const mockClient = createMockClient(mockResponse);
+    const stubContext = createStubContext(mockClient);
+    stubContext.variableState = {
+      serviceName: { value: 'frontend', loading: false },
+    };
+
+    mockedReplaceVariables.mockReturnValueOnce('{resource.service.name="frontend"}');
+
+    const result = await getTraceData({ query: '{resource.service.name="$serviceName"}' }, stubContext);
+
+    expect(mockClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        q: '{resource.service.name="frontend"}',
+      })
+    );
+    expect(result.metadata?.executedQueryString).toBe('{resource.service.name="frontend"}');
+  });
+
+  it('should use the replaced query when it resolves to a valid traceId', async () => {
+    const traceId = 'a'.repeat(32); // valid 32-char hex trace ID
+    const mockResponse = {
+      trace: { resourceSpans: [] },
+    };
+    const mockClient = createMockClient({ traces: [] });
+    mockClient.query = jest.fn(async () => mockResponse);
+    const stubContext = createStubContext(mockClient);
+    stubContext.variableState = {
+      traceId: { value: traceId, loading: false },
+    };
+
+    mockedReplaceVariables.mockReturnValueOnce(traceId);
+
+    const result = await getTraceData({ query: '$traceId' }, stubContext);
+
+    expect(mockedReplaceVariables).toHaveBeenCalledWith('$traceId', stubContext.variableState);
+    expect(mockClient.query).toHaveBeenCalledWith({ traceId });
+    expect(result.trace).toBeDefined();
+  });
+
+  it('should surface response message as a warning notice', async () => {
+    const traceId = 'b'.repeat(32);
+    const mockResponse = {
+      trace: { resourceSpans: [] },
+      message: 'trace exceeds max size',
+    };
+    const mockClient = createMockClient({ traces: [] });
+    mockClient.query = jest.fn(async () => mockResponse);
+    const stubContext = createStubContext(mockClient);
+
+    const result = await getTraceData({ query: traceId }, stubContext);
+
+    expect(result.metadata?.notices).toEqual([{ type: 'warning', message: 'trace exceeds max size' }]);
+  });
+
+  it('should not include notices when response has no message', async () => {
+    const traceId = 'c'.repeat(32);
+    const mockResponse = {
+      trace: { resourceSpans: [] },
+    };
+    const mockClient = createMockClient({ traces: [] });
+    mockClient.query = jest.fn(async () => mockResponse);
+    const stubContext = createStubContext(mockClient);
+
+    const result = await getTraceData({ query: traceId }, stubContext);
+
+    expect(result.metadata?.notices).toEqual([]);
+  });
+
+  it('should replace multiple variables in a complex TraceQL query', async () => {
+    const mockResponse: SearchResponse = {
+      traces: [
+        {
+          traceID: 'trace1',
+          rootServiceName: 'frontend',
+          rootTraceName: 'GET /api/users',
+          startTimeUnixNano: '1718122135898442804',
+          durationMs: 350,
+        },
+      ],
+    };
+    const mockClient = createMockClient(mockResponse);
+    const stubContext = createStubContext(mockClient);
+    stubContext.variableState = {
+      serviceName: { value: 'frontend', loading: false },
+      minDuration: { value: '100ms', loading: false },
+      httpMethod: { value: 'GET', loading: false },
+    };
+
+    const rawQuery =
+      '{resource.service.name="$serviceName" && span.http.method="$httpMethod" && duration > $minDuration}';
+    const replacedQuery = '{resource.service.name="frontend" && span.http.method="GET" && duration > 100ms}';
+
+    mockedReplaceVariables.mockReturnValueOnce(replacedQuery);
+
+    const result = await getTraceData({ query: rawQuery }, stubContext);
+
+    expect(mockedReplaceVariables).toHaveBeenCalledWith(rawQuery, stubContext.variableState);
+    expect(mockClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        q: replacedQuery,
+      })
+    );
+    expect(result.metadata?.executedQueryString).toBe(replacedQuery);
+    expect(result.searchResult).toHaveLength(1);
   });
 });

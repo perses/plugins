@@ -1,5 +1,7 @@
 # Tempo Datasource Plugin
 
+This plugin supports Tempo v2.6.0 and later.
+
 ### How to install
 
 This plugin requires react and react-dom 18

@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, otlptracev1, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
+import { fetchJson, RequestHeaders, UserFriendlyError } from '@perses-dev/client';
 import {
   QueryRequestParameters,
   SearchRequestParameters,
   SearchTagsRequestParameters,
   SearchTagsResponse,
   QueryResponse,
-  ServiceStats,
   SearchResponse,
   SearchTagValuesRequestParameters,
   SearchTagValuesResponse,
@@ -35,7 +34,6 @@ export interface TempoClient extends DatasourceClient {
   // https://grafana.com/docs/tempo/latest/api_docs/
   query(params: QueryRequestParameters, headers?: RequestHeaders): Promise<QueryResponse>;
   search(params: SearchRequestParameters, headers?: RequestHeaders): Promise<SearchResponse>;
-  searchWithFallback(params: SearchRequestParameters, headers?: RequestHeaders): Promise<SearchResponse>;
   searchTags(params: SearchTagsRequestParameters, headers?: RequestHeaders): Promise<SearchTagsResponse>;
   searchTagValues(params: SearchTagValuesRequestParameters, headers?: RequestHeaders): Promise<SearchTagValuesResponse>;
 }
@@ -45,17 +43,7 @@ export interface QueryOptions {
   headers?: RequestHeaders;
 }
 
-export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>): Promise<T> => {
-  const response = await fetch(...args);
-  try {
-    return await response.json();
-  } catch (e) {
-    console.error('Invalid response from server', e);
-    throw new Error('Invalid response from server');
-  }
-};
-
-function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
+async function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
   apiURI: string,
   params: TRequest,
   queryOptions: QueryOptions
@@ -69,10 +57,22 @@ function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
   }
   const init = {
     method: 'GET',
-    headers,
+    headers: {
+      Accept: 'application/json',
+      ...headers,
+    },
   };
 
-  return executeRequest<TResponse>(url, init);
+  try {
+    return await fetchJson<TResponse>(url, init);
+  } catch (e) {
+    // fetchJson() puts the entire response body in the error message,
+    // which can be a full HTML page. Replace with a short status message.
+    if (e instanceof Error && 'status' in e && /^\s*</.test(e.message)) {
+      throw new UserFriendlyError(`Invalid response from server`, e.status as number);
+    }
+    throw e;
+  }
 }
 
 type RequestParams<T> = { [K in keyof T]: string | number };
@@ -103,80 +103,21 @@ export function search(params: SearchRequestParameters, queryOptions: QueryOptio
 
 /**
  * Returns an entire trace.
+ * Throws an 404 if trace is not found.
  */
-export function query(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryResponse> {
-  return fetchWithGet<Record<string, never>, QueryResponse>(
-    `/api/traces/${encodeURIComponent(params.traceId)}`,
+export async function query(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryResponse> {
+  const response = await fetchWithGet<Record<string, never>, QueryResponse>(
+    `/api/v2/traces/${encodeURIComponent(params.traceId)}`,
     {},
     queryOptions
   );
-}
 
-/**
- * Returns a summary report of traces that satisfy the query.
- *
- * If the serviceStats field is missing in the response, fetches all traces
- * and calculates the serviceStats.
- *
- * Tempo computes the serviceStats field during ingestion since vParquet4,
- * this fallback is required for older block formats.
- */
-export async function searchWithFallback(
-  params: SearchRequestParameters,
-  queryOptions: QueryOptions
-): Promise<SearchResponse> {
-  // Get a list of traces that satisfy the query.
-  const searchResponse = await search(params, queryOptions);
-  if (!searchResponse.traces || searchResponse.traces.length === 0) {
-    return { traces: [] };
+  // /api/v2/traces returns an empty trace if trace is not found.
+  // Throw a 404 instead.
+  if (!response.trace?.resourceSpans) {
+    throw new UserFriendlyError('Trace not found', 404);
   }
-
-  // exit early if fallback is not required (serviceStats are contained in the response)
-  if (searchResponse.traces.every((t) => t.serviceStats)) {
-    return searchResponse;
-  }
-
-  // calculate serviceStats (number of spans and errors) per service
-  return {
-    traces: await Promise.all(
-      searchResponse.traces.map(async (trace) => {
-        if (trace.serviceStats) {
-          // fallback not required, serviceStats are contained in the response
-          return trace;
-        }
-
-        const serviceStats: Record<string, ServiceStats> = {};
-        const searchTraceIDResponse = await query({ traceId: trace.traceID }, queryOptions);
-
-        // For every trace, get the full trace, and find the number of spans and errors.
-        for (const batch of searchTraceIDResponse.batches) {
-          let serviceName = 'unknown';
-          for (const attr of batch.resource?.attributes ?? []) {
-            if (attr.key === 'service.name' && 'stringValue' in attr.value) {
-              serviceName = attr.value.stringValue;
-              break;
-            }
-          }
-
-          const stats = serviceStats[serviceName] ?? { spanCount: 0 };
-          for (const scopeSpan of batch.scopeSpans) {
-            stats.spanCount += scopeSpan.spans.length;
-            for (const span of scopeSpan.spans) {
-              if (span.status?.code === otlptracev1.StatusCodeError) {
-                stats.errorCount = (stats.errorCount ?? 0) + 1;
-              }
-            }
-          }
-          serviceStats[serviceName] = stats;
-        }
-
-        return {
-          ...trace,
-          serviceStats,
-        };
-      })
-    ),
-  };
+  return response;
 }
 
 /**

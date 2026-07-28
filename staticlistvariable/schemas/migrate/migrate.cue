@@ -20,12 +20,12 @@ import (
 #grafanaVar: {
 	type: "custom" | "interval"
 	options?: [...{
-		text: string
+		text:  string
 		value: string
 	}]
-    if options == _|_ {
-      query: string
-    }
+	if options == _|_ {
+		query: string
+	}
 	...
 }
 

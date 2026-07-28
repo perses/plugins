@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
 import { ReactElement, useMemo, useState } from 'react';
 import {
   Autocomplete,
@@ -35,6 +34,7 @@ import PlusIcon from 'mdi-material-ui/Plus';
 import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
 import { ErrorAlert } from '@perses-dev/components';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { LabelFilter, LabelValueCounter, Operator } from '../../types';
 import { ListboxComponent } from '../../filter/FilterInputs';
 import { useMetricMetadata, useSeriesStates } from '../../utils';

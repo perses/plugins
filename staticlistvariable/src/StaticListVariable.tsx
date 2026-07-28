@@ -14,7 +14,7 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Autocomplete, Chip, IconButton, TextField, Typography } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import PlusCircleIcon from 'mdi-material-ui/PlusCircle';
 
 type StaticListOption = string | VariableOption;
@@ -23,7 +23,7 @@ type StaticListVariableOptions = {
   values: StaticListOption[];
 };
 
-function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVariableOptions>) {
+function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVariableOptions>): ReactElement {
   const {
     value: { values: variables = [] },
     onChange,

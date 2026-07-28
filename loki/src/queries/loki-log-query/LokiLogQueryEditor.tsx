@@ -24,6 +24,7 @@ import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/materia
 import { ReactElement, useCallback, useMemo } from 'react';
 import { produce } from 'immer';
 import { OptionsEditorControl } from '@perses-dev/components';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import { LogQLEditor } from '../../components';
 import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND, LokiDatasourceSelector, LokiClient } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
@@ -70,7 +71,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     throw new Error('Got unexpected non LokiQuery datasource selection');
   };
 
-  const handleLogsDirection = (_: React.MouseEvent, v: 'backward' | 'forward') =>
+  const handleLogsDirection = (_: React.MouseEvent, v: 'backward' | 'forward'): void =>
     onChange(
       produce(value, (draft: LokiLogQuerySpec) => {
         draft.direction = v;
@@ -78,7 +79,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     );
 
   // Immediate query execution on Enter or blur
-  const handleQueryExecute = (query: string) => {
+  const handleQueryExecute = (query: string): void => {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
@@ -128,12 +129,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
           value={query}
           onChange={handleLogsQueryChange}
           onBlur={handleQueryBlur}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
-              event.preventDefault();
-              handleQueryExecute(query);
-            }
-          }}
+          onKeyDown={createModEnterHandler(() => handleQueryExecute(query))}
           placeholder='Enter LogQL query (e.g. {job="mysql"} |= "error")'
           completionConfig={completionConfig}
           // height="120px"

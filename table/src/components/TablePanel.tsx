@@ -11,38 +11,192 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, Theme, Typography, useTheme } from '@mui/material';
 import {
+  FormatOptions,
+  formatValue,
+  Table,
+  TableCellConfigs,
+  TableColumnConfig,
+  transformData,
+  useSelection,
+} from '@perses-dev/components';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
+import {
+  ActionOptions,
+  CalculationsMap,
   PanelData,
   PanelProps,
   replaceVariablesInString,
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
-import { Table, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { formatValue, Labels, QueryDataType, TimeSeries, TimeSeriesData, transformData } from '@perses-dev/core';
-import { PaginationState, SortingState, ColumnFiltersState } from '@tanstack/react-table';
-import { useTheme, Theme, Typography, Box } from '@mui/material';
-import { ColumnSettings, TableOptions, evaluateConditionalFormatting } from '../models';
+import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
+import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
+import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
+type FilterValuesType<T> = Array<{ original: T; formatted: T }>;
+
+function parseNumericCellValue(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return undefined;
+}
+
+function isPanelData(value: unknown): value is PanelData<QueryDataType> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const candidate = value as { definition?: unknown; data?: unknown };
+  return candidate.definition !== undefined && candidate.data !== undefined;
+}
+
+function createSyntheticPanelData(value: unknown, columnName: string): PanelData<TimeSeriesData> | undefined {
+  const numericValue = parseNumericCellValue(value);
+  if (numericValue === undefined) {
+    return undefined;
+  }
+
+  const now = Date.now();
+  return {
+    definition: {
+      kind: 'TimeSeriesQuery',
+      spec: { plugin: { kind: 'PrometheusTimeSeriesQuery', spec: { query: '' } } },
+    },
+    data: {
+      timeRange: { start: new Date(now), end: new Date(now) },
+      stepMs: 1,
+      series: [{ name: columnName, values: [[now, numericValue]], labels: {} }],
+    },
+  };
+}
+
+function getGaugeNumericValue(value: unknown): number | undefined {
+  if (isPanelData(value)) {
+    const series = (value.data as TimeSeriesData)?.series;
+    const firstSeries = series?.[0];
+    if (!firstSeries?.values?.length) {
+      return undefined;
+    }
+    const calc = CalculationsMap['last-number'];
+    if (typeof calc !== 'function') {
+      return undefined;
+    }
+    const calculatedValue = calc(firstSeries.values);
+    return typeof calculatedValue === 'number' ? calculatedValue : undefined;
+  }
+
+  return parseNumericCellValue(value);
+}
+
+interface GaugeRange {
+  min: number;
+  max: number;
+}
+
+function InlineGaugeCellWithRange({
+  value,
+  range,
+  fillColor,
+  format,
+}: {
+  value?: number;
+  range?: GaugeRange;
+  fillColor?: string;
+  format?: ColumnSettings['format'];
+}): ReactElement {
+  if (value === undefined) {
+    return <></>;
+  }
+
+  let percent = 0;
+  if (range !== undefined) {
+    if (range.max === range.min) {
+      percent = 100;
+    } else {
+      percent = ((value - range.min) / (range.max - range.min)) * 100;
+    }
+  }
+  percent = Math.max(0, Math.min(100, percent));
+
+  const trackColor = 'rgba(127,127,127,0.20)';
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+      <Box sx={{ flexGrow: 1, borderRadius: 1, backgroundColor: trackColor, height: 24, overflow: 'hidden' }}>
+        <Box
+          sx={{
+            width: `${percent}%`,
+            height: '100%',
+            backgroundColor: fillColor ?? 'success.main',
+            borderRadius: 1,
+          }}
+        />
+      </Box>
+      <Typography variant="body2" sx={{ minWidth: 52, textAlign: 'right' }}>
+        {format ? formatValue(value, format) : value.toFixed(2)}
+      </Typography>
+    </Box>
+  );
+}
+
+function resolveGaugeFillColor(
+  value: unknown,
+  globalCellSettings: CellSettings[],
+  columnCellSettings: CellSettings[] | undefined
+): string | undefined {
+  let cellConfig = evaluateConditionalFormatting(value, globalCellSettings);
+  if (columnCellSettings?.length) {
+    const columnCellConfig = evaluateConditionalFormatting(value, columnCellSettings);
+    if (columnCellConfig) {
+      cellConfig = columnCellConfig;
+    }
+  }
+  return cellConfig?.backgroundColor ?? cellConfig?.textColor;
+}
+
 function generateCellContentConfig(
-  column: ColumnSettings
+  column: ColumnSettings,
+  gaugeRange?: GaugeRange,
+  globalCellSettings: CellSettings[] = []
 ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
   if (plugin !== undefined) {
     return {
-      cell: (ctx) => {
-        const panelData: PanelData<QueryDataType> | undefined = ctx.getValue();
+      cell: (ctx): ReactElement => {
+        const cellValue = ctx.getValue();
+        if (plugin.kind === 'GaugeChart') {
+          const gaugeValue = getGaugeNumericValue(cellValue);
+          const gaugeFillColor = resolveGaugeFillColor(gaugeValue, globalCellSettings, column.cellSettings);
+          return (
+            <InlineGaugeCellWithRange
+              value={gaugeValue}
+              range={gaugeRange}
+              fillColor={gaugeFillColor}
+              format={plugin.spec?.format ?? column.format}
+            />
+          );
+        }
+        const panelData = isPanelData(cellValue) ? cellValue : createSyntheticPanelData(cellValue, column.name);
         if (!panelData) return <></>;
         return <EmbeddedPanel kind={plugin.kind} spec={plugin.spec} queryResults={[panelData]} />;
       },
-      cellDescription: column.cellDescription ? () => `${column.cellDescription}` : () => '', // disable hover text
+      cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : (): string => '', // disable hover text
     };
   }
 
   return {
-    cell: (ctx) => {
+    cell: (ctx): ReactElement | string => {
       const cellValue = ctx.getValue();
       return typeof cellValue === 'number' && column.format ? formatValue(cellValue, column.format) : cellValue;
     },
@@ -51,7 +205,7 @@ function generateCellContentConfig(
 }
 
 interface ColumnFilterDropdownProps {
-  allValues: Array<string | number>;
+  allValues: FilterValuesType<string | number>;
   selectedValues: Array<string | number>;
   onFilterChange: (values: Array<string | number>) => void;
   theme: Theme;
@@ -63,7 +217,11 @@ function ColumnFilterDropdown({
   onFilterChange,
   theme,
 }: ColumnFilterDropdownProps): ReactElement {
-  const values = [...new Set(allValues)].filter((v) => v != null).sort();
+  const [searchTerm, setSearchTerm] = useState('');
+  const values = [...new Set(allValues)].filter((v) => v !== null).sort();
+  const filteredValues = searchTerm
+    ? values.filter((v) => String(v).toLowerCase().includes(searchTerm.toLowerCase()))
+    : values;
   if (values.length === 0) {
     return (
       <div
@@ -96,12 +254,29 @@ function ColumnFilterDropdown({
         overflowY: 'auto',
       }}
     >
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '6px 8px',
+          marginBottom: 8,
+          fontSize: 13,
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 4,
+          backgroundColor: theme.palette.background.default,
+          color: theme.palette.text.primary,
+          boxSizing: 'border-box',
+        }}
+      />
       <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 'bold' }}>
         <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
           <input
             type="checkbox"
             checked={selectedValues.length === values.length && values.length > 0}
-            onChange={(e) => onFilterChange(e.target.checked ? values : [])}
+            onChange={(e) => onFilterChange(e.target.checked ? values.map((v) => v.original) : [])}
             style={{ marginRight: 8 }}
           />
           <span style={{ color: theme.palette.text.primary }}>Select All ({values.length})</span>
@@ -114,7 +289,7 @@ function ColumnFilterDropdown({
           borderTop: `1px solid ${theme.palette.divider}`,
         }}
       />
-      {values.map((value, index) => (
+      {filteredValues.map((value, index) => (
         <div key={`value-${index}`} style={{ marginBottom: 4 }}>
           <label
             style={{
@@ -133,12 +308,12 @@ function ColumnFilterDropdown({
           >
             <input
               type="checkbox"
-              checked={selectedValues.includes(value)}
+              checked={selectedValues.includes(value.original)}
               onChange={(e) => {
                 if (e.target.checked) {
-                  onFilterChange([...selectedValues, value]);
+                  onFilterChange([...selectedValues, value.original]);
                 } else {
-                  onFilterChange(selectedValues.filter((v) => v !== value));
+                  onFilterChange(selectedValues.filter((v) => v !== value.original));
                 }
               }}
               style={{ marginRight: 8 }}
@@ -149,7 +324,7 @@ function ColumnFilterDropdown({
                 color: theme.palette.text.primary,
               }}
             >
-              {value === null || value === undefined || value === '' ? '(empty)' : String(value)}
+              {value === null || value === undefined || value.formatted === '' ? '(empty)' : String(value.formatted)}
             </span>
           </label>
         </div>
@@ -166,7 +341,9 @@ function ColumnFilterDropdown({
 function generateColumnConfig(
   name: string,
   columnSettings: ColumnSettings[],
-  allVariables: VariableStateMap
+  allVariables: VariableStateMap,
+  gaugeRangeByColumn: Record<string, GaugeRange>,
+  globalCellSettings: CellSettings[] = []
 ): TableColumnConfig<unknown> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
@@ -187,7 +364,7 @@ function generateColumnConfig(
         width,
         align,
         dataLink: modifiedDataLink,
-        ...generateCellContentConfig(column),
+        ...generateCellContentConfig(column, gaugeRangeByColumn[name], globalCellSettings),
       };
     }
   }
@@ -201,7 +378,7 @@ function generateColumnConfig(
 export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant' | 'range' } {
   // if any cell renders a panel plugin, perform a range query instead of an instant query
   return {
-    mode: (spec.columnSettings ?? []).some((c) => c.plugin) ? 'range' : 'instant',
+    mode: getTablePanelQueryMode(spec),
   };
 }
 
@@ -211,44 +388,55 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   const theme = useTheme();
   const allVariables = useAllVariableValues();
 
+  const selectionEnabled = spec.selection?.enabled ?? false;
+  const { selectionMap, setSelection, clearSelection } = useSelection<Record<string, unknown>, string>();
+
+  const itemActionsConfig = spec.actions ? (spec.actions as ActionOptions) : undefined;
+  const itemActionsListConfig =
+    itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : [];
+
+  const { getItemActionButtons, confirmDialog, actionButtons } = useSelectionItemActions({
+    actions: itemActionsListConfig,
+    variableState: allVariables,
+  });
+
+  const filteredDataRef = useRef<Array<Record<string, unknown>>>([]);
+
+  // Convert selectionMap to TanStack's RowSelectionState format
+  const rowSelection = useMemo((): RowSelectionState => {
+    const result: RowSelectionState = {};
+    selectionMap.forEach((_, id) => {
+      result[id] = true;
+    });
+    return result;
+  }, [selectionMap]);
+
+  const handleRowSelectionChange = useCallback(
+    (newRowSelection: RowSelectionState) => {
+      const newSelection: Array<{ id: string; item: Record<string, unknown> }> = [];
+      for (const [id, isSelected] of Object.entries(newRowSelection)) {
+        if (isSelected) {
+          const index = parseInt(id, 10);
+          if (filteredDataRef.current[index] !== undefined) {
+            newSelection.push({ id, item: filteredDataRef.current[index] });
+          }
+        }
+      }
+
+      if (newSelection.length === 0) {
+        clearSelection();
+      } else {
+        setSelection(newSelection);
+      }
+    },
+    [setSelection, clearSelection]
+  );
+
   // TODO: handle other query types
-  const queryMode = getTablePanelQueryOptions(spec).mode;
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
-    // Transform query results to a tabular format:
-    // [ { timestamp: 123, value: 456, labelName1: labelValue1 }, ... ]
-    return queryResults
-      .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
-        data.data.series.map((ts: TimeSeries) => ({ data, ts, queryIndex }))
-      )
-      .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
-        if (ts.values[0] === undefined) {
-          return { ...ts.labels };
-        }
-
-        // If there are multiple queries, we need to add the query index to the value key and label key to avoid conflicts
-        const valueColumnName = queryResults.length === 1 ? 'value' : `value #${queryIndex + 1}`;
-        const labels =
-          queryResults.length === 1
-            ? ts.labels
-            : Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
-                if (key) acc[`${key} #${queryIndex + 1}`] = value;
-                return acc;
-              }, {} as Labels);
-
-        // If the cell visualization is a panel plugin, filter the data by the current series
-        const columnValue = (spec.columnSettings ?? []).find((x) => x.name === valueColumnName)?.plugin
-          ? { ...data, data: { ...data.data, series: data.data.series.filter((s) => s === ts) } }
-          : ts.values[0][1];
-
-        if (queryMode === 'instant') {
-          // Timestamp is not indexed as it will be the same for all queries
-          return { timestamp: ts.values[0][0], [valueColumnName]: columnValue, ...labels };
-        } else {
-          // Don't add a timestamp for range queries
-          return { [valueColumnName]: columnValue, ...labels };
-        }
-      });
-  }, [queryResults, queryMode, spec.columnSettings]);
+    // Transform query results to a tabular format using shared utility
+    return buildRawTableData(queryResults, spec);
+  }, [queryResults, spec]);
 
   // Transform will be applied by their orders on the original data
   const data = useMemo(() => transformData(rawData, spec.transforms ?? []), [rawData, spec.transforms]);
@@ -264,19 +452,82 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       }
     }
 
+    // Include column names from columnSettings so that columns with no data
+    // are still extended with undefined for cellSettings evaluation (e.g. N/A for null)
+    for (const col of spec.columnSettings ?? []) {
+      if (!result.includes(col.name)) {
+        result.push(col.name);
+      }
+    }
+
     return result;
-  }, [data]);
+  }, [data, spec.columnSettings]);
 
-  // fetch unique values for each column of filtering
+  const columnsFormat = useMemo(() => {
+    const columnsFormat: Record<string, FormatOptions> = {};
+    const settings = spec?.columnSettings;
+    if (settings) {
+      for (let i = 0; i < settings.length; i++) {
+        const { name, format } = settings[i] || {};
+        if (name && format) {
+          columnsFormat[name] = format;
+        }
+      }
+    }
+
+    return columnsFormat;
+  }, [spec]);
+
   const columnUniqueValues = useMemo(() => {
-    const uniqueValues: Record<string, Array<string | number>> = {};
+    const uniqueValues: Record<string, FilterValuesType<string | number>> = {};
 
-    keys.forEach((key) => {
-      const values = data.map((row) => row[key]).filter((val) => val !== null && val !== undefined && val !== '');
-      uniqueValues[key] = Array.from(new Set(values as Array<string | number>));
-    });
+    for (const key of keys) {
+      const formatOption = columnsFormat?.[key];
+      uniqueValues[key] = [];
+      const usedValues: Map<string, true> = new Map();
+      for (const row of data) {
+        const val = row[key];
+        if (val === '' || val === null || val === undefined) {
+          continue;
+        }
+        if (usedValues.get(String(val))) {
+          continue;
+        }
 
+        if (typeof val === 'string' || typeof val === 'number') {
+          uniqueValues[key].push({
+            original: val,
+            formatted: formatOption && typeof val === 'number' ? formatValue(val, formatOption) : val,
+          });
+          usedValues.set(String(val), true);
+        }
+      }
+    }
     return uniqueValues;
+  }, [data, keys, columnsFormat]);
+
+  const gaugeRangeByColumn = useMemo(() => {
+    const result: Record<string, GaugeRange> = {};
+
+    for (const key of keys) {
+      let min = Number.POSITIVE_INFINITY;
+      let max = Number.NEGATIVE_INFINITY;
+
+      for (const row of data) {
+        const numericValue = getGaugeNumericValue(row[key]);
+        if (numericValue === undefined) {
+          continue;
+        }
+        min = Math.min(min, numericValue);
+        max = Math.max(max, numericValue);
+      }
+
+      if (min !== Number.POSITIVE_INFINITY && max !== Number.NEGATIVE_INFINITY) {
+        result[key] = { min, max };
+      }
+    }
+
+    return result;
   }, [data, keys]);
 
   // Generate columns and map each column accessor to its settings index and data key
@@ -288,7 +539,13 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     for (const columnSetting of spec.columnSettings ?? []) {
       if (customizedColumns.has(columnSetting.name)) continue; // Skip duplicates
 
-      const columnConfig = generateColumnConfig(columnSetting.name, spec.columnSettings ?? [], allVariables);
+      const columnConfig = generateColumnConfig(
+        columnSetting.name,
+        spec.columnSettings ?? [],
+        allVariables,
+        gaugeRangeByColumn,
+        spec.cellSettings ?? []
+      );
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
         customizedColumns.add(columnSetting.name);
@@ -299,7 +556,13 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     if (!spec.defaultColumnHidden) {
       for (const key of keys) {
         if (!customizedColumns.has(key)) {
-          const columnConfig = generateColumnConfig(key, spec.columnSettings ?? [], allVariables);
+          const columnConfig = generateColumnConfig(
+            key,
+            spec.columnSettings ?? [],
+            allVariables,
+            gaugeRangeByColumn,
+            spec.cellSettings ?? []
+          );
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
           }
@@ -308,7 +571,28 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return columns;
-  }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables]);
+  }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables, gaugeRangeByColumn, spec.cellSettings]);
+
+  // Filtering state — declared before cellConfigs so filteredData is available for cell config evaluation
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  // filter data based on the current filters
+  const filteredData = useMemo(() => {
+    if (!spec.enableFiltering || columnFilters.length === 0) {
+      return data;
+    }
+
+    return data.filter((row) => {
+      return columnFilters.every((filter) => {
+        const value = row[filter.id];
+        const filterValues = filter.value as Array<string | number>;
+
+        if (!filterValues || filterValues.length === 0) return true;
+
+        return filterValues.includes(value as string | number);
+      });
+    });
+  }, [data, columnFilters, spec.enableFiltering]);
 
   // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
   const cellConfigs: TableCellConfigs = useMemo(() => {
@@ -320,7 +604,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     const result: TableCellConfigs = {};
 
     let index = 0;
-    for (const row of data) {
+    for (const row of filteredData) {
       // Transforming key to object to extend the row with undefined values if the key is not present
       // for checking the cell config "Misc" condition with "null"
       const keysAsObj = keys.reduce(
@@ -359,7 +643,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return result;
-  }, [data, keys, spec.cellSettings, spec.columnSettings]);
+  }, [filteredData, keys, spec.cellSettings, spec.columnSettings]);
 
   function generateDefaultSortingState(): SortingState {
     return (
@@ -376,8 +660,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
 
-  // Filtering state
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [filterAnchorEl, setFilterAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
   const [openFilterColumn, setOpenFilterColumn] = useState<string | null>(null);
 
@@ -388,7 +670,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   };
 
   // update column filter
-  const updateColumnFilter = (columnId: string, values: Array<string | number>) => {
+  const updateColumnFilter = (columnId: string, values: Array<string | number>): void => {
     const newFilters = columnFilters.filter((f) => f.id !== columnId);
     if (values.length > 0) {
       newFilters.push({ id: columnId, value: values });
@@ -397,14 +679,14 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   };
 
   // Handle filter clicks
-  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string) => {
+  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string): void => {
     event.preventDefault();
     event.stopPropagation();
     setFilterAnchorEl({ ...filterAnchorEl, [columnId]: event.currentTarget });
     setOpenFilterColumn(columnId);
   };
 
-  const handleFilterClose = () => {
+  const handleFilterClose = (): void => {
     setFilterAnchorEl({});
     setOpenFilterColumn(null);
   };
@@ -413,7 +695,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   useEffect(() => {
     if (!openFilterColumn) return;
 
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (e: MouseEvent): void => {
       const target = e.target as Element;
       if (!target.closest('[data-filter-dropdown]') && !target.closest('button')) {
         handleFilterClose();
@@ -424,33 +706,14 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       document.addEventListener('click', handleClick);
     }, 100);
 
-    return () => {
+    return (): void => {
       clearTimeout(timer);
       document.removeEventListener('click', handleClick);
     };
   }, [openFilterColumn]);
 
-  // filter data based on the current filters
-  const filteredData = useMemo(() => {
-    let filtered = [...data];
-
-    // apply column filters if enabled
-    if (spec.enableFiltering && columnFilters.length > 0) {
-      filtered = filtered.filter((row) => {
-        return columnFilters.every((filter) => {
-          const value = row[filter.id];
-          const filterValues = filter.value as Array<string | number>;
-
-          if (!filterValues || filterValues.length === 0) return true; // No filter values means no filtering
-
-          // Check if the row value is in the selected filter values
-          return filterValues.includes(value as string | number);
-        });
-      });
-    }
-
-    return filtered;
-  }, [data, columnFilters, spec.enableFiltering]);
+  // Keep ref in sync with filtered data for use in selection handler
+  filteredDataRef.current = filteredData;
 
   const [pagination, setPagination] = useState<PaginationState | undefined>(
     spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
@@ -486,6 +749,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   return (
     <>
+      {confirmDialog}
       {spec.enableFiltering && (
         <div
           style={{
@@ -592,6 +856,11 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         onSortingChange={setSorting}
         pagination={pagination}
         onPaginationChange={setPagination}
+        checkboxSelection={selectionEnabled}
+        rowSelection={rowSelection}
+        onRowSelectionChange={handleRowSelectionChange}
+        getItemActions={({ id, data }) => getItemActionButtons({ id, data: data as Record<string, unknown> })}
+        hasItemActions={actionButtons && actionButtons.length > 0}
       />
     </>
   );

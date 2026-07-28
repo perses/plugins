@@ -49,7 +49,8 @@ const createClient: DatasourcePlugin<PyroscopeDatasourceSpec, PyroscopeClient>['
       searchLabelNames(params, { datasourceUrl, headers: headers ?? specHeaders }, body),
     searchLabelValues: (params, headers, body) =>
       searchLabelValues(params, { datasourceUrl, headers: headers ?? specHeaders }, body),
-    searchServices: (params, headers) => searchServices(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    searchServices: (params, headers, body) =>
+      searchServices(params, { datasourceUrl, headers: headers ?? specHeaders }, body),
   };
 };
 

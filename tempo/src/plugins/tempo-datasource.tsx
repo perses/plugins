@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { TempoClient, query, search, searchTagValues, searchTags, searchWithFallback } from '../model/tempo-client';
+import { TempoClient, query, search, searchTagValues, searchTags } from '../model/tempo-client';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasourceEditor } from './TempoDatasourceEditor';
 
@@ -37,8 +37,6 @@ const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createCl
     },
     query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders }),
     search: (params, headers) => search(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    searchWithFallback: (params, headers) =>
-      searchWithFallback(params, { datasourceUrl, headers: headers ?? specHeaders }),
     searchTags: (params, headers) => searchTags(params, { datasourceUrl, headers: headers ?? specHeaders }),
     searchTagValues: (params, headers) => searchTagValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
   };

@@ -28,7 +28,9 @@ type ClickHouseQuerySpec = {
  * changes with the overall spec value once the input is blurred to prevent re-running queries in the panel's preview
  * every time the user types.
  */
-export function useQueryState<T extends ClickHouseQuerySpec>(props: OptionsEditorProps<T>): {
+export function useQueryState<T extends ClickHouseQuerySpec>(
+  props: OptionsEditorProps<T>
+): {
   query: string;
   handleQueryChange: (e: string) => void;
   handleQueryBlur: () => void;

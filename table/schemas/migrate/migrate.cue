@@ -22,7 +22,16 @@ import (
 )
 
 #grafanaType: "table" | "table-old"
-#panel: _
+#panel:       _
+
+// Build "Value #X" → "value #N" mapping from the targets array.
+// In Grafana, multi-query table panels name value columns by refId (e.g. "Value #A", "Value #B").
+// In Perses, the equivalent columns are named by 1-based query index (e.g. "value #1", "value #2").
+_valueColumnRenameMap: {
+	for i, target in (*#panel.targets | []) if target.refId != _|_ {
+		"Value #\(target.refId)": "value #\(i+1)"
+	}
+}
 
 // Function to rename anonymous fields that Perses names differently than Grafana
 _renameAnonymousFields: {
@@ -30,14 +39,21 @@ _renameAnonymousFields: {
 	output: [
 		if #var == "Time" {"timestamp"},
 		if #var == "Value" {"value"},
+		if (*_valueColumnRenameMap[#var] | null) != null {_valueColumnRenameMap[#var]},
 		#var,
 	][0]
 }
 
 // Function to return the last key of a map
 _getLastKey: {
-    #map: struct.MinFields(1)
-    output: [for k, _ in #map {k}][len(#map) - 1]
+	#map: struct.MinFields(1)
+	output: [for k, _ in #map {k}][len(#map)-1]
+}
+
+// Function to return the last value of a map
+_getLastValue: {
+	#map: struct.MinFields(1)
+	output: [for _, v in #map {v}][len(#map)-1]
 }
 
 kind: "Table"
@@ -53,16 +69,34 @@ spec: {
 		}
 
 		// Retrieve the settings defined in transformations
-		_columnSettingsFromTansform: {
+		// We collect possible values first, then resolve to the last one to mimic Grafana precedence.
+		_columnSettingsFromTransformRaw: {
 			for transformation in (*#panel.transformations | []) if transformation.id == "organize" {
 				for columnName, columnIndex in (*transformation.options.indexByName | {}) {
-					"\({_renameAnonymousFields & {#var: columnName}}.output)": index: columnIndex
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": indexes: "\(columnIndex)": true
 				}
 				for columnName, hidden in (*transformation.options.excludeByName | {}) {
-					"\({_renameAnonymousFields & {#var: columnName}}.output)": hide: hidden
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": hides: "\(hidden)": true
 				}
 				for columnName, displayName in (*transformation.options.renameByName | {}) {
-					"\({_renameAnonymousFields & {#var: columnName}}.output)": header: displayName
+					"\({_renameAnonymousFields & {#var: columnName}}.output)": headers: "\(displayName)": true
+				}
+			}
+		}
+		_columnSettingsFromTransform: {
+			for name, settings in _columnSettingsFromTransformRaw {
+				"\(name)": {
+					if settings.indexes != _|_ if len(settings.indexes) > 0 {
+						_index: {_getLastKey & {#map: settings.indexes}}.output
+						index: strconv.Atoi(_index)
+					}
+					if settings.hides != _|_ if len(settings.hides) > 0 {
+						_hide: {_getLastKey & {#map: settings.hides}}.output
+						hide: _hide == "true"
+					}
+					if settings.headers != _|_ if len(settings.headers) > 0 {
+						header: {_getLastKey & {#map: settings.headers}}.output
+					}
 				}
 			}
 		}
@@ -72,7 +106,7 @@ spec: {
 			#var: string
 			output: [
 				// Check if the column was renamed by a transform
-				for k, v in _columnSettingsFromTansform if #var == (*v.header | null) { k },
+				for k, v in _columnSettingsFromTransform if #var == (*v.header | null) {k},
 				{_renameAnonymousFields & {#var: this.#var}}.output,
 			][0]
 		}
@@ -88,6 +122,30 @@ spec: {
 					if property.id == "custom.width" {
 						// Same principle for width
 						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": widths: (*"\(property.value)" | "auto"): true
+					}
+					if property.id == "links" {
+						for link in property.value {
+							"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": dataLinks: "\(link.url)": {
+								url:        link.url
+								openNewTab: *link.targetBlank | false
+								if link.title != _|_ {
+									title: link.title
+								}
+							}
+						}
+					}
+					if property.id == "unit" {
+						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": units: "\(property.value)": true
+					}
+					if property.id == "noValue" {
+						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": noValues: "\(property.value)": true
+					}
+					if property.id == "mappings" {
+						for mapping in property.value if mapping.type == "value" {
+							for key, option in mapping.options {
+								"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": valueMappings: "\(key)": option
+							}
+						}
 					}
 					// NB: enrich this part when this is done https://github.com/perses/perses/issues/2852
 				}
@@ -109,19 +167,60 @@ spec: {
 							strconv.Atoi(_width),
 						][0]
 					}
+					if settings.dataLinks != _|_ {
+						dataLink: {_getLastValue & {#map: settings.dataLinks}}.output
+					}
+
+					// Unit override → format (only emit if unit is recognized by Perses)
+					if settings.units != _|_ if len(settings.units) > 0 {
+						_unitStr: {_getLastKey & {#map: settings.units}}.output
+						_resolvedUnit: *commonMigrate.#mapping.unit[_unitStr] | null
+						if _resolvedUnit != null {
+							format: unit: _resolvedUnit
+						}
+					}
+
+					// noValue + valueMappings → cellSettings
+					_noValueEntries: [
+						if settings.noValues != _|_ if len(settings.noValues) > 0 {{
+							condition: {
+								kind: "Misc"
+								spec: value: "null"
+							}
+							text: {_getLastKey & {#map: settings.noValues}}.output
+						}},
+					]
+					_mappingEntries: [
+						for key, option in (*settings.valueMappings | {}) {{
+							condition: {
+								kind: "Value"
+								spec: value: key
+							}
+							if option.text != _|_ {
+								text: option.text
+							}
+							if option.color != _|_ {
+								backgroundColor: *commonMigrate.#mapping.color[option.color] | option.color
+							}
+						}},
+					]
+					_columnCellSettings: list.Concat([_noValueEntries, _mappingEntries])
+					if len(_columnCellSettings) > 0 {
+						cellSettings: _columnCellSettings
+					}
 				}
 			}
-			for name, settings in _columnSettingsFromTansform {
+			for name, settings in _columnSettingsFromTransform {
 				"\(name)": [
-				  // We have to hande potential name conflicts due to the overrides.
-				  // In Grafana field overrides take precedence over the organize transformations.
-				  if (*_columnSettingsFromOverrides[name].headers | null) != null {
-					  // Copy all fields except header
-					  for fieldName, fieldValue in settings if fieldName != "header" {
-						"\(fieldName)": fieldValue
-					  }
-				  },
-				  settings
+					// We have to hande potential name conflicts due to the overrides.
+					// In Grafana field overrides take precedence over the organize transformations.
+					if (*_columnSettingsFromOverrides[name].headers | null) != null {
+						// Copy all fields except header
+						for fieldName, fieldValue in settings if fieldName != "header" {
+							"\(fieldName)": fieldValue
+						}
+					},
+					settings,
 				][0]
 			}
 		}
@@ -135,15 +234,15 @@ spec: {
 				name: columnName
 				// Copy all fields except index
 				for fieldName, fieldValue in settings if fieldName != "index" {
-				  "\(fieldName)": fieldValue
+					"\(fieldName)": fieldValue
 				}
 			}],
 			[for columnName, settings in _columnSettingsMerged if settings.index == _|_ {
 				name: columnName
 				settings
-			}]
+			}],
 		])
-		
+
 		// Using flatten to get rid of the nested array for "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
 		#cellSettings: list.FlattenN([
@@ -164,7 +263,7 @@ spec: {
 						}
 					}]
 				}
-				if mapping.type != "value" { // else
+				if mapping.type != "value" {
 					condition: [//switch
 						if mapping.type == "range" {
 							kind: "Range"
@@ -197,12 +296,13 @@ spec: {
 					if mapping.options.result.text != _|_ {
 						text: mapping.options.result.text
 					}
+
 					if mapping.options.result.color != _|_ {
 						backgroundColor: *commonMigrate.#mapping.color[mapping.options.result.color] | mapping.options.result.color
-					}
+					} // else
 				}
 			},
-		], 1),
+		], 1)
 		if len(#cellSettings) != 0 {
 			cellSettings: #cellSettings
 		}

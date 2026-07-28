@@ -1,0 +1,93 @@
+/* Light mode defaults */
+:root {
+  --ansi-black:          #000000;
+  --ansi-red:            #cc0000;
+  --ansi-green:          #00aa00;
+  --ansi-yellow:         #aa5500;
+  --ansi-blue:           #0000aa;
+  --ansi-magenta:        #aa00aa;
+  --ansi-cyan:           #00aaaa;
+  --ansi-white:          #aaaaaa;
+  --ansi-bright-black:   #555555;
+  --ansi-bright-red:     #ff5555;
+  --ansi-bright-green:   #55ff55;
+  --ansi-bright-yellow:  #ffff55;
+  --ansi-bright-blue:    #5555ff;
+  --ansi-bright-magenta: #ff55ff;
+  --ansi-bright-cyan:    #55ffff;
+  --ansi-bright-white:   #ffffff;
+}
+
+/* Dark mode overrides — MUI sets [data-mui-color-scheme="dark"] on the root,
+   falling back to OS preference via prefers-color-scheme */
+[data-mui-color-scheme="dark"],
+.dark-mode {
+  --ansi-black:          #555555;
+  --ansi-red:            #ff6b6b;
+  --ansi-green:          #69db7c;
+  --ansi-yellow:         #ffd43b;
+  --ansi-blue:           #74c0fc;
+  --ansi-magenta:        #da77f2;
+  --ansi-cyan:           #66d9e8;
+  --ansi-white:          #ffffff;
+  --ansi-bright-black:   #888888;
+  --ansi-bright-red:     #ff8787;
+  --ansi-bright-green:   #8ce99a;
+  --ansi-bright-yellow:  #ffe066;
+  --ansi-bright-blue:    #a5d8ff;
+  --ansi-bright-magenta: #e599f7;
+  --ansi-bright-cyan:    #99e9f2;
+  --ansi-bright-white:   #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mui-color-scheme="light"]) {
+    --ansi-black:          #555555;
+    --ansi-red:            #ff6b6b;
+    --ansi-green:          #69db7c;
+    --ansi-yellow:         #ffd43b;
+    --ansi-blue:           #74c0fc;
+    --ansi-magenta:        #da77f2;
+    --ansi-cyan:           #66d9e8;
+    --ansi-white:          #ffffff;
+    --ansi-bright-black:   #888888;
+    --ansi-bright-red:     #ff8787;
+    --ansi-bright-green:   #8ce99a;
+    --ansi-bright-yellow:  #ffe066;
+    --ansi-bright-blue:    #a5d8ff;
+    --ansi-bright-magenta: #e599f7;
+    --ansi-bright-cyan:    #99e9f2;
+    --ansi-bright-white:   #ffffff;
+  }
+}
+
+/* Foreground colors */
+.ansi-black-fg          { color: var(--ansi-black); }
+.ansi-red-fg            { color: var(--ansi-red); }
+.ansi-green-fg          { color: var(--ansi-green); }
+.ansi-yellow-fg         { color: var(--ansi-yellow); }
+.ansi-blue-fg           { color: var(--ansi-blue); }
+.ansi-magenta-fg        { color: var(--ansi-magenta); }
+.ansi-cyan-fg           { color: var(--ansi-cyan); }
+.ansi-white-fg          { color: var(--ansi-white); }
+.ansi-bright-black-fg   { color: var(--ansi-bright-black); }
+.ansi-bright-red-fg     { color: var(--ansi-bright-red); }
+.ansi-bright-green-fg   { color: var(--ansi-bright-green); }
+.ansi-bright-yellow-fg  { color: var(--ansi-bright-yellow); }
+.ansi-bright-blue-fg    { color: var(--ansi-bright-blue); }
+.ansi-bright-magenta-fg { color: var(--ansi-bright-magenta); }
+.ansi-bright-cyan-fg    { color: var(--ansi-bright-cyan); }
+.ansi-bright-white-fg   { color: var(--ansi-bright-white); }
+
+/* Background colors */
+.ansi-black-bg          { background-color: var(--ansi-black); }
+.ansi-red-bg            { background-color: var(--ansi-red); }
+.ansi-green-bg          { background-color: var(--ansi-green); }
+.ansi-yellow-bg         { background-color: var(--ansi-yellow); }
+.ansi-blue-bg           { background-color: var(--ansi-blue); }
+.ansi-magenta-bg        { background-color: var(--ansi-magenta); }
+.ansi-cyan-bg           { background-color: var(--ansi-cyan); }
+.ansi-white-bg          { background-color: var(--ansi-white); }
+
+/* Text decoration */
+.ansi-bold              { font-weight: bold; }

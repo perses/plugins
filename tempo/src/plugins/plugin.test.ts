@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec } from '@perses-dev/core';
 import { TraceQueryContext } from '@perses-dev/plugin-system';
+import { DatasourceSpec } from '@perses-dev/spec';
 import { MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_DATA_SEARCHRESULT, MOCK_TRACE_RESPONSE_SMALL } from '../test';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasource } from './tempo-datasource';
@@ -26,7 +26,7 @@ const datasource: TempoDatasourceSpec = {
 
 const tempoStubClient = TempoDatasource.createClient(datasource, {});
 tempoStubClient.query = jest.fn(async () => MOCK_TRACE_RESPONSE_SMALL);
-tempoStubClient.searchWithFallback = jest.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
+tempoStubClient.search = jest.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
 
 const getDatasourceClient: jest.Mock = jest.fn(() => {
   return tempoStubClient;

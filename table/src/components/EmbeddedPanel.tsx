@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { PanelData } from '@perses-dev/plugin-system';
-import { QueryDataType, UnknownSpec } from '@perses-dev/core';
 import { PanelPluginLoader } from '@perses-dev/dashboards';
 import useResizeObserver from 'use-resize-observer';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { ReactElement } from 'react';
+import { QueryDataType, UnknownSpec } from '@perses-dev/spec';
 
 interface EmbeddedPanelProps {
   kind: string;
@@ -23,7 +24,7 @@ interface EmbeddedPanelProps {
   queryResults: Array<PanelData<QueryDataType>>;
 }
 
-export function EmbeddedPanel({ kind, spec, queryResults }: EmbeddedPanelProps) {
+export function EmbeddedPanel({ kind, spec, queryResults }: EmbeddedPanelProps): ReactElement {
   const { ref, width = 1, height = 1 } = useResizeObserver<HTMLDivElement>();
   return (
     <div ref={ref} style={{ height: '100%' }}>

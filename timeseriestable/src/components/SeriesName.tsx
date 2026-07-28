@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Labels } from '@perses-dev/core';
 import { ReactElement, MouseEvent } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Typography } from '@mui/material';
+import { Labels } from '@perses-dev/spec';
 
 interface SeriesNameProps {
   name: string;

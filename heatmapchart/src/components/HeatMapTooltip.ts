@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { css, Theme } from '@mui/material';
-import { getDateAndTime } from '@perses-dev/components';
-import { FormatOptions, formatValue } from '@perses-dev/core';
+import { FormatOptions, formatValue, getDateAndTime } from '@perses-dev/components';
 import { HeatMapData } from './HeatMapChart';
 
 interface CustomTooltipProps {
@@ -21,7 +20,6 @@ interface CustomTooltipProps {
   label: string;
   marker: string;
   xAxisCategories: number[];
-  yAxisCategories: string[];
   theme: Theme;
   yAxisFormat?: FormatOptions;
   countFormat?: FormatOptions;
@@ -32,13 +30,12 @@ export function generateTooltipHTML({
   label,
   marker,
   xAxisCategories,
-  yAxisCategories,
   theme,
   yAxisFormat,
   countFormat,
 }: CustomTooltipProps): string {
-  const [x, y] = data;
-  const xAxisLabel = xAxisCategories[x];
+  const [xIndex, yLower, yUpper] = data;
+  const xAxisLabel = xAxisCategories[xIndex];
 
   const { formattedDate, formattedTime } = getDateAndTime(xAxisLabel);
 
@@ -57,14 +54,12 @@ export function generateTooltipHTML({
     margin-right: 16px;
   `;
 
-  const lowerBound = parseFloat(yAxisCategories[y]!);
-  const upperBound = yAxisCategories[y + 1]
-    ? parseFloat(yAxisCategories[y + 1]!)
-    : parseFloat(yAxisCategories[y]!) + parseFloat(yAxisCategories[y]!) - parseFloat(yAxisCategories[y - 1]!); // Top cell, upper bound need to be calculated from previous cell
+  const lowerBound = yLower;
+  const upperBound = yUpper;
 
   return `
     <div>
-      <div style="${tooltipHeader.styles}">${formattedDate} ${formattedTime}</div>
+      <div style="${tooltipHeader.styles}">${formattedDate} - ${formattedTime}</div>
       <div style="${tooltipContentStyles.styles}">
         <div style="${labelStyles.styles}">
           ${marker}

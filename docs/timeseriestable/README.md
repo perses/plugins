@@ -2,6 +2,14 @@
 
 The Time Series Table plugin displays time series data in a tabular format in Perses dashboards. This panel plugin provides a structured view of time series data with columns for timestamps and values.
 
+![TimeSeriesTable example](./timeseriestable.png)
+
+## Main customizations
+
+- **Item actions**: add row/item selection actions to trigger links or interactions from selected items.
+
+## References
+
 See also technical docs related to this plugin:
 
 - [Data model](./model.md)

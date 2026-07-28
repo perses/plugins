@@ -11,22 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables } from '@perses-dev/plugin-system';
-import { LogEntry, LogData } from '@perses-dev/core';
-import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
-import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
+import { replaceVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
+import { LogData, LogEntry } from '@perses-dev/spec';
+import {
+  ClickHouseClient,
+  ClickHouseQueryResponse,
+  formatClickHouseDateTime,
+  replaceTimeRangePlaceholders,
+} from '../../model/click-house-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { LogQueryPlugin } from './log-query-plugin-interface';
+import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 
 function flattenObject(
-  obj: Record<string, any>,
+  obj: Record<string, unknown>,
   parentKey = '',
-  result: Record<string, any> = {}
-): Record<string, any> {
+  result: Record<string, unknown> = {}
+): Record<string, unknown> {
   for (const [key, value] of Object.entries(obj)) {
     const newKey = parentKey ? `${parentKey}.${key}` : key;
     if (value && typeof value === 'object' && !Array.isArray(value)) {
-      flattenObject(value, newKey, result);
+      flattenObject(value as Record<string, unknown>, newKey, result);
     } else {
       result[newKey] = value;
     }
@@ -37,13 +41,13 @@ function flattenObject(
 
 function convertStreamsToLogs(streams: LogEntry[]): LogData {
   const entries: LogEntry[] = streams.map((entry) => {
-    const flattened = flattenObject(entry);
+    const flattened = flattenObject(entry as unknown as Record<string, unknown>);
 
-    if (!flattened.Timestamp && flattened.log_time) {
-      flattened.Timestamp = flattened.log_time;
+    if (!flattened['Timestamp'] && flattened['log_time']) {
+      flattened['Timestamp'] = flattened['log_time'];
     }
 
-    const sortedEntry: Record<string, any> = {};
+    const sortedEntry: Record<string, unknown> = {};
     Object.keys(flattened)
       .sort((a, b) => a.localeCompare(b))
       .forEach((key) => {
@@ -56,8 +60,8 @@ function convertStreamsToLogs(streams: LogEntry[]): LogData {
       .join(' ');
 
     return {
-      timestamp: sortedEntry?.Timestamp,
-      labels: sortedEntry,
+      timestamp: sortedEntry?.['Timestamp'] as unknown as number,
+      labels: sortedEntry as Record<string, string>,
       line,
     } as LogEntry;
   });
@@ -83,18 +87,21 @@ export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLo
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;
+  const startTime = formatClickHouseDateTime(start);
+  const endTime = formatClickHouseDateTime(end);
+  const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
 
   const response: ClickHouseQueryResponse = await client.query({
-    start: start.getTime().toString(),
-    end: end.getTime().toString(),
-    query,
+    start: startTime,
+    end: endTime,
+    query: executedQueryString,
   });
 
   return {
     timeRange: { start, end },
-    logs: convertStreamsToLogs(response.data),
+    logs: convertStreamsToLogs(response.data as LogEntry[]),
     metadata: {
-      executedQueryString: query,
+      executedQueryString,
     },
   };
 };

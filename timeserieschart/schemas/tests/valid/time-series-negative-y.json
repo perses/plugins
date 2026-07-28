@@ -1,0 +1,11 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "querySettings": [
+      {
+        "queryIndex": 0,
+        "negativeY": true
+      }
+    ]
+  }
+}

@@ -71,6 +71,36 @@ bar.WithMode(bar.PercentageMode)
 
 Define the chart mode.
 
+### WithOrientation
+
+```golang
+import bar "github.com/perses/plugins/barchart/sdk/go"
+
+bar.WithOrientation(bar.VerticalOrientation)
+```
+
+Define the chart orientation.
+
+### WithGroupBy
+
+```golang
+import bar "github.com/perses/plugins/barchart/sdk/go"
+
+bar.WithGroupBy([]string{"job", "instance"})
+```
+
+Define label keys used to group time series.
+
+### WithStacked
+
+```golang
+import bar "github.com/perses/plugins/barchart/sdk/go"
+
+bar.WithStacked(true)
+```
+
+Enable or disable stacked rendering for grouped bars.
+
 ## Example
 
 ```golang
@@ -94,6 +124,9 @@ func main() {
 					}),
 					bar.SortingBy(bar.AscSort),
 					bar.WithMode(bar.PercentageMode),
+					bar.WithOrientation(bar.VerticalOrientation),
+					bar.WithGroupBy([]string{"job"}),
+					bar.WithStacked(true),
 				),
 			),
 		),

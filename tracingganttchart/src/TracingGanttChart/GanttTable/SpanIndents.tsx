@@ -40,13 +40,17 @@ export function SpanIndents(props: SpanIndentsProps): ReactElement {
   const handleToggleClick = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation();
-      if (collapsedSpans.includes(span.spanId)) {
-        setCollapsedSpans(collapsedSpans.filter((spanId) => spanId !== span.spanId));
-      } else {
-        setCollapsedSpans([...collapsedSpans, span.spanId]);
-      }
+      setCollapsedSpans((prev) => {
+        const next = new Set(prev);
+        if (next.has(span.spanId)) {
+          next.delete(span.spanId);
+        } else {
+          next.add(span.spanId);
+        }
+        return next;
+      });
     },
-    [span, collapsedSpans, setCollapsedSpans]
+    [span, setCollapsedSpans]
   );
 
   const handleIconMouseEnter = useCallback(() => {
@@ -78,7 +82,7 @@ export function SpanIndents(props: SpanIndentsProps): ReactElement {
         >
           {i === spans.length - 1 &&
             span.childSpans.length > 0 &&
-            (collapsedSpans.includes(span.spanId) ? (
+            (collapsedSpans.has(span.spanId) ? (
               <ChevronRightIcon titleAccess="expand" onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />
             ) : (
               <ChevronDownIcon titleAccess="collapse" onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />

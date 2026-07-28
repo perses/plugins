@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+import { TraceTableItemSelectionActionsEditor } from './TraceTableItemSelectionActionsEditor';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table-model';
 
@@ -20,6 +21,7 @@ import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table
  */
 export const TraceTable: PanelPlugin<TraceTableOptions, TraceTablePanelProps> = {
   PanelComponent: TraceTablePanel,
+  panelOptionsEditorComponents: [{ label: 'Item Actions', content: TraceTableItemSelectionActionsEditor }],
   supportedQueryTypes: ['TraceQuery'],
   createInitialOptions: createInitialTraceTableOptions,
 };

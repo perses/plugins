@@ -14,8 +14,8 @@
 import { PanelProps } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { TraceData } from '@perses-dev/core';
 import { ReactElement } from 'react';
+import { TraceData } from '@perses-dev/spec';
 import { DataTable } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 

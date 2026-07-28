@@ -1,0 +1,7 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": {
+    "query": "source=otel-logs-* | where traceId='abc123'",
+    "disableTimeFilter": true
+  }
+}

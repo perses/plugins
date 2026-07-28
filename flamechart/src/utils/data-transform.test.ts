@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StackTrace } from '@perses-dev/core';
+import { StackTrace } from '@perses-dev/spec';
 import { FlameChartSample as Sample } from './data-model';
 import { filterStackTraceById, buildSamples } from './data-transform';
 import { getSpanColor } from './palette-gen';
 
 // define the structuredClone function
-global.structuredClone = (val) => JSON.parse(JSON.stringify(val));
+global.structuredClone = (val): unknown => JSON.parse(JSON.stringify(val));
 
 describe('filterStackTraceById', () => {
   const emptyJson: StackTrace = {} as StackTrace;

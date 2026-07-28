@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { LegacyTimeSeries } from '@perses-dev/components';
-import { TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
-import { convertPercentThreshold, convertPanelYAxis, roundDown } from './data-transform';
+import { TimeScale } from '@perses-dev/spec';
+import { TimeSeriesChartVisualOptions, TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
+import { convertPercentThreshold, convertPanelYAxis, getTimeSeries, roundDown } from './data-transform';
 
 const MAX_VALUE = 120;
 const MOCK_ECHART_TIME_SERIES_DATA: LegacyTimeSeries[] = [
@@ -40,6 +41,13 @@ describe('convertPercentThreshold', () => {
     const value = convertPercentThreshold(50, MOCK_ECHART_TIME_SERIES_DATA);
     expect(value).toEqual(0.5 * MAX_VALUE);
   });
+
+  it('should use absolute values when finding the max so negated series (negativeY) still resolve correctly', () => {
+    // Simulates a series that was negated for display (querySettings.negativeY = true)
+    const negatedSeries: LegacyTimeSeries[] = [{ data: [-10, -30, -80, -50] }, { data: [-20, -MAX_VALUE, -17, -30] }];
+    const value = convertPercentThreshold(50, negatedSeries);
+    expect(value).toEqual(0.5 * MAX_VALUE);
+  });
 });
 
 describe('convertPanelYAxis', () => {
@@ -60,9 +68,6 @@ describe('convertPanelYAxis', () => {
       show: true,
       max: 1,
       min: 0.1,
-      axisLabel: {
-        show: true,
-      },
     });
   });
   it('should convert a Perses yAxis spec of type log to the ECharts equivalent', () => {
@@ -85,9 +90,6 @@ describe('convertPanelYAxis', () => {
       min: undefined,
       type: 'log',
       logBase: 2,
-      axisLabel: {
-        show: true,
-      },
     });
     persesAxis.logBase = 10;
     const actualAxisLog10 = convertPanelYAxis(persesAxis);
@@ -98,9 +100,6 @@ describe('convertPanelYAxis', () => {
       min: undefined,
       type: 'log',
       logBase: 10,
-      axisLabel: {
-        show: true,
-      },
     });
   });
 });
@@ -151,5 +150,62 @@ const ROUND_DOWN_TESTS = [
 describe('roundDown', () => {
   it.each(ROUND_DOWN_TESTS)('returns $expected when the input is $value', ({ value, expected }) => {
     expect(roundDown(value)).toEqual(expected);
+  });
+});
+
+describe('getTimeSeries stack behavior', () => {
+  const TIME_SCALE: TimeScale = { startMs: 0, endMs: 60_000, stepMs: 1000, rangeMs: 60_000 };
+
+  // 6 combinations of (global visual.stack) x (per-query stack override) -> whether
+  // the resulting series should have stack === 'all'. Run for both line and bar display.
+  const STACK_CASES: Array<{
+    label: string;
+    globalStack: 'all' | undefined;
+    querySettingsStack: boolean | undefined;
+    expectStacked: boolean;
+  }> = [
+    {
+      label: 'global=none + query=unset → not stacked',
+      globalStack: undefined,
+      querySettingsStack: undefined,
+      expectStacked: false,
+    },
+    {
+      label: 'global=none + query=true  → stacked',
+      globalStack: undefined,
+      querySettingsStack: true,
+      expectStacked: true,
+    },
+    {
+      label: 'global=none + query=false → not stacked',
+      globalStack: undefined,
+      querySettingsStack: false,
+      expectStacked: false,
+    },
+    {
+      label: 'global=all  + query=unset → stacked',
+      globalStack: 'all',
+      querySettingsStack: undefined,
+      expectStacked: true,
+    },
+    { label: 'global=all  + query=true  → stacked', globalStack: 'all', querySettingsStack: true, expectStacked: true },
+    {
+      label: 'global=all  + query=false → not stacked',
+      globalStack: 'all',
+      querySettingsStack: false,
+      expectStacked: false,
+    },
+  ];
+
+  describe.each(['line', 'bar'] as const)('display: %s', (display) => {
+    it.each(STACK_CASES)('$label', ({ globalStack, querySettingsStack, expectStacked }) => {
+      const visual: TimeSeriesChartVisualOptions = { display, stack: globalStack };
+      const series = getTimeSeries('series-id', 0, 'series', visual, TIME_SCALE, '#000000', {
+        stack: querySettingsStack,
+      });
+
+      expect(series.type).toEqual(display);
+      expect(series.stack).toEqual(expectStacked ? 'all' : undefined);
+    });
   });
 });

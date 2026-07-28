@@ -11,25 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useDatasourceClient } from '@perses-dev/plugin-system';
-import { DatasourceSelector, StatusError } from '@perses-dev/core';
+import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { DatasourceSelector } from '@perses-dev/spec';
+import { StatusError } from '@perses-dev/client';
 import {
   SearchLabelNamesResponse,
   SearchLabelValuesResponse,
   SearchProfileTypesResponse,
   PyroscopeClient,
 } from '../model';
+import { getUnixTimeRange } from '../plugins';
+
+// Pyroscope need timestamp in milliseconds, but the time range from Perses is in seconds.
+const MILLISECONDS = 1_000;
 
 export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<SearchLabelNamesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelNamesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelNames', 'datasource', datasource],
+    queryKey: ['searchLabelNames', client],
     queryFn: async () => {
-      return await client!.searchLabelNames({}, { 'content-type': 'application/json' }, {});
+      return await client!.searchLabelNames(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+      );
     },
   });
 }
@@ -39,12 +50,18 @@ export function useLabelValues(
   labelName: string
 ): UseQueryResult<SearchLabelValuesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchLabelValues', labelName, 'datasource', datasource],
+    queryKey: ['searchLabelValues', labelName, client],
     queryFn: async () => {
-      return await client!.searchLabelValues({}, { 'content-type': 'application/json' }, { name: labelName });
+      return await client!.searchLabelValues(
+        {},
+        { 'content-type': 'application/json' },
+        { name: labelName, start: start * MILLISECONDS, end: end * MILLISECONDS }
+      );
     },
   });
 }
@@ -53,24 +70,36 @@ export function useProfileTypes(
   datasource: DatasourceSelector
 ): UseQueryResult<SearchProfileTypesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchProfileTypesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchProfileTypes', 'datasource', datasource],
+    queryKey: ['searchProfileTypes', client],
     queryFn: async () => {
-      return await client!.searchProfileTypes({}, { 'content-type': 'application/json' }, {});
+      return await client!.searchProfileTypes(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+      );
     },
   });
 }
 
 export function useServices(datasource: DatasourceSelector): UseQueryResult<SearchLabelValuesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
+  const { absoluteTimeRange } = useTimeRange();
+  const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchServices', 'datasource', datasource],
+    queryKey: ['searchServices', client],
     queryFn: async () => {
-      return await client!.searchServices({}, { 'content-type': 'application/json' });
+      return await client!.searchServices(
+        {},
+        { 'content-type': 'application/json' },
+        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+      );
     },
   });
 }

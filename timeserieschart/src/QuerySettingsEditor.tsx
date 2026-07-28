@@ -19,26 +19,27 @@ import {
   MenuItem,
   Slider,
   Stack,
+  Switch,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
   useTheme,
 } from '@mui/material';
-import { OptionsColorPicker } from '@perses-dev/components';
+import { FormatControls, FormatOptions, OptionsColorPicker } from '@perses-dev/components';
 import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import CloseIcon from 'mdi-material-ui/Close';
 import { produce } from 'immer';
-import { useQueryCountContext } from '@perses-dev/plugin-system';
+import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
 import {
+  DEFAULT_AREA_OPACITY,
+  LINE_STYLE_CONFIG,
+  OPACITY_CONFIG,
+  QuerySettingsOptions,
   TimeSeriesChartOptions,
   TimeSeriesChartOptionsEditorProps,
-  QuerySettingsOptions,
-  DEFAULT_AREA_OPACITY,
-  OPACITY_CONFIG,
-  LINE_STYLE_CONFIG,
 } from './time-series-chart-model';
 
 const DEFAULT_COLOR_VALUE = '#555';
@@ -48,7 +49,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
   const { onChange, value } = props;
   const querySettingsList = value.querySettings;
 
-  const handleQuerySettingsChange = (newQuerySettings: QuerySettingsOptions[]) => {
+  const handleQuerySettingsChange = (newQuerySettings: QuerySettingsOptions[]): void => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.querySettings = newQuerySettings;
@@ -205,7 +206,57 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     });
   };
 
-  const queryCount = useQueryCountContext();
+  const addFormat = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.format = { unit: 'decimal', shortValues: true };
+    });
+  };
+
+  const removeFormat = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.format = undefined;
+    });
+  };
+
+  const addStack = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.stack = false;
+    });
+  };
+
+  const removeStack = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.stack = undefined;
+    });
+  };
+
+  const handleStackChange = (i: number, checked: boolean): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.stack = checked;
+    });
+  };
+
+  const handleFormatChange = (i: number, format?: FormatOptions): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.format = format;
+    });
+  };
+
+  const addNegativeY = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.negativeY = true;
+    });
+  };
+
+  const removeNegativeY = (i: number): void => {
+    updateQuerySettings(i, (qs) => {
+      qs.negativeY = undefined;
+    });
+  };
+
+  const { queryDefinitions } = useDataQueriesContext();
+  const queryCount = queryDefinitions.length;
+  const queryNames = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
 
   // Compute the list of query indexes for which query settings are not already defined.
   // This is to avoid already-booked indexes to still be selectable in the dropdown(s)
@@ -243,13 +294,13 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           No query defined
         </Typography>
       ) : (
-        querySettingsList?.length &&
-        querySettingsList.map((querySettings, i) => (
+        querySettingsList?.map((querySettings, i) => (
           <QuerySettingsInput
             inputRef={i === querySettingsList.length - 1 ? recentlyAddedInputRef : undefined}
             key={i}
             querySettings={querySettings}
             availableQueryIndexes={availableQueryIndexes}
+            queryNames={queryNames}
             onQueryIndexChange={(e) => {
               handleQueryIndexChange(e, i);
             }}
@@ -266,6 +317,14 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
             onRemoveLineStyle={() => removeLineStyle(i)}
             onAddAreaOpacity={() => addAreaOpacity(i)}
             onRemoveAreaOpacity={() => removeAreaOpacity(i)}
+            onAddFormat={() => addFormat(i)}
+            onRemoveFormat={() => removeFormat(i)}
+            onFormatChange={(format) => handleFormatChange(i, format)}
+            onAddNegativeY={() => addNegativeY(i)}
+            onRemoveNegativeY={() => removeNegativeY(i)}
+            onAddStack={() => addStack(i)}
+            onRemoveStack={() => removeStack(i)}
+            onStackChange={(checked) => handleStackChange(i, checked)}
           />
         ))
       )}
@@ -281,6 +340,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 interface QuerySettingsInputProps {
   querySettings: QuerySettingsOptions;
   availableQueryIndexes: number[];
+  queryNames: string[];
   onQueryIndexChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorModeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onColorValueChange: (colorValue: string) => void;
@@ -295,11 +355,20 @@ interface QuerySettingsInputProps {
   onRemoveLineStyle: () => void;
   onAddAreaOpacity: () => void;
   onRemoveAreaOpacity: () => void;
+  onAddFormat: () => void;
+  onRemoveFormat: () => void;
+  onFormatChange: (format?: FormatOptions) => void;
+  onAddNegativeY: () => void;
+  onRemoveNegativeY: () => void;
+  onAddStack: () => void;
+  onRemoveStack: () => void;
+  onStackChange: (checked: boolean) => void;
 }
 
 function QuerySettingsInput({
-  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity },
+  querySettings: { queryIndex, colorMode, colorValue, lineStyle, areaOpacity, format, negativeY, stack },
   availableQueryIndexes,
+  queryNames,
   onQueryIndexChange,
   onColorModeChange,
   onColorValueChange,
@@ -313,6 +382,14 @@ function QuerySettingsInput({
   onRemoveLineStyle,
   onAddAreaOpacity,
   onRemoveAreaOpacity,
+  onAddFormat,
+  onRemoveFormat,
+  onFormatChange,
+  onAddNegativeY,
+  onRemoveNegativeY,
+  onAddStack,
+  onRemoveStack,
+  onStackChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
@@ -326,10 +403,26 @@ function QuerySettingsInput({
     if (!colorMode) options.push({ key: 'color', label: 'Color', action: onAddColor });
     if (!lineStyle) options.push({ key: 'lineStyle', label: 'Line Style', action: onAddLineStyle });
     if (areaOpacity === undefined) options.push({ key: 'opacity', label: 'Opacity', action: onAddAreaOpacity });
+    if (format === undefined) options.push({ key: 'format', label: 'Format', action: onAddFormat });
+    if (!negativeY) options.push({ key: 'negativeY', label: 'Negative Y', action: onAddNegativeY });
+    if (stack === undefined) options.push({ key: 'stack', label: 'Stack', action: onAddStack });
     return options;
-  }, [colorMode, lineStyle, areaOpacity, onAddColor, onAddLineStyle, onAddAreaOpacity]);
+  }, [
+    colorMode,
+    lineStyle,
+    areaOpacity,
+    format,
+    negativeY,
+    stack,
+    onAddColor,
+    onAddLineStyle,
+    onAddAreaOpacity,
+    onAddFormat,
+    onAddNegativeY,
+    onAddStack,
+  ]);
 
-  const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleAddMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     if (availableOptions.length === 1 && availableOptions[0]) {
       // If only one option left, add it directly
       availableOptions[0].action();
@@ -339,18 +432,28 @@ function QuerySettingsInput({
     }
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (): void => {
     setAnchorEl(null);
   };
 
-  const handleMenuItemClick = (action: () => void) => {
+  const handleMenuItemClick = (action: () => void): void => {
     action();
     handleMenuClose();
   };
 
   return (
-    <Stack spacing={2} sx={{ borderBottom: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+    <Stack
+      sx={{
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        p: 2,
+        display: 'flex',
+        flexWrap: 'nowrap',
+        flexDirection: 'row',
+      }}
+    >
+      <Stack direction="row" alignItems="center" sx={{ flexWrap: 'wrap', gap: 2, flexGrow: 1 }}>
         {/* Query Index Selection */}
         <TextField
           select
@@ -362,7 +465,7 @@ function QuerySettingsInput({
         >
           {selectableQueryIndexes.map((qi) => (
             <MenuItem key={`query-${qi}`} value={qi}>
-              #{qi + 1}
+              {queryNames[qi] ?? `#${qi + 1}`}
             </MenuItem>
           ))}
         </TextField>
@@ -375,7 +478,7 @@ function QuerySettingsInput({
               <MenuItem value="fixed">Fixed</MenuItem>
             </TextField>
             <OptionsColorPicker
-              label={`Query n°${queryIndex + 1}`}
+              label={queryNames[queryIndex] ?? `Query n°${queryIndex + 1}`}
               color={colorValue || DEFAULT_COLOR_VALUE}
               onColorChange={onColorValueChange}
             />
@@ -425,6 +528,36 @@ function QuerySettingsInput({
           </SettingsSection>
         )}
 
+        {/* Format section */}
+        {format !== undefined && (
+          <SettingsSection label="Format" onRemove={onRemoveFormat}>
+            <Box sx={{ minWidth: '180px', display: 'flex', gap: 1, flexDirection: 'column' }}>
+              <FormatControls value={format} onChange={onFormatChange} />
+            </Box>
+          </SettingsSection>
+        )}
+
+        {/* Negative Y section (presence-only flag) */}
+        {negativeY && (
+          <SettingsSection label="Negative Y" onRemove={onRemoveNegativeY}>
+            <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1, py: 0.5 }}>
+              Series rendered below the X axis
+            </Typography>
+          </SettingsSection>
+        )}
+
+        {/* Stack section */}
+        {stack !== undefined && (
+          <SettingsSection label="Stack" onRemove={onRemoveStack}>
+            <Switch
+              checked={stack}
+              onChange={(e) => onStackChange(e.target.checked)}
+              slotProps={{ input: { 'aria-label': 'stack override' } }}
+            />
+            <Box sx={{ flexGrow: 1 }} />
+          </SettingsSection>
+        )}
+
         {/* Add Options Button - only show if there are available options */}
         {availableOptions.length > 0 && (
           <>
@@ -455,15 +588,16 @@ function QuerySettingsInput({
             </Menu>
           </>
         )}
-
-        {/* Spacer to push delete button to the right */}
-        <Box sx={{ flexGrow: 1 }} />
-
-        {/* Delete Button for this query settings */}
-        <IconButton aria-label={`delete settings for query n°${queryIndex + 1}`} onClick={onDelete}>
+      </Stack>
+      {/* Delete Button for this query settings */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <IconButton
+          aria-label={`delete settings for ${queryNames[queryIndex] ?? `query n°${queryIndex + 1}`}`}
+          onClick={onDelete}
+        >
           <DeleteIcon />
         </IconButton>
-      </Stack>
+      </Box>
     </Stack>
   );
 }

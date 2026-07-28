@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   DatasourceSpec,
   DurationString,
@@ -18,9 +20,7 @@ import {
   parseDurationString,
   TimeSeries,
   TimeSeriesData,
-} from '@perses-dev/core';
-import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import { fromUnixTime, milliseconds } from 'date-fns';
+} from '@perses-dev/spec';
 import {
   parseValueTuple,
   PrometheusClient,
@@ -35,6 +35,7 @@ import {
   PROM_DATASOURCE_KIND,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
+import { interpolateDatasourceProxyParams } from '../interpolation';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
@@ -61,6 +62,8 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const datasource = (await context.datasourceStore.getDatasource(
     selectedDatasource
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
+  const interpolatedOptions = interpolateDatasourceProxyParams(datasource, context.variableState);
+
   const datasourceScrapeInterval = Math.trunc(
     milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
   );
@@ -118,27 +121,11 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   let response;
   switch (context.mode) {
     case 'instant':
-      response = await client.instantQuery(
-        {
-          query,
-          time: end,
-        },
-        undefined,
-        abortSignal
-      );
+      response = await client.instantQuery({ query, time: end }, { ...interpolatedOptions, signal: abortSignal });
       break;
     case 'range':
     default:
-      response = await client.rangeQuery(
-        {
-          query,
-          start,
-          end,
-          step,
-        },
-        undefined,
-        abortSignal
-      );
+      response = await client.rangeQuery({ query, start, end, step }, { ...interpolatedOptions, signal: abortSignal });
       break;
   }
 

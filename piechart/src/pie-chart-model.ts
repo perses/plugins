@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ModeOption, SortOption } from '@perses-dev/components';
-import { CalculationType, DEFAULT_CALCULATION, Definition, FormatOptions } from '@perses-dev/core';
-import { LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { FormatOptions, ModeOption, SortOption } from '@perses-dev/components';
+import { CalculationType, DEFAULT_CALCULATION, LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Definition } from '@perses-dev/spec';
 
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal', shortValues: true };
 export const DEFAULT_SORT: SortOption = 'desc';

@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
 import { CircularProgress, Stack, StackProps } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { MetricList } from '../../display/list/MetricList';
 import { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';

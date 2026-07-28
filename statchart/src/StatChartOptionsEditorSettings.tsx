@@ -18,6 +18,7 @@ import {
   FontSizeSelectorProps,
   FormatControls,
   FormatControlsProps,
+  FormatOptions,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
@@ -26,7 +27,6 @@ import {
   ThresholdsEditor,
   ThresholdsEditorProps,
 } from '@perses-dev/components';
-import { FormatOptions } from '@perses-dev/core';
 import {
   CalculationSelector,
   CalculationSelectorProps,

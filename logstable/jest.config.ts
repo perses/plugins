@@ -18,6 +18,7 @@ const jestConfig: Config.InitialOptions = {
   ...shared,
 
   setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
+  transformIgnorePatterns: ['node_modules/(?!(lodash-es|yaml|ansi_up))'],
 };
 
 export default jestConfig;

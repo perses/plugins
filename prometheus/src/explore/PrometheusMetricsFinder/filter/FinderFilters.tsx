@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Button, FormControl, Stack, StackProps } from '@mui/material';
-import { DatasourceSelector } from '@perses-dev/core';
+
 import {
   DatasourceSelect,
   DatasourceSelectValue,
@@ -21,6 +21,7 @@ import {
 } from '@perses-dev/plugin-system';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement } from 'react';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { PROM_DATASOURCE_KIND } from '../../../model/prometheus-selectors';
 import { LabelFilter } from '../types';
 import { LabelFilterInput } from './FilterInputs';

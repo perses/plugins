@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogData, AbsoluteTimeRange, TimeSeries, TimeSeriesData, TimeSeriesMetadata } from '@perses-dev/core';
+import { AbsoluteTimeRange, LogData, TimeSeries, TimeSeriesData, TimeSeriesMetadata } from '@perses-dev/spec';
 
 export interface LokiTimeSeriesData extends TimeSeriesData {
   logs?: LogData;

@@ -18,7 +18,7 @@ import EyeIcon from 'mdi-material-ui/EyeOutline';
 import CloseIcon from 'mdi-material-ui/Close';
 import Chip from '@mui/material/Chip';
 import { emphasize, styled } from '@mui/material/styles';
-import { formatValue } from '@perses-dev/core';
+import { formatValue } from '@perses-dev/components';
 
 export interface CustomBreadcrumbProps {
   totalValue: string;
@@ -47,7 +47,7 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
 export function CustomBreadcrumb(props: CustomBreadcrumbProps): ReactElement {
   const { totalValue, totalSample, otherItemSample, onSelectedIdChange } = props;
 
-  const handleClick = (event: React.MouseEvent<Element, MouseEvent>) => {
+  const handleClick = (event: React.MouseEvent<Element, MouseEvent>): void => {
     event.preventDefault();
     onSelectedIdChange(0);
   };

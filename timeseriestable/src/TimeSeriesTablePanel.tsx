@@ -15,15 +15,15 @@ import { Box } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { PanelProps } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/core';
 
+import { TimeSeriesData } from '@perses-dev/spec';
 import { TimeSeriesTableOptions } from './model';
 import { DataTable } from './components';
 
 export type TimeSeriesTableProps = PanelProps<TimeSeriesTableOptions, TimeSeriesData>;
 
 export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement {
-  const { contentDimensions, queryResults } = props;
+  const { contentDimensions, queryResults, spec } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
 
@@ -32,7 +32,7 @@ export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement 
       style={{ height: contentDimensions?.height ?? 0 }}
       sx={{ padding: `${contentPadding}px`, overflowY: 'scroll' }}
     >
-      <DataTable queryResults={queryResults} />
+      <DataTable queryResults={queryResults} spec={spec} />
     </Box>
   );
 }

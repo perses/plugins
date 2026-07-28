@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LogQueryContext } from '@perses-dev/plugin-system';
 import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsDatasource } from '../../datasources/victorialogs-datasource';
 import { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
 import { VictoriaLogsLogQuery } from './VictoriaLogsLogQuery';
-import { LogQueryContext } from './interface';
 
 const datasource: VictoriaLogsDatasourceSpec = {
   directUrl: '/test',
@@ -55,6 +55,7 @@ const createStubContext = (): LogQueryContext => {
       start: new Date('01-02-2025'),
     },
     variableState: {},
+    refreshKey: '',
   };
   return stubLogContext;
 };

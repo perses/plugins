@@ -15,8 +15,8 @@ import { TitleComponentOption } from 'echarts';
 import { useChartsTheme } from '@perses-dev/components';
 import { Stack, Typography, SxProps, useMediaQuery, useTheme } from '@mui/material';
 import { FC, useState, useEffect, useMemo } from 'react';
-import { ProfileData, StackTrace } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
+import { ProfileData, StackTrace } from '@perses-dev/spec';
 import { FlameChartOptions } from '../flame-chart-model';
 import { filterStackTraceById, getMaxDepth } from '../utils/data-transform';
 import { FlameChart } from './FlameChart';
@@ -68,13 +68,13 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;
 
-  const onChangePalette = (newPalette: 'package-name' | 'value') => {
+  const onChangePalette = (newPalette: 'package-name' | 'value'): void => {
     setLiveSpec((prev) => {
       return { ...prev, palette: newPalette };
     });
   };
 
-  const onDisplayChange = (value: 'table' | 'flame-graph' | 'both' | 'none') => {
+  const onDisplayChange = (value: 'table' | 'flame-graph' | 'both' | 'none'): void => {
     let showTable = true;
     let showFlameGraph = true;
     if (value === 'table') {

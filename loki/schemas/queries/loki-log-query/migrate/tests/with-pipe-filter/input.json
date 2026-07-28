@@ -1,0 +1,8 @@
+{
+  "datasource": {
+    "type": "loki",
+    "uid": "loki"
+  },
+  "expr": "{pod_name=~\"$pod\"} |~ \"$search\"",
+  "refId": "A"
+}

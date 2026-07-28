@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Virtuoso, ListRange } from 'react-virtuoso';
-import { ReactElement, useMemo, useRef, useState } from 'react';
+import { Virtuoso, VirtuosoHandle, ListRange } from 'react-virtuoso';
+import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
 import { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
-import { Span, Trace } from '../trace';
+import { Span, Trace, forEachSpan } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
 import { GanttTableHeader } from './GanttTableHeader';
@@ -29,32 +29,72 @@ export interface GanttTableProps {
   viewport: Viewport;
   selectedSpan?: Span;
   onSpanClick: (span: Span) => void;
+  matchingSpanIds?: string[];
+  focusedSpanId?: string;
 }
 
 export function GanttTable(props: GanttTableProps): ReactElement {
-  const { options, customLinks, trace, viewport, selectedSpan, onSpanClick } = props;
-  const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
+  const { options, customLinks, trace, viewport, selectedSpan, onSpanClick, matchingSpanIds, focusedSpanId } = props;
+  const { collapsedSpans, setCollapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
   const theme = useTheme();
 
+  // Recursively flatten the span tree to a list of rows, hiding collapsed child spans.
   const rows = useMemo(() => {
     const rows: Span[] = [];
-    for (const rootSpan of trace.rootSpans) {
-      treeToRows(rows, rootSpan, collapsedSpans);
-    }
+    forEachSpan(trace.rootSpans, (span) => {
+      rows.push(span);
+      if (collapsedSpans.has(span.spanId)) {
+        return false;
+      }
+    });
     return rows;
   }, [trace.rootSpans, collapsedSpans]);
+  const matchingSpanIdSet = useMemo(() => new Set(matchingSpanIds ?? []), [matchingSpanIds]);
 
-  const selectedSpanIndex = useMemo(() => {
-    if (!selectedSpan) return undefined;
+  // Auto-expand collapsed ancestors when focusing a search match
+  useEffect(() => {
+    if (!focusedSpanId) return;
 
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i]?.spanId === selectedSpan.spanId) {
-        return i;
-      }
+    const span = trace.spanById.get(focusedSpanId);
+    if (!span) return;
+
+    const ancestorIds = new Set<string>();
+    let parent = span.parentSpan;
+    while (parent) {
+      ancestorIds.add(parent.spanId);
+      parent = parent.parentSpan;
     }
-    return undefined;
+    if (ancestorIds.size > 0) {
+      setCollapsedSpans((prev) => {
+        const next = new Set(prev);
+        let changed = false;
+        for (const id of ancestorIds) {
+          if (next.delete(id)) changed = true;
+        }
+        return changed ? next : prev;
+      });
+    }
+  }, [focusedSpanId, trace.spanById, setCollapsedSpans]);
+
+  // Scroll to focused span when using prev/next buttons in search bar.
+  useEffect(() => {
+    if (!focusedSpanId || !virtuosoRef.current) return;
+
+    const index = rows.findIndex((r) => r.spanId === focusedSpanId);
+    if (index >= 0) {
+      virtuosoRef.current.scrollToIndex({ index, align: 'center' });
+    }
+  }, [focusedSpanId, rows]);
+
+  // Set the top most index in the Virtuoso table to the selected span
+  // Required e.g. when navigating from another page.
+  const initialTopMostSpanIndex = useMemo(() => {
+    if (!selectedSpan) return 0;
+    const index = rows.findIndex((r) => r.spanId === selectedSpan.spanId);
+    return index >= 0 ? index : 0;
   }, [rows, selectedSpan]);
 
   const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
@@ -81,8 +121,9 @@ export function GanttTable(props: GanttTableProps): ReactElement {
     >
       <GanttTableHeader trace={trace} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
       <Virtuoso
+        ref={virtuosoRef}
         data={rows}
-        initialTopMostItemIndex={selectedSpanIndex ?? 0}
+        initialTopMostItemIndex={initialTopMostSpanIndex}
         itemContent={(_, span) => (
           <GanttTableRow
             options={options}
@@ -90,6 +131,8 @@ export function GanttTable(props: GanttTableProps): ReactElement {
             span={span}
             viewport={viewport}
             selected={span === selectedSpan}
+            matched={matchingSpanIdSet.has(span.spanId)}
+            focused={span.spanId === focusedSpanId}
             nameColumnWidth={nameColumnWidth}
             divider={divider}
             onClick={onSpanClick}
@@ -99,17 +142,4 @@ export function GanttTable(props: GanttTableProps): ReactElement {
       />
     </Box>
   );
-}
-
-/**
- * treeToRows recursively transforms the span tree to a list of rows and
- * hides collapsed child spans.
- */
-function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]): void {
-  rows.push(span);
-  if (!collapsedSpans.includes(span.spanId)) {
-    for (const child of span.childSpans) {
-      treeToRows(rows, child, collapsedSpans);
-    }
-  }
 }

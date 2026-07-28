@@ -32,9 +32,7 @@ interface CanvasProps {
 }
 
 type MouseState =
-  | { type: 'none' }
-  | { type: 'resize'; fixedPoint: number }
-  | { type: 'drag'; start: number; end: number };
+  { type: 'none' } | { type: 'resize'; fixedPoint: number } | { type: 'drag'; start: number; end: number };
 
 export function Canvas(props: CanvasProps): ReactElement {
   const { options, trace, viewport, setViewport } = props;

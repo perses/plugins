@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables } from '@perses-dev/plugin-system';
-import { LogEntry, LogData } from '@perses-dev/core';
+import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
+import { LogData, LogEntry } from '@perses-dev/spec';
 import { LokiStreamResult } from '../../model/loki-client-types';
 import { LokiClient } from '../../model/loki-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { LokiLogQuerySpec, LokiLogQueryResponse } from './loki-log-query-types';
-import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
+import { LokiLogQuerySpec } from './loki-log-query-types';
 
 function convertStreamsToLogs(streams: LokiStreamResult[]): LogData {
   const entries: LogEntry[] = [];
@@ -56,7 +55,7 @@ export const getLokiLogData: LogQueryPlugin<LokiLogQuerySpec>['getLogData'] = as
 
   const { start, end } = context.timeRange;
 
-  const response: LokiLogQueryResponse = await client.queryRange({
+  const response = await client.queryRange({
     query,
     start: start.getTime().toString(),
     end: end.getTime().toString(),

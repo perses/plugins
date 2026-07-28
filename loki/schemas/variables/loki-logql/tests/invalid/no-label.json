@@ -1,0 +1,7 @@
+{
+  "kind": "LokiLogQLVariable",
+  "spec": {
+    "expr": "count_over_time({job=\"myapp\"}[1h])",
+    "labelName": ""
+  }
+}

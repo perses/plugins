@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, MouseEvent, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, MouseEvent, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
-import { toZonedTime } from 'date-fns-tz';
-import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
+
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -47,9 +46,10 @@ import {
   DEFAULT_TOOLTIP_CONFIG,
   EChart,
   enableDataZoom,
+  FormatOptions,
   getClosestTimestamp,
+  getCommonTimeScale,
   getFormattedAxis,
-  getFormattedAxisLabel,
   getPointInGrid,
   OnEventsType,
   restoreChart,
@@ -61,6 +61,10 @@ import {
   ZoomEventData,
 } from '@perses-dev/components';
 import { DatasetOption } from 'echarts/types/dist/shared';
+import { TimeScale, TimeSeries } from '@perses-dev/spec';
+import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
+import { TimeSeriesAnnotation } from './utils/annotation';
+import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
 
 use([
   EChartsLineChart,
@@ -81,9 +85,14 @@ export interface TimeChartProps {
   height: number;
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
+  annotations?: TimeSeriesAnnotation[];
   timeScale?: TimeScale;
-  yAxis?: YAXisComponentOption;
+  yAxis?: YAXisComponentOption | YAXisComponentOption[];
   format?: FormatOptions;
+  /**
+   * Map of series ID to format options, used for tooltip formatting when series have different units
+   */
+  seriesFormatMap?: Map<string, FormatOptions>;
   grid?: GridComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
@@ -99,9 +108,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     height,
     data,
     seriesMapping,
+    annotations,
     timeScale: timeScaleProp,
     yAxis,
     format,
+    seriesFormatMap,
     grid,
     isStackedBar = false,
     tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
@@ -122,7 +133,16 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const { timeZone } = useTimeZone();
+  const [hoveredAnnotation, setHoveredAnnotation] = useState<TimeSeriesAnnotation | null>(null);
+  const [pinnedAnnotation, setPinnedAnnotation] = useState<TimeSeriesAnnotation | null>(null);
+  const [pinnedAnnotationPos, setPinnedAnnotationPos] = useState<CursorCoordinates | null>(null);
+  const { timeZone, formatWithUserTimeZone } = useTimeZone();
+
+  const getTimezoneAwareAxisFormatter = useCallback(
+    (rangeMs: number): ((value: number) => string) => createTimezoneAwareAxisFormatter(rangeMs, timeZone),
+    [timeZone]
+  );
+
   let timeScale: TimeScale;
   if (timeScaleProp === undefined) {
     const commonTimeScale = getCommonTimeScale(data);
@@ -186,8 +206,45 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           enableDataZoom(chartRef.current);
         }
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mouseover: (params: any): void => {
+        // Only markPoint (triangles under the X-axis) opens the annotation tooltip.
+        // Hovering markLine or anything else keeps the regular TimeSeries tooltip visible
+        // and clears any stale hovered annotation (mouseout is sometimes missed by ECharts).
+        if (annotations && params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
+          const matchedAnnotation = annotations[params.data.annotationIndex] || null;
+          if (matchedAnnotation) {
+            setHoveredAnnotation(matchedAnnotation);
+            return;
+          }
+        }
+        setHoveredAnnotation(null);
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mouseout: (params: any): void => {
+        if (
+          annotations &&
+          params.componentType === 'markPoint' &&
+          params.data?.annotationIndex !== undefined &&
+          annotations
+        ) {
+          // Only clear if the mouseout corresponds to the currently hovered annotation, so that
+          // a quick move from one markPoint to another isn't cancelled by a late mouseout event.
+          const leaving = annotations[params.data.annotationIndex] || null;
+          setHoveredAnnotation((current) => (current === leaving ? null : current));
+        }
+      },
+      globalout: (): void => {
+        if (annotations) {
+          // Cursor left the chart canvas — guarantee the annotation tooltip is dismissed.
+          setHoveredAnnotation(null);
+        }
+      },
     };
-  }, [onDataZoom, setTooltipPinnedCoords]);
+  }, [annotations, onDataZoom]);
+
+  // Generate annotation series for ECharts markArea (range), markLine (point), and markPoint (markers under X-axis)
+  const annotationSeries = useMemo(() => buildAnnotationSeries(annotations), [annotations]);
 
   const { noDataOption } = chartsTheme;
 
@@ -199,34 +256,36 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     // Utilizes ECharts dataset so raw data is separate from series option style properties
     // https://apache.github.io/echarts-handbook/en/concepts/dataset/
     const dataset: DatasetOption[] = [];
-    const isLocalTimeZone = timeZone === 'local';
     data.map((d, index) => {
       const values = d.values.map(([timestamp, value]) => {
         const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
-        return [isLocalTimeZone ? timestamp : toZonedTime(timestamp, timeZone), val];
+        return [timestamp, val];
       });
       dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
     });
 
     const updatedSeriesMapping =
-      enablePinning && pinnedCrosshair !== null ? [...seriesMapping, pinnedCrosshair] : seriesMapping;
+      enablePinning && pinnedCrosshair !== null
+        ? [...seriesMapping, pinnedCrosshair, ...annotationSeries]
+        : [...seriesMapping, ...annotationSeries];
 
     const option: EChartsCoreOption = {
       dataset: dataset,
       series: updatedSeriesMapping,
       xAxis: {
         type: 'time',
-        min: isLocalTimeZone ? timeScale.startMs : toZonedTime(timeScale.startMs, timeZone),
-        max: isLocalTimeZone ? timeScale.endMs : toZonedTime(timeScale.endMs, timeZone),
+        min: timeScale.startMs,
+        max: timeScale.endMs,
         axisLabel: {
           hideOverlap: true,
-          formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
+          formatter: getTimezoneAwareAxisFormatter(timeScale.rangeMs ?? 0),
         },
         axisPointer: {
           snap: false, // important so shared crosshair does not lag
         },
       },
-      yAxis: getFormattedAxis(yAxis, format),
+      // If yAxis is already an array (multiple Y axes), use it directly; otherwise use getFormattedAxis
+      yAxis: Array.isArray(yAxis) ? yAxis : getFormattedAxis(yAxis, format),
       animation: false,
       tooltip: {
         show: true,
@@ -263,6 +322,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   }, [
     data,
     seriesMapping,
+    annotationSeries,
     timeScale,
     yAxis,
     format,
@@ -270,10 +330,10 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     noDataOption,
     __experimentalEChartsOptionsOverride,
     noDataVariant,
-    timeZone,
     isStackedBar,
     enablePinning,
     pinnedCrosshair,
+    getTimezoneAwareAxisFormatter,
   ]);
 
   // Update adjacent charts so tooltip is unpinned when current chart is clicked.
@@ -301,6 +361,26 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       //   e.preventDefault(); // Prevent the default behaviour when right clicked
       // }}
       onClick={(e) => {
+        // If clicking while hovering an annotation, toggle the annotation tooltip pin
+        // instead of pinning the TimeChartTooltip, so pinned TimeChartTooltip is preserved.
+        if (hoveredAnnotation !== null && e.target instanceof HTMLCanvasElement) {
+          const pinnedPos: CursorCoordinates = {
+            page: { x: e.pageX, y: e.pageY },
+            client: { x: e.clientX, y: e.clientY },
+            plotCanvas: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY },
+            target: e.target,
+          };
+          setPinnedAnnotation((current) => {
+            if (current === hoveredAnnotation) {
+              setPinnedAnnotationPos(null);
+              return null;
+            }
+            setPinnedAnnotationPos(pinnedPos);
+            return hoveredAnnotation;
+          });
+          return;
+        }
+
         // Allows user to opt-in to multi tooltip pinning when Ctrl or Cmd key held down
         const isControlKeyPressed = e.ctrlKey || e.metaKey;
         if (isControlKeyPressed) {
@@ -400,6 +480,8 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         if (tooltipPinnedCoords === null) {
           setShowTooltip(false);
         }
+        // Defensive: clear hovered annotation in case ECharts missed a mouseout event.
+        setHoveredAnnotation(null);
         if (chartRef.current !== undefined) {
           clearHighlightedSeries(chartRef.current);
         }
@@ -422,8 +504,10 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
       }}
     >
-      {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead */}
+      {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead.
+          Keep the time chart tooltip visible when pinned even if user hovers an annotation. */}
       {showTooltip === true &&
+        (tooltipPinnedCoords !== null || hoveredAnnotation === null) &&
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
           <TimeChartTooltip
@@ -435,6 +519,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             enablePinning={isPinningEnabled}
             pinnedPos={tooltipPinnedCoords}
             format={format}
+            seriesFormatMap={seriesFormatMap}
             onUnpinClick={() => {
               // Unpins tooltip when clicking Pin icon in TooltipHeader.
               setTooltipPinnedCoords(null);
@@ -443,6 +528,20 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             }}
           />
         )}
+      {/* Pinned annotation takes priority over hovered. */}
+      {(pinnedAnnotation ?? hoveredAnnotation) && (
+        <AnnotationTooltip
+          annotation={(pinnedAnnotation ?? hoveredAnnotation) as TimeSeriesAnnotation}
+          containerId={chartsTheme.tooltipPortalContainerId}
+          formatWithUserTimeZone={formatWithUserTimeZone}
+          pinnedPos={pinnedAnnotation !== null ? pinnedAnnotationPos : null}
+          enablePinning={isPinningEnabled}
+          onUnpinClick={() => {
+            setPinnedAnnotation(null);
+            setPinnedAnnotationPos(null);
+          }}
+        />
+      )}
       <EChart
         sx={{
           width: '100%',

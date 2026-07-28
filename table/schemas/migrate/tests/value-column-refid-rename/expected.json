@@ -1,0 +1,30 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "header": "Third Metric",
+        "name": "value #3"
+      },
+      {
+        "header": "First Metric",
+        "name": "value #1"
+      },
+      {
+        "hide": true,
+        "name": "timestamp"
+      },
+      {
+        "hide": true,
+        "name": "value #2"
+      }
+    ],
+    "density": "compact",
+    "transforms": [
+      {
+        "kind": "MergeSeries",
+        "spec": {}
+      }
+    ]
+  }
+}

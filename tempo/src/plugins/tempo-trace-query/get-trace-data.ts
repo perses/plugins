@@ -11,12 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, isValidTraceId, Notice, otlptracev1, TraceSearchResult } from '@perses-dev/core';
-import { datasourceSelectValueToSelector, TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { getUnixTime } from 'date-fns';
-import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector, TempoTraceQuerySpec } from '../../model';
-import { DEFAULT_SEARCH_LIMIT, QueryResponse, SearchRequestParameters, SearchResponse } from '../../model/api-types';
-import { TempoClient } from '../../model/tempo-client';
+import { AbsoluteTimeRange, isValidTraceId, Notice, TraceSearchResult } from '@perses-dev/spec';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import {
+  TEMPO_DATASOURCE_KIND,
+  TempoDatasourceSelector,
+  TempoTraceQuerySpec,
+  TempoClient,
+  DEFAULT_SEARCH_LIMIT,
+  QueryResponse,
+  SearchRequestParameters,
+  SearchResponse,
+} from '../../model';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
@@ -32,6 +40,8 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     console.error('TempoTraceQuery is undefined, null, or an empty string.');
     return { searchResult: [] };
   }
+
+  const query = replaceVariables(spec.query, context.variableState);
 
   const defaultTempoDatasource: TempoDatasourceSelector = {
     kind: TEMPO_DATASOURCE_KIND,
@@ -49,17 +59,24 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
    * if the query is a valid traceId, fetch the trace by traceId
    * otherwise, execute a TraceQL query
    */
-  if (isValidTraceId(spec.query)) {
-    const response = await client.query({ traceId: spec.query });
+  if (isValidTraceId(query)) {
+    const response = await client.query({ traceId: query });
+
+    const notices: Notice[] = [];
+    if (response.message) {
+      notices.push({ type: 'warning', message: response.message });
+    }
+
     return {
       trace: parseTraceResponse(response),
       metadata: {
-        executedQueryString: spec.query,
+        executedQueryString: query,
+        notices,
       },
     };
   } else {
     const params: SearchRequestParameters = {
-      q: spec.query,
+      q: query,
     };
 
     // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
@@ -74,7 +91,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     const limit = spec.limit ?? DEFAULT_SEARCH_LIMIT;
     params.limit = limit + 1;
 
-    const response = await client.searchWithFallback(params);
+    const response = await client.search(params);
     const searchResult = parseSearchResponse(response);
     const hasMoreResults = searchResult.length > limit;
 
@@ -93,7 +110,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     return {
       searchResult,
       metadata: {
-        executedQueryString: spec.query,
+        executedQueryString: query,
         hasMoreResults,
         notices,
       },
@@ -102,9 +119,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
 };
 
 function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
-  const trace = {
-    resourceSpans: response.batches,
-  };
+  const trace = response.trace;
 
   // Tempo returns Trace ID and Span ID base64-encoded.
   // The OTLP spec defines the encoding in the hex format:
@@ -113,21 +128,21 @@ function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
   for (const resourceSpan of trace.resourceSpans) {
     for (const scopeSpan of resourceSpan.scopeSpans) {
       for (const span of scopeSpan.spans) {
-        if (span.traceId.length != 32) {
+        if (span.traceId.length !== 32) {
           span.traceId = base64ToHex(span.traceId);
         }
-        if (span.spanId.length != 16) {
+        if (span.spanId.length !== 16) {
           span.spanId = base64ToHex(span.spanId);
         }
-        if (span.parentSpanId && span.parentSpanId.length != 16) {
+        if (span.parentSpanId && span.parentSpanId.length !== 16) {
           span.parentSpanId = base64ToHex(span.parentSpanId);
         }
 
         for (const link of span.links ?? []) {
-          if (link.traceId.length != 32) {
+          if (link.traceId.length !== 32) {
             link.traceId = base64ToHex(link.traceId);
           }
-          if (link.spanId.length != 16) {
+          if (link.spanId.length !== 16) {
             link.spanId = base64ToHex(link.spanId);
           }
         }
@@ -138,7 +153,7 @@ function parseTraceResponse(response: QueryResponse): otlptracev1.TracesData {
   return trace;
 }
 
-function base64ToHex(str: string) {
+function base64ToHex(str: string): string {
   try {
     return atob(str)
       .split('')

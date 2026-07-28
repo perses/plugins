@@ -13,7 +13,7 @@
 
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
-import { otlptracev1 } from '@perses-dev/core';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as otlpTrace from '../test/traces/example_otlp.json';
 import { TicksHeader, TicksHeaderProps } from './Ticks';
 import { getTraceModel } from './trace';

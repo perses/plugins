@@ -28,6 +28,7 @@ export default createConfigForPlugin({
       './PrometheusLabelNamesVariable': './src/plugins/PrometheusLabelNamesVariable.tsx',
       './PrometheusPromQLVariable': './src/plugins/PrometheusPromQLVariable.tsx',
       './PrometheusExplorer': './src/explore/PrometheusExplorer.tsx',
+      './PrometheusPromQLAnnotation': './src/annotations/PrometheusPromQLAnnotation.tsx',
     },
     shared: {
       react: { requiredVersion: '18.2.0', singleton: true },

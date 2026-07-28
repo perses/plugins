@@ -20,7 +20,7 @@ import (
 kind: "StatChart"
 spec: close({
 	calculation:  common.#calculation
-	textMode?: "auto" | "value" | "name" | "none" | "value_and_name"
+	textMode?:    "auto" | "value" | "name" | "none" | "value_and_name"
 	metricLabel?: common.#metricLabel
 	format?:      common.#format
 	thresholds?:  common.#thresholds
@@ -29,7 +29,7 @@ spec: close({
 		width?: number
 	})
 	valueFontSize?: number
-	colorMode?: *"value" | "background_solid" | "none"
-	legendMode?: *"auto" | "on" | "off"
+	colorMode?:     *"value" | "background_solid" | "none"
+	legendMode?:    *"auto" | "on" | "off"
 	mappings?: [...common.#mappings]
 })

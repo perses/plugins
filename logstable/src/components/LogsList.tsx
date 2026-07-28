@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React from 'react';
-import { LogEntry } from '@perses-dev/core';
+import { LogEntry } from '@perses-dev/spec';
 import { LogsTableOptions } from '../model';
 import { EmptyLogsState } from './EmptyLogsState';
 import { useExpandedRows } from './hooks/useExpandedRows';

@@ -44,7 +44,7 @@ export interface LokiQueryResponse {
   };
 }
 
-export type LokiQueryRangeResponse = LokiQueryRangeMatrixResponse & LokiQueryRangeStreamsResponse;
+export type LokiQueryRangeResponse = LokiQueryRangeMatrixResponse | LokiQueryRangeStreamsResponse;
 
 export interface LokiQueryRangeMatrixResponse {
   status: 'success' | 'error';

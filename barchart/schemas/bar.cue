@@ -19,8 +19,11 @@ import (
 
 kind: "BarChart"
 spec: close({
-	calculation: common.#calculation
-	format?:     common.#format
-	sort?:       "asc" | "desc"
-	mode?:       "value" | "percentage"
+	calculation:  common.#calculation
+	format?:      common.#format
+	sort?:        "asc" | "desc"
+	mode?:        "value" | "percentage"
+	orientation?: "horizontal" | "vertical"
+	groupBy?: [...string]
+	isStacked?: bool
 })

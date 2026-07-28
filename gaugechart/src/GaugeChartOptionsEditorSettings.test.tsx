@@ -92,7 +92,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const maxInput = await screen.findByLabelText(/Max/);
+    const maxInput = await screen.findByRole('spinbutton', { name: /Max/ });
     expect(maxInput).toBeInTheDocument();
     userEvent.clear(maxInput);
     userEvent.type(maxInput, '5');

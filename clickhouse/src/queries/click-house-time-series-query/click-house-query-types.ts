@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector } from '@perses-dev/spec';
 
 export interface ClickHouseTimeSeriesQuerySpec {
   query: string;
@@ -21,6 +21,6 @@ export interface ClickHouseTimeSeriesQuerySpec {
 // TODO: import this type from your datasource or an existing datasource plugin
 export type DatasourceQueryResponse = {
   status: string;
-  data: any;
+  data: unknown;
   warnings?: string[];
 };
