@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/core';
+import { RequestHeaders } from '@perses-dev/client';
 
 export interface ClickHouseQueryParams {
   query: string;
+  start?: string;
+  end?: string;
   database?: string;
 }
 
@@ -25,11 +27,22 @@ export interface ClickHouseQueryOptions {
 
 export interface ClickHouseQueryResponse {
   status: 'success' | 'error';
-  data: any;
+  data: unknown;
 }
 
 export interface ClickHouseClient {
   query: (params: { start: string; end: string; query: string }) => Promise<ClickHouseQueryResponse>;
+}
+
+export function replaceTimeRangePlaceholders(query: string, start?: string, end?: string): string {
+  return query.replaceAll('{start}', start ?? '{start}').replaceAll('{end}', end ?? '{end}');
+}
+
+export function formatClickHouseDateTime(date: Date): string {
+  return date
+    .toISOString()
+    .replace('T', ' ')
+    .replace(/\.\d{3}Z$/, '');
 }
 
 export async function query(
@@ -43,7 +56,7 @@ export async function query(
     throw new Error('No query provided in params');
   }
 
-  let finalQuery = params.query.trim();
+  let finalQuery = replaceTimeRangePlaceholders(params.query.trim(), params.start, params.end);
   if (!finalQuery.toUpperCase().includes('FORMAT')) {
     finalQuery += ' FORMAT JSON';
   }

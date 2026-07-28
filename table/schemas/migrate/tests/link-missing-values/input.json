@@ -1,0 +1,104 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DATASOURCE}"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "custom": {
+        "align": "auto",
+        "displayMode": "auto"
+      },
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
+      }
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "instance"
+        },
+        "properties": [
+          {
+            "id": "links",
+            "value": [
+              {
+                "title": "View Instance",
+                "url": "/graph?instance=${__data.fields[\"instance\"]}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "job"
+        },
+        "properties": [
+          {
+            "id": "links",
+            "value": [
+              {
+                "title": "Job",
+                "targetBlank": true,
+                "url": "/graph?instance=${__data.fields[\"job\"]}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "value"
+        },
+        "properties": [
+          {
+            "id": "links",
+            "value": [
+              {
+                "url": "/graph?instance=${__data.fields[\"value\"]}"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 0
+  },
+  "id": 1,
+  "options": {
+    "showHeader": true
+  },
+  "pluginVersion": "10.1.8",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DATASOURCE}"
+      },
+      "expr": "up",
+      "format": "table",
+      "instant": true,
+      "refId": "A"
+    }
+  ],
+  "title": "Table with Link Without TargetBlank",
+  "type": "table"
+}

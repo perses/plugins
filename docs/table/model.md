@@ -26,6 +26,15 @@ enableSorting: <boolean> # Optional
 sort: <enum = "asc" | "desc"> # Optional
 width: <anyOf = number | "auto"> # Optional
 hide: <boolean> # Optional
+dataLink: <Data Link specification> # Optional
+```
+
+## Data Link specification
+
+```yaml
+url: <string> # Required. Supports variable substitution (e.g., ${__data.fields["column_name"]})
+title: <string> # Optional
+openNewTab: <boolean> # Required
 ```
 
 ## Cell Settings specification

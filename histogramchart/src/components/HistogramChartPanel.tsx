@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { Box, Stack, Typography } from '@mui/material';
-import { TimeSeriesData } from '@perses-dev/core';
 import { PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
 import { useChartsTheme } from '@perses-dev/components';
+import { TimeSeriesData } from '@perses-dev/spec';
 import { DEFAULT_FORMAT, DEFAULT_THRESHOLDS, HistogramChartOptions } from '../histogram-chart-model';
 import { HistogramChart, HistogramChartData } from './HistogramChart';
 
@@ -92,6 +92,7 @@ export function HistogramChartPanel(props: HistogramChartPanelProps): ReactEleme
               min={min}
               max={max}
               thresholds={thresholds}
+              logBase={pluginSpec.logBase}
             />
           </Box>
         );

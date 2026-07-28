@@ -13,11 +13,12 @@
 
 import { use } from 'echarts/core';
 import { PieChart as EChartsPieChart } from 'echarts/charts';
-import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { DatasetComponent, GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box, useTheme } from '@mui/material';
 import { ReactElement } from 'react';
-import { EChart, useChartsTheme } from '@perses-dev/components';
+import { EChart, FormatOptions, ModeOption, useChartsTheme } from '@perses-dev/components';
+import { getLabelFormatter, getTooltipFormatter } from './utils';
 
 use([
   EChartsPieChart,
@@ -32,24 +33,29 @@ export interface PieChartData {
   id?: string;
   name: string;
   value: number | null;
+  itemStyle?: {
+    color: string;
+  };
 }
 
 export interface PieChartBaseProps {
   width: number;
   height: number;
   data: PieChartData[] | null;
+  mode?: ModeOption;
   showLabels?: boolean;
+  formatOptions?: FormatOptions;
 }
 
 export function PieChartBase(props: PieChartBaseProps): ReactElement {
-  const { width, height, data, showLabels } = props;
+  const { width, height, data, mode, formatOptions, showLabels } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
 
   const option = {
     tooltip: {
       trigger: 'item',
-      formatter: '{b}: {c} ({d}%)',
+      formatter: getTooltipFormatter(formatOptions),
       appendTo: document.body,
       confine: false,
     },
@@ -61,7 +67,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
           show: Boolean(showLabels),
           position: 'inner',
           fontSize: 14,
-          formatter: '{b}\n{c}',
+          formatter: getLabelFormatter(mode, formatOptions),
           overflow: 'truncate',
           fontWeight: 'bold',
         },

@@ -3,8 +3,7 @@
   "spec": {
     "legend": {
       "mode": "list",
-      "position": "bottom",
-      "values": []
+      "position": "bottom"
     },
     "querySettings": [
       {

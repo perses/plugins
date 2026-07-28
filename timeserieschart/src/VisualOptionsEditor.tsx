@@ -74,7 +74,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             onChange={(__, newValue) => {
               const updatedValue: TimeSeriesChartVisualOptions = {
                 ...value,
-                stack: newValue.id === 'none' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
+                stack: newValue.id === 'none' ? undefined : newValue.id,
               };
               // stacked area chart preset to automatically set area under a curve shading
               if (newValue.id === 'all' && !value.areaOpacity) {

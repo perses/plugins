@@ -1,0 +1,6 @@
+{
+  "kind": "OpenSearchDatasource",
+  "spec": {
+    "directUrl": "http://localhost:9200"
+  }
+}

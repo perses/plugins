@@ -1,0 +1,30 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "instance",
+        "dataLink": {
+          "url": "/graph?instance=${__data.fields[\"instance\"]}",
+          "openNewTab": false,
+          "title": "View Instance"
+        }
+      },
+      {
+        "name": "job",
+        "dataLink": {
+          "url": "/graph?instance=${__data.fields[\"job\"]}",
+          "openNewTab": true,
+          "title": "Job"
+        }
+      },
+      {
+        "name": "value",
+        "dataLink": {
+          "url": "/graph?instance=${__data.fields[\"value\"]}",
+          "openNewTab": false
+        }
+      }
+    ]
+  }
+}

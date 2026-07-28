@@ -22,9 +22,7 @@ export interface ServiceProps {
   onChange?(value: string): void;
 }
 
-export function Service(props: ServiceProps): ReactElement {
-  const { datasource, value, onChange } = props;
-
+export function Service({ datasource, value, onChange }: ServiceProps): ReactElement {
   const { data: servicesOptions, isLoading: isServicesOptionsLoading } = useServices(datasource);
 
   function handleServiceChange(_event: SyntheticEvent, newValue: string | null): void {

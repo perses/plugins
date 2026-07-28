@@ -15,18 +15,14 @@ package model
 
 import (
 	"github.com/perses/shared/cue/common"
-	commonProxy "github.com/perses/shared/cue/common/proxy"
+	"github.com/perses/spec/cue/datasource"
 )
 
-kind: "ClickHouseDatasource"
+#kind: "ClickHouseDatasource"
+
+kind: #kind
 spec: {
-	#directUrl | #proxy
+	datasource.#HTTPDatasourceSpec
 }
 
-#directUrl: {
-	directUrl: common.#url
-}
-
-#proxy: {
-	proxy: commonProxy.#HTTPProxy
-}
+#selector: common.#datasourceSelector & {_kind: #kind}

@@ -5,6 +5,7 @@
     "format": {
       "unit": "decimal"
     },
+    "metricLabel": "version",
     "calculation": "mean",
     "colorMode": "background_solid"
   }

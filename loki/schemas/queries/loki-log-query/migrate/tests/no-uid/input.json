@@ -1,0 +1,7 @@
+{
+  "datasource": {
+    "type": "loki"
+  },
+  "expr": "{job=\"nginx\"} |= \"error\"",
+  "refId": "A"
+}

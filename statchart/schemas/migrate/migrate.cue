@@ -23,26 +23,31 @@ import (
 #panel:       _
 
 #mapping: {
-    type: string
-    options: [...{
-        key: string
-        value: string
-        text: string
-        color: string
-    }]
+	type: string
+	options: [...{
+		key:   string
+		value: string
+		text:  string
+		color: string
+	}]
 }
 
 kind: "StatChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
-	// textMode - map directly from Grafana's BigValueTextMode enum
-	textMode: *#panel.options.textMode | "auto"
+	// metricLabel
+	#textMode: *#panel.options.textMode | "auto"
+	if #textMode == "name" && (*#panel.targets[0].legendFormat | null) != null {
+		// /!\ best effort logic
+		// - if legendFormat contains a more complex expression than {{label}}, the result will be broken (but manually fixable afterwards still)
+		// - Perses's metricLabel is a single setting at panel level, hence the [0], so the result wont fit in case of multiple queries using different legendFormat
+		metricLabel: strings.Trim(#panel.targets[0].legendFormat, "{}")
+	}
 
-	// metricLabel - map from reduceOptions.fields for field selection
-	#fields: *#panel.options.reduceOptions.fields | null
-	if #fields != null && #fields != "" {
-		metricLabel: strings.Trim(#fields, "/^$")
+	// /!\ here too using [0] thus not perfect, even though the field getting remapped is unique to the whole panel in that case
+	if #textMode == "auto" && (*#panel.targets[0].format | null) == "table" && (*#panel.options.reduceOptions.fields | null) != null {
+		metricLabel: strings.Trim(#panel.options.reduceOptions.fields, "/^$")
 	}
 
 	// format
@@ -89,14 +94,14 @@ spec: {
 
 	// colorMode
 	#colorMode: *#panel.options.colorMode | null
-    if #colorMode != null {
-        colorMode: [
-            if #colorMode == "background" || #colorMode == "background_solid" {"background_solid"},
-            if #colorMode == "value" {"value"},
-            if #colorMode == "none" {"none"},
-            {"value"}, // default
-        ][0]
-    }
+	if #colorMode != null {
+		colorMode: [
+			if #colorMode == "background" || #colorMode == "background_solid" {"background_solid"},
+			if #colorMode == "value" {"value"},
+			if #colorMode == "none" {"none"},
+			{"value"}, // default
+		][0]
+	}
 
 	// mappings
 	#mappings: list.Concat([
@@ -121,13 +126,14 @@ spec: {
 
 					}]
 				}
-				if mapping.type != "value" { // else
+				if mapping.type != "value" {
 					#result: {
 						value: *mapping.options.result.text | ""
 						if mapping.options.result.color != _|_ {
 							color: *commonMigrate.#mapping.color[mapping.options.result.color] | mapping.options.result.color
 						}
 					}
+
 					[//switch
 						if mapping.type == "range" {
 							kind: "Range"
@@ -149,19 +155,21 @@ spec: {
 							}
 						},
 						if mapping.type == "special" {
+							#match: *mapping.options.match | "null"
+
 							kind: "Misc"
 							spec: {
 								value: [//switch
-									if mapping.options.match == "nan" {"NaN"},
-									if mapping.options.match == "null+nan" {"null"},
-									mapping.options.match,
+									if #match == "nan" {"NaN"},
+									if #match == "null+nan" {"null"},
+									#match,
 								][0]
 								result: #result
 							}
 						},
-					][0]
+					][0] // else
 				}
-			}
+			},
 		], 1),
 		for override in (*#panel.fieldConfig.overrides | [])
 		if override.matcher.id == "byName" && override.matcher.options == "Value"
@@ -183,12 +191,12 @@ spec: {
 						spec: {
 							result: value: v.options.result.text
 							from: v.options.from
-							to: v.options.to
+							to:   v.options.to
 						}
 					}
-				}
-			], 1),
-		}
+				},
+			], 1)
+		},
 	])
 	if len(#mappings) > 0 {
 		mappings: #mappings

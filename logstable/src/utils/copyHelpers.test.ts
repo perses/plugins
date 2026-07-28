@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry } from '@perses-dev/core';
+import { LogEntry } from '@perses-dev/spec';
 import {
   formatTimestamp,
   formatLabels,
@@ -115,6 +115,39 @@ describe('copyHelpers', () => {
       const result = formatLogEntries([mockLog]);
       expect(result).toContain('foo bar baz');
       expect(result).not.toContain('\n');
+    });
+  });
+
+  describe('ANSI stripping', () => {
+    it('should strip ANSI codes from log message when copying', () => {
+      const ansiLog: LogEntry = {
+        timestamp: 1767225600,
+        line: '\x1b[31mERROR\x1b[0m connection refused',
+        labels: {},
+      };
+      expect(formatLogMessage(ansiLog)).toBe('ERROR connection refused');
+    });
+
+    it('should strip ANSI codes from full log entry when copying', () => {
+      const ansiLog: LogEntry = {
+        timestamp: 1767225600,
+        line: '\x1b[32mINFO\x1b[0m server started',
+        labels: { level: 'info' },
+      };
+      const result = formatLogEntry(ansiLog);
+      expect(result).not.toContain('\x1b[');
+      expect(result).toContain('INFO server started');
+    });
+
+    it('should preserve ANSI codes in JSON format', () => {
+      const ansiLog: LogEntry = {
+        timestamp: 1767225600,
+        line: '\x1b[31mERROR\x1b[0m',
+        labels: {},
+      };
+      const result = formatLogAsJson(ansiLog);
+      const parsed = JSON.parse(result);
+      expect(parsed.line).toBe('\x1b[31mERROR\x1b[0m');
     });
   });
 });

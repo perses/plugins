@@ -14,7 +14,7 @@
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
-import { otlptracev1 } from '@perses-dev/core';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
 import { GanttTableProvider } from './GanttTableProvider';
@@ -43,7 +43,7 @@ describe('SpanDuration', () => {
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();
     expect(parseInt(screen.getByText('150ms').style.left)).toEqual(44); // 44%, on the right side of the span bar
-    expect(screen.getByTestId('span-duration-bar').style.backgroundColor).toEqual('rgba(83, 83, 83, 0.9)');
+    expect(screen.getByTestId('span-duration-bar').style.backgroundColor).toEqual('rgba(172, 170, 83, 0.9)');
   });
 
   it('render span bar duration on left side', () => {

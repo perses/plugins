@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { msToPrometheusDuration, formatDuration, formatValue } from '@perses-dev/core';
+import { formatValue } from '@perses-dev/components';
+import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
 
 export function formatNanoDuration(value: number): string {
   // The value to format is in nanoseconds
@@ -20,7 +21,7 @@ export function formatNanoDuration(value: number): string {
   } else if (value < 1_000_000) {
     return formatValue(value / 1_000, { unit: 'decimal', decimalPlaces: 2, shortValues: true }) + 'μs';
   } else {
-    return formatDuration(msToPrometheusDuration(value / 1_000_000));
+    return formatDuration(convertTimeToDuration(value / 1_000_000));
   }
 }
 

@@ -13,8 +13,8 @@
 
 import { ReactElement, useMemo } from 'react';
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
-import { otlpcommonv1 } from '@perses-dev/core';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import * as oltpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import { Span, Trace } from '../trace';
 import { formatDuration } from '../utils';
 import { CustomLinks } from '../../gantt-chart-model';
@@ -25,7 +25,7 @@ export interface TraceAttributesProps {
   span: Span;
 }
 
-export function TraceAttributes(props: TraceAttributesProps) {
+export function TraceAttributes(props: TraceAttributesProps): ReactElement {
   const { customLinks, trace, span } = props;
 
   return (
@@ -34,28 +34,51 @@ export function TraceAttributes(props: TraceAttributesProps) {
         <AttributeItem name="span ID" value={span.spanId} />
         <AttributeItem name="start" value={formatDuration(span.startTimeUnixMs - trace.startTimeUnixMs)} />
         <AttributeItem name="duration" value={formatDuration(span.endTimeUnixMs - span.startTimeUnixMs)} />
+        {span.kind && <AttributeItem name="kind" value={span.kind} />}
+        {span.status.code && <AttributeItem name="status code" value={span.status.code} />}
+        {span.status.message && <AttributeItem name="status message" value={span.status.message} />}
       </List>
-      <Divider />
+
       {span.attributes.length > 0 && (
         <>
+          <Divider />
           <AttributeList
             customLinks={customLinks}
             attributes={span.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
           />
-          <Divider />
         </>
       )}
-      <AttributeList
-        customLinks={customLinks}
-        attributes={span.resource.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
-      />
+
+      {span.resource.attributes.length > 0 && (
+        <>
+          <Divider />
+          <AttributeList
+            customLinks={customLinks}
+            attributes={span.resource.attributes.toSorted((a, b) => a.key.localeCompare(b.key))}
+          />
+        </>
+      )}
+
+      {(span.scope.name || span.scope.version || (span.scope.attributes && span.scope.attributes.length > 0)) && (
+        <>
+          <Divider />
+          <List>
+            {span.scope.name && <AttributeItem name="scope name" value={span.scope.name} />}
+            {span.scope.version && <AttributeItem name="scope version" value={span.scope.version} />}
+            <AttributeItems
+              customLinks={customLinks}
+              attributes={(span.scope.attributes ?? []).toSorted((a, b) => a.key.localeCompare(b.key))}
+            />
+          </List>
+        </>
+      )}
     </>
   );
 }
 
 export interface AttributeListProps {
   customLinks?: CustomLinks;
-  attributes: otlpcommonv1.KeyValue[];
+  attributes: oltpcommonv1.KeyValue[];
 }
 
 export function AttributeList(props: AttributeListProps): ReactElement {
@@ -70,7 +93,7 @@ export function AttributeList(props: AttributeListProps): ReactElement {
 
 interface AttributeItemsProps {
   customLinks?: CustomLinks;
-  attributes: otlpcommonv1.KeyValue[];
+  attributes: oltpcommonv1.KeyValue[];
 }
 
 export function AttributeItems(props: AttributeItemsProps): ReactElement {
@@ -145,7 +168,7 @@ export function AttributeItem(props: AttributeItemProps): ReactElement {
   );
 }
 
-function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
+export function renderAttributeValue(value: oltpcommonv1.AnyValue): string {
   if ('stringValue' in value) return value.stringValue || '<empty string>';
   if ('intValue' in value) return value.intValue;
   if ('doubleValue' in value) return String(value.doubleValue);
@@ -154,5 +177,5 @@ function renderAttributeValue(value: otlpcommonv1.AnyValue): string {
     const values = value.arrayValue.values;
     return values && values.length > 0 ? values.map(renderAttributeValue).join(', ') : '<empty array>';
   }
-  return 'unknown';
+  return '<unknown type>';
 }

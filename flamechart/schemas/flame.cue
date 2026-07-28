@@ -15,10 +15,10 @@ package model
 
 kind: "FlameChart"
 spec: close({
-    palette: "package-name" | "value"
-    showSettings: bool
-    showSeries: bool
-    showTable: bool
-    showFlameGraph: bool
-    traceHeight?: int & >=0
+	palette:        "package-name" | "value"
+	showSettings:   bool
+	showSeries:     bool
+	showTable:      bool
+	showFlameGraph: bool
+	traceHeight?:   int & >=0
 })

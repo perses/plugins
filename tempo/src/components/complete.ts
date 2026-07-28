@@ -26,7 +26,7 @@ import {
   FieldOp,
 } from '@grafana/lezer-traceql';
 import { EditorView } from '@uiw/react-codemirror';
-import { getUnixTimeRange } from '../plugins/tempo-trace-query';
+import { getUnixTimeRange } from '../plugins';
 import { CompletionConfig } from './TraceQLExtension';
 
 /** CompletionScope specifies the completion kind, e.g. whether to complete tag names or values etc. */
@@ -241,7 +241,7 @@ async function completeTagName(
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
 }
 
-function escapeString(input: string, quoteChar: string) {
+function escapeString(input: string, quoteChar: string): string {
   // do not escape raw strings (when using backticks)
   if (quoteChar === '`') {
     return input;

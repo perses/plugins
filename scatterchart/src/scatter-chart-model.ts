@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec, QueryDefinition } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 

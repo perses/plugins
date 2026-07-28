@@ -1,0 +1,16 @@
+{
+  "name": "@perses-dev/plugins-e2e",
+  "version": "0.1.0",
+  "description": "e2e tests for plugins",
+  "private": true,
+  "scripts": {
+    "test:ci": "npx playwright test --workers=1 --reporter=github,list",
+    "test:install": "npx playwright install --with-deps",
+    "test:local": "npx playwright test --ui",
+    "build": "echo 'Skipping build for e2e tests'"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.2.3"
+  }
+}

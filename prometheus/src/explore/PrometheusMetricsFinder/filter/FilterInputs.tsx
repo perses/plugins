@@ -33,8 +33,8 @@ import {
   TextField,
 } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/Delete';
-import { DatasourceSelector } from '@perses-dev/core';
 import { Virtuoso } from 'react-virtuoso';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { LabelFilter, Operator } from '../types';
 import { useLabels, useLabelValues } from '../utils';
 

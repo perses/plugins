@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 import {
   CalculationSelector,
   CalculationSelectorProps,
+  CalculationType,
   LegendOptionsEditor,
   LegendOptionsEditorProps,
 } from '@perses-dev/plugin-system';
@@ -34,8 +36,10 @@ import {
   SortOption,
   OptionsEditorControl,
   useChartsTheme,
+  FormatOptions,
+  isPercentUnit,
+  isUnitWithShortValues,
 } from '@perses-dev/components';
-import { CalculationType, isPercentUnit, FormatOptions } from '@perses-dev/core';
 import {
   Button,
   FormControl,
@@ -108,7 +112,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     return value.colorPalette || undefined;
   }, [value.colorPalette]);
 
-  const handleColorChange = (color?: string[]) => {
+  const handleColorChange = (color?: string[]): void => {
     onChange(
       produce(value, (draft: PieChartOptions) => {
         if (Array.isArray(color)) {
@@ -123,7 +127,11 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   };
 
   // ensures decimalPlaces defaults to correct value
-  const format = merge({}, DEFAULT_FORMAT, value.format);
+  const format = merge(
+    {},
+    !value.format || isUnitWithShortValues(value.format) ? DEFAULT_FORMAT : omit(DEFAULT_FORMAT, ['shortValues']),
+    value.format
+  );
 
   type ColorScheme = 'default' | 'theme' | 'gradient';
 
@@ -131,7 +139,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     return Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default';
   }, [colorPalette]);
 
-  const handleColorSchemeChange = (scheme: ColorScheme) => {
+  const handleColorSchemeChange = (scheme: ColorScheme): void => {
     if (scheme === 'theme') {
       handleColorChange(themePalette as string[]);
     } else if (scheme === 'default') {

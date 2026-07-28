@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, ThresholdOptions, FormatOptions } from '@perses-dev/core';
+import { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
+import { Definition } from '@perses-dev/spec';
 
 /**
  * Line style options for time series charts.
@@ -44,6 +45,14 @@ export interface QuerySettingsOptions {
   colorValue?: string;
   lineStyle?: LineStyleType;
   areaOpacity?: number;
+  format?: FormatOptions;
+  /**
+   * If true, the query's series values are negated for display so they render
+   * below the X axis. The original (positive) values are preserved for legend
+   * calculations and CSV export, matching Grafana's `transform: "negative-Y"` behavior.
+   */
+  negativeY?: boolean;
+  stack?: boolean;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;

@@ -1,0 +1,22 @@
+{
+  "datasource": {
+    "uid": "loki"
+  },
+  "options": {
+    "showLabels": false,
+    "showTime": true,
+    "sortOrder": "Descending",
+    "wrapLogMessage": true
+  },
+  "targets": [
+    {
+      "datasource": {
+        "uid": "loki"
+      },
+      "expr": "{pod_name=~\"$pod\"} |~ \"$search\"",
+      "refId": "A"
+    }
+  ],
+  "title": "Logs Panel",
+  "type": "logs"
+}

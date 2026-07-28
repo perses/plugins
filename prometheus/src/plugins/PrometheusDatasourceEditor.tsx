@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString } from '@perses-dev/core';
+import { Box, IconButton, TextField, Typography } from '@mui/material';
+import { QueryParamValues } from '@perses-dev/components';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { Box, TextField, Typography, IconButton } from '@mui/material';
-import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
-import React, { ReactElement, useState, useRef } from 'react';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { ReactElement, useRef, useState } from 'react';
+import { DurationString } from '@perses-dev/spec';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
 
 interface QueryParamEntry {
@@ -41,11 +42,11 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   // Use local state to maintain an array of entries during editing, instead of
   // manipulating a map directly which causes weird UX.
   const [entries, setEntries] = useState<QueryParamEntry[]>(() => {
-    const queryParams = value.queryParams ?? {};
-    return Object.entries(queryParams).map(([key, value]) => ({
+    const queryParams: QueryParamValues = value.queryParams ?? {};
+    return Object.entries(queryParams).map(([key, val]) => ({
       id: String(nextIdRef.current++),
       key,
-      value,
+      value: Array.isArray(val) ? val.join(',') : val,
     }));
   });
 
@@ -63,12 +64,15 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   });
   const hasDuplicates = duplicateKeys.size > 0;
 
-  // Convert entries array to object and trigger onChange
-  const syncToParent = (newEntries: QueryParamEntry[]) => {
-    const newParams: Record<string, string> = {};
+  // Convert entries array to object and trigger onChange.
+  // Values containing commas are stored as arrays to preserve the round-trip
+  // with the load-time join(',') in useState above.
+  const syncToParent = (newEntries: QueryParamEntry[]): void => {
+    const newParams: Record<string, string | string[]> = {};
     newEntries.forEach(({ key, value }) => {
       if (key !== '') {
-        newParams[key] = value;
+        const parts = value.split(',');
+        newParams[key] = parts.length > 1 ? parts : value;
       }
     });
 
@@ -78,7 +82,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
     });
   };
 
-  const handleQueryParamChange = (id: string, field: 'key' | 'value', newValue: string) => {
+  const handleQueryParamChange = (id: string, field: 'key' | 'value', newValue: string): void => {
     const newEntries = entries.map((entry) => {
       if (entry.id !== id) return entry;
       return field === 'key' ? { ...entry, key: newValue } : { ...entry, value: newValue };
@@ -87,13 +91,13 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
     syncToParent(newEntries);
   };
 
-  const addQueryParam = () => {
+  const addQueryParam = (): void => {
     const newEntries = [...entries, { id: String(nextIdRef.current++), key: '', value: '' }];
     setEntries(newEntries);
     syncToParent(newEntries);
   };
 
-  const removeQueryParam = (id: string) => {
+  const removeQueryParam = (id: string): void => {
     const newEntries = entries.filter((entry) => entry.id !== id);
     setEntries(newEntries);
     syncToParent(newEntries);

@@ -12,11 +12,18 @@
 // limitations under the License.
 
 import { TitleComponentOption } from 'echarts';
-import { useChartsTheme, GraphSeries, PersesChartsTheme } from '@perses-dev/components';
+import {
+  useChartsTheme,
+  GraphSeries,
+  PersesChartsTheme,
+  ValueMapping,
+  applyValueMapping,
+  createRegexFromString,
+} from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
 import { FC, useMemo } from 'react';
-import { applyValueMapping, Labels, createRegexFromString, TimeSeriesData, ValueMapping } from '@perses-dev/core';
 import { PanelProps, PanelData } from '@perses-dev/plugin-system';
+import { Labels, TimeSeriesData } from '@perses-dev/spec';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline } from './utils/data-transform';
 import { calculateValue } from './utils/calculate-value';

@@ -121,9 +121,17 @@ const (
 )
 
 type QuerySettingsItem struct {
-	QueryIndex uint      `json:"queryIndex" yaml:"queryIndex"`
-	ColorMode  ColorMode `json:"colorMode" yaml:"colorMode"`
-	ColorValue string    `json:"colorValue" yaml:"colorValue"`
+	QueryIndex  uint           `json:"queryIndex" yaml:"queryIndex"`
+	ColorMode   ColorMode      `json:"colorMode,omitempty" yaml:"colorMode,omitempty"`
+	ColorValue  string         `json:"colorValue,omitempty" yaml:"colorValue,omitempty"`
+	LineStyle   string         `json:"lineStyle,omitempty" yaml:"lineStyle,omitempty"`
+	AreaOpacity float64        `json:"areaOpacity,omitempty" yaml:"areaOpacity,omitempty"`
+	Format      *common.Format `json:"format,omitempty" yaml:"format,omitempty"`
+	// NegativeY, when true, renders the query's series below the X axis (values
+	// are negated for display only; legend calculations and CSV export keep the
+	// original values).
+	NegativeY bool  `json:"negativeY,omitempty" yaml:"negativeY,omitempty"`
+	Stack     *bool `json:"stack,omitempty" yaml:"stack,omitempty"`
 }
 
 type Option func(plugin *Builder) error

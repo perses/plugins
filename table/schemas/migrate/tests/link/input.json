@@ -1,0 +1,89 @@
+{
+  "datasource": {
+    "type": "prometheus",
+    "uid": "${DATASOURCE}"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "custom": {
+        "align": "auto",
+        "displayMode": "auto"
+      },
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
+      }
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "instance"
+        },
+        "properties": [
+          {
+            "id": "links",
+            "value": [
+              {
+                "targetBlank": true,
+                "title": "View Instance",
+                "url": "/graph?instance=${__data.fields[\"instance\"]}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "job"
+        },
+        "properties": [
+          {
+            "id": "links",
+            "value": [
+              {
+                "targetBlank": false,
+                "title": "",
+                "url": "/d/job-dashboard?job=${__data.fields[\"job\"]}"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 0
+  },
+  "id": 1,
+  "options": {
+    "showHeader": true
+  },
+  "pluginVersion": "10.1.8",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DATASOURCE}"
+      },
+      "expr": "up",
+      "format": "table",
+      "instant": true,
+      "refId": "A"
+    }
+  ],
+  "title": "Table with Links",
+  "type": "table"
+}

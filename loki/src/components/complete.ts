@@ -365,8 +365,8 @@ async function completeLabelName(completionCfg: CompletionConfig): Promise<Compl
   const end = completionCfg.timeRange?.end ? toUnixSeconds(new Date(completionCfg.timeRange.end).getTime()) : undefined;
 
   try {
-    const response = await completionCfg.client.labels(start, end);
-    if (response.status === 'success') {
+    const response = await completionCfg.client.labels({ start, end });
+    if (response.status === 'success' && response.data) {
       return response.data.map((label: string) => ({ label }));
     }
     return [];
@@ -387,8 +387,8 @@ async function completeLabelValue(completionCfg: CompletionConfig, label: string
   const end = completionCfg.timeRange?.end ? toUnixSeconds(new Date(completionCfg.timeRange.end).getTime()) : undefined;
 
   try {
-    const response = await completionCfg.client.labelValues(label, start, end);
-    if (response.status === 'success') {
+    const response = await completionCfg.client.labelValues({ labelName: label, start, end });
+    if (response.status === 'success' && response.data) {
       return response.data.map((value: string) => ({
         label: value ?? '',
         displayLabel: value ?? '(empty string)',
@@ -409,7 +409,7 @@ function createLineFilterCompletion(operator: string, detail: string): Completio
   return {
     label: `${operator} ""`,
     detail,
-    apply: (view, _completion, from, to) => {
+    apply: (view, _completion, from, to): void => {
       const insert = `${operator} ""`;
       view.dispatch({
         changes: { from, to, insert },
@@ -421,7 +421,7 @@ function createLineFilterCompletion(operator: string, detail: string): Completio
   };
 }
 
-function escapeString(input: string, quoteChar: string) {
+function escapeString(input: string, quoteChar: string): string {
   // do not escape raw strings (when using backticks)
   if (quoteChar === '`') {
     return input;

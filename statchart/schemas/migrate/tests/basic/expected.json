@@ -2,13 +2,13 @@
   "kind": "StatChart",
   "spec": {
     "calculation": "last-number",
-    "textMode": "auto",
     "format": {
       "decimalPlaces": 2,
       "unit": "bytes/sec"
     },
     "colorMode": "value",
     "sparkline": {},
+    "textMode": "auto",
     "thresholds": {
       "steps": [
         {

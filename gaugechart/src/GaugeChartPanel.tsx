@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { Box, Skeleton, Stack } from '@mui/material';
-import { useChartsTheme } from '@perses-dev/components';
-import { CalculationsMap, DEFAULT_CALCULATION, FormatOptions, formatValue, TimeSeriesData } from '@perses-dev/core';
-import { PanelProps } from '@perses-dev/plugin-system';
+import { FormatOptions, formatValue, useChartsTheme } from '@perses-dev/components';
+import { CalculationsMap, DEFAULT_CALCULATION, PanelProps } from '@perses-dev/plugin-system';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
+import { TimeSeriesData } from '@perses-dev/spec';
 import {
   DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,
@@ -102,21 +102,19 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
   const gaugeData = useMemo((): GaugeSeries[] => {
     const seriesData: GaugeSeries[] = [];
 
-    if (!queryResults[0]?.data?.series?.length) {
-      return seriesData;
-    }
-
     if (!CalculationsMap[calculation]) {
       console.warn(`Invalid GaugeChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
     }
 
     const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
 
-    for (const timeSeries of queryResults[0].data.series) {
-      seriesData.push({
-        value: calculate(timeSeries.values),
-        label: showLegend ? (timeSeries.formattedName ?? '') : '',
-      });
+    for (const result of queryResults) {
+      for (const timeSeries of result.data.series) {
+        seriesData.push({
+          value: calculate(timeSeries.values),
+          label: showLegend ? (timeSeries.formattedName ?? '') : '',
+        });
+      }
     }
     return seriesData;
   }, [queryResults, calculation, showLegend]);

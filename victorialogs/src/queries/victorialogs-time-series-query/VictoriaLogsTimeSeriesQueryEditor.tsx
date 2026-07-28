@@ -20,6 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback, useState, useEffect } from 'react';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import { LogsQLEditor } from '../../components/logsql-editor';
 import { VICTORIALOGS_DATASOURCE_KIND, VictoriaLogsDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
@@ -101,12 +102,7 @@ export function VictoriaLogsQueryEditor(props: VictoriaLogsQueryEditorProps): Re
           value={localQuery}
           onChange={handleQueryChange}
           onBlur={() => handleQueryExecute(localQuery)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
-              event.preventDefault();
-              handleQueryExecute(localQuery);
-            }
-          }}
+          onKeyDown={createModEnterHandler(() => handleQueryExecute(localQuery))}
           placeholder='Enter LogsQL query (e.g. {job="mysql"} |= "error")'
           // height="120px"
         />

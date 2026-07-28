@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Base eslint configuration for typescript projects
 module.exports = {
   extends: [
     'eslint:recommended',
@@ -48,19 +49,28 @@ module.exports = {
   },
 
   rules: {
+    '@typescript-eslint/explicit-function-return-type': 'error',
+    '@typescript-eslint/explicit-module-boundary-types': 'error',
+
     'prettier/prettier': 'error',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/array-type': [
       'error',
       {
         default: 'array-simple',
       },
     ],
+    eqeqeq: ['error', 'always'],
     'import/order': 'error',
     // you must disable the base rule as it can report incorrect errors
     'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      },
+    ],
 
     'react/prop-types': 'off',
     'react-hooks/exhaustive-deps': 'error',
@@ -72,6 +82,30 @@ module.exports = {
     // because it avoids false errors on cases where we have a regular
     // import and an `import type`.
     'import/no-duplicates': 'error',
+
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            /**
+             * This library is gigantic and named imports end up slowing down builds/blowing out bundle sizes,
+             * so this prevents that style of import.
+             */
+            group: ['mdi-material-ui', '!mdi-material-ui/'],
+            message: `
+Please use the default import from the icon file directly rather than using a named import.
+
+Good:
+import IconName from 'mdi-material-ui/IconName';
+
+Bad:
+import { IconName } from 'mdi-material-ui';
+`,
+          },
+        ],
+      },
+    ],
   },
 
   ignorePatterns: ['**/dist'],

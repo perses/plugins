@@ -15,26 +15,14 @@ package model
 
 import (
 	"github.com/perses/shared/cue/common"
-	commonProxy "github.com/perses/shared/cue/common/proxy"
+	"github.com/perses/spec/cue/datasource"
 )
-
-kind: #kind
-spec: {
-	#directUrl | #proxy
-}
 
 #kind: "VictoriaLogsDatasource"
 
-#directUrl: {
-	directUrl: common.#url
+kind: #kind
+spec: {
+	datasource.#HTTPDatasourceSpec
 }
 
-#proxy: {
-	proxy: commonProxy.#HTTPProxy
-}
-
-#selector: common.#datasourceSelector & {
-	datasource?: =~common.#variableSyntaxRegex | {
-		kind: #kind
-	}
-}
+#selector: common.#datasourceSelector & {_kind: #kind}

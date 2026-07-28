@@ -2,7 +2,6 @@
   "kind": "StatChart",
   "spec": {
     "calculation": "last",
-    "textMode": "auto",
     "mappings": [
       {
         "kind": "Value",
@@ -63,6 +62,7 @@
         }
       }
     ],
+    "textMode": "auto",
     "thresholds": {
       "steps": [
         {

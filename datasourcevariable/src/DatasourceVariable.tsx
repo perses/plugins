@@ -13,7 +13,7 @@
 
 import { OptionsEditorProps, useListPluginMetadata, VariablePlugin } from '@perses-dev/plugin-system';
 import { Autocomplete, TextField } from '@mui/material';
-import { useEffect, useMemo } from 'react';
+import { ReactElement, useEffect, useMemo } from 'react';
 
 type StaticListVariableOptions = {
   datasourcePluginKind: string;
@@ -21,7 +21,7 @@ type StaticListVariableOptions = {
 
 const EMPTY_SELECTED_KIND = { label: '', value: '' };
 
-export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticListVariableOptions>) => {
+export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticListVariableOptions>): ReactElement => {
   const { onChange, value } = props;
   const { datasourcePluginKind } = value;
   const { data: datasourcePlugins } = useListPluginMetadata(['Datasource']);

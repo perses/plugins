@@ -19,13 +19,14 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
-import { PrometheusClient, DEFAULT_PROM, PROM_DATASOURCE_KIND } from '../model';
+import { DEFAULT_PROM, PROM_DATASOURCE_KIND } from '../model';
 import {
   capturingMatrix,
   capturingVector,
   stringArrayToVariableOptions,
   PrometheusPromQLVariableEditor,
 } from './prometheus-variables';
+import { resolvePrometheusDatasource } from './interpolation';
 import { PrometheusPromQLVariableOptions } from './types';
 
 export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOptions> = {
@@ -36,11 +37,16 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
         ctx.variables,
         await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND)
       ) ?? DEFAULT_PROM;
-    const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(datasourceSelector);
+    const { client, requestOptions } = await resolvePrometheusDatasource(
+      ctx.datasourceStore,
+      datasourceSelector,
+      ctx.variables
+    );
     // TODO we may want to manage a range query as well.
-    const { data: options } = await client.instantQuery({
-      query: replaceVariables(spec.expr, ctx.variables),
-    });
+    const { data: options } = await client.instantQuery(
+      { query: replaceVariables(spec.expr, ctx.variables) },
+      requestOptions
+    );
     const labelName = replaceVariables(spec.labelName, ctx.variables);
     let values: string[] = [];
     if (options?.resultType === 'matrix') {

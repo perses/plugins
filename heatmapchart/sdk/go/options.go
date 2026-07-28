@@ -37,3 +37,24 @@ func ShowVisualMap(show bool) Option {
 		return nil
 	}
 }
+
+func Min(min float64) Option {
+	return func(builder *Builder) error {
+		builder.Min = min
+		return nil
+	}
+}
+
+func Max(max float64) Option {
+	return func(builder *Builder) error {
+		builder.Max = max
+		return nil
+	}
+}
+
+func WithLogBase(logBase uint) Option {
+	return func(builder *Builder) error {
+		builder.LogBase = logBase
+		return nil
+	}
+}

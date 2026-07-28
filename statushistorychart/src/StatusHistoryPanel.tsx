@@ -16,7 +16,7 @@ import { ContentWithLegend, useChartsTheme } from '@perses-dev/components';
 import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import { merge } from 'lodash';
 import { ReactElement, useMemo } from 'react';
-import { TimeSeriesData } from '@perses-dev/core';
+import { TimeSeriesData } from '@perses-dev/spec';
 import { useStatusHistoryDataModel } from './utils/data-transform';
 import { StatusHistoryChartOptions } from './status-history-model.js';
 import { StatusHistoryChartBase } from './StatusHistoryChartBase';

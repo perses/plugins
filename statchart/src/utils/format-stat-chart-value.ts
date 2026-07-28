@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormatOptions, formatValue } from '@perses-dev/core';
+import { FormatOptions, formatValue } from '@perses-dev/components';
 
 export const formatStatChartValue = (value?: string | number | null, format?: FormatOptions): string => {
   if (value === null) {

@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LogQueryContext } from '@perses-dev/plugin-system';
 import { LokiQueryRangeStreamsResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
 import { LokiLogQuery } from './LokiLogQuery';
-import { LogQueryContext } from './log-query-plugin-interface';
 
 const datasource: LokiDatasourceSpec = {
   directUrl: '/test',
@@ -63,6 +63,7 @@ const createStubContext = (): LogQueryContext => {
       start: new Date('01-02-2025'),
     },
     variableState: {},
+    refreshKey: '',
   };
   return stubLogContext;
 };

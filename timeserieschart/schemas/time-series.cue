@@ -60,12 +60,16 @@ spec: close({
 }
 
 #querySettings: [...{
-	queryIndex:    int & >=0
-	colorMode?:    "fixed" | "fixed-single"       // NB: "palette" could be added later
-	colorValue?:   =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
-	lineStyle?:    #lineStyle
-	areaOpacity?:  #areaOpacity
+	queryIndex:   int & >=0
+	colorMode?:   "fixed" | "fixed-single"       // NB: "palette" could be added later
+	colorValue?:  =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
+	lineStyle?:   #lineStyle
+	areaOpacity?: #areaOpacity
+	format?:      common.#format
+	negativeY?:   bool // render the query's series below the X axis
+	stack?:       bool
 }]
 
-#lineStyle:   "solid" | "dashed" | "dotted"
+#lineStyle: "solid" | "dashed" | "dotted"
+
 #areaOpacity: number & >=0 & <=1 // transparency level from 0 (transparent) to 1 (opaque)

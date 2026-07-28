@@ -15,6 +15,13 @@ package pie
 
 import "github.com/perses/perses/go-sdk/common"
 
+func Calculation(calculation common.Calculation) Option {
+	return func(builder *Builder) error {
+		builder.Calculation = calculation
+		return nil
+	}
+}
+
 func WithLegend(legend Legend) Option {
 	return func(builder *Builder) error {
 		builder.Legend = &legend

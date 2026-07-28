@@ -1,0 +1,11 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": {
+    "datasource": {
+      "kind": "OpenSearchDatasource",
+      "name": "opensearch"
+    },
+    "query": "source=logs-*",
+    "messageField": ""
+  }
+}

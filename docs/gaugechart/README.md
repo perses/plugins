@@ -2,6 +2,8 @@
 
 The Gauge Chart plugin displays data as gauge meters in Perses dashboards. This panel plugin is useful for showing single values within a defined range, typically for performance indicators and thresholds.
 
+![GaugeChart example](./gaugechart.png)
+
 See also technical docs related to this plugin:
 
 - [Data model](./model.md)

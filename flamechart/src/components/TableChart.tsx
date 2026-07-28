@@ -13,9 +13,10 @@
 
 import { ReactElement, useMemo, useState } from 'react';
 import { Stack, useTheme, Link } from '@mui/material';
-import { ProfileData } from '@perses-dev/core';
+
 import { Table, TableColumnConfig } from '@perses-dev/components';
 import { SortingState } from '@tanstack/react-table';
+import { ProfileData } from '@perses-dev/spec';
 import { tableRecursionJson } from '../utils/data-transform';
 import { TableChartSample } from '../utils/data-model';
 import { formatItemValue } from '../utils/format';
@@ -58,7 +59,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         align: 'left',
         enableSorting: true,
         width: 0.5 * availableWidth,
-        cell: (ctx) => {
+        cell: (ctx): ReactElement => {
           const cellValue = ctx.getValue();
           return (
             <Link
@@ -84,7 +85,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         align: 'right',
         enableSorting: true,
         width: 0.25 * availableWidth - SCROLL_BAR_WIDTH,
-        cell: (ctx) => {
+        cell: (ctx): string => {
           const cellValue = ctx.getValue();
           return formatItemValue(unit, cellValue);
         },
@@ -96,7 +97,7 @@ export function TableChart(props: TableChartProps): ReactElement {
         align: 'right',
         enableSorting: true,
         width: 0.25 * availableWidth,
-        cell: (ctx) => {
+        cell: (ctx): string => {
           const cellValue = ctx.getValue();
           return formatItemValue(unit, cellValue);
         },

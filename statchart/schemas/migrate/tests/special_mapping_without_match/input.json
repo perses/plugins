@@ -1,0 +1,88 @@
+{
+  "datasource" : {
+    "uid" : "$datasource"
+  },
+  "description" : " - Dynamic Load Balancing: Dynamic load balancing enabled state for the selected stack and namespace",
+  "fieldConfig" : {
+    "defaults" : {
+      "color" : {
+        "mode" : "thresholds"
+      },
+      "links" : [ ],
+      "mappings" : [ {
+        "options" : {
+          "0" : {
+            "color" : "#F2495C",
+            "index" : 0,
+            "text" : "NO"
+          },
+          "1" : {
+            "color" : "#73BF69",
+            "index" : 1,
+            "text" : "YES"
+          }
+        },
+        "type" : "value"
+      }, {
+        "options" : {
+          "result" : {
+            "color" : "#5794F2",
+            "index" : 2,
+            "text" : "No data"
+          }
+        },
+        "type" : "special"
+      } ],
+      "max" : 1,
+      "min" : 0,
+      "thresholds" : {
+        "mode" : "absolute",
+        "steps" : [ {
+          "color" : "#F2495C"
+        }, {
+          "color" : "#73BF69",
+          "value" : 1
+        } ]
+      },
+      "unit" : ""
+    },
+    "overrides" : [ ]
+  },
+  "gridPos" : {
+    "h" : 4,
+    "w" : 3,
+    "x" : 6,
+    "y" : 16
+  },
+  "id" : 88,
+  "options" : {
+    "colorMode" : "value",
+    "graphMode" : "none",
+    "justifyMode" : "auto",
+    "orientation" : "auto",
+    "reduceOptions" : {
+      "calcs" : [ "lastNotNull" ],
+      "fields" : "",
+      "values" : false
+    },
+    "textMode" : "auto"
+  },
+  "pluginVersion" : "7",
+  "targets" : [ {
+    "datasource" : {
+      "type" : "prometheus",
+      "uid" : ""
+    },
+    "exemplar" : false,
+    "expr" : "myquery",
+    "format" : "time_series",
+    "hide" : false,
+    "instant" : false,
+    "interval" : "$sampling",
+    "intervalFactor" : 1,
+    "legendFormat" : "Dynamic Load Balancing",
+    "refId" : "dynamic_load_balancing"
+  } ],
+  "title" : "Dynamic Load Balancing",
+  "type" : "stat"
+}

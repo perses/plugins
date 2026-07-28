@@ -1,0 +1,73 @@
+{
+  "datasource": {
+    "type": "datasource",
+    "uid": "$Datasource"
+  },
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "spanNulls": false
+      },
+      "unit": "none"
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byRegexp",
+          "options": "sum"
+        },
+        "properties": [
+          {
+            "id": "custom.axisPlacement",
+            "value": "right"
+          },
+          {
+            "id": "custom.axisLabel",
+            "value": "sum"
+          }
+        ]
+      }
+    ]
+  },
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 12,
+    "y": 19
+  },
+  "id": 50,
+  "options": {
+    "legend": {
+      "calcs": [
+        "first",
+        "min",
+        "max",
+        "last"
+      ],
+      "displayMode": "table",
+      "placement": "bottom",
+      "showLegend": true,
+      "sortBy": "Max",
+      "sortDesc": true
+    },
+    "tooltip": {
+      "mode": "multi",
+      "sort": "desc"
+    }
+  },
+  "pluginVersion": "v10.1.0",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$Datasource"
+      },
+      "expr": "node_filesystem_files{fstype!=\"\",mountpoint=\"/run\"} - node_filesystem_files_free{fstype!=\"\",mountpoint=\"/run\"}",
+      "format": "time_series",
+      "intervalFactor": 2,
+      "legendFormat": "{{instance}}"
+    }
+  ],
+  "title": "inodes count in /run",
+  "type": "timeseries"
+}

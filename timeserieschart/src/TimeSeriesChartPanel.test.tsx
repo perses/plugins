@@ -14,9 +14,9 @@
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
 import { TimeRangeContext } from '@perses-dev/plugin-system';
 import { VirtuosoMockContext } from 'react-virtuoso';
+import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/spec';
 import { MOCK_TIME_SERIES_DATA_MULTIVALUE } from './test/mock-query-results';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 

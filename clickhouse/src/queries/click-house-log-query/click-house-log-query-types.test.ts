@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LogQueryContext } from '@perses-dev/plugin-system';
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources/click-house-datasource';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
-import { ClickHouseQueryContext } from './log-query-plugin-interface';
 import { ClickHouseLogQuery } from './ClickHouseLogQuery';
 
 const datasource: ClickHouseDatasourceSpec = {
@@ -35,8 +35,8 @@ const getDatasourceClient: jest.Mock = jest.fn(() => {
   return clickhouseStubClient;
 });
 
-const createStubContext = (): ClickHouseQueryContext => {
-  const stubLogContext: ClickHouseQueryContext = {
+const createStubContext = (): LogQueryContext => {
+  const stubLogContext: LogQueryContext = {
     datasourceStore: {
       getDatasource: jest.fn(),
       getDatasourceClient: getDatasourceClient,
@@ -47,10 +47,11 @@ const createStubContext = (): ClickHouseQueryContext => {
       setSavedDatasources: jest.fn(),
     },
     timeRange: {
-      end: new Date('01-01-2025'),
-      start: new Date('01-02-2025'),
+      end: new Date('2025-01-02T00:00:00.000Z'),
+      start: new Date('2025-01-01T00:00:00.000Z'),
     },
     variableState: {},
+    refreshKey: '',
   };
   return stubLogContext;
 };
@@ -70,5 +71,24 @@ describe('ClickHouseLogQuery', () => {
   it('should create initial options with empty query', () => {
     const initialOptions = ClickHouseLogQuery.createInitialOptions();
     expect(initialOptions).toEqual({ query: '' });
+  });
+
+  it('should run query with interpolated time range', async () => {
+    const response = await ClickHouseLogQuery.getLogData(
+      {
+        query: "SELECT * FROM application_logs WHERE timestamp >= '{start}' AND timestamp <= '{end}'",
+      },
+      createStubContext()
+    );
+
+    expect(clickhouseStubClient.query).toHaveBeenCalledWith({
+      start: '2025-01-01 00:00:00',
+      end: '2025-01-02 00:00:00',
+      query:
+        "SELECT * FROM application_logs WHERE timestamp >= '2025-01-01 00:00:00' AND timestamp <= '2025-01-02 00:00:00'",
+    });
+    expect(response.metadata?.executedQueryString).toBe(
+      "SELECT * FROM application_logs WHERE timestamp >= '2025-01-01 00:00:00' AND timestamp <= '2025-01-02 00:00:00'"
+    );
   });
 });

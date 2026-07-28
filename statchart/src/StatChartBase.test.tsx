@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import { FormatOptions } from '@perses-dev/core';
-import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+
+import { ChartsProvider, FormatOptions, testChartsTheme } from '@perses-dev/components';
 import { StatChartBase, StatChartData } from './StatChartBase';
 
 jest.mock('./utils/calculate-font-size', () => ({

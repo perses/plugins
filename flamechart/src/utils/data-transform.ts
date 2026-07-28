@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProfileMetaData, StackTrace } from '@perses-dev/core';
+import { ProfileMetaData, StackTrace } from '@perses-dev/spec';
 import { FlameChartSample as Sample, TableChartSample } from './data-model';
 import { getSpanColor } from './palette-gen';
 import { formatItemValue } from './format';
