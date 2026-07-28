@@ -24,11 +24,7 @@ export interface ColumnsEditorProps {
   defaultEnableSorting?: boolean;
 }
 
-export function ColumnsEditor({
-  columnSettings,
-  onChange,
-  defaultEnableSorting,
-}: ColumnsEditorProps): ReactElement {
+export function ColumnsEditor({ columnSettings, onChange, defaultEnableSorting }: ColumnsEditorProps): ReactElement {
   const [columnsCollapsed, setColumnsCollapsed] = useState(columnSettings.map(() => true));
 
   function handleColumnChange(index: number, column: ColumnSettings): void {

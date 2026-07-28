@@ -140,7 +140,10 @@ describe('TablePanel', () => {
       renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
         enableSorting: true,
         // column settings without an explicit enableSorting inherit the general default
-        columnSettings: [{ name: 'value', header: 'Value' }, { name: 'env', enableSorting: false }],
+        columnSettings: [
+          { name: 'value', header: 'Value' },
+          { name: 'env', enableSorting: false },
+        ],
       });
 
       const valueHeaderCell = await screen.findByRole('columnheader', { name: /Value/i });

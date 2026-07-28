@@ -112,9 +112,7 @@ export function ColumnEditor({
             />
             <OptionsEditorControl
               label="Enable sorting"
-              control={
-                <Switch checked={enableSorting} onChange={(e) => handleEnableSortingChange(e.target.checked)} />
-              }
+              control={<Switch checked={enableSorting} onChange={(e) => handleEnableSortingChange(e.target.checked)} />}
             />
             {column.enableSorting === undefined && (
               <Typography variant="caption" color="text.secondary">
