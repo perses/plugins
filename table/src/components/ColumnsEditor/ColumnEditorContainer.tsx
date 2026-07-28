@@ -37,6 +37,7 @@ export function ColumnEditorContainer({
   onDelete,
   onMoveUp,
   onMoveDown,
+  defaultEnableSorting,
 }: ColumnEditorContainerProps): ReactElement {
   function handleHideColumn(): void {
     onChange({ ...column, hide: !column.hide });
@@ -104,7 +105,7 @@ export function ColumnEditorContainer({
       {/* When a <Grid> is inside a <Stack> with gap, the negative margin of the grid is not applied. Therefore, let's wrap it in a div. */}
       {!isCollapsed && (
         <div>
-          <ColumnEditor column={column} onChange={onChange} />
+          <ColumnEditor column={column} onChange={onChange} defaultEnableSorting={defaultEnableSorting} />
         </div>
       )}
     </DragAndDropElement>

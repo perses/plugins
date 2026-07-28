@@ -48,6 +48,7 @@ export interface ColumnSettings {
   align?: 'left' | 'center' | 'right';
 
   // When `true`, the column will be sortable.
+  // When unset, inherits TableOptions.enableSorting from General Settings.
   enableSorting?: boolean;
 
   // Default sort order for the column.
@@ -138,6 +139,8 @@ export interface TableOptions {
   pagination?: boolean;
   // Enable filtering for individual columns.
   enableFiltering?: boolean;
+  // When true, columns are sortable by default unless overridden in columnSettings.
+  enableSorting?: boolean;
   // Enable row selection.
   selection?: SelectionOptions;
   // Customize actions available for selected rows.

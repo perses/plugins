@@ -1,0 +1,8 @@
+{
+  "kind": "Table",
+  "spec": {
+    "density": "standard",
+    "enableSorting": true,
+    "enableFiltering": true
+  }
+}

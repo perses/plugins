@@ -27,6 +27,7 @@ spec: close({
 	defaultColumnHidden?: bool
 	pagination?:          bool
 	enableFiltering?:     bool
+	enableSorting?:       bool
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
 	transforms?: [...common.#transform]

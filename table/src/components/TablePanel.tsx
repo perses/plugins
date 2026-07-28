@@ -343,7 +343,8 @@ function generateColumnConfig(
   columnSettings: ColumnSettings[],
   allVariables: VariableStateMap,
   gaugeRangeByColumn: Record<string, GaugeRange>,
-  globalCellSettings: CellSettings[] = []
+  globalCellSettings: CellSettings[] = [],
+  defaultEnableSorting = false
 ): TableColumnConfig<unknown> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
@@ -360,7 +361,7 @@ function generateColumnConfig(
         accessorKey: name,
         header: header ?? name,
         headerDescription,
-        enableSorting,
+        enableSorting: enableSorting ?? defaultEnableSorting,
         width,
         align,
         dataLink: modifiedDataLink,
@@ -372,6 +373,7 @@ function generateColumnConfig(
   return {
     accessorKey: name,
     header: name,
+    enableSorting: defaultEnableSorting,
   };
 }
 
@@ -544,7 +546,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         spec.columnSettings ?? [],
         allVariables,
         gaugeRangeByColumn,
-        spec.cellSettings ?? []
+        spec.cellSettings ?? [],
+        spec.enableSorting ?? false
       );
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
@@ -561,7 +564,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
             spec.columnSettings ?? [],
             allVariables,
             gaugeRangeByColumn,
-            spec.cellSettings ?? []
+            spec.cellSettings ?? [],
+            spec.enableSorting ?? false
           );
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
@@ -571,7 +575,15 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return columns;
-  }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables, gaugeRangeByColumn, spec.cellSettings]);
+  }, [
+    keys,
+    spec.columnSettings,
+    spec.defaultColumnHidden,
+    spec.enableSorting,
+    allVariables,
+    gaugeRangeByColumn,
+    spec.cellSettings,
+  ]);
 
   // Filtering state — declared before cellConfigs so filteredData is available for cell config evaluation
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

@@ -21,9 +21,14 @@ import { ColumnEditorContainer } from './ColumnEditorContainer';
 export interface ColumnsEditorProps {
   columnSettings: ColumnSettings[];
   onChange: (columnOptions: ColumnSettings[]) => void;
+  defaultEnableSorting?: boolean;
 }
 
-export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps): ReactElement {
+export function ColumnsEditor({
+  columnSettings,
+  onChange,
+  defaultEnableSorting,
+}: ColumnsEditorProps): ReactElement {
   const [columnsCollapsed, setColumnsCollapsed] = useState(columnSettings.map(() => true));
 
   function handleColumnChange(index: number, column: ColumnSettings): void {
@@ -73,6 +78,7 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps):
           key={i}
           column={column}
           isCollapsed={columnsCollapsed[i] ?? true}
+          defaultEnableSorting={defaultEnableSorting}
           onChange={(updatedColumn: ColumnSettings) => handleColumnChange(i, updatedColumn)}
           onDelete={() => handleColumnDelete(i)}
           onCollapse={(collapsed) => handleColumnCollapseExpand(i, collapsed)}

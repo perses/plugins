@@ -167,6 +167,7 @@ type PluginSpec struct {
 	DefaultColumnHidden bool               `json:"defaultColumnHidden,omitempty" yaml:"defaultColumnHidden,omitempty"`
 	Pagination          bool               `json:"pagination,omitempty" yaml:"pagination,omitempty"`
 	EnableFiltering     bool               `json:"enableFiltering,omitempty" yaml:"enableFiltering,omitempty"`
+	EnableSorting       bool               `json:"enableSorting,omitempty" yaml:"enableSorting,omitempty"`
 	ColumnSettings      []ColumnSettings   `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
 	CellSettings        []CellSettings     `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
 	Transforms          []common.Transform `json:"transforms,omitempty" yaml:"transforms,omitempty"`
