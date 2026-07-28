@@ -90,145 +90,102 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
   return transformProfileResponse(response);
 };
 
-/**
- * This function transform the Pyroscope response into the Perses profile format
- */
-function transformProfileResponse(response: SearchProfilesResponse): ProfileData {
-  const newResponse: ProfileData = {
-    profile: {
-      stackTrace: {} as StackTrace,
-    },
-    numTicks: 0,
-    maxSelf: 0,
-    metadata: {
-      spyName: '',
-      sampleRate: 0,
-      units: '',
-      name: '',
-    },
-    timeline: {
-      startTime: 0,
-      samples: [],
-      durationDelta: 0,
-    },
-  };
+// [offset, total, self, nameIndex].
+const FLAMEBEARER_NODE_SIZE = 4;
 
+export function transformProfileResponse(response: SearchProfilesResponse): ProfileData {
   if (!response) {
-    return newResponse;
+    return emptyProfileData();
   }
 
-  const stackTraces: StackTrace[][] = [];
+  const { flamebearer, metadata, timeline } = response;
 
-  // stackTraces id from 1
   let id = 1;
-  // Set the profile stackTrace property
-  for (let i = 0; i < response.flamebearer.levels.length; i++) {
-    let current = 0;
-    const row: StackTrace[] = [];
 
-    const level = response.flamebearer.levels[i];
+  let root: StackTrace | undefined;
 
+  let parentLevel: StackTrace[] = [];
+
+  for (let depth = 0; depth < flamebearer.levels.length; depth++) {
+    const level = flamebearer.levels[depth];
     if (!level) {
       continue;
     }
 
-    for (let j = 0; j < level.length; j += 4) {
-      const temp: StackTrace = {} as StackTrace;
-      temp.id = id;
-      id += 1;
-      const indexInNamesArray = level[j + 3]; // index in names array
-      if (indexInNamesArray !== undefined) {
-        const name = response.flamebearer.names[indexInNamesArray];
+    const currentLevel: StackTrace[] = [];
+    let cursor = 0;
+    let parentIndex = 0;
 
-        if (name) {
-          temp.name = name;
-        }
-      }
-      temp.level = i;
+    for (let slot = 0; slot < level.length; slot += FLAMEBEARER_NODE_SIZE) {
+      const offset = level[slot] ?? 0;
+      const total = level[slot + 1] ?? 0;
+      const self = level[slot + 2] ?? 0;
+      const nameIndex = level[slot + 3] ?? 0;
 
-      const total = level[j + 1];
-      if (total !== undefined) {
-        temp.total = total;
-      }
+      const start = cursor + offset;
+      const end = start + total;
+      cursor = end;
 
-      const self = level[j + 2];
+      const node: StackTrace = {
+        id: id++,
+        name: flamebearer.names[nameIndex] ?? '',
+        level: depth,
+        start,
+        end,
+        total,
+        self,
+        children: [],
+      };
 
-      if (self !== undefined) {
-        temp.self = self;
-      }
-
-      // start and end
-      const offset = level[j];
-      if (offset !== undefined) {
-        current += offset; // current += offset
-      }
-      temp.start = current;
-      if (total !== undefined) {
-        current += total; // current += total
-      }
-      temp.end = current;
-
-      temp.children = [];
-
-      row.push(temp);
-    }
-
-    stackTraces.push(row);
-  }
-
-  addChildren(stackTraces); // adding children to nodes
-  if (stackTraces[0]?.[0]) {
-    newResponse.profile.stackTrace = stackTraces[0][0];
-  }
-
-  // Set other properties
-  newResponse.numTicks = response.flamebearer.numTicks;
-  newResponse.maxSelf = response.flamebearer.maxSelf;
-
-  newResponse.metadata = {
-    spyName: response.metadata.spyName,
-    sampleRate: response.metadata.sampleRate,
-    units: response.metadata.units,
-    name: response.metadata.name,
-  };
-
-  newResponse.timeline = {
-    startTime: response.timeline.startTime,
-    samples: response.timeline.samples,
-    durationDelta: response.timeline.durationDelta,
-  };
-
-  return newResponse;
-}
-
-// todo: optimize this method as soon as possible
-function addChildren(stackTraces: StackTrace[][]): void {
-  // for (let i = stackTraces.length - 1; i > 0; i--) {
-  for (let i = 1; i < stackTraces.length; i++) {
-    const currentLevel = stackTraces[i];
-    const parentLevel = stackTraces[i - 1];
-
-    if (!currentLevel || !parentLevel) {
-      continue;
-    }
-
-    for (let j = 0; j < currentLevel.length; j++) {
-      const currentStack = currentLevel[j];
-      if (!currentStack) {
-        continue;
-      }
-
-      for (let k = 0; k < parentLevel.length; k++) {
-        const parentStack = parentLevel[k];
-        if (!parentStack) {
-          continue;
-        }
-
-        if (currentStack.start >= parentStack.start && currentStack.end <= parentStack.end) {
-          parentStack.children.push(currentStack);
+      while (parentIndex + 1 < parentLevel.length) {
+        const nextParent = parentLevel[parentIndex + 1];
+        if (!nextParent || nextParent.start > start) {
           break;
         }
+        parentIndex++;
       }
+      const parent = parentLevel[parentIndex];
+      if (parent && start >= parent.start && end <= parent.end) {
+        parent.children.push(node);
+      }
+
+      if (root === undefined) {
+        root = node;
+      }
+      currentLevel.push(node);
     }
+
+    parentLevel = currentLevel;
   }
+
+  return {
+    profile: { stackTrace: root ?? emptyStackTrace() },
+    numTicks: flamebearer.numTicks,
+    maxSelf: flamebearer.maxSelf,
+    metadata: {
+      spyName: metadata.spyName,
+      sampleRate: metadata.sampleRate,
+      units: metadata.units,
+      name: metadata.name,
+    },
+    timeline: {
+      startTime: timeline.startTime,
+      samples: timeline.samples,
+      durationDelta: timeline.durationDelta,
+    },
+  };
+}
+
+function emptyStackTrace(): StackTrace {
+  return { id: 0, name: '', level: 0, start: 0, end: 0, total: 0, self: 0, children: [] };
+}
+
+function emptyProfileData(): ProfileData {
+  return {
+    profile: { stackTrace: emptyStackTrace() },
+    numTicks: 0,
+    maxSelf: 0,
+    metadata: { spyName: '', sampleRate: 0, units: '', name: '' },
+    timeline: { startTime: 0, samples: [], durationDelta: 0 },
+  };
 }
