@@ -27,11 +27,11 @@ const (
 )
 
 type PluginSpec struct {
-	ShowSettings   bool    `json:"showSettings,omitempty" yaml:"showSettings,omitempty"`
-	ShowSeries     bool    `json:"showSeries,omitempty" yaml:"showSeries,omitempty"`
-	ShowTable      bool    `json:"showTable,omitempty" yaml:"showTable,omitempty"`
-	ShowFlameGraph bool    `json:"showFlameGraph,omitempty" yaml:"showFlameGraph,omitempty"`
-	Palette        Palette `json:"mode" yaml:"mode"`
+	ShowSettings   bool    `json:"showSettings" yaml:"showSettings"`
+	ShowSeries     bool    `json:"showSeries" yaml:"showSeries"`
+	ShowTable      bool    `json:"showTable" yaml:"showTable"`
+	ShowFlameGraph bool    `json:"showFlameGraph" yaml:"showFlameGraph"`
+	Palette        Palette `json:"palette" yaml:"palette"`
 }
 
 type Option func(plugin *Builder) error
