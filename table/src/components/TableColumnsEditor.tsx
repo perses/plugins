@@ -23,5 +23,11 @@ export function TableColumnsEditor({ onChange, value }: TableColumnsEditorProps)
     onChange({ ...value, columnSettings: columns });
   }
 
-  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnsChange} />;
+  return (
+    <ColumnsEditor
+      columnSettings={value.columnSettings ?? []}
+      onChange={handleColumnsChange}
+      defaultEnableSorting={value.enableSorting}
+    />
+  );
 }

@@ -137,6 +137,27 @@ describe('TablePanel', () => {
     TEST_TIMEOUT
   );
 
+  it(
+    'should enable sorting on all columns when enableSorting is set in general settings',
+    async () => {
+      renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+        enableSorting: true,
+        // column settings without an explicit enableSorting inherit the general default
+        columnSettings: [
+          { name: 'value', header: 'Value' },
+          { name: 'env', enableSorting: false },
+        ],
+      });
+
+      const valueHeaderCell = await screen.findByRole('columnheader', { name: /Value/i });
+      expect(await within(valueHeaderCell).findByTestId('ArrowDownwardIcon')).toBeInTheDocument();
+
+      const envHeaderCell = await screen.findByRole('columnheader', { name: 'env' });
+      expect(within(envHeaderCell).queryByTestId('ArrowDownwardIcon')).not.toBeInTheDocument();
+    },
+    TEST_TIMEOUT
+  );
+
   it('should apply transforms', async () => {
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
       transforms: [
