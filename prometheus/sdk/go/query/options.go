@@ -57,7 +57,7 @@ func Resolution(resolution int) Option {
 
 func Instant(instant bool) Option {
 	return func(builder *Builder) error {
-		builder.Instant = instant
+		builder.Instant = &instant
 		return nil
 	}
 }
