@@ -17,8 +17,17 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeRangeContext } from '@perses-dev/plugin-system';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/spec';
+import { AnnotationSpecWithData } from '@perses-dev/dashboards';
 import { MOCK_TIME_SERIES_DATA_MULTIVALUE } from './test/mock-query-results';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
+
+// These tests exercise legend rendering, not annotations. The panel calls usePanelAnnotationsWithData,
+// which pulls in the full dashboard runtime (plugin registry, datasource store, query client). Mock it to
+// return no annotations so the panel can render without wiring those providers here.
+jest.mock('@perses-dev/dashboards', () => ({
+  ...jest.requireActual('@perses-dev/dashboards'),
+  usePanelAnnotationsWithData: (): AnnotationSpecWithData[] => [],
+}));
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
