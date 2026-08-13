@@ -1,10 +1,11 @@
 {
   "kind": "StatChart",
   "spec": {
-    "metricLabel": "version",
+    "textMode": "name",
     "format": {
       "unit": "decimal"
     },
+    "metricLabel": "version",
     "calculation": "mean",
     "colorMode": "background_solid"
   }
