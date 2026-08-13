@@ -45,7 +45,7 @@ import {
   getTimeSeriesValues,
 } from '@perses-dev/components';
 import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
-import { useAnnotationsWithData } from '@perses-dev/dashboards';
+import { usePanelAnnotationsWithData } from '@perses-dev/dashboards';
 import {
   TimeSeriesChartOptions,
   DEFAULT_FORMAT,
@@ -156,7 +156,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   const { setTimeRange } = useTimeRange();
 
-  const annotationsWithData = useAnnotationsWithData();
+  const annotationsWithData = usePanelAnnotationsWithData(props.definition?.spec.annotations);
 
   const annotations: TimeSeriesAnnotation[] = useMemo(
     () => convertAnnotationToTimeSeriesAnnotation(annotationsWithData),
