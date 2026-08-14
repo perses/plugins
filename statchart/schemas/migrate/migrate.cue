@@ -37,7 +37,7 @@ spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
 	// metricLabel
-	#textMode: *#panel.options.textMode | null
+	#textMode: *#panel.options.textMode | "auto"
 	if #textMode == "name" && (*#panel.targets[0].legendFormat | null) != null {
 		// /!\ best effort logic
 		// - if legendFormat contains a more complex expression than {{label}}, the result will be broken (but manually fixable afterwards still)

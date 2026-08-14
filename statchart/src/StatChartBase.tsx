@@ -22,7 +22,7 @@ import { EChart, FontSizeOption, FormatOptions, GraphSeries, useChartsTheme } fr
 import chroma from 'chroma-js';
 import { useOptimalFontSize } from './utils/calculate-font-size';
 import { formatStatChartValue } from './utils/format-stat-chart-value';
-import { ColorMode } from './stat-chart-model';
+import { ColorMode, TextMode } from './stat-chart-model';
 
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -35,7 +35,9 @@ const BLACK_COLOR_CODE = '#000000';
 
 export interface StatChartData {
   color: string;
-  calculatedValue?: string | number | null;
+  numericValue?: number | null;
+  displayValue?: string | number | null;
+  displayName?: string;
   seriesData?: GraphSeries;
 }
 
@@ -45,9 +47,11 @@ export interface StatChartProps {
   data: StatChartData;
   format?: FormatOptions;
   sparkline?: LineSeriesOption;
-  showSeriesName?: boolean;
   valueFontSize?: FontSizeOption;
   colorMode?: ColorMode;
+  textMode?: TextMode;
+  isMultiSeries?: boolean;
+  legendMode?: 'auto' | 'on' | 'off';
 }
 
 export const StatChartBase: FC<StatChartProps> = (props) => {
@@ -57,10 +61,12 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     data,
     data: { color },
     sparkline,
-    showSeriesName,
     format,
     valueFontSize,
     colorMode,
+    textMode = 'auto',
+    isMultiSeries = false,
+    legendMode = 'auto',
   } = props;
 
   const {
@@ -70,12 +76,22 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     },
   } = useTheme();
   const chartsTheme = useChartsTheme();
-  const formattedValue = formatStatChartValue(data.calculatedValue, format);
+  const formattedValue = formatStatChartValue(data.displayValue, format);
   const containerPadding = chartsTheme.container.padding.default;
 
-  // calculate series name font size and height
+  // Determine if top text should be shown
+  // Respect explicit legendMode choice, otherwise let textMode decide
+  const shouldShowTopText: boolean = (() => {
+    if (legendMode === 'off') return false;
+    if (legendMode === 'on') return true;
+
+    // legendMode='auto': let textMode decide
+    return textMode === 'value_and_name' || (textMode === 'auto' && isMultiSeries);
+  })();
+
+  // calculate top text font size and height
   let seriesNameFontSize = useOptimalFontSize({
-    text: data?.seriesData?.name ?? '',
+    text: data.displayName ?? '',
     fontWeight: SERIES_NAME_FONT_WEIGHT,
     width,
     height: height * 0.125, // assume series name will take 12.5% of available height
@@ -83,7 +99,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     maxSize: SERIES_NAME_MAX_FONT_SIZE,
   });
 
-  const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
+  const seriesNameHeight = shouldShowTopText ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
 
   // calculate value font size and height
   const availableWidth = width - containerPadding * 2;
@@ -198,7 +214,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   }, [colorMode, containerPadding, optimalValueFontSize, formattedValue, color, paletteMode]);
 
   const seriesName = useMemo((): ReactNode | null => {
-    if (!showSeriesName) return null;
+    if (!shouldShowTopText || !data.displayName) return null;
 
     let textColor = '';
 
@@ -218,10 +234,10 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
 
     return (
       <SeriesName padding={containerPadding} fontSize={seriesNameFontSize} color={textColor}>
-        {data.seriesData?.name}
+        {data.displayName}
       </SeriesName>
     );
-  }, [colorMode, showSeriesName, secondary, color, containerPadding, seriesNameFontSize, data?.seriesData?.name]);
+  }, [colorMode, shouldShowTopText, secondary, color, containerPadding, seriesNameFontSize, data.displayName]);
 
   return (
     <Box
@@ -236,7 +252,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
       }}
     >
       {seriesName}
-      {styledFormattedValue}
+      {data.displayValue !== undefined && textMode !== 'none' && styledFormattedValue}
       {sparkline && (
         <EChart
           sx={{

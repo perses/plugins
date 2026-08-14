@@ -8,6 +8,7 @@
     },
     "colorMode": "value",
     "sparkline": {},
+    "textMode": "auto",
     "thresholds": {
       "steps": [
         {
