@@ -129,4 +129,5 @@ export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec, Pr
   getBuiltinVariableDefinitions,
   OptionsEditorComponent: PrometheusDatasourceEditor,
   createInitialOptions: () => ({ directUrl: '' }),
+  healthCheckPath: '/api/v1/status/buildinfo',
 };
