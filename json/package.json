@@ -1,0 +1,69 @@
+{
+  "name": "@perses-dev/json",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
+    "lint": "oxlint src",
+    "test": "cross-env LC_ALL=C TZ=UTC vitest run",
+    "type-check": "tsc --noEmit"
+  },
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "jsonata": "^2.0.5"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@perses-dev/client": "^0.55.0-beta.6",
+    "@perses-dev/plugin-system": "^0.55.0-beta.6",
+    "@perses-dev/spec": "^0.3.0-beta.5",
+    "immer": "^10.1.1",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0",
+    "react-hook-form": "^7.52.2"
+  },
+  "files": [
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
+  ],
+  "perses": {
+    "metadata": {
+      "name": "Json",
+      "registry": "perses-dev"
+    },
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "JSON Datasource"
+          },
+          "name": "JsonDatasource"
+        }
+      },
+      {
+        "kind": "JsonQuery",
+        "spec": {
+          "display": {
+            "name": "JSON Query"
+          },
+          "name": "JsonQuery"
+        }
+      }
+    ]
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "echarts": "^5.5.0"
+  }
+}
