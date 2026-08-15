@@ -27,12 +27,13 @@ import {
   useTheme,
 } from '@mui/material';
 import { FormatControls, FormatOptions, OptionsColorPicker } from '@perses-dev/components';
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import CloseIcon from 'mdi-material-ui/Close';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import CloseIcon from 'mdi-material-ui/Close';
-import { produce } from 'immer';
-import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+
 import {
   DEFAULT_AREA_OPACITY,
   LINE_STYLE_CONFIG,
@@ -376,8 +377,8 @@ function QuerySettingsInput({
   onAreaOpacityChange,
   onDelete,
   inputRef,
-  onAddColor: onAddColor,
-  onRemoveColor: onRemoveColor,
+  onAddColor,
+  onRemoveColor,
   onAddLineStyle,
   onRemoveLineStyle,
   onAddAreaOpacity,
@@ -392,7 +393,7 @@ function QuerySettingsInput({
   onStackChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
-  const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
+  const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).toSorted((a, b) => a - b);
 
   // State for dropdown menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

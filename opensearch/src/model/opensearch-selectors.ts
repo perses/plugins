@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/spec';
 import { DatasourceSelectValue, isVariableDatasource } from '@perses-dev/plugin-system';
+import { DatasourceSelector } from '@perses-dev/spec';
 
 export const OPENSEARCH_DATASOURCE_KIND = 'OpenSearchDatasource' as const;
 

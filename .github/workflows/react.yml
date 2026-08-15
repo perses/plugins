@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint-npm:
-    name: "lint-npm"
+    name: 'lint-npm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -18,9 +18,10 @@ jobs:
         with:
           enable_npm: true
       - run: npm ci
-      - run: npm run lint
+      - run: npm run lint:ci
+      - run: npm run format:check
   test-npm:
-    name: "test-npm"
+    name: 'test-npm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -33,7 +34,7 @@ jobs:
       - run: npm run test
 
   type-check:
-    name: "type-check"
+    name: 'type-check'
     runs-on: ubuntu-latest
     steps:
       - name: checkout

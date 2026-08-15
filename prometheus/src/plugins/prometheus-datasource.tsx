@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { RequestHeaders } from '@perses-dev/client';
 import { QueryParamValues } from '@perses-dev/components';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { BuiltinVariableDefinition } from '@perses-dev/spec';
-import { RequestHeaders } from '@perses-dev/client';
+
 import {
   ClientRequestOptions,
   healthCheck,

@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
+
 import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
 import { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
-import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 import { buildBoundedPPL, convertPPLToLogs, parseTimestamp } from './get-opensearch-log-data';
+import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 
 const datasource: OpenSearchDatasourceSpec = {
   directUrl: '/test',
@@ -81,7 +82,7 @@ describe('OpenSearchLogQuery', () => {
       },
       createStubContext()
     );
-    expect(variables?.sort()).toEqual(['index', 'level', 'service']);
+    expect(variables?.toSorted()).toEqual(['index', 'level', 'service']);
   });
 
   it('returns empty log data for an empty query without calling the client', async () => {

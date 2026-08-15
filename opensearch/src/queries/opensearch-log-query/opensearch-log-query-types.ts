@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/spec';
+
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 
 export interface OpenSearchLogQuerySpec {

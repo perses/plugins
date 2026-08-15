@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { parseVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
+
 import { getOpenSearchLogData } from './get-opensearch-log-data';
-import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
+import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 
 export const OpenSearchLogQuery: LogQueryPlugin<OpenSearchLogQuerySpec> = {
   getLogData: getOpenSearchLogData,

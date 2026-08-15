@@ -14,6 +14,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { ReactElement, useState } from 'react';
+
 import { PostableSilence } from '../model/api-types';
 import { MatcherEditor, MatcherValue } from './MatcherEditor';
 

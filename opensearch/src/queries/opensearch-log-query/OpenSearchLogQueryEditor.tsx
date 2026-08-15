@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -18,10 +20,9 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { Box, Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
-import { ReactElement } from 'react';
 import { produce } from 'immer';
-import { createModEnterHandler } from '@perses-dev/dashboards';
+import { ReactElement } from 'react';
+
 import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND, OpenSearchDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE, PPL_DOCS_URL, PPL_QUERY_EXAMPLES } from '../constants';
 import { useQueryState } from '../query-editor-model';

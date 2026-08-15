@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Alert } from '@perses-dev/spec';
+
 import { getEffectiveStatus, SORT_COL_ALERTNAME, SORT_COL_STATUS } from './alert-table-sorting';
 
 /**
@@ -130,7 +131,7 @@ export function extractLabelKeys(alerts: Alert[]): string[] {
       keys.add(key);
     }
   }
-  return Array.from(keys).sort();
+  return Array.from(keys).toSorted();
 }
 
 /**

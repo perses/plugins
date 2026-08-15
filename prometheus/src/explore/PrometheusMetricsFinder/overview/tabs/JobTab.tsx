@@ -21,8 +21,9 @@ import {
   StackProps,
   Typography,
 } from '@mui/material';
-import { ReactElement, useMemo, useState } from 'react';
 import { DatasourceSelector } from '@perses-dev/spec';
+import { ReactElement, useMemo, useState } from 'react';
+
 import { MetricList } from '../../display/list/MetricList';
 import { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';

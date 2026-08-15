@@ -13,6 +13,7 @@
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { GreptimeDBTimeSeriesQuery } from './GreptimeDBQuery';
@@ -170,6 +171,6 @@ describe('GreptimeDBTimeSeriesQuery', () => {
     );
 
     expect(result.series).toHaveLength(2);
-    expect(result.series.map((s) => s.name).sort()).toEqual(['host=host-c', 'host=host_b']);
+    expect(result.series.map((s) => s.name).toSorted()).toEqual(['host=host-c', 'host=host_b']);
   });
 });

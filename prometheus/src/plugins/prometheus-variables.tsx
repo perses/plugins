@@ -22,6 +22,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, ChangeEvent, FocusEvent } from 'react';
+
 import { PromQLEditor } from '../components';
 import {
   DEFAULT_PROM,

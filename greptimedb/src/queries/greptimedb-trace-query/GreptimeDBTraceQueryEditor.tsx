@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
-import { produce } from 'immer';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
   isVariableDatasource,
   OptionsEditorProps,
 } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { GreptimeDBQLEditor } from '../../components';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';

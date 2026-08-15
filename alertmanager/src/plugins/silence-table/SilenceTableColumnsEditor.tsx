@@ -15,6 +15,7 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { ColumnsEditor } from '../../components/ColumnsEditor';
 import {
   DEFAULT_COLUMN_HEADERS,

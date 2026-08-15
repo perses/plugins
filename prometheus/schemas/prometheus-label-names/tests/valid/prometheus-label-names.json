@@ -1,9 +1,6 @@
-
 {
   "kind": "PrometheusLabelNamesVariable",
   "spec": {
-    "matchers": [
-      "up{job=\"$job\"}"
-    ]
+    "matchers": ["up{job=\"$job\"}"]
   }
 }

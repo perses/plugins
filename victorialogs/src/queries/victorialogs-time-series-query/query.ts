@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { milliseconds } from 'date-fns';
 import { DurationString, parseDurationString, TimeSeries } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
+
 import { VictoriaLogsClient } from '../../model/client';
 import { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
 import { DEFAULT_DATASOURCE } from '../constants';

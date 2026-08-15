@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { Alert, Box, Stack } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
+import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
 import { QueryDefinition } from '@perses-dev/spec';
+import { ReactElement, useState } from 'react';
+
 import { isProfileQueryComplete, PyroscopeProfileQuerySpec } from '../model';
 
 interface ProfilesExplorerQueryParams {

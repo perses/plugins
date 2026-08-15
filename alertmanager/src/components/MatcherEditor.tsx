@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useId } from 'react';
 import {
   IconButton,
   MenuItem,
@@ -23,6 +22,7 @@ import {
   SelectChangeEvent,
 } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/Delete';
+import { ReactElement, useId } from 'react';
 
 export interface MatcherValue {
   name: string;

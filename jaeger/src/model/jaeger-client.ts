@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceClient } from '@perses-dev/plugin-system';
 import { RequestHeaders } from '@perses-dev/client';
+import { DatasourceClient } from '@perses-dev/plugin-system';
+
 import { JaegerApiResponse, JaegerOperation, JaegerSearchRequestParameters, JaegerTrace } from './api-types';
 
 interface JaegerClientOptions {
@@ -42,7 +43,7 @@ export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>
     return await response.json();
   } catch (e) {
     console.error('Invalid response from server', e);
-    throw new Error('Invalid response from server');
+    throw new Error('Invalid response from server', { cause: e });
   }
 };
 

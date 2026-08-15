@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Alert } from '@perses-dev/spec';
+
 import {
   compareAlertsByColumn,
   compareGroupsByColumn,

@@ -32,6 +32,7 @@ import { produce } from 'immer';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement, useCallback } from 'react';
+
 import { AlertTableOptions, LabelColorMapping, LabelColorOverride } from './alert-table-model';
 
 const MODE_LABELS: Record<LabelColorMapping['mode'], string> = {

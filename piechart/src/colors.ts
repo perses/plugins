@@ -117,7 +117,7 @@ export function getSeriesColor(seriesNames: string[], colorPalette?: string[]): 
         colors.push(generateGradientColor(baseColor, gradientFactor));
       }
     }
-    return colors.sort((a, b) => {
+    return colors.toSorted((a, b) => {
       const seedA = stringToSeed(seriesNames[colors.indexOf(a)] || 'fallback');
       const seedB = stringToSeed(seriesNames[colors.indexOf(b)] || 'fallback');
       return seedA - seedB;
@@ -131,7 +131,7 @@ export function getSeriesColor(seriesNames: string[], colorPalette?: string[]): 
   }
 
   if (totalSeries > colorPalette.length) {
-    return colors.sort((a, b) => {
+    return colors.toSorted((a, b) => {
       const seedA = stringToSeed(seriesNames[colors.indexOf(a)] || 'fallback');
       const seedB = stringToSeed(seriesNames[colors.indexOf(b)] || 'fallback');
       return seedA - seedB;

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useDatasourceClient, useDatasourceStore, useVariableValues } from '@perses-dev/plugin-system';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { DatasourceSelector } from '@perses-dev/spec';
 import { StatusError } from '@perses-dev/client';
+import { useDatasourceClient, useDatasourceStore, useVariableValues } from '@perses-dev/plugin-system';
+import { DatasourceSelector } from '@perses-dev/spec';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+
 import {
   InstantQueryRequestParameters,
   MonitoredInstantQueryResponse,

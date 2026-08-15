@@ -19,9 +19,10 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
-import { stringArrayToVariableOptions, PrometheusLabelNamesVariableEditor } from './prometheus-variables';
 import { resolvePrometheusDatasource } from './interpolation';
+import { stringArrayToVariableOptions, PrometheusLabelNamesVariableEditor } from './prometheus-variables';
 import { PrometheusLabelNamesVariableOptions } from './types';
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
@@ -46,7 +47,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
     };
   },
   dependsOn: (spec: PrometheusLabelNamesVariableOptions) => {
-    const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
+    const matcherVariables = spec.matchers?.flatMap((m) => parseVariables(m)) || [];
     const datasourceVariables =
       spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];
     return { variables: [...matcherVariables, ...datasourceVariables] };

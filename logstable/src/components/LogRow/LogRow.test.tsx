@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, waitFor, fireEvent, RenderResult } from '@testing-library/react';
 import { LogEntry } from '@perses-dev/spec';
+import { render, screen, waitFor, fireEvent, RenderResult } from '@testing-library/react';
+
 import { LogRow } from './LogRow';
 
 // Mock clipboard API

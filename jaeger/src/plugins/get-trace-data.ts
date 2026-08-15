@@ -18,8 +18,9 @@ import {
   VariableStateMap,
 } from '@perses-dev/plugin-system';
 import { AbsoluteTimeRange, Notice, TraceSearchResult } from '@perses-dev/spec';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import {
   DEFAULT_JAEGER,
   DEFAULT_SEARCH_LIMIT,
@@ -303,6 +304,10 @@ function convertSpan(span: JaegerSpan): otlptracev1.Span {
   const spanKindTag = getTagValue(span.tags, 'span.kind');
   const statusCodeTag = getTagValue(span.tags, 'otel.status_code');
   const statusDescriptionTag = getTagValue(span.tags, 'otel.status_description');
+  let statusCode: otlptracev1.Status['code'] | undefined = isErrorSpan(span) ? 'STATUS_CODE_ERROR' : undefined;
+  if (statusCodeTag && typeof statusCodeTag === 'string') {
+    statusCode = STATUS_CODE_MAP[statusCodeTag.toLowerCase()];
+  }
 
   return {
     traceId: normalizeTraceId(span.traceID),
@@ -316,12 +321,7 @@ function convertSpan(span: JaegerSpan): otlptracev1.Span {
     events: (span.logs ?? []).map(convertLog),
     links: buildLinks(span.references),
     status: {
-      code:
-        statusCodeTag && typeof statusCodeTag === 'string'
-          ? STATUS_CODE_MAP[statusCodeTag.toLowerCase()]
-          : isErrorSpan(span)
-            ? 'STATUS_CODE_ERROR'
-            : undefined,
+      code: statusCode,
       message: typeof statusDescriptionTag === 'string' ? statusDescriptionTag : undefined,
     },
   };

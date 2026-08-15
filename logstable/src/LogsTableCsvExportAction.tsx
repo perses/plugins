@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { InfoTooltip } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
-import FileDelimitedOutline from 'mdi-material-ui/FileDelimitedOutline';
+import { InfoTooltip } from '@perses-dev/components';
 import { escapeCsvValue, formatTimestampISO, sanitizeFilename } from '@perses-dev/plugin-system';
 import { LogEntry } from '@perses-dev/spec';
+import FileDelimitedOutline from 'mdi-material-ui/FileDelimitedOutline';
 import { useCallback, useMemo } from 'react';
+
 import { LogsTableProps } from './model';
 import { stripAnsi } from './utils/ansi';
 
@@ -27,7 +28,7 @@ export function collectLabelKeys(entries: LogEntry[]): string[] {
       keys.add(key);
     }
   }
-  return Array.from(keys).sort();
+  return Array.from(keys).toSorted();
 }
 
 export function buildLogsCsvString(entries: LogEntry[]): string {

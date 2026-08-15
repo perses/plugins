@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogEntry } from '@perses-dev/spec';
+
 import {
   formatTimestamp,
   formatLabels,

@@ -30,6 +30,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ChangeEvent, ReactElement, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
   DEFAULT_JAEGER,
   JaegerClient,
@@ -358,7 +359,7 @@ function toOptionalString(value: string): string | undefined {
 }
 
 function toSortedUniqueOptions(values: string[]): string[] {
-  return Array.from(new Set(values.filter((value) => value !== ''))).sort((a, b) => a.localeCompare(b));
+  return Array.from(new Set(values.filter((value) => value !== ''))).toSorted((a, b) => a.localeCompare(b));
 }
 
 function normalizeFieldValue(value: string | undefined): string | undefined {

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { isVariableDatasource, parseVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
+
 import { JaegerTraceQuerySpec } from '../model';
 import { getTraceData } from './get-trace-data';
 import { JaegerTraceQueryEditor } from './JaegerTraceQueryEditor';

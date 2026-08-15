@@ -13,6 +13,7 @@
 
 import { produce } from 'immer';
 import { ChangeEventHandler } from 'react';
+
 import { FlameChartOptionsEditorProps } from '../flame-chart-model';
 
 /**

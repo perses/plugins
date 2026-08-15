@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { InputLabel, Stack } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -18,10 +20,9 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { InputLabel, Stack } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
-import { createModEnterHandler } from '@perses-dev/dashboards';
 import { produce } from 'immer';
+import { ReactElement, useCallback } from 'react';
+
 import { LogQLEditor } from '../../components';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';

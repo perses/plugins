@@ -17,6 +17,7 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { RangeQueryResponse } from '../../model';
 import { PrometheusDatasource } from '../prometheus-datasource';
 import { PrometheusDatasourceSpec } from '../types';

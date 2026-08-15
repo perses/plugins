@@ -26,6 +26,7 @@ import {
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import { ReactElement } from 'react';
+
 import {
   DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,

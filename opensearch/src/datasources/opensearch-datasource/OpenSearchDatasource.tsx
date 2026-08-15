@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import { OpenSearchClient, ppl } from '../../model/opensearch-client';
 import { OpenSearchDatasourceSpec } from './opensearch-datasource-types';
 import { OpenSearchDatasourceEditor } from './OpenSearchDatasourceEditor';

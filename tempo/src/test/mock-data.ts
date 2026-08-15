@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TraceData } from '@perses-dev/spec';
+
 import { QueryResponse, SearchResponse } from '../model/api-types';
 
 export const MOCK_TRACE_RESPONSE: QueryResponse = {

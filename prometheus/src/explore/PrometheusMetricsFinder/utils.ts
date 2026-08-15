@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { StatusError } from '@perses-dev/client';
 import { useDatasourceClient, useTimeRange, useVariableValues, useDatasourceStore } from '@perses-dev/plugin-system';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { DatasourceSelector } from '@perses-dev/spec';
-import { StatusError } from '@perses-dev/client';
+
 import {
   LabelNamesRequestParameters,
   LabelValuesRequestParameters,

@@ -13,10 +13,11 @@
 
 import { TraceQueryContext, replaceVariables } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { TempoDatasourceSpec } from '../tempo-datasource-types';
-import { TempoDatasource } from '../tempo-datasource';
-import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
+
 import { TempoClient } from '../../model';
+import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
+import { TempoDatasource } from '../tempo-datasource';
+import { TempoDatasourceSpec } from '../tempo-datasource-types';
 import { getTraceData } from './get-trace-data';
 
 jest.mock('@perses-dev/plugin-system', () => {

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import { VictoriaLogsClient, streamQueryRange, statsQueryRange, fieldNames, fieldValues } from '../../model/client';
 import { VictoriaLogsDatasourceSpec } from './types';
 import { VictoriaLogsDatasourceEditor } from './VictoriaLogsDatasourceEditor';

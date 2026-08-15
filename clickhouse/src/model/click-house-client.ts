@@ -90,7 +90,7 @@ export async function query(
       data: body.data || body,
     };
   } catch (e) {
-    throw new Error(`ClickHouse query failed: ${e}`);
+    throw new Error(`ClickHouse query failed: ${e}`, { cause: e });
   }
 }
 

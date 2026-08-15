@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { CellContext, ColumnDefTemplate } from '@tanstack/react-table';
+
 import { PieChartData } from './PieChartBase';
 import { PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 

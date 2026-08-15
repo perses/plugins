@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ProfileData, StackTrace } from '@perses-dev/spec';
+
 import { SearchProfilesResponse } from '../../model';
 import { transformProfileResponse } from './get-profile-data';
 

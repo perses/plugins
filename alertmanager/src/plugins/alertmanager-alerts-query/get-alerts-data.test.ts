@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AlertsQueryContext } from '@perses-dev/plugin-system';
+
 import { AlertManagerClient, GettableAlert } from '../../model';
 import { AlertManagerDatasource } from '../alertmanager-datasource';
 import { AlertManagerAlertsQuerySpec } from '../types';

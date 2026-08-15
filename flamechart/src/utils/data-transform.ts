@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { ProfileMetaData, StackTrace } from '@perses-dev/spec';
+
 import { FlameChartSample as Sample, TableChartSample } from './data-model';
-import { getSpanColor } from './palette-gen';
 import { formatItemValue } from './format';
+import { getSpanColor } from './palette-gen';
 
 /**
  * Filter the global stacktrace by a function ID to focus on that function and display its corresponding flame chart

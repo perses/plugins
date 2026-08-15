@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import {
@@ -152,7 +153,7 @@ function inferStepMsFromSeries(
   let minDeltaMs = Number.POSITIVE_INFINITY;
 
   for (const s of series) {
-    const sortedTimestamps = [...s.values.map(([ts]) => ts)].sort((a, b) => a - b);
+    const sortedTimestamps = s.values.map(([ts]) => ts).toSorted((a, b) => a - b);
     for (let i = 1; i < sortedTimestamps.length; i++) {
       const delta = sortedTimestamps[i]! - sortedTimestamps[i - 1]!;
       if (delta > 0 && delta < minDeltaMs) {

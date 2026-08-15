@@ -16,6 +16,7 @@ import { OptionsEditorGroup } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, SyntheticEvent, useCallback } from 'react';
+
 import { AlertDeduplicationConfig, AlertTableOptions } from './alert-table-model';
 
 const MODE_DESCRIPTIONS: Record<AlertDeduplicationConfig['mode'], string> = {

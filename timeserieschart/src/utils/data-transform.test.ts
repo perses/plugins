@@ -13,6 +13,7 @@
 
 import { LegacyTimeSeries } from '@perses-dev/components';
 import { TimeScale } from '@perses-dev/spec';
+
 import { TimeSeriesChartVisualOptions, TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
 import { convertPercentThreshold, convertPanelYAxis, getTimeSeries, roundDown } from './data-transform';
 

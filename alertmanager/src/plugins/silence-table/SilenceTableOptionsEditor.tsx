@@ -16,6 +16,7 @@ import { OptionsEditorGroup } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { ALL_SILENCE_ACTIONS, SilenceAction, SilenceTableOptions } from './silence-table-model';
 
 const ACTION_LABELS: Record<SilenceAction, string> = {

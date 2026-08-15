@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState, useMemo } from 'react';
-import RefreshIcon from 'mdi-material-ui/Refresh';
-import PaletteIcon from 'mdi-material-ui/Palette';
 import { Stack, Button, useTheme, MenuItem, Menu, Fade } from '@mui/material';
 import { ToolbarIconButton, InfoTooltip } from '@perses-dev/components';
-import { TOOLTIP_TEXT } from '../utils/ui-text';
+import PaletteIcon from 'mdi-material-ui/Palette';
+import RefreshIcon from 'mdi-material-ui/Refresh';
+import { ReactElement, useState, useMemo } from 'react';
+
 import { FlameChartOptions } from '../flame-chart-model';
+import { TOOLTIP_TEXT } from '../utils/ui-text';
 
 export interface SettingsProps {
   value: FlameChartOptions;

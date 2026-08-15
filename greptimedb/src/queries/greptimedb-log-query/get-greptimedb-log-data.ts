@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogData, LogEntry } from '@perses-dev/spec';
+
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import {

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { AnnotationPlugin, AnnotationQueryPluginDependencies, parseVariables } from '@perses-dev/plugin-system';
+
 import { PrometheusPromQLAnnotationOptions } from '../plugins';
-import { PrometheusPromQLAnnotationOptionEditor } from './PrometheusPromQLAnnotationOptionEditor';
 import { getAnnotationData } from './get-annotation-data';
+import { PrometheusPromQLAnnotationOptionEditor } from './PrometheusPromQLAnnotationOptionEditor';
 
 export const PrometheusPromQLAnnotation: AnnotationPlugin<PrometheusPromQLAnnotationOptions> = {
   getAnnotationData: getAnnotationData,

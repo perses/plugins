@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { GreptimeDBLogQuery } from './GreptimeDBLogQuery';

@@ -15,6 +15,7 @@ import { TextField } from '@mui/material';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { ColumnsEditor } from '../../components/ColumnsEditor';
 import { AlertTableOptions, ColumnDefinition, ColumnSortMode } from './alert-table-model';
 

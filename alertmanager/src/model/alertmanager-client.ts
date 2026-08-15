@@ -13,6 +13,7 @@
 
 import { fetch, RequestHeaders } from '@perses-dev/client';
 import { DatasourceClient } from '@perses-dev/plugin-system';
+
 import {
   AlertManagerStatus,
   AlertsQueryParams,
@@ -57,7 +58,7 @@ const executeRequest = async <T>(...args: Parameters<typeof fetch>): Promise<T> 
     return await response.json();
   } catch (e) {
     console.error('Invalid response from server', e);
-    throw new Error('Invalid response from server');
+    throw new Error('Invalid response from server', { cause: e });
   }
 };
 

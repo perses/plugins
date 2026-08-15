@@ -47,6 +47,7 @@ import { produce } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 import { MouseEventHandler, ReactElement } from 'react';
+
 import {
   BarChartOptions,
   BarChartOptionsEditorProps,

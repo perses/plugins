@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useState } from 'react';
 import {
   Autocomplete,
   Button,
@@ -30,15 +29,17 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import PlusIcon from 'mdi-material-ui/Plus';
-import CheckIcon from 'mdi-material-ui/Check';
-import CloseIcon from 'mdi-material-ui/Close';
 import { ErrorAlert } from '@perses-dev/components';
 import { DatasourceSelector } from '@perses-dev/spec';
-import { LabelFilter, LabelValueCounter, Operator } from '../../types';
-import { ListboxComponent } from '../../filter/FilterInputs';
-import { useMetricMetadata, useSeriesStates } from '../../utils';
+import CheckIcon from 'mdi-material-ui/Check';
+import CloseIcon from 'mdi-material-ui/Close';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { ReactElement, useMemo, useState } from 'react';
+
 import { MetricChip } from '../../display/MetricChip';
+import { ListboxComponent } from '../../filter/FilterInputs';
+import { LabelFilter, LabelValueCounter, Operator } from '../../types';
+import { useMetricMetadata, useSeriesStates } from '../../utils';
 
 export interface LabelValuesRowProps extends StackProps {
   label: string;
@@ -197,7 +198,7 @@ export function LabelValuesTable({
   ...props
 }: LabelValuesTableProps): ReactElement {
   const labels: string[] = useMemo(() => {
-    return [...labelValueCounters.keys()].sort();
+    return [...labelValueCounters.keys()].toSorted();
   }, [labelValueCounters]);
 
   if (isLoading) {
@@ -264,40 +265,35 @@ export function OverviewTab({
           )}
         </Stack>
         <Stack gap={1} justifyContent="center">
-          {isMetadataLoading ? (
-            <Skeleton variant="rounded" width={75} />
-          ) : metadataError ? (
+          {isMetadataLoading && <Skeleton variant="rounded" width={75} />}
+          {!isMetadataLoading && metadataError && (
             <Chip label="failed to fetch" color="error" sx={{ fontStyle: 'italic' }} />
-          ) : (
-            <MetricChip label={metadata?.type ?? 'unknown'} />
           )}
+          {!isMetadataLoading && !metadataError && <MetricChip label={metadata?.type ?? 'unknown'} />}
           <Typography>
-            Result:{' '}
-            {isLoading ? (
-              <Skeleton variant="text" width={20} sx={{ display: 'inline-block' }} />
-            ) : error ? (
-              <strong>failed to fetch series</strong>
-            ) : (
-              <strong>{series?.length ?? 'unknown'} series</strong>
-            )}
+            Result: {isLoading && <Skeleton variant="text" width={20} sx={{ display: 'inline-block' }} />}
+            {!isLoading && error && <strong>failed to fetch series</strong>}
+            {!isLoading && !error && <strong>{series?.length ?? 'unknown'} series</strong>}
           </Typography>
         </Stack>
       </Stack>
 
-      {error ? (
+      {error && (
         <ErrorAlert
           error={{
             name: `Failed to fetch series ${error?.status && `(${error.status})`}`,
             message: error?.message ?? 'Failed to fetch series',
           }}
         />
-      ) : series?.length === 0 ? (
+      )}
+      {!error && series?.length === 0 && (
         <Stack {...props}>
           <Typography sx={{ color: (theme) => theme.palette.warning.main }}>
             No series found with current filters.
           </Typography>
         </Stack>
-      ) : (
+      )}
+      {!error && series?.length !== 0 && (
         <LabelValuesTable labelValueCounters={labelValueCounters} onFilterAdd={onFilterAdd} isLoading={isLoading} />
       )}
     </Stack>

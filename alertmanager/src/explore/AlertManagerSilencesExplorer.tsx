@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import { Box, Button, Stack } from '@mui/material';
-import BellOffIcon from 'mdi-material-ui/BellOff';
-import { DataQueriesProvider, MultiQueryEditor, useDatasourceClient } from '@perses-dev/plugin-system';
+import { useSnackbar } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
+import { DataQueriesProvider, MultiQueryEditor, useDatasourceClient } from '@perses-dev/plugin-system';
 import { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
-import { useSnackbar } from '@perses-dev/components';
 import { useQueryClient } from '@tanstack/react-query';
+import BellOffIcon from 'mdi-material-ui/BellOff';
+import { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+
 import { SilenceForm } from '../components/SilenceForm';
 import { AlertManagerClient, DEFAULT_ALERTMANAGER, PostableSilence } from '../model';
 

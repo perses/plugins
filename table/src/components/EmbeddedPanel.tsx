@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelData } from '@perses-dev/plugin-system';
-import { PanelPluginLoader } from '@perses-dev/dashboards';
-import useResizeObserver from 'use-resize-observer';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import { PanelPluginLoader } from '@perses-dev/dashboards';
+import { PanelData } from '@perses-dev/plugin-system';
 import { QueryDataType, UnknownSpec } from '@perses-dev/spec';
+import { ReactElement } from 'react';
+import useResizeObserver from 'use-resize-observer';
 
 interface EmbeddedPanelProps {
   kind: string;

@@ -4,16 +4,7 @@
     "legend": {
       "mode": "list",
       "position": "bottom",
-      "values": [
-        "min",
-        "max",
-        "first",
-        "first-number",
-        "last",
-        "last-number",
-        "mean",
-        "sum"
-      ]
+      "values": ["min", "max", "first", "first-number", "last", "last-number", "mean", "sum"]
     },
     "visual": {
       "areaOpacity": 0,

@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { VariableProvider } from '@perses-dev/dashboards';
 import { PanelData, ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import { TraceData } from '@perses-dev/spec';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { VariableProvider } from '@perses-dev/dashboards';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TraceData } from '@perses-dev/spec';
+
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from './test/mock-trace-data';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 

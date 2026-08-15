@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { CompletionContext } from '@codemirror/autocomplete';
 import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-logql';
-import { CompletionContext } from '@codemirror/autocomplete';
-import { Extension } from '@uiw/react-codemirror';
 import { AbsoluteTimeRange } from '@perses-dev/spec';
+import { Extension } from '@uiw/react-codemirror';
+
 import { LokiClient } from '../model';
-import { logqlHighlight } from './logql-highlight';
 import { complete } from './complete';
+import { logqlHighlight } from './logql-highlight';
 
 function logqlLanguage(): LRLanguage {
   return LRLanguage.define({

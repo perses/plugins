@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange } from '@perses-dev/spec';
+
 import { toUnixSeconds, getLokiTimeRange, labels, labelValues } from './loki-client';
 
 // Mock global fetch for labels/labelValues tests

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelectValue } from '@perses-dev/plugin-system';
+
 import { JaegerDatasourceSelector } from './jaeger-selectors';
 
 export interface JaegerTraceQuerySpec {

@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { AnnotationSpecWithData } from '@perses-dev/dashboards';
+import { TimeRangeContext } from '@perses-dev/plugin-system';
+import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/spec';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { TimeRangeContext } from '@perses-dev/plugin-system';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/spec';
-import { AnnotationSpecWithData } from '@perses-dev/dashboards';
+
 import { MOCK_TIME_SERIES_DATA_MULTIVALUE } from './test/mock-query-results';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 

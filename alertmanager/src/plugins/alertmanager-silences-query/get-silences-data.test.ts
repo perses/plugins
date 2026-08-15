@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { SilencesQueryContext } from '@perses-dev/plugin-system';
+
 import { AlertManagerClient } from '../../model';
 import { AlertManagerDatasource } from '../alertmanager-datasource';
 import { AlertManagerSilencesQuerySpec } from '../types';

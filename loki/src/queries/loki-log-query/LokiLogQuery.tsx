@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/spec';
 import { LogQueryPlugin, LogQueryContext, calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
+import { QueryDefinition } from '@perses-dev/spec';
+
 import { getLokiLogData } from './get-loki-log-data';
-import { LokiLogQueryEditor } from './LokiLogQueryEditor';
 import { LokiLogQuerySpec } from './loki-log-query-types';
+import { LokiLogQueryEditor } from './LokiLogQueryEditor';
 
 export const LokiLogQuery: LogQueryPlugin<LokiLogQuerySpec> = {
   getLogData: getLokiLogData,
@@ -23,7 +24,7 @@ export const LokiLogQuery: LogQueryPlugin<LokiLogQuerySpec> = {
   createInitialOptions: () => ({ query: '' }),
   dependsOn: (spec) => {
     const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set([...queryVariables])];
+    const allVariables = [...new Set(queryVariables)];
     return {
       variables: allVariables,
     };

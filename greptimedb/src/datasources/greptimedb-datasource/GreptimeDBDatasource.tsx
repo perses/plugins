@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import { greptimedbQuery } from '../../model/greptimedb-client';
 import { GreptimeDBDatasourceClient, GreptimeDBDatasourceSpec } from './greptimedb-datasource-types';
 import { GreptimeDBDatasourceEditor } from './GreptimeDBDatasourceEditor';
@@ -32,8 +33,8 @@ const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasou
 
   // Support directUrl auth headers while keeping backward compatibility with proxy headers.
   const specHeaders = {
-    ...(proxy?.spec.headers ?? {}),
-    ...(headers ?? {}),
+    ...proxy?.spec.headers,
+    ...headers,
   };
 
   return {

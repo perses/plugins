@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import merge from 'lodash/merge';
-import omit from 'lodash/omit';
 import {
-  CalculationSelector,
-  CalculationSelectorProps,
-  CalculationType,
-  LegendOptionsEditor,
-  LegendOptionsEditorProps,
-} from '@perses-dev/plugin-system';
-import { produce } from 'immer';
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Switch,
+  SwitchProps,
+  Typography,
+} from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
@@ -41,17 +42,17 @@ import {
   isUnitWithShortValues,
 } from '@perses-dev/components';
 import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Switch,
-  SwitchProps,
-  Typography,
-} from '@mui/material';
+  CalculationSelector,
+  CalculationSelectorProps,
+  CalculationType,
+  LegendOptionsEditor,
+  LegendOptionsEditorProps,
+} from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 import { ReactElement, useMemo } from 'react';
+
 import { PieChartOptions, PieChartOptionsEditorProps, DEFAULT_FORMAT } from './pie-chart-model';
 
 export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps): ReactElement {
@@ -136,7 +137,10 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   type ColorScheme = 'default' | 'theme' | 'gradient';
 
   const colorScheme: ColorScheme = useMemo(() => {
-    return Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default';
+    if (!Array.isArray(colorPalette)) {
+      return 'default';
+    }
+    return colorPalette.length === 1 ? 'gradient' : 'theme';
   }, [colorPalette]);
 
   const handleColorSchemeChange = (scheme: ColorScheme): void => {

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { produce } from 'immer';
 import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
+import { produce } from 'immer';
 import { ReactElement } from 'react';
+
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,

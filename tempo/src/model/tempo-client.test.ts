@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { UserFriendlyError } from '@perses-dev/client';
+
 import { MOCK_TRACE_RESPONSE } from '../test';
 import { query, search, searchTagValues } from './tempo-client';
 

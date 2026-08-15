@@ -14,6 +14,7 @@
 import { QueryParamValues } from '@perses-dev/components';
 import { DatasourceSelectValue } from '@perses-dev/plugin-system';
 import { DurationString, HTTPProxy } from '@perses-dev/spec';
+
 import { PrometheusDatasourceSelector } from '../model';
 
 export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';

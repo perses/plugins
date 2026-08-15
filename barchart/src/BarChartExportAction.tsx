@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useMemo } from 'react';
-import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilename } from '@perses-dev/plugin-system';
-import { InfoTooltip } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
+import { InfoTooltip } from '@perses-dev/components';
+import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilename } from '@perses-dev/plugin-system';
 import DownloadIcon from 'mdi-material-ui/Download';
+import React, { useCallback, useMemo } from 'react';
+
 import { BarChartPanelProps } from './BarChartPanel';
 
 export const BarChartExportAction: React.FC<BarChartPanelProps> = ({ queryResults, definition }) => {

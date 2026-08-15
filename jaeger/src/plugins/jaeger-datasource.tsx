@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import { getTrace, JaegerClient, searchOperations, searchServices, searchTraces } from '../model';
 import { JaegerDatasourceSpec } from './jaeger-datasource-types';
 import { JaegerDatasourceEditor } from './JaegerDatasourceEditor';

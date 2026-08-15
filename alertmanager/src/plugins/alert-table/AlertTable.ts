@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
+import { AlertTableOptions } from './alert-table-model';
 import { AlertTableColumnsEditor } from './AlertTableColumnsEditor';
 import { AlertTableDeduplicationEditor } from './AlertTableDeduplicationEditor';
 import { AlertTableLabelsEditor } from './AlertTableLabelsEditor';
 import { AlertTableOptionsEditor } from './AlertTableOptionsEditor';
 import { AlertTablePanel, AlertTablePanelProps } from './AlertTablePanel';
-import { AlertTableOptions } from './alert-table-model';
 
 /**
  * Panel plugin for displaying Alert Manager alerts in a hierarchical table.

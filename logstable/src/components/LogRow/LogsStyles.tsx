@@ -36,11 +36,8 @@ export const LogRowContent = styled(Box, {
     padding: '4px 8px',
     cursor: 'default',
     gap: '12px',
-    backgroundColor: isHighlighted
-      ? theme.palette.action.hover
-      : isSelected
-        ? theme.palette.action.selected
-        : 'transparent',
+    backgroundColor:
+      (isHighlighted && theme.palette.action.hover) || (isSelected && theme.palette.action.selected) || 'transparent',
     '&:hover': {
       backgroundColor: isSelected ? theme.palette.action.focus : theme.palette.action.hover,
     },

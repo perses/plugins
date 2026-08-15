@@ -31,10 +31,11 @@ import {
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
+import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { createPortal } from 'react-dom';
+
 import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
@@ -219,7 +220,7 @@ function ColumnFilterDropdown({
   theme,
 }: ColumnFilterDropdownProps): ReactElement {
   const [searchTerm, setSearchTerm] = useState('');
-  const values = [...new Set(allValues)].filter((v) => v !== null).sort();
+  const values = [...new Set(allValues)].filter((v) => v !== null).toSorted();
   const filteredValues = searchTerm
     ? values.filter((v) => String(v.formatted).toLowerCase().includes(searchTerm.toLowerCase()))
     : values;
@@ -292,19 +293,17 @@ function ColumnFilterDropdown({
       />
       {filteredValues.map((value, index) => (
         <div key={`value-${index}`} style={{ marginBottom: 4 }}>
-          <label
-            style={{
+          <Box
+            component="label"
+            sx={{
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
               padding: '2px 0',
-              borderRadius: 2,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme.palette.action.hover;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              borderRadius: '2px',
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
             }}
           >
             <input
@@ -327,7 +326,7 @@ function ColumnFilterDropdown({
             >
               {value === null || value === undefined || value.formatted === '' ? '(empty)' : String(value.formatted)}
             </span>
-          </label>
+          </Box>
         </div>
       ))}
     </div>

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
 import { HistogramChartOptionsEditorSettings, HistogramChartPanel, HistogramChartPanelProps } from './components';
 import { createInitialHistogramChartOptions, HistogramChartOptions } from './histogram-chart-model';
 

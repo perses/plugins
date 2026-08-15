@@ -21,9 +21,10 @@ import {
   DatasourceStore,
 } from '@perses-dev/plugin-system';
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
-import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import { resolvePrometheusDatasource } from './interpolation';
+import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import { PrometheusLabelValuesVariableOptions, PrometheusDatasourceSpec } from './types';
 
 function extractDatasourceVariables(datasourceSpec: DatasourceSpec<PrometheusDatasourceSpec>): string[] {
@@ -87,7 +88,8 @@ function getDatasourceVariablesFromCache(
     if (!datasourceStore.getDatasourceSpecSync) return [];
 
     const datasourceSpec = datasourceStore.getDatasourceSpecSync(datasourceSelector) as
-      DatasourceSpec<PrometheusDatasourceSpec> | undefined;
+      | DatasourceSpec<PrometheusDatasourceSpec>
+      | undefined;
     return datasourceSpec ? extractDatasourceVariables(datasourceSpec) : [];
   } catch {
     return [];
@@ -126,7 +128,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
     };
   },
   dependsOn: (spec: PrometheusLabelValuesVariableOptions, ctx?: GetVariableOptionsContext) => {
-    const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
+    const matcherVariables = spec.matchers?.flatMap((m) => parseVariables(m)) || [];
     const labelVariables = parseVariables(spec.labelName);
     const datasourceVariables =
       spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];

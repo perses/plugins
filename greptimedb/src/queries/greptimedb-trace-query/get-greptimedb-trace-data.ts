@@ -13,8 +13,9 @@
 
 import { replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { TraceSearchResult } from '@perses-dev/spec';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import {
@@ -270,7 +271,7 @@ function buildSearchResult(records: GreptimeDBRecords | undefined): TraceSearchR
       rootTraceName: entry.rootTraceName,
       serviceStats: entry.serviceStats,
     }))
-    .sort((a, b) => b.startTimeUnixMs - a.startTimeUnixMs);
+    .toSorted((a, b) => b.startTimeUnixMs - a.startTimeUnixMs);
 }
 
 function isIntegerGreptimeDataType(dataType: string): boolean {

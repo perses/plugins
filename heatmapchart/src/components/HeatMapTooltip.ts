@@ -13,6 +13,7 @@
 
 import { css, Theme } from '@mui/material';
 import { FormatOptions, formatValue, getDateAndTime } from '@perses-dev/components';
+
 import { HeatMapData } from './HeatMapChart';
 
 interface CustomTooltipProps {

@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TextField, Stack, MenuItem, Typography } from '@mui/material';
 import { TableDensity, TableCellConfig, FormatOptions, Transform } from '@perses-dev/components';
 import { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
-import React from 'react';
-import { TextField, Stack, MenuItem, Typography } from '@mui/material';
 import { Definition, UnknownSpec } from '@perses-dev/spec';
+import React from 'react';
 
 export interface ColumnSettings {
   name: string;

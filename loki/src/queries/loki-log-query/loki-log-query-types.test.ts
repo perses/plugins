@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
-import { LokiQueryRangeStreamsResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
+
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
+import { LokiQueryRangeStreamsResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
 import { LokiLogQuery } from './LokiLogQuery';
 
 const datasource: LokiDatasourceSpec = {

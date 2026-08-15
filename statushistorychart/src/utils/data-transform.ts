@@ -13,8 +13,9 @@
 
 import { applyValueMapping, LegendItem } from '@perses-dev/components';
 import { PanelData } from '@perses-dev/plugin-system';
-import { useMemo } from 'react';
 import { TimeScale, TimeSeriesData } from '@perses-dev/spec';
+import { useMemo } from 'react';
+
 import { StatusHistoryChartOptions } from '../status-history-model';
 import { StatusHistoryDataItem } from '../StatusHistoryChartBase';
 import { FALLBACK_COLOR, getColorsForValues } from './get-color';

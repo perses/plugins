@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange } from '@perses-dev/spec';
+
 import {
   LokiQueryResponse,
   LokiQueryRangeResponse,

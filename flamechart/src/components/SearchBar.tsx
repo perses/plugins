@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { TextField, InputAdornment, Chip } from '@mui/material';
 import Magnify from 'mdi-material-ui/Magnify';
+import { ReactElement } from 'react';
 
 export interface SearchBarProps {
   searchValue: string;

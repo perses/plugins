@@ -18,6 +18,7 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { LokiClient, DEFAULT_LOKI, LOKI_DATASOURCE_KIND, getLokiTimeRange } from '../model';
 import {
   capturingMetric,

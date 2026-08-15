@@ -13,6 +13,7 @@
 
 import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogEntry, LogData } from '@perses-dev/spec';
+
 import { OpenSearchClient } from '../../model/opensearch-client';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { DEFAULT_DATASOURCE, DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../constants';
@@ -155,7 +156,12 @@ export function parseTimestamp(v: unknown): number {
   // We emit seconds (LogEntry is second-resolution), so we only need the correct
   // magnitude, not sub-second precision: a float's rounding at the ns scale is far
   // below one second and is discarded anyway, so BigInt isn't required here.
-  const numeric = typeof v === 'number' ? v : /^\d+$/.test(String(v)) ? Number(v) : NaN;
+  let numeric = NaN;
+  if (typeof v === 'number') {
+    numeric = v;
+  } else if (/^\d+$/.test(String(v))) {
+    numeric = Number(v);
+  }
   if (!Number.isNaN(numeric)) {
     // Detect the unit by magnitude — a value past year ~5138 for a given unit must
     // really be a finer unit — and normalize to seconds. Without the µs/ns tiers

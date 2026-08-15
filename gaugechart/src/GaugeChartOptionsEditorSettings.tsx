@@ -26,6 +26,7 @@ import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugi
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import { ReactElement } from 'react';
+
 import {
   DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,
@@ -36,7 +37,7 @@ import {
 
 export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
-  /* If legend setting doesn't exist (because it is optional), the legend should show by default 
+  /* If legend setting doesn't exist (because it is optional), the legend should show by default
      This is for the records before the legend option was added
   */
   const showLegend = value?.legend?.show ?? true;

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
 import { HeatMapChartOptionsEditorSettings, HeatMapChartPanel, HeatMapChartPanelProps } from './components';
 import { createInitialHeatMapChartOptions, HeatMapChartOptions } from './heat-map-chart-model';
 

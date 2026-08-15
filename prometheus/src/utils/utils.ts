@@ -37,7 +37,7 @@ export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels
 function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, removeExprWrap?: boolean): string {
   const labelStrings: string[] = [];
   Object.keys(labels)
-    .sort()
+    .toSorted()
     .forEach((labelName) => {
       const labelValue = labels[labelName];
       if (labelValue !== undefined) {

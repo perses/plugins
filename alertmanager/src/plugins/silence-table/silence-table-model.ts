@@ -22,7 +22,14 @@ export type SortDirection = 'asc' | 'desc';
 export type SilenceColumnSortMode = 'alphabetical' | 'date' | 'status';
 
 export type SilenceFieldName =
-  'status' | 'matchers' | 'createdBy' | 'startsAt' | 'endsAt' | 'duration' | 'comment' | 'updatedAt';
+  | 'status'
+  | 'matchers'
+  | 'createdBy'
+  | 'startsAt'
+  | 'endsAt'
+  | 'duration'
+  | 'comment'
+  | 'updatedAt';
 
 export interface SilenceColumnDefinition {
   name: SilenceFieldName;

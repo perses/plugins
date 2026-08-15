@@ -51,6 +51,7 @@ import MagnifyIcon from 'mdi-material-ui/Magnify';
 import UnfoldLessHorizontalIcon from 'mdi-material-ui/UnfoldLessHorizontal';
 import UnfoldMoreHorizontalIcon from 'mdi-material-ui/UnfoldMoreHorizontal';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { SilenceForm } from '../../components/SilenceForm';
 import { StatusBadge } from '../../components/StatusBadge';
 import { AlertManagerClient, extractDatasourceSelector } from '../../model';
@@ -110,7 +111,7 @@ function LabelValueSummaryChips({
   return (
     <Stack direction="row" spacing={0.5}>
       {Object.entries(counts)
-        .sort(([, a], [, b]) => b - a)
+        .toSorted(([, a], [, b]) => b - a)
         .map(([value, count]) => {
           const bgColor = getLabelColor(value, mapping);
           return (
@@ -288,7 +289,7 @@ function AlertGroupRow({
               <TableCell key={colIdx}>
                 <Stack direction="row" spacing={0.5}>
                   {Object.entries(counts)
-                    .sort(([, a], [, b]) => b - a)
+                    .toSorted(([, a], [, b]) => b - a)
                     .map(([value, count]) => (
                       <Chip key={value} label={`${count} ${value}`} size="small" variant="outlined" />
                     ))}

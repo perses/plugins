@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { RequestHeaders } from '@perses-dev/client';
+
 import { GreptimeDBDatasourceResponse, GreptimeDBQueryRequestParameters } from '../datasources/greptimedb-datasource';
 import { GreptimeDBResponseData } from './greptimedb-data-types';
 
@@ -55,7 +56,7 @@ export async function greptimedbQuery(
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      ...(headers ?? {}),
+      ...headers,
     },
     body: new URLSearchParams({
       sql: params.query,
@@ -81,7 +82,7 @@ export async function greptimedbQuery(
       data: body,
     };
   } catch (e) {
-    throw new Error(`GreptimeDB query failed: ${e}`);
+    throw new Error(`GreptimeDB query failed: ${e}`, { cause: e });
   }
 }
 

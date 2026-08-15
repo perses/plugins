@@ -13,6 +13,7 @@
 
 import { Transform, TransformsEditor } from '@perses-dev/components';
 import { ReactElement } from 'react';
+
 import { TableSettingsEditorProps } from '../models';
 
 export function TableTransformsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {

@@ -13,9 +13,10 @@
 
 import { TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_DATA_SEARCHRESULT, MOCK_TRACE_RESPONSE_SMALL } from '../test';
-import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasource } from './tempo-datasource';
+import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoTraceQuery } from './tempo-trace-query/TempoTraceQuery';
 
 jest.mock('echarts/core');

@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import { Button, TextField } from '@mui/material';
 import {
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
   OptionsEditorControl,
 } from '@perses-dev/components';
-import { Button, TextField } from '@mui/material';
+import { ReactElement } from 'react';
+
 import { FlameChartOptionsEditorProps } from '../flame-chart-model';
 import {
   usePaletteState,

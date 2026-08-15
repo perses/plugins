@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Silence } from '@perses-dev/spec';
+
 import { getSilenceDuration, getSilenceFieldValue, inferSortMode } from './silence-table-model';
 
 const makeSilence = (overrides: Partial<Silence> = {}): Silence => ({

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Alert } from '@perses-dev/spec';
+
 import { deduplicateAlerts, extractLabelKeys, getGroupKey, getGroupSummary } from './alert-table-model';
 
 const makeAlert = (overrides: Partial<Alert> = {}): Alert => ({

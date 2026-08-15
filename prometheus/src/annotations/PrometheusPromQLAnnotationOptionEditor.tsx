@@ -11,10 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import { useId } from '@perses-dev/components';
-import { produce } from 'immer';
 import { Autocomplete, FormControl, Stack, TextField } from '@mui/material';
+import { useId } from '@perses-dev/components';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -23,6 +21,10 @@ import {
   useDatasourceClient,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import { ReactElement } from 'react';
+
+import { PromQLEditor } from '../components';
 import {
   DEFAULT_PROM,
   isDefaultPromSelector,
@@ -31,8 +33,6 @@ import {
   PrometheusClient,
   PrometheusDatasourceSelector,
 } from '../model';
-
-import { PromQLEditor } from '../components';
 
 export interface PrometheusAnnotationsQuerySpec {
   expr: string;

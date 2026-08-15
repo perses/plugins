@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Alert } from '@perses-dev/spec';
+
 import { ColumnSortMode, SortDirection } from './alert-table-model';
 import { getSeverityWeight, SEVERITY_ORDER } from './label-colors';
 

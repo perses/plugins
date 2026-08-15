@@ -14,7 +14,6 @@
 import { Completion, CompletionContext, CompletionResult, insertCompletionText } from '@codemirror/autocomplete';
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-import { Tree } from '@lezer/common';
 import {
   String as StringType,
   FieldExpression,
@@ -25,7 +24,9 @@ import {
   SpansetFilter,
   FieldOp,
 } from '@grafana/lezer-traceql';
+import { Tree } from '@lezer/common';
 import { EditorView } from '@uiw/react-codemirror';
+
 import { getUnixTimeRange } from '../plugins';
 import { CompletionConfig } from './TraceQLExtension';
 
@@ -45,7 +46,7 @@ export interface Completions {
   to?: number;
 }
 
-const quoteChars = ['"', '`'];
+const quoteChars = new Set(['"', '`']);
 const defaultQuoteChar = '"';
 
 export async function complete(
@@ -182,7 +183,7 @@ export function identifyCompletions(state: EditorState, pos: number, tree: Tree)
         const fieldExpr = node.parent.firstChild;
         const attribute = state.sliceDoc(fieldExpr.from, fieldExpr.to);
         // ignore leading " in { name="HT
-        const from = quoteChars.includes(state.sliceDoc(node.from, node.from + 1)) ? node.from + 1 : node.from;
+        const from = quoteChars.has(state.sliceDoc(node.from, node.from + 1)) ? node.from + 1 : node.from;
         return { scopes: [{ kind: 'TagValue', tag: attribute }], from };
       }
 
@@ -263,11 +264,11 @@ function escapeString(input: string, quoteChar: string): string {
  */
 export function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number): void {
   let quoteChar = defaultQuoteChar;
-  if (quoteChars.includes(view.state.sliceDoc(from - 1, from))) {
+  if (quoteChars.has(view.state.sliceDoc(from - 1, from))) {
     quoteChar = view.state.sliceDoc(from - 1, from);
     from--;
   }
-  if (quoteChars.includes(view.state.sliceDoc(to, to + 1))) {
+  if (quoteChars.has(view.state.sliceDoc(to, to + 1))) {
     quoteChar = view.state.sliceDoc(to, to + 1);
     to++;
   }

@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { PanelData } from '@perses-dev/plugin-system';
-import { renderHook } from '@testing-library/react';
 import { TimeSeriesData } from '@perses-dev/spec';
+import { renderHook } from '@testing-library/react';
+
 import { useStatusHistoryDataModel } from './data-transform';
 
 describe('useStatusHistoryDataModel', () => {

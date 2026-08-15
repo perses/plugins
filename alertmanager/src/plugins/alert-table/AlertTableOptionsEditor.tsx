@@ -16,6 +16,7 @@ import { OptionsEditorGroup } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ChangeEvent, ReactElement, SyntheticEvent, useCallback } from 'react';
+
 import { AlertAction, AlertTableOptions, ALL_ALERT_ACTIONS } from './alert-table-model';
 
 const ACTION_LABELS: Record<AlertAction, string> = {

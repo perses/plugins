@@ -15,9 +15,10 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
+
 import { VictoriaLogsDatasource } from '../../datasources/victorialogs-datasource';
 import { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
+import { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsTimeSeriesQuery } from './VictoriaLogsTimeSeriesQuery';
 
 const datasource: VictoriaLogsDatasourceSpec = {

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Silence } from '@perses-dev/spec';
+
 import { SilenceColumnSortMode, SilenceFieldName, SortDirection, getSilenceFieldValue } from './silence-table-model';
 
 export interface SilenceSortState {

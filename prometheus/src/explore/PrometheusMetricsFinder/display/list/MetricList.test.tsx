@@ -14,6 +14,7 @@
 import { render, RenderResult, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
+
 import { DEFAULT_PROM } from '../../../../model/prometheus-selectors';
 import { MetricList, MetricListProps } from './MetricList';
 

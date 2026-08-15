@@ -44,10 +44,7 @@
         },
         "lineStyle": {
           "fill": "dot",
-          "dash": [
-            0,
-            10
-          ]
+          "dash": [0, 10]
         }
       },
       "color": {

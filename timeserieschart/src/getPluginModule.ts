@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PluginModuleResource, PluginModuleSpec } from '@perses-dev/plugin-system';
+
 import packageJson from '../package.json';
 
 /**

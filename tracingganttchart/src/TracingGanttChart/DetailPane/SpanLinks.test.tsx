@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { VariableProvider } from '@perses-dev/dashboards';
+import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { screen } from '@testing-library/dom';
 import { render, RenderResult } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { VariableProvider } from '@perses-dev/dashboards';
-import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import { CustomLinks } from '../../gantt-chart-model';
-import { getTraceModel } from '../trace';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
+import { getTraceModel } from '../trace';
 import { SpanLinkList, SpanLinkListProps } from './SpanLinks';
 
 describe('SpanLinks', () => {

@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   DatasourceSpec,
   DurationString,
@@ -21,6 +20,8 @@ import {
   TimeSeries,
   TimeSeriesData,
 } from '@perses-dev/spec';
+import { fromUnixTime, milliseconds } from 'date-fns';
+
 import {
   parseValueTuple,
   PrometheusClient,
@@ -37,8 +38,8 @@ import {
 import { getFormattedPrometheusSeriesName } from '../../utils';
 import { interpolateDatasourceProxyParams } from '../interpolation';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
-import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
+import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,

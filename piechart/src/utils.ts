@@ -19,13 +19,14 @@ import {
   SortOption,
   TableColumnConfig,
 } from '@perses-dev/components';
-import { format } from 'echarts';
 import { comparisonLegends, ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
-import { PieChartData } from './PieChartBase';
+import { format } from 'echarts';
+
 import { DEFAULT_SORT } from './pie-chart-model';
+import { PieChartData } from './PieChartBase';
 
 export function sortSeriesData<T extends PieChartData>(data: T[], sortOrder: SortOption = DEFAULT_SORT): T[] {
-  return data.sort((a, b) => {
+  return data.toSorted((a, b) => {
     // Handle null values - push them to the end regardless of sort order
     if (a.value === null && b.value === null) return 0;
     if (a.value === null) return 1;

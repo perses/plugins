@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { pluginReact } from '@rsbuild/plugin-react';
+
 import { createConfigForPlugin } from '../rsbuild.shared';
 
 export default createConfigForPlugin({

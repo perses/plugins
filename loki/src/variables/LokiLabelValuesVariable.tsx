@@ -18,6 +18,7 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { LokiClient, DEFAULT_LOKI, getLokiTimeRange, LOKI_DATASOURCE_KIND } from '../model';
 import { stringArrayToVariableOptions, LokiLabelValuesVariableEditor } from './loki-variables';
 import { LokiLabelValuesVariableOptions } from './types';
@@ -42,7 +43,7 @@ export const LokiLabelValuesVariable: VariablePlugin<LokiLabelValuesVariableOpti
     return { data: stringArrayToVariableOptions(options) };
   },
   dependsOn: (spec) => {
-    const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
+    const matcherVariables = spec.matchers?.flatMap((m) => parseVariables(m)) || [];
     const labelVariables = parseVariables(spec.labelName);
     const datasourceVariables =
       spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];

@@ -13,6 +13,7 @@
 
 import { replaceVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
+
 import {
   ClickHouseClient,
   ClickHouseQueryResponse,
@@ -49,7 +50,7 @@ function convertStreamsToLogs(streams: LogEntry[]): LogData {
 
     const sortedEntry: Record<string, unknown> = {};
     Object.keys(flattened)
-      .sort((a, b) => a.localeCompare(b))
+      .toSorted((a, b) => a.localeCompare(b))
       .forEach((key) => {
         sortedEntry[key] = flattened[key];
       });

@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { Chip, ChipProps } from '@mui/material';
+import { ReactElement } from 'react';
 
 export interface StatusBadgeProps {
   status: string;

@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelect, DatasourceSelectProps, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
-import { useId } from '@perses-dev/components';
-import { produce } from 'immer';
 import { FormControl, InputLabel, Stack, TextField, useTheme } from '@mui/material';
+import { useId } from '@perses-dev/components';
+import { DatasourceSelect, DatasourceSelectProps, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
 import { ReactElement } from 'react';
+
+import { ProfileTypeSelector, Service, Filters } from '../../components';
 import {
   DEFAULT_PYROSCOPE,
   isDefaultPyroscopeSelector,
@@ -23,7 +25,6 @@ import {
   PYROSCOPE_DATASOURCE_KIND,
   PyroscopeDatasourceSelector,
 } from '../../model';
-import { ProfileTypeSelector, Service, Filters } from '../../components';
 import {
   ProfileQueryEditorProps,
   useMaxNodesState,

@@ -13,6 +13,7 @@
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { VictoriaLogsDatasourceSpec } from './types';
 
 export interface VictoriaLogsDatasourceEditorProps {

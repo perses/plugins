@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme } from '@perses-dev/components';
 import { Theme } from '@mui/material';
+import { PersesChartsTheme } from '@perses-dev/components';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import { getConsistentCategoricalColor, getConsistentColor } from './palette';
 import { Span } from './trace';
 

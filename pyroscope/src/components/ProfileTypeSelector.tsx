@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { Stack, TextField, MenuItem, CircularProgress } from '@mui/material';
+import { ReactElement } from 'react';
+
 import { PyroscopeDatasourceSelector } from '../model';
 import { useProfileTypes } from '../utils/use-query';
 

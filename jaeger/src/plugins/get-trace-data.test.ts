@@ -13,9 +13,10 @@
 
 import { replaceVariables, TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { JaegerClient } from '../model';
-import { JaegerDatasource } from './jaeger-datasource';
 import { getTraceData, jaegerTraceToOTLP } from './get-trace-data';
+import { JaegerDatasource } from './jaeger-datasource';
 
 jest.mock('@perses-dev/plugin-system', () => {
   const actual = jest.requireActual('@perses-dev/plugin-system');
@@ -86,13 +87,15 @@ const makeClient = (): JaegerClient => {
   return client;
 };
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<typeof datasource> => ({
-  default: false,
-  plugin: {
-    kind: 'JaegerDatasource',
-    spec: datasource,
-  },
-}));
+const getDatasource: jest.Mock = jest.fn(
+  (): DatasourceSpec<typeof datasource> => ({
+    default: false,
+    plugin: {
+      kind: 'JaegerDatasource',
+      spec: datasource,
+    },
+  })
+);
 
 function createContext(client: JaegerClient): TraceQueryContext {
   return {
