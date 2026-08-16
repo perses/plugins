@@ -24,6 +24,12 @@ Then in [`perses`](https://github.com/perses/perses) repository:
 3. Login percli to the backend `percli login http://localhost:8080`
 4. Start the plugin development server: `percli plugin start /path/to/the/plugin/dir`
 
+### Code quality
+
+Run `npm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`. Run
+`npm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in GitHub
+Actions.
+
 ### Working with Snapshots
 
 This will allow you to use the updates from perses core in your plugin so you can test the changes.
