@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Theme, Typography, useTheme } from '@mui/material';
+import { Box, Theme, Typography, useTheme } from "@mui/material";
 import {
   FormatOptions,
   formatValue,
@@ -19,9 +19,9 @@ import {
   TableCellConfigs,
   TableColumnConfig,
   transformData,
-  useSelection,
-} from '@perses-dev/components';
-import { useSelectionItemActions } from '@perses-dev/dashboards';
+  useSelection
+} from "@perses-dev/components";
+import { useSelectionItemActions } from "@perses-dev/dashboards";
 import {
   ActionOptions,
   CalculationsMap,
@@ -29,15 +29,15 @@ import {
   PanelProps,
   replaceVariablesInString,
   useAllVariableValues,
-  VariableStateMap,
-} from '@perses-dev/plugin-system';
-import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
-import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
-import { createPortal } from 'react-dom';
-import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
-import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
-import { EmbeddedPanel } from './EmbeddedPanel';
+  VariableStateMap
+} from "@perses-dev/plugin-system";
+import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from "@tanstack/react-table";
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { JsonData, QueryDataType, TimeSeriesData } from "@perses-dev/spec";
+import { createPortal } from "react-dom";
+import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from "../models";
+import { buildRawTableData, getTablePanelQueryMode } from "../table-data-utils";
+import { EmbeddedPanel } from "./EmbeddedPanel";
 
 type FilterValuesType<T> = Array<{ original: T; formatted: T }>;
 
@@ -385,7 +385,7 @@ export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant'
   };
 }
 
-export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
+export type TableProps = PanelProps<TableOptions, TimeSeriesData | JsonData>;
 
 export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
   const theme = useTheme();
@@ -439,9 +439,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     [setSelection, clearSelection]
   );
 
-  // TODO: handle other query types
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
-    // Transform query results to a tabular format using shared utility
     return buildRawTableData(queryResults, spec);
   }, [queryResults, spec]);
 

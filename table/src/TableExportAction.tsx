@@ -16,7 +16,7 @@ import { escapeCsvValue, PanelData, sanitizeFilename } from '@perses-dev/plugin-
 import { InfoTooltip, transformData } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
 import DownloadIcon from 'mdi-material-ui/Download';
-import { TimeSeriesData } from '@perses-dev/spec';
+import { QueryDataType } from '@perses-dev/spec';
 import { TableProps } from './components';
 import type { TableOptions } from './models';
 import { buildRawTableData } from './table-data-utils';
@@ -32,10 +32,9 @@ export interface ExportColumn {
  * CSV output matches the visual table.
  */
 export function buildTableData(
-  queryResults: Array<PanelData<TimeSeriesData>>,
+  queryResults: Array<PanelData<QueryDataType>>,
   spec: TableOptions
 ): { data: Array<Record<string, unknown>>; columns: ExportColumn[] } {
-  // Use shared utility with forExport=true to get raw scalar values
   const rawData = buildRawTableData(queryResults, spec, { forExport: true });
 
   const transformed = transformData(rawData, spec.transforms ?? []);
