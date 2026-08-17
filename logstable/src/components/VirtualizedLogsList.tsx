@@ -153,7 +153,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
       await navigator.clipboard.writeText(text);
       showCopyPopover(format, selectedLogs.length);
     },
-    [logs, showCopyPopover]
+    [logs, showCopyPopover],
   );
 
   const handleRowSelect = useCallback(
@@ -198,7 +198,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
         setLastSelectedIndex(index);
       }
     },
-    [selectedRows, lastSelectedIndex]
+    [selectedRows, lastSelectedIndex],
   );
 
   const renderLogRow = (index: number): ReactNode | null => {

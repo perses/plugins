@@ -34,7 +34,7 @@ describe('TraceHeaderBar', () => {
     return render(
       <MemoryRouter>
         <TraceHeaderBar {...props} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
   };
 

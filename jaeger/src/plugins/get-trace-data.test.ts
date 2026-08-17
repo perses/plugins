@@ -94,7 +94,7 @@ const getDatasource: jest.Mock = jest.fn(
       kind: 'JaegerDatasource',
       spec: datasource,
     },
-  })
+  }),
 );
 
 function createContext(client: JaegerClient): TraceQueryContext {
@@ -166,7 +166,7 @@ describe('getTraceData', () => {
         minDuration: '20ms',
         limit: 25,
       },
-      context
+      context,
     );
 
     expect(client.searchTraces).toHaveBeenCalledWith({
@@ -202,10 +202,10 @@ describe('getTraceData', () => {
     const client = makeClient();
 
     await expect(getTraceData({ tags: '[]' }, createContext(client))).rejects.toThrow(
-      'Jaeger tags must be a JSON object.'
+      'Jaeger tags must be a JSON object.',
     );
     await expect(getTraceData({ operation: 'GET /api/cart' }, createContext(client))).rejects.toThrow(
-      'Jaeger trace searches require a service when Trace ID is not provided.'
+      'Jaeger trace searches require a service when Trace ID is not provided.',
     );
   });
 

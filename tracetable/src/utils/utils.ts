@@ -21,7 +21,7 @@ export function getServiceColor(
   chartsTheme: PersesChartsTheme,
   paletteMode: 'auto' | 'categorical' | undefined,
   serviceName: string,
-  error = false
+  error = false,
 ): string {
   switch (paletteMode) {
     case 'categorical': {

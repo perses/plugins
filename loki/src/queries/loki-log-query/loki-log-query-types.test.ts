@@ -76,7 +76,7 @@ describe('LokiLogQuery', () => {
       {
         query: '{service="$service", level="$level"} |= "error"',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['service', 'level']);
   });

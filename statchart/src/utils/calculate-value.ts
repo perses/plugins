@@ -16,7 +16,7 @@ import { TimeSeries } from '@perses-dev/spec';
 
 export const calculateValue = (
   calculation: CalculationType,
-  seriesData: TimeSeries
+  seriesData: TimeSeries,
 ): ReturnType<(typeof CalculationsMap)[CalculationType]> => {
   if (CalculationsMap[calculation] === undefined) {
     console.warn(`Invalid StatChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);

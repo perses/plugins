@@ -29,7 +29,7 @@ type ClickHouseQuerySpec = {
  * every time the user types.
  */
 export function useQueryState<T extends ClickHouseQuerySpec>(
-  props: OptionsEditorProps<T>
+  props: OptionsEditorProps<T>,
 ): {
   query: string;
   handleQueryChange: (e: string) => void;
@@ -60,7 +60,7 @@ export function useQueryState<T extends ClickHouseQuerySpec>(
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

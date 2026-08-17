@@ -72,7 +72,7 @@ describe('TimeSeriesTablePanel', () => {
             </VariableProvider>
           </TimeRangeProviderBasic>
         </SnackbarProvider>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 

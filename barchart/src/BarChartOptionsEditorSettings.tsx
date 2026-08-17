@@ -66,7 +66,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     onChange(
       produce(value, (draft: BarChartOptions) => {
         draft.calculation = newCalculation;
-      })
+      }),
     );
   };
 
@@ -74,7 +74,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     onChange(
       produce(value, (draft: BarChartOptions) => {
         draft.format = newFormat;
-      })
+      }),
     );
   };
 
@@ -82,7 +82,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     onChange(
       produce(value, (draft: BarChartOptions) => {
         draft.sort = newSort;
-      })
+      }),
     );
   };
 
@@ -90,7 +90,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     onChange(
       produce(value, (draft: BarChartOptions) => {
         draft.mode = newMode;
-      })
+      }),
     );
   };
 
@@ -104,7 +104,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
         draft.groupBy = DEFAULT_GROUP_BY;
         draft.isStacked = DEFAULT_IS_STACKED;
         draft.orientation = DEFAULT_ORIENTATION;
-      })
+      }),
     );
   };
 
@@ -112,7 +112,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   const format = merge(
     {},
     !value.format || isUnitWithShortValues(value.format) ? DEFAULT_FORMAT : omit(DEFAULT_FORMAT, ['shortValues']),
-    value.format
+    value.format,
   );
   const groupBy = value.groupBy ?? DEFAULT_GROUP_BY;
   const isStacked = value.isStacked ?? DEFAULT_IS_STACKED;
@@ -134,7 +134,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
               onChange(
                 produce(value, (draft: BarChartOptions) => {
                   draft.orientation = v;
-                })
+                }),
               )
             }
           >
@@ -153,7 +153,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
                 produce(value, (draft: BarChartOptions) => {
                   draft.groupBy = filtered;
                   if (filtered.length === 0) draft.isStacked = false;
-                })
+                }),
               );
             }}
             options={[]}
@@ -176,7 +176,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
                   onChange(
                     produce(value, (draft: BarChartOptions) => {
                       draft.isStacked = e.target.checked;
-                    })
+                    }),
                   )
                 }
               />

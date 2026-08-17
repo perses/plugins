@@ -41,7 +41,7 @@ export function ClickHouseLogQueryEditor(props: ClickHouseQueryEditorProps): Rea
       onChange(
         produce(value, (draft) => {
           draft.datasource = newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -53,7 +53,7 @@ export function ClickHouseLogQueryEditor(props: ClickHouseQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 
@@ -61,7 +61,7 @@ export function ClickHouseLogQueryEditor(props: ClickHouseQueryEditorProps): Rea
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   const examplesStyle: React.CSSProperties = {

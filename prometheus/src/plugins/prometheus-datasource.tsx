@@ -37,7 +37,7 @@ function wrapClientMethod<P, R>(
   fn: (params: P, opts: QueryOptions) => Promise<R>,
   datasourceUrl: string,
   specHeaders?: RequestHeaders,
-  specQueryParams?: QueryParamValues
+  specQueryParams?: QueryParamValues,
 ): (params: P, options?: ClientRequestOptions) => Promise<R> {
   return (params: P, options?: ClientRequestOptions) =>
     fn(params, {

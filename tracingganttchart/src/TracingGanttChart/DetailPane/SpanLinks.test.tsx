@@ -40,7 +40,7 @@ describe('SpanLinks', () => {
             </TimeRangeProviderBasic>
           </ReactRouterProvider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 
@@ -68,7 +68,7 @@ describe('SpanLinks', () => {
     expect(screen.getByRole('link', { name: 'tid1' })).toHaveAttribute('href', '/datasource/tempods/trace/tid1');
     expect(screen.getByRole('link', { name: 'sid1' })).toHaveAttribute(
       'href',
-      '/datasource/tempods/trace/tid1?span=sid1'
+      '/datasource/tempods/trace/tid1?span=sid1',
     );
   });
 });

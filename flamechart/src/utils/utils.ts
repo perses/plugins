@@ -28,7 +28,7 @@ export function usePaletteState(props: FlameChartOptionsEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.palette = newPalette;
-      })
+      }),
     );
   };
 
@@ -47,7 +47,7 @@ export function useTraceHeightState(props: FlameChartOptionsEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.traceHeight = event.target.value ? Number(event.target.value) : undefined;
-      })
+      }),
     );
   };
 
@@ -66,7 +66,7 @@ export function useShowSettingsState(props: FlameChartOptionsEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.showSettings = newValue;
-      })
+      }),
     );
   };
 
@@ -85,7 +85,7 @@ export function useShowSeriesState(props: FlameChartOptionsEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.showSeries = newValue;
-      })
+      }),
     );
   };
 
@@ -104,7 +104,7 @@ export function useShowTableState(props: FlameChartOptionsEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.showTable = newValue;
-      })
+      }),
     );
   };
 
@@ -123,7 +123,7 @@ export function useShowFlameGraphState(props: FlameChartOptionsEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.showFlameGraph = newValue;
-      })
+      }),
     );
   };
 
@@ -143,6 +143,6 @@ export function resetSettings(props: FlameChartOptionsEditorProps): void {
       draft.showSeries = false;
       draft.showTable = true;
       draft.showFlameGraph = true;
-    })
+    }),
   );
 }

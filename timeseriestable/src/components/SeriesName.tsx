@@ -74,7 +74,7 @@ function FormatedSeriesName({ labels }: { labels: Labels }): ReactElement {
         >
           <strong>{label}</strong>=<span>&quot;{labels[label]}&quot;</span>
         </Typography>
-      </span>
+      </span>,
     );
 
     if (first) {

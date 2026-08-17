@@ -104,7 +104,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 const useStatChartData = (
   queryResults: Array<PanelData<TimeSeriesData>>,
   spec: StatChartOptions,
-  chartsTheme: PersesChartsTheme
+  chartsTheme: PersesChartsTheme,
 ): StatChartData[] => {
   return useMemo(() => {
     const { calculation, mappings, metricLabel } = spec;
@@ -137,7 +137,7 @@ const useStatChartData = (
 const getValueOrLabel = (
   value?: number | null,
   mappings?: ValueMapping[],
-  label?: string
+  label?: string,
 ): string | number | undefined | null => {
   if (label) {
     return label;

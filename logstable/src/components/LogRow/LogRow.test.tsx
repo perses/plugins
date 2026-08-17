@@ -39,7 +39,7 @@ describe('LogRow', () => {
         onToggle={jest.fn()}
         isSelected={isSelected}
         onSelect={onSelect}
-      />
+      />,
     );
   };
 

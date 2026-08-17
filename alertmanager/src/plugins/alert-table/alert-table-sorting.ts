@@ -142,7 +142,7 @@ function getMostCriticalSeverity(counts: Record<string, number>): { weight: numb
 export function compareGroupsByColumn(
   aCounts: Record<string, number> | undefined,
   bCounts: Record<string, number> | undefined,
-  sort: SortState
+  sort: SortState,
 ): number {
   const emptyA = !aCounts || Object.keys(aCounts).length === 0;
   const emptyB = !bCounts || Object.keys(bCounts).length === 0;

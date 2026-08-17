@@ -55,7 +55,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
           const nextDatasource = isDefaultTempoSelector(next) ? undefined : next;
           draft.datasource = nextDatasource;
-        })
+        }),
       );
       return;
     }
@@ -67,7 +67,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     onChange(
       produce(value, (draft) => {
         draft.query = newQuery;
-      })
+      }),
     );
   };
 
@@ -75,7 +75,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   return (
@@ -105,7 +105,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
             onChange(
               produce(value, (draft) => {
                 draft.limit = newLimit;
-              })
+              }),
             )
           }
         />

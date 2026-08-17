@@ -31,7 +31,7 @@ import {
 import { VictoriaLogsFieldNamesVariableOptions } from '../types';
 
 export function VictoriaLogsFieldNamesVariableEditor(
-  props: OptionsEditorProps<VictoriaLogsFieldNamesVariableOptions>
+  props: OptionsEditorProps<VictoriaLogsFieldNamesVariableOptions>,
 ): ReactElement {
   const {
     onChange,
@@ -42,7 +42,7 @@ export function VictoriaLogsFieldNamesVariableEditor(
   const datasourceSelectValue = datasource ?? DEFAULT_VICTORIALOGS;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    VICTORIALOGS_DATASOURCE_KIND
+    VICTORIALOGS_DATASOURCE_KIND,
   ) as VictoriaLogsDatasourceSelector;
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
@@ -50,14 +50,14 @@ export function VictoriaLogsFieldNamesVariableEditor(
         onChange(
           produce(value, (draft) => {
             draft.datasource = !isVariableDatasource(next) && isDefaultVictoriaLogsSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }
 
       throw new Error('Got unexpected non-VictoriaLogs datasource selector');
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleQueryChange = useCallback(
@@ -65,10 +65,10 @@ export function VictoriaLogsFieldNamesVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.query = event.target.value;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

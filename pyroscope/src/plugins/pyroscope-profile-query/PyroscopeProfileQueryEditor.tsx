@@ -39,7 +39,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
   const datasourceSelectValue = datasource ?? DEFAULT_PYROSCOPE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    PYROSCOPE_DATASOURCE_KIND
+    PYROSCOPE_DATASOURCE_KIND,
   ) as PyroscopeDatasourceSelector;
   const datasourceSelectLabelID = useId('pyroscope-datasource-label');
 
@@ -56,7 +56,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
             draft.datasource = isDefaultPyroscopeSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }

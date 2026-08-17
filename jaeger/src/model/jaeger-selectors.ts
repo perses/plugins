@@ -27,7 +27,7 @@ export function isDefaultJaegerSelector(datasourceSelectValue: DatasourceSelectV
 }
 
 export function isJaegerDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue
+  datasourceSelectValue: DatasourceSelectValue,
 ): datasourceSelectValue is JaegerDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === JAEGER_DATASOURCE_KIND;
 }

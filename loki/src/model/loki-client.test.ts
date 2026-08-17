@@ -154,7 +154,7 @@ describe('handleErrorResponse', () => {
     });
 
     await expect(labels({}, options)).rejects.toThrow(
-      'Loki query_range error: 400 Bad Request - {"message":"parse error","status":"error"}'
+      'Loki query_range error: 400 Bad Request - {"message":"parse error","status":"error"}',
     );
   });
 
@@ -168,7 +168,7 @@ describe('handleErrorResponse', () => {
     });
 
     await expect(labels({}, options)).rejects.toThrow(
-      'Loki query_range error: 500 Internal Server Error - upstream timeout'
+      'Loki query_range error: 500 Internal Server Error - upstream timeout',
     );
   });
 

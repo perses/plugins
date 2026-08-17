@@ -58,7 +58,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const seriesData = useMemo(
     () => buildSamples(palette, data.metadata, data.profile.stackTrace, searchValue, selectedId),
-    [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue]
+    [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue],
   );
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
@@ -232,7 +232,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         }}
       />
     ),
-    [chartsTheme.echartsTheme, height, option, width]
+    [chartsTheme.echartsTheme, height, option, width],
   );
 
   return (

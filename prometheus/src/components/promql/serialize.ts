@@ -87,7 +87,7 @@ const serializeNode = (node: ASTNode, indent = 0, pretty = false, initialIndent 
       return `${initialInd}(${childListSeparator}${serializeNode(
         node.expr,
         childIndent,
-        pretty
+        pretty,
       )}${childListSeparator}${ind})`;
 
     case nodeType.call: {
@@ -134,7 +134,7 @@ const serializeNode = (node: ASTNode, indent = 0, pretty = false, initialIndent 
       }${node.bool ? ' bool' : ''}${matching}${grouping}${childSeparator}${serializeNode(
         maybeParenthesizeBinopChild(node.op, node.rhs),
         childIndent,
-        pretty
+        pretty,
       )}`;
     }
 

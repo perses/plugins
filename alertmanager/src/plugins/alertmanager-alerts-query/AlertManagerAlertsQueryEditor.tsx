@@ -41,7 +41,7 @@ export function AlertManagerAlertsQueryEditor(props: AlertManagerAlertsQueryEdit
       onChange(
         produce(value, (draft) => {
           draft.datasource = isDefaultAlertManagerSelector(next) ? undefined : next;
-        })
+        }),
       );
       return;
     }
@@ -57,10 +57,10 @@ export function AlertManagerAlertsQueryEditor(props: AlertManagerAlertsQueryEdit
             .split('\n')
             .map((f) => f.trim())
             .filter((f) => f !== '');
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleBooleanChange = useCallback(
@@ -68,10 +68,10 @@ export function AlertManagerAlertsQueryEditor(props: AlertManagerAlertsQueryEdit
       onChange(
         produce(value, (draft) => {
           draft[field] = checked;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleReceiverChange = useCallback(
@@ -79,10 +79,10 @@ export function AlertManagerAlertsQueryEditor(props: AlertManagerAlertsQueryEdit
       onChange(
         produce(value, (draft) => {
           draft.receiver = receiver.trim() === '' ? undefined : receiver.trim();
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

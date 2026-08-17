@@ -41,7 +41,7 @@ export const LogRowContent = styled(Box, {
     '&:hover': {
       backgroundColor: isSelected ? theme.palette.action.focus : theme.palette.action.hover,
     },
-  })
+  }),
 );
 
 export const ExpandButton = styled(IconButton, {

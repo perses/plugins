@@ -40,7 +40,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    LOKI_DATASOURCE_KIND
+    LOKI_DATASOURCE_KIND,
   ) as LokiDatasourceSelector;
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
 
@@ -64,7 +64,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
           const nextDatasource = isDefaultLokiSelector(newDatasourceSelection) ? undefined : newDatasourceSelection;
           draft.datasource = nextDatasource;
-        })
+        }),
       );
       return;
     }
@@ -76,7 +76,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     onChange(
       produce(value, (draft: LokiLogQuerySpec) => {
         draft.direction = v;
-      })
+      }),
     );
 
   // Immediate query execution on Enter or blur
@@ -84,7 +84,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 
@@ -92,7 +92,7 @@ export function LokiLogQueryEditor(props: LokiQueryEditorProps): ReactElement {
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   return (

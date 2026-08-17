@@ -50,7 +50,7 @@ export function useMaxNodesState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.maxNodes = e === '' ? undefined : parseInt(e);
-      })
+      }),
     );
   };
 
@@ -81,7 +81,7 @@ export function useProfileTypeState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.profileType = e;
-      })
+      }),
     );
   };
 
@@ -112,7 +112,7 @@ export function useServiceState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.service = e;
-      })
+      }),
     );
   };
 
@@ -136,7 +136,7 @@ export function useFiltersState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.filters = f;
-      })
+      }),
     );
   };
 

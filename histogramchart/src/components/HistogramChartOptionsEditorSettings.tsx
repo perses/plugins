@@ -47,7 +47,7 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
     onChange(
       produce(value, (draft: HistogramChartOptions) => {
         draft.format = newFormat;
-      })
+      }),
     );
   };
 
@@ -55,7 +55,7 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
     onChange(
       produce(value, (draft: HistogramChartOptions) => {
         draft.thresholds = thresholds;
-      })
+      }),
     );
   };
 
@@ -99,7 +99,7 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
                   onChange(
                     produce(value, (draft: HistogramChartOptions) => {
                       draft.min = newValue;
-                    })
+                    }),
                   );
                 }}
                 placeholder={minPlaceholder}
@@ -119,7 +119,7 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
                   onChange(
                     produce(value, (draft: HistogramChartOptions) => {
                       draft.max = newValue;
-                    })
+                    }),
                   );
                 }}
                 placeholder={maxPlaceholder}
@@ -140,7 +140,7 @@ export function HistogramChartOptionsEditorSettings(props: HistogramChartOptions
                   onChange(
                     produce(value, (draft: HistogramChartOptions) => {
                       draft.logBase = newValue.log;
-                    })
+                    }),
                   );
                 }}
                 disableClearable

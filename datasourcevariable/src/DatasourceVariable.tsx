@@ -28,7 +28,7 @@ export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticL
 
   const datasourcePluginKindSet = useMemo(
     () => new Set(datasourcePlugins?.map((plugin) => plugin.spec.name)),
-    [datasourcePlugins]
+    [datasourcePlugins],
   );
 
   const options = Array.from(datasourcePluginKindSet).map((kind) => ({

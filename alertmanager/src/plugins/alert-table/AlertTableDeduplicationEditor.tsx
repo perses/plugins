@@ -37,10 +37,10 @@ export function AlertTableDeduplicationEditor(props: OptionsEditorProps<AlertTab
           if (mode === 'labels') {
             draft.deduplication.labels = draft.deduplication.labels ?? [];
           }
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleLabelsChange = useCallback(
@@ -51,10 +51,10 @@ export function AlertTableDeduplicationEditor(props: OptionsEditorProps<AlertTab
             draft.deduplication = { mode: 'labels' };
           }
           draft.deduplication.labels = newLabels.length > 0 ? newLabels : undefined;
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

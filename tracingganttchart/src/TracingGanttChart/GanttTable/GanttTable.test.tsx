@@ -33,7 +33,7 @@ describe('GanttTable', () => {
             <GanttTable {...props} onSpanClick={onSpanClick} />
           </GanttTableProvider>
         </VirtuosoMockContext.Provider>
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 

@@ -105,7 +105,7 @@ function inferStepMs(response?: DatasourceQueryResponse): number {
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     return { series: [] };
@@ -114,7 +114,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQueryS
   const query = replaceVariables(spec.query, context.variableState);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;

@@ -54,7 +54,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.querySettings = newQuerySettings;
-      })
+      }),
     );
   };
   // Every time a new query settings input is added, we want to focus the recently added input
@@ -74,7 +74,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           if (querySettings) {
             querySettings.queryIndex = parseInt(e.target.value);
           }
-        })
+        }),
       );
     }
   };
@@ -95,7 +95,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               }
             }
           }
-        })
+        }),
       );
     }
   };
@@ -110,7 +110,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               querySettings.colorValue = colorValue;
             }
           }
-        })
+        }),
       );
     }
   };
@@ -125,7 +125,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               querySettings.lineStyle = lineStyle as QuerySettingsOptions['lineStyle'];
             }
           }
-        })
+        }),
       );
     }
   };
@@ -141,7 +141,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               querySettings.areaOpacity = newValue;
             }
           }
-        })
+        }),
       );
     }
   };
@@ -155,7 +155,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           if (qs) {
             updater(qs);
           }
-        })
+        }),
       );
     }
   };
@@ -283,7 +283,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
       handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           draft.push(defaultQuerySettings);
-        })
+        }),
       );
     }
   };

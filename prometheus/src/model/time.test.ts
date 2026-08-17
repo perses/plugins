@@ -22,7 +22,7 @@ describe('getRangeStep', () => {
     const resolution = 1;
     const suggestedStepMs = 200;
     expect(
-      getRangeStep({ start: timerangeStart, end: timerangeEnd }, minStepSeconds, resolution, suggestedStepMs)
+      getRangeStep({ start: timerangeStart, end: timerangeEnd }, minStepSeconds, resolution, suggestedStepMs),
     ).toEqual(minStepSeconds);
   });
 
@@ -34,7 +34,7 @@ describe('getRangeStep', () => {
     const resolution = 1;
     const suggestedStepMs = 600000;
     expect(
-      getRangeStep({ start: timerangeStart, end: timerangeEnd }, minStepSeconds, resolution, suggestedStepMs)
+      getRangeStep({ start: timerangeStart, end: timerangeEnd }, minStepSeconds, resolution, suggestedStepMs),
     ).toEqual(suggestedStepMs / 1000);
   });
 });

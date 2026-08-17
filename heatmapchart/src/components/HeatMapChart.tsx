@@ -158,7 +158,7 @@ export function HeatMapChart({
           type: 'custom',
           renderItem: function (
             params: CustomSeriesRenderItemParams,
-            api: CustomSeriesRenderItemAPI
+            api: CustomSeriesRenderItemAPI,
           ): CustomSeriesRenderItemReturn {
             const xIndex = api.value(0) as number;
             const yLower = api.value(1) as number;
@@ -231,7 +231,7 @@ export function HeatMapChart({
         theme={chartsTheme.echartsTheme}
       />
     ),
-    [chartsTheme.container.padding.default, chartsTheme.echartsTheme, height, option, width]
+    [chartsTheme.container.padding.default, chartsTheme.echartsTheme, height, option, width],
   );
 
   return <>{chart}</>;

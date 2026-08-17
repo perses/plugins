@@ -47,7 +47,7 @@ export function formatClickHouseDateTime(date: Date): string {
 
 export async function query(
   params: ClickHouseQueryParams,
-  queryOptions: ClickHouseQueryOptions
+  queryOptions: ClickHouseQueryOptions,
 ): Promise<ClickHouseQueryResponse> {
   const { datasourceUrl, headers } = queryOptions;
 

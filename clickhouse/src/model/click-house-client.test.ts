@@ -23,8 +23,8 @@ describe('ClickHouse client', () => {
       replaceTimeRangePlaceholders(
         "SELECT * FROM logs WHERE timestamp BETWEEN '{start}' AND '{end}'",
         '2025-01-01 00:00:00',
-        '2025-01-02 00:00:00'
-      )
+        '2025-01-02 00:00:00',
+      ),
     ).toEqual("SELECT * FROM logs WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00'");
   });
 
@@ -47,14 +47,14 @@ describe('ClickHouse client', () => {
       },
       {
         datasourceUrl: 'http://clickhouse.example.com',
-      }
+      },
     );
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [calledUrl] = fetchMock.mock.calls[0]!;
     const url = new URL(calledUrl);
     expect(url.searchParams.get('query')).toBe(
-      "SELECT * FROM logs WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' FORMAT JSON"
+      "SELECT * FROM logs WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' FORMAT JSON",
     );
   });
 });

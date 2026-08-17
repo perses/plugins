@@ -32,7 +32,7 @@ import { VictoriaLogsFieldValuesVariableOptions } from '../types';
 import { useFieldNames } from '../utils';
 
 export function VictoriaLogsFieldValuesVariableEditor(
-  props: OptionsEditorProps<VictoriaLogsFieldValuesVariableOptions>
+  props: OptionsEditorProps<VictoriaLogsFieldValuesVariableOptions>,
 ): ReactElement {
   const {
     onChange,
@@ -42,7 +42,7 @@ export function VictoriaLogsFieldValuesVariableEditor(
   const datasourceSelectValue = datasource ?? DEFAULT_VICTORIALOGS;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    VICTORIALOGS_DATASOURCE_KIND
+    VICTORIALOGS_DATASOURCE_KIND,
   ) as VictoriaLogsDatasourceSelector;
   const { data: fieldNames, isLoading: isFieldNamesOptionsLoading } = useFieldNames(query, selectedDatasource);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
@@ -52,14 +52,14 @@ export function VictoriaLogsFieldValuesVariableEditor(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
             draft.datasource = !isVariableDatasource(next) && isDefaultVictoriaLogsSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }
 
       throw new Error('Got unexpected non-VictoriaLogs datasource selector');
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleQueryChange = useCallback(
@@ -67,10 +67,10 @@ export function VictoriaLogsFieldValuesVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.query = event.target.value;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleFieldChange = useCallback(
@@ -78,10 +78,10 @@ export function VictoriaLogsFieldValuesVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.field = newValue || '';
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const fieldNamesOptions = useMemo(() => {

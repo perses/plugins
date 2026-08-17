@@ -37,7 +37,7 @@ describe('JaegerTraceQueryEditor', () => {
       () =>
         ({
           kind: 'JaegerDatasource',
-        }) as never
+        }) as never,
     );
   });
 
@@ -63,7 +63,7 @@ describe('JaegerTraceQueryEditor', () => {
       expect(onChange).toHaveBeenCalledWith({
         service: 'frontend',
         traceId: '7d73f3ae841bf59a',
-      })
+      }),
     );
   });
 
@@ -84,7 +84,7 @@ describe('JaegerTraceQueryEditor', () => {
           minDuration: ' 50ms ',
         }}
         onChange={onChange}
-      />
+      />,
     );
 
     await waitFor(() =>
@@ -92,7 +92,7 @@ describe('JaegerTraceQueryEditor', () => {
         minDuration: '50ms',
         operation: undefined,
         service: undefined,
-      })
+      }),
     );
   });
 

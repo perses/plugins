@@ -40,7 +40,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.legend = newLegend;
-      })
+      }),
     );
   };
 
@@ -48,7 +48,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.visual = newVisual;
-      })
+      }),
     );
   };
 
@@ -56,7 +56,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.yAxis = newYAxis;
-      })
+      }),
     );
   };
 
@@ -64,7 +64,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.thresholds = thresholds;
-      })
+      }),
     );
   };
 
@@ -91,7 +91,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
                   draft.legend = undefined;
                   draft.visual = undefined;
                   draft.thresholds = undefined;
-                })
+                }),
               );
             }}
           >

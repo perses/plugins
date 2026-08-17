@@ -39,7 +39,7 @@ export function GreptimeDBTraceQueryEditor(props: GreptimeDBTraceQueryEditorProp
       onChange(
         produce(value, (draft) => {
           draft.datasource = newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -50,7 +50,7 @@ export function GreptimeDBTraceQueryEditor(props: GreptimeDBTraceQueryEditorProp
     onChange(
       produce(value, (draft) => {
         draft.query = queryValue;
-      })
+      }),
     );
   };
 
@@ -58,7 +58,7 @@ export function GreptimeDBTraceQueryEditor(props: GreptimeDBTraceQueryEditorProp
     (next: string) => {
       handleQueryChange(next);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   return (

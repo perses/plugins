@@ -74,7 +74,7 @@ export const DataTable = ({ queryResults, spec }: DataTableProps): ReactElement 
   const itemActionsConfig = spec.actions ? (spec.actions as ActionOptions) : undefined;
   const itemActionsListConfig = useMemo(
     () => (itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : []),
-    [itemActionsConfig?.enabled, itemActionsConfig?.displayWithItem, itemActionsConfig?.actionsList]
+    [itemActionsConfig?.enabled, itemActionsConfig?.displayWithItem, itemActionsConfig?.actionsList],
   );
 
   const { getItemActionButtons, confirmDialog, actionButtons } = useSelectionItemActions({
@@ -113,7 +113,7 @@ export const DataTable = ({ queryResults, spec }: DataTableProps): ReactElement 
       const rowData = buildRowData(ts);
       toggleSelection(rowData, seriesIdx.toString());
     },
-    [toggleSelection]
+    [toggleSelection],
   );
 
   // Memoize row data for stable references

@@ -23,7 +23,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <HistogramChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 
@@ -35,7 +35,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
           unit: 'decimal',
         },
       },
-      onChange
+      onChange,
     );
     const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     userEvent.click(unitSelector);
@@ -48,7 +48,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
         format: {
           unit: 'years',
         },
-      })
+      }),
     );
   });
 
@@ -64,7 +64,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
         },
         min: 1,
       },
-      onChange
+      onChange,
     );
     const minInput = await screen.findByRole('spinbutton', { name: /Min/ });
     expect(minInput).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
         },
         max: 1,
       },
-      onChange
+      onChange,
     );
     const maxInput = await screen.findByRole('spinbutton', { name: /Max/ });
     expect(maxInput).toBeInTheDocument();
@@ -104,7 +104,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
           unit: 'decimal',
         },
       },
-      onChange
+      onChange,
     );
     const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
     userEvent.click(logBaseSelector);
@@ -115,7 +115,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         logBase: 10,
-      })
+      }),
     );
   });
 
@@ -128,7 +128,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
         },
         logBase: 10,
       },
-      onChange
+      onChange,
     );
     const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
     userEvent.click(logBaseSelector);
@@ -139,7 +139,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         logBase: undefined,
-      })
+      }),
     );
   });
 });

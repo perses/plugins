@@ -34,7 +34,7 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
     onChange(
       produce(value, (draft: StatusHistoryChartOptions) => {
         draft.legend = newLegend;
-      })
+      }),
     );
   };
 
@@ -42,7 +42,7 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
     onChange(
       produce(value, (draft: StatusHistoryChartOptions) => {
         draft.sorting = newSort;
-      })
+      }),
     );
   };
 
@@ -69,7 +69,7 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
                 produce(value, (draft: StatusHistoryChartOptions) => {
                   // reset button removes all optional panel options
                   draft.legend = undefined;
-                })
+                }),
               );
             }}
           >

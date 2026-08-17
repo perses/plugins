@@ -37,7 +37,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    LOKI_DATASOURCE_KIND
+    LOKI_DATASOURCE_KIND,
   ) as LokiDatasourceSelector;
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
 
@@ -46,7 +46,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
       onChange(
         produce(value, (draft) => {
           draft.datasource = newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -59,7 +59,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 
@@ -67,7 +67,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   return (

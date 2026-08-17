@@ -87,7 +87,7 @@ describe('VictoriaLogsTimeSeriesQuery', () => {
       {
         query: 'rate({service="$service", instance="$instance"}[5m])',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['service', 'instance']);
   });

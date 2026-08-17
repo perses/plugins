@@ -58,7 +58,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
 
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    PROM_DATASOURCE_KIND
+    PROM_DATASOURCE_KIND,
   ) as PrometheusDatasourceSelector;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
@@ -75,7 +75,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
           const nextDatasource = isDefaultPromSelector(next) ? undefined : next;
           draft.datasource = nextDatasource;
-        })
+        }),
       );
       return;
     }
@@ -87,7 +87,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
     onChange(
       produce(value, (draft) => {
         draft.expr = next;
-      })
+      }),
     );
   };
 
@@ -95,7 +95,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
     onChange(
       produce(value, (draft) => {
         draft.title = next || undefined;
-      })
+      }),
     );
   };
 
@@ -103,7 +103,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
     onChange(
       produce(value, (draft) => {
         draft.legend = next || undefined;
-      })
+      }),
     );
   };
 
@@ -111,7 +111,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
     onChange(
       produce(value, (draft) => {
         draft.tags = next.length > 0 ? next : undefined;
-      })
+      }),
     );
   };
 

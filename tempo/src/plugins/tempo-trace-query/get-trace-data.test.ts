@@ -103,7 +103,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: DEFAULT_SEARCH_LIMIT + 1,
-      })
+      }),
     );
 
     // Verify no notice is shown
@@ -134,7 +134,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: customLimit + 1,
-      })
+      }),
     );
 
     // Verify notice is present
@@ -182,7 +182,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         q: '{resource.service.name="frontend"}',
-      })
+      }),
     );
     expect(result.metadata?.executedQueryString).toBe('{resource.service.name="frontend"}');
   });
@@ -269,7 +269,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         q: replacedQuery,
-      })
+      }),
     );
     expect(result.metadata?.executedQueryString).toBe(replacedQuery);
     expect(result.searchResult).toHaveLength(1);

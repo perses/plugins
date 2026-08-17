@@ -41,7 +41,7 @@ export function AlertManagerSilencesQueryEditor(props: AlertManagerSilencesQuery
       onChange(
         produce(value, (draft) => {
           draft.datasource = isDefaultAlertManagerSelector(next) ? undefined : next;
-        })
+        }),
       );
       return;
     }
@@ -57,10 +57,10 @@ export function AlertManagerSilencesQueryEditor(props: AlertManagerSilencesQuery
             .split('\n')
             .map((f) => f.trim())
             .filter((f) => f !== '');
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

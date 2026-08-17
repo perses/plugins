@@ -46,7 +46,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     onChange(
       produce(value, (draft: GaugeChartOptions) => {
         draft.calculation = newCalculation;
-      })
+      }),
     );
   };
 
@@ -54,7 +54,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     onChange(
       produce(value, (draft: GaugeChartOptions) => {
         draft.format = newFormat;
-      })
+      }),
     );
   };
 
@@ -73,7 +73,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     onChange(
       produce(value, (draft: GaugeChartOptions) => {
         draft.thresholds = thresholds;
-      })
+      }),
     );
   };
 
@@ -95,7 +95,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
                   onChange(
                     produce(value, (draft: GaugeChartOptions) => {
                       draft.max = newValue;
-                    })
+                    }),
                   );
                 }}
                 placeholder={maxPlaceholder}
@@ -114,7 +114,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
                 onChange(
                   produce(value, (draft: GaugeChartOptions) => {
                     draft.legend = { ...draft.legend, show: !showLegend };
-                  })
+                  }),
                 );
               }}
               checked={showLegend}

@@ -52,7 +52,7 @@ export interface PrometheusClient extends DatasourceClient {
   labelValues(params: LabelValuesRequestParameters, options?: ClientRequestOptions): Promise<LabelValuesResponse>;
   metricMetadata(
     params: MetricMetadataRequestParameters,
-    options?: ClientRequestOptions
+    options?: ClientRequestOptions,
   ): Promise<MetricMetadataResponse>;
   series(params: SeriesRequestParameters, options?: ClientRequestOptions): Promise<SeriesResponse>;
   parseQuery(params: ParseQueryRequestParameters, options?: ClientRequestOptions): Promise<ParseQueryResponse>;
@@ -91,7 +91,7 @@ function buildQueryString(queryParams?: QueryParamValues, initialParams?: URLSea
 
 export function mergeQueryParams(
   defaults?: QueryParamValues,
-  overrides?: QueryParamValues
+  overrides?: QueryParamValues,
 ): QueryParamValues | undefined {
   if (!defaults && !overrides) return undefined;
   return { ...defaults, ...overrides };
@@ -118,7 +118,7 @@ export function healthCheck(queryOptions: QueryOptions) {
  */
 export function instantQuery(
   params: InstantQueryRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<InstantQueryResponse> {
   return fetchWithPost<InstantQueryRequestParameters, InstantQueryResponse>('/api/v1/query', params, queryOptions);
 }
@@ -128,7 +128,7 @@ export function instantQuery(
  */
 export function rangeQuery(
   params: RangeQueryRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<RangeQueryResponse> {
   return fetchWithPost<RangeQueryRequestParameters, RangeQueryResponse>('/api/v1/query_range', params, queryOptions);
 }
@@ -138,7 +138,7 @@ export function rangeQuery(
  */
 export function labelNames(
   params: LabelNamesRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<LabelNamesResponse> {
   return fetchWithPost<LabelNamesRequestParameters, LabelNamesResponse>('/api/v1/labels', params, queryOptions);
 }
@@ -148,7 +148,7 @@ export function labelNames(
  */
 export function labelValues(
   params: LabelValuesRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<LabelValuesResponse> {
   const { labelName, ...searchParams } = params;
 
@@ -169,7 +169,7 @@ export function labelValues(
  */
 export function metricMetadata(
   params: MetricMetadataRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<MetricMetadataResponse> {
   const apiURI = `/api/v1/metadata`;
   return fetchWithGet<MetricMetadataRequestParameters, MetricMetadataResponse>(apiURI, params, queryOptions);
@@ -188,7 +188,7 @@ export function series(params: SeriesRequestParameters, queryOptions: QueryOptio
  */
 export function parseQuery(
   params: ParseQueryRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<ParseQueryResponse> {
   const apiURI = `/api/v1/parse_query`;
   return fetchWithPost<ParseQueryRequestParameters, ParseQueryResponse>(apiURI, params, queryOptions);
@@ -197,7 +197,7 @@ export function parseQuery(
 function fetchWithGet<T extends RequestParams<T>, TResponse>(
   apiURI: string,
   params: T,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<TResponse> {
   const { datasourceUrl, headers, queryParams, signal } = queryOptions;
   const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams, createSearchParams(params))}`;
@@ -207,7 +207,7 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
 function fetchWithPost<T extends RequestParams<T>, TResponse>(
   apiURI: string,
   params: T,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<TResponse> {
   const { datasourceUrl, headers, signal, queryParams } = queryOptions;
   const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams)}`;

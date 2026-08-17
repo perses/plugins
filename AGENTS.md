@@ -10,7 +10,7 @@ Before editing:
 
 - Read `README.md` and `.github/pull_request_template.md` for repository and pull-request conventions.
 - Read the affected plugin's `README.md`, `package.json`, and neighboring implementations.
-- For TypeScript or React work, also follow `.github/instructions/ui.instructions.md`.
+- For TypeScript or React work, also follow `STYLEGUIDE.md`.
 
 ## Architecture map
 

@@ -55,7 +55,7 @@ export function useQueryState(props: TraceQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

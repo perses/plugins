@@ -69,7 +69,7 @@ describe('LogsTablePanel', () => {
             </VariableProvider>
           </TimeRangeProviderBasic>
         </SnackbarProvider>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 

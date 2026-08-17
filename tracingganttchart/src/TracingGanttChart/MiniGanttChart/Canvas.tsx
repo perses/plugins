@@ -54,7 +54,7 @@ export function Canvas(props: CanvasProps): ReactElement {
 
   const spanColorGenerator = useCallback(
     (span: Span) => getSpanColor(muiTheme, chartsTheme, options.visual?.palette?.mode, span),
-    [muiTheme, chartsTheme, options.visual?.palette?.mode]
+    [muiTheme, chartsTheme, options.visual?.palette?.mode],
   );
 
   useEffect(() => {

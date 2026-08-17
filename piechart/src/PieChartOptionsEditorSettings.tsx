@@ -62,7 +62,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.calculation = newCalculation;
-      })
+      }),
     );
   };
 
@@ -70,7 +70,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.legend = newLegend;
-      })
+      }),
     );
   };
 
@@ -78,7 +78,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.format = newFormat;
-      })
+      }),
     );
   };
 
@@ -86,7 +86,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.sort = newSort;
-      })
+      }),
     );
   };
 
@@ -94,7 +94,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.mode = newMode;
-      })
+      }),
     );
   };
 
@@ -102,7 +102,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.showLabels = checked;
-      })
+      }),
     );
   };
 
@@ -123,7 +123,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
         } else {
           draft.colorPalette = undefined;
         }
-      })
+      }),
     );
   };
 
@@ -131,7 +131,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   const format = merge(
     {},
     !value.format || isUnitWithShortValues(value.format) ? DEFAULT_FORMAT : omit(DEFAULT_FORMAT, ['shortValues']),
-    value.format
+    value.format,
   );
 
   type ColorScheme = 'default' | 'theme' | 'gradient';
@@ -227,7 +227,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                   // reset button removes all optional panel options
                   draft.legend = undefined;
                   draft.colorPalette = undefined;
-                })
+                }),
               );
             }}
           >

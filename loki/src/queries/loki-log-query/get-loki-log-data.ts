@@ -40,7 +40,7 @@ function convertStreamsToLogs(streams: LokiStreamResult[]): LogData {
 
 export const getLokiLogData: LogQueryPlugin<LokiLogQuerySpec>['getLogData'] = async (
   spec: LokiLogQuerySpec,
-  context: LogQueryContext
+  context: LogQueryContext,
 ) => {
   if (!spec.query) {
     return {
@@ -51,7 +51,7 @@ export const getLokiLogData: LogQueryPlugin<LokiLogQuerySpec>['getLogData'] = as
 
   const query = replaceVariables(spec.query, context.variableState);
   const client = (await context.datasourceStore.getDatasourceClient<LokiClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as LokiClient;
 
   const { start, end } = context.timeRange;

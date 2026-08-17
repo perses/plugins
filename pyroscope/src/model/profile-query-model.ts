@@ -29,7 +29,7 @@ export interface PyroscopeProfileQuerySpec {
  * When either is missing, the query is considered incomplete and should not be run.
  */
 export function isProfileQueryComplete(
-  spec: Partial<Pick<PyroscopeProfileQuerySpec, 'service' | 'profileType'>>
+  spec: Partial<Pick<PyroscopeProfileQuerySpec, 'service' | 'profileType'>>,
 ): boolean {
   return !!spec.service && !!spec.profileType;
 }

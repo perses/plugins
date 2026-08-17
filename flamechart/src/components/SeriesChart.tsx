@@ -132,7 +132,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
             data.metadata?.units || '',
             data.metadata?.name || '',
             theme.palette.primary.main,
-            theme.palette.divider
+            theme.palette.divider,
           ),
       },
       axisPointer: {
@@ -174,7 +174,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
         _instance={chartRef}
       />
     ),
-    [chartsTheme.echartsTheme, height, option, width, handleEvents]
+    [chartsTheme.echartsTheme, height, option, width, handleEvents],
   );
 
   return (

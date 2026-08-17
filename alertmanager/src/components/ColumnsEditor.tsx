@@ -219,7 +219,7 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
       idsRef.current.splice(index, 1);
       onRemove(index);
     },
-    [onRemove]
+    [onRemove],
   );
 
   const handleMoveUp = useCallback(
@@ -230,7 +230,7 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
       ids.splice(index - 1, 0, id);
       onMoveUp(index);
     },
-    [onMoveUp]
+    [onMoveUp],
   );
 
   const handleMoveDown = useCallback(
@@ -241,7 +241,7 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
       ids.splice(index + 1, 0, id);
       onMoveDown(index);
     },
-    [onMoveDown]
+    [onMoveDown],
   );
 
   return (

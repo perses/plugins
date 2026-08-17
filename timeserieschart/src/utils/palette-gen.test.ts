@@ -228,7 +228,7 @@ describe('getAutoPaletteColor', () => {
   it('should generate a unique color from the series name', () => {
     const generatedColor = getAutoPaletteColor(
       'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
-      fallbackColor
+      fallbackColor,
     );
     expect(generatedColor).toEqual('hsla(128.97,50%,35%,0.9)');
   });

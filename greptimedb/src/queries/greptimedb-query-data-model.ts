@@ -30,7 +30,7 @@ export type { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData 
 export function replaceQueryVariables(
   query: string,
   variableState: VariableStateMap,
-  timeRange: AbsoluteTimeRange
+  timeRange: AbsoluteTimeRange,
 ): string {
   const { start, end } = timeRange;
   const rangeMs = end.valueOf() - start.valueOf();

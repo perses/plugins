@@ -281,7 +281,7 @@ export function evaluateConditionalFormatting(value: unknown, settings: CellSett
 export function renderConditionEditor(
   condition: Condition,
   onChange: (condition: Condition) => void,
-  size: 'small' | 'medium' = 'small'
+  size: 'small' | 'medium' = 'small',
 ): React.ReactElement | null {
   if (condition.kind === 'Value') {
     return React.createElement(TextField, {
@@ -329,7 +329,7 @@ export function renderConditionEditor(
           fullWidth: true,
           size: size,
         }),
-      ]
+      ],
     );
   } else if (condition.kind === 'Regex') {
     return React.createElement(TextField, {
@@ -376,11 +376,11 @@ export function renderConditionEditor(
                 key: 'caption',
                 variant: 'caption',
               },
-              option.caption
+              option.caption,
             ),
-          ])
-        )
-      )
+          ]),
+        ),
+      ),
     );
   }
   return null;

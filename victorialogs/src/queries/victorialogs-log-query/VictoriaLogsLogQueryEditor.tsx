@@ -35,7 +35,7 @@ export function VictoriaLogsLogQueryEditor(props: VictoriaLogsQueryEditorProps):
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    VICTORIALOGS_DATASOURCE_KIND
+    VICTORIALOGS_DATASOURCE_KIND,
   ) as VictoriaLogsDatasourceSelector;
 
   // const { data: client } = useDatasourceClient<VictoriaLogsClient>(selectedDatasource);
@@ -68,7 +68,7 @@ export function VictoriaLogsLogQueryEditor(props: VictoriaLogsQueryEditorProps):
     (query: string) => {
       onChange({ ...value, query });
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

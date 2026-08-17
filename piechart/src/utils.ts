@@ -50,7 +50,7 @@ export const getTooltipFormatter = (formatOptions?: FormatOptions): ((props: for
 };
 export const getLabelFormatter = (
   mode?: ModeOption,
-  formatOptions?: FormatOptions
+  formatOptions?: FormatOptions,
 ): ((props: formatterProps) => string) => {
   if (mode === 'percentage') {
     return percentageLabelFormatter(formatOptions);
@@ -77,11 +77,11 @@ const percentageLabelFormatter = (formatOptions?: FormatOptions) => {
 export interface PieChartLegendMapper {
   mapToLegendItems: (
     pieChartData: Array<Required<PieChartData>>,
-    selectedValues?: Array<LegendValue | ComparisonValues>
+    selectedValues?: Array<LegendValue | ComparisonValues>,
   ) => LegendItem[];
   mapToLegendColumns: (
     selectedValues?: Array<LegendValue | ComparisonValues>,
-    formatOptions?: FormatOptions
+    formatOptions?: FormatOptions,
   ) => Array<TableColumnConfig<LegendItem>>;
 }
 
@@ -97,7 +97,7 @@ export class PieChartListLegendMapper implements PieChartLegendMapper {
 export class PieChartTableLegendMapper implements PieChartLegendMapper {
   mapToLegendItems(
     pieChartData: Array<Required<PieChartData>>,
-    selectedValues?: Array<LegendValue | ComparisonValues>
+    selectedValues?: Array<LegendValue | ComparisonValues>,
   ): LegendItem[] {
     const relativePieChartData = calculatePercentages(pieChartData);
     const absoluteValueSelected = selectedValues?.includes('abs');
@@ -124,7 +124,7 @@ export class PieChartTableLegendMapper implements PieChartLegendMapper {
 
   mapToLegendColumns(
     selectedValues?: Array<LegendValue | ComparisonValues>,
-    formatOptions?: FormatOptions
+    formatOptions?: FormatOptions,
   ): Array<TableColumnConfig<LegendItem>> {
     const relativeFormatOptions = { unit: 'percent', decimalPlaces: formatOptions?.decimalPlaces } as const;
     return (

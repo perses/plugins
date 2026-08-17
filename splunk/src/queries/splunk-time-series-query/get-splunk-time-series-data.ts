@@ -21,7 +21,7 @@ import { DEFAULT_DATASOURCE } from '../constants';
 import { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
 
 function convertResultsToTimeSeries(
-  results: Array<{ _time: string; [key: string]: string | number }> | { _time: string; [key: string]: string | number }
+  results: Array<{ _time: string; [key: string]: string | number }> | { _time: string; [key: string]: string | number },
 ): TimeSeries[] {
   const resultsArray = Array.isArray(results) ? results : [results];
 
@@ -45,7 +45,7 @@ function convertResultsToTimeSeries(
 
 export const getSplunkTimeSeriesData: TimeSeriesQueryPlugin<SplunkTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   if (!spec.query) {
     return {
@@ -57,7 +57,7 @@ export const getSplunkTimeSeriesData: TimeSeriesQueryPlugin<SplunkTimeSeriesQuer
 
   const query = replaceVariables(spec.query, context.variableState);
   const client: SplunkClient = await context.datasourceStore.getDatasourceClient<SplunkClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   );
 
   const datasourceSpec = await context.datasourceStore.getDatasource(spec.datasource ?? DEFAULT_DATASOURCE);
@@ -102,7 +102,7 @@ export const getSplunkTimeSeriesData: TimeSeriesQueryPlugin<SplunkTimeSeriesQuer
   }
 
   const convertedSeries: TimeSeries[] = convertResultsToTimeSeries(
-    resultsResponse.results as Array<{ _time: string; [key: string]: string | number }>
+    resultsResponse.results as Array<{ _time: string; [key: string]: string | number }>,
   );
 
   return {

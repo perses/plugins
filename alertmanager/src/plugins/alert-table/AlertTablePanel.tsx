@@ -363,7 +363,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
         exceptionSnackbar(err);
       }
     },
-    [amClient, queryClient, successSnackbar, exceptionSnackbar]
+    [amClient, queryClient, successSnackbar, exceptionSnackbar],
   );
 
   const silenceInitial = useMemo(() => {
@@ -381,7 +381,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
   const defaultGroupBy = useMemo(() => spec.defaultGroupBy ?? ['alertname'], [spec.defaultGroupBy]);
   const variableNames = useMemo(
     () => [...new Set(defaultGroupBy.flatMap((entry) => parseVariables(entry)))],
-    [defaultGroupBy]
+    [defaultGroupBy],
   );
   const variableState = useAllVariableValues(variableNames);
 
@@ -416,7 +416,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
 
   const effectiveActions = useMemo<AlertAction[]>(
     () => spec.allowedActions ?? ALL_ALERT_ACTIONS,
-    [spec.allowedActions]
+    [spec.allowedActions],
   );
   const showActionsColumn = effectiveActions.length > 0;
   const runbookAnnotationKey = spec.runbookAnnotationKey || 'runbook_url';
@@ -428,7 +428,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
 
   const allTrackedKeys = useMemo(
     () => [...new Set([...labelKeys, ...columnDefs.map((c) => c.name)])],
-    [labelKeys, columnDefs]
+    [labelKeys, columnDefs],
   );
 
   const initialSort = useMemo<SortState | null>(() => {
@@ -505,8 +505,8 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
         compareGroupsByColumn(
           a.summary.labelCounts?.[sortState.columnName],
           b.summary.labelCounts?.[sortState.columnName],
-          sortState
-        )
+          sortState,
+        ),
       );
     }
 

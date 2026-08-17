@@ -54,7 +54,7 @@ function getResponsiveValueFontSize(
   value: number | null,
   format: FormatOptions,
   width: number,
-  height: number
+  height: number,
 ): string {
   const MIN_SIZE = 8;
   const MAX_SIZE = 64;
@@ -155,7 +155,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
       null,
       format,
       contentDimensions.width,
-      contentDimensions.height
+      contentDimensions.height,
     );
     const emptyProgressWidth = getResponsiveProgressWidth(contentDimensions.width, contentDimensions.height);
     const emptyTitleFontSize = getResponsiveTitleFontSize(contentDimensions.width, contentDimensions.height);

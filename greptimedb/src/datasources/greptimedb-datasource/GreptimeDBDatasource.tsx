@@ -19,7 +19,7 @@ import { GreptimeDBDatasourceEditor } from './GreptimeDBDatasourceEditor';
 
 const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasourceClient>['createClient'] = (
   spec,
-  options
+  options,
 ) => {
   const { directUrl, headers, proxy } = spec;
   const { proxyUrl } = options;
@@ -27,7 +27,7 @@ const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasou
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
     throw new Error(
-      'No URL specified for GreptimeDBDatasource client. You can use directUrl in the spec to configure it.'
+      'No URL specified for GreptimeDBDatasource client. You can use directUrl in the spec to configure it.',
     );
   }
 

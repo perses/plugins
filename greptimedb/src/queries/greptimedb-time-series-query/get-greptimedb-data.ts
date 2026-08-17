@@ -43,7 +43,7 @@ function buildSeriesName(valueColumnName: string, labels: Record<string, string>
 
 function buildTimeSeries(
   records: GreptimeDBRecords | undefined,
-  fallbackTimestampMs: number
+  fallbackTimestampMs: number,
 ): Array<{ name: string; labels: Record<string, string>; values: Array<[number, number]> }> {
   const columnSchemas = records?.schema?.column_schemas ?? [];
   const rows = records?.rows ?? [];
@@ -148,7 +148,7 @@ function buildTimeSeries(
 
 function inferStepMsFromSeries(
   series: Array<{ name: string; labels: Record<string, string>; values: Array<[number, number]> }>,
-  fallbackStepMs: number
+  fallbackStepMs: number,
 ): number {
   let minDeltaMs = Number.POSITIVE_INFINITY;
 
@@ -167,7 +167,7 @@ function inferStepMsFromSeries(
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<GreptimeDBTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   if (!spec.query) {
     return {
@@ -179,7 +179,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<GreptimeDBTimeSeriesQueryS
   const query = replaceQueryVariables(spec.query, context.variableState, context.timeRange);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as GreptimeDBClient;
 
   const response: GreptimeDBQueryResponse = await client.query({

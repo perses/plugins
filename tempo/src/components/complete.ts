@@ -51,7 +51,7 @@ const defaultQuoteChar = '"';
 
 export async function complete(
   completionCfg: CompletionConfig,
-  { state, pos }: CompletionContext
+  { state, pos }: CompletionContext,
 ): Promise<CompletionResult | null> {
   // First, identify the completion scopes, for example Scopes() and TagName(scope=intrinsic)
   const completions = identifyCompletions(state, pos, syntaxTree(state));
@@ -229,7 +229,7 @@ async function retrieveOptions(completionCfg: CompletionConfig, completions: Com
 
 async function completeTagName(
   completionCfg: CompletionConfig,
-  scope: 'resource' | 'span' | 'intrinsic'
+  scope: 'resource' | 'span' | 'intrinsic',
 ): Promise<Completion[]> {
   if (!completionCfg.client) {
     return [];

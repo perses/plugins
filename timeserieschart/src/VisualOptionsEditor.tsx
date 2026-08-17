@@ -45,7 +45,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
       produce(value, (draft) => {
         draft.lineWidth = newValue;
         draft.pointRadius = symbolSize;
-      })
+      }),
     );
   };
 
@@ -54,7 +54,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     onChange(
       produce(value, (draft) => {
         draft.areaOpacity = newValue;
-      })
+      }),
     );
   };
 

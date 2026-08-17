@@ -165,7 +165,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
 export function getSymbolSize(
   spanCount: number,
   spanCountRange: [number, number],
-  sizeRange: [number, number]
+  sizeRange: [number, number],
 ): number {
   const [minSize, maxSize] = sizeRange;
   const [minSpanCount, maxSpanCount] = spanCountRange;

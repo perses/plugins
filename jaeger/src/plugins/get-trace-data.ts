@@ -132,7 +132,7 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
 
 function resolveSpec(
   spec: JaegerTraceQuerySpec,
-  variableState: VariableStateMap
+  variableState: VariableStateMap,
 ): Omit<JaegerTraceQuerySpec, 'tags'> & { tags?: string } {
   const traceId = trimToUndefined(replaceVariables(spec.traceId ?? '', variableState));
   const service = trimToUndefined(replaceVariables(spec.service ?? '', variableState));
@@ -187,8 +187,8 @@ function buildExecutedQueryString(spec: JaegerTraceQuerySpec): string {
         minDuration: spec.minDuration,
         maxDuration: spec.maxDuration,
         limit: spec.limit,
-      }).filter(([, value]) => value !== undefined && value !== '')
-    )
+      }).filter(([, value]) => value !== undefined && value !== ''),
+    ),
   );
 }
 
@@ -230,7 +230,7 @@ function getTraceBounds(spans: JaegerSpan[]): { startTimeUnixMs: number; endTime
 
   const [startTime, endTime] = spans.reduce<[number, number]>(
     (acc, span) => [Math.min(acc[0], span.startTime), Math.max(acc[1], span.startTime + span.duration)],
-    [spans[0]!.startTime, spans[0]!.startTime + spans[0]!.duration]
+    [spans[0]!.startTime, spans[0]!.startTime + spans[0]!.duration],
   );
 
   return {
@@ -271,7 +271,7 @@ export function jaegerTraceToOTLP(trace: JaegerTrace): otlptracev1.TracesData {
 function getOrCreateResourceSpan(
   resourceSpanByProcessID: Map<string, otlptracev1.ResourceSpan>,
   processID: string,
-  process?: JaegerProcess
+  process?: JaegerProcess,
 ): otlptracev1.ResourceSpan {
   const existing = resourceSpanByProcessID.get(processID);
   if (existing) {

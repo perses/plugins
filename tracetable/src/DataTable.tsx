@@ -88,7 +88,7 @@ export function DataTable(props: DataTableProps): ReactElement {
   const paletteMode = options.visual?.palette?.mode;
   const serviceColorGenerator = useCallback(
     (serviceName: string) => getServiceColor(muiTheme, chartsTheme, paletteMode, serviceName),
-    [muiTheme, chartsTheme, paletteMode]
+    [muiTheme, chartsTheme, paletteMode],
   );
 
   const rows: Row[] = useMemo(() => {
@@ -134,7 +134,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         setSelection(newSelection);
       }
     },
-    [rowsById, setSelection, clearSelection]
+    [rowsById, setSelection, clearSelection],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -241,7 +241,7 @@ export function DataTable(props: DataTableProps): ReactElement {
           ]
         : []),
     ],
-    [serviceColorGenerator, actionsList, getItemActionButtons, dateFormatter]
+    [serviceColorGenerator, actionsList, getItemActionButtons, dateFormatter],
   );
 
   return (

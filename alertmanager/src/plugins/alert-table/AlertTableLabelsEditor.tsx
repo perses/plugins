@@ -65,7 +65,7 @@ function LabelMappingEntry({
         draft.overrides?.splice(overrideIndex, 1);
       });
     },
-    [index, onUpdate]
+    [index, onUpdate],
   );
 
   const handleUpdateOverride = useCallback(
@@ -81,7 +81,7 @@ function LabelMappingEntry({
         }
       });
     },
-    [index, onUpdate]
+    [index, onUpdate],
   );
 
   return (
@@ -181,7 +181,7 @@ export function AlertTableLabelsEditor(props: OptionsEditorProps<AlertTableOptio
       produce(value, (draft) => {
         if (!draft.labelColorMappings) draft.labelColorMappings = [];
         draft.labelColorMappings.push({ labelKey: '', mode: 'auto' });
-      })
+      }),
     );
   }, [value, onChange]);
 
@@ -190,10 +190,10 @@ export function AlertTableLabelsEditor(props: OptionsEditorProps<AlertTableOptio
       onChange(
         produce(value, (draft) => {
           draft.labelColorMappings?.splice(index, 1);
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleUpdateMapping = useCallback(
@@ -204,10 +204,10 @@ export function AlertTableLabelsEditor(props: OptionsEditorProps<AlertTableOptio
           if (mapping) {
             updater(mapping);
           }
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

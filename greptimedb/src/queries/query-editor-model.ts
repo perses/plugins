@@ -51,7 +51,7 @@ export function useQueryState<T extends QuerySpec>(props: {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

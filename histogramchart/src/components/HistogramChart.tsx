@@ -78,7 +78,7 @@ export function HistogramChart({
               parseFloat(lowerBound), // Use original lower bound for threshold coloring
               thresholds,
               chartsTheme,
-              chartsTheme.echartsTheme[0] as string
+              chartsTheme.echartsTheme[0] as string,
             ),
           },
         };
@@ -141,7 +141,7 @@ export function HistogramChart({
           type: 'custom',
           renderItem: function (
             params: CustomSeriesRenderItemParams,
-            api: CustomSeriesRenderItemAPI
+            api: CustomSeriesRenderItemAPI,
           ): CustomSeriesRenderItemReturn {
             const lowerBound = api.value(0) as number;
             const upperBound = api.value(1) as number;

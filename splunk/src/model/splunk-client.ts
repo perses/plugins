@@ -56,12 +56,12 @@ export interface SplunkClient {
   getJobResults: (
     jobId: string,
     params?: SplunkJobResultsParams,
-    headers?: SplunkRequestHeaders
+    headers?: SplunkRequestHeaders,
   ) => Promise<SplunkResultsResponse>;
   getJobEvents: (
     jobId: string,
     params?: SplunkJobResultsParams,
-    headers?: SplunkRequestHeaders
+    headers?: SplunkRequestHeaders,
   ) => Promise<SplunkEventsResponse>;
   exportSearch: (params: SplunkExportSearchParams, headers?: SplunkRequestHeaders) => Promise<SplunkResultsResponse>;
   getIndexes: (headers?: SplunkRequestHeaders) => Promise<SplunkIndexResponse>;
@@ -86,7 +86,7 @@ function buildUrl(path: string, datasourceUrl: string): URL {
 
 export async function createJob(
   params: SplunkJobCreateParams,
-  options: SplunkApiOptions
+  options: SplunkApiOptions,
 ): Promise<SplunkJobCreateResponse> {
   const url = buildUrl('/services/search/v2/jobs', options.datasourceUrl);
 
@@ -121,7 +121,7 @@ export async function getJobStatus(jobId: string, options: SplunkApiOptions): Pr
 export async function getJobResults(
   jobId: string,
   params: SplunkJobResultsParams = {},
-  options: SplunkApiOptions
+  options: SplunkApiOptions,
 ): Promise<SplunkResultsResponse> {
   const url = buildUrl(`/services/search/v2/jobs/${jobId}/results`, options.datasourceUrl);
   url.searchParams.append('output_mode', params.output_mode || 'json');
@@ -140,7 +140,7 @@ export async function getJobResults(
 export async function getJobEvents(
   jobId: string,
   params: SplunkJobResultsParams = {},
-  options: SplunkApiOptions
+  options: SplunkApiOptions,
 ): Promise<SplunkEventsResponse> {
   const url = buildUrl(`/services/search/v2/jobs/${jobId}/events`, options.datasourceUrl);
   url.searchParams.append('output_mode', params.output_mode || 'json');
@@ -161,7 +161,7 @@ This is a temporary implementation to unblock plugin development.
 Refactor later to properly handle streaming responses. */
 export async function exportSearch(
   params: SplunkExportSearchParams,
-  options: SplunkApiOptions
+  options: SplunkApiOptions,
 ): Promise<SplunkResultsResponse> {
   const url = buildUrl('/services/search/v2/jobs/export', options.datasourceUrl);
 

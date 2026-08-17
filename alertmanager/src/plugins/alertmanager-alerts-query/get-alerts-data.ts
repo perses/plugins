@@ -94,7 +94,7 @@ function transformAlert(apiAlert: GettableAlert): Alert {
  */
 export async function getAlertsData(
   spec: AlertManagerAlertsQuerySpec,
-  context: AlertsQueryContext
+  context: AlertsQueryContext,
 ): Promise<AlertsData> {
   const listDatasourceSelectItems =
     await context.datasourceStore.listDatasourceSelectItems(ALERTMANAGER_DATASOURCE_KIND);
@@ -134,7 +134,7 @@ function buildQueryString(spec: AlertManagerAlertsQuerySpec): string {
         silenced: spec.silenced,
         inhibited: spec.inhibited,
         receiver: spec.receiver,
-      }).filter(([, value]) => value !== undefined)
-    )
+      }).filter(([, value]) => value !== undefined),
+    ),
   );
 }

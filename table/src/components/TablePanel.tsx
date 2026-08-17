@@ -155,7 +155,7 @@ function InlineGaugeCellWithRange({
 function resolveGaugeFillColor(
   value: unknown,
   globalCellSettings: CellSettings[],
-  columnCellSettings: CellSettings[] | undefined
+  columnCellSettings: CellSettings[] | undefined,
 ): string | undefined {
   let cellConfig = evaluateConditionalFormatting(value, globalCellSettings);
   if (columnCellSettings?.length) {
@@ -170,7 +170,7 @@ function resolveGaugeFillColor(
 function generateCellContentConfig(
   column: ColumnSettings,
   gaugeRange?: GaugeRange,
-  globalCellSettings: CellSettings[] = []
+  globalCellSettings: CellSettings[] = [],
 ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
   if (plugin !== undefined) {
@@ -344,7 +344,7 @@ function generateColumnConfig(
   allVariables: VariableStateMap,
   gaugeRangeByColumn: Record<string, GaugeRange>,
   globalCellSettings: CellSettings[] = [],
-  defaultEnableSorting = false
+  defaultEnableSorting = false,
 ): TableColumnConfig<unknown> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
@@ -435,7 +435,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         setSelection(newSelection);
       }
     },
-    [setSelection, clearSelection]
+    [setSelection, clearSelection],
   );
 
   // TODO: handle other query types
@@ -551,7 +551,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         allVariables,
         gaugeRangeByColumn,
         spec.cellSettings ?? [],
-        spec.enableSorting ?? false
+        spec.enableSorting ?? false,
       );
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
@@ -569,7 +569,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
             allVariables,
             gaugeRangeByColumn,
             spec.cellSettings ?? [],
-            spec.enableSorting ?? false
+            spec.enableSorting ?? false,
           );
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
@@ -628,7 +628,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
           acc[key] = undefined;
           return acc;
         },
-        {} as Record<string, undefined>
+        {} as Record<string, undefined>,
       );
 
       const extendRow = {
@@ -738,7 +738,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   filteredDataRef.current = filteredData;
 
   const [pagination, setPagination] = useState<PaginationState | undefined>(
-    spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
+    spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined,
   );
 
   useEffect(() => {
@@ -950,7 +950,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
                           theme={theme}
                         />
                       </div>,
-                      document.body
+                      document.body,
                     )}
                 </div>
               );

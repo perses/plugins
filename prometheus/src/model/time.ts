@@ -45,7 +45,7 @@ export function getRangeStep(
   timeRange: PrometheusTimeRange,
   minStepSeconds = 15,
   resolution = 1,
-  suggestedStepMs = 0
+  suggestedStepMs = 0,
 ): number {
   const suggestedStepSeconds = suggestedStepMs / 1000;
   const queryRangeSeconds = timeRange.end - timeRange.start;

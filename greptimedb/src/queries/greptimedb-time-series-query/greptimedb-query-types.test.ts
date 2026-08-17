@@ -84,7 +84,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
       {
         query: 'SELECT * FROM metrics WHERE foo="$foo" AND bar="$bar"',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['foo', 'bar']);
   });
@@ -124,7 +124,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
 
     const result = await GreptimeDBTimeSeriesQuery.getTimeSeriesData(
       { query: 'SELECT count(*) FROM logs' },
-      createStubContext()
+      createStubContext(),
     );
     expect(result.series).toHaveLength(1);
     expect(result.series[0]?.name).toBe('count(*)');
@@ -167,7 +167,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
       {
         query: "SELECT date_bin(INTERVAL '1 minute', ts) AS time, host, avg(cpu_usage) AS value FROM cpu_metrics_30",
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(result.series).toHaveLength(2);

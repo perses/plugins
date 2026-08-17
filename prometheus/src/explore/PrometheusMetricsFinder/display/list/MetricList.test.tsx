@@ -47,7 +47,7 @@ describe('MetricList', () => {
             onExplore={onExplore}
           />
         </VirtuosoMockContext.Provider>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
   it('should render metrics', () => {

@@ -40,7 +40,7 @@ export function SplunkTimeSeriesQueryEditor(props: SplunkQueryEditorProps): Reac
       onChange(
         produce(value, (draft) => {
           draft.datasource = newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -52,7 +52,7 @@ export function SplunkTimeSeriesQueryEditor(props: SplunkQueryEditorProps): Reac
     onChange(
       produce(value, (draft) => {
         draft.query = newQuery;
-      })
+      }),
     );
   };
 

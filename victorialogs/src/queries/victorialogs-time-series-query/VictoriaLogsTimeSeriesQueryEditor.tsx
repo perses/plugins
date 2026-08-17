@@ -35,7 +35,7 @@ export function VictoriaLogsQueryEditor(props: VictoriaLogsQueryEditorProps): Re
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    VICTORIALOGS_DATASOURCE_KIND
+    VICTORIALOGS_DATASOURCE_KIND,
   ) as VictoriaLogsDatasourceSelector;
 
   // Local state for editor value to prevent query_range calls on every keystroke
@@ -65,7 +65,7 @@ export function VictoriaLogsQueryEditor(props: VictoriaLogsQueryEditorProps): Re
     (query: string) => {
       onChange({ ...value, query });
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

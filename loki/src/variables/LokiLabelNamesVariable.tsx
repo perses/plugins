@@ -29,7 +29,7 @@ export const LokiLabelNamesVariable: VariablePlugin<LokiLabelNamesVariableOption
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_LOKI,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(LOKI_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(LOKI_DATASOURCE_KIND),
       ) ?? DEFAULT_LOKI;
     const client: LokiClient = await ctx.datasourceStore.getDatasourceClient(datasourceSelector);
     const query = spec.matchers ? replaceVariables(spec.matchers[0] ?? '', ctx.variables) || undefined : undefined;

@@ -34,7 +34,7 @@ describe('StatChart', () => {
           data={mockStatData}
           format={format}
         />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 

@@ -23,7 +23,7 @@ import { formatSeriesName } from '../utils';
 export const getAnnotationData = async (
   spec: PrometheusPromQLAnnotationOptions,
   context: AnnotationContext,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
 ): Promise<AnnotationData[]> => {
   if (!spec.expr) {
     return [];
@@ -35,18 +35,18 @@ export const getAnnotationData = async (
     datasourceSelectValueToSelector(
       spec.datasource ?? DEFAULT_PROM,
       context.variableState,
-      listDatasourceSelectItems
+      listDatasourceSelectItems,
     ) ?? DEFAULT_PROM;
 
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(datasourceSelector);
 
   const datasource = (await context.datasourceStore.getDatasource(
-    datasourceSelector
+    datasourceSelector,
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
   const interpolatedOptions = interpolateDatasourceProxyParams(datasource, context.variableState);
 
   const datasourceScrapeInterval = Math.trunc(
-    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
+    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000,
   );
 
   const timeRange = getPrometheusTimeRange(context.absoluteTimeRange);
@@ -75,7 +75,7 @@ export const getAnnotationData = async (
       end: alignedEnd,
       step: step,
     },
-    { ...interpolatedOptions, signal: abortSignal }
+    { ...interpolatedOptions, signal: abortSignal },
   );
 
   const result: AnnotationData[] = [];

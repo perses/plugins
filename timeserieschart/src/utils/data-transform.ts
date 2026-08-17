@@ -71,7 +71,7 @@ export function getTimeSeries(
   timeScale: TimeScale,
   paletteColor: string,
   querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number; stack?: boolean },
-  yAxisIndex?: number
+  yAxisIndex?: number,
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -185,7 +185,7 @@ export function convertPercentThreshold(
   percent: number,
   data: LegacyTimeSeries[] | TimeSeries[],
   max?: number,
-  min?: number
+  min?: number,
 ): number {
   const percentDecimal = percent / 100;
   const adjustedMax = max ?? findMax(data);

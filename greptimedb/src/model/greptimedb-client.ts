@@ -43,7 +43,7 @@ async function readErrorResponse(response: Response): Promise<string> {
 
 export async function greptimedbQuery(
   params: GreptimeDBQueryRequestParameters,
-  queryOptions: GreptimeDBQueryOptions
+  queryOptions: GreptimeDBQueryOptions,
 ): Promise<GreptimeDBDatasourceResponse> {
   const { datasourceUrl, headers } = queryOptions;
   const url = buildSqlUrl(datasourceUrl);

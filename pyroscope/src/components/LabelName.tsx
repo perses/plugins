@@ -30,7 +30,7 @@ export function LabelName(props: LabelNameProps): ReactElement {
 
   const filteredLabelNamesOptions = useMemo(
     () => filterLabelNamesOptions(labelNamesOptions?.names ?? []),
-    [labelNamesOptions]
+    [labelNamesOptions],
   );
 
   return (

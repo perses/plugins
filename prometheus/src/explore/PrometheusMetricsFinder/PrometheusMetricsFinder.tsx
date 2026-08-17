@@ -177,7 +177,7 @@ export function PrometheusMetricsFinder({
 }: PrometheusMetricsFinderProps): ReactElement {
   const settingsStored = localStorage.getItem(PERSES_METRICS_FINDER_SETTINGS);
   const [settings, setSettings] = useState<Settings>(
-    settingsStored ? JSON.parse(settingsStored) : { isMetadataEnabled: true }
+    settingsStored ? JSON.parse(settingsStored) : { isMetadataEnabled: true },
   );
 
   function handleSettingsUpdate(value: Settings): void {

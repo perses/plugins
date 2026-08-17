@@ -56,14 +56,14 @@ export function LabelFilterInput({
 }: LabelFilterInputProps): ReactElement {
   const filtersWithoutCurrent = useMemo(
     () => filters.filter((filter) => filter.label !== value.label),
-    [filters, value.label]
+    [filters, value.label],
   );
 
   const { data: labelOptions, isLoading: isLabelOptionsLoading } = useLabels(filtersWithoutCurrent, datasource);
   const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useLabelValues(
     value.label,
     filtersWithoutCurrent,
-    datasource
+    datasource,
   );
 
   return (
@@ -112,7 +112,7 @@ export const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTML
         />
       </ul>
     );
-  }
+  },
 );
 ListboxComponent.displayName = 'ListboxComponent';
 

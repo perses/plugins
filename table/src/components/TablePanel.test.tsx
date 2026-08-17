@@ -74,7 +74,7 @@ describe('TablePanel', () => {
             </ChartsProvider>
           </VirtuosoMockContext.Provider>
         </ItemActionsProvider>
-      </SelectionProvider>
+      </SelectionProvider>,
     );
   };
 
@@ -95,7 +95,7 @@ describe('TablePanel', () => {
 
       expect(await screen.findAllByRole('cell')).toHaveLength(16); // 2 time series with 8 columns
     },
-    TEST_TIMEOUT
+    TEST_TIMEOUT,
   );
 
   it(
@@ -135,7 +135,7 @@ describe('TablePanel', () => {
 
       expect(await screen.findAllByRole('cell')).toHaveLength(14); // 2 time series with 7 columns
     },
-    TEST_TIMEOUT
+    TEST_TIMEOUT,
   );
 
   it(
@@ -156,7 +156,7 @@ describe('TablePanel', () => {
       const envHeaderCell = await screen.findByRole('columnheader', { name: 'env' });
       expect(within(envHeaderCell).queryByTestId('ArrowDownwardIcon')).not.toBeInTheDocument();
     },
-    TEST_TIMEOUT
+    TEST_TIMEOUT,
   );
 
   it('should apply transforms', async () => {
@@ -244,7 +244,7 @@ describe('TablePanel', () => {
             </PluginRegistry>
           </QueryClientProvider>
         </ChartsProvider>
-      </VirtuosoMockContext.Provider>
+      </VirtuosoMockContext.Provider>,
     );
 
     // embedded panel is loaded async
@@ -279,7 +279,7 @@ describe('TablePanel', () => {
           expect(within(firstHeader).getByRole('checkbox')).toBeInTheDocument();
         }
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -292,7 +292,7 @@ describe('TablePanel', () => {
         // Should not have any checkboxes
         expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -303,7 +303,7 @@ describe('TablePanel', () => {
         // Should not have any checkboxes by default
         expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -324,7 +324,7 @@ describe('TablePanel', () => {
           expect(firstRowCheckbox).toBeChecked();
         }
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -346,7 +346,7 @@ describe('TablePanel', () => {
           });
         }
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -377,7 +377,7 @@ describe('TablePanel', () => {
         const actionButtons = screen.queryAllByRole('button', { name: 'Test Action' });
         expect(actionButtons).toHaveLength(2); // 2 rows with action buttons
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
   });
 
@@ -397,7 +397,7 @@ describe('TablePanel', () => {
               </ChartsProvider>
             </VirtuosoMockContext.Provider>
           </ItemActionsProvider>
-        </SelectionProvider>
+        </SelectionProvider>,
       );
     };
 
@@ -435,7 +435,7 @@ describe('TablePanel', () => {
         expect(await screen.findByRole('cell', { name: '100' })).toBeInTheDocument();
         expect(await screen.findByRole('cell', { name: '200' })).toBeInTheDocument();
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -464,7 +464,7 @@ describe('TablePanel', () => {
         // ns-b's value #1 = 200 should still render correctly (not become N/A)
         expect(screen.getByRole('cell', { name: '200' })).toBeInTheDocument();
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -484,7 +484,7 @@ describe('TablePanel', () => {
         // No N/A should appear — all cells have real values (100, 200, 50, 0)
         expect(screen.queryAllByRole('cell', { name: 'N/A' })).toHaveLength(0);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -511,7 +511,7 @@ describe('TablePanel', () => {
         // Q1 has data, Q2 has partial data, Q3 is completely empty
         renderMultiQueryPanel(
           [MOCK_MULTI_QUERY_DATA_Q1, MOCK_MULTI_QUERY_DATA_Q2, MOCK_MULTI_QUERY_DATA_EMPTY],
-          options
+          options,
         );
 
         // Both namespaces should be present
@@ -523,7 +523,7 @@ describe('TablePanel', () => {
         // At minimum: ns-b missing value #2 (1) + both rows missing value #3 (2) = 3 N/A cells
         expect(naCells.length).toBeGreaterThanOrEqual(3);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
   });
 });

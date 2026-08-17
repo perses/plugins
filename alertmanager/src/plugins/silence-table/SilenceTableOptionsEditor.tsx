@@ -39,10 +39,10 @@ export function SilenceTableOptionsEditor(props: OptionsEditorProps<SilenceTable
             if (idx >= 0) current.splice(idx, 1);
           }
           draft.allowedActions = current;
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

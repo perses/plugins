@@ -64,7 +64,7 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
 
   const maxDepth: number = useMemo(
     () => (selectedStackTrace ? getMaxDepth(selectedStackTrace) : 0),
-    [selectedStackTrace]
+    [selectedStackTrace],
   );
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle as SxProps;

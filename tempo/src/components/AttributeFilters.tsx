@@ -44,14 +44,14 @@ export function AttributeFilters(props: AttributeFiltersProps): ReactElement {
     'resource.service.name',
     filterToTraceQL({ ...filter, serviceName: [] }),
     start,
-    end
+    end,
   );
   const { data: spanNameOptions } = useTagValues(
     client,
     'name',
     filterToTraceQL({ ...filter, spanName: [] }),
     start,
-    end
+    end,
   );
 
   return (
@@ -247,7 +247,7 @@ function useTagValues(
   tag: string,
   query: string,
   start?: number,
-  end?: number
+  end?: number,
 ): UseQueryResult<string[] | undefined> {
   return useQuery({
     queryKey: ['useTagValues', client, tag, query, start, end],

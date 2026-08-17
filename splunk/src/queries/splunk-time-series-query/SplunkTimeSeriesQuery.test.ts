@@ -25,7 +25,7 @@ describe('SplunkTimeSeriesQuery', () => {
       {
         query: 'search index=$index sourcetype=$sourcetype | stats count by $index',
       },
-      {} as never
+      {} as never,
     );
     expect(variables).toEqual(expect.arrayContaining(['index', 'sourcetype']));
     expect(variables).toHaveLength(2);

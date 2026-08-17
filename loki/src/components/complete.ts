@@ -53,7 +53,7 @@ const ERROR_NODE = 0; // Lezer parser creates error nodes for incomplete/malform
 
 export async function complete(
   completionCfg: CompletionConfig,
-  { state, pos }: CompletionContext
+  { state, pos }: CompletionContext,
 ): Promise<CompletionResult | null> {
   // First, identify the completion scope
   const completion = identifyCompletion(state, pos, syntaxTree(state));

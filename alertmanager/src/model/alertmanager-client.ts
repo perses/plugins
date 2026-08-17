@@ -80,7 +80,7 @@ function buildSearchParams(params: Record<string, unknown> | object): URLSearchP
 function fetchWithGet<TResponse>(
   apiURI: string,
   params: Record<string, unknown> | object,
-  queryOptions: AlertManagerQueryOptions
+  queryOptions: AlertManagerQueryOptions,
 ): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
@@ -98,7 +98,7 @@ function fetchWithGet<TResponse>(
 
 export function getAlerts(
   params?: AlertsQueryParams,
-  queryOptions?: AlertManagerQueryOptions
+  queryOptions?: AlertManagerQueryOptions,
 ): Promise<GettableAlert[]> {
   const opts = queryOptions ?? { datasourceUrl: '' };
   return fetchWithGet<GettableAlert[]>('/api/v2/alerts', params ?? {}, opts);
@@ -106,7 +106,7 @@ export function getAlerts(
 
 export function getSilences(
   params?: SilencesQueryParams,
-  queryOptions?: AlertManagerQueryOptions
+  queryOptions?: AlertManagerQueryOptions,
 ): Promise<GettableSilence[]> {
   const opts = queryOptions ?? { datasourceUrl: '' };
   return fetchWithGet<GettableSilence[]>('/api/v2/silences', params ?? {}, opts);
@@ -118,7 +118,7 @@ export function getSilence(id: string, queryOptions: AlertManagerQueryOptions): 
 
 export function createSilence(
   silence: PostableSilence,
-  queryOptions: AlertManagerQueryOptions
+  queryOptions: AlertManagerQueryOptions,
 ): Promise<{ silenceID: string }> {
   const { datasourceUrl, headers = {} } = queryOptions;
 

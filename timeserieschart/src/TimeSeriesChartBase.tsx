@@ -122,7 +122,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     onDoubleClick,
     __experimentalEChartsOptionsOverride,
   },
-  ref
+  ref,
 ) {
   const { chartsTheme, enablePinning, enableSyncGrouping, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } =
     useChartsContext();
@@ -140,7 +140,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
 
   const getTimezoneAwareAxisFormatter = useCallback(
     (rangeMs: number): ((value: number) => string) => createTimezoneAwareAxisFormatter(rangeMs, timeZone),
-    [timeZone]
+    [timeZone],
   );
 
   let timeScale: TimeScale;

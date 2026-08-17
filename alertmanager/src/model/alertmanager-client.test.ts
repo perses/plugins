@@ -75,7 +75,7 @@ describe('alertmanager-client', () => {
           active: true,
           receiver: 'team-a',
         },
-        { datasourceUrl: 'http://am.example' }
+        { datasourceUrl: 'http://am.example' },
       );
 
       expect(fetchMock).toHaveBeenCalledWith(
@@ -83,7 +83,7 @@ describe('alertmanager-client', () => {
         {
           method: 'GET',
           headers: {},
-        }
+        },
       );
     });
 
@@ -124,7 +124,7 @@ describe('alertmanager-client', () => {
 
     it('throws on non-ok response with JSON error body', async () => {
       fetchMock.mockResolvedValueOnce(
-        mockErrorResponse(500, 'Internal Server Error', { message: 'backend overloaded' })
+        mockErrorResponse(500, 'Internal Server Error', { message: 'backend overloaded' }),
       );
 
       await expect(getAlerts(undefined, { datasourceUrl: 'http://am.example' })).rejects.toThrow('backend overloaded');
@@ -168,7 +168,7 @@ describe('alertmanager-client', () => {
           id: 'silence-123',
           status: { state: 'active' },
           matchers: [],
-        })
+        }),
       );
 
       await getSilence('silence/123', { datasourceUrl: 'http://am.example' });
@@ -219,7 +219,7 @@ describe('alertmanager-client', () => {
       fetchMock.mockResolvedValueOnce(mockErrorResponse(400, 'Bad Request', { message: 'silence already expired' }));
 
       await expect(deleteSilence('silence-456', { datasourceUrl: 'http://am.example' })).rejects.toThrow(
-        'silence already expired'
+        'silence already expired',
       );
     });
 
@@ -227,7 +227,7 @@ describe('alertmanager-client', () => {
       fetchMock.mockResolvedValueOnce(mockErrorResponse(500, 'Internal Server Error'));
 
       await expect(deleteSilence('silence-456', { datasourceUrl: 'http://am.example' })).rejects.toThrow(
-        'Internal Server Error'
+        'Internal Server Error',
       );
     });
 
@@ -275,7 +275,7 @@ describe('alertmanager-client', () => {
       });
 
       await expect(getAlerts(undefined, { datasourceUrl: 'http://am.example' })).rejects.toThrow(
-        'Invalid response from server'
+        'Invalid response from server',
       );
     });
   });

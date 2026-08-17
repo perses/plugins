@@ -41,7 +41,7 @@ export function GreptimeDBTimeSeriesQueryEditor(props: GreptimeDBTimeSeriesQuery
       onChange(
         produce(value, (draft) => {
           draft.datasource = newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -52,7 +52,7 @@ export function GreptimeDBTimeSeriesQueryEditor(props: GreptimeDBTimeSeriesQuery
     onChange(
       produce(value, (draft) => {
         draft.query = queryValue;
-      })
+      }),
     );
   };
 
@@ -60,7 +60,7 @@ export function GreptimeDBTimeSeriesQueryEditor(props: GreptimeDBTimeSeriesQuery
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   const examplesStyle = {

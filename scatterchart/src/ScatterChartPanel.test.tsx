@@ -47,7 +47,7 @@ describe('ScatterChartPanel', (): void => {
             </TimeRangeProviderBasic>
           </ReactRouterProvider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 

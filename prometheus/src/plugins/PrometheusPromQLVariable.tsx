@@ -36,17 +36,17 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_PROM,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND),
       ) ?? DEFAULT_PROM;
     const { client, requestOptions } = await resolvePrometheusDatasource(
       ctx.datasourceStore,
       datasourceSelector,
-      ctx.variables
+      ctx.variables,
     );
     // TODO we may want to manage a range query as well.
     const { data: options } = await client.instantQuery(
       { query: replaceVariables(spec.expr, ctx.variables) },
-      requestOptions
+      requestOptions,
     );
     const labelName = replaceVariables(spec.labelName, ctx.variables);
     let values: string[] = [];

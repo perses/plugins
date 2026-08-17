@@ -113,7 +113,7 @@ export function LogExplorer(): ReactElement {
       datasourceStore,
       refreshKey: '',
     }),
-    [absoluteTimeRange, variableState, datasourceStore]
+    [absoluteTimeRange, variableState, datasourceStore],
   );
 
   // Get all datasource plugins that support LogQuery
@@ -127,7 +127,7 @@ export function LogExplorer(): ReactElement {
           return pluginSpec?.supportedQueryTypes?.includes('LogQuery');
         })
         .map((p) => p.kind) ?? [],
-    [datasourcePlugins]
+    [datasourcePlugins],
   );
 
   const { data: volumeQueries = EMPTY_QUERIES } = useQuery({
@@ -143,7 +143,7 @@ export function LogExplorer(): ReactElement {
             console.error(`[LogExplorer] Failed to create volume query for ${query.spec.plugin.kind}:`, error);
             return null;
           }
-        })
+        }),
       );
       return results.filter((q): q is QueryDefinition => q !== null);
     },

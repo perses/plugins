@@ -87,7 +87,7 @@ export function createConfigForPlugin(options: PluginConfigOptions) {
   return mergeRsbuildConfig(
     baseConfig, // base config first
     rsbuildConfig, // then any user config overrides
-    rsbuildConfigWithMfPlugin // then add the Module Federation plugin last
+    rsbuildConfigWithMfPlugin, // then add the Module Federation plugin last
   );
 }
 

@@ -26,7 +26,7 @@ import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 function flattenObject(
   obj: Record<string, unknown>,
   parentKey = '',
-  result: Record<string, unknown> = {}
+  result: Record<string, unknown> = {},
 ): Record<string, unknown> {
   for (const [key, value] of Object.entries(obj)) {
     const newKey = parentKey ? `${parentKey}.${key}` : key;
@@ -84,7 +84,7 @@ export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLo
   const query = replaceVariables(spec.query, context.variableState);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;

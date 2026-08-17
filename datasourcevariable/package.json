@@ -18,6 +18,7 @@
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
     "lint": "oxlint src",
+    "lint:ci": "oxlint src",
     "test": "cross-env LC_ALL=C TZ=UTC jest --passWithNoTests",
     "type-check": "tsc --noEmit"
   },

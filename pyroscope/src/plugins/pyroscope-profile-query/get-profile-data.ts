@@ -35,14 +35,14 @@ export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number;
 
 export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getProfileData'] = async (
   spec,
-  context
+  context,
 ) => {
   const defaultPyroscopeDatasource: PyroscopeDatasourceSelector = {
     kind: PYROSCOPE_DATASOURCE_KIND,
   };
 
   const client: PyroscopeClient = await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? defaultPyroscopeDatasource
+    spec.datasource ?? defaultPyroscopeDatasource,
   );
 
   const buildQueryString = (): string => {

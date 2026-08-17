@@ -19,7 +19,7 @@ export function getSeriesTooltip(
   unit: string,
   name: string,
   color: string,
-  divColor: string
+  divColor: string,
 ): string {
   const date = new Date(data.value[0]);
   const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });

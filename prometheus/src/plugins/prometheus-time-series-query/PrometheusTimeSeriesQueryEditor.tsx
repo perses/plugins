@@ -65,7 +65,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    PROM_DATASOURCE_KIND
+    PROM_DATASOURCE_KIND,
   ) as PrometheusDatasourceSelector;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
@@ -91,7 +91,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
           const nextDatasource = isDefaultPromSelector(next) ? undefined : next;
           draft.datasource = nextDatasource;
-        })
+        }),
       );
       return;
     }
@@ -108,7 +108,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     /* Try catch is necessary, because when the minStep value is being typed, it will be valid when the duration unit is added. Example: 2m = 2 + m */
     try {
       const durationsSeconds = getDurationStringSeconds(
-        replaceVariables(minStepPlaceholder, variableState) as DurationString
+        replaceVariables(minStepPlaceholder, variableState) as DurationString,
       );
       return durationsSeconds !== undefined ? durationsSeconds * 1000 : undefined;
     } catch {

@@ -31,12 +31,12 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_PROM,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND),
       ) ?? DEFAULT_PROM;
     const { client, requestOptions } = await resolvePrometheusDatasource(
       ctx.datasourceStore,
       datasourceSelector,
-      ctx.variables
+      ctx.variables,
     );
     const match = spec.matchers ? spec.matchers.map((m) => replaceVariables(m, ctx.variables)) : undefined;
     const timeRange = getPrometheusTimeRange(ctx.timeRange);

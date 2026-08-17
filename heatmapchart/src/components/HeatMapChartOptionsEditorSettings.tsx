@@ -40,7 +40,7 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
     onChange(
       produce(value, (draft: HeatMapChartOptions) => {
         draft.yAxisFormat = newFormat;
-      })
+      }),
     );
   };
 
@@ -48,7 +48,7 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
     onChange(
       produce(value, (draft: HeatMapChartOptions) => {
         draft.countFormat = newFormat;
-      })
+      }),
     );
   };
 
@@ -56,7 +56,7 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
     onChange(
       produce(value, (draft: HeatMapChartOptions) => {
         draft.showVisualMap = checked;
-      })
+      }),
     );
   };
 
@@ -93,7 +93,7 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
                   onChange(
                     produce(value, (draft: HeatMapChartOptions) => {
                       draft.min = newValue;
-                    })
+                    }),
                   );
                 }}
                 placeholder="Auto"
@@ -112,7 +112,7 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
                   onChange(
                     produce(value, (draft: HeatMapChartOptions) => {
                       draft.max = newValue;
-                    })
+                    }),
                   );
                 }}
                 placeholder="Auto"
@@ -130,7 +130,7 @@ export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEdit
                   onChange(
                     produce(value, (draft: HeatMapChartOptions) => {
                       draft.logBase = newValue.log;
-                    })
+                    }),
                   );
                 }}
                 disableClearable

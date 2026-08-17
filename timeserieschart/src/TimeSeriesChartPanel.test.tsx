@@ -93,7 +93,7 @@ describe('TimeSeriesChartPanel', () => {
             />
           </TimeRangeContext.Provider>
         </ChartsProvider>
-      </VirtuosoMockContext.Provider>
+      </VirtuosoMockContext.Provider>,
     );
   };
 
@@ -101,8 +101,8 @@ describe('TimeSeriesChartPanel', () => {
     renderPanel();
     expect(
       await screen.findByText(
-        'device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"'
-      )
+        'device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"',
+      ),
     ).toBeInTheDocument();
   });
 

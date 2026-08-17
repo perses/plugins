@@ -149,7 +149,7 @@ export default function TreeNode({
         return newStates;
       });
     },
-    [setChildStates]
+    [setChildStates],
   );
 
   // Update the size and position of tree connector lines based on the node's and its parent's position.

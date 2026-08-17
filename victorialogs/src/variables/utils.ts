@@ -41,7 +41,7 @@ export function getVictoriaLogsTimeRange(timeRange: AbsoluteTimeRange): { start:
 
 export function useFieldNames(
   query: string,
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): UseQueryResult<VictoriaLogsFieldNamesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },
@@ -65,7 +65,7 @@ export function useFieldNames(
 export function useFieldValues(
   field: string,
   query: string,
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): UseQueryResult<VictoriaLogsFieldValuesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },

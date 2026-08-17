@@ -47,7 +47,7 @@ function getLokiRangeStep(
   startMs: number,
   endMs: number,
   minStepSeconds = DEFAULT_MIN_STEP_SECONDS,
-  suggestedStepMs = 0
+  suggestedStepMs = 0,
 ): number {
   const suggestedStepSeconds = suggestedStepMs / 1000;
   const queryRangeSeconds = (endMs - startMs) / 1000;
@@ -104,7 +104,7 @@ function convertVectorToTimeSeries(vector: LokiVectorResult[]): TimeSeries[] {
 
 export const getLokiTimeSeriesData: TimeSeriesQueryPlugin<LokiTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   if (!spec.query) {
     return {
@@ -116,7 +116,7 @@ export const getLokiTimeSeriesData: TimeSeriesQueryPlugin<LokiTimeSeriesQuerySpe
 
   const query = replaceVariables(spec.query, context.variableState);
   const client = (await context.datasourceStore.getDatasourceClient<LokiClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as LokiClient;
 
   const { start, end } = context.timeRange;

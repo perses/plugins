@@ -82,7 +82,7 @@ function extractDatasourceVariables(datasourceSpec: DatasourceSpec<PrometheusDat
 
 function getDatasourceVariablesFromCache(
   datasourceSelector: DatasourceSelector,
-  datasourceStore: DatasourceStore
+  datasourceStore: DatasourceStore,
 ): string[] {
   try {
     if (!datasourceStore.getDatasourceSpecSync) return [];
@@ -103,13 +103,13 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_PROM,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND),
       ) ?? DEFAULT_PROM;
 
     const { client, requestOptions } = await resolvePrometheusDatasource(
       ctx.datasourceStore,
       datasourceSelector,
-      ctx.variables
+      ctx.variables,
     );
     const match = pluginDef.matchers ? pluginDef.matchers.map((m) => replaceVariables(m, ctx.variables)) : undefined;
 
@@ -121,7 +121,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
         'match[]': match,
         ...timeRange,
       },
-      requestOptions
+      requestOptions,
     );
     return {
       data: stringArrayToVariableOptions(options),

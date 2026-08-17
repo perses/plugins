@@ -27,7 +27,7 @@ export function isDefaultOpenSearchSelector(datasourceSelectValue: DatasourceSel
 }
 
 export function isOpenSearchDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue
+  datasourceSelectValue: DatasourceSelectValue,
 ): datasourceSelectValue is OpenSearchDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === OPENSEARCH_DATASOURCE_KIND;
 }

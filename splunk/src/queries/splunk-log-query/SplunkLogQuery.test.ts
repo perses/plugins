@@ -43,7 +43,7 @@ describe('SplunkLogQuery', () => {
       {
         query: 'search index=$index sourcetype=$sourcetype error',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(expect.arrayContaining(['index', 'sourcetype']));
     expect(variables).toHaveLength(2);
@@ -55,7 +55,7 @@ describe('SplunkLogQuery', () => {
       {
         query: 'search index=main error',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual([]);
   });

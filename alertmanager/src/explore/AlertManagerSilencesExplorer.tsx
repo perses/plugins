@@ -67,7 +67,7 @@ function CreateSilenceButton({ queries }: { queries: QueryDefinition[] }): React
         exceptionSnackbar(err);
       }
     },
-    [amClient, queryClient, successSnackbar, exceptionSnackbar]
+    [amClient, queryClient, successSnackbar, exceptionSnackbar],
   );
 
   return (

@@ -19,7 +19,7 @@ import { VictoriaLogsDatasourceEditor } from './VictoriaLogsDatasourceEditor';
 
 const createClient: DatasourcePlugin<VictoriaLogsDatasourceSpec, VictoriaLogsClient>['createClient'] = (
   spec,
-  options
+  options,
 ) => {
   const { directUrl, proxy } = spec;
   const { proxyUrl } = options;

@@ -39,7 +39,7 @@ describe('SpanEvents', () => {
             </TimeRangeProviderBasic>
           </ReactRouterProvider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 

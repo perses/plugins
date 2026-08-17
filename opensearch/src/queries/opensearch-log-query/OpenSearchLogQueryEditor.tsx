@@ -47,7 +47,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    OPENSEARCH_DATASOURCE_KIND
+    OPENSEARCH_DATASOURCE_KIND,
   ) as OpenSearchDatasourceSelector;
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
@@ -57,7 +57,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       onChange(
         produce(value, (draft) => {
           draft.datasource = isDefaultOpenSearchSelector(newDatasourceSelection) ? undefined : newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -69,7 +69,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.index = next.length > 0 ? next : undefined;
-      })
+      }),
     );
   };
 
@@ -80,7 +80,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       onChange(
         produce(value, (draft) => {
           draft[field] = next.length > 0 ? next : undefined;
-        })
+        }),
       );
     };
 
@@ -89,7 +89,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.disableTimeFilter = checked ? true : undefined;
-      })
+      }),
     );
   };
 
@@ -98,7 +98,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

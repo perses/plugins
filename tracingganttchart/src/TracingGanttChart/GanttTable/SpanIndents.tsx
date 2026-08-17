@@ -51,7 +51,7 @@ export function SpanIndents(props: SpanIndentsProps): ReactElement {
         return next;
       });
     },
-    [span, setCollapsedSpans]
+    [span, setCollapsedSpans],
   );
 
   const handleIconMouseEnter = useCallback(() => {

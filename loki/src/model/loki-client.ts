@@ -82,7 +82,7 @@ export interface LokiClient {
     query: string,
     start?: string,
     end?: string,
-    headers?: LokiRequestHeaders
+    headers?: LokiRequestHeaders,
   ) => Promise<LokiIndexStatsResponse>;
 }
 
@@ -152,7 +152,7 @@ export function toUnixSeconds(val: string | number | Date): string {
 
 export async function queryRange(
   params: LokiQueryRangeParams,
-  options: LokiApiOptions
+  options: LokiApiOptions,
 ): Promise<LokiQueryRangeResponse> {
   const url = buildUrl('/loki/api/v1/query_range', options.datasourceUrl);
   url.searchParams.append('query', params.query);
@@ -201,7 +201,7 @@ export async function labels(params: LokiLabelsParams, options: LokiApiOptions):
 
 export async function labelValues(
   params: LokiLabelValuesParams,
-  options: LokiApiOptions
+  options: LokiApiOptions,
 ): Promise<LokiLabelValuesResponse> {
   const url = buildUrl(`/loki/api/v1/label/${params.labelName}/values`, options.datasourceUrl);
   if (params.start) url.searchParams.append('start', params.start);
@@ -227,7 +227,7 @@ export async function series(
   match: string[],
   start: string | undefined,
   end: string | undefined,
-  options: LokiApiOptions
+  options: LokiApiOptions,
 ): Promise<LokiSeriesResponse> {
   const url = buildUrl('/loki/api/v1/series', options.datasourceUrl);
   match.forEach((m) => url.searchParams.append('match[]', m));
@@ -299,7 +299,7 @@ export async function indexStats(
   query: string,
   start: string | undefined,
   end: string | undefined,
-  options: LokiApiOptions
+  options: LokiApiOptions,
 ): Promise<LokiIndexStatsResponse> {
   const url = buildUrl('/loki/api/v1/index/stats', options.datasourceUrl);
   url.searchParams.append('query', query);

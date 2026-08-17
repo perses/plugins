@@ -29,7 +29,7 @@ describe('SpanDuration', () => {
         <GanttTableProvider>
           <SpanDuration {...props} />
         </GanttTableProvider>
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 

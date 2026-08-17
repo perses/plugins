@@ -27,7 +27,7 @@ export function isDefaultAlertManagerSelector(datasourceSelectValue: DatasourceS
 }
 
 export function isAlertManagerDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue
+  datasourceSelectValue: DatasourceSelectValue,
 ): datasourceSelectValue is AlertManagerDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === ALERTMANAGER_DATASOURCE_KIND;
 }

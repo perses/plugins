@@ -50,7 +50,7 @@ describe('tempo-client', () => {
     });
 
     await expect(query({ traceId: 'nonexistent' }, { datasourceUrl: '' })).rejects.toThrow(
-      new UserFriendlyError('Trace not found', 404)
+      new UserFriendlyError('Trace not found', 404),
     );
   });
 
@@ -68,7 +68,7 @@ describe('tempo-client', () => {
     fetchMock.mockResolvedValueOnce(
       mockErrorResponse(502, '<html><body>Bad Gateway</body></html>', {
         headers: new Headers({ 'content-type': 'text/html' }),
-      })
+      }),
     );
 
     await expect(search({ q: '{}' }, { datasourceUrl: '' })).rejects.toThrow('Invalid response from server');

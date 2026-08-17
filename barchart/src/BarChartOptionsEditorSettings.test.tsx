@@ -35,7 +35,7 @@ describe('BarChartOptionsEditorSettings', () => {
           }
           onChange={onChange}
         />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 
@@ -53,7 +53,7 @@ describe('BarChartOptionsEditorSettings', () => {
         format: {
           unit: 'years',
         },
-      })
+      }),
     );
   });
 
@@ -69,7 +69,7 @@ describe('BarChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         calculation: 'mean',
-      })
+      }),
     );
   });
 
@@ -85,7 +85,7 @@ describe('BarChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         sort: 'asc',
-      })
+      }),
     );
   });
 
@@ -101,7 +101,7 @@ describe('BarChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         mode: 'percentage',
-      })
+      }),
     );
   });
 
@@ -146,7 +146,7 @@ describe('BarChartOptionsEditorSettings', () => {
         sort: 'asc',
         mode: 'percentage',
       },
-      onChange
+      onChange,
     );
     const resetButton = screen.getByRole('button', { name: 'Reset To Defaults' });
     userEvent.click(resetButton);
@@ -159,7 +159,7 @@ describe('BarChartOptionsEditorSettings', () => {
         calculation: 'last',
         sort: 'desc',
         mode: 'value',
-      })
+      }),
     );
   });
 });

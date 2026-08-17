@@ -28,7 +28,7 @@ import { getInterpolatedRequestOptions } from '../plugins/interpolation';
 export function useParseQuery(
   content: string,
   datasource: DatasourceSelector,
-  enabled?: boolean
+  enabled?: boolean,
 ): UseQueryResult<ParseQueryResponse, StatusError> {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
   const datasourceStore = useDatasourceStore();
@@ -50,7 +50,7 @@ export function useParseQuery(
 export function useInstantQuery(
   content: string,
   datasource: DatasourceSelector,
-  enabled?: boolean
+  enabled?: boolean,
 ): UseQueryResult<MonitoredInstantQueryResponse, StatusError> {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
   const datasourceStore = useDatasourceStore();

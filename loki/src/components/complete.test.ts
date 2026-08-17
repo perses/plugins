@@ -360,7 +360,7 @@ describe('complete', () => {
         const view = new EditorView({ state });
         applyQuotedCompletion(view, { label: completion }, from, to ?? from);
         expect(view.state.doc.toString()).toBe(expected);
-      }
+      },
     );
   });
 });

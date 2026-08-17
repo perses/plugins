@@ -40,7 +40,7 @@ describe('Attributes', () => {
             </TimeRangeProviderBasic>
           </ReactRouterProvider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 
@@ -58,7 +58,7 @@ describe('Attributes', () => {
             </TimeRangeProviderBasic>
           </ReactRouterProvider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 
@@ -117,7 +117,7 @@ describe('Attributes', () => {
     expect(screen.getByText('testing')).not.toHaveAttribute('href');
     expect(screen.getByRole('link', { name: 'hotrod' })).toHaveAttribute(
       'href',
-      '/console/ns/testing/pod/hotrod/detail'
+      '/console/ns/testing/pod/hotrod/detail',
     );
   });
 

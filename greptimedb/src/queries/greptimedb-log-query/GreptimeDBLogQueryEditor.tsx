@@ -42,7 +42,7 @@ export function GreptimeDBLogQueryEditor(props: GreptimeDBLogQueryEditorProps): 
       onChange(
         produce(value, (draft) => {
           draft.datasource = newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -53,7 +53,7 @@ export function GreptimeDBLogQueryEditor(props: GreptimeDBLogQueryEditorProps): 
     onChange(
       produce(value, (draft) => {
         draft.query = queryValue;
-      })
+      }),
     );
   };
 
@@ -61,7 +61,7 @@ export function GreptimeDBLogQueryEditor(props: GreptimeDBLogQueryEditorProps): 
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   const examplesStyle = {

@@ -34,7 +34,7 @@ describe('FilterInputs', () => {
         isLabelValuesOptionsLoading={isLabelValuesOptionsLoading}
         onChange={onChange}
         onDelete={onDelete}
-      />
+      />,
     );
   };
 

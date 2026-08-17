@@ -117,7 +117,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
           appendToBody: true,
           confine: true,
           formatter: (
-            params: Array<{ seriesName: string; data: number | null; name: string; color: string }>
+            params: Array<{ seriesName: string; data: number | null; name: string; color: string }>,
           ): string => {
             if (!params.length) return '';
             const header = `<b>${params[0]?.name}</b><br/>`;
@@ -126,7 +126,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
               .map(
                 (p) =>
                   `<span style="display:inline-block;margin-right:5px;border-radius:50%;width:10px;height:10px;background-color:${p.color}"></span>` +
-                  `${p.seriesName}: <b>${formatValue(p.data, format)}</b>`
+                  `${p.seriesName}: <b>${formatValue(p.data, format)}</b>`,
               )
               .join('<br/>');
             return header + rows;

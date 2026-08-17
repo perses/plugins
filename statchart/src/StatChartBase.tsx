@@ -277,5 +277,5 @@ const Value = styled(Typography, {
     padding: sparkline ? `${padding}px ${padding}px 0 ${padding}px` : ` 0 ${padding}px`,
     whiteSpace: 'nowrap',
     lineHeight: LINE_HEIGHT,
-  })
+  }),
 );

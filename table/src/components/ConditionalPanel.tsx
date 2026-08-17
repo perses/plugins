@@ -86,7 +86,7 @@ export function ConditionalRule({ cell, onChange, onDelete, ...props }: Conditio
           {renderConditionEditor(
             cell.condition,
             (updatedCondition) => onChange({ ...cell, condition: updatedCondition }),
-            'small'
+            'small',
           )}
         </Stack>
       </Grid>

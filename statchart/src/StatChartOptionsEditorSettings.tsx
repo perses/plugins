@@ -58,7 +58,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     onChange(
       produce(value, (draft: StatChartOptions) => {
         draft.calculation = metricLabel;
-      })
+      }),
     );
   };
 
@@ -66,7 +66,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     onChange(
       produce(value, (draft: StatChartOptions) => {
         draft.metricLabel = newCalculation;
-      })
+      }),
     );
   };
 
@@ -75,17 +75,17 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
       onChange(
         produce(value, (draft: StatChartOptions) => {
           draft.legendMode = newShowLegend.id;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleUnitChange: FormatControlsProps['onChange'] = (newFormat) => {
     onChange(
       produce(value, (draft: StatChartOptions) => {
         draft.format = newFormat;
-      })
+      }),
     );
   };
 
@@ -96,7 +96,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
         // uses the default chart color and line styles. In the future, this
         // will likely be configurable in the UI.
         draft.sparkline = checked ? {} : undefined;
-      })
+      }),
     );
   };
 
@@ -104,7 +104,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     onChange(
       produce(value, (draft: StatChartOptions) => {
         draft.thresholds = thresholds;
-      })
+      }),
     );
   };
 
@@ -112,7 +112,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     onChange(
       produce(value, (draft: StatChartOptions) => {
         draft.valueFontSize = fontSize;
-      })
+      }),
     );
   };
 
@@ -121,10 +121,10 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
       onChange(
         produce(value, (draft: StatChartOptions) => {
           draft.colorMode = newColorMode.id;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const selectShowLegend = useMemo((): ReactElement => {

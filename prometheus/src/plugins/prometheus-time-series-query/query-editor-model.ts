@@ -56,7 +56,7 @@ export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 
@@ -92,7 +92,7 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.seriesNameFormat = format;
-      })
+      }),
     );
   };
 
@@ -128,7 +128,7 @@ export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.minStep = minStep;
-      })
+      }),
     );
   };
 

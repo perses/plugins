@@ -53,7 +53,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
     endTimeUnixMs: trace.endTimeUnixMs,
   });
   const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(() =>
-    options.selectedSpanId ? trace.spanById.get(options.selectedSpanId) : undefined
+    options.selectedSpanId ? trace.spanById.get(options.selectedSpanId) : undefined,
   );
   const search = useSpanSearch(trace);
 

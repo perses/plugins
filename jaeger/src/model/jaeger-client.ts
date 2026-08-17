@@ -26,7 +26,7 @@ export interface JaegerClient extends DatasourceClient {
   getTrace(traceId: string, headers?: RequestHeaders): Promise<JaegerApiResponse<JaegerTrace[]>>;
   searchTraces(
     params: JaegerSearchRequestParameters,
-    headers?: RequestHeaders
+    headers?: RequestHeaders,
   ): Promise<JaegerApiResponse<JaegerTrace[]>>;
   searchServices(headers?: RequestHeaders): Promise<JaegerApiResponse<string[]>>;
   searchOperations(service: string, headers?: RequestHeaders): Promise<JaegerApiResponse<JaegerOperation[]>>;
@@ -65,7 +65,7 @@ function buildSearchParams(params: JaegerSearchRequestParameters): URLSearchPara
 function fetchWithGet<TResponse>(
   apiURI: string,
   params: JaegerSearchRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
@@ -87,7 +87,7 @@ export function getTrace(traceId: string, queryOptions: QueryOptions): Promise<J
 
 export function searchTraces(
   params: JaegerSearchRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<JaegerApiResponse<JaegerTrace[]>> {
   return fetchWithGet<JaegerApiResponse<JaegerTrace[]>>('/api/traces', params, queryOptions);
 }
@@ -98,7 +98,7 @@ export function searchServices(queryOptions: QueryOptions): Promise<JaegerApiRes
 
 export function searchOperations(
   service: string,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<JaegerApiResponse<JaegerOperation[]>> {
   return fetchWithGet<JaegerApiResponse<JaegerOperation[]>>('/api/operations', { service }, queryOptions);
 }

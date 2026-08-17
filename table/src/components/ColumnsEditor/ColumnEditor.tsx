@@ -50,7 +50,7 @@ export function ColumnEditor({
   ...others
 }: ColumnEditorProps): ReactElement {
   const [width, setWidth] = useState<number>(
-    column.width === undefined || column.width === 'auto' ? 100 : column.width
+    column.width === undefined || column.width === 'auto' ? 100 : column.width,
   );
 
   const enableSorting = column.enableSorting ?? defaultEnableSorting;

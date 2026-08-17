@@ -4,6 +4,15 @@
     "build": {},
     "test": {},
     "lint": {},
+    "lint:ci": {},
+    "//#format:root": {
+      "cache": false,
+      "outputs": []
+    },
+    "//#format:root:check": {
+      "cache": false,
+      "outputs": []
+    },
     "type-check": {},
     "dev": {
       "persistent": true,

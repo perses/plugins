@@ -19,7 +19,7 @@ import { ClickHouseDatasourceEditor } from './ClickHouseDatasourceEditor';
 
 const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasourceClient>['createClient'] = (
   spec,
-  options
+  options,
 ) => {
   const { directUrl, proxy } = spec;
   const { proxyUrl } = options;
@@ -27,7 +27,7 @@ const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasou
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
     throw new Error(
-      'No URL specified for ClickHouseDatasource client. You can use directUrl in the spec to configure it.'
+      'No URL specified for ClickHouseDatasource client. You can use directUrl in the spec to configure it.',
     );
   }
 

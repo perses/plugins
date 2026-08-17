@@ -31,7 +31,7 @@ describe('jaeger-client', () => {
         limit: 25,
         start: 1000,
       },
-      { datasourceUrl: 'http://jaeger.example' }
+      { datasourceUrl: 'http://jaeger.example' },
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -39,7 +39,7 @@ describe('jaeger-client', () => {
       {
         headers: {},
         method: 'GET',
-      }
+      },
     );
   });
 

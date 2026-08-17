@@ -85,7 +85,7 @@ export function buildSamples(
   metadata: ProfileMetaData | undefined,
   traces: StackTrace,
   searchValue: string,
-  id?: number
+  id?: number,
 ): Sample[] {
   const data: Sample[] = [];
   const filteredJson = filterStackTraceById(traces, id);

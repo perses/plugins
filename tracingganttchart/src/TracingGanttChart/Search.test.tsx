@@ -93,7 +93,7 @@ describe('SearchBar', () => {
     return render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <SearchBarWithHook />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 

@@ -48,7 +48,7 @@ function generateCompleteTimestamps(timescale?: TimeScale): number[] {
 export function useStatusHistoryDataModel(
   queryResults: Array<PanelData<TimeSeriesData>>,
   themeColors: string[],
-  spec: StatusHistoryChartOptions
+  spec: StatusHistoryChartOptions,
 ): StatusHistoryDataModel {
   return useMemo(() => {
     if (!queryResults || queryResults.length === 0) {

@@ -92,7 +92,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
         onToggle(index);
       }
     },
-    [isExpandable, onToggle, index]
+    [isExpandable, onToggle, index],
   );
 
   const handleRowMouseDown = useCallback(
@@ -101,7 +101,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
         onSelect(index, e);
       }
     },
-    [onSelect, index]
+    [onSelect, index],
   );
 
   const handleOpenMenu = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -145,7 +145,7 @@ const DefaultLogRow: React.FC<LogRowProps> = ({
         setCopySuccess(false);
       }, COPY_SUCCESS_DURATION_MS);
     },
-    [log, handleCloseMenu]
+    [log, handleCloseMenu],
   );
 
   if (!log) return null;

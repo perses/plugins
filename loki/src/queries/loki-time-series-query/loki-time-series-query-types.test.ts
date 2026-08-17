@@ -108,7 +108,7 @@ describe('LokiTimeSeriesQuery', () => {
       {
         query: 'rate({service="$service", instance="$instance"}[5m])',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['service', 'instance']);
   });
@@ -127,7 +127,7 @@ describe('LokiTimeSeriesQuery', () => {
       const context = createStubContext({ mode: 'instant' });
       const result = await LokiTimeSeriesQuery.getTimeSeriesData(
         { query: 'count_over_time({service="api"} [1h])' },
-        context
+        context,
       );
 
       expect(lokiStubClient.query).toHaveBeenCalledTimes(1);

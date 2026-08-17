@@ -161,7 +161,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   const annotations: TimeSeriesAnnotation[] = useMemo(
     () => convertAnnotationToTimeSeriesAnnotation(annotationsWithData),
-    [annotationsWithData]
+    [annotationsWithData],
   );
 
   // Populate series data based on query results
@@ -269,8 +269,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 timeScale,
                 seriesColor,
                 querySettings,
-                yAxisIndex
-              )
+                yAxisIndex,
+              ),
             );
 
             // Store the format for this series for tooltip formatting
@@ -431,7 +431,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
         return columns;
       },
-      [] as Array<TableColumnConfig<LegendItem>>
+      [] as Array<TableColumnConfig<LegendItem>>,
     );
   }, [legend?.values, format]);
 

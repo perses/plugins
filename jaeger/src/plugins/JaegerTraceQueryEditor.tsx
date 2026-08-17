@@ -82,7 +82,7 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
       onChange(
         produce(value, (draft) => {
           draft.datasource = isDefaultJaegerSelector(next) ? undefined : next;
-        })
+        }),
       );
       return;
     }
@@ -95,10 +95,10 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
       onChange(
         produce(value, (draft) => {
           draft[field] = normalizeFieldValue(nextValue);
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (
@@ -146,7 +146,7 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
               onChange(
                 produce(value, (draft) => {
                   draft.spanKind = event.target.value === '' ? undefined : event.target.value;
-                })
+                }),
               )
             }
           >
@@ -168,7 +168,7 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
                 produce(value, (draft) => {
                   draft.limit =
                     typeof event.target.value === 'number' ? event.target.value : parseInt(event.target.value);
-                })
+                }),
               )
             }
           >
@@ -253,7 +253,7 @@ function LazyAutocompleteTextField(props: LazyAutocompleteTextFieldProps): React
       setDraftValue(normalizedValue);
       onCommit(toOptionalString(normalizedValue));
     },
-    [onCommit]
+    [onCommit],
   );
 
   const handleInputChange = useCallback((_event: SyntheticEvent, nextValue: string, reason: string): void => {
@@ -266,7 +266,7 @@ function LazyAutocompleteTextField(props: LazyAutocompleteTextFieldProps): React
     (_event: SyntheticEvent, nextValue: string | null): void => {
       commitValue(nextValue ?? '');
     },
-    [commitValue]
+    [commitValue],
   );
 
   const handleBlur = useCallback((): void => {

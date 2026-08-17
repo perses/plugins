@@ -27,7 +27,7 @@ import { AlertManagerDatasourceSpec } from './types';
 
 const createClient: DatasourcePlugin<AlertManagerDatasourceSpec, AlertManagerClient>['createClient'] = (
   spec,
-  options
+  options,
 ) => {
   const { directUrl, proxy } = spec;
   const { proxyUrl } = options;

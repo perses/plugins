@@ -47,7 +47,7 @@ export interface QueryOptions {
 async function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
   apiURI: string,
   params: TRequest,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
@@ -110,7 +110,7 @@ export async function query(params: QueryRequestParameters, queryOptions: QueryO
   const response = await fetchWithGet<Record<string, never>, QueryResponse>(
     `/api/v2/traces/${encodeURIComponent(params.traceId)}`,
     {},
-    queryOptions
+    queryOptions,
   );
 
   // /api/v2/traces returns an empty trace if trace is not found.
@@ -126,7 +126,7 @@ export async function query(params: QueryRequestParameters, queryOptions: QueryO
  */
 export function searchTags(
   params: SearchTagsRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<SearchTagsResponse> {
   return fetchWithGet<SearchTagsRequestParameters, SearchTagsResponse>('/api/v2/search/tags', params, queryOptions);
 }
@@ -136,12 +136,12 @@ export function searchTags(
  */
 export function searchTagValues(
   params: SearchTagValuesRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<SearchTagValuesResponse> {
   const { tag, ...rest } = params;
   return fetchWithGet<Omit<SearchTagValuesRequestParameters, 'tag'>, SearchTagValuesResponse>(
     `/api/v2/search/tag/${encodeURIComponent(tag)}/values`,
     rest,
-    queryOptions
+    queryOptions,
   );
 }

@@ -26,7 +26,7 @@ describe('SpanName', () => {
     return render(
       <GanttTableProvider>
         <SpanName {...props} nameColumnWidth={25} />
-      </GanttTableProvider>
+      </GanttTableProvider>,
     );
   };
 

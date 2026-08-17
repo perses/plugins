@@ -31,7 +31,7 @@ export const VictoriaLogsFieldValuesVariable: VariablePlugin<VictoriaLogsFieldVa
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_VICTORIALOGS,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(VICTORIALOGS_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(VICTORIALOGS_DATASOURCE_KIND),
       ) ?? DEFAULT_VICTORIALOGS;
     const client: VictoriaLogsClient = await ctx.datasourceStore.getDatasourceClient(datasourceSelector);
     const query = replaceVariables(spec.query, ctx.variables);

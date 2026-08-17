@@ -42,7 +42,7 @@ function transformSilence(apiSilence: GettableSilence): Silence {
  */
 export async function getSilencesData(
   spec: AlertManagerSilencesQuerySpec,
-  context: SilencesQueryContext
+  context: SilencesQueryContext,
 ): Promise<SilencesData> {
   const listDatasourceSelectItems =
     await context.datasourceStore.listDatasourceSelectItems(ALERTMANAGER_DATASOURCE_KIND);
@@ -72,7 +72,7 @@ function buildQueryString(spec: AlertManagerSilencesQuerySpec): string {
     Object.fromEntries(
       Object.entries({
         filters: spec.filters,
-      }).filter(([, value]) => value !== undefined)
-    )
+      }).filter(([, value]) => value !== undefined),
+    ),
   );
 }

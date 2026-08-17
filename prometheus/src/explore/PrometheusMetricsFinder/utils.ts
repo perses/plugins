@@ -36,7 +36,7 @@ import { computeFilterExpr, LabelFilter, LabelValueCounter } from './types';
 export function useMetricMetadata(
   metricName: string,
   datasource: DatasourceSelector,
-  enabled?: boolean
+  enabled?: boolean,
 ): {
   isLoading: false | true;
   metadata: MetricMetadata | undefined;
@@ -76,7 +76,7 @@ export function useMetricMetadata(
 
 export function useLabels(
   filters: LabelFilter[],
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): UseQueryResult<LabelValuesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },
@@ -108,7 +108,7 @@ export function useLabels(
 export function useLabelValues(
   labelName: string,
   filters: LabelFilter[],
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): UseQueryResult<LabelValuesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },
@@ -142,7 +142,7 @@ export function useLabelValues(
 export function useSeriesStates(
   metricName: string,
   filters: LabelFilter[],
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): {
   series: Metric[] | undefined;
   labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>>;

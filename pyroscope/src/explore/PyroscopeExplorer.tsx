@@ -57,7 +57,7 @@ export function PyroscopeExplorer(): ReactElement {
 
   // A profile query is only executable once a service and a profile type are selected.
   const hasIncompleteQuery = queries.some(
-    (query) => !isProfileQueryComplete((query.spec?.plugin?.spec ?? {}) as Partial<PyroscopeProfileQuerySpec>)
+    (query) => !isProfileQueryComplete((query.spec?.plugin?.spec ?? {}) as Partial<PyroscopeProfileQuerySpec>),
   );
 
   return (

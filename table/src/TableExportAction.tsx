@@ -34,7 +34,7 @@ export interface ExportColumn {
  */
 export function buildTableData(
   queryResults: Array<PanelData<TimeSeriesData>>,
-  spec: TableOptions
+  spec: TableOptions,
 ): { data: Array<Record<string, unknown>>; columns: ExportColumn[] } {
   // Use shared utility with forExport=true to get raw scalar values
   const rawData = buildRawTableData(queryResults, spec, { forExport: true });

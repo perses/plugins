@@ -64,7 +64,7 @@ describe('ClickHouseLogQuery', () => {
       {
         query: '"SELECT * FROM otel_logs WHERE foo="$foo" AND bar="$bar"',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['foo', 'bar']);
   });
@@ -79,7 +79,7 @@ describe('ClickHouseLogQuery', () => {
       {
         query: "SELECT * FROM application_logs WHERE timestamp >= '{start}' AND timestamp <= '{end}'",
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(clickhouseStubClient.query).toHaveBeenCalledWith({
@@ -89,7 +89,7 @@ describe('ClickHouseLogQuery', () => {
         "SELECT * FROM application_logs WHERE timestamp >= '2025-01-01 00:00:00' AND timestamp <= '2025-01-02 00:00:00'",
     });
     expect(response.metadata?.executedQueryString).toBe(
-      "SELECT * FROM application_logs WHERE timestamp >= '2025-01-01 00:00:00' AND timestamp <= '2025-01-02 00:00:00'"
+      "SELECT * FROM application_logs WHERE timestamp >= '2025-01-01 00:00:00' AND timestamp <= '2025-01-02 00:00:00'",
     );
   });
 });

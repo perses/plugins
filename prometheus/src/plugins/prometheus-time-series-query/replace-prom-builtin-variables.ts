@@ -33,7 +33,7 @@ export function replacePromBuiltinVariables(query: string, minStepMs: number, in
   updatedQuery = replaceVariable(
     updatedQuery,
     '__rate_interval',
-    formatDuration(convertTimeToDuration(rateIntervalMs))
+    formatDuration(convertTimeToDuration(rateIntervalMs)),
   );
 
   return updatedQuery;
