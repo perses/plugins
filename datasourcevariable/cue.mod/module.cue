@@ -10,8 +10,16 @@ deps: {
 		v:       "v0.54.0"
 		default: true
 	}
+	"github.com/perses/plugins/jaeger@v0": {
+		v:       "v0.1.0"
+		default: true
+	}
 	"github.com/perses/plugins/loki@v0": {
 		v:       "v0.5.0-rc.1"
+		default: true
+	}
+	"github.com/perses/plugins/opensearch@v0": {
+		v:       "v0.1.0"
 		default: true
 	}
 	"github.com/perses/plugins/prometheus@v0": {
