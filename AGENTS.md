@@ -53,7 +53,7 @@ npm run test -w <workspace>
 Before completion of a TypeScript change, run the relevant repository checks:
 
 ```sh
-npm run lint:ci
+npm run lint
 npm run format:check
 npm run type-check
 npm run test

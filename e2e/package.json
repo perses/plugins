@@ -8,7 +8,7 @@
     "test:install": "npx playwright install --with-deps",
     "test:local": "npx playwright test --ui",
     "build": "echo 'Skipping build for e2e tests'",
-    "lint:ci": "oxlint src"
+    "lint": "oxlint src"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

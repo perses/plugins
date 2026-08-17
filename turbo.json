@@ -4,7 +4,6 @@
     "build": {},
     "test": {},
     "lint": {},
-    "lint:ci": {},
     "//#format:root": {
       "cache": false,
       "outputs": []
