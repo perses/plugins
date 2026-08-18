@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, Stack, TextField } from '@mui/material';
+import { Button, ButtonGroup, FormControl, Stack, TextField } from '@mui/material';
 import { useId } from '@perses-dev/components';
 import { PanelEditorContext } from '@perses-dev/dashboards';
 import {
@@ -47,6 +47,7 @@ import {
   useQueryState,
   useFormatState,
   useMinStepState,
+  useInstantState,
 } from './query-editor-model';
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
@@ -75,6 +76,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
+  const { instant, handleInstantChange } = useInstantState(props);
   const minStepPlaceholder =
     minStep ??
     (datasourceResource && (datasourceResource.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
@@ -152,7 +154,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         isReadOnly={isReadonly}
         treeViewMetadata={treeViewMetadata}
       />
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" spacing={2} alignItems="flex-start">
         <TextField
           fullWidth
           label="Legend"
@@ -173,12 +175,27 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           value={minStep ?? ''}
           onChange={(e) => handleMinStepChange(e.target.value ? (e.target.value as DurationString) : undefined)}
           onBlur={handleMinStepBlur}
+          disabled={instant === true}
           sx={{ width: '250px' }}
           slotProps={{
             inputLabel: { shrink: isReadonly ? true : undefined },
             input: { readOnly: isReadonly },
           }}
         />
+        <ButtonGroup disabled={isReadonly} sx={{ '& .MuiButton-root': { px: 2, py: 2 } }}>
+          <Button variant={instant === false ? 'contained' : 'outlined'} onClick={() => handleInstantChange(false)}>
+            Range
+          </Button>
+          <Button variant={instant === true ? 'contained' : 'outlined'} onClick={() => handleInstantChange(true)}>
+            Instant
+          </Button>
+          <Button
+            variant={instant === undefined ? 'contained' : 'outlined'}
+            onClick={() => handleInstantChange(undefined)}
+          >
+            Auto
+          </Button>
+        </ButtonGroup>
       </Stack>
     </Stack>
   );

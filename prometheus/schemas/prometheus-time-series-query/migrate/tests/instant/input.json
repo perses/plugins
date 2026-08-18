@@ -1,0 +1,5 @@
+{
+  "expr": "up{env=\"demo\",instance=~\"demo.do.prometheus.io.*\"}",
+  "instant": true,
+  "refID": "A"
+}

@@ -23,5 +23,6 @@ export interface PrometheusTimeSeriesQuerySpec {
   seriesNameFormat?: string;
   minStep?: DurationString;
   resolution?: number;
+  instant?: boolean;
   datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
 }
