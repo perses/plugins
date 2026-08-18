@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, Stack, TextField } from '@mui/material';
+import { Button, ButtonGroup, FormControl, Stack, TextField } from '@mui/material';
 import { useId } from '@perses-dev/components';
 import { PanelEditorContext } from '@perses-dev/dashboards';
 import {
@@ -25,9 +25,6 @@ import {
   useSuggestedStepMs,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-
-import { useId } from '@perses-dev/components';
-import { Button, ButtonGroup, FormControl, Stack, TextField } from '@mui/material';
 import { produce } from 'immer';
 
 import { ReactElement, useContext, useMemo } from 'react';
