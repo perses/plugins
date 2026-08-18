@@ -151,7 +151,7 @@ export function useInstantState(props: PrometheusTimeSeriesQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.instant = next;
-      })
+      }),
     );
   };
 

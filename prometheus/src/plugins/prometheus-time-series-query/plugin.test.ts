@@ -19,7 +19,6 @@ import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
 
 import { RangeQueryResponse, InstantQueryResponse } from '../../model';
-
 import { PrometheusDatasource } from '../prometheus-datasource';
 import { PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuery } from './';
@@ -146,7 +145,7 @@ describe('PrometheusTimeSeriesQuery', () => {
         query: 'up',
         instant: true,
       },
-      ctx
+      ctx,
     );
 
     expect(promStubClient.instantQuery).toHaveBeenCalledTimes(1);
@@ -164,7 +163,7 @@ describe('PrometheusTimeSeriesQuery', () => {
         query: 'up',
         instant: false,
       },
-      ctx
+      ctx,
     );
 
     expect(promStubClient.rangeQuery).toHaveBeenCalledTimes(1);
@@ -181,7 +180,7 @@ describe('PrometheusTimeSeriesQuery', () => {
       {
         query: 'up',
       },
-      ctx
+      ctx,
     );
 
     expect(promStubClient.instantQuery).toHaveBeenCalledTimes(1);

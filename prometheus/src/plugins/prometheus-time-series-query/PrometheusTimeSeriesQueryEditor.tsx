@@ -26,7 +26,6 @@ import {
   useTimeRange,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-
 import { ReactElement, useContext, useMemo } from 'react';
 
 import { PromQLEditor } from '../../components';
