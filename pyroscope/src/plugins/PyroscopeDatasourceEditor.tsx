@@ -36,8 +36,12 @@ export function PyroscopeDatasourceEditor(props: PyroscopeDatasourceEditorProps)
         allowedEndpoints: [
           // list of standard endpoints suggested by default
           {
-            endpointPattern: '/pyroscope/render',
-            method: 'GET',
+            endpointPattern: '/querier.v1.QuerierService/SelectMergeStacktraces',
+            method: 'POST',
+          },
+          {
+            endpointPattern: '/querier.v1.QuerierService/SelectSeries',
+            method: 'POST',
           },
           {
             endpointPattern: '/querier.v1.QuerierService/ProfileTypes',

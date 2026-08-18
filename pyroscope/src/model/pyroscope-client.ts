@@ -15,14 +15,16 @@ import { RequestHeaders } from '@perses-dev/client';
 import { DatasourceClient } from '@perses-dev/plugin-system';
 
 import {
-  SearchProfilesParameters,
-  SearchProfilesResponse,
   SearchProfileTypesParameters,
   SearchProfileTypesResponse,
   SearchLabelNamesParameters,
   SearchLabelNamesResponse,
   SearchLabelValuesParameters,
   SearchLabelValuesResponse,
+  SelectMergeStacktracesRequest,
+  SelectMergeStacktracesResponse,
+  SelectSeriesRequest,
+  SelectSeriesResponse,
 } from './api-types';
 
 interface PyroscopeClientOptions {
@@ -32,7 +34,11 @@ interface PyroscopeClientOptions {
 
 export interface PyroscopeClient extends DatasourceClient {
   options: PyroscopeClientOptions;
-  searchProfiles(params: SearchProfilesParameters, headers?: RequestHeaders): Promise<SearchProfilesResponse>;
+  selectMergeStacktraces(
+    body: SelectMergeStacktracesRequest,
+    headers?: RequestHeaders,
+  ): Promise<SelectMergeStacktracesResponse>;
+  selectSeries(body: SelectSeriesRequest, headers?: RequestHeaders): Promise<SelectSeriesResponse>;
   searchProfileTypes(
     params: SearchProfileTypesParameters,
     headers: RequestHeaders,
@@ -66,30 +72,15 @@ export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>
     return await response.json();
   } catch (e) {
     console.error('Invalid response from server', e);
-    throw new Error('Invalid response from server', { cause: e });
+    throw new Error('Invalid response from server');
   }
 };
-
-function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptions: QueryOptions): Promise<TResponse> {
-  const { datasourceUrl, headers = {} } = queryOptions;
-
-  let url = `${datasourceUrl}${apiURI}`;
-  if (params) {
-    url += '?' + new URLSearchParams(params);
-  }
-  const init = {
-    method: 'GET',
-    headers,
-  };
-
-  return executeRequest<TResponse>(url, init);
-}
 
 function fetchWithPost<T, TResponse>(
   apiURI: string,
   params: T | null,
   queryOptions: QueryOptions,
-  body: Record<string, string | number>,
+  body: Record<string, unknown>,
 ): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
@@ -99,7 +90,7 @@ function fetchWithPost<T, TResponse>(
   }
   const init = {
     method: 'POST',
-    headers,
+    headers: { 'content-type': 'application/json', ...headers },
     body: JSON.stringify(body),
   };
 
@@ -107,13 +98,35 @@ function fetchWithPost<T, TResponse>(
 }
 
 /**
- * Returns profiling data.
+ * Returns the flame graph for the matching profiles.
  */
-export function searchProfiles(
-  params: SearchProfilesParameters,
+export function selectMergeStacktraces(
+  body: SelectMergeStacktracesRequest,
   queryOptions: QueryOptions,
-): Promise<SearchProfilesResponse> {
-  return fetchWithGet<SearchProfilesParameters, SearchProfilesResponse>('/pyroscope/render', params, queryOptions);
+): Promise<SelectMergeStacktracesResponse> {
+  const { datasourceUrl, headers = {} } = queryOptions;
+
+  return executeRequest<SelectMergeStacktracesResponse>(
+    `${datasourceUrl}/querier.v1.QuerierService/SelectMergeStacktraces`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...headers },
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+/**
+ * Returns the time series (timeline) for the matching profiles.
+ */
+export function selectSeries(body: SelectSeriesRequest, queryOptions: QueryOptions): Promise<SelectSeriesResponse> {
+  const { datasourceUrl, headers = {} } = queryOptions;
+
+  return executeRequest<SelectSeriesResponse>(`${datasourceUrl}/querier.v1.QuerierService/SelectSeries`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...headers },
+    body: JSON.stringify(body),
+  });
 }
 
 /**
