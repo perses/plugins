@@ -15,6 +15,7 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+
 import { GaugeChartOptions } from './gauge-chart-model';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
@@ -23,7 +24,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <GaugeChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 
@@ -36,7 +37,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
         },
         calculation: 'first',
       },
-      onChange
+      onChange,
     );
     const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     userEvent.click(unitSelector);
@@ -49,7 +50,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
         format: {
           unit: 'years',
         },
-      })
+      }),
     );
   });
 
@@ -62,7 +63,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
         },
         calculation: 'first',
       },
-      onChange
+      onChange,
     );
     const calcSelector = screen.getByRole('combobox', { name: 'Calculation' });
     userEvent.click(calcSelector);
@@ -73,7 +74,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         calculation: 'mean',
-      })
+      }),
     );
   });
 
@@ -90,7 +91,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
         max: 1,
         calculation: 'last-number',
       },
-      onChange
+      onChange,
     );
     const maxInput = await screen.findByRole('spinbutton', { name: /Max/ });
     expect(maxInput).toBeInTheDocument();

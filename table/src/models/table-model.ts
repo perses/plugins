@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TextField, Stack, MenuItem, Typography } from '@mui/material';
 import { TableDensity, TableCellConfig, FormatOptions, Transform } from '@perses-dev/components';
 import { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
-import React from 'react';
-import { TextField, Stack, MenuItem, Typography } from '@mui/material';
 import { Definition, UnknownSpec } from '@perses-dev/spec';
+import React from 'react';
 
 export interface ColumnSettings {
   name: string;
@@ -48,6 +48,7 @@ export interface ColumnSettings {
   align?: 'left' | 'center' | 'right';
 
   // When `true`, the column will be sortable.
+  // When unset, inherits TableOptions.enableSorting from General Settings.
   enableSorting?: boolean;
 
   // Default sort order for the column.
@@ -138,6 +139,8 @@ export interface TableOptions {
   pagination?: boolean;
   // Enable filtering for individual columns.
   enableFiltering?: boolean;
+  // When true, columns are sortable by default unless overridden in columnSettings.
+  enableSorting?: boolean;
   // Enable row selection.
   selection?: SelectionOptions;
   // Customize actions available for selected rows.
@@ -278,7 +281,7 @@ export function evaluateConditionalFormatting(value: unknown, settings: CellSett
 export function renderConditionEditor(
   condition: Condition,
   onChange: (condition: Condition) => void,
-  size: 'small' | 'medium' = 'small'
+  size: 'small' | 'medium' = 'small',
 ): React.ReactElement | null {
   if (condition.kind === 'Value') {
     return React.createElement(TextField, {
@@ -326,7 +329,7 @@ export function renderConditionEditor(
           fullWidth: true,
           size: size,
         }),
-      ]
+      ],
     );
   } else if (condition.kind === 'Regex') {
     return React.createElement(TextField, {
@@ -373,11 +376,11 @@ export function renderConditionEditor(
                 key: 'caption',
                 variant: 'caption',
               },
-              option.caption
+              option.caption,
             ),
-          ])
-        )
-      )
+          ]),
+        ),
+      ),
     );
   }
   return null;

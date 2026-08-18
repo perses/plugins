@@ -15,6 +15,7 @@ import { TextField } from '@mui/material';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { ColumnsEditor } from '../../components/ColumnsEditor';
 import { AlertTableOptions, ColumnDefinition, ColumnSortMode } from './alert-table-model';
 
@@ -34,7 +35,7 @@ export function AlertTableColumnsEditor(props: OptionsEditorProps<AlertTableOpti
       produce(value, (draft) => {
         if (!draft.columns) draft.columns = [];
         draft.columns.push({ name: '' });
-      })
+      }),
     );
   }, [value, onChange]);
 
@@ -43,10 +44,10 @@ export function AlertTableColumnsEditor(props: OptionsEditorProps<AlertTableOpti
       onChange(
         produce(value, (draft) => {
           draft.columns?.splice(index, 1);
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleUpdateColumn = useCallback(
@@ -57,10 +58,10 @@ export function AlertTableColumnsEditor(props: OptionsEditorProps<AlertTableOpti
           if (column) {
             updater(column);
           }
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleMoveUp = useCallback(
@@ -71,10 +72,10 @@ export function AlertTableColumnsEditor(props: OptionsEditorProps<AlertTableOpti
           if (!draft.columns) return;
           const item = draft.columns.splice(index, 1)[0]!;
           draft.columns.splice(index - 1, 0, item);
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleMoveDown = useCallback(
@@ -84,10 +85,10 @@ export function AlertTableColumnsEditor(props: OptionsEditorProps<AlertTableOpti
           if (!draft.columns || index >= draft.columns.length - 1) return;
           const item = draft.columns.splice(index, 1)[0]!;
           draft.columns.splice(index + 1, 0, item);
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

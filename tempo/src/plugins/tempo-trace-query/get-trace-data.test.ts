@@ -13,10 +13,11 @@
 
 import { TraceQueryContext, replaceVariables } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { TempoDatasourceSpec } from '../tempo-datasource-types';
-import { TempoDatasource } from '../tempo-datasource';
-import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
+
 import { TempoClient } from '../../model';
+import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
+import { TempoDatasource } from '../tempo-datasource';
+import { TempoDatasourceSpec } from '../tempo-datasource-types';
 import { getTraceData } from './get-trace-data';
 
 jest.mock('@perses-dev/plugin-system', () => {
@@ -102,7 +103,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: DEFAULT_SEARCH_LIMIT + 1,
-      })
+      }),
     );
 
     // Verify no notice is shown
@@ -133,7 +134,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         limit: customLimit + 1,
-      })
+      }),
     );
 
     // Verify notice is present
@@ -181,7 +182,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         q: '{resource.service.name="frontend"}',
-      })
+      }),
     );
     expect(result.metadata?.executedQueryString).toBe('{resource.service.name="frontend"}');
   });
@@ -268,7 +269,7 @@ describe('getTraceData', () => {
     expect(mockClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         q: replacedQuery,
-      })
+      }),
     );
     expect(result.metadata?.executedQueryString).toBe(replacedQuery);
     expect(result.searchResult).toHaveLength(1);

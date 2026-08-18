@@ -13,9 +13,10 @@
 
 import { TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_DATA_SEARCHRESULT, MOCK_TRACE_RESPONSE_SMALL } from '../test';
-import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasource } from './tempo-datasource';
+import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoTraceQuery } from './tempo-trace-query/TempoTraceQuery';
 
 jest.mock('echarts/core');
@@ -66,7 +67,7 @@ describe('TempoTraceQuery', () => {
       {
         query: 'duration > 900ms',
       },
-      stubTempoContext
+      stubTempoContext,
     );
     expect(results).toEqual(MOCK_TRACE_DATA_SEARCHRESULT);
   });
@@ -74,7 +75,7 @@ describe('TempoTraceQuery', () => {
   it('should convert base64-encoded trace IDs and span IDs in the response to hex format', async () => {
     const results = await TempoTraceQuery.getTraceData({ query: 'fbd37845209d43cdccd418dc5f9ff021' }, stubTempoContext);
     expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.traceId).toEqual(
-      'fbd37845209d43cdccd418dc5f9ff021'
+      'fbd37845209d43cdccd418dc5f9ff021',
     );
     expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.spanId).toEqual('8467bca11377c166');
     expect(results.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[1]?.parentSpanId).toEqual('9c22eb77cb5c14c7');

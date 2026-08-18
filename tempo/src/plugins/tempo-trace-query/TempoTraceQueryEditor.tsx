@@ -21,6 +21,9 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, useState } from 'react';
+
+import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
+import { AttributeFilters } from '../../components/AttributeFilters';
 import {
   TempoClient,
   DEFAULT_TEMPO,
@@ -28,8 +31,6 @@ import {
   isTempoDatasourceSelector,
   TEMPO_DATASOURCE_KIND,
 } from '../../model';
-import { AttributeFilters } from '../../components/AttributeFilters';
-import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
 import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
@@ -54,7 +55,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
           const nextDatasource = isDefaultTempoSelector(next) ? undefined : next;
           draft.datasource = nextDatasource;
-        })
+        }),
       );
       return;
     }
@@ -66,7 +67,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     onChange(
       produce(value, (draft) => {
         draft.query = newQuery;
-      })
+      }),
     );
   };
 
@@ -74,7 +75,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   return (
@@ -104,7 +105,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
             onChange(
               produce(value, (draft) => {
                 draft.limit = newLimit;
-              })
+              }),
             )
           }
         />

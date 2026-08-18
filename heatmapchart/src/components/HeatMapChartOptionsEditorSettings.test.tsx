@@ -15,6 +15,7 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { act } from 'react';
+
 import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
 import { HeatMapChartOptionsEditorSettings } from './HeatMapChartOptionsEditorSettings';
 
@@ -23,7 +24,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <HeatMapChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 
@@ -38,7 +39,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
         countFormat: DEFAULT_FORMAT,
         showVisualMap: false,
       },
-      onChange
+      onChange,
     );
     const showVisualMapSwitch = await screen.findByRole('checkbox', { name: /Show Visual Map/ });
     expect(showVisualMapSwitch).toBeInTheDocument();
@@ -56,7 +57,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
         yAxisFormat: DEFAULT_FORMAT,
         countFormat: DEFAULT_FORMAT,
       },
-      onChange
+      onChange,
     );
     const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
     userEvent.click(logBaseSelector);
@@ -67,7 +68,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         logBase: 10,
-      })
+      }),
     );
   });
 
@@ -79,7 +80,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
         countFormat: DEFAULT_FORMAT,
         logBase: 10,
       },
-      onChange
+      onChange,
     );
     const logBaseSelector = screen.getByRole('combobox', { name: 'Log Base' });
     userEvent.click(logBaseSelector);
@@ -90,7 +91,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         logBase: undefined,
-      })
+      }),
     );
   });
 });

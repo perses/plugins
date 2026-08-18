@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
-import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
   FormatControls,
@@ -24,6 +23,7 @@ import {
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
+import { ReactElement, useState } from 'react';
 
 import { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
@@ -40,12 +40,29 @@ type OmittedMuiProps = 'children' | 'value' | 'onChange';
 export interface ColumnEditorProps extends Omit<StackProps, OmittedMuiProps> {
   column: ColumnSettings;
   onChange: (column: ColumnSettings) => void;
+  defaultEnableSorting?: boolean;
 }
 
-export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps): ReactElement {
+export function ColumnEditor({
+  column,
+  onChange,
+  defaultEnableSorting = false,
+  ...others
+}: ColumnEditorProps): ReactElement {
   const [width, setWidth] = useState<number>(
-    column.width === undefined || column.width === 'auto' ? 100 : column.width
+    column.width === undefined || column.width === 'auto' ? 100 : column.width,
   );
+
+  const enableSorting = column.enableSorting ?? defaultEnableSorting;
+
+  function handleEnableSortingChange(checked: boolean): void {
+    if (checked === defaultEnableSorting) {
+      const { enableSorting: _ignored, ...rest } = column;
+      onChange(rest);
+      return;
+    }
+    onChange({ ...column, enableSorting: checked });
+  }
 
   return (
     <Stack {...others}>
@@ -95,14 +112,14 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             />
             <OptionsEditorControl
               label="Enable sorting"
-              control={
-                <Switch
-                  checked={column.enableSorting ?? false}
-                  onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
-                />
-              }
+              control={<Switch checked={enableSorting} onChange={(e) => handleEnableSortingChange(e.target.checked)} />}
             />
-            {column.enableSorting && (
+            {column.enableSorting === undefined && (
+              <Typography variant="caption" color="text.secondary">
+                Inherits from General Settings
+              </Typography>
+            )}
+            {enableSorting && (
               <OptionsEditorControl
                 label="Default Sort"
                 control={

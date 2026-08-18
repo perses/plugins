@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import merge from 'lodash/merge';
-import omit from 'lodash/omit';
 import {
-  CalculationSelector,
-  CalculationSelectorProps,
-  CalculationType,
-  LegendOptionsEditor,
-  LegendOptionsEditorProps,
-} from '@perses-dev/plugin-system';
-import { produce } from 'immer';
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Switch,
+  SwitchProps,
+  Typography,
+} from '@mui/material';
 import {
   FormatControls,
   FormatControlsProps,
@@ -41,17 +42,17 @@ import {
   isUnitWithShortValues,
 } from '@perses-dev/components';
 import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Switch,
-  SwitchProps,
-  Typography,
-} from '@mui/material';
+  CalculationSelector,
+  CalculationSelectorProps,
+  CalculationType,
+  LegendOptionsEditor,
+  LegendOptionsEditorProps,
+} from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 import { ReactElement, useMemo } from 'react';
+
 import { PieChartOptions, PieChartOptionsEditorProps, DEFAULT_FORMAT } from './pie-chart-model';
 
 export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps): ReactElement {
@@ -61,7 +62,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.calculation = newCalculation;
-      })
+      }),
     );
   };
 
@@ -69,7 +70,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.legend = newLegend;
-      })
+      }),
     );
   };
 
@@ -77,7 +78,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.format = newFormat;
-      })
+      }),
     );
   };
 
@@ -85,7 +86,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.sort = newSort;
-      })
+      }),
     );
   };
 
@@ -93,7 +94,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.mode = newMode;
-      })
+      }),
     );
   };
 
@@ -101,7 +102,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     onChange(
       produce(value, (draft: PieChartOptions) => {
         draft.showLabels = checked;
-      })
+      }),
     );
   };
 
@@ -122,7 +123,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
         } else {
           draft.colorPalette = undefined;
         }
-      })
+      }),
     );
   };
 
@@ -130,13 +131,16 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
   const format = merge(
     {},
     !value.format || isUnitWithShortValues(value.format) ? DEFAULT_FORMAT : omit(DEFAULT_FORMAT, ['shortValues']),
-    value.format
+    value.format,
   );
 
   type ColorScheme = 'default' | 'theme' | 'gradient';
 
   const colorScheme: ColorScheme = useMemo(() => {
-    return Array.isArray(colorPalette) ? (colorPalette.length === 1 ? 'gradient' : 'theme') : 'default';
+    if (!Array.isArray(colorPalette)) {
+      return 'default';
+    }
+    return colorPalette.length === 1 ? 'gradient' : 'theme';
   }, [colorPalette]);
 
   const handleColorSchemeChange = (scheme: ColorScheme): void => {
@@ -223,7 +227,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
                   // reset button removes all optional panel options
                   draft.legend = undefined;
                   draft.colorPalette = undefined;
-                })
+                }),
               );
             }}
           >

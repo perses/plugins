@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AttributeField, FieldExpression, FieldOp, IntrinsicField, Static, parser } from '@grafana/lezer-traceql';
+
 import { DurationField, Filter } from './filter';
 
 interface Matcher {
@@ -36,7 +37,7 @@ export function traceQLToFilter(query: string): Filter {
     traceDuration: reverseDurationMatcher(matchers['traceDuration']),
     customMatchers: reverseCustomMatcher(
       matchers,
-      new Set(['resource.service.name', 'name', 'resource.k8s.namespace.name', 'status', 'duration', 'traceDuration'])
+      new Set(['resource.service.name', 'name', 'resource.k8s.namespace.name', 'status', 'duration', 'traceDuration']),
     ),
   };
 }

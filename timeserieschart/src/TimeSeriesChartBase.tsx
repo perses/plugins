@@ -11,32 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, MouseEvent, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
-import merge from 'lodash/merge';
-import isEqual from 'lodash/isEqual';
-
-import type {
-  EChartsCoreOption,
-  GridComponentOption,
-  LineSeriesOption,
-  YAXisComponentOption,
-  TooltipComponentOption,
-} from 'echarts';
-import { ECharts as EChartsInstance, use } from 'echarts/core';
-import { LineChart as EChartsLineChart, BarChart as EChartsBarChart } from 'echarts/charts';
-import {
-  GridComponent,
-  DatasetComponent,
-  DataZoomComponent,
-  MarkAreaComponent,
-  MarkLineComponent,
-  MarkPointComponent,
-  TitleComponent,
-  ToolboxComponent,
-  TooltipComponent,
-} from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
 import {
   ChartInstance,
   ChartInstanceFocusOpts,
@@ -60,13 +35,38 @@ import {
   useTimeZone,
   ZoomEventData,
 } from '@perses-dev/components';
-import { DatasetOption } from 'echarts/types/dist/shared';
 import { TimeScale, TimeSeries } from '@perses-dev/spec';
-import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
-import { TimeSeriesAnnotation } from './utils/annotation';
-import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
+import type {
+  EChartsCoreOption,
+  GridComponentOption,
+  LineSeriesOption,
+  YAXisComponentOption,
+  TooltipComponentOption,
+} from 'echarts';
+import { LineChart as EChartsLineChart, BarChart as EChartsBarChart } from 'echarts/charts';
+import {
+  GridComponent,
+  DatasetComponent,
+  DataZoomComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
+  MarkPointComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+} from 'echarts/components';
+import { ECharts as EChartsInstance, use as registerECharts } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { DatasetOption } from 'echarts/types/dist/shared';
+import isEqual from 'lodash/isEqual';
+import merge from 'lodash/merge';
+import { forwardRef, MouseEvent, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
-use([
+import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
+import { TimeSeriesAnnotation } from './utils/annotation';
+import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
+
+registerECharts([
   EChartsLineChart,
   EChartsBarChart,
   GridComponent,
@@ -122,7 +122,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     onDoubleClick,
     __experimentalEChartsOptionsOverride,
   },
-  ref
+  ref,
 ) {
   const { chartsTheme, enablePinning, enableSyncGrouping, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } =
     useChartsContext();
@@ -140,7 +140,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
 
   const getTimezoneAwareAxisFormatter = useCallback(
     (rangeMs: number): ((value: number) => string) => createTimezoneAwareAxisFormatter(rangeMs, timeZone),
-    [timeZone]
+    [timeZone],
   );
 
   let timeScale: TimeScale;

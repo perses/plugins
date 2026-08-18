@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { milliseconds } from 'date-fns';
 import { DurationString, parseDurationString, TimeSeries } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
+
 import { VictoriaLogsClient } from '../../model/client';
 import { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
 import { DEFAULT_DATASOURCE } from '../constants';
@@ -51,7 +52,7 @@ function getVictoriaLogsRangeStep(
   startMs: number,
   endMs: number,
   minStepSeconds = DEFAULT_MIN_STEP_SECONDS,
-  suggestedStepMs = 0
+  suggestedStepMs = 0,
 ): number {
   const suggestedStepSeconds = suggestedStepMs / 1000;
   const querySeconds = (endMs - startMs) / 1000;
@@ -118,7 +119,7 @@ export const getVictoriaLogsTimeSeriesData: TimeSeriesQueryPlugin<VictoriaLogsTi
 
     const query = replaceVariables(spec.query, context.variableState);
     const client = (await context.datasourceStore.getDatasourceClient<VictoriaLogsClient>(
-      spec.datasource ?? DEFAULT_DATASOURCE
+      spec.datasource ?? DEFAULT_DATASOURCE,
     )) as VictoriaLogsClient;
 
     const { start, end } = context.timeRange;
@@ -130,7 +131,7 @@ export const getVictoriaLogsTimeSeriesData: TimeSeriesQueryPlugin<VictoriaLogsTi
       start.getTime(),
       end.getTime(),
       minStepSeconds,
-      context.suggestedStepMs
+      context.suggestedStepMs,
     );
     const stepString = formatStepForVictoriaLogs(stepSeconds);
     const stepMs = stepSeconds * 1000;

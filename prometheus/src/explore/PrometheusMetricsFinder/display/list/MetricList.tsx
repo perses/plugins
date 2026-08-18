@@ -14,11 +14,12 @@
 import { Button, Divider, Skeleton, Stack, StackProps, TableCell, Typography } from '@mui/material';
 import { Fuzzy, FuzzyMatchingInterval } from '@nexucis/fuzzy';
 import { useExplorerQueryParams } from '@perses-dev/explore';
+import { DatasourceSelector } from '@perses-dev/spec';
 import CompassIcon from 'mdi-material-ui/Compass';
 import { ReactElement, ReactNode, useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { TableVirtuoso } from 'react-virtuoso';
-import { DatasourceSelector } from '@perses-dev/spec';
+
 import { LabelFilter } from '../../types';
 import { useMetricMetadata } from '../../utils';
 import { MetricChip } from '../MetricChip';

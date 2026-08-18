@@ -13,8 +13,9 @@
 
 import { Box, styled } from '@mui/material';
 import { ReactElement } from 'react';
-import { Viewport, formatDuration } from './utils';
+
 import { Trace } from './trace';
+import { Viewport, formatDuration } from './utils';
 
 export interface TicksHeaderProps {
   trace: Trace;
@@ -32,7 +33,7 @@ export function TicksHeader(props: TicksHeaderProps): ReactElement {
 
   return (
     <>
-      <TickBox style={{ left: '0%', borderWidth: 0 }}>{formatDuration(startAt + duration * 0)}</TickBox>
+      <TickBox style={{ left: '0%', borderWidth: 0 }}>{formatDuration(startAt)}</TickBox>
       <TickBox style={{ left: '25%' }}>{formatDuration(startAt + duration * 0.25)}</TickBox>
       <TickBox style={{ left: '50%' }}>{formatDuration(startAt + duration * 0.5)}</TickBox>
       <TickBox style={{ left: '75%' }}>{formatDuration(startAt + duration * 0.75)}</TickBox>

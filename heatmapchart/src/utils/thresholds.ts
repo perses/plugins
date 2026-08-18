@@ -17,7 +17,7 @@ export function getColorFromThresholds(
   value: number,
   thresholds: ThresholdOptions | undefined,
   chartsTheme: PersesChartsTheme,
-  defaultColor: string
+  defaultColor: string,
 ): string | null {
   if (thresholds?.steps) {
     const matchingColors = thresholds.steps

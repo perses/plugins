@@ -13,22 +13,23 @@
 
 import { replaceVariables } from '@perses-dev/plugin-system';
 import { HTTPAllowedEndpoint, LogData, LogEntry } from '@perses-dev/spec';
-import { SplunkClient } from '../../model/splunk-client';
+
 import { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
-import { DEFAULT_DATASOURCE } from '../constants';
+import { SplunkClient } from '../../model/splunk-client';
 import {
   SplunkIndexResponse,
   SplunkJobCreateResponse,
   SplunkJobStatusResponse,
   SplunkResultsResponse,
 } from '../../model/splunk-client-types';
-import { SplunkLogQuerySpec } from './splunk-log-query-types';
+import { DEFAULT_DATASOURCE } from '../constants';
 import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
+import { SplunkLogQuerySpec } from './splunk-log-query-types';
 
 function convertResultsToLogs(
   results:
     | Array<{ _time: string; _raw: string; [key: string]: string | number }>
-    | { _time: string; _raw: string; [key: string]: string | number }
+    | { _time: string; _raw: string; [key: string]: string | number },
 ): LogData {
   const resultsArray = Array.isArray(results) ? results : [results];
 
@@ -50,7 +51,7 @@ function convertResultsToLogs(
 
 export const getSplunkLogData: LogQueryPlugin<SplunkLogQuerySpec>['getLogData'] = async (
   spec: SplunkLogQuerySpec,
-  context: LogQueryContext
+  context: LogQueryContext,
 ) => {
   if (!spec.query) {
     return {
@@ -61,7 +62,7 @@ export const getSplunkLogData: LogQueryPlugin<SplunkLogQuerySpec>['getLogData'] 
 
   const query = replaceVariables(spec.query, context.variableState);
   const client: SplunkClient = await context.datasourceStore.getDatasourceClient<SplunkClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   );
 
   const datasourceSpec = await context.datasourceStore.getDatasource(spec.datasource ?? DEFAULT_DATASOURCE);
@@ -69,11 +70,11 @@ export const getSplunkLogData: LogQueryPlugin<SplunkLogQuerySpec>['getLogData'] 
     (datasourceSpec.plugin.spec as SplunkDatasourceSpec)?.proxy?.spec?.allowedEndpoints || [];
 
   const hasExportEndpoint: boolean = allowedEndpoints.some((ep: HTTPAllowedEndpoint) =>
-    ep.endpointPattern?.includes('/export')
+    ep.endpointPattern?.includes('/export'),
   );
   //TODO - Ideally this Indexes endpoint to be pushed inside the explorer view.
   const hasIndexesEndpoint: boolean = allowedEndpoints.some((ep: HTTPAllowedEndpoint) =>
-    ep.endpointPattern?.includes('/indexes')
+    ep.endpointPattern?.includes('/indexes'),
   );
 
   const { start, end } = context.timeRange;
@@ -101,7 +102,7 @@ export const getSplunkLogData: LogQueryPlugin<SplunkLogQuerySpec>['getLogData'] 
           labels: Object.fromEntries(
             Object.entries(index)
               .filter(([key]) => key !== 'name')
-              .map(([key, value]) => [key, typeof value === 'object' ? JSON.stringify(value) : String(value)])
+              .map(([key, value]) => [key, typeof value === 'object' ? JSON.stringify(value) : String(value)]),
           ) as Record<string, string>,
         }))
       : [];
@@ -139,7 +140,7 @@ export const getSplunkLogData: LogQueryPlugin<SplunkLogQuerySpec>['getLogData'] 
   }
 
   const logs: LogData = convertResultsToLogs(
-    eventsResponse.results as Array<{ _time: string; _raw: string; [key: string]: string | number }>
+    eventsResponse.results as Array<{ _time: string; _raw: string; [key: string]: string | number }>,
   );
 
   return {

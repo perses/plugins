@@ -13,9 +13,10 @@
 
 import { replaceVariables, TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { JaegerClient } from '../model';
-import { JaegerDatasource } from './jaeger-datasource';
 import { getTraceData, jaegerTraceToOTLP } from './get-trace-data';
+import { JaegerDatasource } from './jaeger-datasource';
 
 jest.mock('@perses-dev/plugin-system', () => {
   const actual = jest.requireActual('@perses-dev/plugin-system');
@@ -86,13 +87,15 @@ const makeClient = (): JaegerClient => {
   return client;
 };
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<typeof datasource> => ({
-  default: false,
-  plugin: {
-    kind: 'JaegerDatasource',
-    spec: datasource,
-  },
-}));
+const getDatasource: jest.Mock = jest.fn(
+  (): DatasourceSpec<typeof datasource> => ({
+    default: false,
+    plugin: {
+      kind: 'JaegerDatasource',
+      spec: datasource,
+    },
+  }),
+);
 
 function createContext(client: JaegerClient): TraceQueryContext {
   return {
@@ -163,7 +166,7 @@ describe('getTraceData', () => {
         minDuration: '20ms',
         limit: 25,
       },
-      context
+      context,
     );
 
     expect(client.searchTraces).toHaveBeenCalledWith({
@@ -199,10 +202,10 @@ describe('getTraceData', () => {
     const client = makeClient();
 
     await expect(getTraceData({ tags: '[]' }, createContext(client))).rejects.toThrow(
-      'Jaeger tags must be a JSON object.'
+      'Jaeger tags must be a JSON object.',
     );
     await expect(getTraceData({ operation: 'GET /api/cart' }, createContext(client))).rejects.toThrow(
-      'Jaeger trace searches require a service when Trace ID is not provided.'
+      'Jaeger trace searches require a service when Trace ID is not provided.',
     );
   });
 

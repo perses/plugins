@@ -13,8 +13,9 @@
 
 import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
-import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
+
 import { VictoriaLogsClient } from '../../model/client';
+import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { VictoriaLogsLogQuerySpec } from './types';
 
@@ -39,7 +40,7 @@ function convertStreamToLogs(data: VictoriaLogsStreamQueryRangeResponse, default
 
 export const getVictoriaLogsLogData: LogQueryPlugin<VictoriaLogsLogQuerySpec>['getLogData'] = async (
   spec: VictoriaLogsLogQuerySpec,
-  context: LogQueryContext
+  context: LogQueryContext,
 ) => {
   if (!spec.query) {
     return {
@@ -50,7 +51,7 @@ export const getVictoriaLogsLogData: LogQueryPlugin<VictoriaLogsLogQuerySpec>['g
 
   const query = replaceVariables(spec.query, context.variableState);
   const client = (await context.datasourceStore.getDatasourceClient<VictoriaLogsClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as VictoriaLogsClient;
 
   const { start, end } = context.timeRange;

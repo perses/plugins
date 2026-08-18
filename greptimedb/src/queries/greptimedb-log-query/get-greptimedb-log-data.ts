@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogData, LogEntry } from '@perses-dev/spec';
+
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import {
@@ -90,7 +91,7 @@ export const getGreptimeDBLogData: LogQueryPlugin<GreptimeDBLogQuerySpec>['getLo
   const query = replaceQueryVariables(spec.query, context.variableState, context.timeRange);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as GreptimeDBClient;
 
   const response: GreptimeDBQueryResponse = await client.query({

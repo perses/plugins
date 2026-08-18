@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { GreptimeDBLogQuery } from './GreptimeDBLogQuery';
@@ -70,7 +71,7 @@ describe('GreptimeDBLogQuery', () => {
       {
         query: 'SELECT * FROM logs WHERE foo="$foo" AND bar="$bar"',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['foo', 'bar']);
   });
@@ -108,7 +109,7 @@ describe('GreptimeDBLogQuery', () => {
       {
         query: 'SELECT * FROM logs',
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(result.logs.totalCount).toBe(2);

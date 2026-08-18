@@ -19,9 +19,10 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { VictoriaLogsClient, DEFAULT_VICTORIALOGS, VICTORIALOGS_DATASOURCE_KIND } from '../../model';
-import { fieldItemsToVariableOptions, getVictoriaLogsTimeRange } from '../utils';
 import { VictoriaLogsFieldNamesVariableOptions } from '../types';
+import { fieldItemsToVariableOptions, getVictoriaLogsTimeRange } from '../utils';
 import { VictoriaLogsFieldNamesVariableEditor } from './VictoriaLogsFieldNamesVariableEditor';
 
 export const VictoriaLogsFieldNamesVariable: VariablePlugin<VictoriaLogsFieldNamesVariableOptions> = {
@@ -30,7 +31,7 @@ export const VictoriaLogsFieldNamesVariable: VariablePlugin<VictoriaLogsFieldNam
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_VICTORIALOGS,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(VICTORIALOGS_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(VICTORIALOGS_DATASOURCE_KIND),
       ) ?? DEFAULT_VICTORIALOGS;
     const client: VictoriaLogsClient = await ctx.datasourceStore.getDatasourceClient(datasourceSelector);
     const timeRange = getVictoriaLogsTimeRange(ctx.timeRange);

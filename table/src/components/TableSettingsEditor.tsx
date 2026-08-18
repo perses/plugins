@@ -23,6 +23,7 @@ import {
   TableDensity,
 } from '@perses-dev/components';
 import { ChangeEvent, ReactElement } from 'react';
+
 import { TableSettingsEditorProps } from '../models';
 
 interface DefaultColumnsDimensionsControlProps {
@@ -93,6 +94,14 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
     onChange({ ...value, enableFiltering: checked });
   }
 
+  function handleEnableSortingChange(_event: ChangeEvent, checked: boolean): void {
+    onChange({
+      ...value,
+      enableSorting: checked,
+      columnSettings: value.columnSettings?.map(({ enableSorting: _ignored, ...column }) => column),
+    });
+  }
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -109,6 +118,10 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
           <OptionsEditorControl
             label="Enable Column Filtering"
             control={<Switch checked={!!value.enableFiltering} onChange={handleEnableFilteringChange} />}
+          />
+          <OptionsEditorControl
+            label="Enable Sorting"
+            control={<Switch checked={!!value.enableSorting} onChange={handleEnableSortingChange} />}
           />
 
           <DefaultColumnsDimensionsControl

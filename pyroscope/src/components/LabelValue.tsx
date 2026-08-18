@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { TextField, Autocomplete } from '@mui/material';
+import { ReactElement } from 'react';
+
 import { PyroscopeDatasourceSelector } from '../model';
 import { useLabelValues } from '../utils/use-query';
 

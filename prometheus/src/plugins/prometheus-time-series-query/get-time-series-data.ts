@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   DatasourceSpec,
   DurationString,
@@ -21,6 +20,8 @@ import {
   TimeSeries,
   TimeSeriesData,
 } from '@perses-dev/spec';
+import { fromUnixTime, milliseconds } from 'date-fns';
+
 import {
   parseValueTuple,
   PrometheusClient,
@@ -37,13 +38,13 @@ import {
 import { getFormattedPrometheusSeriesName } from '../../utils';
 import { interpolateDatasourceProxyParams } from '../interpolation';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
-import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
+import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
   context,
-  abortSignal
+  abortSignal,
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     // Do not make a request to the backend, instead return an empty TimeSeriesData
@@ -56,16 +57,16 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     datasourceSelectValueToSelector(
       spec.datasource ?? DEFAULT_PROM,
       context.variableState,
-      listDatasourceSelectItems
+      listDatasourceSelectItems,
     ) ?? DEFAULT_PROM;
 
   const datasource = (await context.datasourceStore.getDatasource(
-    selectedDatasource
+    selectedDatasource,
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
   const interpolatedOptions = interpolateDatasourceProxyParams(datasource, context.variableState);
 
   const datasourceScrapeInterval = Math.trunc(
-    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
+    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000,
   );
 
   // Min step is the lower bound of the interval between data points
@@ -74,7 +75,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     getDurationStringSeconds(
       // resolve any variable that may have been provided
       // TODO add a validation check to make sure the variable is a DurationString, to avoid the back & forth cast here
-      replaceVariables(spec.minStep as string, context.variableState) as DurationString
+      replaceVariables(spec.minStep as string, context.variableState) as DurationString,
     ) ?? datasourceScrapeInterval;
 
   const timeRange = getPrometheusTimeRange(context.timeRange);

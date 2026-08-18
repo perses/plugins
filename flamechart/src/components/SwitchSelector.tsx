@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import { OptionsEditorControl } from '@perses-dev/components';
 import { Switch } from '@mui/material';
+import { OptionsEditorControl } from '@perses-dev/components';
+import { ReactElement } from 'react';
 
 export interface SwitchSelectorProps {
   onChange: (newValue: boolean) => void;

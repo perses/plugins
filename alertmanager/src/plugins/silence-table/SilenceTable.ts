@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
+import { SilenceTableOptions } from './silence-table-model';
 import { SilenceTableColumnsEditor } from './SilenceTableColumnsEditor';
 import { SilenceTableOptionsEditor } from './SilenceTableOptionsEditor';
 import { SilenceTablePanel } from './SilenceTablePanel';
-import { SilenceTableOptions } from './silence-table-model';
 
 /**
  * Panel plugin for displaying Alert Manager silences in a table.

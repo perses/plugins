@@ -13,6 +13,7 @@
 
 import { replaceVariables, VariableStateMap } from '@perses-dev/plugin-system';
 import { AbsoluteTimeRange } from '@perses-dev/spec';
+
 import { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData } from '../model/greptimedb-data-types';
 
 export type { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData };
@@ -29,7 +30,7 @@ export type { GreptimeDBColumnSchema, GreptimeDBRecords, GreptimeDBResponseData 
 export function replaceQueryVariables(
   query: string,
   variableState: VariableStateMap,
-  timeRange: AbsoluteTimeRange
+  timeRange: AbsoluteTimeRange,
 ): string {
   const { start, end } = timeRange;
   const rangeMs = end.valueOf() - start.valueOf();
@@ -129,8 +130,8 @@ export function findTimeColumnIndex(columnSchemas: GreptimeDBColumnSchema[]): nu
   }
 
   if (timeIndex === -1) {
-    const fallbackColumns = ['greptime_timestamp', 'timestamp', 'ts', 'time'];
-    timeIndex = columnSchemas.findIndex((col) => fallbackColumns.includes(col.name.toLowerCase()));
+    const fallbackColumns = new Set(['greptime_timestamp', 'timestamp', 'ts', 'time']);
+    timeIndex = columnSchemas.findIndex((col) => fallbackColumns.has(col.name.toLowerCase()));
   }
 
   return timeIndex;

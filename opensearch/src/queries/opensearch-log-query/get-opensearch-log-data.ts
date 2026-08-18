@@ -13,6 +13,7 @@
 
 import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogEntry, LogData } from '@perses-dev/spec';
+
 import { OpenSearchClient } from '../../model/opensearch-client';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { DEFAULT_DATASOURCE, DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../constants';
@@ -63,7 +64,7 @@ export function buildBoundedPPL(
   userQuery: string,
   start: Date,
   end: Date,
-  { index, timestampField = '@timestamp', disableTimeFilter = false }: BoundedPPLOptions = {}
+  { index, timestampField = '@timestamp', disableTimeFilter = false }: BoundedPPLOptions = {},
 ): string {
   let trimmed = userQuery.trim();
 
@@ -155,7 +156,12 @@ export function parseTimestamp(v: unknown): number {
   // We emit seconds (LogEntry is second-resolution), so we only need the correct
   // magnitude, not sub-second precision: a float's rounding at the ns scale is far
   // below one second and is discarded anyway, so BigInt isn't required here.
-  const numeric = typeof v === 'number' ? v : /^\d+$/.test(String(v)) ? Number(v) : NaN;
+  let numeric = NaN;
+  if (typeof v === 'number') {
+    numeric = v;
+  } else if (/^\d+$/.test(String(v))) {
+    numeric = Number(v);
+  }
   if (!Number.isNaN(numeric)) {
     // Detect the unit by magnitude — a value past year ~5138 for a given unit must
     // really be a finer unit — and normalize to seconds. Without the µs/ns tiers
@@ -181,7 +187,7 @@ export function parseTimestamp(v: unknown): number {
 
 function rowToObject(
   schema: OpenSearchPPLResponse['schema'],
-  row: Array<string | number | boolean | null>
+  row: Array<string | number | boolean | null>,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   schema.forEach((col, i) => {
@@ -193,7 +199,7 @@ function rowToObject(
 export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLogData'] = async (
   spec: OpenSearchLogQuerySpec,
   context: LogQueryContext,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
 ) => {
   // Treat a blank or whitespace-only query as "no query": trimming it would leave
   // an empty string that produces invalid PPL, so short-circuit before hitting the API.
@@ -207,7 +213,7 @@ export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLo
   const query = replaceVariables(spec.query, context.variableState);
   const resolvedIndex = spec.index ? replaceVariables(spec.index, context.variableState) : undefined;
   const client = (await context.datasourceStore.getDatasourceClient<OpenSearchClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as OpenSearchClient;
 
   const { start, end } = context.timeRange;

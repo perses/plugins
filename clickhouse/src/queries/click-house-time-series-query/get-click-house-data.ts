@@ -13,10 +13,18 @@
 
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { TimeSeries } from '@perses-dev/spec';
-import { DEFAULT_DATASOURCE } from '../constants';
+
+import {
+  ClickHouseClient,
+  ClickHouseQueryResponse,
+  formatClickHouseDateTime,
+  replaceTimeRangePlaceholders,
+} from '../../model/click-house-client';
 import { TimeSeriesEntry } from '../../model/click-house-data-types';
-import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
+import { DEFAULT_DATASOURCE } from '../constants';
 import { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './click-house-query-types';
+
+const DEFAULT_STEP_MS = 30 * 1000;
 
 function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
   const data = response?.data as TimeSeriesEntry[];
@@ -24,23 +32,80 @@ function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
     return [];
   }
 
-  const values: Array<[number, number]> = data.map((row: TimeSeriesEntry) => {
-    const timestamp = new Date(row.time).getTime();
-    const value = Number(row.log_count);
-    return [timestamp, value];
-  });
+  const metricNames = Object.keys(data[0] ?? {}).filter((key) => key !== 'time');
 
-  return [
-    {
-      name: 'log_count',
-      values,
-    },
-  ];
+  return metricNames
+    .map((metricName) => {
+      const values: Array<[number, number | null]> = data.map((row: TimeSeriesEntry) => {
+        const timestamp = new Date(row.time).getTime();
+        const value = toTimeSeriesValue(row[metricName]);
+        return [timestamp, value];
+      });
+
+      return {
+        name: metricName,
+        values,
+      };
+    })
+    .filter((series) => series.values.some(([, value]) => value !== null));
+}
+
+function toTimeSeriesValue(value: number | string | null | undefined): number | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function inferStepMs(response?: DatasourceQueryResponse): number {
+  const data = response?.data as TimeSeriesEntry[];
+  if (!response || !data || data.length < 2) {
+    return DEFAULT_STEP_MS;
+  }
+
+  const timestamps = data
+    .map((row: TimeSeriesEntry) => new Date(row.time).getTime())
+    .filter(Number.isFinite)
+    .toSorted((a, b) => a - b);
+
+  if (timestamps.length < 2) {
+    return DEFAULT_STEP_MS;
+  }
+
+  const deltas: number[] = [];
+  for (let i = 1; i < timestamps.length; i++) {
+    const previous = timestamps[i - 1];
+    const current = timestamps[i];
+    if (previous === undefined || current === undefined || current <= previous) {
+      continue;
+    }
+    deltas.push(current - previous);
+  }
+
+  if (deltas.length === 0) {
+    return DEFAULT_STEP_MS;
+  }
+
+  const deltaCounts = new Map<number, number>();
+  for (const delta of deltas) {
+    deltaCounts.set(delta, (deltaCounts.get(delta) ?? 0) + 1);
+  }
+
+  const inferredStep = Array.from(deltaCounts.entries()).toSorted(([deltaA, countA], [deltaB, countB]) => {
+    if (countA !== countB) {
+      return countB - countA;
+    }
+    return deltaB - deltaA;
+  })[0]?.[0];
+
+  return inferredStep ?? DEFAULT_STEP_MS;
 }
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     return { series: [] };
@@ -49,23 +114,26 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQueryS
   const query = replaceVariables(spec.query, context.variableState);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;
+  const startTime = formatClickHouseDateTime(start);
+  const endTime = formatClickHouseDateTime(end);
+  const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
 
   const response: ClickHouseQueryResponse = await client.query({
-    start: start.getTime().toString(),
-    end: end.getTime().toString(),
-    query,
+    start: startTime,
+    end: endTime,
+    query: executedQueryString,
   });
 
   return {
     series: buildTimeSeries(response),
     timeRange: { start, end },
-    stepMs: 30 * 1000,
+    stepMs: inferStepMs(response),
     metadata: {
-      executedQueryString: query,
+      executedQueryString,
     },
   };
 };

@@ -15,6 +15,7 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { ColumnsEditor } from '../../components/ColumnsEditor';
 import {
   DEFAULT_COLUMN_HEADERS,
@@ -56,7 +57,7 @@ export function SilenceTableColumnsEditor(props: OptionsEditorProps<SilenceTable
       produce(value, (draft) => {
         if (!draft.columns) draft.columns = [];
         draft.columns.push({ name: FIELD_OPTIONS[0] ?? 'updatedAt' });
-      })
+      }),
     );
   }, [value, onChange]);
 
@@ -65,10 +66,10 @@ export function SilenceTableColumnsEditor(props: OptionsEditorProps<SilenceTable
       onChange(
         produce(value, (draft) => {
           draft.columns?.splice(index, 1);
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleUpdateColumn = useCallback(
@@ -79,10 +80,10 @@ export function SilenceTableColumnsEditor(props: OptionsEditorProps<SilenceTable
           if (column) {
             updater(column);
           }
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleMoveUp = useCallback(
@@ -93,10 +94,10 @@ export function SilenceTableColumnsEditor(props: OptionsEditorProps<SilenceTable
           if (!draft.columns) return;
           const item = draft.columns.splice(index, 1)[0]!;
           draft.columns.splice(index - 1, 0, item);
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleMoveDown = useCallback(
@@ -106,10 +107,10 @@ export function SilenceTableColumnsEditor(props: OptionsEditorProps<SilenceTable
           if (!draft.columns || index >= draft.columns.length - 1) return;
           const item = draft.columns.splice(index, 1)[0]!;
           draft.columns.splice(index + 1, 0, item);
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

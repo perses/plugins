@@ -13,6 +13,7 @@
 
 import { TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { GreptimeDBTraceQuery } from './GreptimeDBTraceQuery';
@@ -96,7 +97,7 @@ describe('GreptimeDBTraceQuery', () => {
       {
         query: 'SELECT * FROM public.opentelemetry_traces',
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(result.searchResult).toHaveLength(1);
@@ -183,7 +184,7 @@ describe('GreptimeDBTraceQuery', () => {
       {
         query: detailsQuery,
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(mockedQuery).toHaveBeenCalledWith({
@@ -215,7 +216,7 @@ describe('GreptimeDBTraceQuery', () => {
           name: '',
         },
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(getDatasourceClient).toHaveBeenCalledWith({
@@ -240,13 +241,13 @@ describe('GreptimeDBTraceQuery', () => {
           value: 'a1b2c3d4e5f60123456789abcdef0001',
           loading: false,
         },
-      })
+      }),
     );
 
     expect(mockedQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         query: "SELECT * FROM public.web_trace_demo WHERE trace_id = 'a1b2c3d4e5f60123456789abcdef0001'",
-      })
+      }),
     );
   });
 });

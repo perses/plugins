@@ -14,6 +14,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { ReactElement, useState } from 'react';
+
 import { PostableSilence } from '../model/api-types';
 import { MatcherEditor, MatcherValue } from './MatcherEditor';
 
@@ -58,7 +59,7 @@ export function SilenceForm({ open, onClose, onSubmit, initialSilence }: Silence
           isEqual: m.isEqual,
           isRegex: m.isRegex,
         }))
-      : [{ ...DEFAULT_MATCHER }]
+      : [{ ...DEFAULT_MATCHER }],
   );
   const [startsAt, setStartsAt] = useState(initialSilence?.startsAt?.slice(0, 16) ?? getNowLocalISO());
   const [endsAt, setEndsAt] = useState(initialSilence?.endsAt?.slice(0, 16) ?? getDefaultEndTime());

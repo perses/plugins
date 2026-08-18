@@ -23,6 +23,7 @@ jest.mock('@perses-dev/plugin-system', () => {
 });
 
 import { LogEntry } from '@perses-dev/spec';
+
 import { collectLabelKeys, buildLogsCsvString } from './LogsTableCsvExportAction';
 
 describe('collectLabelKeys', () => {

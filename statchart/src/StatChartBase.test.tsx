@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ChartsProvider, FormatOptions, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 
-import { ChartsProvider, FormatOptions, testChartsTheme } from '@perses-dev/components';
 import { StatChartBase, StatChartData } from './StatChartBase';
 
 jest.mock('./utils/calculate-font-size', () => ({
@@ -34,7 +34,7 @@ describe('StatChart', () => {
           data={mockStatData}
           format={format}
         />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 
@@ -48,7 +48,7 @@ describe('StatChart', () => {
         [1654006185000, 7.733891213538757],
         [1654006200000, 7.731101813010433],
         [1654006215000, 7.722454672079215],
-        [1654006230000, 7.722733612256738],
+        [1654006200000, 7.722733612256738],
       ],
     },
   };

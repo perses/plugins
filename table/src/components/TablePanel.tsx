@@ -31,9 +31,11 @@ import {
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
+import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
+import { createPortal } from 'react-dom';
+
 import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
@@ -153,7 +155,7 @@ function InlineGaugeCellWithRange({
 function resolveGaugeFillColor(
   value: unknown,
   globalCellSettings: CellSettings[],
-  columnCellSettings: CellSettings[] | undefined
+  columnCellSettings: CellSettings[] | undefined,
 ): string | undefined {
   let cellConfig = evaluateConditionalFormatting(value, globalCellSettings);
   if (columnCellSettings?.length) {
@@ -168,7 +170,7 @@ function resolveGaugeFillColor(
 function generateCellContentConfig(
   column: ColumnSettings,
   gaugeRange?: GaugeRange,
-  globalCellSettings: CellSettings[] = []
+  globalCellSettings: CellSettings[] = [],
 ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
   if (plugin !== undefined) {
@@ -218,9 +220,9 @@ function ColumnFilterDropdown({
   theme,
 }: ColumnFilterDropdownProps): ReactElement {
   const [searchTerm, setSearchTerm] = useState('');
-  const values = [...new Set(allValues)].filter((v) => v !== null).sort();
+  const values = [...new Set(allValues)].filter((v) => v !== null).toSorted();
   const filteredValues = searchTerm
-    ? values.filter((v) => String(v).toLowerCase().includes(searchTerm.toLowerCase()))
+    ? values.filter((v) => String(v.formatted).toLowerCase().includes(searchTerm.toLowerCase()))
     : values;
   if (values.length === 0) {
     return (
@@ -291,19 +293,17 @@ function ColumnFilterDropdown({
       />
       {filteredValues.map((value, index) => (
         <div key={`value-${index}`} style={{ marginBottom: 4 }}>
-          <label
-            style={{
+          <Box
+            component="label"
+            sx={{
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
               padding: '2px 0',
-              borderRadius: 2,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme.palette.action.hover;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              borderRadius: '2px',
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
             }}
           >
             <input
@@ -326,7 +326,7 @@ function ColumnFilterDropdown({
             >
               {value === null || value === undefined || value.formatted === '' ? '(empty)' : String(value.formatted)}
             </span>
-          </label>
+          </Box>
         </div>
       ))}
     </div>
@@ -343,7 +343,8 @@ function generateColumnConfig(
   columnSettings: ColumnSettings[],
   allVariables: VariableStateMap,
   gaugeRangeByColumn: Record<string, GaugeRange>,
-  globalCellSettings: CellSettings[] = []
+  globalCellSettings: CellSettings[] = [],
+  defaultEnableSorting = false,
 ): TableColumnConfig<unknown> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
@@ -360,7 +361,7 @@ function generateColumnConfig(
         accessorKey: name,
         header: header ?? name,
         headerDescription,
-        enableSorting,
+        enableSorting: enableSorting ?? defaultEnableSorting,
         width,
         align,
         dataLink: modifiedDataLink,
@@ -372,6 +373,7 @@ function generateColumnConfig(
   return {
     accessorKey: name,
     header: name,
+    enableSorting: defaultEnableSorting,
   };
 }
 
@@ -401,6 +403,10 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   });
 
   const filteredDataRef = useRef<Array<Record<string, unknown>>>([]);
+  // Refs used to keep the filter row in sync with the table's horizontal
+  const panelContainerRef = useRef<HTMLDivElement>(null);
+  const filterRowInnerRef = useRef<HTMLDivElement>(null);
+  const filterCellRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   // Convert selectionMap to TanStack's RowSelectionState format
   const rowSelection = useMemo((): RowSelectionState => {
@@ -429,7 +435,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         setSelection(newSelection);
       }
     },
-    [setSelection, clearSelection]
+    [setSelection, clearSelection],
   );
 
   // TODO: handle other query types
@@ -544,7 +550,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         spec.columnSettings ?? [],
         allVariables,
         gaugeRangeByColumn,
-        spec.cellSettings ?? []
+        spec.cellSettings ?? [],
+        spec.enableSorting ?? false,
       );
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
@@ -561,7 +568,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
             spec.columnSettings ?? [],
             allVariables,
             gaugeRangeByColumn,
-            spec.cellSettings ?? []
+            spec.cellSettings ?? [],
+            spec.enableSorting ?? false,
           );
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
@@ -571,7 +579,15 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     }
 
     return columns;
-  }, [keys, spec.columnSettings, spec.defaultColumnHidden, allVariables, gaugeRangeByColumn, spec.cellSettings]);
+  }, [
+    keys,
+    spec.columnSettings,
+    spec.defaultColumnHidden,
+    spec.enableSorting,
+    allVariables,
+    gaugeRangeByColumn,
+    spec.cellSettings,
+  ]);
 
   // Filtering state — declared before cellConfigs so filteredData is available for cell config evaluation
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -612,7 +628,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
           acc[key] = undefined;
           return acc;
         },
-        {} as Record<string, undefined>
+        {} as Record<string, undefined>,
       );
 
       const extendRow = {
@@ -682,6 +698,12 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string): void => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (openFilterColumn === columnId) {
+      handleFilterClose();
+      return;
+    }
+
     setFilterAnchorEl({ ...filterAnchorEl, [columnId]: event.currentTarget });
     setOpenFilterColumn(columnId);
   };
@@ -716,7 +738,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   filteredDataRef.current = filteredData;
 
   const [pagination, setPagination] = useState<PaginationState | undefined>(
-    spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
+    spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined,
   );
 
   useEffect(() => {
@@ -727,6 +749,80 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       setPagination(undefined);
     }
   }, [spec.pagination, pagination]);
+
+  // Sync the filter row's horizontal position with the table scroll.
+  useEffect(() => {
+    if (!spec.enableFiltering) {
+      return;
+    }
+
+    const scrollContainer = panelContainerRef.current?.querySelector<HTMLElement>('.MuiTableContainer-root');
+    const filterRowInner = filterRowInnerRef.current;
+
+    if (!scrollContainer || !filterRowInner) {
+      return;
+    }
+
+    const syncFilterRowScroll = (): void => {
+      filterRowInner.style.transform = `translateX(-${scrollContainer.scrollLeft}px)`;
+
+      setOpenFilterColumn((current) => (current === null ? current : null));
+      setFilterAnchorEl((current) => (Object.keys(current).length === 0 ? current : {}));
+    };
+
+    syncFilterRowScroll();
+
+    scrollContainer.addEventListener('scroll', syncFilterRowScroll, { passive: true });
+    return (): void => {
+      scrollContainer.removeEventListener('scroll', syncFilterRowScroll);
+    };
+  }, [spec.enableFiltering, columns, contentDimensions]);
+
+  // Sync filter cell widths with the actual rendered table column widths to keep them aligned.
+  useEffect(() => {
+    if (!spec.enableFiltering) {
+      return;
+    }
+
+    const scrollContainer = panelContainerRef.current?.querySelector<HTMLElement>('.MuiTableContainer-root');
+    if (!scrollContainer) {
+      return;
+    }
+
+    const headerRow = scrollContainer.querySelector('thead tr');
+    if (!headerRow) {
+      return;
+    }
+
+    const syncColumnWidths = (): void => {
+      const headerCells = scrollContainer.querySelectorAll<HTMLElement>('thead tr th');
+
+      columns.forEach((_, idx) => {
+        const headerCell = headerCells[idx];
+        const filterCell = filterCellRefs.current[idx];
+        if (!headerCell || !filterCell) {
+          return;
+        }
+
+        const width = `${headerCell.getBoundingClientRect().width}px`;
+        filterCell.style.width = width;
+        filterCell.style.minWidth = width;
+        filterCell.style.maxWidth = width;
+      });
+    };
+
+    syncColumnWidths();
+
+    // Re-sync whenever the header row's size changes
+    const resizeObserver = new ResizeObserver(syncColumnWidths);
+    if (headerRow) {
+      resizeObserver.observe(headerRow);
+    }
+
+    return (): void => {
+      resizeObserver.disconnect();
+    };
+  }, [spec.enableFiltering, columns, contentDimensions, selectionEnabled, actionButtons]);
 
   if (contentDimensions === undefined) {
     return null;
@@ -748,99 +844,118 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }
 
   return (
-    <>
+    <div ref={panelContainerRef} style={{ display: 'contents' }}>
       {confirmDialog}
       {spec.enableFiltering && (
         <div
           style={{
-            display: 'flex',
+            overflow: 'hidden',
             background: theme.palette.background.default,
             borderBottom: `1px solid ${theme.palette.divider}`,
             width: contentDimensions.width,
             boxSizing: 'border-box',
           }}
         >
-          {columns.map((column, idx) => {
-            const filters = getSelectedFilterValues(column.accessorKey as string);
-            const columnWidth = column.width || spec.defaultColumnWidth;
-            return (
-              <div
-                key={`filter-${idx}`}
-                style={{
-                  padding: '8px',
-                  borderRight: idx < columns.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
-                  width: columnWidth,
-                  minWidth: columnWidth,
-                  maxWidth: columnWidth,
-                  display: 'flex',
-                  alignItems: 'center',
-                  position: 'relative',
-                  boxSizing: 'border-box',
-                  flex: typeof columnWidth === 'number' ? 'none' : '1 1 auto',
-                }}
-              >
-                <span
-                  style={{
-                    marginRight: 8,
-                    fontSize: '12px',
-                    color: theme.palette.text.secondary,
-                    flex: 1,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {filters.length ? `${filters.length} items` : 'All'}
-                </span>
-                <button
-                  onClick={(e) => {
-                    handleFilterClick(e, column.accessorKey as string);
-                  }}
-                  style={{
-                    border: `1px solid ${theme.palette.divider}`,
-                    background: theme.palette.background.paper,
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    color: filters.length ? theme.palette.primary.main : theme.palette.text.secondary,
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    minWidth: '20px',
-                    height: '24px',
-                    flexShrink: 0,
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = theme.palette.action.hover;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = theme.palette.background.paper;
-                  }}
-                  type="button"
-                >
-                  ▼
-                </button>
+          <div
+            ref={filterRowInnerRef}
+            style={{
+              display: 'flex',
+              width: 'max-content',
+              willChange: 'transform',
+            }}
+          >
+            {columns.map((column, idx) => {
+              const filters = getSelectedFilterValues(column.accessorKey as string);
+              const columnWidth = column.width || spec.defaultColumnWidth;
+              const anchorEl = filterAnchorEl[column.accessorKey as string];
 
-                {openFilterColumn === column.accessorKey && (
-                  <div
+              return (
+                <div
+                  key={`column-${column.accessorKey}`}
+                  ref={(el) => {
+                    filterCellRefs.current[idx] = el;
+                  }}
+                  style={{
+                    padding: '8px',
+                    borderRight: idx < columns.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
+                    // These are just a starting size for the first paint —
+                    // the width-sync effect above overwrites them with the
+                    // table's actual rendered column widths.
+                    width: columnWidth,
+                    minWidth: columnWidth,
+                    maxWidth: columnWidth,
+                    display: 'flex',
+                    alignItems: 'center',
+                    position: 'relative',
+                    boxSizing: 'border-box',
+                    flex: 'none',
+                  }}
+                >
+                  <span
                     style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      zIndex: 1000,
-                      marginTop: 4,
+                      marginRight: 8,
+                      fontSize: '12px',
+                      color: theme.palette.text.secondary,
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    <ColumnFilterDropdown
-                      allValues={columnUniqueValues[column.accessorKey as string] || []}
-                      selectedValues={filters}
-                      onFilterChange={(values) => updateColumnFilter(column.accessorKey as string, values)}
-                      theme={theme}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                    {filters.length ? `${filters.length} items` : 'All'}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      handleFilterClick(e, column.accessorKey as string);
+                    }}
+                    style={{
+                      border: `1px solid ${theme.palette.divider}`,
+                      background: theme.palette.background.paper,
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      color: filters.length ? theme.palette.primary.main : theme.palette.text.secondary,
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      minWidth: '20px',
+                      height: '24px',
+                      flexShrink: 0,
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = theme.palette.action.hover;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = theme.palette.background.paper;
+                    }}
+                    type="button"
+                  >
+                    ▼
+                  </button>
+
+                  {openFilterColumn === column.accessorKey &&
+                    anchorEl &&
+                    createPortal(
+                      <div
+                        style={{
+                          position: 'fixed',
+                          top: anchorEl.getBoundingClientRect().bottom + 4,
+                          left: anchorEl.getBoundingClientRect().left,
+                          zIndex: theme.zIndex.modal,
+                        }}
+                      >
+                        <ColumnFilterDropdown
+                          allValues={columnUniqueValues[column.accessorKey as string] || []}
+                          selectedValues={filters}
+                          onFilterChange={(values) => updateColumnFilter(column.accessorKey as string, values)}
+                          theme={theme}
+                        />
+                      </div>,
+                      document.body,
+                    )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
       <Table
@@ -862,6 +977,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         getItemActions={({ id, data }) => getItemActionButtons({ id, data: data as Record<string, unknown> })}
         hasItemActions={actionButtons && actionButtons.length > 0}
       />
-    </>
+    </div>
   );
 }

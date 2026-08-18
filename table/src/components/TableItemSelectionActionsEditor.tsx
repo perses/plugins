@@ -13,6 +13,7 @@
 
 import { ActionOptions, ItemSelectionActionsEditor, SelectionOptions } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { TableSettingsEditorProps } from '../models';
 
 export function TableItemSelectionActionsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {

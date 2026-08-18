@@ -16,6 +16,7 @@ import { OptionsEditorGroup } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { ALL_SILENCE_ACTIONS, SilenceAction, SilenceTableOptions } from './silence-table-model';
 
 const ACTION_LABELS: Record<SilenceAction, string> = {
@@ -38,10 +39,10 @@ export function SilenceTableOptionsEditor(props: OptionsEditorProps<SilenceTable
             if (idx >= 0) current.splice(idx, 1);
           }
           draft.allowedActions = current;
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

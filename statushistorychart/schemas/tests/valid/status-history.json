@@ -1,9 +1,9 @@
 {
-    "kind": "StatusHistoryChart",
-    "spec": {
-        "legend": {
-            "position": "bottom"
-        },
-        "sorting": "asc"
-    }
+  "kind": "StatusHistoryChart",
+  "spec": {
+    "legend": {
+      "position": "bottom"
+    },
+    "sorting": "asc"
+  }
 }

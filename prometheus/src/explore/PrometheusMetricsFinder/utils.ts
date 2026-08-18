@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { StatusError } from '@perses-dev/client';
 import { useDatasourceClient, useTimeRange, useVariableValues, useDatasourceStore } from '@perses-dev/plugin-system';
+import { DatasourceSelector } from '@perses-dev/spec';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { DatasourceSelector } from '@perses-dev/spec';
-import { StatusError } from '@perses-dev/client';
+
 import {
   LabelNamesRequestParameters,
   LabelValuesRequestParameters,
@@ -35,7 +36,7 @@ import { computeFilterExpr, LabelFilter, LabelValueCounter } from './types';
 export function useMetricMetadata(
   metricName: string,
   datasource: DatasourceSelector,
-  enabled?: boolean
+  enabled?: boolean,
 ): {
   isLoading: false | true;
   metadata: MetricMetadata | undefined;
@@ -75,7 +76,7 @@ export function useMetricMetadata(
 
 export function useLabels(
   filters: LabelFilter[],
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): UseQueryResult<LabelValuesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },
@@ -107,7 +108,7 @@ export function useLabels(
 export function useLabelValues(
   labelName: string,
   filters: LabelFilter[],
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): UseQueryResult<LabelValuesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },
@@ -141,7 +142,7 @@ export function useLabelValues(
 export function useSeriesStates(
   metricName: string,
   filters: LabelFilter[],
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): {
   series: Metric[] | undefined;
   labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>>;

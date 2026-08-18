@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
-import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isValidTraceId } from '@perses-dev/spec';
+import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import { ReactElement, useMemo } from 'react';
+
 import { TempoClient } from '../model';
 import { TraceQLExtension } from './TraceQLExtension';
 

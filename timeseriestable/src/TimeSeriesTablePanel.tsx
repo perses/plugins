@@ -13,12 +13,12 @@
 
 import { Box } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
-import { ReactElement } from 'react';
 import { PanelProps } from '@perses-dev/plugin-system';
-
 import { TimeSeriesData } from '@perses-dev/spec';
-import { TimeSeriesTableOptions } from './model';
+import { ReactElement } from 'react';
+
 import { DataTable } from './components';
+import { TimeSeriesTableOptions } from './model';
 
 export type TimeSeriesTableProps = PanelProps<TimeSeriesTableOptions, TimeSeriesData>;
 

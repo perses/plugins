@@ -13,6 +13,7 @@
 
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { ColumnSettings, TableOptions } from '../models';
 import { ColumnsEditor } from './ColumnsEditor';
 
@@ -23,5 +24,11 @@ export function TableColumnsEditor({ onChange, value }: TableColumnsEditorProps)
     onChange({ ...value, columnSettings: columns });
   }
 
-  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnsChange} />;
+  return (
+    <ColumnsEditor
+      columnSettings={value.columnSettings ?? []}
+      onChange={handleColumnsChange}
+      defaultEnableSorting={value.enableSorting}
+    />
+  );
 }

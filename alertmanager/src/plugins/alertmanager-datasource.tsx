@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import {
   AlertManagerClient,
   getAlerts,
@@ -21,12 +22,12 @@ import {
   deleteSilence,
   getStatus,
 } from '../model';
-import { AlertManagerDatasourceSpec } from './types';
 import { AlertManagerDatasourceEditor } from './AlertManagerDatasourceEditor';
+import { AlertManagerDatasourceSpec } from './types';
 
 const createClient: DatasourcePlugin<AlertManagerDatasourceSpec, AlertManagerClient>['createClient'] = (
   spec,
-  options
+  options,
 ) => {
   const { directUrl, proxy } = spec;
   const { proxyUrl } = options;

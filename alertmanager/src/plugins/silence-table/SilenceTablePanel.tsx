@@ -34,6 +34,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import MagnifyIcon from 'mdi-material-ui/Magnify';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { MatchersList } from '../../components/MatchersList';
 import { StatusBadge } from '../../components/StatusBadge';
 import { AlertManagerClient, extractDatasourceSelector } from '../../model';
@@ -158,7 +159,7 @@ export function SilenceTablePanel({ spec, queryResults, contentDimensions }: Sil
 
   const effectiveActions = useMemo<SilenceAction[]>(
     () => spec?.allowedActions ?? ALL_SILENCE_ACTIONS,
-    [spec?.allowedActions]
+    [spec?.allowedActions],
   );
   const showActionsColumn = effectiveActions.length > 0;
 
@@ -203,7 +204,7 @@ export function SilenceTablePanel({ spec, queryResults, contentDimensions }: Sil
 
   const silences = useMemo(() => {
     if (!sortState) return filteredSilences;
-    return [...filteredSilences].sort((a, b) => compareSilencesByColumn(a, b, sortState));
+    return [...filteredSilences].toSorted((a, b) => compareSilencesByColumn(a, b, sortState));
   }, [filteredSilences, sortState]);
 
   if (allSilences.length === 0) {

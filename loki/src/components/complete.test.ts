@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EditorState, EditorView } from '@uiw/react-codemirror';
-import { parser } from '@grafana/lezer-logql';
 import { LRLanguage, ensureSyntaxTree } from '@codemirror/language';
+import { parser } from '@grafana/lezer-logql';
+import { EditorState, EditorView } from '@uiw/react-codemirror';
+
 import { identifyCompletion, applyQuotedCompletion } from './complete';
 
 const logQLExtension = LRLanguage.define({ parser: parser });
@@ -359,7 +360,7 @@ describe('complete', () => {
         const view = new EditorView({ state });
         applyQuotedCompletion(view, { label: completion }, from, to ?? from);
         expect(view.state.doc.toString()).toBe(expected);
-      }
+      },
     );
   });
 });

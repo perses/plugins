@@ -15,6 +15,7 @@ import { styled, useTheme } from '@mui/material';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import { MouseEvent, ReactElement, useCallback } from 'react';
+
 import { Span } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 
@@ -50,7 +51,7 @@ export function SpanIndents(props: SpanIndentsProps): ReactElement {
         return next;
       });
     },
-    [span, setCollapsedSpans]
+    [span, setCollapsedSpans],
   );
 
   const handleIconMouseEnter = useCallback(() => {

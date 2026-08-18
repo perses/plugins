@@ -23,13 +23,13 @@ export interface VictoriaLogsDatasourceSelector extends DatasourceSelector {
 export const DEFAULT_VICTORIALOGS: VictoriaLogsDatasourceSelector = { kind: VICTORIALOGS_DATASOURCE_KIND };
 
 export function isDefaultVictoriaLogsSelector(
-  datasourceSelectValue: DatasourceSelectValue<VictoriaLogsDatasourceSelector>
+  datasourceSelectValue: DatasourceSelectValue<VictoriaLogsDatasourceSelector>,
 ): boolean {
   return !isVariableDatasource(datasourceSelectValue) && datasourceSelectValue.name === undefined;
 }
 
 export function isVictoriaLogsDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue<DatasourceSelector>
+  datasourceSelectValue: DatasourceSelectValue<DatasourceSelector>,
 ): datasourceSelectValue is VictoriaLogsDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === VICTORIALOGS_DATASOURCE_KIND;
 }

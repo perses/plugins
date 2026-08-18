@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { milliseconds } from 'date-fns';
 import { DurationString, parseDurationString, TimeSeries } from '@perses-dev/spec';
-import { LokiClient } from '../../model/loki-client';
-import { LokiMatrixResult } from '../../model/loki-client-types';
+import { milliseconds } from 'date-fns';
+
+import { LokiClient, toUnixSeconds } from '../../model/loki-client';
+import { LokiMatrixResult, LokiVectorResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 
@@ -46,7 +47,7 @@ function getLokiRangeStep(
   startMs: number,
   endMs: number,
   minStepSeconds = DEFAULT_MIN_STEP_SECONDS,
-  suggestedStepMs = 0
+  suggestedStepMs = 0,
 ): number {
   const suggestedStepSeconds = suggestedStepMs / 1000;
   const queryRangeSeconds = (endMs - startMs) / 1000;
@@ -88,9 +89,22 @@ function convertMatrixToTimeSeries(matrix: LokiMatrixResult[]): TimeSeries[] {
   });
 }
 
+function convertVectorToTimeSeries(vector: LokiVectorResult[]): TimeSeries[] {
+  return vector.map((series) => {
+    const name = Object.entries(series.metric)
+      .map(([k, v]) => `${k}=${v}`)
+      .join(', ');
+    return {
+      name,
+      values: [[Number(series.value[0]) * 1000, Number(series.value[1])]],
+      labels: series.metric,
+    };
+  });
+}
+
 export const getLokiTimeSeriesData: TimeSeriesQueryPlugin<LokiTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   if (!spec.query) {
     return {
@@ -102,12 +116,32 @@ export const getLokiTimeSeriesData: TimeSeriesQueryPlugin<LokiTimeSeriesQuerySpe
 
   const query = replaceVariables(spec.query, context.variableState);
   const client = (await context.datasourceStore.getDatasourceClient<LokiClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as LokiClient;
 
   const { start, end } = context.timeRange;
 
-  // Calculate proper step using similar logic to Prometheus
+  if (context.mode === 'instant') {
+    const response = await client.query({ query, time: toUnixSeconds(end) });
+
+    if (response.data.resultType === 'vector') {
+      return {
+        series: convertVectorToTimeSeries(response.data.result as LokiVectorResult[]),
+        timeRange: { start, end },
+        stepMs: DEFAULT_MIN_STEP_SECONDS * 1000,
+        metadata: { executedQueryString: query },
+      };
+    }
+
+    return {
+      series: [],
+      timeRange: { start, end },
+      stepMs: DEFAULT_MIN_STEP_SECONDS * 1000,
+      metadata: { notices: [{ type: 'warning', message: "log streams are not supported in 'instant' mode" }] },
+    };
+  }
+
+  // Range mode (default)
   const minStepSeconds = spec.step
     ? (getDurationStringSeconds(spec.step as DurationString) ?? DEFAULT_MIN_STEP_SECONDS)
     : DEFAULT_MIN_STEP_SECONDS;

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { isVariableDatasource, parseVariables, SilencesQueryPlugin } from '@perses-dev/plugin-system';
+
 import { AlertManagerSilencesQuerySpec } from '../types';
-import { getSilencesData } from './get-silences-data';
 import { AlertManagerSilencesQueryEditor } from './AlertManagerSilencesQueryEditor';
+import { getSilencesData } from './get-silences-data';
 
 export const AlertManagerSilencesQuery: SilencesQueryPlugin<AlertManagerSilencesQuerySpec> = {
   getSilencesData,

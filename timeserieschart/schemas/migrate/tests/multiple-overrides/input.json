@@ -104,10 +104,7 @@
           {
             "id": "custom.lineStyle",
             "value": {
-              "dash": [
-                8,
-                10
-              ],
+              "dash": [8, 10],
               "fill": "dash"
             }
           }
@@ -133,10 +130,7 @@
           {
             "id": "custom.lineStyle",
             "value": {
-              "dash": [
-                10,
-                10
-              ],
+              "dash": [10, 10],
               "fill": "dash"
             }
           }
@@ -249,11 +243,7 @@
       "showLegend": true,
       "displayMode": "table",
       "placement": "right",
-      "calcs": [
-        "min",
-        "max",
-        "mean"
-      ],
+      "calcs": ["min", "max", "mean"],
       "sortBy": "Max",
       "sortDesc": true
     }

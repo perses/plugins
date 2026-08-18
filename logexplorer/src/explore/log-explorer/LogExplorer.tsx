@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
+import { Panel } from '@perses-dev/dashboards';
+import { useExplorerManagerContext } from '@perses-dev/explore';
 import {
   DataQueriesProvider,
   LogQueryContext,
@@ -22,11 +24,9 @@ import {
   usePluginRegistry,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useState, useMemo } from 'react';
 import { QueryDefinition } from '@perses-dev/spec';
-import { Panel } from '@perses-dev/dashboards';
-import { useExplorerManagerContext } from '@perses-dev/explore';
 import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useState, useMemo } from 'react';
 
 interface LogExplorerQueryParams {
   queries?: QueryDefinition[];
@@ -113,7 +113,7 @@ export function LogExplorer(): ReactElement {
       datasourceStore,
       refreshKey: '',
     }),
-    [absoluteTimeRange, variableState, datasourceStore]
+    [absoluteTimeRange, variableState, datasourceStore],
   );
 
   // Get all datasource plugins that support LogQuery
@@ -127,7 +127,7 @@ export function LogExplorer(): ReactElement {
           return pluginSpec?.supportedQueryTypes?.includes('LogQuery');
         })
         .map((p) => p.kind) ?? [],
-    [datasourcePlugins]
+    [datasourcePlugins],
   );
 
   const { data: volumeQueries = EMPTY_QUERIES } = useQuery({
@@ -143,7 +143,7 @@ export function LogExplorer(): ReactElement {
             console.error(`[LogExplorer] Failed to create volume query for ${query.spec.plugin.kind}:`, error);
             return null;
           }
-        })
+        }),
       );
       return results.filter((q): q is QueryDefinition => q !== null);
     },

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Alert } from '@perses-dev/spec';
+
 import {
   compareAlertsByColumn,
   compareGroupsByColumn,
@@ -22,7 +23,7 @@ import {
 
 const makeAlert = (
   labels: Record<string, string>,
-  overrides?: Partial<Pick<Alert, 'name' | 'state' | 'suppressed'>>
+  overrides?: Partial<Pick<Alert, 'name' | 'state' | 'suppressed'>>,
 ): Alert => ({
   id: 'fp',
   name: overrides?.name ?? labels['alertname'] ?? '',

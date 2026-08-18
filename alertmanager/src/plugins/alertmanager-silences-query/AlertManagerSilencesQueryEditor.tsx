@@ -16,6 +16,7 @@ import { useId } from '@perses-dev/components';
 import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback } from 'react';
+
 import { LazyTextField } from '../../components/LazyTextField';
 import {
   ALERTMANAGER_DATASOURCE_KIND,
@@ -40,7 +41,7 @@ export function AlertManagerSilencesQueryEditor(props: AlertManagerSilencesQuery
       onChange(
         produce(value, (draft) => {
           draft.datasource = isDefaultAlertManagerSelector(next) ? undefined : next;
-        })
+        }),
       );
       return;
     }
@@ -56,10 +57,10 @@ export function AlertManagerSilencesQueryEditor(props: AlertManagerSilencesQuery
             .split('\n')
             .map((f) => f.trim())
             .filter((f) => f !== '');
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

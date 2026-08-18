@@ -24,7 +24,7 @@ export function convertThresholds(
   thresholds: ThresholdOptions,
   unit: FormatOptions,
   max: number,
-  palette: ThresholdColorPalette
+  palette: ThresholdColorPalette,
 ): EChartsAxisLineColors {
   const defaultThresholdColor = thresholds.defaultColor ?? palette.defaultColor;
   const defaultThresholdSteps: EChartsAxisLineColors = [[0, defaultThresholdColor]];

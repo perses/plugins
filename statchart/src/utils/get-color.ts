@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { applyValueMapping, PersesChartsTheme, ThresholdOptions, ValueMapping } from '@perses-dev/components';
+
 import { StatChartOptions } from '../stat-chart-model';
 
 type StatChartValue = number | string | null;
@@ -19,7 +20,7 @@ type StatChartValue = number | string | null;
 export function getStatChartColor(
   chartsTheme: PersesChartsTheme,
   spec?: StatChartOptions,
-  value?: StatChartValue
+  value?: StatChartValue,
 ): string {
   const { mappings, thresholds } = spec ?? {};
 
@@ -62,7 +63,7 @@ function getColorFromThresholds(
   value: StatChartValue,
   thresholds: ThresholdOptions,
   chartsTheme: PersesChartsTheme,
-  defaultColor: string
+  defaultColor: string,
 ): string | null {
   if (thresholds?.steps && typeof value === 'number') {
     const matchingColors = thresholds.steps

@@ -12,12 +12,10 @@
 // limitations under the License.
 
 import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/material';
-import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
-import { useSelectionItemActions } from '@perses-dev/dashboards';
-import InformationIcon from 'mdi-material-ui/Information';
-import { useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import { useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
+import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import {
   convertTimeToDuration,
   formatDuration,
@@ -26,8 +24,11 @@ import {
   TraceData,
   TraceSearchResult,
 } from '@perses-dev/spec';
-import { getServiceColor } from './utils/utils';
+import InformationIcon from 'mdi-material-ui/Information';
+import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+
 import { TraceTableOptions } from './trace-table-model';
+import { getServiceColor } from './utils/utils';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -87,7 +88,7 @@ export function DataTable(props: DataTableProps): ReactElement {
   const paletteMode = options.visual?.palette?.mode;
   const serviceColorGenerator = useCallback(
     (serviceName: string) => getServiceColor(muiTheme, chartsTheme, paletteMode, serviceName),
-    [muiTheme, chartsTheme, paletteMode]
+    [muiTheme, chartsTheme, paletteMode],
   );
 
   const rows: Row[] = useMemo(() => {
@@ -133,7 +134,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         setSelection(newSelection);
       }
     },
-    [rowsById, setSelection, clearSelection]
+    [rowsById, setSelection, clearSelection],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -240,7 +241,7 @@ export function DataTable(props: DataTableProps): ReactElement {
           ]
         : []),
     ],
-    [serviceColorGenerator, actionsList, getItemActionButtons, dateFormatter]
+    [serviceColorGenerator, actionsList, getItemActionButtons, dateFormatter],
   );
 
   return (

@@ -26,8 +26,9 @@ import {
 import { useSelection } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import { ActionOptions, PanelData, useAllVariableValues } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { BucketTuple, HistogramValue, TimeSeries, TimeSeriesData, TimeSeriesHistogramTuple } from '@perses-dev/spec';
+import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+
 import { TimeSeriesTableOptions } from '../model';
 import { EmbeddedPanel } from './EmbeddedPanel';
 import { SeriesName } from './SeriesName';
@@ -73,7 +74,7 @@ export const DataTable = ({ queryResults, spec }: DataTableProps): ReactElement 
   const itemActionsConfig = spec.actions ? (spec.actions as ActionOptions) : undefined;
   const itemActionsListConfig = useMemo(
     () => (itemActionsConfig?.enabled && itemActionsConfig.displayWithItem ? itemActionsConfig.actionsList : []),
-    [itemActionsConfig?.enabled, itemActionsConfig?.displayWithItem, itemActionsConfig?.actionsList]
+    [itemActionsConfig?.enabled, itemActionsConfig?.displayWithItem, itemActionsConfig?.actionsList],
   );
 
   const { getItemActionButtons, confirmDialog, actionButtons } = useSelectionItemActions({
@@ -112,7 +113,7 @@ export const DataTable = ({ queryResults, spec }: DataTableProps): ReactElement 
       const rowData = buildRowData(ts);
       toggleSelection(rowData, seriesIdx.toString());
     },
-    [toggleSelection]
+    [toggleSelection],
   );
 
   // Memoize row data for stable references

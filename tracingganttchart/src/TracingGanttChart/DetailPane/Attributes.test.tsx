@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, RenderResult } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
-import { MemoryRouter } from 'react-router-dom';
 import { VariableProvider } from '@perses-dev/dashboards';
 import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { screen } from '@testing-library/dom';
+import { render, RenderResult } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
+import { CustomLinks } from '../../gantt-chart-model';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
-import { CustomLinks } from '../../gantt-chart-model';
 import { AttributeList, AttributeListProps, TraceAttributes, TraceAttributesProps } from './Attributes';
 
 describe('Attributes', () => {
@@ -39,7 +40,7 @@ describe('Attributes', () => {
             </TimeRangeProviderBasic>
           </ReactRouterProvider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 
@@ -57,7 +58,7 @@ describe('Attributes', () => {
             </TimeRangeProviderBasic>
           </ReactRouterProvider>
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 
@@ -116,7 +117,7 @@ describe('Attributes', () => {
     expect(screen.getByText('testing')).not.toHaveAttribute('href');
     expect(screen.getByRole('link', { name: 'hotrod' })).toHaveAttribute(
       'href',
-      '/console/ns/testing/pod/hotrod/detail'
+      '/console/ns/testing/pod/hotrod/detail',
     );
   });
 

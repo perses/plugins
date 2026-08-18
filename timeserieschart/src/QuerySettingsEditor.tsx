@@ -27,12 +27,13 @@ import {
   useTheme,
 } from '@mui/material';
 import { FormatControls, FormatOptions, OptionsColorPicker } from '@perses-dev/components';
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import CloseIcon from 'mdi-material-ui/Close';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import CloseIcon from 'mdi-material-ui/Close';
-import { produce } from 'immer';
-import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+
 import {
   DEFAULT_AREA_OPACITY,
   LINE_STYLE_CONFIG,
@@ -53,7 +54,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.querySettings = newQuerySettings;
-      })
+      }),
     );
   };
   // Every time a new query settings input is added, we want to focus the recently added input
@@ -73,7 +74,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           if (querySettings) {
             querySettings.queryIndex = parseInt(e.target.value);
           }
-        })
+        }),
       );
     }
   };
@@ -94,7 +95,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               }
             }
           }
-        })
+        }),
       );
     }
   };
@@ -109,7 +110,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               querySettings.colorValue = colorValue;
             }
           }
-        })
+        }),
       );
     }
   };
@@ -124,7 +125,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               querySettings.lineStyle = lineStyle as QuerySettingsOptions['lineStyle'];
             }
           }
-        })
+        }),
       );
     }
   };
@@ -140,7 +141,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
               querySettings.areaOpacity = newValue;
             }
           }
-        })
+        }),
       );
     }
   };
@@ -154,7 +155,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
           if (qs) {
             updater(qs);
           }
-        })
+        }),
       );
     }
   };
@@ -170,7 +171,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
 
   const addColor = (i: number): void => {
     updateQuerySettings(i, (qs) => {
-      qs.colorMode = 'fixed-single';
+      qs.colorMode = 'fixed';
       qs.colorValue = DEFAULT_COLOR_VALUE;
     });
   };
@@ -282,7 +283,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
       handleQuerySettingsChange(
         produce(querySettingsList, (draft) => {
           draft.push(defaultQuerySettings);
-        })
+        }),
       );
     }
   };
@@ -376,8 +377,8 @@ function QuerySettingsInput({
   onAreaOpacityChange,
   onDelete,
   inputRef,
-  onAddColor: onAddColor,
-  onRemoveColor: onRemoveColor,
+  onAddColor,
+  onRemoveColor,
   onAddLineStyle,
   onRemoveLineStyle,
   onAddAreaOpacity,
@@ -392,7 +393,7 @@ function QuerySettingsInput({
   onStackChange,
 }: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
-  const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
+  const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).toSorted((a, b) => a - b);
 
   // State for dropdown menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -474,8 +475,8 @@ function QuerySettingsInput({
         {colorMode && (
           <SettingsSection label="Color" onRemove={onRemoveColor}>
             <TextField select value={colorMode} onChange={onColorModeChange} size="small" sx={{ flexGrow: 1 }}>
-              <MenuItem value="fixed-single">Fixed (single)</MenuItem>
               <MenuItem value="fixed">Fixed</MenuItem>
+              <MenuItem value="fixed-single">Fixed (single series)</MenuItem>
             </TextField>
             <OptionsColorPicker
               label={queryNames[queryIndex] ?? `Query n°${queryIndex + 1}`}

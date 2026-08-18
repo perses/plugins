@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import PlusIcon from 'mdi-material-ui/Plus';
 import { ToolbarIconButton } from '@perses-dev/components';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { ReactElement } from 'react';
 
 export interface AddFilterItemProps {
   onClick: () => void;

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+
 import { getVictoriaLogsTimeSeriesData } from './query';
-import { VictoriaLogsQueryEditor } from './VictoriaLogsTimeSeriesQueryEditor';
 import { VictoriaLogsTimeSeriesQuerySpec } from './types';
+import { VictoriaLogsQueryEditor } from './VictoriaLogsTimeSeriesQueryEditor';
 
 export const VictoriaLogsTimeSeriesQuery: TimeSeriesQueryPlugin<VictoriaLogsTimeSeriesQuerySpec> = {
   getTimeSeriesData: getVictoriaLogsTimeSeriesData,
@@ -22,7 +23,7 @@ export const VictoriaLogsTimeSeriesQuery: TimeSeriesQueryPlugin<VictoriaLogsTime
   createInitialOptions: () => ({ query: '' }),
   dependsOn: (spec) => {
     const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set([...queryVariables])];
+    const allVariables = [...new Set(queryVariables)];
     return {
       variables: allVariables,
     };

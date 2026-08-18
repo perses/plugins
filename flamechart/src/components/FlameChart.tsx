@@ -11,23 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
+import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
+import { ProfileData } from '@perses-dev/spec';
 import {
   CustomSeriesRenderItem,
   CustomSeriesRenderItemAPI,
   CustomSeriesRenderItemParams,
   CustomSeriesRenderItemReturn,
 } from 'echarts';
-import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
-import { ReactElement, useState, useMemo, MouseEvent } from 'react';
-import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
-import RefreshIcon from 'mdi-material-ui/Refresh';
-import EyeIcon from 'mdi-material-ui/EyeOutline';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { EChartsCoreOption } from 'echarts/core';
-import { ProfileData } from '@perses-dev/spec';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
+import RefreshIcon from 'mdi-material-ui/Refresh';
+import { ReactElement, useState, useMemo, MouseEvent } from 'react';
+
+import { FlameChartSample as Sample } from '../utils/data-model';
 import { buildSamples, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
-import { FlameChartSample as Sample } from '../utils/data-model';
 import { CustomBreadcrumb } from './CustomBreadcrumb';
 
 const ITEM_GAP = 2; // vertical gap between flame chart items
@@ -57,7 +58,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
 
   const seriesData = useMemo(
     () => buildSamples(palette, data.metadata, data.profile.stackTrace, searchValue, selectedId),
-    [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue]
+    [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue],
   );
 
   const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
@@ -231,7 +232,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         }}
       />
     ),
-    [chartsTheme.echartsTheme, height, option, width]
+    [chartsTheme.echartsTheme, height, option, width],
   );
 
   return (

@@ -13,14 +13,20 @@
 
 import { replaceVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
-import { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
+
+import {
+  ClickHouseClient,
+  ClickHouseQueryResponse,
+  formatClickHouseDateTime,
+  replaceTimeRangePlaceholders,
+} from '../../model/click-house-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 
 function flattenObject(
   obj: Record<string, unknown>,
   parentKey = '',
-  result: Record<string, unknown> = {}
+  result: Record<string, unknown> = {},
 ): Record<string, unknown> {
   for (const [key, value] of Object.entries(obj)) {
     const newKey = parentKey ? `${parentKey}.${key}` : key;
@@ -44,7 +50,7 @@ function convertStreamsToLogs(streams: LogEntry[]): LogData {
 
     const sortedEntry: Record<string, unknown> = {};
     Object.keys(flattened)
-      .sort((a, b) => a.localeCompare(b))
+      .toSorted((a, b) => a.localeCompare(b))
       .forEach((key) => {
         sortedEntry[key] = flattened[key];
       });
@@ -78,22 +84,25 @@ export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLo
   const query = replaceVariables(spec.query, context.variableState);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;
+  const startTime = formatClickHouseDateTime(start);
+  const endTime = formatClickHouseDateTime(end);
+  const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
 
   const response: ClickHouseQueryResponse = await client.query({
-    start: start.getTime().toString(),
-    end: end.getTime().toString(),
-    query,
+    start: startTime,
+    end: endTime,
+    query: executedQueryString,
   });
 
   return {
     timeRange: { start, end },
     logs: convertStreamsToLogs(response.data as LogEntry[]),
     metadata: {
-      executedQueryString: query,
+      executedQueryString,
     },
   };
 };

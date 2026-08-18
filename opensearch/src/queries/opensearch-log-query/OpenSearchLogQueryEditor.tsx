@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -18,10 +20,9 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { Box, Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
-import { ReactElement } from 'react';
 import { produce } from 'immer';
-import { createModEnterHandler } from '@perses-dev/dashboards';
+import { ReactElement } from 'react';
+
 import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND, OpenSearchDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE, PPL_DOCS_URL, PPL_QUERY_EXAMPLES } from '../constants';
 import { useQueryState } from '../query-editor-model';
@@ -46,7 +47,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    OPENSEARCH_DATASOURCE_KIND
+    OPENSEARCH_DATASOURCE_KIND,
   ) as OpenSearchDatasourceSelector;
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
@@ -56,7 +57,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       onChange(
         produce(value, (draft) => {
           draft.datasource = isDefaultOpenSearchSelector(newDatasourceSelection) ? undefined : newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -68,7 +69,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.index = next.length > 0 ? next : undefined;
-      })
+      }),
     );
   };
 
@@ -79,7 +80,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       onChange(
         produce(value, (draft) => {
           draft[field] = next.length > 0 ? next : undefined;
-        })
+        }),
       );
     };
 
@@ -88,7 +89,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.disableTimeFilter = checked ? true : undefined;
-      })
+      }),
     );
   };
 
@@ -97,7 +98,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

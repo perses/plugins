@@ -4,11 +4,7 @@
     "legend": {
       "position": "right",
       "mode": "table",
-      "values": [
-        "min",
-        "max",
-        "mean"
-      ]
+      "values": ["min", "max", "mean"]
     },
     "yAxis": {
       "format": {

@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
 import { Box, Stack } from '@mui/material';
-import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
+import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
 import { QueryDefinition } from '@perses-dev/spec';
+import { ReactElement, useState } from 'react';
 
 interface AlertsExplorerQueryParams {
   queries?: QueryDefinition[];

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme } from '@perses-dev/components';
 import { Theme } from '@mui/material';
+import { PersesChartsTheme } from '@perses-dev/components';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import { getConsistentCategoricalColor, getConsistentColor } from './palette';
 import { Span } from './trace';
 
@@ -35,7 +36,7 @@ export function getServiceColor(
   chartsTheme: PersesChartsTheme,
   paletteMode: 'auto' | 'categorical' | undefined,
   serviceName: string,
-  error = false
+  error = false,
 ): string {
   switch (paletteMode) {
     case 'categorical': {
@@ -54,7 +55,7 @@ export function getSpanColor(
   muiTheme: Theme,
   chartsTheme: PersesChartsTheme,
   paletteMode: 'auto' | 'categorical' | undefined,
-  span: Span
+  span: Span,
 ): string {
   return getServiceColor(muiTheme, chartsTheme, paletteMode, span.resource.serviceName ?? '', spanHasError(span));
 }

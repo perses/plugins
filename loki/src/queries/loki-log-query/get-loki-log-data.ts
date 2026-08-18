@@ -13,8 +13,9 @@
 
 import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
-import { LokiStreamResult } from '../../model/loki-client-types';
+
 import { LokiClient } from '../../model/loki-client';
+import { LokiStreamResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
 import { LokiLogQuerySpec } from './loki-log-query-types';
 
@@ -39,7 +40,7 @@ function convertStreamsToLogs(streams: LokiStreamResult[]): LogData {
 
 export const getLokiLogData: LogQueryPlugin<LokiLogQuerySpec>['getLogData'] = async (
   spec: LokiLogQuerySpec,
-  context: LogQueryContext
+  context: LogQueryContext,
 ) => {
   if (!spec.query) {
     return {
@@ -50,7 +51,7 @@ export const getLokiLogData: LogQueryPlugin<LokiLogQuerySpec>['getLogData'] = as
 
   const query = replaceVariables(spec.query, context.variableState);
   const client = (await context.datasourceStore.getDatasourceClient<LokiClient>(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as LokiClient;
 
   const { start, end } = context.timeRange;

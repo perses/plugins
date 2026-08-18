@@ -59,6 +59,13 @@ func WithEnableFiltering(enabled bool) Option {
 	}
 }
 
+func WithEnableSorting(enabled bool) Option {
+	return func(builder *Builder) error {
+		builder.EnableSorting = enabled
+		return nil
+	}
+}
+
 func WithColumnSettings(settings []ColumnSettings) Option {
 	return func(builder *Builder) error {
 		builder.ColumnSettings = settings

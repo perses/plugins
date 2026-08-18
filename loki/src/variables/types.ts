@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelectValue } from '@perses-dev/plugin-system';
+
 import { LokiDatasourceSelector } from '../model/loki-selectors';
 
 export interface LokiVariableOptionsBase {

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { datasourceSelectValueToSelector, replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
-import { getUnixTime } from 'date-fns';
 import { AbsoluteTimeRange, isValidTraceId, Notice, TraceSearchResult } from '@perses-dev/spec';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import { getUnixTime } from 'date-fns';
+
 import {
   TEMPO_DATASOURCE_KIND,
   TempoDatasourceSelector,

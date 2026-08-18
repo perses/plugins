@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { SilencesQueryContext } from '@perses-dev/plugin-system';
+
 import { AlertManagerClient } from '../../model';
 import { AlertManagerDatasource } from '../alertmanager-datasource';
 import { AlertManagerSilencesQuerySpec } from '../types';
@@ -57,7 +58,7 @@ function createContext(client: AlertManagerClient): SilencesQueryContext {
     datasourceStore: {
       getDatasource: jest.fn(),
       getDatasourceClient: jest.fn(() =>
-        Promise.resolve(client)
+        Promise.resolve(client),
       ) as SilencesQueryContext['datasourceStore']['getDatasourceClient'],
       listDatasourceSelectItems: jest.fn(async () => []),
       getLocalDatasources: jest.fn(),
@@ -141,7 +142,7 @@ describe('getSilencesData', () => {
     expect(client.getSilences).toHaveBeenCalledWith(
       expect.objectContaining({
         filter: ['team="ops"'],
-      })
+      }),
     );
   });
 });

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import * as echarts from 'echarts';
+
 import { FlameChartSample } from './data-model';
 import { formatItemValue } from './format';
 

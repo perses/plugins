@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
+
 import { MatchersList } from './MatchersList';
 
 describe('MatchersList', () => {
@@ -42,7 +43,7 @@ describe('MatchersList', () => {
           { name: 'alertname', value: 'HighMemory', isEqual: true, isRegex: false },
           { name: 'severity', value: 'critical', isEqual: true, isRegex: false },
         ]}
-      />
+      />,
     );
     expect(screen.getByText('alertname="HighMemory"')).toBeInTheDocument();
     expect(screen.getByText('severity="critical"')).toBeInTheDocument();

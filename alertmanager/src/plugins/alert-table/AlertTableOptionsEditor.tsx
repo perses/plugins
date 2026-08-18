@@ -16,6 +16,7 @@ import { OptionsEditorGroup } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ChangeEvent, ReactElement, SyntheticEvent, useCallback } from 'react';
+
 import { AlertAction, AlertTableOptions, ALL_ALERT_ACTIONS } from './alert-table-model';
 
 const ACTION_LABELS: Record<AlertAction, string> = {
@@ -33,10 +34,10 @@ export function AlertTableOptionsEditor(props: OptionsEditorProps<AlertTableOpti
       onChange(
         produce(value, (draft) => {
           draft.defaultGroupBy = newValue.length > 0 ? newValue : undefined;
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleRunbookKeyChange = useCallback(
@@ -45,10 +46,10 @@ export function AlertTableOptionsEditor(props: OptionsEditorProps<AlertTableOpti
         produce(value, (draft) => {
           const trimmed = e.target.value.trim();
           draft.runbookAnnotationKey = trimmed || undefined;
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleToggle = useCallback(
@@ -63,10 +64,10 @@ export function AlertTableOptionsEditor(props: OptionsEditorProps<AlertTableOpti
             if (idx >= 0) current.splice(idx, 1);
           }
           draft.allowedActions = current;
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

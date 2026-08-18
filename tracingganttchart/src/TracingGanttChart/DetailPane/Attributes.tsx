@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import * as oltpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import { ReactElement, useMemo } from 'react';
+
+import { CustomLinks } from '../../gantt-chart-model';
 import { Span, Trace } from '../trace';
 import { formatDuration } from '../utils';
-import { CustomLinks } from '../../gantt-chart-model';
 
 export interface TraceAttributesProps {
   customLinks?: CustomLinks;

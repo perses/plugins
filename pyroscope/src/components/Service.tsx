@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, SyntheticEvent } from 'react';
 import { Stack, TextField, Autocomplete } from '@mui/material';
+import { ReactElement, SyntheticEvent } from 'react';
+
 import { PyroscopeDatasourceSelector } from '../model';
 import { useServices } from '../utils/use-query';
 

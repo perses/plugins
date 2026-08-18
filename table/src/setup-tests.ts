@@ -15,3 +15,10 @@ import '@testing-library/jest-dom';
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
 jest.mock('echarts/core');
+
+// jsdom does not implement ResizeObserver
+globalThis.ResizeObserver = class ResizeObserver {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+};

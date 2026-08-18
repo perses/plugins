@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { milliseconds, getUnixTime } from 'date-fns';
 import { AbsoluteTimeRange, DurationString, parseDurationString } from '@perses-dev/spec';
+import { milliseconds, getUnixTime } from 'date-fns';
+
 import { UnixTimestampSeconds } from './api-types';
 
 export interface PrometheusTimeRange {
@@ -44,7 +45,7 @@ export function getRangeStep(
   timeRange: PrometheusTimeRange,
   minStepSeconds = 15,
   resolution = 1,
-  suggestedStepMs = 0
+  suggestedStepMs = 0,
 ): number {
   const suggestedStepSeconds = suggestedStepMs / 1000;
   const queryRangeSeconds = timeRange.end - timeRange.start;

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
-import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
+
 import { VictoriaLogsDatasource } from '../../datasources/victorialogs-datasource';
 import { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
+import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsLogQuery } from './VictoriaLogsLogQuery';
 
 const datasource: VictoriaLogsDatasourceSpec = {
@@ -67,7 +68,7 @@ describe('VictoriaLogsLogQuery', () => {
       {
         query: '{service="$service", level="$level"} |= "error"',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['service', 'level']);
   });

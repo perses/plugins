@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo } from 'react';
 import { Table, TableBody, TableRow, TableCell, useTheme, alpha } from '@mui/material';
-import './ansiColors.css';
 import { Labels } from '@perses-dev/spec';
+
+import './ansiColors.css';
+import React, { useMemo } from 'react';
+
 import { ansiToSanitizedHtml } from '../../utils/ansi';
 
 const AnsiValue: React.FC<{ value: string }> = ({ value }) => {

@@ -18,6 +18,7 @@ import {
   SelectionOptions,
 } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
+
 import { TraceTableOptions } from './trace-table-model';
 
 type TraceTableItemSelectionActionsEditorProps = OptionsEditorProps<TraceTableOptions>;

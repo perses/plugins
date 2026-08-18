@@ -4,6 +4,6 @@
   "compilerOptions": {
     "emitDeclarationOnly": true,
     "declaration": true,
-    "preserveWatchOutput": true,
-  },
+    "preserveWatchOutput": true
+  }
 }

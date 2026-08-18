@@ -22,8 +22,8 @@ describe('JaegerTraceQuery', () => {
           service: '$service',
           tags: '{"env":"$env"}',
         },
-        {} as never
-      )
+        {} as never,
+      ),
     ).toEqual({
       variables: ['trace_ds', 'service', 'env'],
     });

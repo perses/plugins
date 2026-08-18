@@ -60,7 +60,7 @@ describe('PrometheusDatasource query parameters', () => {
       await healthCheckFn;
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:9090/-/healthy?dedup=false&timeout=30s',
-        expect.any(Object)
+        expect.any(Object),
       );
     }
 

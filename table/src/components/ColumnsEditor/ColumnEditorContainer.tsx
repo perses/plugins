@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import ChevronRight from 'mdi-material-ui/ChevronRight';
-import ChevronDown from 'mdi-material-ui/ChevronDown';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import EyeIcon from 'mdi-material-ui/EyeOutline';
-import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import { DragAndDropElement, DragButton } from '@perses-dev/components';
+import ChevronDown from 'mdi-material-ui/ChevronDown';
+import ChevronRight from 'mdi-material-ui/ChevronRight';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
 import { ReactElement } from 'react';
+
 import { ColumnEditor, ColumnEditorProps } from './ColumnEditor';
 
 export interface ColumnEditorContainerProps extends ColumnEditorProps {
@@ -37,6 +38,7 @@ export function ColumnEditorContainer({
   onDelete,
   onMoveUp,
   onMoveDown,
+  defaultEnableSorting,
 }: ColumnEditorContainerProps): ReactElement {
   function handleHideColumn(): void {
     onChange({ ...column, hide: !column.hide });
@@ -104,7 +106,7 @@ export function ColumnEditorContainer({
       {/* When a <Grid> is inside a <Stack> with gap, the negative margin of the grid is not applied. Therefore, let's wrap it in a div. */}
       {!isCollapsed && (
         <div>
-          <ColumnEditor column={column} onChange={onChange} />
+          <ColumnEditor column={column} onChange={onChange} defaultEnableSorting={defaultEnableSorting} />
         </div>
       )}
     </DragAndDropElement>

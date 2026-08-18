@@ -19,11 +19,12 @@ import {
   PluginRegistry,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { TimeSeriesData } from '@perses-dev/spec';
+
 import { TableOptions, TimeSeriesTableProps } from '../models';
 import {
   MOCK_MULTI_QUERY_DATA_EMPTY,
@@ -37,12 +38,15 @@ import {
 import { TablePanel } from './TablePanel';
 
 /* mock all variables */
+const MOCK_VARIABLE_STATE_MAP: VariableStateMap = {
+  myproject: { loading: false, value: 'my_project' },
+  __range: { loading: false, value: '1h' },
+};
 jest.mock('@perses-dev/plugin-system', () => ({
   ...jest.requireActual('@perses-dev/plugin-system'),
-  useAllVariableValues: (): VariableStateMap => ({
-    myproject: { loading: false, value: 'my_project' },
-    __range: { loading: false, value: '1h' },
-  }),
+  // Return a stable reference (like the real hook, which memoizes) so consumers
+  // that depend on it in a useMemo/useEffect dependency array don't recompute/rerun on every render.
+  useAllVariableValues: (): VariableStateMap => MOCK_VARIABLE_STATE_MAP,
 }));
 
 const TEST_TIMEOUT = 15000; // Github Actions is slow
@@ -70,7 +74,7 @@ describe('TablePanel', () => {
             </ChartsProvider>
           </VirtuosoMockContext.Provider>
         </ItemActionsProvider>
-      </SelectionProvider>
+      </SelectionProvider>,
     );
   };
 
@@ -91,7 +95,7 @@ describe('TablePanel', () => {
 
       expect(await screen.findAllByRole('cell')).toHaveLength(16); // 2 time series with 8 columns
     },
-    TEST_TIMEOUT
+    TEST_TIMEOUT,
   );
 
   it(
@@ -131,7 +135,28 @@ describe('TablePanel', () => {
 
       expect(await screen.findAllByRole('cell')).toHaveLength(14); // 2 time series with 7 columns
     },
-    TEST_TIMEOUT
+    TEST_TIMEOUT,
+  );
+
+  it(
+    'should enable sorting on all columns when enableSorting is set in general settings',
+    async () => {
+      renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+        enableSorting: true,
+        // column settings without an explicit enableSorting inherit the general default
+        columnSettings: [
+          { name: 'value', header: 'Value' },
+          { name: 'env', enableSorting: false },
+        ],
+      });
+
+      const valueHeaderCell = await screen.findByRole('columnheader', { name: /Value/i });
+      expect(await within(valueHeaderCell).findByTestId('ArrowDownwardIcon')).toBeInTheDocument();
+
+      const envHeaderCell = await screen.findByRole('columnheader', { name: 'env' });
+      expect(within(envHeaderCell).queryByTestId('ArrowDownwardIcon')).not.toBeInTheDocument();
+    },
+    TEST_TIMEOUT,
   );
 
   it('should apply transforms', async () => {
@@ -219,7 +244,7 @@ describe('TablePanel', () => {
             </PluginRegistry>
           </QueryClientProvider>
         </ChartsProvider>
-      </VirtuosoMockContext.Provider>
+      </VirtuosoMockContext.Provider>,
     );
 
     // embedded panel is loaded async
@@ -254,7 +279,7 @@ describe('TablePanel', () => {
           expect(within(firstHeader).getByRole('checkbox')).toBeInTheDocument();
         }
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -267,7 +292,7 @@ describe('TablePanel', () => {
         // Should not have any checkboxes
         expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -278,7 +303,7 @@ describe('TablePanel', () => {
         // Should not have any checkboxes by default
         expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -299,7 +324,7 @@ describe('TablePanel', () => {
           expect(firstRowCheckbox).toBeChecked();
         }
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -321,7 +346,7 @@ describe('TablePanel', () => {
           });
         }
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -352,7 +377,7 @@ describe('TablePanel', () => {
         const actionButtons = screen.queryAllByRole('button', { name: 'Test Action' });
         expect(actionButtons).toHaveLength(2); // 2 rows with action buttons
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
   });
 
@@ -372,7 +397,7 @@ describe('TablePanel', () => {
               </ChartsProvider>
             </VirtuosoMockContext.Provider>
           </ItemActionsProvider>
-        </SelectionProvider>
+        </SelectionProvider>,
       );
     };
 
@@ -410,7 +435,7 @@ describe('TablePanel', () => {
         expect(await screen.findByRole('cell', { name: '100' })).toBeInTheDocument();
         expect(await screen.findByRole('cell', { name: '200' })).toBeInTheDocument();
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -439,7 +464,7 @@ describe('TablePanel', () => {
         // ns-b's value #1 = 200 should still render correctly (not become N/A)
         expect(screen.getByRole('cell', { name: '200' })).toBeInTheDocument();
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -459,7 +484,7 @@ describe('TablePanel', () => {
         // No N/A should appear — all cells have real values (100, 200, 50, 0)
         expect(screen.queryAllByRole('cell', { name: 'N/A' })).toHaveLength(0);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
 
     it(
@@ -486,7 +511,7 @@ describe('TablePanel', () => {
         // Q1 has data, Q2 has partial data, Q3 is completely empty
         renderMultiQueryPanel(
           [MOCK_MULTI_QUERY_DATA_Q1, MOCK_MULTI_QUERY_DATA_Q2, MOCK_MULTI_QUERY_DATA_EMPTY],
-          options
+          options,
         );
 
         // Both namespaces should be present
@@ -498,7 +523,7 @@ describe('TablePanel', () => {
         // At minimum: ns-b missing value #2 (1) + both rows missing value #3 (2) = 3 N/A cells
         expect(naCells.length).toBeGreaterThanOrEqual(3);
       },
-      TEST_TIMEOUT
+      TEST_TIMEOUT,
     );
   });
 });
