@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import { useState } from 'react';
 
 /**
  * Generic type for any Loki query spec that has a query field
@@ -29,7 +29,7 @@ type LokiQuerySpec = {
  * every time the user types.
  */
 export function useQueryState<T extends LokiQuerySpec>(
-  props: OptionsEditorProps<T>
+  props: OptionsEditorProps<T>,
 ): {
   query: string;
   handleQueryChange: (e: string) => void;
@@ -60,7 +60,7 @@ export function useQueryState<T extends LokiQuerySpec>(
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

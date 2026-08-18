@@ -13,6 +13,7 @@
 
 import { datasourceSelectValueToSelector, replaceVariables, SilencesQueryContext } from '@perses-dev/plugin-system';
 import { Silence, SilencesData } from '@perses-dev/spec';
+
 import { ALERTMANAGER_DATASOURCE_KIND, AlertManagerClient, DEFAULT_ALERTMANAGER, GettableSilence } from '../../model';
 import { AlertManagerSilencesQuerySpec } from '../types';
 /**
@@ -41,7 +42,7 @@ function transformSilence(apiSilence: GettableSilence): Silence {
  */
 export async function getSilencesData(
   spec: AlertManagerSilencesQuerySpec,
-  context: SilencesQueryContext
+  context: SilencesQueryContext,
 ): Promise<SilencesData> {
   const listDatasourceSelectItems =
     await context.datasourceStore.listDatasourceSelectItems(ALERTMANAGER_DATASOURCE_KIND);
@@ -71,7 +72,7 @@ function buildQueryString(spec: AlertManagerSilencesQuerySpec): string {
     Object.fromEntries(
       Object.entries({
         filters: spec.filters,
-      }).filter(([, value]) => value !== undefined)
-    )
+      }).filter(([, value]) => value !== undefined),
+    ),
   );
 }

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import { useState } from 'react';
+
 import { TempoTraceQuerySpec } from '../../model/trace-query-model';
 
 export type TraceQueryEditorProps = OptionsEditorProps<TempoTraceQuerySpec>;
@@ -54,7 +55,7 @@ export function useQueryState(props: TraceQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

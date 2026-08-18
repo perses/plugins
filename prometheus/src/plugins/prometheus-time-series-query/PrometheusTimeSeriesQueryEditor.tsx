@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { produce } from 'immer';
+import { FormControl, Stack, TextField } from '@mui/material';
+import { useId } from '@perses-dev/components';
+import { PanelEditorContext } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -23,10 +25,10 @@ import {
   useSuggestedStepMs,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { useId } from '@perses-dev/components';
-import { FormControl, Stack, TextField } from '@mui/material';
+import { produce } from 'immer';
 import { ReactElement, useContext, useMemo } from 'react';
-import { PanelEditorContext } from '@perses-dev/dashboards';
+
+import { PromQLEditor } from '../../components';
 import {
   DEFAULT_PROM,
   DurationString,
@@ -40,7 +42,6 @@ import {
   PrometheusDatasourceSelector,
 } from '../../model';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
-import { PromQLEditor } from '../../components';
 import {
   PrometheusTimeSeriesQueryEditorProps,
   useQueryState,
@@ -64,7 +65,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    PROM_DATASOURCE_KIND
+    PROM_DATASOURCE_KIND,
   ) as PrometheusDatasourceSelector;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
@@ -76,7 +77,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const minStepPlaceholder =
     minStep ??
-    (datasourceResource && (datasourceResource?.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
+    (datasourceResource && (datasourceResource.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
     DEFAULT_SCRAPE_INTERVAL;
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
@@ -90,7 +91,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
           // If they're using the default, just omit the datasource prop (i.e. set to undefined)
           const nextDatasource = isDefaultPromSelector(next) ? undefined : next;
           draft.datasource = nextDatasource;
-        })
+        }),
       );
       return;
     }
@@ -107,7 +108,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     /* Try catch is necessary, because when the minStep value is being typed, it will be valid when the duration unit is added. Example: 2m = 2 + m */
     try {
       const durationsSeconds = getDurationStringSeconds(
-        replaceVariables(minStepPlaceholder, variableState) as DurationString
+        replaceVariables(minStepPlaceholder, variableState) as DurationString,
       );
       return durationsSeconds !== undefined ? durationsSeconds * 1000 : undefined;
     } catch {

@@ -17,9 +17,10 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse, LokiQueryResponse } from '../../model/loki-client-types';
+
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
+import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse, LokiQueryResponse } from '../../model/loki-client-types';
 import { LokiTimeSeriesQuery } from './LokiTimeSeriesQuery';
 
 const datasource: LokiDatasourceSpec = {
@@ -107,7 +108,7 @@ describe('LokiTimeSeriesQuery', () => {
       {
         query: 'rate({service="$service", instance="$instance"}[5m])',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['service', 'instance']);
   });
@@ -126,7 +127,7 @@ describe('LokiTimeSeriesQuery', () => {
       const context = createStubContext({ mode: 'instant' });
       const result = await LokiTimeSeriesQuery.getTimeSeriesData(
         { query: 'count_over_time({service="api"} [1h])' },
-        context
+        context,
       );
 
       expect(lokiStubClient.query).toHaveBeenCalledTimes(1);

@@ -35,7 +35,7 @@ describe('GreptimeDBDatasource.createClient', () => {
           'x-greptime-db-name': 'metrics',
         },
       },
-      {}
+      {},
     );
 
     await client.query({
@@ -50,7 +50,7 @@ describe('GreptimeDBDatasource.createClient', () => {
           Authorization: 'Bearer direct-token',
           'x-greptime-db-name': 'metrics',
         },
-      }
+      },
     );
   });
 
@@ -62,7 +62,7 @@ describe('GreptimeDBDatasource.createClient', () => {
           Authorization: 'Bearer from-spec',
         },
       },
-      {}
+      {},
     );
 
     await client.query(
@@ -71,7 +71,7 @@ describe('GreptimeDBDatasource.createClient', () => {
       },
       {
         Authorization: 'Bearer runtime',
-      }
+      },
     );
 
     expect(mockedQuery).toHaveBeenCalledWith(
@@ -81,7 +81,7 @@ describe('GreptimeDBDatasource.createClient', () => {
         headers: {
           Authorization: 'Bearer runtime',
         },
-      }
+      },
     );
   });
 });

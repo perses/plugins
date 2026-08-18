@@ -14,6 +14,7 @@
 import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-logql';
 import { Extension } from '@uiw/react-codemirror';
+
 import { logsqlHighlight } from './logsql-highlight';
 
 function logsqlLanguage(): LRLanguage {

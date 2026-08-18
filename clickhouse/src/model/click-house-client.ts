@@ -47,7 +47,7 @@ export function formatClickHouseDateTime(date: Date): string {
 
 export async function query(
   params: ClickHouseQueryParams,
-  queryOptions: ClickHouseQueryOptions
+  queryOptions: ClickHouseQueryOptions,
 ): Promise<ClickHouseQueryResponse> {
   const { datasourceUrl, headers } = queryOptions;
 
@@ -90,7 +90,7 @@ export async function query(
       data: body.data || body,
     };
   } catch (e) {
-    throw new Error(`ClickHouse query failed: ${e}`);
+    throw new Error(`ClickHouse query failed: ${e}`, { cause: e });
   }
 }
 

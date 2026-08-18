@@ -23,6 +23,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, ChangeEvent, FocusEvent } from 'react';
+
 import { LogQLEditor } from '../components';
 import {
   DEFAULT_LOKI,
@@ -45,7 +46,7 @@ const EMPTY_MATCHERS: string[] = [];
 
 function useLokiDatasourceChangeHandler<T extends LokiVariableOptionsBase>(
   value: T,
-  onChange: (value: T) => void
+  onChange: (value: T) => void,
 ): DatasourceSelectProps['onChange'] {
   return useCallback(
     (next) => {
@@ -54,13 +55,13 @@ function useLokiDatasourceChangeHandler<T extends LokiVariableOptionsBase>(
         onChange(
           produce(value, (draft) => {
             draft.datasource = !isVariableDatasource(next) && isDefaultLokiSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }
       throw new Error('Got unexpected non-Loki datasource selector');
     },
-    [onChange, value]
+    [onChange, value],
   );
 }
 
@@ -79,10 +80,10 @@ export function LokiLabelValuesVariableEditor(props: OptionsEditorProps<LokiLabe
       onChange(
         produce(value, (draft) => {
           draft.labelName = e.target.value;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleMatchEditorsChange = useCallback(
@@ -90,10 +91,10 @@ export function LokiLabelValuesVariableEditor(props: OptionsEditorProps<LokiLabe
       onChange(
         produce(value, (draft) => {
           draft.matchers = matchers;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (
@@ -143,10 +144,10 @@ export function LokiLabelNamesVariableEditor(props: OptionsEditorProps<LokiLabel
       onChange(
         produce(value, (draft) => {
           draft.matchers = matchers;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (
@@ -179,7 +180,7 @@ export function LokiLogQLVariableEditor(props: OptionsEditorProps<LokiLogQLVaria
   const datasourceSelectValue = datasource ?? DEFAULT_LOKI;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    LOKI_DATASOURCE_KIND
+    LOKI_DATASOURCE_KIND,
   ) as LokiDatasourceSelector;
 
   const { data: client } = useDatasourceClient<LokiClient>(selectedDatasource);
@@ -191,10 +192,10 @@ export function LokiLogQLVariableEditor(props: OptionsEditorProps<LokiLogQLVaria
       onChange(
         produce(value, (draft) => {
           draft.expr = e.target.textContent ?? '';
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleLabelNameChange = useCallback(
@@ -202,10 +203,10 @@ export function LokiLogQLVariableEditor(props: OptionsEditorProps<LokiLogQLVaria
       onChange(
         produce(value, (draft) => {
           draft.labelName = e.target.value;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

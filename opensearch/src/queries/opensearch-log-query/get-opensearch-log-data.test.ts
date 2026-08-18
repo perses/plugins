@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
+
 import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
 import { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
 import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
-import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 import { buildBoundedPPL, convertPPLToLogs, parseTimestamp } from './get-opensearch-log-data';
+import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 
 const datasource: OpenSearchDatasourceSpec = {
   directUrl: '/test',
@@ -79,9 +80,9 @@ describe('OpenSearchLogQuery', () => {
         query: 'source=$index | where service="$service" and level="$level"',
         index: '$index',
       },
-      createStubContext()
+      createStubContext(),
     );
-    expect(variables?.sort()).toEqual(['index', 'level', 'service']);
+    expect(variables?.toSorted()).toEqual(['index', 'level', 'service']);
   });
 
   it('returns empty log data for an empty query without calling the client', async () => {
@@ -102,7 +103,7 @@ describe('OpenSearchLogQuery', () => {
     if (!OpenSearchLogQuery.dependsOn) throw new Error('dependsOn is not defined');
     const { variables } = OpenSearchLogQuery.dependsOn(
       { query: "source=logs-* | where traceId='$traceId'" },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toContain('traceId');
   });
@@ -123,7 +124,7 @@ describe('OpenSearchLogQuery', () => {
         timestampField: 'time',
         messageField: 'body',
       },
-      createStubContext()
+      createStubContext(),
     );
 
     const sentQuery = pplMock.mock.calls[0]?.[0]?.query as string;
@@ -142,7 +143,7 @@ describe('OpenSearchLogQuery', () => {
         variableState: {
           traceId: { value: 'abc123', loading: false },
         } as unknown as LogQueryContext['variableState'],
-      }
+      },
     );
 
     const sentQuery = pplMock.mock.calls[0]?.[0]?.query as string;
@@ -152,7 +153,7 @@ describe('OpenSearchLogQuery', () => {
   it('executes a PPL query and maps rows to log entries', async () => {
     const result = await OpenSearchLogQuery.getLogData(
       { query: 'source=logs-* | where level="error"' },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(stubClient.ppl).toHaveBeenCalledTimes(1);
@@ -173,28 +174,28 @@ describe('buildBoundedPPL', () => {
   it('injects the time-range filter immediately after the source clause', () => {
     const q = buildBoundedPPL('source=logs-* | where level="error"', start, end);
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where level=\"error\""
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where level=\"error\"",
     );
   });
 
   it('prepends source=<index> when the user query does not declare one', () => {
     const q = buildBoundedPPL('where level="error"', start, end, { index: 'logs-*' });
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where level=\"error\""
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where level=\"error\"",
     );
   });
 
   it('leaves the user source clause alone when already present and ignores the spec.index hint', () => {
     const q = buildBoundedPPL('source=other-* | head 10', start, end, { index: 'logs-*' });
     expect(q).toBe(
-      "source=other-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | head 10"
+      "source=other-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | head 10",
     );
   });
 
   it('uses a custom timestamp field name in the injected where clause', () => {
     const q = buildBoundedPPL('source=logs-* | head 10', start, end, { timestampField: 'time' });
     expect(q).toBe(
-      "source=logs-* | where `time` >= '2025-01-01T00:00:00.000Z' and `time` <= '2025-01-01T01:00:00.000Z' | head 10"
+      "source=logs-* | where `time` >= '2025-01-01T00:00:00.000Z' and `time` <= '2025-01-01T01:00:00.000Z' | head 10",
     );
   });
 
@@ -203,35 +204,35 @@ describe('buildBoundedPPL', () => {
     // each backtick is doubled so the value stays a single backtick-quoted identifier
     const quoted = '```inject`` x`';
     expect(q).toBe(
-      `source=logs-* | where ${quoted} >= '2025-01-01T00:00:00.000Z' and ${quoted} <= '2025-01-01T01:00:00.000Z' | head 10`
+      `source=logs-* | where ${quoted} >= '2025-01-01T00:00:00.000Z' and ${quoted} <= '2025-01-01T01:00:00.000Z' | head 10`,
     );
   });
 
   it('runs the bound BEFORE a stats command (otherwise @timestamp is gone)', () => {
     const q = buildBoundedPPL('source=logs-* | stats count() by service', start, end);
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | stats count() by service"
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | stats count() by service",
     );
   });
 
   it('runs the bound BEFORE a fields command that excludes @timestamp', () => {
     const q = buildBoundedPPL('source=logs-* | fields service, body', start, end);
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | fields service, body"
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | fields service, body",
     );
   });
 
   it('runs the bound BEFORE a top command (which collapses to top-N rows without @timestamp)', () => {
     const q = buildBoundedPPL('source=logs-* | top 3 service', start, end);
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | top 3 service"
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | top 3 service",
     );
   });
 
   it('appends a single where pipe when the user query has no other pipes', () => {
     const q = buildBoundedPPL('source=logs-*', start, end);
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'"
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'",
     );
   });
 
@@ -257,10 +258,10 @@ describe('buildBoundedPPL', () => {
     const q = buildBoundedPPL(
       "source=logs-* | where `@timestamp` >= '2024-12-31T00:00:00Z' | stats count() by service",
       start,
-      end
+      end,
     );
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where `@timestamp` >= '2024-12-31T00:00:00Z' | stats count() by service"
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z' | where `@timestamp` >= '2024-12-31T00:00:00Z' | stats count() by service",
     );
   });
 
@@ -289,7 +290,7 @@ describe('buildBoundedPPL', () => {
   it('does not emit a dangling pipe when the query is just a source clause with a trailing pipe', () => {
     const q = buildBoundedPPL('source=logs-* |', start, end);
     expect(q).toBe(
-      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'"
+      "source=logs-* | where `@timestamp` >= '2025-01-01T00:00:00.000Z' and `@timestamp` <= '2025-01-01T01:00:00.000Z'",
     );
     expect(q.trimEnd().endsWith('|')).toBe(false);
   });
@@ -397,7 +398,7 @@ describe('convertPPLToLogs', () => {
         ],
         datarows: [['2025-01-01T00:00:00.000Z', 'OTel body wins', 'noise']],
       },
-      { timestampField: 'time', messageField: 'body' }
+      { timestampField: 'time', messageField: 'body' },
     );
     expect(logs.entries[0]?.line).toBe('OTel body wins');
     expect(logs.entries[0]?.labels).toEqual({ message: 'noise' });
@@ -413,7 +414,7 @@ describe('convertPPLToLogs', () => {
         ],
         datarows: [['2025-01-01T00:00:00.000Z', 'hello']],
       },
-      { timestampField: 'nope', messageField: 'also-missing' }
+      { timestampField: 'nope', messageField: 'also-missing' },
     );
     expect(logs.entries[0]?.line).toBe('hello');
   });

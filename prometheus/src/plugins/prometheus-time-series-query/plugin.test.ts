@@ -17,6 +17,7 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { RangeQueryResponse } from '../../model';
 import { PrometheusDatasource } from '../prometheus-datasource';
 import { PrometheusDatasourceSpec } from '../types';
@@ -90,7 +91,7 @@ describe('PrometheusTimeSeriesQuery', () => {
         query: 'sum(up{job="$job"}) by ($instance)',
         seriesNameFormat: `$foo - label`,
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['job', 'instance', 'foo']);
   });
@@ -109,7 +110,7 @@ describe('PrometheusTimeSeriesQuery', () => {
         query: 'sum(up{job="$job"}) by ($instance)',
         seriesNameFormat: `$foo - format`,
       },
-      ctx
+      ctx,
     );
 
     expect(results.series[0]?.formattedName).toEqual('bar - format');

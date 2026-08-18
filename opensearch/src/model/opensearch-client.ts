@@ -29,7 +29,7 @@ export interface OpenSearchClient {
   ppl: (
     params: OpenSearchPPLParams,
     headers?: OpenSearchRequestHeaders,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ) => Promise<OpenSearchPPLResponse>;
 }
 
@@ -37,7 +37,7 @@ export class OpenSearchPPLError extends Error {
   constructor(
     public readonly status: number,
     public readonly body: string,
-    message?: string
+    message?: string,
   ) {
     super(message ?? buildShortMessage(status, body));
     this.name = 'OpenSearchPPLError';
@@ -82,7 +82,7 @@ function buildUrl(path: string, datasourceUrl: string): URL {
 export async function ppl(
   params: OpenSearchPPLParams,
   options: OpenSearchApiOptions,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<OpenSearchPPLResponse> {
   const url = buildUrl('/_plugins/_ppl', options.datasourceUrl);
 

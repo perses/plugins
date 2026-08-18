@@ -17,6 +17,7 @@ import { PanelProps, useReplaceVariablesInString } from '@perses-dev/plugin-syst
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import React, { ReactElement, useMemo } from 'react';
+
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;

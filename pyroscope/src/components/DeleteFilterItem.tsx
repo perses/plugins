@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import CloseIcon from 'mdi-material-ui/Close';
 import { ToolbarIconButton } from '@perses-dev/components';
+import CloseIcon from 'mdi-material-ui/Close';
+import { ReactElement } from 'react';
 
 export interface DeleteFilterItemProps {
   onClick: () => void;

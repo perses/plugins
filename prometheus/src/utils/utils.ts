@@ -37,7 +37,7 @@ export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels
 function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, removeExprWrap?: boolean): string {
   const labelStrings: string[] = [];
   Object.keys(labels)
-    .sort()
+    .toSorted()
     .forEach((labelName) => {
       const labelValue = labels[labelName];
       if (labelValue !== undefined) {
@@ -58,7 +58,7 @@ export function getUniqueKeyForPrometheusResult(
   metricLabels: {
     [key: string]: string;
   },
-  { removeExprWrap }: { removeExprWrap?: boolean } = {}
+  { removeExprWrap }: { removeExprWrap?: boolean } = {},
 ): string {
   const metricNameKey = '__name__';
   if (Object.prototype.hasOwnProperty.call(metricLabels, metricNameKey)) {
@@ -67,7 +67,7 @@ export function getUniqueKeyForPrometheusResult(
         ...metricLabels,
         [metricNameKey]: undefined,
       },
-      removeExprWrap
+      removeExprWrap,
     );
     if (removeExprWrap) {
       return `${stringifiedLabels}`;
@@ -84,7 +84,7 @@ export function getUniqueKeyForPrometheusResult(
 export function getFormattedPrometheusSeriesName(
   query: string,
   metric: Metric,
-  formatter?: string
+  formatter?: string,
 ): {
   name: string;
   formattedName: string;

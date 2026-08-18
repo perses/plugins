@@ -11,18 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationData, DatasourceSpec, parseDurationString } from '@perses-dev/spec';
 import { AnnotationContext, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import { AnnotationData, DatasourceSpec, parseDurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
-import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
+
 import { DEFAULT_PROM, getPrometheusTimeRange, getRangeStep, PROM_DATASOURCE_KIND, PrometheusClient } from '../model';
-import { formatSeriesName } from '../utils';
+import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
 import { interpolateDatasourceProxyParams } from '../plugins/interpolation';
+import { formatSeriesName } from '../utils';
 
 export const getAnnotationData = async (
   spec: PrometheusPromQLAnnotationOptions,
   context: AnnotationContext,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
 ): Promise<AnnotationData[]> => {
   if (!spec.expr) {
     return [];
@@ -34,18 +35,18 @@ export const getAnnotationData = async (
     datasourceSelectValueToSelector(
       spec.datasource ?? DEFAULT_PROM,
       context.variableState,
-      listDatasourceSelectItems
+      listDatasourceSelectItems,
     ) ?? DEFAULT_PROM;
 
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(datasourceSelector);
 
   const datasource = (await context.datasourceStore.getDatasource(
-    datasourceSelector
+    datasourceSelector,
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
   const interpolatedOptions = interpolateDatasourceProxyParams(datasource, context.variableState);
 
   const datasourceScrapeInterval = Math.trunc(
-    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
+    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000,
   );
 
   const timeRange = getPrometheusTimeRange(context.absoluteTimeRange);
@@ -74,7 +75,7 @@ export const getAnnotationData = async (
       end: alignedEnd,
       step: step,
     },
-    { ...interpolatedOptions, signal: abortSignal }
+    { ...interpolatedOptions, signal: abortSignal },
   );
 
   const result: AnnotationData[] = [];

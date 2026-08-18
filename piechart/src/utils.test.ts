@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { CellContext, ColumnDefTemplate } from '@tanstack/react-table';
+
 import { PieChartData } from './PieChartBase';
 import { PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 
@@ -109,7 +110,7 @@ describe('PieChartTableLegendMapper', () => {
           id: '5',
           label: 'Label 5',
         },
-      ].map((v, index) => ({ ...v, data: expectedData[index] }))
+      ].map((v, index) => ({ ...v, data: expectedData[index] })),
     );
   });
 
@@ -157,7 +158,7 @@ describe('PieChartTableLegendMapper', () => {
       } else {
         throw new Error('Cell formatter is not defined');
       }
-    }
+    },
   );
 });
 

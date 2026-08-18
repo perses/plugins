@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useState } from 'react';
 import { Stack, useTheme, Link } from '@mui/material';
-
 import { Table, TableColumnConfig } from '@perses-dev/components';
-import { SortingState } from '@tanstack/react-table';
 import { ProfileData } from '@perses-dev/spec';
-import { tableRecursionJson } from '../utils/data-transform';
+import { SortingState } from '@tanstack/react-table';
+import { ReactElement, useMemo, useState } from 'react';
+
 import { TableChartSample } from '../utils/data-model';
+import { tableRecursionJson } from '../utils/data-transform';
 import { formatItemValue } from '../utils/format';
 import { SearchBar } from './SearchBar';
 

@@ -13,12 +13,13 @@
 
 import { PersesChartsTheme } from '@perses-dev/components';
 import { LineSeriesOption } from 'echarts/charts';
+
 import { StatChartSparklineOptions } from '../stat-chart-model';
 
 export function convertSparkline(
   chartsTheme: PersesChartsTheme,
   color: string,
-  sparkline?: StatChartSparklineOptions
+  sparkline?: StatChartSparklineOptions,
 ): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
 

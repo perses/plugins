@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
-import * as exampleTrace from '../test/traces/example_otlp.json';
-import * as missingRootSpanTrace from '../test/traces/pushbytes_no_root_span_otlp.json';
-import * as incompleteTrace from '../test/traces/pushbytes_incomplete_otlp.json';
-import * as asyncTrace from '../test/traces/async_jaeger.json';
+
 import { JaegerTrace, jaegerTraceToOTLP } from '../test/convert/jaeger';
+import * as asyncTrace from '../test/traces/async_jaeger.json';
+import * as exampleTrace from '../test/traces/example_otlp.json';
+import * as incompleteTrace from '../test/traces/pushbytes_incomplete_otlp.json';
+import * as missingRootSpanTrace from '../test/traces/pushbytes_no_root_span_otlp.json';
 import { forEachSpan, getTraceModel, Span } from './trace';
 
 describe('trace', () => {

@@ -44,7 +44,7 @@ export function getColorForValue(value: number | string, baseColor: string): str
     const color = hslToHex(
       Math.abs(newH),
       Math.min(Math.max(newS, 50), 90), // Keep saturation 50-90%
-      Math.min(Math.max(newL, 30), 70) // Keep lightness 30-70%
+      Math.min(Math.max(newL, 30), 70), // Keep lightness 30-70%
     );
 
     // Validate generated color

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { AlertsQueryPlugin, isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
+
 import { AlertManagerAlertsQuerySpec } from '../types';
-import { getAlertsData } from './get-alerts-data';
 import { AlertManagerAlertsQueryEditor } from './AlertManagerAlertsQueryEditor';
+import { getAlertsData } from './get-alerts-data';
 
 export const AlertManagerAlertsQuery: AlertsQueryPlugin<AlertManagerAlertsQuerySpec> = {
   getAlertsData,

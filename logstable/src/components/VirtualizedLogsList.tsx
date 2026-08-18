@@ -11,20 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'react';
 import { Box, useTheme, Popover, Button, ButtonGroup, IconButton } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
-import { Virtuoso } from 'react-virtuoso';
 import { useSelection } from '@perses-dev/components';
 import { formatForDisplay, useSelectionItemActions } from '@perses-dev/dashboards';
 import { ActionOptions, useAllVariableValues } from '@perses-dev/plugin-system';
 import { LogEntry } from '@perses-dev/spec';
-import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
+import CloseIcon from 'mdi-material-ui/Close';
+import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'react';
+import { Virtuoso } from 'react-virtuoso';
+
 import { LogsTableOptions } from '../model';
+import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogRow } from './LogRow';
 
 const PERSES_LOGSTABLE_HINTS_DISMISSED = 'PERSES_LOGSTABLE_HINTS_DISMISSED';
 const COPY_TOAST_DURATION_MS = 5000;
+type CopyFormat = 'full' | 'message' | 'json';
+const COPY_FORMAT_LABELS: Record<CopyFormat, string> = {
+  full: 'Full',
+  message: 'Message',
+  json: 'JSON',
+};
 
 // Platform-aware modifier key display using TanStack's formatForDisplay
 const modKeyDisplay = formatForDisplay('Mod');
@@ -47,7 +54,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const selectedRowsRef = useRef<Set<number>>(selectedRows);
   const [copyPopoverAnchor, setCopyPopoverAnchor] = useState<{ x: number; y: number } | null>(null);
-  const [lastCopiedFormat, setLastCopiedFormat] = useState<'full' | 'message' | 'json'>('full');
+  const [lastCopiedFormat, setLastCopiedFormat] = useState<CopyFormat>('full');
   const [lastCopiedCount, setLastCopiedCount] = useState(0);
   const copyPopoverTimerRef = useRef<number | null>(null);
   const [isHintsDismissed, setIsHintsDismissed] = useState(() => {
@@ -130,7 +137,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
   const handleCopyInFormat = useCallback(
     async (format: 'full' | 'message' | 'json') => {
       const selectedLogs = Array.from(selectedRowsRef.current)
-        .sort((a, b) => a - b)
+        .toSorted((a, b) => a - b)
         .map((index) => logs[index])
         .filter((log) => log !== undefined);
 
@@ -146,7 +153,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
       await navigator.clipboard.writeText(text);
       showCopyPopover(format, selectedLogs.length);
     },
-    [logs, showCopyPopover]
+    [logs, showCopyPopover],
   );
 
   const handleRowSelect = useCallback(
@@ -191,7 +198,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
         setLastSelectedIndex(index);
       }
     },
-    [selectedRows, lastSelectedIndex]
+    [selectedRows, lastSelectedIndex],
   );
 
   const renderLogRow = (index: number): ReactNode | null => {
@@ -232,7 +239,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
     if (currentSelectedRows.size > 0) {
       e.preventDefault();
       const selectedLogs = Array.from(currentSelectedRows)
-        .sort((a, b) => a - b)
+        .toSorted((a, b) => a - b)
         .map((index) => logs[index])
         .filter((log) => log !== undefined);
       const formattedText = formatLogEntries(selectedLogs);
@@ -262,7 +269,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
         if (selectedRowsRef.current.size > 0 && !hasTextSelection) {
           e.preventDefault();
           const selectedLogs = Array.from(selectedRowsRef.current)
-            .sort((a, b) => a - b)
+            .toSorted((a, b) => a - b)
             .map((index) => logs[index])
             .filter((log) => log !== undefined);
           const formattedText = formatLogEntries(selectedLogs);
@@ -413,7 +420,7 @@ export const VirtualizedLogsList: React.FC<VirtualizedLogsListProps> = ({
                 component="span"
                 sx={{ color: theme.palette.primary.main, minWidth: '60px', display: 'inline-block' }}
               >
-                {lastCopiedFormat === 'full' ? 'Full' : lastCopiedFormat === 'message' ? 'Message' : 'JSON'}
+                {COPY_FORMAT_LABELS[lastCopiedFormat]}
               </Box>
             </Box>
             <ButtonGroup size="small" variant="outlined">

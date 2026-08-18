@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Divider, List } from '@mui/material';
-import { Fragment, ReactElement } from 'react';
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
-import { Span, Link } from '../trace';
+import { Fragment, ReactElement } from 'react';
+
 import { CustomLinks } from '../../gantt-chart-model';
+import { Span, Link } from '../trace';
 import { AttributeItem, AttributeItems } from './Attributes';
 
 export interface SpanLinkListProps {

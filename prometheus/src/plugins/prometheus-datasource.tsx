@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { RequestHeaders } from '@perses-dev/client';
 import { QueryParamValues } from '@perses-dev/components';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { BuiltinVariableDefinition } from '@perses-dev/spec';
-import { RequestHeaders } from '@perses-dev/client';
+
 import {
   ClientRequestOptions,
   healthCheck,
@@ -36,7 +37,7 @@ function wrapClientMethod<P, R>(
   fn: (params: P, opts: QueryOptions) => Promise<R>,
   datasourceUrl: string,
   specHeaders?: RequestHeaders,
-  specQueryParams?: QueryParamValues
+  specQueryParams?: QueryParamValues,
 ): (params: P, options?: ClientRequestOptions) => Promise<R> {
   return (params: P, options?: ClientRequestOptions) =>
     fn(params, {

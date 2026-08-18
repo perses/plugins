@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { ProfileQueryPlugin } from '@perses-dev/plugin-system';
-import { getUnixTime } from 'date-fns';
 import { AbsoluteTimeRange, ProfileData, StackTrace } from '@perses-dev/spec';
+import { getUnixTime } from 'date-fns';
+
 import {
   PyroscopeProfileQuerySpec,
   PYROSCOPE_DATASOURCE_KIND,
@@ -34,14 +35,14 @@ export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number;
 
 export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getProfileData'] = async (
   spec,
-  context
+  context,
 ) => {
   const defaultPyroscopeDatasource: PyroscopeDatasourceSelector = {
     kind: PYROSCOPE_DATASOURCE_KIND,
   };
 
   const client: PyroscopeClient = await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? defaultPyroscopeDatasource
+    spec.datasource ?? defaultPyroscopeDatasource,
   );
 
   const buildQueryString = (): string => {

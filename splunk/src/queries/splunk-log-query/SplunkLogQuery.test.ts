@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SplunkLogQuery } from './SplunkLogQuery';
 import { LogQueryContext } from './log-query-plugin-interface';
+import { SplunkLogQuery } from './SplunkLogQuery';
 
 const createStubContext = (): LogQueryContext => ({
   datasourceStore: {
@@ -43,7 +43,7 @@ describe('SplunkLogQuery', () => {
       {
         query: 'search index=$index sourcetype=$sourcetype error',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(expect.arrayContaining(['index', 'sourcetype']));
     expect(variables).toHaveLength(2);
@@ -55,7 +55,7 @@ describe('SplunkLogQuery', () => {
       {
         query: 'search index=main error',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual([]);
   });

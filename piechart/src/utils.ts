@@ -19,13 +19,14 @@ import {
   SortOption,
   TableColumnConfig,
 } from '@perses-dev/components';
-import { format } from 'echarts';
 import { comparisonLegends, ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
-import { PieChartData } from './PieChartBase';
+import { format } from 'echarts';
+
 import { DEFAULT_SORT } from './pie-chart-model';
+import { PieChartData } from './PieChartBase';
 
 export function sortSeriesData<T extends PieChartData>(data: T[], sortOrder: SortOption = DEFAULT_SORT): T[] {
-  return data.sort((a, b) => {
+  return data.toSorted((a, b) => {
     // Handle null values - push them to the end regardless of sort order
     if (a.value === null && b.value === null) return 0;
     if (a.value === null) return 1;
@@ -49,7 +50,7 @@ export const getTooltipFormatter = (formatOptions?: FormatOptions): ((props: for
 };
 export const getLabelFormatter = (
   mode?: ModeOption,
-  formatOptions?: FormatOptions
+  formatOptions?: FormatOptions,
 ): ((props: formatterProps) => string) => {
   if (mode === 'percentage') {
     return percentageLabelFormatter(formatOptions);
@@ -76,11 +77,11 @@ const percentageLabelFormatter = (formatOptions?: FormatOptions) => {
 export interface PieChartLegendMapper {
   mapToLegendItems: (
     pieChartData: Array<Required<PieChartData>>,
-    selectedValues?: Array<LegendValue | ComparisonValues>
+    selectedValues?: Array<LegendValue | ComparisonValues>,
   ) => LegendItem[];
   mapToLegendColumns: (
     selectedValues?: Array<LegendValue | ComparisonValues>,
-    formatOptions?: FormatOptions
+    formatOptions?: FormatOptions,
   ) => Array<TableColumnConfig<LegendItem>>;
 }
 
@@ -96,7 +97,7 @@ export class PieChartListLegendMapper implements PieChartLegendMapper {
 export class PieChartTableLegendMapper implements PieChartLegendMapper {
   mapToLegendItems(
     pieChartData: Array<Required<PieChartData>>,
-    selectedValues?: Array<LegendValue | ComparisonValues>
+    selectedValues?: Array<LegendValue | ComparisonValues>,
   ): LegendItem[] {
     const relativePieChartData = calculatePercentages(pieChartData);
     const absoluteValueSelected = selectedValues?.includes('abs');
@@ -123,7 +124,7 @@ export class PieChartTableLegendMapper implements PieChartLegendMapper {
 
   mapToLegendColumns(
     selectedValues?: Array<LegendValue | ComparisonValues>,
-    formatOptions?: FormatOptions
+    formatOptions?: FormatOptions,
   ): Array<TableColumnConfig<LegendItem>> {
     const relativeFormatOptions = { unit: 'percent', decimalPlaces: formatOptions?.decimalPlaces } as const;
     return (

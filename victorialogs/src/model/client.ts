@@ -55,19 +55,19 @@ export interface VictoriaLogsClient {
   };
   streamQueryRange: (
     params: VictoriaLogsStreamQueryRangeParams,
-    headers?: VictoriaLogsRequestHeaders
+    headers?: VictoriaLogsRequestHeaders,
   ) => Promise<VictoriaLogsStreamQueryRangeResponse>;
   statsQueryRange: (
     params: VictoriaLogsStatsQueryRangeParams,
-    headers?: VictoriaLogsRequestHeaders
+    headers?: VictoriaLogsRequestHeaders,
   ) => Promise<VictoriaLogsStatsQueryRangeResponse>;
   fieldNames: (
     params: VictoriaLogsFieldNamesParams,
-    headers?: VictoriaLogsRequestHeaders
+    headers?: VictoriaLogsRequestHeaders,
   ) => Promise<VictoriaLogsFieldNamesResponse>;
   fieldValues: (
     params: VictoriaLogsFieldValuesParams,
-    headers?: VictoriaLogsRequestHeaders
+    headers?: VictoriaLogsRequestHeaders,
   ) => Promise<VictoriaLogsFieldValuesResponse>;
 }
 
@@ -91,7 +91,7 @@ function buildUrl(path: string, datasourceUrl: string): URL {
 
 export async function streamQueryRange(
   params: VictoriaLogsStreamQueryRangeParams,
-  options: VictoriaLogsApiOptions
+  options: VictoriaLogsApiOptions,
 ): Promise<VictoriaLogsStreamQueryRangeResponse> {
   const url = buildUrl('/select/logsql/query', options.datasourceUrl);
   const postData: Record<string, string> = {
@@ -142,7 +142,7 @@ export async function streamQueryRange(
 
 export async function statsQueryRange(
   params: VictoriaLogsStatsQueryRangeParams,
-  options: VictoriaLogsApiOptions
+  options: VictoriaLogsApiOptions,
 ): Promise<VictoriaLogsStatsQueryRangeResponse> {
   const url = buildUrl('/select/logsql/stats_query_range', options.datasourceUrl);
   const postData: Record<string, string> = {
@@ -167,7 +167,7 @@ export async function statsQueryRange(
 
 export async function fieldNames(
   params: VictoriaLogsFieldNamesParams,
-  options: VictoriaLogsApiOptions
+  options: VictoriaLogsApiOptions,
 ): Promise<VictoriaLogsFieldNamesResponse> {
   const url = buildUrl('/select/logsql/field_names', options.datasourceUrl);
   const postData: Record<string, string> = {
@@ -191,7 +191,7 @@ export async function fieldNames(
 
 export async function fieldValues(
   params: VictoriaLogsFieldValuesParams,
-  options: VictoriaLogsApiOptions
+  options: VictoriaLogsApiOptions,
 ): Promise<VictoriaLogsFieldValuesResponse> {
   const url = buildUrl(`/select/logsql/field_values`, options.datasourceUrl);
   const postData: Record<string, string> = {

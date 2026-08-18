@@ -14,18 +14,19 @@
 import { Box, Skeleton, Stack } from '@mui/material';
 import { FormatOptions, formatValue, useChartsTheme } from '@perses-dev/components';
 import { CalculationsMap, DEFAULT_CALCULATION, PanelProps } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/spec';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo } from 'react';
-import { TimeSeriesData } from '@perses-dev/spec';
+
 import {
   DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,
   DEFAULT_MAX_PERCENT_DECIMAL,
   GaugeChartOptions,
 } from './gauge-chart-model';
-import { convertThresholds, defaultThresholdInput } from './thresholds';
 import { GaugeChartBase, GaugeSeries } from './GaugeChartBase';
+import { convertThresholds, defaultThresholdInput } from './thresholds';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };
 const GAUGE_MIN_WIDTH = 90;
@@ -53,7 +54,7 @@ function getResponsiveValueFontSize(
   value: number | null,
   format: FormatOptions,
   width: number,
-  height: number
+  height: number,
 ): string {
   const MIN_SIZE = 8;
   const MAX_SIZE = 64;
@@ -154,7 +155,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
       null,
       format,
       contentDimensions.width,
-      contentDimensions.height
+      contentDimensions.height,
     );
     const emptyProgressWidth = getResponsiveProgressWidth(contentDimensions.width, contentDimensions.height);
     const emptyTitleFontSize = getResponsiveTitleFontSize(contentDimensions.width, contentDimensions.height);

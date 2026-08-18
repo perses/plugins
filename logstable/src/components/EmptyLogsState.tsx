@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
+import React from 'react';
 
 interface EmptyLogsStateProps {
   message?: string;

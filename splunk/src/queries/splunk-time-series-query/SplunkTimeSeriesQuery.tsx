@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+
 import { getSplunkTimeSeriesData } from './get-splunk-time-series-data';
-import { SplunkTimeSeriesQueryEditor } from './SplunkTimeSeriesQueryEditor';
 import { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
+import { SplunkTimeSeriesQueryEditor } from './SplunkTimeSeriesQueryEditor';
 
 export const SplunkTimeSeriesQuery: TimeSeriesQueryPlugin<SplunkTimeSeriesQuerySpec> = {
   getTimeSeriesData: getSplunkTimeSeriesData,
@@ -22,7 +23,7 @@ export const SplunkTimeSeriesQuery: TimeSeriesQueryPlugin<SplunkTimeSeriesQueryS
   createInitialOptions: () => ({ query: '' }),
   dependsOn: (spec) => {
     const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set([...queryVariables])];
+    const allVariables = [...new Set(queryVariables)];
     return {
       variables: allVariables,
     };

@@ -13,8 +13,9 @@
 
 import { replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
 import { TraceSearchResult } from '@perses-dev/spec';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
 import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import {
@@ -40,7 +41,7 @@ interface MutableTraceResult {
 
 export const getGreptimeDBTraceData: TraceQueryPlugin<GreptimeDBTraceQuerySpec>['getTraceData'] = async (
   spec,
-  context
+  context,
 ) => {
   const rawQuery = replaceVariables(spec.query ?? '', context.variableState).trim();
   if (rawQuery.length === 0) {
@@ -49,7 +50,7 @@ export const getGreptimeDBTraceData: TraceQueryPlugin<GreptimeDBTraceQuerySpec>[
 
   const datasourceSelector = normalizeDatasourceSelector(spec.datasource);
   const client = (await context.datasourceStore.getDatasourceClient(
-    datasourceSelector ?? DEFAULT_DATASOURCE
+    datasourceSelector ?? DEFAULT_DATASOURCE,
   )) as GreptimeDBClient;
   const start = context.absoluteTimeRange?.start.getTime().toString() ?? '0';
   const end = context.absoluteTimeRange?.end.getTime().toString() ?? '0';
@@ -80,7 +81,7 @@ export const getGreptimeDBTraceData: TraceQueryPlugin<GreptimeDBTraceQuerySpec>[
 };
 
 function normalizeDatasourceSelector(
-  datasource: GreptimeDBTraceQuerySpec['datasource']
+  datasource: GreptimeDBTraceQuerySpec['datasource'],
 ): GreptimeDBTraceQuerySpec['datasource'] | undefined {
   if (!datasource) {
     return undefined;
@@ -270,7 +271,7 @@ function buildSearchResult(records: GreptimeDBRecords | undefined): TraceSearchR
       rootTraceName: entry.rootTraceName,
       serviceStats: entry.serviceStats,
     }))
-    .sort((a, b) => b.startTimeUnixMs - a.startTimeUnixMs);
+    .toSorted((a, b) => b.startTimeUnixMs - a.startTimeUnixMs);
 }
 
 function isIntegerGreptimeDataType(dataType: string): boolean {
@@ -391,7 +392,7 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
       (durationIndex !== undefined
         ? String(
             BigInt(startTimeUnixNano) +
-              BigInt(toNanoString(row[durationIndex], getColumnDataType(columns, durationIndex)) ?? '0')
+              BigInt(toNanoString(row[durationIndex], getColumnDataType(columns, durationIndex)) ?? '0'),
           )
         : startTimeUnixNano);
 
@@ -484,7 +485,7 @@ function convertRowsToTrace(records: GreptimeDBRecords | undefined): otlptracev1
     ([_, value]) => ({
       resource: { attributes: value.resourceAttrs },
       scopeSpans: Array.from(value.scopeSpans.values()),
-    })
+    }),
   );
 
   return {

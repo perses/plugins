@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { DurationString } from '@perses-dev/spec';
+import { produce } from 'immer';
+import { useState } from 'react';
+
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export type PrometheusTimeSeriesQueryEditorProps = OptionsEditorProps<PrometheusTimeSeriesQuerySpec>;
@@ -55,7 +56,7 @@ export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 
@@ -91,7 +92,7 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.seriesNameFormat = format;
-      })
+      }),
     );
   };
 
@@ -127,7 +128,7 @@ export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.minStep = minStep;
-      })
+      }),
     );
   };
 

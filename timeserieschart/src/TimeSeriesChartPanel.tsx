@@ -11,19 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
-import type { GridComponentOption } from 'echarts';
-import merge from 'lodash/merge';
-import {
-  LEGEND_VALUE_CONFIG,
-  PanelProps,
-  useTimeRange,
-  validateLegendSpec,
-  legendValues,
-  getCalculations,
-  CalculationType,
-} from '@perses-dev/plugin-system';
 import {
   ChartInstance,
   YAxisLabel,
@@ -44,8 +32,21 @@ import {
   formatValue,
   getTimeSeriesValues,
 } from '@perses-dev/components';
-import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import { usePanelAnnotationsWithData } from '@perses-dev/dashboards';
+import {
+  LEGEND_VALUE_CONFIG,
+  PanelProps,
+  useTimeRange,
+  validateLegendSpec,
+  legendValues,
+  getCalculations,
+  CalculationType,
+} from '@perses-dev/plugin-system';
+import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import type { GridComponentOption } from 'echarts';
+import merge from 'lodash/merge';
+import { ReactElement, useMemo, useRef, useState } from 'react';
+
 import {
   TimeSeriesChartOptions,
   DEFAULT_FORMAT,
@@ -53,6 +54,8 @@ import {
   THRESHOLD_PLOT_INTERVAL,
   QuerySettingsOptions,
 } from './time-series-chart-model';
+import { TimeSeriesChartBase } from './TimeSeriesChartBase';
+import { convertAnnotationToTimeSeriesAnnotation, TimeSeriesAnnotation } from './utils/annotation';
 import {
   getTimeSeries,
   getCommonTimeScaleForQueries,
@@ -61,8 +64,6 @@ import {
   convertPercentThreshold,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
-import { TimeSeriesChartBase } from './TimeSeriesChartBase';
-import { convertAnnotationToTimeSeriesAnnotation, TimeSeriesAnnotation } from './utils/annotation';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions, TimeSeriesData>;
 
@@ -160,7 +161,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   const annotations: TimeSeriesAnnotation[] = useMemo(
     () => convertAnnotationToTimeSeriesAnnotation(annotationsWithData),
-    [annotationsWithData]
+    [annotationsWithData],
   );
 
   // Populate series data based on query results
@@ -268,8 +269,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 timeScale,
                 seriesColor,
                 querySettings,
-                yAxisIndex
-              )
+                yAxisIndex,
+              ),
             );
 
             // Store the format for this series for tooltip formatting
@@ -430,7 +431,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
         return columns;
       },
-      [] as Array<TableColumnConfig<LegendItem>>
+      [] as Array<TableColumnConfig<LegendItem>>,
     );
   }, [legend?.values, format]);
 

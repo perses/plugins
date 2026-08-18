@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceClient } from '@perses-dev/plugin-system';
 import { RequestHeaders } from '@perses-dev/client';
+import { DatasourceClient } from '@perses-dev/plugin-system';
+
 import {
   SearchProfilesParameters,
   SearchProfilesResponse,
@@ -35,22 +36,22 @@ export interface PyroscopeClient extends DatasourceClient {
   searchProfileTypes(
     params: SearchProfileTypesParameters,
     headers: RequestHeaders,
-    body: Record<string, string | number>
+    body: Record<string, string | number>,
   ): Promise<SearchProfileTypesResponse>;
   searchLabelNames(
     params: SearchLabelNamesParameters,
     headers: RequestHeaders,
-    body: Record<string, string | number>
+    body: Record<string, string | number>,
   ): Promise<SearchLabelNamesResponse>;
   searchLabelValues(
     params: SearchLabelValuesParameters,
     headers: RequestHeaders,
-    body: Record<string, string | number>
+    body: Record<string, string | number>,
   ): Promise<SearchLabelValuesResponse>;
   searchServices(
     params: SearchLabelValuesParameters,
     headers: RequestHeaders,
-    body: Record<string, string | number>
+    body: Record<string, string | number>,
   ): Promise<SearchLabelValuesResponse>;
 }
 
@@ -65,7 +66,7 @@ export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>
     return await response.json();
   } catch (e) {
     console.error('Invalid response from server', e);
-    throw new Error('Invalid response from server');
+    throw new Error('Invalid response from server', { cause: e });
   }
 };
 
@@ -88,7 +89,7 @@ function fetchWithPost<T, TResponse>(
   apiURI: string,
   params: T | null,
   queryOptions: QueryOptions,
-  body: Record<string, string | number>
+  body: Record<string, string | number>,
 ): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
@@ -110,7 +111,7 @@ function fetchWithPost<T, TResponse>(
  */
 export function searchProfiles(
   params: SearchProfilesParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<SearchProfilesResponse> {
   return fetchWithGet<SearchProfilesParameters, SearchProfilesResponse>('/pyroscope/render', params, queryOptions);
 }
@@ -121,13 +122,13 @@ export function searchProfiles(
 export function searchProfileTypes(
   params: SearchProfileTypesParameters,
   queryOptions: QueryOptions,
-  body: Record<string, string | number>
+  body: Record<string, string | number>,
 ): Promise<SearchProfileTypesResponse> {
   return fetchWithPost<SearchProfileTypesParameters, SearchProfileTypesResponse>(
     '/querier.v1.QuerierService/ProfileTypes',
     params,
     queryOptions,
-    body
+    body,
   );
 }
 
@@ -137,13 +138,13 @@ export function searchProfileTypes(
 export function searchLabelNames(
   params: SearchLabelNamesParameters,
   queryOptions: QueryOptions,
-  body: Record<string, string | number>
+  body: Record<string, string | number>,
 ): Promise<SearchLabelNamesResponse> {
   return fetchWithPost<SearchLabelNamesParameters, SearchLabelNamesResponse>(
     '/querier.v1.QuerierService/LabelNames',
     params,
     queryOptions,
-    body
+    body,
   );
 }
 
@@ -153,13 +154,13 @@ export function searchLabelNames(
 export function searchLabelValues(
   params: SearchLabelValuesParameters,
   queryOptions: QueryOptions,
-  body: Record<string, string | number>
+  body: Record<string, string | number>,
 ): Promise<SearchLabelValuesResponse> {
   return fetchWithPost<SearchLabelValuesParameters, SearchLabelValuesResponse>(
     '/querier.v1.QuerierService/LabelValues',
     params,
     queryOptions,
-    body
+    body,
   );
 }
 
@@ -170,12 +171,12 @@ export function searchLabelValues(
 export function searchServices(
   params: SearchLabelValuesParameters,
   queryOptions: QueryOptions,
-  body: Record<string, string | number>
+  body: Record<string, string | number>,
 ): Promise<SearchLabelValuesResponse> {
   return fetchWithPost<SearchLabelValuesParameters, SearchLabelValuesResponse>(
     '/querier.v1.QuerierService/LabelValues',
     params,
     queryOptions,
-    { name: 'service_name', ...body }
+    { name: 'service_name', ...body },
   );
 }

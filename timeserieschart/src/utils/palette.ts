@@ -49,7 +49,7 @@ export function getConsistentCategoricalColor(
   name: string,
   error: boolean,
   categoricalPalette: string[],
-  errorPalette: string[]
+  errorPalette: string[],
 ): string {
   const palette = error ? errorPalette : categoricalPalette;
   if (palette.length === 0) {

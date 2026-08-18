@@ -18,6 +18,7 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { LokiClient, DEFAULT_LOKI, getLokiTimeRange, LOKI_DATASOURCE_KIND } from '../model';
 import { stringArrayToVariableOptions, LokiLabelValuesVariableEditor } from './loki-variables';
 import { LokiLabelValuesVariableOptions } from './types';
@@ -28,7 +29,7 @@ export const LokiLabelValuesVariable: VariablePlugin<LokiLabelValuesVariableOpti
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_LOKI,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(LOKI_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(LOKI_DATASOURCE_KIND),
       ) ?? DEFAULT_LOKI;
     const client: LokiClient = await ctx.datasourceStore.getDatasourceClient(datasourceSelector);
     const query = spec.matchers ? replaceVariables(spec.matchers[0] ?? '', ctx.variables) || undefined : undefined;
@@ -42,7 +43,7 @@ export const LokiLabelValuesVariable: VariablePlugin<LokiLabelValuesVariableOpti
     return { data: stringArrayToVariableOptions(options) };
   },
   dependsOn: (spec) => {
-    const matcherVariables = spec.matchers?.map((m) => parseVariables(m)).flat() || [];
+    const matcherVariables = spec.matchers?.flatMap((m) => parseVariables(m)) || [];
     const labelVariables = parseVariables(spec.labelName);
     const datasourceVariables =
       spec.datasource && isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource) : [];

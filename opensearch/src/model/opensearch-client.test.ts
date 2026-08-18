@@ -54,7 +54,7 @@ describe('opensearch-client', () => {
     const mock = mockFetch({ ok: true, status: 200, body: { schema: [], datarows: [] } });
     await ppl(
       { query: 'source=logs-*' },
-      { datasourceUrl: 'http://localhost:9200', headers: { Authorization: 'Basic xyz' } }
+      { datasourceUrl: 'http://localhost:9200', headers: { Authorization: 'Basic xyz' } },
     );
     const [, init] = mock.mock.calls[0] as [string, RequestInit];
     expect((init.headers as Record<string, string>).Authorization).toBe('Basic xyz');
@@ -68,7 +68,7 @@ describe('opensearch-client', () => {
       body: '{"error":{"reason":"bad PPL"}}',
     });
     await expect(ppl({ query: 'broken' }, { datasourceUrl: 'http://localhost:9200' })).rejects.toBeInstanceOf(
-      OpenSearchPPLError
+      OpenSearchPPLError,
     );
   });
 
@@ -105,10 +105,10 @@ describe('opensearch-client', () => {
     it('combines reason and details when both are present and differ', () => {
       const err = new OpenSearchPPLError(
         400,
-        '{"error":{"reason":"Invalid Query","details":"can\'t resolve Symbol(name=@timestamp)"}}'
+        '{"error":{"reason":"Invalid Query","details":"can\'t resolve Symbol(name=@timestamp)"}}',
       );
       expect(err.message).toBe(
-        "OpenSearch PPL request failed (400): Invalid Query — can't resolve Symbol(name=@timestamp)"
+        "OpenSearch PPL request failed (400): Invalid Query — can't resolve Symbol(name=@timestamp)",
       );
     });
 
@@ -125,7 +125,7 @@ describe('opensearch-client', () => {
     it('falls through to details when reason is an empty string', () => {
       const err = new OpenSearchPPLError(
         400,
-        '{"error":{"reason":"","details":"can\'t resolve Symbol(name=@timestamp)"}}'
+        '{"error":{"reason":"","details":"can\'t resolve Symbol(name=@timestamp)"}}',
       );
       expect(err.message).toBe("OpenSearch PPL request failed (400): can't resolve Symbol(name=@timestamp)");
     });

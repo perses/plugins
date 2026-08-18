@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, SyntheticEvent, useCallback, useEffect, useState } from 'react';
 import { Autocomplete, Checkbox, Stack, TextField, TextFieldProps } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { ReactElement, SyntheticEvent, useCallback, useEffect, useState } from 'react';
+
 import { TempoClient } from '../model';
 import { getUnixTimeRange } from '../plugins';
 import { filterToTraceQL, traceQLToFilter, DurationField, Filter, splitByUnquotedWhitespace } from './filter';
@@ -43,14 +44,14 @@ export function AttributeFilters(props: AttributeFiltersProps): ReactElement {
     'resource.service.name',
     filterToTraceQL({ ...filter, serviceName: [] }),
     start,
-    end
+    end,
   );
   const { data: spanNameOptions } = useTagValues(
     client,
     'name',
     filterToTraceQL({ ...filter, spanName: [] }),
     start,
-    end
+    end,
   );
 
   return (
@@ -246,7 +247,7 @@ function useTagValues(
   tag: string,
   query: string,
   start?: number,
-  end?: number
+  end?: number,
 ): UseQueryResult<string[] | undefined> {
   return useQuery({
     queryKey: ['useTagValues', client, tag, query, start, end],
@@ -254,7 +255,7 @@ function useTagValues(
     queryFn: async function () {
       if (!client) return;
       const values = await client.searchTagValues({ tag, q: query, start, end });
-      return values.tagValues.map((tagValue) => tagValue.value ?? '').sort();
+      return values.tagValues.map((tagValue) => tagValue.value ?? '').toSorted();
     },
     staleTime: 60 * 1000, // cache tag value response for 1m
   });

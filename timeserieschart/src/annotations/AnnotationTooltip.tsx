@@ -12,10 +12,6 @@
 // limitations under the License.
 
 import { Box, Divider, Portal, Stack, Typography } from '@mui/material';
-import Pin from 'mdi-material-ui/Pin';
-import PinOutline from 'mdi-material-ui/PinOutline';
-import useResizeObserver from 'use-resize-observer';
-import type { LineSeriesOption } from 'echarts';
 import {
   assembleTransform,
   CursorCoordinates,
@@ -28,6 +24,11 @@ import {
   useMousePosition,
 } from '@perses-dev/components';
 import { DEFAULT_ANNOTATION_COLOR } from '@perses-dev/plugin-system';
+import type { LineSeriesOption } from 'echarts';
+import Pin from 'mdi-material-ui/Pin';
+import PinOutline from 'mdi-material-ui/PinOutline';
+import useResizeObserver from 'use-resize-observer';
+
 import { TimeSeriesAnnotation } from '../utils/annotation';
 
 export interface AnnotationTooltipProps {

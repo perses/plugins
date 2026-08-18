@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent, ReactElement } from 'react';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Link, Stack, TextField } from '@mui/material';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ChangeEvent, ReactElement } from 'react';
+
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelOptionsEditorProps = OptionsEditorProps<MarkdownPanelOptions>;

@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import { useState } from 'react';
 
 type OpenSearchQuerySpec = {
   query: string;
@@ -24,7 +24,7 @@ type OpenSearchQuerySpec = {
  * Changes are propagated to the spec on blur.
  */
 export function useQueryState<T extends OpenSearchQuerySpec>(
-  props: OptionsEditorProps<T>
+  props: OptionsEditorProps<T>,
 ): {
   query: string;
   handleQueryChange: (e: string) => void;
@@ -48,7 +48,7 @@ export function useQueryState<T extends OpenSearchQuerySpec>(
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 

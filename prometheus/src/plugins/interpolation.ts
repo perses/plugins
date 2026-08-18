@@ -14,6 +14,7 @@
 import { interpolateHeaders, interpolateQueryParams, VariableStateMap } from '@perses-dev/components';
 import { DatasourceStore } from '@perses-dev/plugin-system';
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+
 import { ClientRequestOptions, PrometheusClient } from '../model';
 import { PrometheusDatasourceSpec } from './types';
 
@@ -25,7 +26,7 @@ export interface ResolvedPrometheusDatasource {
 export async function resolvePrometheusDatasource(
   datasourceStore: DatasourceStore,
   selector: DatasourceSelector,
-  variableState: VariableStateMap
+  variableState: VariableStateMap,
 ): Promise<ResolvedPrometheusDatasource> {
   const [client, datasource] = await Promise.all([
     datasourceStore.getDatasourceClient<PrometheusClient>(selector),
@@ -37,7 +38,7 @@ export async function resolvePrometheusDatasource(
 
 export function interpolateDatasourceProxyParams(
   datasource: DatasourceSpec<PrometheusDatasourceSpec>,
-  variableState: VariableStateMap
+  variableState: VariableStateMap,
 ): ClientRequestOptions {
   const spec = datasource.plugin.spec;
   const rawHeaders = spec.proxy?.spec?.headers;
@@ -52,7 +53,7 @@ export function interpolateDatasourceProxyParams(
 export async function getInterpolatedRequestOptions(
   datasourceStore: DatasourceStore,
   datasource: DatasourceSelector,
-  variableState: VariableStateMap
+  variableState: VariableStateMap,
 ): Promise<ClientRequestOptions> {
   const datasourceSpec = (await datasourceStore.getDatasource(datasource)) as DatasourceSpec<PrometheusDatasourceSpec>;
   return interpolateDatasourceProxyParams(datasourceSpec, variableState);

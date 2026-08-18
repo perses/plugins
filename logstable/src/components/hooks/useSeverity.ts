@@ -13,6 +13,7 @@
 
 import { useTheme } from '@mui/material';
 import { LogEntry } from '@perses-dev/spec';
+
 import { getSeverity } from '../utils';
 
 export const useSeverityColor = (log?: LogEntry): string => {

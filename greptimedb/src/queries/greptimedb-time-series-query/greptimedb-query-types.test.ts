@@ -13,6 +13,7 @@
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { GreptimeDBTimeSeriesQuery } from './GreptimeDBQuery';
@@ -83,7 +84,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
       {
         query: 'SELECT * FROM metrics WHERE foo="$foo" AND bar="$bar"',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['foo', 'bar']);
   });
@@ -123,7 +124,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
 
     const result = await GreptimeDBTimeSeriesQuery.getTimeSeriesData(
       { query: 'SELECT count(*) FROM logs' },
-      createStubContext()
+      createStubContext(),
     );
     expect(result.series).toHaveLength(1);
     expect(result.series[0]?.name).toBe('count(*)');
@@ -166,10 +167,10 @@ describe('GreptimeDBTimeSeriesQuery', () => {
       {
         query: "SELECT date_bin(INTERVAL '1 minute', ts) AS time, host, avg(cpu_usage) AS value FROM cpu_metrics_30",
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(result.series).toHaveLength(2);
-    expect(result.series.map((s) => s.name).sort()).toEqual(['host=host-c', 'host=host_b']);
+    expect(result.series.map((s) => s.name).toSorted()).toEqual(['host=host-c', 'host=host_b']);
   });
 });

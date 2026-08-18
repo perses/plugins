@@ -13,10 +13,10 @@
 
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/promql/format.tsx
 
-import React, { ReactElement, ReactNode } from 'react';
 import { styled } from '@mui/material';
-
 import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
+import React, { ReactElement, ReactNode } from 'react';
+
 import ASTNode, {
   VectorSelector,
   matchType,
@@ -80,40 +80,52 @@ export const labelNameList = (labels: string[]): React.ReactNode[] => {
   });
 };
 
-const formatAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, offset: number): ReactNode => (
-  <>
-    {timestamp !== null ? (
+const formatAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, offset: number): ReactNode => {
+  let at: ReactNode = null;
+  if (timestamp !== null) {
+    at = (
       <>
         {' '}
         <PromQLOperator>@</PromQLOperator> <PromQLNumber>{(timestamp / 1000).toFixed(3)}</PromQLNumber>
       </>
-    ) : startOrEnd !== null ? (
+    );
+  } else if (startOrEnd !== null) {
+    at = (
       <>
         {' '}
         <PromQLOperator>@</PromQLOperator> <PromQLKeyword>{startOrEnd}</PromQLKeyword>
         <span>(</span>
         <span>)</span>
       </>
-    ) : (
-      <></>
-    )}
-    {offset === 0 ? (
-      <></>
-    ) : offset > 0 ? (
+    );
+  }
+
+  let formattedOffset: ReactNode = null;
+  if (offset > 0) {
+    formattedOffset = (
       <>
         {' '}
         <PromQLKeyword>offset</PromQLKeyword>{' '}
         <PromQLDuration>{formatDuration(convertTimeToDuration(offset))}</PromQLDuration>
       </>
-    ) : (
+    );
+  } else if (offset < 0) {
+    formattedOffset = (
       <>
         {' '}
         <PromQLKeyword>offset</PromQLKeyword>{' '}
         <PromQLDuration>-{formatDuration(convertTimeToDuration(-offset))}</PromQLDuration>
       </>
-    )}
-  </>
-);
+    );
+  }
+
+  return (
+    <>
+      {at}
+      {formattedOffset}
+    </>
+  );
+};
 
 const formatSelector = (node: VectorSelector | MatrixSelector): ReactElement => {
   const matchLabels = node.matchers
@@ -208,17 +220,17 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
         </>
       );
     case nodeType.call: {
-      const children =
-        childMaxDepth === undefined || childMaxDepth > 0
-          ? node.args.map((arg, i) => (
-              <span key={i}>
-                {i !== 0 && ', '}
-                {formatNode(arg, showChildren)}
-              </span>
-            ))
-          : node.args.length > 0
-            ? ellipsis
-            : '';
+      let children: ReactNode = '';
+      if (childMaxDepth === undefined || childMaxDepth > 0) {
+        children = node.args.map((arg, i) => (
+          <span key={i}>
+            {i !== 0 && ', '}
+            {formatNode(arg, showChildren)}
+          </span>
+        ));
+      } else if (node.args.length > 0) {
+        children = ellipsis;
+      }
 
       return (
         <>

@@ -31,10 +31,11 @@ import {
   useAllVariableValues,
   VariableStateMap,
 } from '@perses-dev/plugin-system';
+import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import { createPortal } from 'react-dom';
+
 import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
@@ -154,7 +155,7 @@ function InlineGaugeCellWithRange({
 function resolveGaugeFillColor(
   value: unknown,
   globalCellSettings: CellSettings[],
-  columnCellSettings: CellSettings[] | undefined
+  columnCellSettings: CellSettings[] | undefined,
 ): string | undefined {
   let cellConfig = evaluateConditionalFormatting(value, globalCellSettings);
   if (columnCellSettings?.length) {
@@ -169,7 +170,7 @@ function resolveGaugeFillColor(
 function generateCellContentConfig(
   column: ColumnSettings,
   gaugeRange?: GaugeRange,
-  globalCellSettings: CellSettings[] = []
+  globalCellSettings: CellSettings[] = [],
 ): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
   if (plugin !== undefined) {
@@ -219,7 +220,7 @@ function ColumnFilterDropdown({
   theme,
 }: ColumnFilterDropdownProps): ReactElement {
   const [searchTerm, setSearchTerm] = useState('');
-  const values = [...new Set(allValues)].filter((v) => v !== null).sort();
+  const values = [...new Set(allValues)].filter((v) => v !== null).toSorted();
   const filteredValues = searchTerm
     ? values.filter((v) => String(v.formatted).toLowerCase().includes(searchTerm.toLowerCase()))
     : values;
@@ -292,19 +293,17 @@ function ColumnFilterDropdown({
       />
       {filteredValues.map((value, index) => (
         <div key={`value-${index}`} style={{ marginBottom: 4 }}>
-          <label
-            style={{
+          <Box
+            component="label"
+            sx={{
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
               padding: '2px 0',
-              borderRadius: 2,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme.palette.action.hover;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              borderRadius: '2px',
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
             }}
           >
             <input
@@ -327,7 +326,7 @@ function ColumnFilterDropdown({
             >
               {value === null || value === undefined || value.formatted === '' ? '(empty)' : String(value.formatted)}
             </span>
-          </label>
+          </Box>
         </div>
       ))}
     </div>
@@ -345,7 +344,7 @@ function generateColumnConfig(
   allVariables: VariableStateMap,
   gaugeRangeByColumn: Record<string, GaugeRange>,
   globalCellSettings: CellSettings[] = [],
-  defaultEnableSorting = false
+  defaultEnableSorting = false,
 ): TableColumnConfig<unknown> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
@@ -436,7 +435,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         setSelection(newSelection);
       }
     },
-    [setSelection, clearSelection]
+    [setSelection, clearSelection],
   );
 
   // TODO: handle other query types
@@ -552,7 +551,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         allVariables,
         gaugeRangeByColumn,
         spec.cellSettings ?? [],
-        spec.enableSorting ?? false
+        spec.enableSorting ?? false,
       );
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
@@ -570,7 +569,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
             allVariables,
             gaugeRangeByColumn,
             spec.cellSettings ?? [],
-            spec.enableSorting ?? false
+            spec.enableSorting ?? false,
           );
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
@@ -629,7 +628,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
           acc[key] = undefined;
           return acc;
         },
-        {} as Record<string, undefined>
+        {} as Record<string, undefined>,
       );
 
       const extendRow = {
@@ -739,7 +738,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   filteredDataRef.current = filteredData;
 
   const [pagination, setPagination] = useState<PaginationState | undefined>(
-    spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined
+    spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined,
   );
 
   useEffect(() => {
@@ -951,7 +950,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
                           theme={theme}
                         />
                       </div>,
-                      document.body
+                      document.body,
                     )}
                 </div>
               );

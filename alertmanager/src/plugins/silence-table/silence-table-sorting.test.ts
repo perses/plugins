@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Silence } from '@perses-dev/spec';
+
 import { compareSilencesByColumn, SilenceSortState } from './silence-table-sorting';
 
 const makeSilence = (overrides: Partial<Silence> = {}): Silence => ({

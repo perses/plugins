@@ -22,6 +22,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, useCallback, ChangeEvent, FocusEvent } from 'react';
+
 import { PromQLEditor } from '../components';
 import {
   DEFAULT_PROM,
@@ -41,7 +42,7 @@ import {
 } from './types';
 
 export function PrometheusLabelValuesVariableEditor(
-  props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>
+  props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>,
 ): ReactElement {
   const {
     onChange,
@@ -57,14 +58,14 @@ export function PrometheusLabelValuesVariableEditor(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
             draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }
 
       throw new Error('Got unexpected non-Prometheus datasource selector');
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleLabelChange = useCallback(
@@ -72,10 +73,10 @@ export function PrometheusLabelValuesVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.labelName = e.target.value;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleMatchEditorsChange = useCallback(
@@ -83,10 +84,10 @@ export function PrometheusLabelValuesVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.matchers = matchers;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (
@@ -122,7 +123,7 @@ export function PrometheusLabelValuesVariableEditor(
 }
 
 export function PrometheusLabelNamesVariableEditor(
-  props: OptionsEditorProps<PrometheusLabelNamesVariableOptions>
+  props: OptionsEditorProps<PrometheusLabelNamesVariableOptions>,
 ): ReactElement {
   const {
     onChange,
@@ -138,14 +139,14 @@ export function PrometheusLabelNamesVariableEditor(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
             draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }
 
       throw new Error('Got unexpected non-Prometheus datasource selector');
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleMatchEditorChange = useCallback(
@@ -153,10 +154,10 @@ export function PrometheusLabelNamesVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.matchers = matchers;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (
@@ -181,7 +182,7 @@ export function PrometheusLabelNamesVariableEditor(
 }
 
 export function PrometheusPromQLVariableEditor(
-  props: OptionsEditorProps<PrometheusPromQLVariableOptions>
+  props: OptionsEditorProps<PrometheusPromQLVariableOptions>,
 ): ReactElement {
   const {
     onChange,
@@ -191,7 +192,7 @@ export function PrometheusPromQLVariableEditor(
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    PROM_DATASOURCE_KIND
+    PROM_DATASOURCE_KIND,
   ) as PrometheusDatasourceSelector;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
@@ -203,14 +204,14 @@ export function PrometheusPromQLVariableEditor(
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
             draft.datasource = !isVariableDatasource(next) && isDefaultPromSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }
 
       throw new Error('Got unexpected non-Prometheus datasource selector');
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleOnBlurPromQlChange = useCallback(
@@ -218,10 +219,10 @@ export function PrometheusPromQLVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.expr = e.target.textContent ?? '';
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   const handleLabelNameChange = useCallback(
@@ -229,10 +230,10 @@ export function PrometheusPromQLVariableEditor(
       onChange(
         produce(value, (draft) => {
           draft.labelName = e.target.value;
-        })
+        }),
       );
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

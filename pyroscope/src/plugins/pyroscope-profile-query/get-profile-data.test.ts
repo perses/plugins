@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ProfileData, StackTrace } from '@perses-dev/spec';
+
 import { SearchProfilesResponse } from '../../model';
 import { transformProfileResponse } from './get-profile-data';
 
@@ -377,7 +378,7 @@ function buildRandomTree(
   end: number,
   depth: number,
   maxDepth: number,
-  namePool: string[]
+  namePool: string[],
 ): GeneratedNode {
   const reuseName = namePool.length > 0 && rng() < 0.4;
   const name = reuseName ? namePool[Math.floor(rng() * namePool.length)]! : `fn-${depth}-${start}-${end}`;

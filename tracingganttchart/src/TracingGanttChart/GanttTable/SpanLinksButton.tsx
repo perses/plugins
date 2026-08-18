@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { IconButton, Menu, MenuItem } from '@mui/material';
-import { MouseEvent, ReactElement, useState } from 'react';
-import LaunchIcon from 'mdi-material-ui/Launch';
 import { InfoTooltip } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
-import { Span } from '../trace';
+import LaunchIcon from 'mdi-material-ui/Launch';
+import { MouseEvent, ReactElement, useState } from 'react';
+
 import { CustomLinks } from '../../gantt-chart-model';
+import { Span } from '../trace';
 
 export interface SpanLinksButtonProps {
   customLinks: CustomLinks;

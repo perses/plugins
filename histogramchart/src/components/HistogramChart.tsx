@@ -11,17 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
 import { EChart, FormatOptions, getFormattedAxis, ThresholdOptions, useChartsTheme } from '@perses-dev/components';
-import { use, EChartsCoreOption } from 'echarts/core';
+import { BucketTuple } from '@perses-dev/spec';
 import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
 import { CustomChart } from 'echarts/charts';
+import { use as registerECharts, EChartsCoreOption } from 'echarts/core';
 import { CustomSeriesRenderItemReturn } from 'echarts/types/dist/echarts';
-import { BucketTuple } from '@perses-dev/spec';
-import { getColorFromThresholds } from '../utils';
-import { LOG_BASE } from '../histogram-chart-model';
+import { ReactElement, useMemo } from 'react';
 
-use([CustomChart]);
+import { LOG_BASE } from '../histogram-chart-model';
+import { getColorFromThresholds } from '../utils';
+
+registerECharts([CustomChart]);
 
 export interface HistogramChartData {
   buckets: BucketTuple[];
@@ -77,7 +78,7 @@ export function HistogramChart({
               parseFloat(lowerBound), // Use original lower bound for threshold coloring
               thresholds,
               chartsTheme,
-              chartsTheme.echartsTheme[0] as string
+              chartsTheme.echartsTheme[0] as string,
             ),
           },
         };
@@ -140,7 +141,7 @@ export function HistogramChart({
           type: 'custom',
           renderItem: function (
             params: CustomSeriesRenderItemParams,
-            api: CustomSeriesRenderItemAPI
+            api: CustomSeriesRenderItemAPI,
           ): CustomSeriesRenderItemReturn {
             const lowerBound = api.value(0) as number;
             const upperBound = api.value(1) as number;

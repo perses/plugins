@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
+import { ReactElement } from 'react';
+
 import { PyroscopeDatasourceSelector } from '../model';
 import { LabelFilter } from '../utils/types';
-import { FilterItem } from './FilterItem';
 import { AddFilterItem } from './AddFilterItem';
+import { FilterItem } from './FilterItem';
 
 export interface FiltersProps {
   datasource: PyroscopeDatasourceSelector;

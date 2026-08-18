@@ -13,6 +13,7 @@
 
 import { Labels, PanelData } from '@perses-dev/plugin-system';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/spec';
+
 import { TableOptions } from './models';
 
 /**
@@ -49,14 +50,14 @@ export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' 
 export function buildRawTableData(
   queryResults: Array<PanelData<TimeSeriesData>>,
   spec: TableOptions,
-  options: BuildRawTableDataOptions = {}
+  options: BuildRawTableDataOptions = {},
 ): Array<Record<string, unknown>> {
   const { forExport = false } = options;
   const queryMode = getTablePanelQueryMode(spec);
 
   return queryResults
     .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
-      (data.data?.series ?? []).map((ts: TimeSeries) => ({ data, ts, queryIndex }))
+      (data.data?.series ?? []).map((ts: TimeSeries) => ({ data, ts, queryIndex })),
     )
     .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
       // Pick the last (most recent) data point. For range responses the last

@@ -38,12 +38,7 @@
   "id": 50,
   "options": {
     "legend": {
-      "calcs": [
-        "first",
-        "min",
-        "max",
-        "last"
-      ],
+      "calcs": ["first", "min", "max", "last"],
       "displayMode": "table",
       "placement": "bottom",
       "showLegend": true,

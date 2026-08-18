@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
-import { ReactElement, useState } from 'react';
 import {
   AlignSelector,
   FormatControls,
@@ -24,6 +23,7 @@ import {
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
+import { ReactElement, useState } from 'react';
 
 import { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
@@ -50,7 +50,7 @@ export function ColumnEditor({
   ...others
 }: ColumnEditorProps): ReactElement {
   const [width, setWidth] = useState<number>(
-    column.width === undefined || column.width === 'auto' ? 100 : column.width
+    column.width === undefined || column.width === 'auto' ? 100 : column.width,
   );
 
   const enableSorting = column.enableSorting ?? defaultEnableSorting;

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
+
 import { PPL_DOCS_URL } from '../constants';
-import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
+import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 
 jest.mock('@perses-dev/plugin-system', () => ({
   ...jest.requireActual('@perses-dev/plugin-system'),

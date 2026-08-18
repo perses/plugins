@@ -14,9 +14,10 @@
 import { Box, Stack } from '@mui/material';
 import AlertIcon from 'mdi-material-ui/AlertCircleOutline';
 import { ReactElement } from 'react';
-import { spanHasError } from '../utils';
-import { Span } from '../trace';
+
 import { CustomLinks } from '../../gantt-chart-model';
+import { Span } from '../trace';
+import { spanHasError } from '../utils';
 import { SpanIndents } from './SpanIndents';
 import { SpanLinksButton } from './SpanLinksButton';
 

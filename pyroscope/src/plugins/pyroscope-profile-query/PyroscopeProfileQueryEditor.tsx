@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelect, DatasourceSelectProps, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
-import { useId } from '@perses-dev/components';
-import { produce } from 'immer';
 import { FormControl, InputLabel, Stack, TextField, useTheme } from '@mui/material';
+import { useId } from '@perses-dev/components';
+import { DatasourceSelect, DatasourceSelectProps, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
 import { ReactElement } from 'react';
+
+import { ProfileTypeSelector, Service, Filters } from '../../components';
 import {
   DEFAULT_PYROSCOPE,
   isDefaultPyroscopeSelector,
@@ -23,7 +25,6 @@ import {
   PYROSCOPE_DATASOURCE_KIND,
   PyroscopeDatasourceSelector,
 } from '../../model';
-import { ProfileTypeSelector, Service, Filters } from '../../components';
 import {
   ProfileQueryEditorProps,
   useMaxNodesState,
@@ -38,7 +39,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
   const datasourceSelectValue = datasource ?? DEFAULT_PYROSCOPE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    PYROSCOPE_DATASOURCE_KIND
+    PYROSCOPE_DATASOURCE_KIND,
   ) as PyroscopeDatasourceSelector;
   const datasourceSelectLabelID = useId('pyroscope-datasource-label');
 
@@ -55,7 +56,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
           produce(value, (draft) => {
             // If they're using the default, just omit the datasource prop (i.e. set to undefined)
             draft.datasource = isDefaultPyroscopeSelector(next) ? undefined : next;
-          })
+          }),
         );
         return;
       }

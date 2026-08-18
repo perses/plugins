@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { InputLabel, Stack } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -18,9 +20,8 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { InputLabel, Stack } from '@mui/material';
 import { ReactElement, useCallback, useState, useEffect } from 'react';
-import { createModEnterHandler } from '@perses-dev/dashboards';
+
 import { LogsQLEditor } from '../../components/logsql-editor';
 import { VICTORIALOGS_DATASOURCE_KIND, VictoriaLogsDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
@@ -34,7 +35,7 @@ export function VictoriaLogsLogQueryEditor(props: VictoriaLogsQueryEditorProps):
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    VICTORIALOGS_DATASOURCE_KIND
+    VICTORIALOGS_DATASOURCE_KIND,
   ) as VictoriaLogsDatasourceSelector;
 
   // const { data: client } = useDatasourceClient<VictoriaLogsClient>(selectedDatasource);
@@ -67,7 +68,7 @@ export function VictoriaLogsLogQueryEditor(props: VictoriaLogsQueryEditorProps):
     (query: string) => {
       onChange({ ...value, query });
     },
-    [onChange, value]
+    [onChange, value],
   );
 
   return (

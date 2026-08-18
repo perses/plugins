@@ -16,6 +16,7 @@ import { OptionsEditorGroup } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { ReactElement, SyntheticEvent, useCallback } from 'react';
+
 import { AlertDeduplicationConfig, AlertTableOptions } from './alert-table-model';
 
 const MODE_DESCRIPTIONS: Record<AlertDeduplicationConfig['mode'], string> = {
@@ -36,10 +37,10 @@ export function AlertTableDeduplicationEditor(props: OptionsEditorProps<AlertTab
           if (mode === 'labels') {
             draft.deduplication.labels = draft.deduplication.labels ?? [];
           }
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const handleLabelsChange = useCallback(
@@ -50,10 +51,10 @@ export function AlertTableDeduplicationEditor(props: OptionsEditorProps<AlertTab
             draft.deduplication = { mode: 'labels' };
           }
           draft.deduplication.labels = newLabels.length > 0 ? newLabels : undefined;
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

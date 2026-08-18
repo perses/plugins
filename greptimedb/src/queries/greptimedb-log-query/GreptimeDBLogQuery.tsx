@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { parseVariables } from '@perses-dev/plugin-system';
-import { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
+
 import { getGreptimeDBLogData } from './get-greptimedb-log-data';
+import { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
 import { GreptimeDBLogQueryEditor } from './GreptimeDBLogQueryEditor';
 import { LogQueryPlugin } from './log-query-plugin-interface';
 
@@ -25,7 +26,7 @@ export const GreptimeDBLogQuery: LogQueryPlugin<GreptimeDBLogQuerySpec> = {
   }),
   dependsOn: (spec) => {
     const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set([...queryVariables])];
+    const allVariables = [...new Set(queryVariables)];
     return {
       variables: allVariables,
     };

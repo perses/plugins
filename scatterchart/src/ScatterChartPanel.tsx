@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps } from '@perses-dev/plugin-system';
-import { ReactElement, useMemo } from 'react';
-import { EChartsOption, SeriesOption } from 'echarts';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
+import { PanelProps } from '@perses-dev/plugin-system';
 import { TraceData, TraceSearchResult } from '@perses-dev/spec';
-import { Scatterplot } from './Scatterplot';
+import { EChartsOption, SeriesOption } from 'echarts';
+import { ReactElement, useMemo } from 'react';
+
 import { ScatterChartOptions } from './scatter-chart-model';
+import { Scatterplot } from './Scatterplot';
 
 export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnixMs' | 'serviceStats'> {
   name: string;
@@ -164,7 +165,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
 export function getSymbolSize(
   spanCount: number,
   spanCountRange: [number, number],
-  sizeRange: [number, number]
+  sizeRange: [number, number],
 ): number {
   const [minSize, maxSize] = sizeRange;
   const [minSpanCount, maxSpanCount] = spanCountRange;

@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme } from '@perses-dev/components';
 import { Theme } from '@mui/material';
+import { PersesChartsTheme } from '@perses-dev/components';
+
 import { getConsistentCategoricalColor, getConsistentColor } from './palette';
 
 export function getServiceColor(
@@ -20,7 +21,7 @@ export function getServiceColor(
   chartsTheme: PersesChartsTheme,
   paletteMode: 'auto' | 'categorical' | undefined,
   serviceName: string,
-  error = false
+  error = false,
 ): string {
   switch (paletteMode) {
     case 'categorical': {

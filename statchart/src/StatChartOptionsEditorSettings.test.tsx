@@ -14,6 +14,7 @@
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { StatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 
@@ -22,7 +23,7 @@ describe('StatChartOptionsEditorSettings', () => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <StatChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsProvider>
+      </ChartsProvider>,
     );
   };
 
@@ -35,7 +36,7 @@ describe('StatChartOptionsEditorSettings', () => {
         },
         calculation: 'last',
       },
-      onChange
+      onChange,
     );
     const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     userEvent.click(unitSelector);
@@ -48,7 +49,7 @@ describe('StatChartOptionsEditorSettings', () => {
         format: {
           unit: 'percent',
         },
-      })
+      }),
     );
   });
 
@@ -61,7 +62,7 @@ describe('StatChartOptionsEditorSettings', () => {
         },
         calculation: 'sum',
       },
-      onChange
+      onChange,
     );
     const calcSelector = screen.getByRole('combobox', { name: 'Calculation' });
     userEvent.click(calcSelector);
@@ -72,7 +73,7 @@ describe('StatChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         calculation: 'first-number',
-      })
+      }),
     );
   });
 
@@ -85,7 +86,7 @@ describe('StatChartOptionsEditorSettings', () => {
         },
         calculation: 'sum',
       },
-      onChange
+      onChange,
     );
     const sparklineSwitch = screen.getByRole('checkbox', { name: 'Sparkline' });
     expect(sparklineSwitch).not.toBeChecked();
@@ -94,7 +95,7 @@ describe('StatChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         sparkline: {},
-      })
+      }),
     );
   });
 
@@ -110,7 +111,7 @@ describe('StatChartOptionsEditorSettings', () => {
           color: '#ff0000',
         },
       },
-      onChange
+      onChange,
     );
     const sparklineSwitch = screen.getByRole('checkbox', { name: 'Sparkline' });
     expect(sparklineSwitch).toBeChecked();
@@ -119,7 +120,7 @@ describe('StatChartOptionsEditorSettings', () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
         sparkline: undefined,
-      })
+      }),
     );
   });
 });

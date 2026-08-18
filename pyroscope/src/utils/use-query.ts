@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
-
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { DatasourceSelector } from '@perses-dev/spec';
 import { StatusError } from '@perses-dev/client';
+import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
+import { DatasourceSelector } from '@perses-dev/spec';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+
 import {
   SearchLabelNamesResponse,
   SearchLabelValuesResponse,
@@ -39,7 +39,7 @@ export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<Se
       return await client!.searchLabelNames(
         {},
         { 'content-type': 'application/json' },
-        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+        { start: start * MILLISECONDS, end: end * MILLISECONDS },
       );
     },
   });
@@ -47,7 +47,7 @@ export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<Se
 
 export function useLabelValues(
   datasource: DatasourceSelector,
-  labelName: string
+  labelName: string,
 ): UseQueryResult<SearchLabelValuesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
   const { absoluteTimeRange } = useTimeRange();
@@ -60,14 +60,14 @@ export function useLabelValues(
       return await client!.searchLabelValues(
         {},
         { 'content-type': 'application/json' },
-        { name: labelName, start: start * MILLISECONDS, end: end * MILLISECONDS }
+        { name: labelName, start: start * MILLISECONDS, end: end * MILLISECONDS },
       );
     },
   });
 }
 
 export function useProfileTypes(
-  datasource: DatasourceSelector
+  datasource: DatasourceSelector,
 ): UseQueryResult<SearchProfileTypesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
   const { absoluteTimeRange } = useTimeRange();
@@ -80,7 +80,7 @@ export function useProfileTypes(
       return await client!.searchProfileTypes(
         {},
         { 'content-type': 'application/json' },
-        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+        { start: start * MILLISECONDS, end: end * MILLISECONDS },
       );
     },
   });
@@ -98,7 +98,7 @@ export function useServices(datasource: DatasourceSelector): UseQueryResult<Sear
       return await client!.searchServices(
         {},
         { 'content-type': 'application/json' },
-        { start: start * MILLISECONDS, end: end * MILLISECONDS }
+        { start: start * MILLISECONDS, end: end * MILLISECONDS },
       );
     },
   });

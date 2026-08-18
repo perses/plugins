@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Button } from '@mui/material';
-import { produce } from 'immer';
 import {
   OptionsEditorGroup,
   OptionsEditorGrid,
@@ -21,7 +20,9 @@ import {
   ThresholdsEditorProps,
 } from '@perses-dev/components';
 import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
 import { ReactElement } from 'react';
+
 import {
   TimeSeriesChartOptions,
   DEFAULT_VISUAL,
@@ -39,7 +40,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.legend = newLegend;
-      })
+      }),
     );
   };
 
@@ -47,7 +48,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.visual = newVisual;
-      })
+      }),
     );
   };
 
@@ -55,7 +56,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.yAxis = newYAxis;
-      })
+      }),
     );
   };
 
@@ -63,7 +64,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
         draft.thresholds = thresholds;
-      })
+      }),
     );
   };
 
@@ -90,7 +91,7 @@ export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEdit
                   draft.legend = undefined;
                   draft.visual = undefined;
                   draft.thresholds = undefined;
-                })
+                }),
               );
             }}
           >

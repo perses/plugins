@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { CircularProgress, Stack, StackProps } from '@mui/material';
-import { ReactElement, useMemo } from 'react';
 import { DatasourceSelector } from '@perses-dev/spec';
+import { ReactElement, useMemo } from 'react';
+
 import { MetricList } from '../../display/list/MetricList';
 import { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
+import { Box } from '@mui/material';
 import {
   EChart,
   FormatOptions,
@@ -20,13 +20,13 @@ import {
   getFormattedAxis,
   useChartsTheme,
 } from '@perses-dev/components';
-import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { use as registerECharts, EChartsCoreOption } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { Box } from '@mui/material';
+import { ReactElement, useMemo } from 'react';
 
-use([
+registerECharts([
   EChartsBarChart,
   GridComponent,
   DatasetComponent,
@@ -117,7 +117,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
           appendToBody: true,
           confine: true,
           formatter: (
-            params: Array<{ seriesName: string; data: number | null; name: string; color: string }>
+            params: Array<{ seriesName: string; data: number | null; name: string; color: string }>,
           ): string => {
             if (!params.length) return '';
             const header = `<b>${params[0]?.name}</b><br/>`;
@@ -126,7 +126,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
               .map(
                 (p) =>
                   `<span style="display:inline-block;margin-right:5px;border-radius:50%;width:10px;height:10px;background-color:${p.color}"></span>` +
-                  `${p.seriesName}: <b>${formatValue(p.data, format)}</b>`
+                  `${p.seriesName}: <b>${formatValue(p.data, format)}</b>`,
               )
               .join('<br/>');
             return header + rows;
@@ -199,11 +199,13 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
     };
   }, [data, groupedData, isStacked, chartsTheme, width, mode, format, isHorizontal]);
 
-  const numGroupedRows = groupedData
-    ? isStacked
-      ? groupedData.categories.length
-      : groupedData.categories.length * groupedData.series.length
-    : 0;
+  let numGroupedRows = 0;
+  if (groupedData) {
+    numGroupedRows = groupedData.categories.length;
+    if (!isStacked) {
+      numGroupedRows *= groupedData.series.length;
+    }
+  }
 
   function getChartHeight(): number | string {
     if (groupedData) {

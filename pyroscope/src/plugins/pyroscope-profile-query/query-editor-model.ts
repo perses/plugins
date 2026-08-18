@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import { useState } from 'react';
+
 import { PyroscopeProfileQuerySpec } from '../../model/profile-query-model';
 import { LabelFilter } from '../../utils/types';
 
@@ -49,7 +50,7 @@ export function useMaxNodesState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.maxNodes = e === '' ? undefined : parseInt(e);
-      })
+      }),
     );
   };
 
@@ -80,7 +81,7 @@ export function useProfileTypeState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.profileType = e;
-      })
+      }),
     );
   };
 
@@ -111,7 +112,7 @@ export function useServiceState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.service = e;
-      })
+      }),
     );
   };
 
@@ -135,7 +136,7 @@ export function useFiltersState(props: ProfileQueryEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.filters = f;
-      })
+      }),
     );
   };
 

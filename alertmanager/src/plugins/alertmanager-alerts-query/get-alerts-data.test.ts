@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AlertsQueryContext } from '@perses-dev/plugin-system';
+
 import { AlertManagerClient, GettableAlert } from '../../model';
 import { AlertManagerDatasource } from '../alertmanager-datasource';
 import { AlertManagerAlertsQuerySpec } from '../types';
@@ -55,7 +56,7 @@ function createContext(client: AlertManagerClient): AlertsQueryContext {
     datasourceStore: {
       getDatasource: jest.fn(),
       getDatasourceClient: jest.fn(() =>
-        Promise.resolve(client)
+        Promise.resolve(client),
       ) as AlertsQueryContext['datasourceStore']['getDatasourceClient'],
       listDatasourceSelectItems: jest.fn(async () => []),
       getLocalDatasources: jest.fn(),
@@ -153,7 +154,7 @@ describe('getAlertsData', () => {
       expect.objectContaining({
         filter: ['team="ops"'],
         receiver: 'slack-ops',
-      })
+      }),
     );
   });
 });

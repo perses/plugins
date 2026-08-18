@@ -31,9 +31,7 @@
     },
     "pieType": "pie",
     "reduceOptions": {
-      "calcs": [
-        "lastNotNull"
-      ],
+      "calcs": ["lastNotNull"],
       "fields": "",
       "values": false
     },
@@ -41,9 +39,7 @@
       "mode": "single",
       "sort": "none"
     },
-    "displayLabels": [
-      "name"
-    ]
+    "displayLabels": ["name"]
   },
   "pluginVersion": "11.3.0-pre",
   "targets": [

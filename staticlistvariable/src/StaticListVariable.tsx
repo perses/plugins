@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Autocomplete, Chip, IconButton, TextField, Typography } from '@mui/material';
 /* eslint-disable jsx-a11y/no-autofocus */
 import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Autocomplete, Chip, IconButton, TextField, Typography } from '@mui/material';
-import { ReactElement, useCallback, useState } from 'react';
 import PlusCircleIcon from 'mdi-material-ui/PlusCircle';
+import { ReactElement, useCallback, useState } from 'react';
 
 type StaticListOption = string | VariableOption;
 
@@ -47,7 +47,7 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
         values: [...variables, { value: String(newVariable), label: String(newVariable) }],
       });
     },
-    [onChange, variables]
+    [onChange, variables],
   );
 
   const onPasteHandler = useCallback(
@@ -69,18 +69,18 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
         e.preventDefault();
       }
     },
-    [onChange, variables]
+    [onChange, variables],
   );
 
   const tagDeleteHandler = useCallback(
     (option: string) => {
       const filteredVariables = variables.filter(
-        (v) => !((v as string) === option || (v as VariableOption)?.value === option)
+        (v) => !((v as string) === option || (v as VariableOption)?.value === option),
       );
       onChange({ values: [...filteredVariables] });
       setEditModeOption('');
     },
-    [variables, onChange]
+    [variables, onChange],
   );
 
   const renderTagsHandler = useCallback(
@@ -215,7 +215,7 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
         );
       });
     },
-    [variables, tagDeleteHandler, editModeOption, onChange]
+    [variables, tagDeleteHandler, editModeOption, onChange],
   );
 
   return (

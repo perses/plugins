@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceClient } from '@perses-dev/plugin-system';
 import { RequestHeaders } from '@perses-dev/client';
+import { DatasourceClient } from '@perses-dev/plugin-system';
+
 import { JaegerApiResponse, JaegerOperation, JaegerSearchRequestParameters, JaegerTrace } from './api-types';
 
 interface JaegerClientOptions {
@@ -25,7 +26,7 @@ export interface JaegerClient extends DatasourceClient {
   getTrace(traceId: string, headers?: RequestHeaders): Promise<JaegerApiResponse<JaegerTrace[]>>;
   searchTraces(
     params: JaegerSearchRequestParameters,
-    headers?: RequestHeaders
+    headers?: RequestHeaders,
   ): Promise<JaegerApiResponse<JaegerTrace[]>>;
   searchServices(headers?: RequestHeaders): Promise<JaegerApiResponse<string[]>>;
   searchOperations(service: string, headers?: RequestHeaders): Promise<JaegerApiResponse<JaegerOperation[]>>;
@@ -42,7 +43,7 @@ export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>
     return await response.json();
   } catch (e) {
     console.error('Invalid response from server', e);
-    throw new Error('Invalid response from server');
+    throw new Error('Invalid response from server', { cause: e });
   }
 };
 
@@ -64,7 +65,7 @@ function buildSearchParams(params: JaegerSearchRequestParameters): URLSearchPara
 function fetchWithGet<TResponse>(
   apiURI: string,
   params: JaegerSearchRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
@@ -86,7 +87,7 @@ export function getTrace(traceId: string, queryOptions: QueryOptions): Promise<J
 
 export function searchTraces(
   params: JaegerSearchRequestParameters,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<JaegerApiResponse<JaegerTrace[]>> {
   return fetchWithGet<JaegerApiResponse<JaegerTrace[]>>('/api/traces', params, queryOptions);
 }
@@ -97,7 +98,7 @@ export function searchServices(queryOptions: QueryOptions): Promise<JaegerApiRes
 
 export function searchOperations(
   service: string,
-  queryOptions: QueryOptions
+  queryOptions: QueryOptions,
 ): Promise<JaegerApiResponse<JaegerOperation[]>> {
   return fetchWithGet<JaegerApiResponse<JaegerOperation[]>>('/api/operations', { service }, queryOptions);
 }

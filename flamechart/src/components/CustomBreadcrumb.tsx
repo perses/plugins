@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { Stack, Breadcrumbs } from '@mui/material';
-import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import EyeIcon from 'mdi-material-ui/EyeOutline';
-import CloseIcon from 'mdi-material-ui/Close';
 import Chip from '@mui/material/Chip';
 import { emphasize, styled } from '@mui/material/styles';
 import { formatValue } from '@perses-dev/components';
+import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
+import CloseIcon from 'mdi-material-ui/Close';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
+import { ReactElement } from 'react';
 
 export interface CustomBreadcrumbProps {
   totalValue: string;

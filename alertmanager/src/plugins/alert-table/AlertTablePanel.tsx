@@ -51,6 +51,7 @@ import MagnifyIcon from 'mdi-material-ui/Magnify';
 import UnfoldLessHorizontalIcon from 'mdi-material-ui/UnfoldLessHorizontal';
 import UnfoldMoreHorizontalIcon from 'mdi-material-ui/UnfoldMoreHorizontal';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { SilenceForm } from '../../components/SilenceForm';
 import { StatusBadge } from '../../components/StatusBadge';
 import { AlertManagerClient, extractDatasourceSelector } from '../../model';
@@ -110,7 +111,7 @@ function LabelValueSummaryChips({
   return (
     <Stack direction="row" spacing={0.5}>
       {Object.entries(counts)
-        .sort(([, a], [, b]) => b - a)
+        .toSorted(([, a], [, b]) => b - a)
         .map(([value, count]) => {
           const bgColor = getLabelColor(value, mapping);
           return (
@@ -288,7 +289,7 @@ function AlertGroupRow({
               <TableCell key={colIdx}>
                 <Stack direction="row" spacing={0.5}>
                   {Object.entries(counts)
-                    .sort(([, a], [, b]) => b - a)
+                    .toSorted(([, a], [, b]) => b - a)
                     .map(([value, count]) => (
                       <Chip key={value} label={`${count} ${value}`} size="small" variant="outlined" />
                     ))}
@@ -362,7 +363,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
         exceptionSnackbar(err);
       }
     },
-    [amClient, queryClient, successSnackbar, exceptionSnackbar]
+    [amClient, queryClient, successSnackbar, exceptionSnackbar],
   );
 
   const silenceInitial = useMemo(() => {
@@ -380,7 +381,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
   const defaultGroupBy = useMemo(() => spec.defaultGroupBy ?? ['alertname'], [spec.defaultGroupBy]);
   const variableNames = useMemo(
     () => [...new Set(defaultGroupBy.flatMap((entry) => parseVariables(entry)))],
-    [defaultGroupBy]
+    [defaultGroupBy],
   );
   const variableState = useAllVariableValues(variableNames);
 
@@ -415,7 +416,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
 
   const effectiveActions = useMemo<AlertAction[]>(
     () => spec.allowedActions ?? ALL_ALERT_ACTIONS,
-    [spec.allowedActions]
+    [spec.allowedActions],
   );
   const showActionsColumn = effectiveActions.length > 0;
   const runbookAnnotationKey = spec.runbookAnnotationKey || 'runbook_url';
@@ -427,7 +428,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
 
   const allTrackedKeys = useMemo(
     () => [...new Set([...labelKeys, ...columnDefs.map((c) => c.name)])],
-    [labelKeys, columnDefs]
+    [labelKeys, columnDefs],
   );
 
   const initialSort = useMemo<SortState | null>(() => {
@@ -504,8 +505,8 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
         compareGroupsByColumn(
           a.summary.labelCounts?.[sortState.columnName],
           b.summary.labelCounts?.[sortState.columnName],
-          sortState
-        )
+          sortState,
+        ),
       );
     }
 

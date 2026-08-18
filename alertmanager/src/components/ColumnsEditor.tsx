@@ -27,8 +27,8 @@ import {
   Typography,
 } from '@mui/material';
 import { OptionsEditorGroup } from '@perses-dev/components';
-import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
+import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement, useCallback, useRef } from 'react';
@@ -219,7 +219,7 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
       idsRef.current.splice(index, 1);
       onRemove(index);
     },
-    [onRemove]
+    [onRemove],
   );
 
   const handleMoveUp = useCallback(
@@ -230,7 +230,7 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
       ids.splice(index - 1, 0, id);
       onMoveUp(index);
     },
-    [onMoveUp]
+    [onMoveUp],
   );
 
   const handleMoveDown = useCallback(
@@ -241,7 +241,7 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
       ids.splice(index + 1, 0, id);
       onMoveDown(index);
     },
-    [onMoveDown]
+    [onMoveDown],
   );
 
   return (

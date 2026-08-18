@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { Grid2 as Grid, Stack } from '@mui/material';
+import { ReactElement } from 'react';
+
 import { PyroscopeDatasourceSelector } from '../model';
 import { LabelFilter, OperatorType } from '../utils/types';
-import { LabelName } from './LabelName';
-import { Operator } from './Operator';
-import { LabelValue } from './LabelValue';
 import { DeleteFilterItem } from './DeleteFilterItem';
+import { LabelName } from './LabelName';
+import { LabelValue } from './LabelValue';
+import { Operator } from './Operator';
 
 export interface FilterItemProps {
   datasource: PyroscopeDatasourceSelector;

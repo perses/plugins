@@ -27,7 +27,7 @@ export function isDefaultLokiSelector(datasourceSelectValue: DatasourceSelectVal
 }
 
 export function isLokiDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue
+  datasourceSelectValue: DatasourceSelectValue,
 ): datasourceSelectValue is LokiDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === LOKI_DATASOURCE_KIND;
 }

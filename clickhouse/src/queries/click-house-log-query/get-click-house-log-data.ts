@@ -13,6 +13,7 @@
 
 import { replaceVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
 import { LogData, LogEntry } from '@perses-dev/spec';
+
 import {
   ClickHouseClient,
   ClickHouseQueryResponse,
@@ -25,7 +26,7 @@ import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 function flattenObject(
   obj: Record<string, unknown>,
   parentKey = '',
-  result: Record<string, unknown> = {}
+  result: Record<string, unknown> = {},
 ): Record<string, unknown> {
   for (const [key, value] of Object.entries(obj)) {
     const newKey = parentKey ? `${parentKey}.${key}` : key;
@@ -49,7 +50,7 @@ function convertStreamsToLogs(streams: LogEntry[]): LogData {
 
     const sortedEntry: Record<string, unknown> = {};
     Object.keys(flattened)
-      .sort((a, b) => a.localeCompare(b))
+      .toSorted((a, b) => a.localeCompare(b))
       .forEach((key) => {
         sortedEntry[key] = flattened[key];
       });
@@ -83,7 +84,7 @@ export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLo
   const query = replaceVariables(spec.query, context.variableState);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;

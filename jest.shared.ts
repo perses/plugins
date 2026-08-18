@@ -13,6 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+
 import type { Config } from '@jest/types';
 
 const swcrcPath = resolve(__dirname, './.cjs.swcrc');

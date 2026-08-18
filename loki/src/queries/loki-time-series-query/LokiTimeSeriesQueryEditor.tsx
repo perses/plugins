@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { InputLabel, Stack } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/dashboards';
 import {
   DatasourceSelect,
   DatasourceSelectProps,
@@ -18,10 +20,9 @@ import {
   OptionsEditorProps,
   useDatasourceSelectValueToSelector,
 } from '@perses-dev/plugin-system';
-import { InputLabel, Stack } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
-import { createModEnterHandler } from '@perses-dev/dashboards';
 import { produce } from 'immer';
+import { ReactElement, useCallback } from 'react';
+
 import { LogQLEditor } from '../../components';
 import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
@@ -36,7 +37,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
   const datasourceSelectValue = datasource ?? DEFAULT_DATASOURCE;
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
-    LOKI_DATASOURCE_KIND
+    LOKI_DATASOURCE_KIND,
   ) as LokiDatasourceSelector;
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
 
@@ -45,7 +46,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
       onChange(
         produce(value, (draft) => {
           draft.datasource = newDatasourceSelection;
-        })
+        }),
       );
       return;
     }
@@ -58,7 +59,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
     onChange(
       produce(value, (draft) => {
         draft.query = query;
-      })
+      }),
     );
   };
 
@@ -66,7 +67,7 @@ export function LokiQueryEditor(props: LokiQueryEditorProps): ReactElement {
     (e: string) => {
       handleQueryChange(e);
     },
-    [handleQueryChange]
+    [handleQueryChange],
   );
 
   return (

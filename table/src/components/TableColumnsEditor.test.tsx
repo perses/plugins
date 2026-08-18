@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { fireEvent, render, screen } from '@testing-library/react';
+
 import { TableOptions } from '../models';
 import { TableColumnsEditor } from './TableColumnsEditor';
 

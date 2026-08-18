@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TitleComponentOption } from 'echarts';
+import { Stack, Typography, SxProps } from '@mui/material';
 import {
   useChartsTheme,
   GraphSeries,
@@ -20,15 +20,16 @@ import {
   applyValueMapping,
   createRegexFromString,
 } from '@perses-dev/components';
-import { Stack, Typography, SxProps } from '@mui/material';
-import { FC, useMemo } from 'react';
 import { PanelProps, PanelData } from '@perses-dev/plugin-system';
 import { Labels, TimeSeriesData } from '@perses-dev/spec';
+import { TitleComponentOption } from 'echarts';
+import { FC, useMemo } from 'react';
+
 import { StatChartOptions } from './stat-chart-model';
-import { convertSparkline } from './utils/data-transform';
-import { calculateValue } from './utils/calculate-value';
-import { getStatChartColor } from './utils/get-color';
 import { StatChartBase, StatChartData } from './StatChartBase';
+import { calculateValue } from './utils/calculate-value';
+import { convertSparkline } from './utils/data-transform';
+import { getStatChartColor } from './utils/get-color';
 
 const MIN_WIDTH = 100;
 const SPACING = 2;
@@ -38,14 +39,19 @@ export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions, queryResults } = props;
 
-  const { format, sparkline, valueFontSize: valueFontSize, colorMode } = spec;
+  const { format, sparkline, valueFontSize, colorMode } = spec;
   const chartsTheme = useChartsTheme();
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
   const isMultiSeries = statChartData.length > 1;
 
   // Handle three-state showLegend: 'on' | 'off' | 'auto' (or undefined for backward compatibility)
-  const shouldShowLegend = spec.legendMode === 'on' ? true : spec.legendMode === 'off' ? false : isMultiSeries;
+  let shouldShowLegend = isMultiSeries;
+  if (spec.legendMode === 'on') {
+    shouldShowLegend = true;
+  } else if (spec.legendMode === 'off') {
+    shouldShowLegend = false;
+  }
 
   if (!contentDimensions) return null;
 
@@ -98,7 +104,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 const useStatChartData = (
   queryResults: Array<PanelData<TimeSeriesData>>,
   spec: StatChartOptions,
-  chartsTheme: PersesChartsTheme
+  chartsTheme: PersesChartsTheme,
 ): StatChartData[] => {
   return useMemo(() => {
     const { calculation, mappings, metricLabel } = spec;
@@ -131,7 +137,7 @@ const useStatChartData = (
 const getValueOrLabel = (
   value?: number | null,
   mappings?: ValueMapping[],
-  label?: string
+  label?: string,
 ): string | number | undefined | null => {
   if (label) {
     return label;

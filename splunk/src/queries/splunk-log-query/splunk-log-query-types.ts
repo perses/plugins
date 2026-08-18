@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/spec';
+
 import { SplunkLogResults } from '../../model/splunk-client-types';
 
 export interface SplunkLogQuerySpec {

@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { YAXisComponentOption } from 'echarts';
-import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
@@ -24,6 +22,9 @@ import {
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
 import { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import type { YAXisComponentOption } from 'echarts';
+import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
+
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -70,7 +71,7 @@ export function getTimeSeries(
   timeScale: TimeScale,
   paletteColor: string,
   querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number; stack?: boolean },
-  yAxisIndex?: number
+  yAxisIndex?: number,
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
@@ -184,7 +185,7 @@ export function convertPercentThreshold(
   percent: number,
   data: LegacyTimeSeries[] | TimeSeries[],
   max?: number,
-  min?: number
+  min?: number,
 ): number {
   const percentDecimal = percent / 100;
   const adjustedMax = max ?? findMax(data);

@@ -17,6 +17,7 @@ jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
 import { ClickHouseTimeSeriesQuery } from './ClickHouseQuery';
@@ -80,7 +81,7 @@ describe('ClickHouseTimeSeriesQuery', () => {
       {
         query: '"SELECT * FROM otel_logs WHERE foo="$foo" AND bar="$bar"',
       },
-      createStubContext()
+      createStubContext(),
     );
     expect(variables).toEqual(['foo', 'bar']);
   });
@@ -96,7 +97,7 @@ describe('ClickHouseTimeSeriesQuery', () => {
         query:
           "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(clickhouseStubClient.query).toHaveBeenCalledWith({
@@ -123,7 +124,7 @@ describe('ClickHouseTimeSeriesQuery', () => {
     ]);
     expect(response.stepMs).toBe(60 * 1000);
     expect(response.metadata?.executedQueryString).toBe(
-      "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time"
+      "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time",
     );
   });
 
@@ -142,7 +143,7 @@ describe('ClickHouseTimeSeriesQuery', () => {
         query:
           "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
@@ -173,7 +174,7 @@ describe('ClickHouseTimeSeriesQuery', () => {
         query:
           "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
       },
-      createStubContext()
+      createStubContext(),
     );
 
     expect(response.stepMs).toBe(24 * 60 * 60 * 1000);

@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { JaegerTraceQueryEditor } from './JaegerTraceQueryEditor';
 
 jest.mock('@perses-dev/components', () => ({
@@ -36,7 +37,7 @@ describe('JaegerTraceQueryEditor', () => {
       () =>
         ({
           kind: 'JaegerDatasource',
-        }) as never
+        }) as never,
     );
   });
 
@@ -62,7 +63,7 @@ describe('JaegerTraceQueryEditor', () => {
       expect(onChange).toHaveBeenCalledWith({
         service: 'frontend',
         traceId: '7d73f3ae841bf59a',
-      })
+      }),
     );
   });
 
@@ -83,7 +84,7 @@ describe('JaegerTraceQueryEditor', () => {
           minDuration: ' 50ms ',
         }}
         onChange={onChange}
-      />
+      />,
     );
 
     await waitFor(() =>
@@ -91,7 +92,7 @@ describe('JaegerTraceQueryEditor', () => {
         minDuration: '50ms',
         operation: undefined,
         service: undefined,
-      })
+      }),
     );
   });
 

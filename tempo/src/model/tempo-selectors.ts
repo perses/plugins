@@ -39,7 +39,7 @@ export function isDefaultTempoSelector(datasourceSelectValue: DatasourceSelectVa
  * Type guard to make sure a datasourceSelectValue is a Tempo one.
  */
 export function isTempoDatasourceSelector(
-  datasourceSelectValue: DatasourceSelectValue
+  datasourceSelectValue: DatasourceSelectValue,
 ): datasourceSelectValue is TempoDatasourceSelector {
   return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === TEMPO_DATASOURCE_KIND;
 }

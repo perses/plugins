@@ -22,7 +22,7 @@ export function drawSpans(
   width: number,
   height: number,
   trace: Trace,
-  spanColorGenerator: (span: Span) => string
+  spanColorGenerator: (span: Span) => string,
 ): void {
   // calculate optimal height, enforce min and max bar height and finally round to an integer
   const numSpans = trace.spanById.size;
@@ -43,7 +43,7 @@ export function drawSpans(
       Math.round(relativeStart * width),
       Math.round(y),
       Math.max(minSpanWidthPx, Math.round(relativeDuration * width)),
-      barHeight
+      barHeight,
     );
     ctx.fill();
     y += yChange;

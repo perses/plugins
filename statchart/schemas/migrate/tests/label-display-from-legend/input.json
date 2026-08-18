@@ -44,9 +44,7 @@
   "options": {
     "reduceOptions": {
       "values": false,
-      "calcs": [
-        "mean"
-      ],
+      "calcs": ["mean"],
       "fields": ""
     },
     "orientation": "auto",

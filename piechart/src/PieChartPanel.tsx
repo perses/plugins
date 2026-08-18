@@ -22,19 +22,20 @@ import {
   useId,
 } from '@perses-dev/components';
 import { CalculationsMap, CalculationType, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/spec';
 import merge from 'lodash/merge';
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { TimeSeriesData } from '@perses-dev/spec';
-import { PieChartOptions } from './pie-chart-model';
-import { PieChartLegendMapper, PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
+
 import { getSeriesColor } from './colors';
+import { PieChartOptions } from './pie-chart-model';
 import { PieChartBase, PieChartData } from './PieChartBase';
+import { PieChartLegendMapper, PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode, format: formatOptions, legend: pieChartLegend, colorPalette: colorPalette },
+    spec: { calculation, sort, mode, format: formatOptions, legend: pieChartLegend, colorPalette },
     contentDimensions,
     queryResults,
   } = props;

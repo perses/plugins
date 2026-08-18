@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useMemo } from 'react';
-import { escapeCsvValue, PanelData, sanitizeFilename } from '@perses-dev/plugin-system';
-import { InfoTooltip, transformData } from '@perses-dev/components';
 import { IconButton } from '@mui/material';
-import DownloadIcon from 'mdi-material-ui/Download';
+import { InfoTooltip, transformData } from '@perses-dev/components';
+import { escapeCsvValue, PanelData, sanitizeFilename } from '@perses-dev/plugin-system';
 import { TimeSeriesData } from '@perses-dev/spec';
+import DownloadIcon from 'mdi-material-ui/Download';
+import React, { useCallback, useMemo } from 'react';
+
 import { TableProps } from './components';
 import type { TableOptions } from './models';
 import { buildRawTableData } from './table-data-utils';
@@ -33,7 +34,7 @@ export interface ExportColumn {
  */
 export function buildTableData(
   queryResults: Array<PanelData<TimeSeriesData>>,
-  spec: TableOptions
+  spec: TableOptions,
 ): { data: Array<Record<string, unknown>>; columns: ExportColumn[] } {
   // Use shared utility with forExport=true to get raw scalar values
   const rawData = buildRawTableData(queryResults, spec, { forExport: true });

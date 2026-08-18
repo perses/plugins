@@ -18,6 +18,7 @@ import {
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
+
 import { LokiClient, DEFAULT_LOKI, LOKI_DATASOURCE_KIND, getLokiTimeRange } from '../model';
 import {
   capturingMetric,
@@ -33,7 +34,7 @@ export const LokiLogQLVariable: VariablePlugin<LokiLogQLVariableOptions> = {
       datasourceSelectValueToSelector(
         spec.datasource ?? DEFAULT_LOKI,
         ctx.variables,
-        await ctx.datasourceStore.listDatasourceSelectItems(LOKI_DATASOURCE_KIND)
+        await ctx.datasourceStore.listDatasourceSelectItems(LOKI_DATASOURCE_KIND),
       ) ?? DEFAULT_LOKI;
     const client: LokiClient = await ctx.datasourceStore.getDatasourceClient(datasourceSelector);
     const timeRange = getLokiTimeRange(ctx.timeRange);

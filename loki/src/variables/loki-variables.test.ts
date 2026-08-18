@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { GetVariableOptionsContext } from '@perses-dev/plugin-system';
+
 import { LokiStreamResult } from '../model/loki-client-types';
 import { stringArrayToVariableOptions, capturingMetric, capturingStreams } from './loki-variables';
-import { LokiLabelValuesVariable } from './LokiLabelValuesVariable';
 import { LokiLabelNamesVariable } from './LokiLabelNamesVariable';
+import { LokiLabelValuesVariable } from './LokiLabelValuesVariable';
 import { LokiLogQLVariable } from './LokiLogQLVariable';
 
 // Dummy context for dependsOn calls (the implementations don't use ctx)

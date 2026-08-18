@@ -13,14 +13,15 @@
 
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { TimeSeries } from '@perses-dev/spec';
-import { DEFAULT_DATASOURCE } from '../constants';
-import { TimeSeriesEntry } from '../../model/click-house-data-types';
+
 import {
   ClickHouseClient,
   ClickHouseQueryResponse,
   formatClickHouseDateTime,
   replaceTimeRangePlaceholders,
 } from '../../model/click-house-client';
+import { TimeSeriesEntry } from '../../model/click-house-data-types';
+import { DEFAULT_DATASOURCE } from '../constants';
 import { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './click-house-query-types';
 
 const DEFAULT_STEP_MS = 30 * 1000;
@@ -67,7 +68,7 @@ function inferStepMs(response?: DatasourceQueryResponse): number {
   const timestamps = data
     .map((row: TimeSeriesEntry) => new Date(row.time).getTime())
     .filter(Number.isFinite)
-    .sort((a, b) => a - b);
+    .toSorted((a, b) => a - b);
 
   if (timestamps.length < 2) {
     return DEFAULT_STEP_MS;
@@ -92,7 +93,7 @@ function inferStepMs(response?: DatasourceQueryResponse): number {
     deltaCounts.set(delta, (deltaCounts.get(delta) ?? 0) + 1);
   }
 
-  const inferredStep = Array.from(deltaCounts.entries()).sort(([deltaA, countA], [deltaB, countB]) => {
+  const inferredStep = Array.from(deltaCounts.entries()).toSorted(([deltaA, countA], [deltaB, countB]) => {
     if (countA !== countB) {
       return countB - countA;
     }
@@ -104,7 +105,7 @@ function inferStepMs(response?: DatasourceQueryResponse): number {
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
-  context
+  context,
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     return { series: [] };
@@ -113,7 +114,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQueryS
   const query = replaceVariables(spec.query, context.variableState);
 
   const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE
+    spec.datasource ?? DEFAULT_DATASOURCE,
   )) as ClickHouseClient;
 
   const { start, end } = context.timeRange;

@@ -14,7 +14,6 @@
 import { Completion, CompletionContext, CompletionResult, insertCompletionText } from '@codemirror/autocomplete';
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-import { SyntaxNode, Tree } from '@lezer/common';
 import {
   Selector,
   Matchers,
@@ -27,7 +26,9 @@ import {
   String as StringType,
   Pipe,
 } from '@grafana/lezer-logql';
+import { SyntaxNode, Tree } from '@lezer/common';
 import { EditorView } from '@uiw/react-codemirror';
+
 import { toUnixSeconds } from '../model';
 import { CompletionConfig } from './logql-extension';
 
@@ -46,13 +47,13 @@ export interface CompletionInfo {
   to?: number;
 }
 
-const quoteChars = ['"', '`'];
+const quoteChars = new Set(['"', '`']);
 const defaultQuoteChar = '"';
 const ERROR_NODE = 0; // Lezer parser creates error nodes for incomplete/malformed syntax
 
 export async function complete(
   completionCfg: CompletionConfig,
-  { state, pos }: CompletionContext
+  { state, pos }: CompletionContext,
 ): Promise<CompletionResult | null> {
   // First, identify the completion scope
   const completion = identifyCompletion(state, pos, syntaxTree(state));
@@ -234,7 +235,7 @@ function detectLabelCompletion(state: EditorState, pos: number, node: SyntaxNode
         if (labelNode?.type.id === Identifier) {
           const label = state.sliceDoc(labelNode.from, labelNode.to);
           // Skip leading quote if present: { name="HT▯
-          const from = quoteChars.includes(state.sliceDoc(node.from, node.from + 1)) ? node.from + 1 : node.from;
+          const from = quoteChars.has(state.sliceDoc(node.from, node.from + 1)) ? node.from + 1 : node.from;
           return { scope: { kind: 'LabelValue', label }, from };
         }
       }
@@ -330,7 +331,12 @@ function completePipeFunctions(afterPipe: boolean, hasSpace: boolean, afterExcla
 
   // Parser functions and pipe operations: always show
   // Add pipe prefix when not after pipe (e.g., "{} " needs "| json" not " json")
-  const parserPrefix = !afterPipe ? '| ' : hasSpace ? '' : ' ';
+  let parserPrefix = ' ';
+  if (!afterPipe) {
+    parserPrefix = '| ';
+  } else if (hasSpace) {
+    parserPrefix = '';
+  }
 
   // Parsing expressions: Extract structured data
   const parsingExpressions = ['json', 'logfmt', 'pattern', 'regexp', 'unpack', 'unwrap'];
@@ -443,11 +449,11 @@ function escapeString(input: string, quoteChar: string): string {
  */
 export function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number): void {
   let quoteChar = defaultQuoteChar;
-  if (quoteChars.includes(view.state.sliceDoc(from - 1, from))) {
+  if (quoteChars.has(view.state.sliceDoc(from - 1, from))) {
     quoteChar = view.state.sliceDoc(from - 1, from);
     from--;
   }
-  if (quoteChars.includes(view.state.sliceDoc(to, to + 1))) {
+  if (quoteChars.has(view.state.sliceDoc(to, to + 1))) {
     quoteChar = view.state.sliceDoc(to, to + 1);
     to++;
   }
