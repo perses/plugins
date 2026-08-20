@@ -26,7 +26,7 @@ export function labelAttrs(
   halfW: number,
   halfH: number,
   position: LabelPosition | undefined,
-  padding: number | undefined
+  padding: number | undefined,
 ): LabelAttrs {
   const pos = position ?? 'below';
   const pad = padding ?? DEFAULT_PADDING;

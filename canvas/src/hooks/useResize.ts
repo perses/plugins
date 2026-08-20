@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { PointerEvent, useCallback, useMemo, useState } from 'react';
-import { CanvasSpec, FloatingEdge, isFloatingEdge } from '../model';
-import { useZoomContext } from '../contexts/ZoomContext';
+
 import { useEditorContext } from '../contexts/EditorContext';
 import { useSpecContext } from '../contexts/SpecContext';
+import { useZoomContext } from '../contexts/ZoomContext';
+import { CanvasSpec, FloatingEdge, isFloatingEdge } from '../model';
 import {
   BoundingBox,
   HANDLE_POSITIONS,
@@ -67,7 +68,7 @@ function scalePoint(
   px: number,
   py: number,
   origBoundingBox: BoundingBox,
-  final: FinalBoundingBox
+  final: FinalBoundingBox,
 ): { x: number; y: number } {
   const origWidth = origBoundingBox.maxX - origBoundingBox.minX;
   const origHeight = origBoundingBox.maxY - origBoundingBox.minY;
@@ -84,7 +85,7 @@ function scaleNodeSize(
   height: number,
   kind: string,
   origBoundingBox: BoundingBox,
-  final: FinalBoundingBox
+  final: FinalBoundingBox,
 ): { width: number; height: number } {
   const scaleX = (final.maxX - final.minX) / (origBoundingBox.maxX - origBoundingBox.minX);
   const scaleY = (final.maxY - final.minY) / (origBoundingBox.maxY - origBoundingBox.minY);
@@ -116,11 +117,11 @@ export function useResize(): UseResizeResult {
 
   const selectedNodes = useMemo(
     () => (spec.nodes ?? []).filter((n) => selectedIds.has(n.id)),
-    [spec.nodes, selectedIds]
+    [spec.nodes, selectedIds],
   );
   const selectedFloatingEdges = useMemo(
     () => (spec.edges ?? []).filter((ed): ed is FloatingEdge => selectedIds.has(ed.id) && isFloatingEdge(ed)),
-    [spec.edges, selectedIds]
+    [spec.edges, selectedIds],
   );
 
   const beginResize = useCallback(
@@ -144,7 +145,7 @@ export function useResize(): UseResizeResult {
       });
       return true;
     },
-    [selectedNodes, selectedFloatingEdges]
+    [selectedNodes, selectedFloatingEdges],
   );
 
   const updateResize = useCallback(
@@ -157,7 +158,7 @@ export function useResize(): UseResizeResult {
         return { ...current, currentX: point.x, currentY: point.y };
       });
     },
-    [toCanvasPoint]
+    [toCanvasPoint],
   );
 
   const applyResize = useCallback(
@@ -192,7 +193,7 @@ export function useResize(): UseResizeResult {
         edge.y2 = pos.y;
       });
     },
-    [resizeDrag, selectedNodes, selectedFloatingEdges]
+    [resizeDrag, selectedNodes, selectedFloatingEdges],
   );
 
   const resetResize = useCallback((): void => {

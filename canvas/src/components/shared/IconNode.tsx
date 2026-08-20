@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, SVGProps } from 'react';
+
 import { NodeSpec } from '../../model';
 import { ICON_PATHS } from '../../utils/icons';
 import { labelAttrs } from '../../utils/labelPosition';

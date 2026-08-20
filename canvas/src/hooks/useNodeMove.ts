@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { PointerEvent, useCallback, useState } from 'react';
-import { CanvasSpec } from '../model';
-import { useZoomContext } from '../contexts/ZoomContext';
+
 import { useEditorContext } from '../contexts/EditorContext';
 import { useSpecContext } from '../contexts/SpecContext';
+import { useZoomContext } from '../contexts/ZoomContext';
+import { CanvasSpec } from '../model';
 
 interface MoveDrag {
   totalDx: number;
@@ -52,13 +53,13 @@ export function useNodeMove(): UseNodeMoveResult {
       const origEdges = (spec.edges ?? [])
         .filter(
           (ed): ed is typeof ed & { x2: number; y2: number } =>
-            selectedIds.has(ed.id) && ed.x2 !== undefined && ed.y2 !== undefined
+            selectedIds.has(ed.id) && ed.x2 !== undefined && ed.y2 !== undefined,
         )
         .map((ed) => ({ id: ed.id, x2: ed.x2, y2: ed.y2 }));
       setMoveDrag({ totalDx: 0, totalDy: 0, origNodes, origEdges });
       return null;
     },
-    [selectedIds, spec]
+    [selectedIds, spec],
   );
 
   const updateMove = useCallback(
@@ -75,7 +76,7 @@ export function useNodeMove(): UseNodeMoveResult {
         return { ...current, totalDx: current.totalDx + dx, totalDy: current.totalDy + dy };
       });
     },
-    [selectedIds, transform.k]
+    [selectedIds, transform.k],
   );
 
   const applyMove = useCallback(
@@ -101,7 +102,7 @@ export function useNodeMove(): UseNodeMoveResult {
         }
       });
     },
-    [moveDrag]
+    [moveDrag],
   );
 
   const resetMove = useCallback((): void => {

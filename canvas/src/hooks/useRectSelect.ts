@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { PointerEvent, useCallback, useRef, useState } from 'react';
-import { useZoomContext } from '../contexts/ZoomContext';
+
 import { useSpecContext } from '../contexts/SpecContext';
+import { useZoomContext } from '../contexts/ZoomContext';
 import { computeSelectionFromRect } from '../utils/selectionUtils';
 
 export interface SelectionRect {
@@ -60,7 +61,7 @@ export function useRectSelect(): UseRectSelectResult {
       setSelectionRect(rect);
       return true;
     },
-    [toCanvasPoint]
+    [toCanvasPoint],
   );
 
   const updateSelection = useCallback(
@@ -73,7 +74,7 @@ export function useRectSelect(): UseRectSelectResult {
       rectRef.current = updated;
       setSelectionRect(updated);
     },
-    [toCanvasPoint]
+    [toCanvasPoint],
   );
 
   const applySelection = useCallback((): Set<string> => {

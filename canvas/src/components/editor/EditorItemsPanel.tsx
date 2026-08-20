@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useRef } from 'react';
 import {
   Box,
   Button,
@@ -22,14 +21,16 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
+import { ReactElement, useCallback, useRef } from 'react';
+
 import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
-import { useZoom } from '../../hooks/useZoom';
 import { ZoomProvider } from '../../contexts/ZoomContext';
+import { useZoom } from '../../hooks/useZoom';
+import { BackgroundPropertiesPanel } from './BackgroundPropertiesPanel';
+import { EdgePropertiesPanel } from './EdgePropertiesPanel';
 import { EditorCanvas } from './EditorCanvas';
 import { NodePropertiesPanel } from './NodePropertiesPanel';
-import { EdgePropertiesPanel } from './EdgePropertiesPanel';
-import { BackgroundPropertiesPanel } from './BackgroundPropertiesPanel';
 
 const CANVAS_HEIGHT = 400;
 const PROPERTIES_HEIGHT = 700;
@@ -81,7 +82,7 @@ export function EditorItemsPanel(): ReactElement {
       const id = event.target.value;
       selectItems(id ? new Set([id]) : new Set());
     },
-    [selectItems]
+    [selectItems],
   );
 
   const hasBackgrounds = (spec.backgrounds?.length ?? 0) > 0;

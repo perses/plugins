@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, useCallback, useMemo, useRef, useState } from 'react';
 import { select } from 'd3-selection';
 import { zoom, zoomIdentity, ZoomTransform } from 'd3-zoom';
+import { PointerEvent, useCallback, useMemo, useRef, useState } from 'react';
 
 const FIT_PADDING = 40;
 
@@ -23,7 +23,7 @@ export interface UseZoomResult {
   fitView: (
     boundingBox: { minX: number; minY: number; maxX: number; maxY: number },
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
   ) => void;
   toCanvasPoint: (event: PointerEvent<SVGSVGElement>) => { x: number; y: number };
   resetPan: () => void;
@@ -55,7 +55,7 @@ export function useZoom(): UseZoomResult {
       });
       select<SVGSVGElement, unknown>(node).call(zoomBehavior);
     },
-    [zoomBehavior]
+    [zoomBehavior],
   );
 
   const resetPan = useCallback(() => {
@@ -69,7 +69,7 @@ export function useZoom(): UseZoomResult {
     (
       boundingBox: { minX: number; minY: number; maxX: number; maxY: number },
       canvasWidth: number,
-      canvasHeight: number
+      canvasHeight: number,
     ): void => {
       if (!nodeRef.current) {
         return;
@@ -82,7 +82,7 @@ export function useZoom(): UseZoomResult {
       const t = zoomIdentity.translate(tx, ty).scale(scale);
       select<SVGSVGElement, unknown>(nodeRef.current).call(zoomBehavior.transform, t);
     },
-    [zoomBehavior]
+    [zoomBehavior],
   );
 
   const toCanvasPoint = useCallback(
@@ -95,7 +95,7 @@ export function useZoom(): UseZoomResult {
       const py = event.clientY - rect.top;
       return { x: transform.invertX(px), y: transform.invertY(py) };
     },
-    [transform]
+    [transform],
   );
 
   return { svgRef, transform, fitView, toCanvasPoint, resetPan };

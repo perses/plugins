@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
 import { produce } from 'immer';
-import { BackgroundSpec, EdgeSpec, NodeSpec, CanvasSpec } from '../model';
+import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
+
 import { DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT } from '../components/shared/NodeRenderer';
+import { BackgroundSpec, EdgeSpec, NodeSpec, CanvasSpec } from '../model';
 import { generateId } from '../utils/generateId';
 import { useEditorContext } from './EditorContext';
 
@@ -79,7 +80,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
           height: DEFAULT_NODE_HEIGHT,
           kind: 'icon',
         });
-      })
+      }),
     );
     selectItems(new Set([id]));
   }
@@ -89,7 +90,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
     onChange(
       produce(spec, (draft) => {
         (draft.backgrounds ??= []).push({ id, x, y, width, height });
-      })
+      }),
     );
     selectItems(new Set([id]));
   }
@@ -106,7 +107,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
         const tmp = arr[idx]!;
         arr[idx] = arr[swapIdx]!;
         arr[swapIdx] = tmp;
-      })
+      }),
     );
   }
 
@@ -117,9 +118,9 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
         draft.backgrounds = (draft.backgrounds ?? []).filter((bg) => !selectedIds.has(bg.id));
         draft.nodes = (draft.nodes ?? []).filter((n) => !selectedIds.has(n.id));
         draft.edges = (draft.edges ?? []).filter(
-          (ed) => !selectedIds.has(ed.id) && !selectedIds.has(ed.source) && !selectedIds.has(ed.target)
+          (ed) => !selectedIds.has(ed.id) && !selectedIds.has(ed.source) && !selectedIds.has(ed.target),
         );
-      })
+      }),
     );
     clearSelection();
   }
@@ -131,7 +132,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
         if (idx !== -1 && draft.nodes) {
           draft.nodes[idx] = updated;
         }
-      })
+      }),
     );
   }
 
@@ -142,7 +143,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
         if (idx !== -1 && draft.edges) {
           draft.edges[idx] = updated;
         }
-      })
+      }),
     );
   }
 
@@ -153,7 +154,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
         if (idx !== -1 && draft.backgrounds) {
           draft.backgrounds[idx] = updated;
         }
-      })
+      }),
     );
   }
 

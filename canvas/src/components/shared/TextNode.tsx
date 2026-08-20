@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
 import { NodeSpec } from '../../model';
 
 const DEFAULT_TEXT_COLOR = 'currentColor';
