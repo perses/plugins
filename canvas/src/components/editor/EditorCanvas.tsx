@@ -24,7 +24,7 @@ import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { EditorEdge } from './EditorEdge';
-import { EditorNode } from './EditorNode';
+import { EditorNodeItem } from './EditorNodeItem';
 import { SelectionBoundingBox } from './SelectionBoundingBox';
 import { DragEdgeLine } from './DragEdgeLine';
 import { SelectionRectOverlay } from './SelectionRectOverlay';
@@ -210,44 +210,24 @@ export function EditorCanvas({
       <GlobalBackgroundLayer backgrounds={spec.backgrounds ?? []} width={width} height={height} />
       <g transform={transform.toString()}>
         <BackgroundLayer backgrounds={spec.backgrounds ?? []} />
-        {displayNodes.map((node) => {
-          const onNodePointerDown = (event: PointerEvent<SVGRectElement>): void => {
-            const unselectedId = selectNode(event, node.id);
-            if (unselectedId !== null) {
-              selectItems(new Set([unselectedId]));
-            } else {
-              startMove();
-            }
-          };
-          const onNodePointerMove = (event: PointerEvent<SVGRectElement>): void => {
-            updateMove(event, node.id);
-          };
-          const onNodeMouseEnter = (): void => {
-            if (mode.type !== 'dragging-edge') {
-              hoverNode(node.id);
-            }
-          };
-          const onNodeMouseLeave = (): void => unhoverNode(node.id);
-          const onCrossDragStart = (anchor: AnchorPoint, x: number, y: number): void => {
-            beginEdgeDrag(node.id, anchor, x, y);
-            startDragEdge();
-          };
-          return (
-            <EditorNode
-              key={node.id}
-              node={node}
-              isHovered={hoveredId === node.id}
-              isSelected={selectedIds.has(node.id)}
-              snapTarget={dragEdge?.snapTargetId === node.id}
-              isDragging={mode.type === 'dragging-edge'}
-              onPointerDown={onNodePointerDown}
-              onPointerMove={onNodePointerMove}
-              onMouseEnter={onNodeMouseEnter}
-              onMouseLeave={onNodeMouseLeave}
-              onCrossDragStart={onCrossDragStart}
-            />
-          );
-        })}
+        {displayNodes.map((node) => (
+          <EditorNodeItem
+            key={node.id}
+            node={node}
+            isHovered={hoveredId === node.id}
+            isSelected={selectedIds.has(node.id)}
+            snapTarget={dragEdge?.snapTargetId === node.id}
+            isDragging={mode.type === 'dragging-edge'}
+            selectNode={selectNode}
+            selectItems={selectItems}
+            startMove={startMove}
+            updateMove={updateMove}
+            hoverNode={hoverNode}
+            unhoverNode={unhoverNode}
+            beginEdgeDrag={beginEdgeDrag}
+            startDragEdge={startDragEdge}
+          />
+        ))}
 
         {displayEdges.map((edge) => {
           const onEdgeClick = (event: PointerEvent<SVGLineElement>): void => {
