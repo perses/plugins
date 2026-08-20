@@ -170,7 +170,7 @@ describe('BarChartOptionsEditorSettings', () => {
     userEvent.click(addButton);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        colorOverrides: [{ regex: '', color: '#555' }],
+        visual: { colorOverrides: [{ regex: '', color: '#555' }] },
       }),
     );
   });
@@ -185,7 +185,7 @@ describe('BarChartOptionsEditorSettings', () => {
         calculation: 'first',
         sort: 'desc',
         mode: 'value',
-        colorOverrides: [{ regex: 'errors', color: '#ff0000' }],
+        visual: { colorOverrides: [{ regex: 'errors', color: '#ff0000' }] },
       },
       onChange,
     );
@@ -193,7 +193,7 @@ describe('BarChartOptionsEditorSettings', () => {
     userEvent.click(deleteButton);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        colorOverrides: [],
+        visual: { colorOverrides: [] },
       }),
     );
   });

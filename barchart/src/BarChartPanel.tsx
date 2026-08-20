@@ -33,7 +33,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
       groupBy = [],
       isStacked = false,
       orientation = 'horizontal',
-      colorOverrides,
+      visual,
     },
     contentDimensions,
     queryResults,
@@ -142,7 +142,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
         groupedData={stackedBarChartData}
         isStacked={isStacked}
         orientation={orientation}
-        colorOverrides={colorOverrides}
+        colorOverrides={visual?.colorOverrides}
       />
     </Box>
   );

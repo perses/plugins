@@ -26,8 +26,10 @@ spec: close({
 	orientation?: "horizontal" | "vertical"
 	groupBy?: [...string]
 	isStacked?: bool
-	colorOverrides?: [...{
-		regex: string
-		color: string
-	}]
+	visual?: {
+		colorOverrides?: [...{
+			regex: string
+			color: string
+		}]
+	}
 })

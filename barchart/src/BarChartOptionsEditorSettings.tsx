@@ -62,7 +62,7 @@ import {
   DEFAULT_SORT,
   DEFAULT_IS_STACKED,
   DEFAULT_GROUP_BY,
-  DEFAULT_COLOR_OVERRIDES,
+  DEFAULT_VISUAL,
 } from './bar-chart-model';
 
 const DEFAULT_COLOR_VALUE = '#555';
@@ -112,7 +112,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
         draft.groupBy = DEFAULT_GROUP_BY;
         draft.isStacked = DEFAULT_IS_STACKED;
         draft.orientation = DEFAULT_ORIENTATION;
-        draft.colorOverrides = DEFAULT_COLOR_OVERRIDES;
+        draft.visual = DEFAULT_VISUAL;
       }),
     );
   };
@@ -120,8 +120,9 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   const handleAddColorOverride = (): void => {
     onChange(
       produce(value, (draft: BarChartOptions) => {
-        if (!draft.colorOverrides) draft.colorOverrides = [];
-        draft.colorOverrides.push({ regex: '', color: DEFAULT_COLOR_VALUE });
+        if (!draft.visual) draft.visual = {};
+        if (!draft.visual.colorOverrides) draft.visual.colorOverrides = [];
+        draft.visual.colorOverrides.push({ regex: '', color: DEFAULT_COLOR_VALUE });
       }),
     );
   };
@@ -129,7 +130,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   const handleRemoveColorOverride = (index: number): void => {
     onChange(
       produce(value, (draft: BarChartOptions) => {
-        draft.colorOverrides?.splice(index, 1);
+        draft.visual?.colorOverrides?.splice(index, 1);
       }),
     );
   };
@@ -137,7 +138,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   const handleColorOverrideRegexChange = (index: number, regex: string): void => {
     onChange(
       produce(value, (draft: BarChartOptions) => {
-        const override = draft.colorOverrides?.[index];
+        const override = draft.visual?.colorOverrides?.[index];
         if (override) override.regex = regex;
       }),
     );
@@ -146,7 +147,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   const handleColorOverrideColorChange = (index: number, color: string): void => {
     onChange(
       produce(value, (draft: BarChartOptions) => {
-        const override = draft.colorOverrides?.[index];
+        const override = draft.visual?.colorOverrides?.[index];
         if (override) override.color = color;
       }),
     );
@@ -160,7 +161,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   );
   const groupBy = value.groupBy ?? DEFAULT_GROUP_BY;
   const isStacked = value.isStacked ?? DEFAULT_IS_STACKED;
-  const colorOverrides = value.colorOverrides ?? DEFAULT_COLOR_OVERRIDES;
+  const colorOverrides = value.visual?.colorOverrides ?? [];
 
   return (
     <OptionsEditorGrid>
@@ -244,10 +245,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
                 color={override.color || DEFAULT_COLOR_VALUE}
                 onColorChange={(color) => handleColorOverrideColorChange(i, color)}
               />
-              <IconButton
-                aria-label={`delete color override n°${i + 1}`}
-                onClick={() => handleRemoveColorOverride(i)}
-              >
+              <IconButton aria-label={`delete color override n°${i + 1}`} onClick={() => handleRemoveColorOverride(i)}>
                 <DeleteIcon />
               </IconButton>
             </Stack>

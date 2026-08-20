@@ -7,11 +7,13 @@
     },
     "sort": "desc",
     "mode": "value",
-    "colorOverrides": [
-      {
-        "regex": "errors",
-        "color": "#ff0000"
-      }
-    ]
+    "visual": {
+      "colorOverrides": [
+        {
+          "regex": "errors",
+          "color": "#ff0000"
+        }
+      ]
+    }
   }
 }
