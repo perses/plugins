@@ -1,10 +1,7 @@
 {
   "kind": "PrometheusTimeSeriesQuery",
   "spec": {
-    "datasource": {
-      "kind": "PrometheusDatasource",
-      "name": "${datasource}"
-    },
+    "datasource": "${datasource}",
     "minStep": "",
     "query": "avg without (instance) (hadoop_hdfs_datanode_capacity{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
     "seriesNameFormat": "{{_target}}"
