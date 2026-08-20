@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { PointerEvent, ReactElement } from 'react';
+
+import { useZoomContext } from '../../contexts/ZoomContext';
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
 import { edgeEndpoints } from '../../utils/edgeUtils';
 import { editorStyles } from '../../utils/editorStyles';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { useZoomContext } from '../../contexts/ZoomContext';
 import { EdgeLines, LineStyle } from '../shared/EdgeLines';
 
 interface EditorEdgeProps {
@@ -32,7 +33,7 @@ interface EditorEdgeProps {
     fixedX: number,
     fixedY: number,
     fixedNodeId: string,
-    fixedAnchor: AnchorPoint
+    fixedAnchor: AnchorPoint,
   ) => void;
 }
 

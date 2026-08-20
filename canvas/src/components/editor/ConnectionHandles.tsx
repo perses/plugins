@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { NodeSpec, AnchorPoint } from '../../model';
 import { ANCHOR_KEYS, anchorPosition } from '../../utils/edgeUtils';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 
 const CROSS_LENGTH = 8;
 

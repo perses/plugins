@@ -49,7 +49,7 @@ export function closestAnchor(node: NodeSpec, pt: { x: number; y: number }): Anc
 
 export function edgeEndpoints(
   edge: EdgeSpec,
-  nodeById: Map<string, NodeSpec>
+  nodeById: Map<string, NodeSpec>,
 ): { x1: number; y1: number; x2: number; y2: number } | null {
   const src = nodeById.get(edge.source);
   if (!src) return null;
@@ -94,7 +94,7 @@ export function snapTarget(
   nodes: NodeSpec[],
   pt: { x: number; y: number },
   excludeId: string,
-  snapRadius: number
+  snapRadius: number,
 ): { node: NodeSpec; anchor: AnchorPoint } | null {
   let best: { node: NodeSpec; anchor: AnchorPoint; dist: number } | null = null;
   for (const node of nodes) {

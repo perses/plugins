@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
 import { BackgroundSpec } from '../../model';
 import { imageFitToPreserveAspectRatio, isSafeImageUrl } from '../../utils/panelUtils';
 

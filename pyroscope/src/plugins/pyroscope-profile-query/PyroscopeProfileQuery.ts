@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ProfileQueryPlugin } from '@perses-dev/plugin-system';
+
 import { PyroscopeProfileQuerySpec } from '../../model/profile-query-model';
 import { getProfileData } from './get-profile-data';
 import { PyroscopeProfileQueryEditor } from './PyroscopeProfileQueryEditor';

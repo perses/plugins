@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Autocomplete, Box, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { OptionsColorPicker } from '@perses-dev/components';
 import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
+import React, { ReactElement, useCallback, useMemo } from 'react';
+
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { NodeSpec } from '../../model';
 import { ICON_NAMES } from '../../utils/icons';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { IconPreview } from './IconPreview';
 
 interface NodePropertiesPanelProps {
@@ -43,7 +44,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           onChange({ ...node, [key]: undefined });
         }
       },
-    [node, onChange]
+    [node, onChange],
   );
 
   return (

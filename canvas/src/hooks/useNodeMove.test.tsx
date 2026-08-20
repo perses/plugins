@@ -14,9 +14,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { produce } from 'immer';
 import React from 'react';
+
+import { useEditorContext } from '../contexts/EditorContext';
 import { CanvasSpec, NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
-import { useEditorContext } from '../contexts/EditorContext';
 import { useNodeMove } from './useNodeMove';
 
 function makeNode(id: string, x: number, y: number): NodeSpec {

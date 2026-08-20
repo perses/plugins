@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useCallback } from 'react';
 import {
   Box,
   Checkbox,
@@ -27,12 +26,14 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
-import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import { OptionsColorPicker } from '@perses-dev/components';
-import { BackgroundSpec, CanvasSpec } from '../../model';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
+import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
+import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
+import React, { ReactElement, useCallback } from 'react';
+
 import { useSpecContext } from '../../contexts/SpecContext';
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
+import { BackgroundSpec, CanvasSpec } from '../../model';
 
 interface BackgroundPropertiesPanelProps {
   background: BackgroundSpec;
@@ -54,7 +55,7 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           onChange({ ...background, [key]: v });
         }
       },
-    [background, onChange]
+    [background, onChange],
   );
 
   const IMAGE_FIT_OPTIONS: Array<BackgroundSpec['imageFit']> = ['cover', 'contain', 'stretch'];

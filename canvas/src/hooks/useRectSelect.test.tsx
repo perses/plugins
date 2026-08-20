@@ -13,6 +13,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
+
 import { NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
 import { useRectSelect } from './useRectSelect';
@@ -24,7 +25,7 @@ function makeNode(id: string, x: number, y: number): NodeSpec {
 function makePointerEvent(
   x: number,
   y: number,
-  overrides: Partial<PointerEvent> = {}
+  overrides: Partial<PointerEvent> = {},
 ): React.PointerEvent<SVGSVGElement> {
   return {
     clientX: x,

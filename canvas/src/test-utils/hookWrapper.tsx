@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import React, { ReactNode, useState } from 'react';
-import { CanvasSpec } from '../model';
+
 import { EditorStateProvider } from '../contexts/EditorContext';
 import { SpecContext, SpecContextValue } from '../contexts/SpecContext';
 import { ZoomContext, ZoomContextValue } from '../contexts/ZoomContext';
+import { CanvasSpec } from '../model';
 
 // Minimal identity-transform stub — d3-zoom is ESM-only and not transformable by Jest.
 const identityTransform = {
@@ -56,7 +57,7 @@ export function HookWrapper({ initialSpec = {}, children }: WrapperProps): React
   const edgeById = React.useMemo(() => new Map((spec.edges ?? []).map((ed) => [ed.id, ed])), [spec.edges]);
   const backgroundById = React.useMemo(
     () => new Map((spec.backgrounds ?? []).map((bg) => [bg.id, bg])),
-    [spec.backgrounds]
+    [spec.backgrounds],
   );
 
   const specCtx: SpecContextValue = {

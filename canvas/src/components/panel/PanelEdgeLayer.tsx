@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { TimeSeries } from '@perses-dev/core';
+import { ReactElement } from 'react';
+
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { CanvasSpec } from '../../model';
 import { edgeEndpoints, strokeWidthFromThresholds } from '../../utils/edgeUtils';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
+import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
 import { EdgeLabel } from '../shared/EdgeLabel';
 import { EdgeLines, edgeLabelPoints, LineStyle } from '../shared/EdgeLines';
-import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
 
 const NS_PREFIX = 'wm-panel';
 
@@ -29,7 +30,7 @@ function resolveEdgeStyle(
   seriesByQueryIndex: Map<number, TimeSeries>,
   spec: CanvasSpec,
   paletteColors: string[],
-  fallbackColor: string
+  fallbackColor: string,
 ): { stroke: string; strokeWidth: number } {
   const defaultWidth = edgeStrokeWidth ?? spec.edgeDefaultStrokeWidth ?? 2;
   if (queryIndex === undefined) {
@@ -94,7 +95,7 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
           seriesByQueryIndex,
           spec,
           paletteColors,
-          fallbackColor
+          fallbackColor,
         );
         const bwdStyle = resolveEdgeStyle(
           edge.targetQueryIndex,
@@ -103,7 +104,7 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
           seriesByQueryIndex,
           spec,
           paletteColors,
-          fallbackColor
+          fallbackColor,
         );
         const scaledFwdStyle: LineStyle = {
           stroke: fwdStyle.stroke,
@@ -120,7 +121,7 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
           pts,
           edge.bidirectional ?? false,
           scaledFwdStyle.strokeWidth,
-          scaledBwdStyle.strokeWidth
+          scaledBwdStyle.strokeWidth,
         );
         const fwdLabel = resolveLabel(edge.sourceQueryIndex, edge.sourceLabelTemplate);
         const bwdLabel = edge.bidirectional ? resolveLabel(edge.targetQueryIndex, edge.targetLabelTemplate) : null;

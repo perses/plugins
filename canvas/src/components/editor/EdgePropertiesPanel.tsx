@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Checkbox, FormControlLabel, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
+import React, { ReactElement, useCallback, useMemo } from 'react';
+
 import { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
 
 const ANCHOR_OPTIONS: AnchorPoint[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
@@ -35,14 +36,14 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, source: e.target.value });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onSourceAnchorChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, sourceAnchor: e.target.value as AnchorPoint });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onTargetChange = useCallback(
@@ -55,28 +56,28 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         y2: undefined,
       });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onTargetAnchorChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, targetAnchor: e.target.value as AnchorPoint });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onBidirectionalChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, bidirectional: e.target.checked || undefined });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onThicknessModeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, thicknessMode: e.target.value as 'fixed' | 'threshold' });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onStrokeWidthChange = useCallback(
@@ -84,7 +85,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
       const v = parseFloat(e.target.value);
       onChange({ ...edge, strokeWidth: Number.isFinite(v) && v > 0 ? v : undefined });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onSourceQueryIndexChange = useCallback(
@@ -92,14 +93,14 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
       const v = e.target.value;
       onChange({ ...edge, sourceQueryIndex: v === '' ? undefined : Number(v) });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onSourceLabelTemplateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, sourceLabelTemplate: e.target.value || undefined });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onTargetQueryIndexChange = useCallback(
@@ -107,14 +108,14 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
       const v = e.target.value;
       onChange({ ...edge, targetQueryIndex: v === '' ? undefined : Number(v) });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   const onTargetLabelTemplateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, targetLabelTemplate: e.target.value || undefined });
     },
-    [edge, onChange]
+    [edge, onChange],
   );
 
   return (
