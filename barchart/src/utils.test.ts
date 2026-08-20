@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { BarChartData } from './BarChartBase';
-import { calculatePercentages, sortSeriesData } from './utils';
+import { calculatePercentages, getOverrideColor, sortSeriesData } from './utils';
 
 const MOCK_DATA: BarChartData[] = [
   {
@@ -116,5 +116,48 @@ describe('sortSeriesData', () => {
         value: 5,
       },
     ]);
+  });
+});
+
+describe('getOverrideColor', () => {
+  it('returns the color of the first matching override', () => {
+    const color = getOverrideColor('errors_total', [
+      { regex: 'errors', color: '#ff0000' },
+      { regex: 'total', color: '#00ff00' },
+    ]);
+    expect(color).toBe('#ff0000');
+  });
+
+  it('returns undefined when no override matches', () => {
+    const color = getOverrideColor('latency', [{ regex: 'errors', color: '#ff0000' }]);
+    expect(color).toBeUndefined();
+  });
+
+  it('returns undefined when overrides is undefined', () => {
+    expect(getOverrideColor('errors')).toBeUndefined();
+  });
+
+  it('ignores invalid regex and continues to the next override', () => {
+    const color = getOverrideColor('errors_total', [
+      { regex: '[', color: '#ff0000' },
+      { regex: 'errors', color: '#00ff00' },
+    ]);
+    expect(color).toBe('#00ff00');
+  });
+
+  it('ignores empty regex and continues to the next override', () => {
+    const color = getOverrideColor('errors_total', [
+      { regex: '', color: '#ff0000' },
+      { regex: 'errors', color: '#00ff00' },
+    ]);
+    expect(color).toBe('#00ff00');
+  });
+
+  it('ignores empty regex and falls back to undefined if no other overrides match', () => {
+    const color = getOverrideColor('latency', [
+      { regex: '', color: '#ff0000' },
+      { regex: 'errors', color: '#00ff00' },
+    ]);
+    expect(color).toBeUndefined();
   });
 });

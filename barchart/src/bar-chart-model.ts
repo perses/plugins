@@ -21,6 +21,15 @@ export const DEFAULT_MODE: ModeOption = 'value';
 export const DEFAULT_ORIENTATION: 'horizontal' | 'vertical' = 'horizontal';
 export const DEFAULT_GROUP_BY: string[] = [];
 export const DEFAULT_IS_STACKED = false;
+export const DEFAULT_COLOR_OVERRIDES: ColorOverride[] = [];
+
+/**
+ * A regex-based color override for a series/bar.
+ */
+export interface ColorOverride {
+  regex: string;
+  color: string;
+}
 
 /**
  * The schema for a BarChart panel.
@@ -40,6 +49,7 @@ export interface BarChartOptions {
   orientation?: 'horizontal' | 'vertical';
   groupBy?: string[];
   isStacked?: boolean;
+  colorOverrides?: ColorOverride[];
 }
 
 export type BarChartOptionsEditorProps = OptionsEditorProps<BarChartOptions>;
@@ -56,5 +66,6 @@ export function createInitialBarChartOptions(): BarChartOptions {
     orientation: DEFAULT_ORIENTATION,
     groupBy: DEFAULT_GROUP_BY,
     isStacked: DEFAULT_IS_STACKED,
+    colorOverrides: DEFAULT_COLOR_OVERRIDES,
   };
 }

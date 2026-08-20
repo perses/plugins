@@ -13,7 +13,7 @@
 
 import { SortOption } from '@perses-dev/components';
 
-import { DEFAULT_SORT } from './bar-chart-model';
+import { ColorOverride, DEFAULT_SORT } from './bar-chart-model';
 import { BarChartData } from './BarChartBase';
 
 export function calculatePercentages(data: BarChartData[]): Array<{ label: string; value: number }> {
@@ -57,4 +57,25 @@ export function sortSeriesData(data: BarChartData[], sortOrder: SortOption = DEF
       return a.value < b.value ? -1 : 1;
     });
   }
+}
+
+/**
+ * Returns the color of the first override whose regex matches the given name.
+ * Invalid regex patterns are skipped. Returns undefined if no override matches.
+ */
+export function getOverrideColor(name: string, overrides?: ColorOverride[]): string | undefined {
+  if (!overrides) return undefined;
+  for (const override of overrides) {
+    if (override.regex === '') {
+      continue;
+    }
+    try {
+      if (new RegExp(override.regex).test(name)) {
+        return override.color;
+      }
+    } catch {
+      // ignore invalid regex patterns
+    }
+  }
+  return undefined;
 }
