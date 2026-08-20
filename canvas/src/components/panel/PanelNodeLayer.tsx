@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback } from 'react';
 import { TimeSeries } from '@perses-dev/core';
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
+import { ReactElement, useCallback } from 'react';
+
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { CanvasSpec } from '../../model';
-import { NodeRenderer } from '../shared/NodeRenderer';
 import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
+import { NodeRenderer } from '../shared/NodeRenderer';
 
 interface PanelNodeLayerProps {
   spec: CanvasSpec;
@@ -35,7 +36,7 @@ export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
     (link: string) => {
       window.open(replaceVariablesInString(link, variableValues), '_blank', 'noopener,noreferrer');
     },
-    [variableValues]
+    [variableValues],
   );
 
   return (

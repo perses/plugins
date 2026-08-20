@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { memo, PointerEvent, ReactElement, useCallback } from 'react';
+
 import { AnchorPoint, NodeSpec } from '../../model';
 import { EditorNode } from './EditorNode';
 
@@ -57,14 +58,14 @@ export const EditorNodeItem = memo(function EditorNodeItem({
         startMove();
       }
     },
-    [nodeId, selectNode, selectItems, startMove]
+    [nodeId, selectNode, selectItems, startMove],
   );
 
   const onPointerMove = useCallback(
     (event: PointerEvent<SVGRectElement>): void => {
       updateMove(event, nodeId);
     },
-    [nodeId, updateMove]
+    [nodeId, updateMove],
   );
 
   const onMouseEnter = useCallback((): void => {
@@ -82,7 +83,7 @@ export const EditorNodeItem = memo(function EditorNodeItem({
       beginEdgeDrag(nodeId, anchor, x, y);
       startDragEdge();
     },
-    [nodeId, beginEdgeDrag, startDragEdge]
+    [nodeId, beginEdgeDrag, startDragEdge],
   );
 
   return (

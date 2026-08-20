@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
 import { ICON_PATHS } from '../../utils/icons';
 
 interface IconPreviewProps {

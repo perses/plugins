@@ -43,7 +43,7 @@ describe('nodeBoundingBox', () => {
       [
         { x: 10, y: 20 },
         { x: -5, y: 50 },
-      ]
+      ],
     );
     expect(result).toEqual({ minX: -5, minY: 20, maxX: 10, maxY: 50 });
   });

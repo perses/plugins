@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
+
 import { CanvasPanel } from './components/panel/CanvasPanel';
-import { CanvasSpec, CanvasProps } from './model';
 import { GlobalSettingsEditor } from './components/settings/GlobalSettingsEditor';
+import { CanvasSpec, CanvasProps } from './model';
 
 export const Canvas: PanelPlugin<CanvasSpec, CanvasProps> = {
   PanelComponent: CanvasPanel,

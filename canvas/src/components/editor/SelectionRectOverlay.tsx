@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
+import { useZoomContext } from '../../contexts/ZoomContext';
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { SelectionRect } from '../../hooks/useRectSelect';
 import { editorStyles } from '../../utils/editorStyles';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { useZoomContext } from '../../contexts/ZoomContext';
 
 interface SelectionRectOverlayProps {
   rect: SelectionRect;

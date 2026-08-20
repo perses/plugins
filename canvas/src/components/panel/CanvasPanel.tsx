@@ -11,17 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEvent, ReactElement, useCallback, useMemo } from 'react';
-import { TimeSeries } from '@perses-dev/core';
 import { useChartsTheme } from '@perses-dev/components';
+import { TimeSeries } from '@perses-dev/core';
+import { MouseEvent, ReactElement, useCallback, useMemo } from 'react';
+
+import { useZoomContext, ZoomProvider } from '../../contexts/ZoomContext';
+import { useZoom } from '../../hooks/useZoom';
 import { CanvasProps } from '../../model';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
-import { useZoom } from '../../hooks/useZoom';
-import { useZoomContext, ZoomProvider } from '../../contexts/ZoomContext';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
-import { ThresholdLegend } from './ThresholdLegend';
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
+import { ThresholdLegend } from './ThresholdLegend';
 
 interface PanelSvgProps {
   svgRef: (node: SVGSVGElement | null) => void;
@@ -50,7 +51,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
         resetPan();
       }
     },
-    [fitView, resetPan, nodes, width, height]
+    [fitView, resetPan, nodes, width, height],
   );
 
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;

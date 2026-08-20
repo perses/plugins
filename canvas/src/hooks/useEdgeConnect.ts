@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { PointerEvent, useCallback, useState } from 'react';
+
+import { useSpecContext } from '../contexts/SpecContext';
+import { useZoomContext } from '../contexts/ZoomContext';
 import { AnchorPoint, EdgeSpec, CanvasSpec } from '../model';
 import { anchorPosition, edgeEndpoints, pointInsideNode, snapTarget } from '../utils/edgeUtils';
-import { useZoomContext } from '../contexts/ZoomContext';
-import { useSpecContext } from '../contexts/SpecContext';
 import { generateId } from '../utils/generateId';
 
 const SNAP_RADIUS = 20;
@@ -106,7 +107,7 @@ interface UseEdgeConnectResult {
     fixedX: number,
     fixedY: number,
     fixedNodeId: string,
-    fixedAnchor: AnchorPoint
+    fixedAnchor: AnchorPoint,
   ) => boolean;
   updateEdgeDrag: (event: PointerEvent<SVGSVGElement>) => void;
   resetEdgeDrag: () => void;
@@ -130,7 +131,7 @@ export function useEdgeConnect(): UseEdgeConnectResult {
       fixedX: number,
       fixedY: number,
       fixedNodeId: string,
-      fixedAnchor: AnchorPoint
+      fixedAnchor: AnchorPoint,
     ): boolean => {
       event.stopPropagation();
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -156,7 +157,7 @@ export function useEdgeConnect(): UseEdgeConnectResult {
       });
       return true;
     },
-    [edgeById, nodeById]
+    [edgeById, nodeById],
   );
 
   const updateEdgeDrag = useCallback(
@@ -177,7 +178,7 @@ export function useEdgeConnect(): UseEdgeConnectResult {
         };
       });
     },
-    [spec.nodes, toCanvasPoint]
+    [spec.nodes, toCanvasPoint],
   );
 
   const applyEdgeDrag = useCallback(
@@ -210,7 +211,7 @@ export function useEdgeConnect(): UseEdgeConnectResult {
         (draft.edges ??= []).push(buildNewEdge(dragEdge, snap, pt));
       }
     },
-    [dragEdge, nodeById]
+    [dragEdge, nodeById],
   );
 
   const resetEdgeDrag = useCallback((): void => {

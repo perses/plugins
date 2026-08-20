@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import React, { ReactElement } from 'react';
+
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { NodeSpec } from '../../model';
 import { ICON_PATHS } from '../../utils/icons';
 import { labelAttrs } from '../../utils/labelPosition';
 import { isSafeImageUrl } from '../../utils/panelUtils';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 
 export const ICON_FILL_RATIO = 0.6;
 export const CORNER_RADIUS_RATIO = 0.2;

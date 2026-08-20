@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { useTheme } from '@mui/material';
-import { ThresholdOptions } from '@perses-dev/core';
 import { FormatOptions, formatValue } from '@perses-dev/components';
+import { ThresholdOptions } from '@perses-dev/core';
+import { ReactElement } from 'react';
 
 const SWATCH_SIZE = 12;
 const ROW_HEIGHT = 18;

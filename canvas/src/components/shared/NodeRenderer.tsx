@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import React, { ReactElement } from 'react';
+
 import { NodeSpec } from '../../model';
-import { RectangleNode } from './RectangleNode';
 import { IconNode } from './IconNode';
+import { RectangleNode } from './RectangleNode';
 import { TextNode } from './TextNode';
 
 export const DEFAULT_NODE_WIDTH = 48;

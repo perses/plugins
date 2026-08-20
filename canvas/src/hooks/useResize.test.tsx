@@ -14,8 +14,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { produce } from 'immer';
 import React from 'react';
-import { CanvasSpec, NodeSpec } from '../model';
+
 import { useEditorContext } from '../contexts/EditorContext';
+import { CanvasSpec, NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
 import { useResize } from './useResize';
 

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import React, { ReactElement } from 'react';
+
 import { midpoint } from '../../utils/edgeUtils';
 
 type Line = { x1: number; y1: number; x2: number; y2: number };
@@ -34,7 +35,7 @@ function computeEdgeGeometry(
   pts: Line,
   bidirectional: boolean,
   fwdStrokeWidth: number,
-  bwdStrokeWidth: number
+  bwdStrokeWidth: number,
 ): EdgeGeometry {
   const fwdShorten = ARROW_SW_W * fwdStrokeWidth;
   const bwdShorten = ARROW_SW_W * bwdStrokeWidth;
@@ -141,7 +142,7 @@ export function edgeLabelPoints(
   pts: Line,
   bidirectional: boolean,
   fwdStrokeWidth: number,
-  bwdStrokeWidth: number
+  bwdStrokeWidth: number,
 ): { fwd: { x: number; y: number }; bwd: { x: number; y: number } | null } {
   const { fwd, bwd } = computeEdgeGeometry(pts, bidirectional, fwdStrokeWidth, bwdStrokeWidth);
   return { fwd: midpoint(fwd), bwd: bwd ? midpoint(bwd) : null };

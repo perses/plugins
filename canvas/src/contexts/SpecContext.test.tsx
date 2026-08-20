@@ -13,6 +13,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React, { ReactNode, useState } from 'react';
+
 import { BackgroundSpec, CanvasSpec } from '../model';
 import { EditorStateProvider, useEditorContext } from './EditorContext';
 import { SpecProvider, useSpecContext } from './SpecContext';

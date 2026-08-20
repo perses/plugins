@@ -12,6 +12,10 @@
 // limitations under the License.
 
 import { PointerEvent, ReactElement } from 'react';
+
+import { useZoomContext } from '../../contexts/ZoomContext';
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
+import { editorStyles } from '../../utils/editorStyles';
 import {
   BoundingBox,
   HANDLE_POSITIONS,
@@ -20,9 +24,6 @@ import {
   RESIZE_HANDLE_IDS,
   ResizeHandleId,
 } from '../../utils/resizeUtils';
-import { editorStyles } from '../../utils/editorStyles';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { useZoomContext } from '../../contexts/ZoomContext';
 
 interface SelectionBoundingBoxProps {
   boundingBox: BoundingBox;

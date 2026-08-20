@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EdgeSpec, NodeSpec } from '../model';
 import type { SelectionRect } from '../hooks/useRectSelect';
+import type { EdgeSpec, NodeSpec } from '../model';
 
 export function computeSelectionFromRect(rect: SelectionRect, nodes: NodeSpec[], edges: EdgeSpec[]): Set<string> {
   const minX = Math.min(rect.x0, rect.x1);

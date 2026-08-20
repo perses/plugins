@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useCallback } from 'react';
 import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, SelectChangeEvent, Switch } from '@mui/material';
+import React, { ReactElement, useCallback } from 'react';
+
 import { CanvasSpec } from '../../model';
 
 interface LegendSettingsProps {
@@ -28,14 +29,14 @@ export function LegendSettings({ value, onChange }: LegendSettingsProps): ReactE
         legend: event.target.checked ? { position: value.legend?.position ?? 'bottom' } : undefined,
       });
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const onPositionChange = useCallback(
     (event: SelectChangeEvent<'bottom' | 'right'>): void => {
       onChange({ ...value, legend: { position: event.target.value as 'bottom' | 'right' } });
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

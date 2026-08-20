@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { PointerEvent, ReactElement } from 'react';
+
+import { useZoomContext } from '../../contexts/ZoomContext';
+import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { NodeSpec, AnchorPoint } from '../../model';
 import { editorStyles } from '../../utils/editorStyles';
-import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { useZoomContext } from '../../contexts/ZoomContext';
 import { NodeRenderer } from '../shared/NodeRenderer';
 import { ConnectionHandles } from './ConnectionHandles';
 

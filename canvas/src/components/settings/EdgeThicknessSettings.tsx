@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Box, InputAdornment, TextField, Typography } from '@mui/material';
 import { formatValue, StepOptions } from '@perses-dev/components';
 import { produce } from 'immer';
+import React, { ReactElement, useCallback, useMemo } from 'react';
+
 import { CanvasSpec } from '../../model';
 
 interface EdgeThicknessSettingsProps {
@@ -35,7 +36,7 @@ function ThresholdWidthRow({ step, strokeWidth, format, onChange }: ThresholdWid
       const parsed = parseFloat(event.target.value);
       onChange(Number.isFinite(parsed) && parsed > 0 ? parsed : undefined);
     },
-    [onChange]
+    [onChange],
   );
 
   return (
@@ -69,7 +70,7 @@ export function EdgeThicknessSettings({ value, onChange }: EdgeThicknessSettings
         edgeDefaultStrokeWidth: Number.isFinite(parsed) && parsed > 0 ? parsed : undefined,
       });
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   const onThresholdWidthChange = useCallback(
@@ -87,10 +88,10 @@ export function EdgeThicknessSettings({ value, onChange }: EdgeThicknessSettings
           } else if (existing >= 0) {
             draft.edgeThresholdWidths.splice(existing, 1);
           }
-        })
+        }),
       );
     },
-    [value, onChange]
+    [value, onChange],
   );
 
   return (

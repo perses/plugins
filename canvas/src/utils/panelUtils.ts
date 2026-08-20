@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ThresholdOptions, TimeSeries } from '@perses-dev/core';
 import { FormatOptions, formatValue } from '@perses-dev/components';
+import { ThresholdOptions, TimeSeries } from '@perses-dev/core';
+
 import { BackgroundSpec } from '../model';
 
 export function isSafeImageUrl(url: string): boolean {
@@ -62,7 +63,7 @@ export function colorFromThresholds(
   thresholdValue: number,
   thresholds: ThresholdOptions,
   paletteColors: string[],
-  fallbackColor: string
+  fallbackColor: string,
 ): string {
   const defaultColor = thresholds.defaultColor ?? paletteColors[0] ?? fallbackColor;
   if (!thresholds.steps?.length) {

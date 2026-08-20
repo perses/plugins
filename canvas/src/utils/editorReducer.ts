@@ -12,7 +12,11 @@
 // limitations under the License.
 
 export type EditorMode =
-  { type: 'idle' } | { type: 'selecting' } | { type: 'moving' } | { type: 'dragging-edge' } | { type: 'resizing' };
+  | { type: 'idle' }
+  | { type: 'selecting' }
+  | { type: 'moving' }
+  | { type: 'dragging-edge' }
+  | { type: 'resizing' };
 
 export interface EditorState {
   mode: EditorMode;

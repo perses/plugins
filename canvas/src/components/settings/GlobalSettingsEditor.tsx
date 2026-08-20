@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box } from '@mui/material';
 import {
   FormatControls,
   OptionsEditorColumn,
@@ -20,13 +21,13 @@ import {
 } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
-import { Box } from '@mui/material';
-import { CanvasSpec } from '../../model';
+
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
+import { CanvasSpec } from '../../model';
 import { EditorItemsPanel } from '../editor/EditorItemsPanel';
-import { LegendSettings } from './LegendSettings';
 import { EdgeThicknessSettings } from './EdgeThicknessSettings';
+import { LegendSettings } from './LegendSettings';
 
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
 

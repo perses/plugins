@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TimeSeries } from '@perses-dev/core';
+
 import { colorFromThresholds, interpolateLabel, isSafeImageUrl } from './panelUtils';
 
 function makeSeries(labels: Record<string, string>, values: Array<[number, number | null]>): TimeSeries {
@@ -63,7 +64,7 @@ describe('colorFromThresholds', () => {
 
   it('returns threshold defaultColor when set and no step matches', () => {
     expect(
-      colorFromThresholds(1, { defaultColor: '#123', steps: [{ value: 10, color: '#abc' }] }, palette, fallback)
+      colorFromThresholds(1, { defaultColor: '#123', steps: [{ value: 10, color: '#abc' }] }, palette, fallback),
     ).toBe('#123');
   });
 

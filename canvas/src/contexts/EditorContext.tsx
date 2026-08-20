@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { createContext, ReactElement, ReactNode, useContext, useReducer } from 'react';
+
 import { EditorState, editorReducer, INITIAL_EDITOR_STATE } from '../utils/editorReducer';
 
 export interface EditorContextValue {
