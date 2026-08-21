@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
+import { createContext, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react';
 
 import { DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT } from '../components/shared/NodeRenderer';
 import { BackgroundSpec, EdgeSpec, NodeSpec, CanvasSpec } from '../model';
@@ -68,50 +68,59 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
     return new Map(backgrounds.map((bg) => [bg.id, bg]));
   }, [spec.backgrounds]);
 
-  function addNode(x: number, y: number): void {
-    const id = generateId('node');
-    onChange(
-      produce(spec, (draft) => {
-        (draft.nodes ??= []).push({
-          id,
-          x,
-          y,
-          width: DEFAULT_NODE_WIDTH,
-          height: DEFAULT_NODE_HEIGHT,
-          kind: 'icon',
-        });
-      }),
-    );
-    selectItems(new Set([id]));
-  }
+  const addNode = useCallback(
+    (x: number, y: number): void => {
+      const id = generateId('node');
+      onChange(
+        produce(spec, (draft) => {
+          (draft.nodes ??= []).push({
+            id,
+            x,
+            y,
+            width: DEFAULT_NODE_WIDTH,
+            height: DEFAULT_NODE_HEIGHT,
+            kind: 'icon',
+          });
+        }),
+      );
+      selectItems(new Set([id]));
+    },
+    [spec, onChange, selectItems],
+  );
 
-  function addBackground(x: number, y: number, width: number, height: number): void {
-    const id = generateId('bg');
-    onChange(
-      produce(spec, (draft) => {
-        (draft.backgrounds ??= []).push({ id, x, y, width, height });
-      }),
-    );
-    selectItems(new Set([id]));
-  }
+  const addBackground = useCallback(
+    (x: number, y: number, width: number, height: number): void => {
+      const id = generateId('bg');
+      onChange(
+        produce(spec, (draft) => {
+          (draft.backgrounds ??= []).push({ id, x, y, width, height });
+        }),
+      );
+      selectItems(new Set([id]));
+    },
+    [spec, onChange, selectItems],
+  );
 
-  function moveBackground(id: string, direction: 'up' | 'down'): void {
-    onChange(
-      produce(spec, (draft) => {
-        const arr = draft.backgrounds ?? [];
-        const idx = arr.findIndex((bg) => bg.id === id);
-        const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-        if (idx === -1 || swapIdx < 0 || swapIdx >= arr.length) {
-          return;
-        }
-        const tmp = arr[idx]!;
-        arr[idx] = arr[swapIdx]!;
-        arr[swapIdx] = tmp;
-      }),
-    );
-  }
+  const moveBackground = useCallback(
+    (id: string, direction: 'up' | 'down'): void => {
+      onChange(
+        produce(spec, (draft) => {
+          const arr = draft.backgrounds ?? [];
+          const idx = arr.findIndex((bg) => bg.id === id);
+          const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+          if (idx === -1 || swapIdx < 0 || swapIdx >= arr.length) {
+            return;
+          }
+          const tmp = arr[idx]!;
+          arr[idx] = arr[swapIdx]!;
+          arr[swapIdx] = tmp;
+        }),
+      );
+    },
+    [spec, onChange],
+  );
 
-  function deleteSelected(): void {
+  const deleteSelected = useCallback((): void => {
     const { selectedIds } = state;
     onChange(
       produce(spec, (draft) => {
@@ -123,59 +132,80 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
       }),
     );
     clearSelection();
-  }
+  }, [state, spec, onChange, clearSelection]);
 
-  function onNodePropertiesChange(updated: NodeSpec): void {
-    onChange(
-      produce(spec, (draft) => {
-        const idx = (draft.nodes ?? []).findIndex((n) => n.id === updated.id);
-        if (idx !== -1 && draft.nodes) {
-          draft.nodes[idx] = updated;
-        }
-      }),
-    );
-  }
-
-  function onEdgePropertiesChange(updated: EdgeSpec): void {
-    onChange(
-      produce(spec, (draft) => {
-        const idx = (draft.edges ?? []).findIndex((ed) => ed.id === updated.id);
-        if (idx !== -1 && draft.edges) {
-          draft.edges[idx] = updated;
-        }
-      }),
-    );
-  }
-
-  function onBackgroundPropertiesChange(updated: BackgroundSpec): void {
-    onChange(
-      produce(spec, (draft) => {
-        const idx = (draft.backgrounds ?? []).findIndex((bg) => bg.id === updated.id);
-        if (idx !== -1 && draft.backgrounds) {
-          draft.backgrounds[idx] = updated;
-        }
-      }),
-    );
-  }
-
-  return (
-    <SpecContext.Provider
-      value={{
-        spec,
-        updateSpec: onChange,
-        nodeById,
-        edgeById,
-        backgroundById,
-        addNode,
-        addBackground,
-        moveBackground,
-        deleteSelected,
-        onNodePropertiesChange,
-        onEdgePropertiesChange,
-        onBackgroundPropertiesChange,
-      }}
-    >
-      {children}
-    </SpecContext.Provider>
+  const onNodePropertiesChange = useCallback(
+    (updated: NodeSpec): void => {
+      onChange(
+        produce(spec, (draft) => {
+          const idx = (draft.nodes ?? []).findIndex((n) => n.id === updated.id);
+          if (idx !== -1 && draft.nodes) {
+            draft.nodes[idx] = updated;
+          }
+        }),
+      );
+    },
+    [spec, onChange],
   );
+
+  const onEdgePropertiesChange = useCallback(
+    (updated: EdgeSpec): void => {
+      onChange(
+        produce(spec, (draft) => {
+          const idx = (draft.edges ?? []).findIndex((ed) => ed.id === updated.id);
+          if (idx !== -1 && draft.edges) {
+            draft.edges[idx] = updated;
+          }
+        }),
+      );
+    },
+    [spec, onChange],
+  );
+
+  const onBackgroundPropertiesChange = useCallback(
+    (updated: BackgroundSpec): void => {
+      onChange(
+        produce(spec, (draft) => {
+          const idx = (draft.backgrounds ?? []).findIndex((bg) => bg.id === updated.id);
+          if (idx !== -1 && draft.backgrounds) {
+            draft.backgrounds[idx] = updated;
+          }
+        }),
+      );
+    },
+    [spec, onChange],
+  );
+
+  const value = useMemo(
+    () => ({
+      spec,
+      updateSpec: onChange,
+      nodeById,
+      edgeById,
+      backgroundById,
+      addNode,
+      addBackground,
+      moveBackground,
+      deleteSelected,
+      onNodePropertiesChange,
+      onEdgePropertiesChange,
+      onBackgroundPropertiesChange,
+    }),
+    [
+      spec,
+      onChange,
+      nodeById,
+      edgeById,
+      backgroundById,
+      addNode,
+      addBackground,
+      moveBackground,
+      deleteSelected,
+      onNodePropertiesChange,
+      onEdgePropertiesChange,
+      onBackgroundPropertiesChange,
+    ],
+  );
+
+  return <SpecContext.Provider value={value}>{children}</SpecContext.Provider>;
 }

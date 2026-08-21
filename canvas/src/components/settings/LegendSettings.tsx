@@ -45,7 +45,7 @@ export function LegendSettings({ value, onChange }: LegendSettingsProps): ReactE
         control={<Switch checked={value.legend !== undefined} onChange={onToggle} />}
         label="Show legend"
       />
-      {value.legend !== undefined && (
+      {value.legend !== undefined ? (
         <FormControl size="small" sx={{ width: 180 }}>
           <InputLabel>Position</InputLabel>
           <Select
@@ -58,7 +58,7 @@ export function LegendSettings({ value, onChange }: LegendSettingsProps): ReactE
             <MenuItem value="right">Right</MenuItem>
           </Select>
         </FormControl>
-      )}
+      ) : null}
     </>
   );
 }

@@ -20,6 +20,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Slider,
   Stack,
   TextField,
@@ -34,6 +35,18 @@ import React, { ReactElement, useCallback } from 'react';
 import { useSpecContext } from '../../contexts/SpecContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { BackgroundSpec, CanvasSpec } from '../../model';
+
+const IMAGE_FIT_OPTIONS: Array<BackgroundSpec['imageFit']> = ['cover', 'contain', 'stretch'];
+
+function parseImageFit(value: string): BackgroundSpec['imageFit'] {
+  return IMAGE_FIT_OPTIONS.includes(value as BackgroundSpec['imageFit'])
+    ? (value as BackgroundSpec['imageFit'])
+    : undefined;
+}
+
+function formatOpacityLabel(v: number): string {
+  return `${Math.round(v * 100)}%`;
+}
 
 interface BackgroundPropertiesPanelProps {
   background: BackgroundSpec;
@@ -58,13 +71,59 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
     [background, onChange],
   );
 
-  const IMAGE_FIT_OPTIONS: Array<BackgroundSpec['imageFit']> = ['cover', 'contain', 'stretch'];
+  const onGlobalChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...background, global: e.target.checked || undefined });
+    },
+    [background, onChange],
+  );
 
-  function parseImageFit(value: string): BackgroundSpec['imageFit'] {
-    return IMAGE_FIT_OPTIONS.includes(value as BackgroundSpec['imageFit'])
-      ? (value as BackgroundSpec['imageFit'])
-      : undefined;
-  }
+  const onNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...background, name: e.target.value || undefined });
+    },
+    [background, onChange],
+  );
+
+  const onColorChange = useCallback(
+    (color: string): void => {
+      onChange({ ...background, color });
+    },
+    [background, onChange],
+  );
+
+  const onColorClear = useCallback((): void => {
+    onChange({ ...background, color: undefined });
+  }, [background, onChange]);
+
+  const onOpacityChange = useCallback(
+    (_: Event, v: number | number[]): void => {
+      onChange({ ...background, opacity: Array.isArray(v) ? v[0] : v });
+    },
+    [background, onChange],
+  );
+
+  const onImageUrlChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...background, image: e.target.value || undefined });
+    },
+    [background, onChange],
+  );
+
+  const onImageFitChange = useCallback(
+    (e: SelectChangeEvent<BackgroundSpec['imageFit']>): void => {
+      onChange({ ...background, imageFit: parseImageFit(e.target.value ?? '') });
+    },
+    [background, onChange],
+  );
+
+  const onMoveUp = useCallback((): void => {
+    moveBackground(background.id, 'up');
+  }, [background.id, moveBackground]);
+
+  const onMoveDown = useCallback((): void => {
+    moveBackground(background.id, 'down');
+  }, [background.id, moveBackground]);
 
   return (
     <Stack spacing={2}>
@@ -74,18 +133,14 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
         </Typography>
         <Tooltip title="Move up (render below)">
           <span>
-            <IconButton size="small" disabled={idx <= 0} onClick={() => moveBackground(background.id, 'up')}>
+            <IconButton size="small" disabled={idx <= 0} onClick={onMoveUp}>
               <ArrowUpIcon fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
         <Tooltip title="Move down (render above)">
           <span>
-            <IconButton
-              size="small"
-              disabled={idx >= backgrounds.length - 1}
-              onClick={() => moveBackground(background.id, 'down')}
-            >
+            <IconButton size="small" disabled={idx >= backgrounds.length - 1} onClick={onMoveDown}>
               <ArrowDownIcon fontSize="small" />
             </IconButton>
           </span>
@@ -93,13 +148,7 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
       </Stack>
 
       <FormControlLabel
-        control={
-          <Checkbox
-            size="small"
-            checked={background.global ?? false}
-            onChange={(e) => onChange({ ...background, global: e.target.checked || undefined })}
-          />
-        }
+        control={<Checkbox size="small" checked={background.global ?? false} onChange={onGlobalChange} />}
         label="Global (fit panel)"
       />
 
@@ -107,7 +156,7 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
         label="Name"
         size="small"
         value={background.name ?? ''}
-        onChange={(e) => onChange({ ...background, name: e.target.value || undefined })}
+        onChange={onNameChange}
         placeholder={background.id}
       />
 
@@ -160,8 +209,8 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           <OptionsColorPicker
             label="Color"
             color={background.color ?? nodeDefaultFill}
-            onColorChange={(color) => onChange({ ...background, color })}
-            onClear={() => onChange({ ...background, color: undefined })}
+            onColorChange={onColorChange}
+            onClear={onColorClear}
           />
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
@@ -173,9 +222,9 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           max={1}
           step={0.05}
           value={background.opacity ?? 1}
-          onChange={(_, v) => onChange({ ...background, opacity: Array.isArray(v) ? v[0] : v })}
+          onChange={onOpacityChange}
           valueLabelDisplay="auto"
-          valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
+          valueLabelFormat={formatOpacityLabel}
           sx={{ pr: 2 }}
         />
       </Stack>
@@ -185,7 +234,7 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           label="Image URL"
           size="small"
           value={background.image ?? ''}
-          onChange={(e) => onChange({ ...background, image: e.target.value || undefined })}
+          onChange={onImageUrlChange}
           sx={{ flex: 1 }}
         />
         <FormControl size="small" sx={{ width: 110 }} disabled={!background.image}>
@@ -193,7 +242,7 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           <Select<BackgroundSpec['imageFit']>
             label="Image fit"
             value={background.imageFit ?? 'cover'}
-            onChange={(e) => onChange({ ...background, imageFit: parseImageFit(e.target.value ?? '') })}
+            onChange={onImageFitChange}
             MenuProps={{ PaperProps: { style: { maxHeight: 240 } } }}
           >
             <MenuItem value="cover">Cover</MenuItem>

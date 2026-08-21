@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// eslint-disable-next-line import/no-unassigned-import
 import '@testing-library/jest-dom';
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom

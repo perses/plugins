@@ -18,6 +18,7 @@ import React, { ReactElement, useCallback, useMemo } from 'react';
 import { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
 
 const ANCHOR_OPTIONS: AnchorPoint[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
+const SELECT_SLOT_PROPS = { select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } } as const;
 
 interface EdgePropertiesPanelProps {
   edge: EdgeSpec;
@@ -30,7 +31,14 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
   const { queryDefinitions } = useDataQueriesContext();
   const queryCount = queryDefinitions.length;
   const queryNames = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
-  const queryIndexes = Array.from({ length: queryCount }, (_, i) => i);
+  const queryIndexes = useMemo(() => Array.from({ length: queryCount }, (_, i) => i), [queryCount]);
+
+  const onNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...edge, name: e.target.value || undefined });
+    },
+    [edge, onChange],
+  );
 
   const onSourceChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -118,17 +126,13 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
     [edge, onChange],
   );
 
+  const strokeWidthSlotProps = useMemo(() => ({ htmlInput: { min: 1, step: 1 } }), []);
+
   return (
     <Stack spacing={2}>
       <Typography variant="subtitle2">Edge properties</Typography>
 
-      <TextField
-        label="Name"
-        size="small"
-        value={edge.name ?? ''}
-        placeholder={edge.id}
-        onChange={(e) => onChange({ ...edge, name: e.target.value || undefined })}
-      />
+      <TextField label="Name" size="small" value={edge.name ?? ''} placeholder={edge.id} onChange={onNameChange} />
 
       <TextField
         select
@@ -136,7 +140,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         size="small"
         value={edge.source}
         onChange={onSourceChange}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+        slotProps={SELECT_SLOT_PROPS}
       >
         {nodes.map((n) => (
           <MenuItem key={n.id} value={n.id}>
@@ -151,7 +155,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         size="small"
         value={edge.sourceAnchor ?? 'n'}
         onChange={onSourceAnchorChange}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+        slotProps={SELECT_SLOT_PROPS}
       >
         {ANCHOR_OPTIONS.map((a) => (
           <MenuItem key={a} value={a}>
@@ -166,7 +170,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         size="small"
         value={edge.target}
         onChange={onTargetChange}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+        slotProps={SELECT_SLOT_PROPS}
       >
         {nodes.map((n) => (
           <MenuItem key={n.id} value={n.id}>
@@ -182,7 +186,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         value={edge.targetAnchor ?? 'n'}
         disabled={hasFreeTarget}
         onChange={onTargetAnchorChange}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+        slotProps={SELECT_SLOT_PROPS}
       >
         {ANCHOR_OPTIONS.map((a) => (
           <MenuItem key={a} value={a}>
@@ -202,23 +206,23 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         size="small"
         value={edge.thicknessMode ?? 'fixed'}
         onChange={onThicknessModeChange}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+        slotProps={SELECT_SLOT_PROPS}
       >
         <MenuItem value="fixed">Fixed</MenuItem>
         <MenuItem value="threshold">Threshold</MenuItem>
       </TextField>
 
-      {(edge.thicknessMode ?? 'fixed') === 'fixed' && (
+      {(edge.thicknessMode ?? 'fixed') === 'fixed' ? (
         <TextField
           label="Stroke width"
           size="small"
           type="number"
-          slotProps={{ htmlInput: { min: 1, step: 1 } }}
+          slotProps={strokeWidthSlotProps}
           value={edge.strokeWidth ?? ''}
           placeholder="default"
           onChange={onStrokeWidthChange}
         />
-      )}
+      ) : null}
 
       <TextField
         select
@@ -226,7 +230,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         size="small"
         value={edge.sourceQueryIndex ?? ''}
         onChange={onSourceQueryIndexChange}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+        slotProps={SELECT_SLOT_PROPS}
       >
         <MenuItem value="">
           <em>None</em>
@@ -246,7 +250,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         helperText="Use {{value}} to show query result"
       />
 
-      {edge.bidirectional && (
+      {edge.bidirectional ? (
         <>
           <TextField
             select
@@ -254,7 +258,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
             size="small"
             value={edge.targetQueryIndex ?? ''}
             onChange={onTargetQueryIndexChange}
-            slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+            slotProps={SELECT_SLOT_PROPS}
           >
             <MenuItem value="">
               <em>None</em>
@@ -274,7 +278,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
             helperText="Use {{value}} to show query result"
           />
         </>
-      )}
+      ) : null}
     </Stack>
   );
 }

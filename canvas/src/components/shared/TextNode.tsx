@@ -16,6 +16,7 @@ import { ReactElement } from 'react';
 import { NodeSpec } from '../../model';
 
 const DEFAULT_TEXT_COLOR = 'currentColor';
+const NO_INTERACTION_STYLE = { pointerEvents: 'none', userSelect: 'none' } as const;
 
 export interface TextNodeProps {
   node: NodeSpec;
@@ -43,18 +44,18 @@ export function TextNode({ node, displayLabel, fillOverride, rectProps }: TextNo
         strokeWidth={2}
         {...rectProps}
       />
-      {displayLabel && (
+      {displayLabel ? (
         <text
           textAnchor="middle"
           dominantBaseline="central"
           fill={textColor}
           fontSize={fontSize}
           fontWeight="500"
-          style={{ pointerEvents: 'none', userSelect: 'none' }}
+          style={NO_INTERACTION_STYLE}
         >
           {displayLabel}
         </text>
-      )}
+      ) : null}
     </>
   );
 }

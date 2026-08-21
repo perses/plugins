@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, ReactElement } from 'react';
+import { PointerEvent, ReactElement, useCallback } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
@@ -24,6 +24,11 @@ import {
   RESIZE_HANDLE_IDS,
   ResizeHandleId,
 } from '../../utils/resizeUtils';
+
+const NO_POINTER_EVENTS = { pointerEvents: 'none' } as const;
+const HANDLE_CURSOR_STYLES = Object.fromEntries(
+  RESIZE_HANDLE_IDS.map((h) => [h, { cursor: RESIZE_CURSORS[h] }]),
+) as Record<ResizeHandleId, { cursor: string }>;
 
 interface SelectionBoundingBoxProps {
   boundingBox: BoundingBox;
@@ -45,9 +50,17 @@ export function SelectionBoundingBox({
   const bh = boundingBox.maxY - boundingBox.minY + pad * 2;
   const paddedBoundingBox: BoundingBox = { minX: bx, minY: by, maxX: bx + bw, maxY: by + bh };
 
+  const makeHandlerPointerDown = useCallback(
+    (h: ResizeHandleId) =>
+      (event: PointerEvent<SVGCircleElement>): void => {
+        onResizeHandlePointerDown(event, h);
+      },
+    [onResizeHandlePointerDown],
+  );
+
   return (
     <g>
-      <rect x={bx} y={by} width={bw} height={bh} {...theme.selectionBoundingBox} style={{ pointerEvents: 'none' }} />
+      <rect x={bx} y={by} width={bw} height={bh} {...theme.selectionBoundingBox} style={NO_POINTER_EVENTS} />
       {RESIZE_HANDLE_IDS.map((h) => {
         const pos = handlePosition(paddedBoundingBox, h);
         return (
@@ -56,8 +69,8 @@ export function SelectionBoundingBox({
             cx={pos.x}
             cy={pos.y}
             {...theme.resizeHandle}
-            style={{ cursor: RESIZE_CURSORS[h] }}
-            onPointerDown={(event) => onResizeHandlePointerDown(event, h)}
+            style={HANDLE_CURSOR_STYLES[h]}
+            onPointerDown={makeHandlerPointerDown(h)}
           />
         );
       })}

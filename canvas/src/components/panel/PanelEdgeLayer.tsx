@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeSeries } from '@perses-dev/spec';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { CanvasSpec } from '../../model';
@@ -64,9 +64,9 @@ interface PanelEdgeLayerProps {
 }
 
 export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: PanelEdgeLayerProps): ReactElement {
-  const nodes = spec.nodes ?? [];
-  const edges = spec.edges ?? [];
-  const nodeById = new Map(nodes.map((n) => [n.id, n]));
+  const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
+  const edges = useMemo(() => spec.edges ?? [], [spec.edges]);
+  const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const { labelBackground, labelBorder, labelText, connection: fallbackColor } = useCanvasTheme();
 
   return (
@@ -136,7 +136,7 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
               bwdStyle={scaledBwdStyle}
               lineProps={{ style: { pointerEvents: 'none' } }}
             />
-            {fwdLabel && (
+            {fwdLabel ? (
               <EdgeLabel
                 x={labelPts.fwd.x}
                 y={labelPts.fwd.y}
@@ -146,8 +146,8 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
                 border={labelBorder}
                 color={labelText}
               />
-            )}
-            {bwdLabel && labelPts.bwd && (
+            ) : null}
+            {bwdLabel && labelPts.bwd ? (
               <EdgeLabel
                 x={labelPts.bwd.x}
                 y={labelPts.bwd.y}
@@ -157,7 +157,7 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
                 border={labelBorder}
                 color={labelText}
               />
-            )}
+            ) : null}
           </g>
         );
       })}

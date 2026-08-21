@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import { ReactElement, useCallback } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { NodeSpec, AnchorPoint } from '../../model';
@@ -28,6 +28,15 @@ export function ConnectionHandles({ node, onDragStart }: ConnectionHandlesProps)
   const { connection } = useCanvasTheme();
   const armLen = CROSS_LENGTH;
 
+  const makePointerDownHandler = useCallback(
+    (anchor: AnchorPoint, x: number, y: number) =>
+      (event: React.PointerEvent): void => {
+        event.stopPropagation();
+        onDragStart(anchor, x, y);
+      },
+    [onDragStart],
+  );
+
   return (
     <>
       {ANCHOR_KEYS.map((anchor) => {
@@ -37,10 +46,7 @@ export function ConnectionHandles({ node, onDragStart }: ConnectionHandlesProps)
             key={anchor}
             transform={`translate(${pos.x},${pos.y})`}
             style={{ cursor: 'crosshair' }}
-            onPointerDown={(event) => {
-              event.stopPropagation();
-              onDragStart(anchor, pos.x, pos.y);
-            }}
+            onPointerDown={makePointerDownHandler(anchor, pos.x, pos.y)}
           >
             <circle r={armLen} fill="transparent" />
             <line x1={-armLen / 2} y1={0} x2={armLen / 2} y2={0} stroke={connection} strokeWidth={1.5} />

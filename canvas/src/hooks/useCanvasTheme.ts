@@ -13,6 +13,7 @@
 
 import { useTheme } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
+import { useMemo } from 'react';
 
 export interface CanvasTheme {
   palette: string[];
@@ -32,18 +33,21 @@ export interface CanvasTheme {
 export function useCanvasTheme(): CanvasTheme {
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
-  return {
-    palette: chartsTheme.thresholds.palette,
-    selection: muiTheme.palette.warning.main,
-    connection: muiTheme.palette.info.main,
-    snapHighlight: muiTheme.palette.success.main,
-    background: muiTheme.palette.background.paper,
-    divider: muiTheme.palette.divider,
-    text: muiTheme.palette.text.primary,
-    labelBackground: muiTheme.palette.background.paper,
-    labelBorder: muiTheme.palette.divider,
-    labelText: muiTheme.palette.text.primary,
-    nodeStroke: muiTheme.palette.background.paper,
-    nodeDefaultFill: muiTheme.palette.primary.main,
-  };
+  return useMemo(
+    () => ({
+      palette: chartsTheme.thresholds.palette,
+      selection: muiTheme.palette.warning.main,
+      connection: muiTheme.palette.info.main,
+      snapHighlight: muiTheme.palette.success.main,
+      background: muiTheme.palette.background.paper,
+      divider: muiTheme.palette.divider,
+      text: muiTheme.palette.text.primary,
+      labelBackground: muiTheme.palette.background.paper,
+      labelBorder: muiTheme.palette.divider,
+      labelText: muiTheme.palette.text.primary,
+      nodeStroke: muiTheme.palette.background.paper,
+      nodeDefaultFill: muiTheme.palette.primary.main,
+    }),
+    [muiTheme, chartsTheme],
+  );
 }

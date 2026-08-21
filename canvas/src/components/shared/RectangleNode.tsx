@@ -22,6 +22,9 @@ import { isSafeImageUrl } from '../../utils/panelUtils';
 export const ICON_FILL_RATIO = 0.6;
 export const CORNER_RADIUS_RATIO = 0.2;
 
+const NO_INTERACTION_STYLE = { pointerEvents: 'none', userSelect: 'none' } as const;
+const NO_POINTER_EVENTS_STYLE = { pointerEvents: 'none' } as const;
+
 export interface RectangleNodeProps {
   node: NodeSpec;
   displayLabel: string | undefined;
@@ -62,7 +65,7 @@ export function RectangleNode({
         strokeWidth={2}
         {...rectProps}
       />
-      {node.backgroundImage && isSafeImageUrl(node.backgroundImage) && (
+      {node.backgroundImage && isSafeImageUrl(node.backgroundImage) ? (
         <image
           href={node.backgroundImage}
           x={-halfW}
@@ -71,18 +74,18 @@ export function RectangleNode({
           height={height}
           preserveAspectRatio="xMidYMid slice"
           clipPath={`inset(0 round ${cornerRadius}px)`}
-          style={{ pointerEvents: 'none' }}
+          style={NO_POINTER_EVENTS_STYLE}
         />
-      )}
-      {iconPath && (
+      ) : null}
+      {iconPath ? (
         <g
           transform={`translate(${-iconSize / 2},${-iconSize / 2}) scale(${iconScale})`}
-          style={{ pointerEvents: 'none' }}
+          style={NO_POINTER_EVENTS_STYLE}
         >
           <path d={iconPath} fill={nodeStroke} />
         </g>
-      )}
-      {displayLabel && (
+      ) : null}
+      {displayLabel ? (
         <text
           x={lAttrs.x}
           y={lAttrs.y}
@@ -90,11 +93,11 @@ export function RectangleNode({
           dominantBaseline={lAttrs.dominantBaseline}
           fill="currentColor"
           fontSize={12}
-          style={{ pointerEvents: 'none', userSelect: 'none' }}
+          style={NO_INTERACTION_STYLE}
         >
           {displayLabel}
         </text>
-      )}
+      ) : null}
     </>
   );
 }
