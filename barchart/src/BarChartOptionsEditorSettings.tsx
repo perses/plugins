@@ -230,6 +230,8 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
             label="Stack bars"
           />
         </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
         <OptionsEditorGroup title="Color Overrides">
           {colorOverrides.map((override, i) => (
             <Stack key={i} direction="row" alignItems="center" spacing={1}>
@@ -254,8 +256,6 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
             Add Color Override
           </Button>
         </OptionsEditorGroup>
-      </OptionsEditorColumn>
-      <OptionsEditorColumn>
         <OptionsEditorGroup title="Reset Settings">
           <Button variant="outlined" color="secondary" onClick={handleResetSettings}>
             Reset To Defaults
