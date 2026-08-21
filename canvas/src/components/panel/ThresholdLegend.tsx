@@ -13,13 +13,14 @@
 
 import { useTheme } from '@mui/material';
 import { FormatOptions, formatValue, ThresholdOptions } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 
 const SWATCH_SIZE = 12;
 const ROW_HEIGHT = 18;
 const LABEL_OFFSET = SWATCH_SIZE + 6;
 const PADDING = 8;
 const FONT_SIZE = 11;
+const NO_SELECT_STYLE = { userSelect: 'none' } as const;
 
 interface ThresholdLegendProps {
   thresholds: ThresholdOptions;
@@ -32,15 +33,20 @@ interface ThresholdLegendProps {
 export function ThresholdLegend({ thresholds, format, paletteColors, x, y }: ThresholdLegendProps): ReactElement {
   const muiTheme = useTheme();
   const defaultColor = thresholds.defaultColor ?? paletteColors[0] ?? muiTheme.palette.success.main;
-  const steps = thresholds.steps ?? [];
+  const steps = useMemo(() => thresholds.steps ?? [], [thresholds.steps]);
 
-  const rows: Array<{ color: string; label: string }> = [
-    ...steps.map((step, i) => ({
-      color: step.color ?? paletteColors[i] ?? defaultColor,
-      label: `≥ ${formatValue(step.value, format)}`,
-    })),
-    { color: defaultColor, label: 'default' },
-  ].reverse();
+  const rows = useMemo(
+    () =>
+      [
+        ...steps.map((step, i) => ({
+          color: step.color ?? paletteColors[i] ?? defaultColor,
+          label: `≥ ${formatValue(step.value, format)}`,
+          key: String(step.value),
+        })),
+        { color: defaultColor, label: 'default', key: 'default' },
+      ].reverse(),
+    [steps, paletteColors, defaultColor, format],
+  );
 
   const boxWidth = 110;
   const boxHeight = rows.length * ROW_HEIGHT + PADDING * 2;
@@ -61,14 +67,14 @@ export function ThresholdLegend({ thresholds, format, paletteColors, x, y }: Thr
       {rows.map((row, i) => {
         const ry = y + PADDING + i * ROW_HEIGHT + (ROW_HEIGHT - SWATCH_SIZE) / 2;
         return (
-          <g key={i}>
+          <g key={row.key}>
             <rect x={x + PADDING} y={ry} width={SWATCH_SIZE} height={SWATCH_SIZE} fill={row.color} rx={2} />
             <text
               x={x + PADDING + LABEL_OFFSET}
               y={ry + SWATCH_SIZE - 2}
               fontSize={FONT_SIZE}
               fill={muiTheme.palette.text.primary}
-              style={{ userSelect: 'none' }}
+              style={NO_SELECT_STYLE}
             >
               {row.label}
             </text>

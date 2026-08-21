@@ -22,7 +22,7 @@ import { useNodeMove } from '../../hooks/useNodeMove';
 import { useRectSelect } from '../../hooks/useRectSelect';
 import { useResize } from '../../hooks/useResize';
 import { CanvasSpec, FloatingEdge, isFloatingEdge } from '../../model';
-import { nodeBoundingBox } from '../../utils/resizeUtils';
+import { nodeBoundingBox, ResizeHandleId } from '../../utils/resizeUtils';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { DragEdgeLine } from './DragEdgeLine';
 import { EditorEdgeItem } from './EditorEdgeItem';
@@ -80,6 +80,7 @@ export function EditorCanvas({
   }, [mode, spec, applyMove, applyResize, applyEdgeDrag]);
   const displayNodes = useMemo(() => unsavedSpec.nodes ?? [], [unsavedSpec.nodes]);
   const displayEdges = useMemo(() => unsavedSpec.edges ?? [], [unsavedSpec.edges]);
+  const displayBackgrounds = useMemo(() => unsavedSpec.backgrounds ?? [], [unsavedSpec.backgrounds]);
   const nodeById = useMemo(() => new Map(displayNodes.map((n) => [n.id, n])), [displayNodes]);
 
   const selectionBoundingBox = useMemo(() => {
@@ -94,6 +95,17 @@ export function EditorCanvas({
         )
       : null;
   }, [displayEdges, displayNodes, mode.type, selectedIds]);
+
+  const svgStyle = useMemo(
+    () => ({
+      display: 'block' as const,
+      cursor: mode.type === 'dragging-edge' ? 'crosshair' : 'default',
+      border: '1px solid',
+      borderColor: 'divider',
+      outline: 'none',
+    }),
+    [mode.type],
+  );
 
   useLayoutEffect(() => {
     if (displayNodes.length === 0) {
@@ -189,6 +201,15 @@ export function EditorCanvas({
     [selectedIds, deleteSelected],
   );
 
+  const onResizeHandlePointerDown = useCallback(
+    (event: PointerEvent<SVGCircleElement>, handleId: ResizeHandleId): void => {
+      if (beginResize(event, handleId)) {
+        startResize();
+      }
+    },
+    [beginResize, startResize],
+  );
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
@@ -197,22 +218,16 @@ export function EditorCanvas({
         role="application"
         width={width}
         height={height}
-        style={{
-          display: 'block',
-          cursor: mode.type === 'dragging-edge' ? 'crosshair' : 'default',
-          border: '1px solid',
-          borderColor: 'divider',
-          outline: 'none',
-        }}
+        style={svgStyle}
         onDoubleClick={onSvgDoubleClick}
         onKeyDown={onKeyDown}
         onPointerDown={onSvgPointerDown}
         onPointerMove={onSvgPointerMove}
         onPointerUp={onSvgPointerUp}
       >
-        <GlobalBackgroundLayer backgrounds={spec.backgrounds ?? []} width={width} height={height} />
+        <GlobalBackgroundLayer backgrounds={displayBackgrounds} width={width} height={height} />
         <g transform={transform.toString()}>
-          <BackgroundLayer backgrounds={spec.backgrounds ?? []} />
+          <BackgroundLayer backgrounds={displayBackgrounds} />
           {displayNodes.map((node) => (
             <EditorNodeItem
               key={node.id}
@@ -249,11 +264,7 @@ export function EditorCanvas({
           {selectionBoundingBox && (
             <SelectionBoundingBox
               boundingBox={selectionBoundingBox}
-              onResizeHandlePointerDown={(event, handleId) => {
-                if (beginResize(event, handleId)) {
-                  startResize();
-                }
-              }}
+              onResizeHandlePointerDown={onResizeHandlePointerDown}
             />
           )}
 

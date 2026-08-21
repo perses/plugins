@@ -13,7 +13,7 @@
 
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
 import { TimeSeries } from '@perses-dev/spec';
-import { ReactElement, useCallback } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { CanvasSpec } from '../../model';
@@ -28,7 +28,7 @@ interface PanelNodeLayerProps {
 }
 
 export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: PanelNodeLayerProps): ReactElement {
-  const nodes = spec.nodes ?? [];
+  const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
   const variableValues = useAllVariableValues();
   const { connection: fallbackColor, nodeDefaultFill } = useCanvasTheme();
 
@@ -38,6 +38,8 @@ export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
     },
     [variableValues],
   );
+
+  const rectProps = useMemo(() => ({ strokeWidth: 2 / k }), [k]);
 
   return (
     <>
@@ -59,13 +61,16 @@ export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
           }
         }
         const { link } = node;
+        const groupProps = link
+          ? { onClick: (): void => handleNodeClick(link), style: { cursor: 'pointer' } }
+          : undefined;
         return (
           <NodeRenderer
             key={node.id}
             node={node}
             defaultFill={nodeDefaultFill}
-            groupProps={link ? { onClick: () => handleNodeClick(link), style: { cursor: 'pointer' } } : undefined}
-            rectProps={{ strokeWidth: 2 / k }}
+            groupProps={groupProps}
+            rectProps={rectProps}
             labelOverride={labelOverride}
             fillOverride={fillOverride}
           />

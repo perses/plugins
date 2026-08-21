@@ -17,6 +17,9 @@ import { NodeSpec } from '../../model';
 import { ICON_PATHS } from '../../utils/icons';
 import { labelAttrs } from '../../utils/labelPosition';
 
+const NO_INTERACTION_STYLE = { pointerEvents: 'none', userSelect: 'none' } as const;
+const NO_POINTER_EVENTS_STYLE = { pointerEvents: 'none' } as const;
+
 export interface IconNodeProps {
   node: NodeSpec;
   displayLabel: string | undefined;
@@ -46,24 +49,24 @@ export function IconNode({ node, displayLabel, defaultFill, fillOverride, rectPr
         {...rectProps}
       />
       {iconPath ? (
-        <g transform={`translate(${-halfW},${-halfH}) scale(${iconScale})`} style={{ pointerEvents: 'none' }}>
+        <g transform={`translate(${-halfW},${-halfH}) scale(${iconScale})`} style={NO_POINTER_EVENTS_STYLE}>
           <path d={iconPath} fill={iconColor} />
         </g>
       ) : (
-        <ellipse rx={halfW} ry={halfH} fill={iconColor} style={{ pointerEvents: 'none' }} />
+        <ellipse rx={halfW} ry={halfH} fill={iconColor} style={NO_POINTER_EVENTS_STYLE} />
       )}
-      {displayLabel && (
+      {displayLabel ? (
         <text
           x={lAttrs.x}
           y={lAttrs.y}
           textAnchor={lAttrs.textAnchor}
           dominantBaseline={lAttrs.dominantBaseline}
           fill="currentColor"
-          style={{ pointerEvents: 'none', userSelect: 'none' }}
+          style={NO_INTERACTION_STYLE}
         >
           {displayLabel}
         </text>
-      )}
+      ) : null}
     </>
   );
 }

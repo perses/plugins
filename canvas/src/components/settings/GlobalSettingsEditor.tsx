@@ -14,13 +14,15 @@
 import { Box } from '@mui/material';
 import {
   FormatControls,
+  FormatOptions,
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
   ThresholdsEditor,
+  ThresholdOptions,
 } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import { ReactElement, useCallback } from 'react';
 
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
@@ -32,6 +34,20 @@ import { LegendSettings } from './LegendSettings';
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
 
 export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorProps): ReactElement {
+  const onFormatChange = useCallback(
+    (format: FormatOptions): void => {
+      onChange({ ...value, format });
+    },
+    [value, onChange],
+  );
+
+  const onThresholdsChange = useCallback(
+    (thresholds: ThresholdOptions | undefined): void => {
+      onChange({ ...value, thresholds });
+    },
+    [value, onChange],
+  );
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <OptionsEditorGrid>
@@ -40,18 +56,11 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
             <LegendSettings value={value} onChange={onChange} />
           </OptionsEditorGroup>
           <OptionsEditorGroup title="Format">
-            <FormatControls
-              value={value.format ?? { unit: 'decimal' }}
-              onChange={(format) => onChange({ ...value, format })}
-            />
+            <FormatControls value={value.format ?? { unit: 'decimal' }} onChange={onFormatChange} />
           </OptionsEditorGroup>
         </OptionsEditorColumn>
         <OptionsEditorColumn>
-          <ThresholdsEditor
-            hideDefault
-            thresholds={value.thresholds}
-            onChange={(thresholds) => onChange({ ...value, thresholds })}
-          />
+          <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
           <OptionsEditorGroup title="Edge thickness">
             <EdgeThicknessSettings value={value} onChange={onChange} />
           </OptionsEditorGroup>

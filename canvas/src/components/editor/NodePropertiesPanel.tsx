@@ -21,6 +21,8 @@ import { NodeSpec } from '../../model';
 import { ICON_NAMES } from '../../utils/icons';
 import { IconPreview } from './IconPreview';
 
+const SELECT_SLOT_PROPS = { select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } } as const;
+
 interface NodePropertiesPanelProps {
   node: NodeSpec;
   onChange: (updated: NodeSpec) => void;
@@ -31,7 +33,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
   const { nodeDefaultFill } = useCanvasTheme();
   const queryCount = queryDefinitions.length;
   const queryNames = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
-  const queryIndexes = Array.from({ length: queryCount }, (_, i) => i);
+  const queryIndexes = useMemo(() => Array.from({ length: queryCount }, (_, i) => i), [queryCount]);
   const shape = node.kind;
 
   const onIntFieldChange = useCallback(
@@ -45,6 +47,101 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
         }
       },
     [node, onChange],
+  );
+
+  const onKindChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...node, kind: e.target.value as NodeSpec['kind'] });
+    },
+    [node, onChange],
+  );
+
+  const onIconChange = useCallback(
+    (_: React.SyntheticEvent, newIcon: string | null): void => {
+      onChange({ ...node, icon: newIcon ?? undefined });
+    },
+    [node, onChange],
+  );
+
+  const onBackgroundImageChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...node, backgroundImage: e.target.value || undefined });
+    },
+    [node, onChange],
+  );
+
+  const onLinkChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...node, link: e.target.value || undefined });
+    },
+    [node, onChange],
+  );
+
+  const onLabelChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...node, label: e.target.value || undefined });
+    },
+    [node, onChange],
+  );
+
+  const onLabelPositionChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...node, labelPosition: e.target.value as NodeSpec['labelPosition'] });
+    },
+    [node, onChange],
+  );
+
+  const onQueryIndexChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      const v = e.target.value;
+      onChange({ ...node, queryIndex: v === '' ? undefined : Number(v) });
+    },
+    [node, onChange],
+  );
+
+  const onColorModeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      const v = e.target.value as '' | 'threshold' | 'fixed';
+      onChange({ ...node, colorMode: v === '' ? undefined : v });
+    },
+    [node, onChange],
+  );
+
+  const onColorChange = useCallback(
+    (color: string): void => {
+      onChange({ ...node, color });
+    },
+    [node, onChange],
+  );
+
+  const onColorClear = useCallback((): void => {
+    onChange({ ...node, color: undefined });
+  }, [node, onChange]);
+
+  const isOptionEqualToValue = useCallback((option: string, value: string) => option === value, []);
+
+  const renderInput = useCallback(
+    (params: object) => <TextField {...(params as Record<string, unknown>)} label="Icon" size="small" />,
+    [],
+  );
+
+  const renderOption = useCallback(
+    (props: React.HTMLAttributes<HTMLLIElement>, name: string) => (
+      <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <IconPreview name={name} />
+        <Typography variant="body2">{name}</Typography>
+      </Box>
+    ),
+    [],
+  );
+
+  const colorBoxSx = useMemo(
+    () => ({
+      flexShrink: 0,
+      opacity: node.colorMode !== 'fixed' ? 0.38 : 1,
+      pointerEvents: node.colorMode !== 'fixed' ? ('none' as const) : ('auto' as const),
+    }),
+    [node.colorMode],
   );
 
   return (
@@ -88,51 +185,39 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
         />
       </Stack>
 
-      <TextField
-        select
-        label="Kind"
-        size="small"
-        value={shape}
-        onChange={(e) => onChange({ ...node, kind: e.target.value as NodeSpec['kind'] })}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
-      >
+      <TextField select label="Kind" size="small" value={shape} onChange={onKindChange} slotProps={SELECT_SLOT_PROPS}>
         <MenuItem value="rectangle">Rectangle</MenuItem>
         <MenuItem value="icon">Icon</MenuItem>
         <MenuItem value="text">Text</MenuItem>
       </TextField>
 
-      {shape !== 'text' && (
+      {shape !== 'text' ? (
         <Autocomplete
           options={ICON_NAMES}
           value={node.icon ?? null}
-          onChange={(_, newIcon) => onChange({ ...node, icon: newIcon ?? undefined })}
-          renderInput={(params) => <TextField {...params} label="Icon" size="small" />}
-          renderOption={(props, name) => (
-            <Box component="li" {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <IconPreview name={name} />
-              <Typography variant="body2">{name}</Typography>
-            </Box>
-          )}
-          isOptionEqualToValue={(option, value) => option === value}
+          onChange={onIconChange}
+          renderInput={renderInput}
+          renderOption={renderOption}
+          isOptionEqualToValue={isOptionEqualToValue}
           clearOnEscape
           size="small"
         />
-      )}
+      ) : null}
 
-      {shape === 'rectangle' && (
+      {shape === 'rectangle' ? (
         <TextField
           label="Background image URL"
           size="small"
           value={node.backgroundImage ?? ''}
-          onChange={(e) => onChange({ ...node, backgroundImage: e.target.value || undefined })}
+          onChange={onBackgroundImageChange}
         />
-      )}
+      ) : null}
 
       <TextField
         label="Link URL"
         size="small"
         value={node.link ?? ''}
-        onChange={(e) => onChange({ ...node, link: e.target.value || undefined })}
+        onChange={onLinkChange}
         helperText="Navigate to this URL on click. Use ${varName} for dashboard variables."
       />
 
@@ -140,19 +225,19 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
         label="Label"
         size="small"
         value={node.label ?? ''}
-        onChange={(e) => onChange({ ...node, label: e.target.value || undefined })}
+        onChange={onLabelChange}
         helperText="Use {{label_name}} or {{value}} to interpolate query data"
       />
 
-      {shape !== 'text' && (
+      {shape !== 'text' ? (
         <Stack direction="row" spacing={1}>
           <TextField
             select
             label="Label position"
             size="small"
             value={node.labelPosition ?? 'below'}
-            onChange={(e) => onChange({ ...node, labelPosition: e.target.value as NodeSpec['labelPosition'] })}
-            slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+            onChange={onLabelPositionChange}
+            slotProps={SELECT_SLOT_PROPS}
             sx={{ flex: 1 }}
           >
             <MenuItem value="below">Below</MenuItem>
@@ -172,18 +257,15 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
             sx={{ width: 100 }}
           />
         </Stack>
-      )}
+      ) : null}
 
       <TextField
         select
         label="Query"
         size="small"
         value={node.queryIndex ?? ''}
-        onChange={(e) => {
-          const v = e.target.value;
-          onChange({ ...node, queryIndex: v === '' ? undefined : Number(v) });
-        }}
-        slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+        onChange={onQueryIndexChange}
+        slotProps={SELECT_SLOT_PROPS}
         sx={{ minWidth: 120 }}
       >
         <MenuItem value="">
@@ -202,11 +284,8 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           label="Color mode"
           size="small"
           value={node.colorMode ?? ''}
-          onChange={(e) => {
-            const v = e.target.value as '' | 'threshold' | 'fixed';
-            onChange({ ...node, colorMode: v === '' ? undefined : v });
-          }}
-          slotProps={{ select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } }}
+          onChange={onColorModeChange}
+          slotProps={SELECT_SLOT_PROPS}
           sx={{ flex: 1 }}
         >
           <MenuItem value="">
@@ -216,18 +295,12 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           <MenuItem value="fixed">Fixed</MenuItem>
         </TextField>
 
-        <Box
-          sx={{
-            flexShrink: 0,
-            opacity: node.colorMode !== 'fixed' ? 0.38 : 1,
-            pointerEvents: node.colorMode !== 'fixed' ? 'none' : 'auto',
-          }}
-        >
+        <Box sx={colorBoxSx}>
           <OptionsColorPicker
             label="Color"
             color={node.color ?? nodeDefaultFill}
-            onColorChange={(color) => onChange({ ...node, color })}
-            onClear={() => onChange({ ...node, color: undefined })}
+            onColorChange={onColorChange}
+            onClear={onColorClear}
           />
         </Box>
       </Stack>

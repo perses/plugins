@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
@@ -30,17 +30,17 @@ export function DragEdgeLine({ dragEdge }: DragEdgeLineProps): ReactElement {
     transform: { k },
   } = useZoomContext();
   const theme = editorStyles(useCanvasTheme(), k);
-  const pts = { x1: dragEdge.x1, y1: dragEdge.y1, x2: dragEdge.x2, y2: dragEdge.y2 };
-  return (
-    <EdgeLines
-      pts={pts}
-      bidirectional={false}
-      nsPrefix={NS_PREFIX}
-      fwdStyle={{
-        stroke: theme.dragEdge.stroke,
-        strokeWidth: theme.dragEdge.strokeWidth,
-      }}
-      lineProps={{ strokeDasharray: theme.dragEdge.strokeDasharray, style: { pointerEvents: 'none' } }}
-    />
+  const pts = useMemo(
+    () => ({ x1: dragEdge.x1, y1: dragEdge.y1, x2: dragEdge.x2, y2: dragEdge.y2 }),
+    [dragEdge.x1, dragEdge.y1, dragEdge.x2, dragEdge.y2],
   );
+  const fwdStyle = useMemo(
+    () => ({ stroke: theme.dragEdge.stroke, strokeWidth: theme.dragEdge.strokeWidth }),
+    [theme.dragEdge.stroke, theme.dragEdge.strokeWidth],
+  );
+  const lineProps = useMemo(
+    () => ({ strokeDasharray: theme.dragEdge.strokeDasharray, style: { pointerEvents: 'none' } as const }),
+    [theme.dragEdge.strokeDasharray],
+  );
+  return <EdgeLines pts={pts} bidirectional={false} nsPrefix={NS_PREFIX} fwdStyle={fwdStyle} lineProps={lineProps} />;
 }

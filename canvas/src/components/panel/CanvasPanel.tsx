@@ -36,6 +36,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
   const { transform, fitView, resetPan } = useZoomContext();
 
   const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
+  const backgrounds = useMemo(() => spec.backgrounds ?? [], [spec.backgrounds]);
 
   const width = contentDimensions?.width ?? 600;
   const height = contentDimensions?.height ?? 400;
@@ -55,6 +56,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
   );
 
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;
+  const thresholds = spec.thresholds ?? {};
   const legendPosition = spec.legend?.position ?? 'bottom';
   const LEGEND_MARGIN = 8;
   const legendX = legendPosition === 'right' ? width - 118 - LEGEND_MARGIN : LEGEND_MARGIN;
@@ -69,9 +71,9 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
       style={{ display: 'block', cursor: 'grab' }}
       onDoubleClick={handleDoubleClick}
     >
-      <GlobalBackgroundLayer backgrounds={spec.backgrounds ?? []} width={width} height={height} />
+      <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
       <g transform={transform.toString()}>
-        <BackgroundLayer backgrounds={spec.backgrounds ?? []} />
+        <BackgroundLayer backgrounds={backgrounds} />
         <PanelNodeLayer
           spec={spec}
           seriesByQueryIndex={seriesByQueryIndex}
@@ -86,15 +88,15 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
         />
       </g>
 
-      {showLegend && (
+      {showLegend ? (
         <ThresholdLegend
-          thresholds={spec.thresholds ?? {}}
+          thresholds={thresholds}
           format={spec.format}
           paletteColors={paletteColors}
           x={legendX}
           y={legendY}
         />
-      )}
+      ) : null}
     </svg>
   );
 }
@@ -117,8 +119,13 @@ export function CanvasPanel(props: CanvasProps): ReactElement | null {
 
   const { svgRef, toCanvasPoint, transform, fitView, resetPan } = useZoom();
 
+  const zoomValue = useMemo(
+    () => ({ toCanvasPoint, transform, fitView, resetPan }),
+    [toCanvasPoint, transform, fitView, resetPan],
+  );
+
   return (
-    <ZoomProvider value={{ toCanvasPoint, transform, fitView, resetPan }}>
+    <ZoomProvider value={zoomValue}>
       <PanelSvg svgRef={svgRef} props={props} seriesByQueryIndex={seriesByQueryIndex} paletteColors={paletteColors} />
     </ZoomProvider>
   );

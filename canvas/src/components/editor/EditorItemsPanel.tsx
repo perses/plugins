@@ -21,7 +21,7 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import { ReactElement, useCallback, useRef } from 'react';
+import { ReactElement, useCallback, useMemo, useRef } from 'react';
 
 import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
@@ -60,14 +60,14 @@ export function EditorItemsPanel(): ReactElement {
   const selectedBackground =
     selectedIds.size === 1 && firstSelectedId ? (backgroundById.get(firstSelectedId) ?? null) : null;
 
-  function onAddNode(): void {
+  const onAddNode = useCallback((): void => {
     const canvasWidth = containerRef.current?.clientWidth ?? 0;
     const cx = transform.invertX(canvasWidth / 2);
     const cy = transform.invertY(CANVAS_HEIGHT / 2);
     addNode(cx, cy);
-  }
+  }, [transform, addNode]);
 
-  function onAddBackground(): void {
+  const onAddBackground = useCallback((): void => {
     const canvasWidth = containerRef.current?.clientWidth ?? 0;
     const k = transform.k > 0 ? transform.k : 1;
     const width = canvasWidth > 0 ? canvasWidth / k : 200;
@@ -75,7 +75,7 @@ export function EditorItemsPanel(): ReactElement {
     const x = transform.invertX(0);
     const y = transform.invertY(0);
     addBackground(x, y, width, height);
-  }
+  }, [transform, addBackground]);
 
   const onItemSelect = useCallback(
     (event: SelectChangeEvent): void => {
@@ -88,12 +88,20 @@ export function EditorItemsPanel(): ReactElement {
   const hasBackgrounds = (spec.backgrounds?.length ?? 0) > 0;
   const hasNodes = (spec.nodes?.length ?? 0) > 0;
   const hasEdges = (spec.edges?.length ?? 0) > 0;
+  const specNodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
+
+  const zoomValue = useMemo(
+    () => ({ toCanvasPoint, transform, fitView, resetPan }),
+    [toCanvasPoint, transform, fitView, resetPan],
+  );
+
+  const canvasWidth = containerRef.current?.clientWidth ?? 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Box ref={containerRef}>
-        <ZoomProvider value={{ toCanvasPoint, transform, fitView, resetPan }}>
-          <EditorCanvas svgRef={svgRef} width={containerRef.current?.clientWidth ?? 0} height={CANVAS_HEIGHT} />
+        <ZoomProvider value={zoomValue}>
+          <EditorCanvas svgRef={svgRef} width={canvasWidth} height={CANVAS_HEIGHT} />
         </ZoomProvider>
       </Box>
 
@@ -109,19 +117,19 @@ export function EditorItemsPanel(): ReactElement {
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            {hasBackgrounds && <ListSubheader>Backgrounds</ListSubheader>}
+            {hasBackgrounds ? <ListSubheader>Backgrounds</ListSubheader> : null}
             {spec.backgrounds?.map((bg) => (
               <MenuItem key={bg.id} value={bg.id}>
                 {bg.name ?? bg.id}
               </MenuItem>
             ))}
-            {hasNodes && <ListSubheader>Nodes</ListSubheader>}
+            {hasNodes ? <ListSubheader>Nodes</ListSubheader> : null}
             {spec.nodes?.map((n) => (
               <MenuItem key={n.id} value={n.id}>
                 {n.label ?? n.id}
               </MenuItem>
             ))}
-            {hasEdges && <ListSubheader>Edges</ListSubheader>}
+            {hasEdges ? <ListSubheader>Edges</ListSubheader> : null}
             {spec.edges?.map((ed) => (
               <MenuItem key={ed.id} value={ed.id}>
                 {ed.name ?? ed.id}
@@ -147,14 +155,14 @@ export function EditorItemsPanel(): ReactElement {
       </Box>
 
       <Box sx={{ height: PROPERTIES_HEIGHT, overflowY: 'auto' }}>
-        {selectedNode && <NodePropertiesPanel node={selectedNode} onChange={onNodePropertiesChange} />}
-        {selectedEdge && (
-          <EdgePropertiesPanel edge={selectedEdge} nodes={spec.nodes ?? []} onChange={onEdgePropertiesChange} />
-        )}
-        {selectedBackground && (
+        {selectedNode ? <NodePropertiesPanel node={selectedNode} onChange={onNodePropertiesChange} /> : null}
+        {selectedEdge ? (
+          <EdgePropertiesPanel edge={selectedEdge} nodes={specNodes} onChange={onEdgePropertiesChange} />
+        ) : null}
+        {selectedBackground ? (
           <BackgroundPropertiesPanel background={selectedBackground} onChange={onBackgroundPropertiesChange} />
-        )}
-        {!selectedNode && !selectedEdge && !selectedBackground && (
+        ) : null}
+        {!selectedNode && !selectedEdge && !selectedBackground ? (
           <Box
             sx={{
               height: '100%',
@@ -166,7 +174,7 @@ export function EditorItemsPanel(): ReactElement {
           >
             Select a node or edge to edit its properties
           </Box>
-        )}
+        ) : null}
       </Box>
     </Box>
   );
