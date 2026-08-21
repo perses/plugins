@@ -21,7 +21,6 @@ export const DEFAULT_MODE: ModeOption = 'value';
 export const DEFAULT_ORIENTATION: 'horizontal' | 'vertical' = 'horizontal';
 export const DEFAULT_GROUP_BY: string[] = [];
 export const DEFAULT_IS_STACKED = false;
-export const DEFAULT_COLOR_OVERRIDES: ColorOverride[] = [];
 export const DEFAULT_VISUAL: BarChartVisual = {};
 
 /**
