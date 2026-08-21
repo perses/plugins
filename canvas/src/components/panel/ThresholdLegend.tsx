@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { useTheme } from '@mui/material';
-import { FormatOptions, formatValue } from '@perses-dev/components';
-import { ThresholdOptions } from '@perses-dev/core';
+import { FormatOptions, formatValue, ThresholdOptions } from '@perses-dev/components';
 import { ReactElement } from 'react';
 
 const SWATCH_SIZE = 12;

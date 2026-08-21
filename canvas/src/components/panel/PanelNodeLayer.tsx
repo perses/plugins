@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeries } from '@perses-dev/core';
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
+import { TimeSeries } from '@perses-dev/spec';
 import { ReactElement, useCallback } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
