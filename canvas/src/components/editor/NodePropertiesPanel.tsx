@@ -19,9 +19,8 @@ import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { NodeSpec } from '../../model';
 import { ICON_NAMES } from '../../utils/icons';
+import { SelectField } from '../shared/SelectField';
 import { IconPreview } from './IconPreview';
-
-const SELECT_SLOT_PROPS = { select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } } as const;
 
 interface NodePropertiesPanelProps {
   node: NodeSpec;
@@ -185,11 +184,11 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
         />
       </Stack>
 
-      <TextField select label="Kind" size="small" value={shape} onChange={onKindChange} slotProps={SELECT_SLOT_PROPS}>
+      <SelectField label="Kind" value={shape} onChange={onKindChange}>
         <MenuItem value="rectangle">Rectangle</MenuItem>
         <MenuItem value="icon">Icon</MenuItem>
         <MenuItem value="text">Text</MenuItem>
-      </TextField>
+      </SelectField>
 
       {shape !== 'text' ? (
         <Autocomplete
@@ -231,13 +230,10 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
 
       {shape !== 'text' ? (
         <Stack direction="row" spacing={1}>
-          <TextField
-            select
+          <SelectField
             label="Label position"
-            size="small"
             value={node.labelPosition ?? 'below'}
             onChange={onLabelPositionChange}
-            slotProps={SELECT_SLOT_PROPS}
             sx={{ flex: 1 }}
           >
             <MenuItem value="below">Below</MenuItem>
@@ -245,7 +241,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
             <MenuItem value="left">Left</MenuItem>
             <MenuItem value="right">Right</MenuItem>
             <MenuItem value="center">Center</MenuItem>
-          </TextField>
+          </SelectField>
           <TextField
             label="Label padding"
             size="small"
@@ -259,15 +255,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
         </Stack>
       ) : null}
 
-      <TextField
-        select
-        label="Query"
-        size="small"
-        value={node.queryIndex ?? ''}
-        onChange={onQueryIndexChange}
-        slotProps={SELECT_SLOT_PROPS}
-        sx={{ minWidth: 120 }}
-      >
+      <SelectField label="Query" value={node.queryIndex ?? ''} onChange={onQueryIndexChange} sx={{ minWidth: 120 }}>
         <MenuItem value="">
           <em>None</em>
         </MenuItem>
@@ -276,24 +264,16 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
             {queryNames[qi] ?? `#${qi + 1}`}
           </MenuItem>
         ))}
-      </TextField>
+      </SelectField>
 
       <Stack direction="row" spacing={1} alignItems="center">
-        <TextField
-          select
-          label="Color mode"
-          size="small"
-          value={node.colorMode ?? ''}
-          onChange={onColorModeChange}
-          slotProps={SELECT_SLOT_PROPS}
-          sx={{ flex: 1 }}
-        >
+        <SelectField label="Color mode" value={node.colorMode ?? ''} onChange={onColorModeChange} sx={{ flex: 1 }}>
           <MenuItem value="">
             <em>None (default)</em>
           </MenuItem>
           <MenuItem value="threshold">Threshold</MenuItem>
           <MenuItem value="fixed">Fixed</MenuItem>
-        </TextField>
+        </SelectField>
 
         <Box sx={colorBoxSx}>
           <OptionsColorPicker

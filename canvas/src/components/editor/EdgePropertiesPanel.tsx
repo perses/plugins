@@ -16,9 +16,9 @@ import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-sy
 import React, { ReactElement, useCallback, useMemo } from 'react';
 
 import { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
+import { SelectField } from '../shared/SelectField';
 
 const ANCHOR_OPTIONS: AnchorPoint[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
-const SELECT_SLOT_PROPS = { select: { MenuProps: { PaperProps: { style: { maxHeight: 240 } } } } } as const;
 
 interface EdgePropertiesPanelProps {
   edge: EdgeSpec;
@@ -134,83 +134,52 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
 
       <TextField label="Name" size="small" value={edge.name ?? ''} placeholder={edge.id} onChange={onNameChange} />
 
-      <TextField
-        select
-        label="Source"
-        size="small"
-        value={edge.source}
-        onChange={onSourceChange}
-        slotProps={SELECT_SLOT_PROPS}
-      >
+      <SelectField label="Source" value={edge.source} onChange={onSourceChange}>
         {nodes.map((n) => (
           <MenuItem key={n.id} value={n.id}>
             {n.label ?? n.id}
           </MenuItem>
         ))}
-      </TextField>
+      </SelectField>
 
-      <TextField
-        select
-        label="Source anchor"
-        size="small"
-        value={edge.sourceAnchor ?? 'n'}
-        onChange={onSourceAnchorChange}
-        slotProps={SELECT_SLOT_PROPS}
-      >
+      <SelectField label="Source anchor" value={edge.sourceAnchor ?? 'n'} onChange={onSourceAnchorChange}>
         {ANCHOR_OPTIONS.map((a) => (
           <MenuItem key={a} value={a}>
             {a}
           </MenuItem>
         ))}
-      </TextField>
+      </SelectField>
 
-      <TextField
-        select
-        label="Target"
-        size="small"
-        value={edge.target}
-        onChange={onTargetChange}
-        slotProps={SELECT_SLOT_PROPS}
-      >
+      <SelectField label="Target" value={edge.target} onChange={onTargetChange}>
         {nodes.map((n) => (
           <MenuItem key={n.id} value={n.id}>
             {n.label ?? n.id}
           </MenuItem>
         ))}
-      </TextField>
+      </SelectField>
 
-      <TextField
-        select
+      <SelectField
         label="Target anchor"
-        size="small"
         value={edge.targetAnchor ?? 'n'}
         disabled={hasFreeTarget}
         onChange={onTargetAnchorChange}
-        slotProps={SELECT_SLOT_PROPS}
       >
         {ANCHOR_OPTIONS.map((a) => (
           <MenuItem key={a} value={a}>
             {a}
           </MenuItem>
         ))}
-      </TextField>
+      </SelectField>
 
       <FormControlLabel
         control={<Checkbox size="small" checked={edge.bidirectional ?? false} onChange={onBidirectionalChange} />}
         label="Bidirectional"
       />
 
-      <TextField
-        select
-        label="Thickness mode"
-        size="small"
-        value={edge.thicknessMode ?? 'fixed'}
-        onChange={onThicknessModeChange}
-        slotProps={SELECT_SLOT_PROPS}
-      >
+      <SelectField label="Thickness mode" value={edge.thicknessMode ?? 'fixed'} onChange={onThicknessModeChange}>
         <MenuItem value="fixed">Fixed</MenuItem>
         <MenuItem value="threshold">Threshold</MenuItem>
-      </TextField>
+      </SelectField>
 
       {(edge.thicknessMode ?? 'fixed') === 'fixed' ? (
         <TextField
@@ -224,13 +193,10 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         />
       ) : null}
 
-      <TextField
-        select
+      <SelectField
         label="Source → target query"
-        size="small"
         value={edge.sourceQueryIndex ?? ''}
         onChange={onSourceQueryIndexChange}
-        slotProps={SELECT_SLOT_PROPS}
       >
         <MenuItem value="">
           <em>None</em>
@@ -240,7 +206,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
             {queryNames[qi] ?? `#${qi + 1}`}
           </MenuItem>
         ))}
-      </TextField>
+      </SelectField>
 
       <TextField
         label="Source label template"
@@ -252,13 +218,10 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
 
       {edge.bidirectional ? (
         <>
-          <TextField
-            select
+          <SelectField
             label="Target → source query"
-            size="small"
             value={edge.targetQueryIndex ?? ''}
             onChange={onTargetQueryIndexChange}
-            slotProps={SELECT_SLOT_PROPS}
           >
             <MenuItem value="">
               <em>None</em>
@@ -268,7 +231,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
                 {queryNames[qi] ?? `#${qi + 1}`}
               </MenuItem>
             ))}
-          </TextField>
+          </SelectField>
 
           <TextField
             label="Target label template"
