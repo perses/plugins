@@ -21,11 +21,11 @@ import { useEdgeConnect } from '../../hooks/useEdgeConnect';
 import { useNodeMove } from '../../hooks/useNodeMove';
 import { useRectSelect } from '../../hooks/useRectSelect';
 import { useResize } from '../../hooks/useResize';
-import { AnchorPoint, CanvasSpec, FloatingEdge, isFloatingEdge } from '../../model';
+import { CanvasSpec, FloatingEdge, isFloatingEdge } from '../../model';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { DragEdgeLine } from './DragEdgeLine';
-import { EditorEdge } from './EditorEdge';
+import { EditorEdgeItem } from './EditorEdgeItem';
 import { EditorNodeItem } from './EditorNodeItem';
 import { SelectionBoundingBox } from './SelectionBoundingBox';
 import { SelectionRectOverlay } from './SelectionRectOverlay';
@@ -232,36 +232,19 @@ export function EditorCanvas({
             />
           ))}
 
-          {displayEdges.map((edge) => {
-            const onEdgeClick = (event: PointerEvent<SVGLineElement>): void => {
-              event.stopPropagation();
-              selectItems(new Set([edge.id]));
-            };
-            const onEndpointPointerDown = (
-              event: PointerEvent<SVGCircleElement>,
-              end: 'source' | 'target',
-              fixedX: number,
-              fixedY: number,
-              fixedNodeId: string,
-              fixedAnchor: AnchorPoint,
-            ): void => {
-              if (beginEndpointDrag(event, edge.id, end, fixedX, fixedY, fixedNodeId, fixedAnchor)) {
-                startDragEdge();
-              }
-            };
-            return (
-              <EditorEdge
-                key={edge.id}
-                edge={edge}
-                isSelected={!selectionBoundingBox && selectedIds.has(edge.id)}
-                isDragging={mode.type === 'dragging-edge'}
-                nsPrefix={`${NS_PREFIX}-${edge.id}`}
-                nodeById={nodeById}
-                onEdgeClick={onEdgeClick}
-                onEndpointPointerDown={onEndpointPointerDown}
-              />
-            );
-          })}
+          {displayEdges.map((edge) => (
+            <EditorEdgeItem
+              key={edge.id}
+              edge={edge}
+              isSelected={!selectionBoundingBox && selectedIds.has(edge.id)}
+              isDragging={mode.type === 'dragging-edge'}
+              nsPrefix={`${NS_PREFIX}-${edge.id}`}
+              nodeById={nodeById}
+              selectItems={selectItems}
+              beginEndpointDrag={beginEndpointDrag}
+              startDragEdge={startDragEdge}
+            />
+          ))}
 
           {selectionBoundingBox && (
             <SelectionBoundingBox
