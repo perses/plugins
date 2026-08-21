@@ -25,7 +25,7 @@ export type BarChartPanelProps = PanelProps<BarChartOptions, TimeSeriesData>;
 
 export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, format, sort, mode, groupBy = [], isStacked = false, orientation = 'horizontal' },
+    spec: { calculation, format, sort, mode, groupBy = [], isStacked = false, orientation = 'horizontal', visual },
     contentDimensions,
     queryResults,
   } = props;
@@ -133,6 +133,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
         groupedData={stackedBarChartData}
         isStacked={isStacked}
         orientation={orientation}
+        colorOverrides={visual?.colorOverrides}
       />
     </Box>
   );

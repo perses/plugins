@@ -162,4 +162,39 @@ describe('BarChartOptionsEditorSettings', () => {
       }),
     );
   });
+
+  it('can add a color override', () => {
+    const onChange = jest.fn();
+    renderBarChartOptionsEditorSettings(undefined, onChange);
+    const addButton = screen.getByRole('button', { name: 'Add Color Override' });
+    userEvent.click(addButton);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visual: { colorOverrides: [{ regex: '', color: '#555' }] },
+      }),
+    );
+  });
+
+  it('can remove a color override', () => {
+    const onChange = jest.fn();
+    renderBarChartOptionsEditorSettings(
+      {
+        format: {
+          unit: 'decimal',
+        },
+        calculation: 'first',
+        sort: 'desc',
+        mode: 'value',
+        visual: { colorOverrides: [{ regex: 'errors', color: '#ff0000' }] },
+      },
+      onChange,
+    );
+    const deleteButton = screen.getByRole('button', { name: 'delete color override n°1' });
+    userEvent.click(deleteButton);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visual: { colorOverrides: [] },
+      }),
+    );
+  });
 });

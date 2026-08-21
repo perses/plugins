@@ -1,0 +1,19 @@
+{
+  "kind": "BarChart",
+  "spec": {
+    "calculation": "last-number",
+    "format": {
+      "unit": "decimal"
+    },
+    "sort": "desc",
+    "mode": "value",
+    "visual": {
+      "colorOverrides": [
+        {
+          "regex": "errors",
+          "color": "#ff0000"
+        }
+      ]
+    }
+  }
+}
