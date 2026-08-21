@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormatOptions } from '@perses-dev/components';
-import { TimeSeriesData, ThresholdOptions } from '@perses-dev/core';
+import { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import { PanelProps, LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/spec';
 
 export type QueryData = TimeSeriesData;
 

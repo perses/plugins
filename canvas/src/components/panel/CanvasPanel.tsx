@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useChartsTheme } from '@perses-dev/components';
-import { TimeSeries } from '@perses-dev/core';
+import { TimeSeries } from '@perses-dev/spec';
 import { MouseEvent, ReactElement, useCallback, useMemo } from 'react';
 
 import { useZoomContext, ZoomProvider } from '../../contexts/ZoomContext';
