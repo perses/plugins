@@ -108,7 +108,7 @@ export function EdgeLines({
     <>
       <defs>
         <EdgeArrowMarker nsPrefix={nsPrefix} direction="fwd" fill={fwdStyle.stroke} />
-        {bwd && <EdgeArrowMarker nsPrefix={nsPrefix} direction="bwd" fill={resolvedBwdStyle.stroke} />}
+        {bwd ? <EdgeArrowMarker nsPrefix={nsPrefix} direction="bwd" fill={resolvedBwdStyle.stroke} /> : null}
       </defs>
       <line
         x1={fwd.x1}
@@ -121,7 +121,7 @@ export function EdgeLines({
         markerEnd={`url(#${markerId(nsPrefix, 'fwd')})`}
         {...lineProps}
       />
-      {bwd && (
+      {bwd ? (
         <line
           x1={bwd.x1}
           y1={bwd.y1}
@@ -133,7 +133,7 @@ export function EdgeLines({
           markerEnd={`url(#${markerId(nsPrefix, 'bwd')})`}
           {...lineProps}
         />
-      )}
+      ) : null}
     </>
   );
 }

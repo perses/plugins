@@ -18,6 +18,17 @@ import React, { ReactElement, useCallback, useMemo } from 'react';
 
 import { CanvasSpec } from '../../model';
 
+const STROKE_SLOT_PROPS = {
+  htmlInput: { min: 1, step: 1 },
+  input: { endAdornment: <InputAdornment position="end">px</InputAdornment> },
+} as const;
+
+const ROW_BOX_SX = { display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 } as const;
+const ROW_CAPTION_SX = { minWidth: 70, color: 'text.secondary' } as const;
+const ROW_TEXT_WIDTH_SX = { width: 100 } as const;
+const DEFAULT_STROKE_SX = { mb: 1, width: 180 } as const;
+const BLOCK_CAPTION_SX = { display: 'block', mb: 0.5 } as const;
+
 interface EdgeThicknessSettingsProps {
   value: CanvasSpec;
   onChange: (value: CanvasSpec) => void;
@@ -40,20 +51,17 @@ function ThresholdWidthRow({ step, strokeWidth, format, onChange }: ThresholdWid
   );
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-      <Typography variant="caption" sx={{ minWidth: 70, color: 'text.secondary' }}>
+    <Box sx={ROW_BOX_SX}>
+      <Typography variant="caption" sx={ROW_CAPTION_SX}>
         ≥ {formatValue(step.value, format)}
       </Typography>
       <TextField
         size="small"
         type="number"
-        slotProps={{
-          htmlInput: { min: 1, step: 1 },
-          input: { endAdornment: <InputAdornment position="end">px</InputAdornment> },
-        }}
+        slotProps={STROKE_SLOT_PROPS}
         value={strokeWidth ?? ''}
         onChange={onWidthChange}
-        sx={{ width: 100 }}
+        sx={ROW_TEXT_WIDTH_SX}
       />
     </Box>
   );
@@ -100,31 +108,32 @@ export function EdgeThicknessSettings({ value, onChange }: EdgeThicknessSettings
         label="Default stroke width"
         size="small"
         type="number"
-        slotProps={{
-          htmlInput: { min: 1, step: 1 },
-          input: { endAdornment: <InputAdornment position="end">px</InputAdornment> },
-        }}
+        slotProps={STROKE_SLOT_PROPS}
         value={value.edgeDefaultStrokeWidth ?? ''}
         onChange={onDefaultStrokeWidthChange}
         placeholder="2"
-        sx={{ mb: 1, width: 180 }}
+        sx={DEFAULT_STROKE_SX}
       />
-      {thresholdSteps.length > 0 && (
+      {thresholdSteps.length > 0 ? (
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+          <Typography variant="caption" color="text.secondary" sx={BLOCK_CAPTION_SX}>
             Per-threshold widths
           </Typography>
-          {thresholdSteps.map((step) => (
-            <ThresholdWidthRow
-              key={step.value}
-              step={step}
-              strokeWidth={value.edgeThresholdWidths?.find((w) => w.value === step.value)?.strokeWidth}
-              format={value.format}
-              onChange={(strokeWidth) => onThresholdWidthChange(step.value, strokeWidth)}
-            />
-          ))}
+          {thresholdSteps.map((step) => {
+            const handleChange = (strokeWidth: number | undefined): void =>
+              onThresholdWidthChange(step.value, strokeWidth);
+            return (
+              <ThresholdWidthRow
+                key={step.value}
+                step={step}
+                strokeWidth={value.edgeThresholdWidths?.find((w) => w.value === step.value)?.strokeWidth}
+                format={value.format}
+                onChange={handleChange}
+              />
+            );
+          })}
         </Box>
-      )}
+      ) : null}
     </>
   );
 }

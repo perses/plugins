@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, ReactElement } from 'react';
+import { PointerEvent, ReactElement, useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
@@ -47,19 +47,23 @@ export function EditorNode({
 }: EditorNodeProps): ReactElement {
   const wmTheme = useCanvasTheme();
   const theme = editorStyles(wmTheme, useZoomContext().transform.k);
+
+  const rectProps = useMemo(
+    () => ({
+      style: { cursor: 'move' } as const,
+      ...(snapTarget ? theme.nodeSnap : theme.nodeDefault),
+      onPointerDown,
+      onPointerMove,
+    }),
+    [snapTarget, theme.nodeSnap, theme.nodeDefault, onPointerDown, onPointerMove],
+  );
+
   return (
     <g onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-      <NodeRenderer
-        node={node}
-        defaultFill={wmTheme.nodeDefaultFill}
-        rectProps={{
-          style: { cursor: 'move' },
-          ...(snapTarget ? theme.nodeSnap : theme.nodeDefault),
-          onPointerDown,
-          onPointerMove,
-        }}
-      />
-      {isHovered && !isSelected && !isDragging && <ConnectionHandles node={node} onDragStart={onCrossDragStart} />}
+      <NodeRenderer node={node} defaultFill={wmTheme.nodeDefaultFill} rectProps={rectProps} />
+      {isHovered && !isSelected && !isDragging ? (
+        <ConnectionHandles node={node} onDragStart={onCrossDragStart} />
+      ) : null}
     </g>
   );
 }

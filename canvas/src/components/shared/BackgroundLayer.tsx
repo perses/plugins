@@ -16,6 +16,8 @@ import { ReactElement } from 'react';
 import { BackgroundSpec } from '../../model';
 import { imageFitToPreserveAspectRatio, isSafeImageUrl } from '../../utils/panelUtils';
 
+const BG_GROUP_STYLE = { pointerEvents: 'none' } as const;
+
 interface GlobalBackgroundLayerProps {
   backgrounds: BackgroundSpec[];
   width: number;
@@ -28,9 +30,9 @@ export function GlobalBackgroundLayer({ backgrounds, width, height }: GlobalBack
       {backgrounds
         .filter((bg) => bg.global)
         .map((bg) => (
-          <g key={bg.id} style={{ pointerEvents: 'none', opacity: bg.opacity ?? 1 }}>
+          <g key={bg.id} style={BG_GROUP_STYLE} opacity={bg.opacity ?? 1}>
             <rect x={0} y={0} width={width} height={height} fill={bg.color ?? 'transparent'} stroke="none" />
-            {bg.image && isSafeImageUrl(bg.image) && (
+            {bg.image && isSafeImageUrl(bg.image) ? (
               <image
                 href={bg.image}
                 x={0}
@@ -39,7 +41,7 @@ export function GlobalBackgroundLayer({ backgrounds, width, height }: GlobalBack
                 height={height}
                 preserveAspectRatio={imageFitToPreserveAspectRatio(bg.imageFit)}
               />
-            )}
+            ) : null}
           </g>
         ))}
     </>
@@ -56,13 +58,9 @@ export function BackgroundLayer({ backgrounds }: BackgroundLayerProps): ReactEle
       {backgrounds
         .filter((bg) => !bg.global)
         .map((bg) => (
-          <g
-            key={bg.id}
-            transform={`translate(${bg.x},${bg.y})`}
-            style={{ pointerEvents: 'none', opacity: bg.opacity ?? 1 }}
-          >
+          <g key={bg.id} transform={`translate(${bg.x},${bg.y})`} style={BG_GROUP_STYLE} opacity={bg.opacity ?? 1}>
             <rect x={0} y={0} width={bg.width} height={bg.height} fill={bg.color ?? 'transparent'} stroke="none" />
-            {bg.image && isSafeImageUrl(bg.image) && (
+            {bg.image && isSafeImageUrl(bg.image) ? (
               <image
                 href={bg.image}
                 x={0}
@@ -71,7 +69,7 @@ export function BackgroundLayer({ backgrounds }: BackgroundLayerProps): ReactEle
                 height={bg.height}
                 preserveAspectRatio={imageFitToPreserveAspectRatio(bg.imageFit)}
               />
-            )}
+            ) : null}
           </g>
         ))}
     </>

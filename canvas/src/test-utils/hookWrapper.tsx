@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useMemo, useState } from 'react';
 
 import { EditorStateProvider } from '../contexts/EditorContext';
 import { SpecContext, SpecContextValue } from '../contexts/SpecContext';
@@ -53,27 +53,27 @@ interface WrapperProps {
 export function HookWrapper({ initialSpec = {}, children }: WrapperProps): React.ReactElement {
   const [spec, setSpec] = useState<CanvasSpec>(initialSpec);
 
-  const nodeById = React.useMemo(() => new Map((spec.nodes ?? []).map((n) => [n.id, n])), [spec.nodes]);
-  const edgeById = React.useMemo(() => new Map((spec.edges ?? []).map((ed) => [ed.id, ed])), [spec.edges]);
-  const backgroundById = React.useMemo(
-    () => new Map((spec.backgrounds ?? []).map((bg) => [bg.id, bg])),
-    [spec.backgrounds],
-  );
+  const nodeById = useMemo(() => new Map((spec.nodes ?? []).map((n) => [n.id, n])), [spec.nodes]);
+  const edgeById = useMemo(() => new Map((spec.edges ?? []).map((ed) => [ed.id, ed])), [spec.edges]);
+  const backgroundById = useMemo(() => new Map((spec.backgrounds ?? []).map((bg) => [bg.id, bg])), [spec.backgrounds]);
 
-  const specCtx: SpecContextValue = {
-    spec,
-    nodeById,
-    edgeById,
-    backgroundById,
-    updateSpec: setSpec,
-    addNode: jest.fn(),
-    addBackground: jest.fn(),
-    moveBackground: jest.fn(),
-    deleteSelected: jest.fn(),
-    onNodePropertiesChange: jest.fn(),
-    onEdgePropertiesChange: jest.fn(),
-    onBackgroundPropertiesChange: jest.fn(),
-  };
+  const specCtx = useMemo<SpecContextValue>(
+    () => ({
+      spec,
+      nodeById,
+      edgeById,
+      backgroundById,
+      updateSpec: setSpec,
+      addNode: jest.fn(),
+      addBackground: jest.fn(),
+      moveBackground: jest.fn(),
+      deleteSelected: jest.fn(),
+      onNodePropertiesChange: jest.fn(),
+      onEdgePropertiesChange: jest.fn(),
+      onBackgroundPropertiesChange: jest.fn(),
+    }),
+    [spec, nodeById, edgeById, backgroundById],
+  );
 
   return (
     <EditorStateProvider>
@@ -85,7 +85,7 @@ export function HookWrapper({ initialSpec = {}, children }: WrapperProps): React
 }
 
 export function makeWrapper(initialSpec?: CanvasSpec) {
-  return function Wrapper({ children }: { children: ReactNode }): React.ReactElement {
+  return function Wrapper({ children }: { children: ReactNode }): ReactElement {
     return <HookWrapper initialSpec={initialSpec}>{children}</HookWrapper>;
   };
 }

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, ReactNode, useContext, useReducer } from 'react';
+import { createContext, ReactElement, ReactNode, useCallback, useContext, useMemo, useReducer } from 'react';
 
 import { EditorState, editorReducer, INITIAL_EDITOR_STATE } from '../utils/editorReducer';
 
@@ -41,22 +41,42 @@ export function useEditorContext(): EditorContextValue {
 export function EditorStateProvider({ children }: { children: ReactNode }): ReactElement {
   const [state, dispatch] = useReducer(editorReducer, INITIAL_EDITOR_STATE);
 
-  return (
-    <EditorContext.Provider
-      value={{
-        state,
-        selectItems: (ids) => dispatch({ type: 'SELECT_ITEMS', ids }),
-        clearSelection: () => dispatch({ type: 'CLEAR_SELECTION' }),
-        hoverNode: (id) => dispatch({ type: 'HOVER_NODE', id }),
-        unhoverNode: (id) => dispatch({ type: 'UNHOVER_NODE', id }),
-        startSelectionRect: () => dispatch({ type: 'SELECTION_RECT_START' }),
-        startMove: () => dispatch({ type: 'MOVE_START' }),
-        startDragEdge: () => dispatch({ type: 'DRAG_EDGE_START' }),
-        startResize: () => dispatch({ type: 'RESIZE_START' }),
-        endInteraction: () => dispatch({ type: 'INTERACTION_END' }),
-      }}
-    >
-      {children}
-    </EditorContext.Provider>
+  const selectItems = useCallback((ids: Set<string>) => dispatch({ type: 'SELECT_ITEMS', ids }), []);
+  const clearSelection = useCallback(() => dispatch({ type: 'CLEAR_SELECTION' }), []);
+  const hoverNode = useCallback((id: string) => dispatch({ type: 'HOVER_NODE', id }), []);
+  const unhoverNode = useCallback((id: string) => dispatch({ type: 'UNHOVER_NODE', id }), []);
+  const startSelectionRect = useCallback(() => dispatch({ type: 'SELECTION_RECT_START' }), []);
+  const startMove = useCallback(() => dispatch({ type: 'MOVE_START' }), []);
+  const startDragEdge = useCallback(() => dispatch({ type: 'DRAG_EDGE_START' }), []);
+  const startResize = useCallback(() => dispatch({ type: 'RESIZE_START' }), []);
+  const endInteraction = useCallback(() => dispatch({ type: 'INTERACTION_END' }), []);
+
+  const value = useMemo(
+    () => ({
+      state,
+      selectItems,
+      clearSelection,
+      hoverNode,
+      unhoverNode,
+      startSelectionRect,
+      startMove,
+      startDragEdge,
+      startResize,
+      endInteraction,
+    }),
+    [
+      state,
+      selectItems,
+      clearSelection,
+      hoverNode,
+      unhoverNode,
+      startSelectionRect,
+      startMove,
+      startDragEdge,
+      startResize,
+      endInteraction,
+    ],
   );
+
+  return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;
 }

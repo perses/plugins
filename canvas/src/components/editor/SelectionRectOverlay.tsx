@@ -18,6 +18,8 @@ import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { SelectionRect } from '../../hooks/useRectSelect';
 import { editorStyles } from '../../utils/editorStyles';
 
+const NO_POINTER_EVENTS = { pointerEvents: 'none' } as const;
+
 interface SelectionRectOverlayProps {
   rect: SelectionRect;
 }
@@ -31,7 +33,5 @@ export function SelectionRectOverlay({ rect }: SelectionRectOverlayProps): React
   const minY = Math.min(rect.y0, rect.y1);
   const width = Math.abs(rect.x1 - rect.x0);
   const height = Math.abs(rect.y1 - rect.y0);
-  return (
-    <rect x={minX} y={minY} width={width} height={height} {...theme.selectionRect} style={{ pointerEvents: 'none' }} />
-  );
+  return <rect x={minX} y={minY} width={width} height={height} {...theme.selectionRect} style={NO_POINTER_EVENTS} />;
 }
