@@ -125,7 +125,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
 
       const clonedSparkLine = { ...sparkline };
       if (colorMode === 'background_solid') {
-        clonedSparkLine.areaStyle = { color: WHITE_COLOR_CODE, opacity: 0.4 };
+        clonedSparkLine.areaStyle = { color: WHITE_COLOR_CODE, opacity: chartsTheme.sparkline.areaOpacity };
         clonedSparkLine.lineStyle = { color: WHITE_COLOR_CODE, opacity: 1 };
       }
 
