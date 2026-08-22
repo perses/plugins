@@ -11,10 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-jest.mock('echarts/core');
-jest.mock('@perses-dev/components', () => ({ InfoTooltip: 'InfoTooltip' }));
-jest.mock('@perses-dev/plugin-system', () => {
-  const csvExport = jest.requireActual('@perses-dev/plugin-system/dist/cjs/utils/csv-export');
+vi.mock('echarts/core');
+vi.mock('@perses-dev/components', () => ({ InfoTooltip: 'InfoTooltip' }));
+vi.mock('@perses-dev/plugin-system', async () => {
+  const csvExport = await vi.importActual<{
+    escapeCsvValue: (value: unknown) => string;
+    formatTimestampISO: (timestamp: number) => string;
+    sanitizeFilename: (filename: string) => string;
+  }>('@perses-dev/plugin-system/dist/cjs/utils/csv-export');
   return {
     escapeCsvValue: csvExport.escapeCsvValue,
     formatTimestampISO: csvExport.formatTimestampISO,

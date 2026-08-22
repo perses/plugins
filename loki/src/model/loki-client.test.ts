@@ -16,8 +16,16 @@ import { AbsoluteTimeRange } from '@perses-dev/spec';
 import { toUnixSeconds, getLokiTimeRange, labels, labelValues } from './loki-client';
 
 // Mock global fetch for labels/labelValues tests
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
+
+function getLastCalledUrl(): URL {
+  const call = mockFetch.mock.lastCall;
+  if (!call) {
+    throw new Error('Expected fetch to have been called');
+  }
+  return new URL(call[0]);
+}
 
 beforeEach(() => {
   mockFetch.mockReset();
@@ -82,7 +90,7 @@ describe('labels', () => {
   it('appends query parameter to URL when provided', async () => {
     await labels({ start: '1000', end: '2000', query: '{job="varlogs"}' }, options);
 
-    const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+    const calledUrl = getLastCalledUrl();
     expect(calledUrl.searchParams.get('start')).toBe('1000');
     expect(calledUrl.searchParams.get('end')).toBe('2000');
     expect(calledUrl.searchParams.get('query')).toBe('{job="varlogs"}');
@@ -91,7 +99,7 @@ describe('labels', () => {
   it('omits query parameter when undefined', async () => {
     await labels({ start: '1000', end: '2000' }, options);
 
-    const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+    const calledUrl = getLastCalledUrl();
     expect(calledUrl.searchParams.get('start')).toBe('1000');
     expect(calledUrl.searchParams.get('end')).toBe('2000');
     expect(calledUrl.searchParams.has('query')).toBe(false);
@@ -100,7 +108,7 @@ describe('labels', () => {
   it('works with no optional parameters', async () => {
     await labels({}, options);
 
-    const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+    const calledUrl = getLastCalledUrl();
     expect(calledUrl.searchParams.has('start')).toBe(false);
     expect(calledUrl.searchParams.has('end')).toBe(false);
     expect(calledUrl.searchParams.has('query')).toBe(false);
@@ -113,7 +121,7 @@ describe('labelValues', () => {
   it('appends query parameter to URL when provided', async () => {
     await labelValues({ labelName: 'job', start: '1000', end: '2000', query: '{namespace="prod"}' }, options);
 
-    const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+    const calledUrl = getLastCalledUrl();
     expect(calledUrl.pathname).toBe('/loki/api/v1/label/job/values');
     expect(calledUrl.searchParams.get('start')).toBe('1000');
     expect(calledUrl.searchParams.get('end')).toBe('2000');
@@ -123,7 +131,7 @@ describe('labelValues', () => {
   it('omits query parameter when undefined', async () => {
     await labelValues({ labelName: 'job', start: '1000', end: '2000' }, options);
 
-    const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+    const calledUrl = getLastCalledUrl();
     expect(calledUrl.searchParams.get('start')).toBe('1000');
     expect(calledUrl.searchParams.get('end')).toBe('2000');
     expect(calledUrl.searchParams.has('query')).toBe(false);
@@ -132,7 +140,7 @@ describe('labelValues', () => {
   it('works with no optional parameters', async () => {
     await labelValues({ labelName: 'job' }, options);
 
-    const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+    const calledUrl = getLastCalledUrl();
     expect(calledUrl.pathname).toBe('/loki/api/v1/label/job/values');
     expect(calledUrl.searchParams.has('start')).toBe(false);
     expect(calledUrl.searchParams.has('end')).toBe(false);

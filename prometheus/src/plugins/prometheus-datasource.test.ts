@@ -48,7 +48,7 @@ describe('PrometheusDatasource query parameters', () => {
     const client = PrometheusDatasource.createClient(spec, {});
 
     // Mock the global fetch to verify the URL includes query parameters
-    const mockFetch = jest.fn().mockResolvedValue({
+    const mockFetch = vi.fn().mockResolvedValue({
       status: 200,
       json: () => Promise.resolve({ data: [] }),
     });

@@ -13,10 +13,11 @@
 
 // TODO: This should be fixed globally in the test setup
 
-jest.mock('echarts/core');
+vi.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock } from 'vitest';
 
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
@@ -29,7 +30,7 @@ const datasource: ClickHouseDatasourceSpec = {
 const clickhouseStubClient = ClickHouseDatasource.createClient(datasource, {});
 
 // Mock query to only return ClickHouse "data"
-clickhouseStubClient.query = jest.fn(async () => {
+clickhouseStubClient.query = vi.fn(async () => {
   const stubResponse: ClickHouseQueryResponse = {
     status: 'success',
     data: [
@@ -40,11 +41,11 @@ clickhouseStubClient.query = jest.fn(async () => {
   return stubResponse as ClickHouseQueryResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return clickhouseStubClient;
 });
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<ClickHouseDatasourceSpec> => {
+const getDatasource: Mock = vi.fn((): DatasourceSpec<ClickHouseDatasourceSpec> => {
   return {
     default: false,
     plugin: {
@@ -59,11 +60,11 @@ const createStubContext = (): TimeSeriesQueryContext => {
     datasourceStore: {
       getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('2025-01-02T00:00:00.000Z'),
@@ -129,7 +130,7 @@ describe('ClickHouseTimeSeriesQuery', () => {
   });
 
   it('should infer daily query step from returned timestamps', async () => {
-    (clickhouseStubClient.query as jest.Mock).mockResolvedValueOnce({
+    (clickhouseStubClient.query as Mock).mockResolvedValueOnce({
       status: 'success',
       data: [
         { time: '2026-01-01 22:00:00', flights: 80 },
@@ -160,7 +161,7 @@ describe('ClickHouseTimeSeriesQuery', () => {
   });
 
   it('should keep timezone daily buckets daily across daylight saving time changes', async () => {
-    (clickhouseStubClient.query as jest.Mock).mockResolvedValueOnce({
+    (clickhouseStubClient.query as Mock).mockResolvedValueOnce({
       status: 'success',
       data: [
         { time: '2026-03-28 22:00:00', flights: 80 },

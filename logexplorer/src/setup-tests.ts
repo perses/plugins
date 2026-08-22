@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
-jest.mock('echarts/core');
+vi.mock('echarts/core');

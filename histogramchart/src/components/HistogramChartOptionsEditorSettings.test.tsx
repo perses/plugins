@@ -19,7 +19,7 @@ import { HistogramChartOptions } from '../histogram-chart-model';
 import { HistogramChartOptionsEditorSettings } from './HistogramChartOptionsEditorSettings';
 
 describe('HistogramChartOptionsEditorSettings', () => {
-  const renderHistogramChartOptionsEditorSettings = (value: HistogramChartOptions, onChange = jest.fn()): void => {
+  const renderHistogramChartOptionsEditorSettings = (value: HistogramChartOptions, onChange = vi.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <HistogramChartOptionsEditorSettings value={value} onChange={onChange} />
@@ -28,7 +28,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
   };
 
   it('can modify unit', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderHistogramChartOptionsEditorSettings(
       {
         format: {
@@ -54,7 +54,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
 
   it('can modify min', async () => {
     let minValue: number | undefined = undefined;
-    const onChange = jest.fn((e) => {
+    const onChange = vi.fn((e) => {
       minValue = e.min;
     });
     renderHistogramChartOptionsEditorSettings(
@@ -76,7 +76,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
 
   it('can modify max', async () => {
     let maxValue: number | undefined = undefined;
-    const onChange = jest.fn((e) => {
+    const onChange = vi.fn((e) => {
       maxValue = e.max;
     });
     renderHistogramChartOptionsEditorSettings(
@@ -97,7 +97,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
   });
 
   it('can modify log base', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderHistogramChartOptionsEditorSettings(
       {
         format: {
@@ -120,7 +120,7 @@ describe('HistogramChartOptionsEditorSettings', () => {
   });
 
   it('can clear log base to none', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderHistogramChartOptionsEditorSettings(
       {
         format: {

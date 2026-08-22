@@ -16,7 +16,7 @@ import { UserFriendlyError } from '@perses-dev/client';
 import { MOCK_TRACE_RESPONSE } from '../test';
 import { query, search, searchTagValues } from './tempo-client';
 
-const fetchMock = (global.fetch = jest.fn());
+const fetchMock = (global.fetch = vi.fn());
 
 function mockErrorResponse(status: number, statusText: string, overrides?: Record<string, unknown>): unknown {
   const resp = {

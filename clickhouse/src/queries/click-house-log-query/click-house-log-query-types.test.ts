@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { Mock } from 'vitest';
 
 import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources/click-house-datasource';
 import { ClickHouseQueryResponse } from '../../model/click-house-client';
@@ -24,7 +25,7 @@ const datasource: ClickHouseDatasourceSpec = {
 const clickhouseStubClient = ClickHouseDatasource.createClient(datasource, {});
 
 // Mock query
-clickhouseStubClient.query = jest.fn(async () => {
+clickhouseStubClient.query = vi.fn(async () => {
   const stubResponse: ClickHouseQueryResponse = {
     status: 'success',
     data: [],
@@ -32,20 +33,20 @@ clickhouseStubClient.query = jest.fn(async () => {
   return stubResponse as ClickHouseQueryResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return clickhouseStubClient;
 });
 
 const createStubContext = (): LogQueryContext => {
   const stubLogContext: LogQueryContext = {
     datasourceStore: {
-      getDatasource: jest.fn(),
+      getDatasource: vi.fn(),
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('2025-01-02T00:00:00.000Z'),

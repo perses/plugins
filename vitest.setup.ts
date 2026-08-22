@@ -11,14 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
-
-import shared from '../jest.shared';
-
-const jestConfig: Config.InitialOptions = {
-  ...shared,
-
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
-};
-
-export default jestConfig;
+// jsdom does not implement the geometry API CodeMirror uses when measuring text.
+Range.prototype.getClientRects = (): DOMRectList => [] as unknown as DOMRectList;

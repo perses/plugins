@@ -38,12 +38,14 @@ import {
 import { TablePanel } from './TablePanel';
 
 /* mock all variables */
-const MOCK_VARIABLE_STATE_MAP: VariableStateMap = {
-  myproject: { loading: false, value: 'my_project' },
-  __range: { loading: false, value: '1h' },
-};
-jest.mock('@perses-dev/plugin-system', () => ({
-  ...jest.requireActual('@perses-dev/plugin-system'),
+const MOCK_VARIABLE_STATE_MAP = vi.hoisted(
+  (): VariableStateMap => ({
+    myproject: { loading: false, value: 'my_project' },
+    __range: { loading: false, value: '1h' },
+  }),
+);
+vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@perses-dev/plugin-system')>()),
   // Return a stable reference (like the real hook, which memoizes) so consumers
   // that depend on it in a useMemo/useEffect dependency array don't recompute/rerun on every render.
   useAllVariableValues: (): VariableStateMap => MOCK_VARIABLE_STATE_MAP,
@@ -248,11 +250,11 @@ describe('TablePanel', () => {
     );
 
     // embedded panel is loaded async
-    await waitFor(async () => {
+    await waitFor(() => {
       // the outer table has two rows
       // each row has one table in the 'value' column
       // in total, 3 tables should be visible
-      expect(await screen.findAllByRole('table')).toHaveLength(3);
+      expect(screen.getAllByRole('table')).toHaveLength(3);
     });
   });
 

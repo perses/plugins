@@ -19,7 +19,7 @@ import { BarChartOptions } from './bar-chart-model';
 import { BarChartOptionsEditorSettings } from './BarChartOptionsEditorSettings';
 
 describe('BarChartOptionsEditorSettings', () => {
-  const renderBarChartOptionsEditorSettings = (value?: BarChartOptions, onChange = jest.fn()): void => {
+  const renderBarChartOptionsEditorSettings = (value?: BarChartOptions, onChange = vi.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <BarChartOptionsEditorSettings
@@ -40,7 +40,7 @@ describe('BarChartOptionsEditorSettings', () => {
   };
 
   it('can modify unit', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderBarChartOptionsEditorSettings(undefined, onChange);
     const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     userEvent.click(unitSelector);
@@ -58,7 +58,7 @@ describe('BarChartOptionsEditorSettings', () => {
   });
 
   it('can modify calculation', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderBarChartOptionsEditorSettings(undefined, onChange);
     const calcSelector = screen.getByRole('combobox', { name: 'Calculation' });
     userEvent.click(calcSelector);
@@ -74,7 +74,7 @@ describe('BarChartOptionsEditorSettings', () => {
   });
 
   it('can modify sort order', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderBarChartOptionsEditorSettings(undefined, onChange);
     const sortSelector = screen.getByRole('combobox', { name: 'Sort' });
     userEvent.click(sortSelector);
@@ -90,7 +90,7 @@ describe('BarChartOptionsEditorSettings', () => {
   });
 
   it('can modify mode', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderBarChartOptionsEditorSettings(undefined, onChange);
     const modeSelector = screen.getByRole('combobox', { name: 'Mode' });
     userEvent.click(modeSelector);
@@ -136,7 +136,7 @@ describe('BarChartOptionsEditorSettings', () => {
   });
 
   it('should reset settings to defaults', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderBarChartOptionsEditorSettings(
       {
         format: {
@@ -164,7 +164,7 @@ describe('BarChartOptionsEditorSettings', () => {
   });
 
   it('can add a color override', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderBarChartOptionsEditorSettings(undefined, onChange);
     const addButton = screen.getByRole('button', { name: 'Add Color Override' });
     userEvent.click(addButton);
@@ -176,7 +176,7 @@ describe('BarChartOptionsEditorSettings', () => {
   });
 
   it('can remove a color override', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderBarChartOptionsEditorSettings(
       {
         format: {

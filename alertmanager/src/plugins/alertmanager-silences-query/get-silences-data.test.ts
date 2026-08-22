@@ -48,7 +48,7 @@ const mockSilences = [
 
 const makeClient = (): AlertManagerClient => {
   const client = AlertManagerDatasource.createClient(datasource, {});
-  client.getSilences = jest.fn(async () => mockSilences);
+  client.getSilences = vi.fn(async () => mockSilences);
   return client;
 };
 
@@ -56,15 +56,15 @@ function createContext(client: AlertManagerClient): SilencesQueryContext {
   return {
     variableState: {},
     datasourceStore: {
-      getDatasource: jest.fn(),
-      getDatasourceClient: jest.fn(() =>
+      getDatasource: vi.fn(),
+      getDatasourceClient: vi.fn(() =>
         Promise.resolve(client),
       ) as SilencesQueryContext['datasourceStore']['getDatasourceClient'],
-      listDatasourceSelectItems: jest.fn(async () => []),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(async () => []),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
   };
 }
@@ -118,7 +118,7 @@ describe('getSilencesData', () => {
 
   it('returns empty silences array when API returns empty', async () => {
     const client = makeClient();
-    client.getSilences = jest.fn(async () => []);
+    client.getSilences = vi.fn(async () => []);
     const spec: AlertManagerSilencesQuerySpec = {};
     const context = createContext(client);
 

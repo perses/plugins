@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { Mock } from 'vitest';
+
 import { ppl, OpenSearchPPLError } from './opensearch-client';
 
 describe('opensearch-client', () => {
@@ -18,17 +20,17 @@ describe('opensearch-client', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
-  function mockFetch(response: { ok: boolean; status: number; body: unknown }): jest.Mock {
-    const mock = jest.fn(async () => ({
+  function mockFetch(response: { ok: boolean; status: number; body: unknown }): Mock {
+    const mock = vi.fn(async () => ({
       ok: response.ok,
       status: response.status,
       text: async (): Promise<string> =>
         typeof response.body === 'string' ? response.body : JSON.stringify(response.body),
       json: async (): Promise<unknown> => response.body,
-    })) as unknown as jest.Mock;
+    })) as unknown as Mock;
     global.fetch = mock as unknown as typeof fetch;
     return mock;
   }

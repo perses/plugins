@@ -11,15 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
+import { resolve } from 'node:path';
 
-import shared from '../jest.shared';
+import { definePackageVitestConfig } from '../vitest.shared';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
-
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
-  transformIgnorePatterns: ['node_modules/(?!(lodash-es|yaml|ansi_up))'],
-};
-
-export default jestConfig;
+export default definePackageVitestConfig({
+  packageDir: resolve(__dirname),
+  passWithNoTests: true,
+  setupFiles: ['src/setup-tests.ts'],
+});

@@ -20,9 +20,9 @@ type FetchResponse = {
   json: () => Promise<unknown>;
 };
 
-const fetchMock = jest.fn();
-jest.mock('@perses-dev/client', () => ({
-  ...jest.requireActual('@perses-dev/client'),
+const fetchMock = vi.hoisted(() => vi.fn());
+vi.mock('@perses-dev/client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@perses-dev/client')>()),
   fetch: (...args: unknown[]): Promise<FetchResponse> => fetchMock(...args),
 }));
 

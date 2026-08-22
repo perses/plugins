@@ -46,7 +46,7 @@ const mockAlerts: GettableAlert[] = [
 
 const makeClient = (): AlertManagerClient => {
   const client = AlertManagerDatasource.createClient(datasource, {});
-  client.getAlerts = jest.fn(async () => mockAlerts);
+  client.getAlerts = vi.fn(async () => mockAlerts);
   return client;
 };
 
@@ -54,15 +54,15 @@ function createContext(client: AlertManagerClient): AlertsQueryContext {
   return {
     variableState: {},
     datasourceStore: {
-      getDatasource: jest.fn(),
-      getDatasourceClient: jest.fn(() =>
+      getDatasource: vi.fn(),
+      getDatasourceClient: vi.fn(() =>
         Promise.resolve(client),
       ) as AlertsQueryContext['datasourceStore']['getDatasourceClient'],
-      listDatasourceSelectItems: jest.fn(async () => []),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(async () => []),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
   };
 }
@@ -127,7 +127,7 @@ describe('getAlertsData', () => {
 
   it('returns empty alerts array when API returns empty', async () => {
     const client = makeClient();
-    client.getAlerts = jest.fn(async () => []);
+    client.getAlerts = vi.fn(async () => []);
     const spec: AlertManagerAlertsQuerySpec = {};
     const context = createContext(client);
 
