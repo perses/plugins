@@ -13,21 +13,22 @@
 
 import { useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { MockedFunction } from 'vitest';
 
 import { JaegerTraceQueryEditor } from './JaegerTraceQueryEditor';
 
-jest.mock('@perses-dev/components', () => ({
-  useId: jest.fn(() => 'jaeger-datasource-label'),
+vi.mock('@perses-dev/components', () => ({
+  useId: vi.fn(() => 'jaeger-datasource-label'),
 }));
 
-jest.mock('@perses-dev/plugin-system', () => ({
-  DatasourceSelect: jest.fn(() => null),
-  useDatasourceClient: jest.fn(),
-  useDatasourceSelectValueToSelector: jest.fn((value) => value),
+vi.mock('@perses-dev/plugin-system', () => ({
+  DatasourceSelect: vi.fn(() => null),
+  useDatasourceClient: vi.fn(),
+  useDatasourceSelectValueToSelector: vi.fn((value) => value),
 }));
 
-const mockedUseDatasourceClient = useDatasourceClient as jest.MockedFunction<typeof useDatasourceClient>;
-const mockedUseDatasourceSelectValueToSelector = useDatasourceSelectValueToSelector as jest.MockedFunction<
+const mockedUseDatasourceClient = useDatasourceClient as MockedFunction<typeof useDatasourceClient>;
+const mockedUseDatasourceSelectValueToSelector = useDatasourceSelectValueToSelector as MockedFunction<
   typeof useDatasourceSelectValueToSelector
 >;
 
@@ -44,12 +45,12 @@ describe('JaegerTraceQueryEditor', () => {
   it('commits typed values on blur instead of each keystroke', async () => {
     mockedUseDatasourceClient.mockReturnValue({
       data: {
-        searchServices: jest.fn(async () => ({ data: [] })),
-        searchOperations: jest.fn(async () => ({ data: [] })),
+        searchServices: vi.fn(async () => ({ data: [] })),
+        searchOperations: vi.fn(async () => ({ data: [] })),
       },
     } as never);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(<JaegerTraceQueryEditor value={{ service: 'frontend' }} onChange={onChange} />);
 
     const traceIdInput = screen.getByLabelText('Trace ID');
@@ -70,12 +71,12 @@ describe('JaegerTraceQueryEditor', () => {
   it('normalizes empty and whitespace-only optional fields from the incoming spec', async () => {
     mockedUseDatasourceClient.mockReturnValue({
       data: {
-        searchServices: jest.fn(async () => ({ data: [] })),
-        searchOperations: jest.fn(async () => ({ data: [] })),
+        searchServices: vi.fn(async () => ({ data: [] })),
+        searchOperations: vi.fn(async () => ({ data: [] })),
       },
     } as never);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <JaegerTraceQueryEditor
         value={{
@@ -97,8 +98,8 @@ describe('JaegerTraceQueryEditor', () => {
   });
 
   it('loads service and operation options from the datasource client', async () => {
-    const searchServices = jest.fn(async () => ({ data: ['checkout', 'frontend'] }));
-    const searchOperations = jest.fn(async () => ({
+    const searchServices = vi.fn(async () => ({ data: ['checkout', 'frontend'] }));
+    const searchOperations = vi.fn(async () => ({
       data: [
         { name: 'GET /api/cart', spanKind: 'server' },
         { name: 'GET /api/cart', spanKind: 'client' },
@@ -113,7 +114,7 @@ describe('JaegerTraceQueryEditor', () => {
       },
     } as never);
 
-    render(<JaegerTraceQueryEditor value={{ service: 'frontend' }} onChange={jest.fn()} />);
+    render(<JaegerTraceQueryEditor value={{ service: 'frontend' }} onChange={vi.fn()} />);
 
     await waitFor(() => expect(searchServices).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(searchOperations).toHaveBeenCalledWith('frontend'));

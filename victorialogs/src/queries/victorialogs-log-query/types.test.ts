@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { Mock } from 'vitest';
 
 import { VictoriaLogsDatasource } from '../../datasources/victorialogs-datasource';
 import { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
@@ -25,7 +26,7 @@ const datasource: VictoriaLogsDatasourceSpec = {
 const victorialogsStubClient = VictoriaLogsDatasource.createClient(datasource, {});
 
 // Mock range query
-victorialogsStubClient.streamQueryRange = jest.fn(async () => {
+victorialogsStubClient.streamQueryRange = vi.fn(async () => {
   return [
     {
       service: 'api',
@@ -36,20 +37,20 @@ victorialogsStubClient.streamQueryRange = jest.fn(async () => {
   ] as VictoriaLogsStreamQueryRangeResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return victorialogsStubClient;
 });
 
 const createStubContext = (): LogQueryContext => {
   const stubLogContext: LogQueryContext = {
     datasourceStore: {
-      getDatasource: jest.fn(),
+      getDatasource: vi.fn(),
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('01-01-2025'),

@@ -13,28 +13,28 @@
 
 import { useOptimalFontSize } from './calculate-font-size';
 
-jest.mock('@perses-dev/components', () => {
-  const actual = jest.requireActual('@perses-dev/components');
+vi.mock('@perses-dev/components', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@perses-dev/components')>();
   return {
     ...actual,
-    useChartsTheme: jest.fn().mockReturnValue(actual.testChartsTheme),
+    useChartsTheme: vi.fn().mockReturnValue(actual.testChartsTheme),
   };
 });
 
 describe('useOptimalFontSize', () => {
   const mockCanvasContext = {
     font: '',
-    measureText: jest.fn().mockReturnValue({ width: 100 }),
+    measureText: vi.fn().mockReturnValue({ width: 100 }),
   };
 
   beforeEach(() => {
-    document.createElement = jest.fn().mockReturnValue({
-      getContext: jest.fn().mockReturnValue(mockCanvasContext),
+    document.createElement = vi.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue(mockCanvasContext),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calculates the optimal font size where width is the constraint', () => {

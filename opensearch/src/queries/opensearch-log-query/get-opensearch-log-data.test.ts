@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { Mock } from 'vitest';
 
 import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
 import { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
@@ -25,7 +26,7 @@ const datasource: OpenSearchDatasourceSpec = {
 
 const stubClient = OpenSearchDatasource.createClient(datasource, {});
 
-stubClient.ppl = jest.fn(async () => {
+stubClient.ppl = vi.fn(async () => {
   const response: OpenSearchPPLResponse = {
     schema: [
       { name: '@timestamp', type: 'timestamp' },
@@ -42,18 +43,18 @@ stubClient.ppl = jest.fn(async () => {
   return response;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => stubClient);
+const getDatasourceClient: Mock = vi.fn(() => stubClient);
 
 function createStubContext(): LogQueryContext {
   return {
     datasourceStore: {
-      getDatasource: jest.fn(),
+      getDatasource: vi.fn(),
       getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       start: new Date('2025-01-01T00:00:00.000Z'),
@@ -66,7 +67,7 @@ function createStubContext(): LogQueryContext {
 
 describe('OpenSearchLogQuery', () => {
   afterEach(() => {
-    (stubClient.ppl as jest.Mock).mockClear();
+    (stubClient.ppl as Mock).mockClear();
   });
 
   it('creates initial options with empty query', () => {
@@ -109,7 +110,7 @@ describe('OpenSearchLogQuery', () => {
   });
 
   it('passes timestampField + messageField through to the bounder and mapper', async () => {
-    const pplMock = stubClient.ppl as jest.Mock;
+    const pplMock = stubClient.ppl as Mock;
     pplMock.mockImplementationOnce(async () => ({
       schema: [
         { name: 'time', type: 'timestamp' },
@@ -133,7 +134,7 @@ describe('OpenSearchLogQuery', () => {
   });
 
   it('substitutes a $traceId variable into the PPL before sending', async () => {
-    const pplMock = stubClient.ppl as jest.Mock;
+    const pplMock = stubClient.ppl as Mock;
     pplMock.mockImplementationOnce(async () => ({ schema: [], datarows: [] }));
 
     await OpenSearchLogQuery.getLogData(

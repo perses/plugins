@@ -13,10 +13,11 @@
 
 // TODO: This should be fixed globally in the test setup
 
-jest.mock('echarts/core');
+vi.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock } from 'vitest';
 
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
@@ -30,7 +31,7 @@ const datasource: LokiDatasourceSpec = {
 const lokiStubClient = LokiDatasource.createClient(datasource, {});
 
 // Mock range query
-lokiStubClient.queryRange = jest.fn(async () => {
+lokiStubClient.queryRange = vi.fn(async () => {
   const stubResponse: LokiQueryRangeMatrixResponse = {
     status: 'success',
     data: {
@@ -50,7 +51,7 @@ lokiStubClient.queryRange = jest.fn(async () => {
 });
 
 // Mock instant query
-lokiStubClient.query = jest.fn(async () => {
+lokiStubClient.query = vi.fn(async () => {
   const stubResponse: LokiQueryResponse = {
     status: 'success',
     data: {
@@ -66,11 +67,11 @@ lokiStubClient.query = jest.fn(async () => {
   return stubResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return lokiStubClient;
 });
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<LokiDatasourceSpec> => {
+const getDatasource: Mock = vi.fn((): DatasourceSpec<LokiDatasourceSpec> => {
   return {
     default: false,
     plugin: {
@@ -85,11 +86,11 @@ const createStubContext = (overrides?: Partial<TimeSeriesQueryContext>): TimeSer
     datasourceStore: {
       getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('2025-01-01T00:00:00Z'),
@@ -120,7 +121,7 @@ describe('LokiTimeSeriesQuery', () => {
 
   describe('instant mode', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should call client.query() with end time as unix seconds and return vector series', async () => {
@@ -132,14 +133,18 @@ describe('LokiTimeSeriesQuery', () => {
 
       expect(lokiStubClient.query).toHaveBeenCalledTimes(1);
       expect(lokiStubClient.queryRange).not.toHaveBeenCalled();
-      const callArgs = (lokiStubClient.query as jest.Mock).mock.calls[0][0];
+      const call = (lokiStubClient.query as Mock).mock.lastCall;
+      if (!call) {
+        throw new Error('Expected query to have been called');
+      }
+      const [callArgs] = call;
       expect(callArgs.time).toBe(Math.floor(context.timeRange.end.getTime() / 1000).toString());
       expect(result.series).toHaveLength(1);
       expect(result.series[0]?.values[0]?.[1]).toBe(99);
     });
 
     it('should return empty series with warning notice for streams resultType', async () => {
-      (lokiStubClient.query as jest.Mock).mockResolvedValueOnce({
+      (lokiStubClient.query as Mock).mockResolvedValueOnce({
         status: 'success',
         data: {
           resultType: 'streams',
@@ -157,7 +162,7 @@ describe('LokiTimeSeriesQuery', () => {
   });
 
   it('should use queryRange when mode is not set', async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const context = createStubContext();
     await LokiTimeSeriesQuery.getTimeSeriesData({ query: 'count_over_time({service="api"} [1h])' }, context);
 

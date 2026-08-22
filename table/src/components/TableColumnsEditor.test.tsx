@@ -17,12 +17,12 @@ import { TableOptions } from '../models';
 import { TableColumnsEditor } from './TableColumnsEditor';
 
 describe('TableColumnsEditor', () => {
-  function renderTableColumnsEditor(value: TableOptions, onChange = jest.fn()): void {
+  function renderTableColumnsEditor(value: TableOptions, onChange = vi.fn()): void {
     render(<TableColumnsEditor value={value} onChange={onChange} />);
   }
 
   it('can add a new column settings', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderTableColumnsEditor({ columnSettings: [] }, onChange);
     const addColumnButton = screen.getByRole('button', { name: /Add Column Settings/i });
     fireEvent.click(addColumnButton);
@@ -30,7 +30,7 @@ describe('TableColumnsEditor', () => {
   });
 
   it('can enable column custom width', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderTableColumnsEditor({ columnSettings: [{ name: 'column_0' }] }, onChange);
 
     // Expand the column settings editor for column_0
@@ -42,7 +42,7 @@ describe('TableColumnsEditor', () => {
   });
 
   it('can rename a column', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderTableColumnsEditor({ columnSettings: [{ name: 'column_0' }] }, onChange);
 
     // Expand the column settings editor for column_0

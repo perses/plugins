@@ -11,4 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '@testing-library/jest-dom/vitest';
+import { resolve } from 'node:path';
+
+import { definePackageVitestConfig } from '../vitest.shared';
+
+export default definePackageVitestConfig({
+  packageDir: resolve(__dirname),
+  passWithNoTests: true,
+});

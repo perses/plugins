@@ -13,10 +13,11 @@
 
 // TODO: This should be fixed globally in the test setup
 
-jest.mock('echarts/core');
+vi.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock } from 'vitest';
 
 import { RangeQueryResponse, InstantQueryResponse } from '../../model';
 import { PrometheusDatasource } from '../prometheus-datasource';
@@ -31,7 +32,7 @@ const datasource: PrometheusDatasourceSpec = {
 const promStubClient = PrometheusDatasource.createClient(datasource, {});
 
 // Mock range query
-promStubClient.rangeQuery = jest.fn(async () => {
+promStubClient.rangeQuery = vi.fn(async () => {
   const stubRepsonse: RangeQueryResponse = {
     status: 'success',
     data: {
@@ -50,7 +51,7 @@ promStubClient.rangeQuery = jest.fn(async () => {
 });
 
 // Mock instant query
-promStubClient.instantQuery = jest.fn(async () => {
+promStubClient.instantQuery = vi.fn(async () => {
   const stubResponse: InstantQueryResponse = {
     status: 'success',
     data: {
@@ -68,11 +69,11 @@ promStubClient.instantQuery = jest.fn(async () => {
   return stubResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return promStubClient;
 });
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<PrometheusDatasourceSpec> => {
+const getDatasource: Mock = vi.fn((): DatasourceSpec<PrometheusDatasourceSpec> => {
   return {
     default: false,
     plugin: {
@@ -87,11 +88,11 @@ const createStubContext = (): TimeSeriesQueryContext => {
     datasourceStore: {
       getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('01-01-2023'),
@@ -137,8 +138,8 @@ describe('PrometheusTimeSeriesQuery', () => {
 
   it('should use instantQuery when spec.instant is true', async () => {
     const ctx = createStubContext();
-    (promStubClient.instantQuery as jest.Mock).mockClear();
-    (promStubClient.rangeQuery as jest.Mock).mockClear();
+    (promStubClient.instantQuery as Mock).mockClear();
+    (promStubClient.rangeQuery as Mock).mockClear();
 
     await PrometheusTimeSeriesQuery.getTimeSeriesData(
       {
@@ -155,8 +156,8 @@ describe('PrometheusTimeSeriesQuery', () => {
   it('should use rangeQuery when spec.instant is false even if context mode is instant', async () => {
     const ctx = createStubContext();
     ctx.mode = 'instant';
-    (promStubClient.instantQuery as jest.Mock).mockClear();
-    (promStubClient.rangeQuery as jest.Mock).mockClear();
+    (promStubClient.instantQuery as Mock).mockClear();
+    (promStubClient.rangeQuery as Mock).mockClear();
 
     await PrometheusTimeSeriesQuery.getTimeSeriesData(
       {
@@ -173,8 +174,8 @@ describe('PrometheusTimeSeriesQuery', () => {
   it('should use instantQuery when spec.instant is unset and context mode is instant', async () => {
     const ctx = createStubContext();
     ctx.mode = 'instant';
-    (promStubClient.instantQuery as jest.Mock).mockClear();
-    (promStubClient.rangeQuery as jest.Mock).mockClear();
+    (promStubClient.instantQuery as Mock).mockClear();
+    (promStubClient.rangeQuery as Mock).mockClear();
 
     await PrometheusTimeSeriesQuery.getTimeSeriesData(
       {

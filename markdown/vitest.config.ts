@@ -11,22 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
+import { resolve } from 'node:path';
 
-import shared from '../jest.shared';
+import { definePackageVitestConfig } from '../vitest.shared';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
-
-  moduleNameMapper: {
-    ...(shared.moduleNameMapper ?? {}),
-    '^react$': '<rootDir>/../node_modules/react',
-    '^react-dom$': '<rootDir>/../node_modules/react-dom',
-    '^react/jsx-runtime$': '<rootDir>/../node_modules/react/jsx-runtime',
-    '^react-dom/(.*)$': '<rootDir>/../node_modules/react-dom/$1',
-  },
-
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/setup-tests.ts'],
-};
-
-export default jestConfig;
+export default definePackageVitestConfig({
+  packageDir: resolve(__dirname),
+  passWithNoTests: true,
+  setupFiles: ['src/setup-tests.ts'],
+});

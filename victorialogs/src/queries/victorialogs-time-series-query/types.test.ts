@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-jest.mock('echarts/core');
+vi.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock } from 'vitest';
 
 import { VictoriaLogsDatasource } from '../../datasources/victorialogs-datasource';
 import { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
@@ -28,7 +29,7 @@ const datasource: VictoriaLogsDatasourceSpec = {
 const victorialogsStubClient = VictoriaLogsDatasource.createClient(datasource, {});
 
 // Mock range query
-victorialogsStubClient.statsQueryRange = jest.fn(async () => {
+victorialogsStubClient.statsQueryRange = vi.fn(async () => {
   return {
     status: 'success',
     data: {
@@ -46,11 +47,11 @@ victorialogsStubClient.statsQueryRange = jest.fn(async () => {
   } as VictoriaLogsStatsQueryRangeResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return victorialogsStubClient;
 });
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<VictoriaLogsDatasourceSpec> => {
+const getDatasource: Mock = vi.fn((): DatasourceSpec<VictoriaLogsDatasourceSpec> => {
   return {
     default: false,
     plugin: {
@@ -65,11 +66,11 @@ const createStubContext = (): TimeSeriesQueryContext => {
     datasourceStore: {
       getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('01-01-2025'),

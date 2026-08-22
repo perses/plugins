@@ -16,13 +16,13 @@ import { SplunkLogQuery } from './SplunkLogQuery';
 
 const createStubContext = (): LogQueryContext => ({
   datasourceStore: {
-    getDatasource: jest.fn(),
-    getDatasourceClient: jest.fn(),
-    listDatasourceSelectItems: jest.fn(),
-    getLocalDatasources: jest.fn(),
-    setLocalDatasources: jest.fn(),
-    getSavedDatasources: jest.fn(),
-    setSavedDatasources: jest.fn(),
+    getDatasource: vi.fn(),
+    getDatasourceClient: vi.fn(),
+    listDatasourceSelectItems: vi.fn(),
+    getLocalDatasources: vi.fn(),
+    setLocalDatasources: vi.fn(),
+    getSavedDatasources: vi.fn(),
+    setSavedDatasources: vi.fn(),
   },
   timeRange: {
     end: new Date('01-01-2025'),

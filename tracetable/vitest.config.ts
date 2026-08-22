@@ -11,4 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module.exports = {};
+import { resolve } from 'node:path';
+
+import { definePackageVitestConfig } from '../vitest.shared';
+
+export default definePackageVitestConfig({
+  packageDir: resolve(__dirname),
+  setupFiles: ['src/setup-tests.ts'],
+});
