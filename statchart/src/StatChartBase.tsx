@@ -53,6 +53,8 @@ export interface StatChartProps {
   showSeriesName?: boolean;
   valueFontSize?: FontSizeOption;
   colorMode?: ColorMode;
+  alignmentText?: string;
+  alignmentSeriesName?: string;
 }
 
 export const StatChartBase: FC<StatChartProps> = (props) => {
@@ -66,6 +68,8 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     format,
     valueFontSize,
     colorMode,
+    alignmentText,
+    alignmentSeriesName,
   } = props;
 
   const {
@@ -78,37 +82,40 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   const formattedValue = formatStatChartValue(data.calculatedValue, format);
   const containerPadding = chartsTheme.container.padding.default;
 
-  // calculate series name font size and height
+  const availableWidth = width - containerPadding * 2;
+
+  // in multi-series: legend gets a fixed portion of height (like Grafana)
   let seriesNameFontSize = useOptimalFontSize({
     text: data?.seriesData?.name ?? '',
     fontWeight: SERIES_NAME_FONT_WEIGHT,
     width,
-    height: height * 0.125, // assume series name will take 12.5% of available height
+    height: height * 0.2,
     lineHeight: LINE_HEIGHT,
     maxSize: SERIES_NAME_MAX_FONT_SIZE,
   });
 
+  if (alignmentSeriesName !== undefined) {
+    // multi-series: use 15% of cell height for legend, clamped between 14px and 30px
+    seriesNameFontSize = Math.max(14, Math.min((height * 0.15) / LINE_HEIGHT, SERIES_NAME_MAX_FONT_SIZE));
+  }
+
   const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
 
-  // calculate value font size and height
-  const availableWidth = width - containerPadding * 2;
   const availableHeight = height - seriesNameHeight;
   const optimalValueFontSize = useOptimalFontSize({
-    text: formattedValue,
-    // override the font size if user selects it in the settings
+    text: alignmentText || formattedValue,
     fontSizeOverride: valueFontSize,
     fontWeight: VALUE_FONT_WEIGHT,
-    // without sparkline, use only 50% of the available width so it looks better for multiseries
     width: sparkline ? availableWidth : availableWidth * 0.5,
-    // with sparkline, use only 25% of available height to leave room for chart
-    // without sparkline, value should take up 90% of available space
     height: sparkline ? availableHeight * 0.25 : availableHeight * 0.9,
     lineHeight: LINE_HEIGHT,
   });
   const valueFontHeight = optimalValueFontSize * LINE_HEIGHT;
 
-  // make sure the series name font size is slightly smaller than value font size
-  seriesNameFontSize = Math.min(optimalValueFontSize * 0.7, seriesNameFontSize);
+  // single-series: keep legend smaller than value
+  if (alignmentSeriesName === undefined) {
+    seriesNameFontSize = Math.min(optimalValueFontSize * 0.7, seriesNameFontSize);
+  }
 
   const option: EChartsCoreOption = useMemo(() => {
     if (!data.seriesData) return chartsTheme.noDataOption;
@@ -232,7 +239,10 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     <Box
       sx={{
         height: '100%',
-        width: '100%',
+        width: width,
+        minWidth: width,
+        flexShrink: 0,
+        overflow: 'hidden',
         backgroundColor: colorMode === 'background_solid' ? color : 'transparent',
         display: 'flex',
         flexDirection: 'column',
@@ -267,8 +277,6 @@ const SeriesName = styled(Typography, {
   color: color,
   padding: `${padding}px`,
   fontSize: `${fontSize}px`,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 }));
 
