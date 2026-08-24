@@ -115,5 +115,3 @@ jobs:
         run: go run ./scripts/cue-publish/cue-publish.go -tag=${{ github.event.release.tag_name }} -token=${{ secrets.CUE_REG_TOKEN }}
       - name: Publish npm package
         run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
