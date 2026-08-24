@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 
-import { LokiQueryRangeStreamsResponse } from '../../model/loki-client-types';
+import type { LokiQueryRangeStreamsResponse } from '../../model/loki-client-types';
 
 export interface LokiLogQuerySpec {
   query: string;

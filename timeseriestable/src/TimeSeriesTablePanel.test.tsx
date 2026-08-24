@@ -19,19 +19,21 @@ import {
   testChartsTheme,
 } from '@perses-dev/components';
 import { VariableProvider } from '@perses-dev/dashboards';
-import { TimeRangeProviderBasic, WebhookAction } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { WebhookAction } from '@perses-dev/plugin-system';
+import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { TimeSeriesTableOptions } from './model';
+import type { TimeSeriesTableOptions } from './model';
 import {
   MOCK_TIME_SERIES_DATA_MULTIVALUE,
   MOCK_TIME_SERIES_DATA_SINGLEVALUE,
   MOCK_TIME_SERIES_QUERY_DEFINITION,
 } from './test/mock-query-results';
-import { TimeSeriesTablePanel, TimeSeriesTableProps } from './TimeSeriesTablePanel';
+import type { TimeSeriesTableProps } from './TimeSeriesTablePanel';
+import { TimeSeriesTablePanel } from './TimeSeriesTablePanel';
 
 const TEST_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> = {
   contentDimensions: { width: 500, height: 500 },

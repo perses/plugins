@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialBarChartOptions, BarChartOptions } from './bar-chart-model';
+import type { BarChartOptions } from './bar-chart-model';
+import { createInitialBarChartOptions } from './bar-chart-model';
 import { BarChartExportAction } from './BarChartExportAction';
 import { BarChartOptionsEditorSettings } from './BarChartOptionsEditorSettings';
-import { BarChartPanel, BarChartPanelProps } from './BarChartPanel';
+import type { BarChartPanelProps } from './BarChartPanel';
+import { BarChartPanel } from './BarChartPanel';
 
 /**
  * The core BarChart panel plugin for Perses.

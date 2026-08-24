@@ -13,8 +13,8 @@
 
 import { Typography } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
-import { Labels } from '@perses-dev/spec';
-import { ReactElement, MouseEvent } from 'react';
+import type { Labels } from '@perses-dev/spec';
+import type { ReactElement, MouseEvent } from 'react';
 
 interface SeriesNameProps {
   name: string;

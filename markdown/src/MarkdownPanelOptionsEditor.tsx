@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { Link, Stack, TextField } from '@mui/material';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ChangeEvent, ReactElement } from 'react';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { ChangeEvent, ReactElement } from 'react';
 
-import { MarkdownPanelOptions } from './markdown-panel-model';
+import type { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelOptionsEditorProps = OptionsEditorProps<MarkdownPanelOptions>;
 

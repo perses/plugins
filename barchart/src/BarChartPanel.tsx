@@ -13,12 +13,15 @@
 
 import { Box } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
-import { CalculationsMap, CalculationType, PanelProps } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
-import { ReactElement, useMemo } from 'react';
+import type { CalculationType, PanelProps } from '@perses-dev/plugin-system';
+import { CalculationsMap } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { BarChartOptions } from './bar-chart-model';
-import { BarChartBase, BarChartData, StackedBarChartData, StackedBarChartSeries } from './BarChartBase';
+import type { BarChartOptions } from './bar-chart-model';
+import type { BarChartData, StackedBarChartData, StackedBarChartSeries } from './BarChartBase';
+import { BarChartBase } from './BarChartBase';
 import { calculatePercentages, sortSeriesData } from './utils';
 
 export type BarChartPanelProps = PanelProps<BarChartOptions, TimeSeriesData>;

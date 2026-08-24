@@ -11,21 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  StackProps,
-  Typography,
-} from '@mui/material';
-import { DatasourceSelector } from '@perses-dev/spec';
-import { ReactElement, useMemo, useState } from 'react';
+import type { StackProps } from '@mui/material';
+import { CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material';
+import type { DatasourceSelector } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 
 import { MetricList } from '../../display/list/MetricList';
-import { LabelFilter } from '../../types';
+import type { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';
 
 export interface JobList extends StackProps {

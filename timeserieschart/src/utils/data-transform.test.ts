@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegacyTimeSeries } from '@perses-dev/components';
-import { TimeScale } from '@perses-dev/spec';
+import type { LegacyTimeSeries } from '@perses-dev/components';
+import type { TimeScale } from '@perses-dev/spec';
 
-import { TimeSeriesChartVisualOptions, TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
+import type { TimeSeriesChartVisualOptions, TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
 import { convertPercentThreshold, convertPanelYAxis, getTimeSeries, roundDown } from './data-transform';
 
 const MAX_VALUE = 120;

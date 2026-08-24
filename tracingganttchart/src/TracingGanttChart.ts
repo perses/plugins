@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialTracingGanttChartOptions, TracingGanttChartOptions } from './gantt-chart-model';
+import type { TracingGanttChartOptions } from './gantt-chart-model';
+import { createInitialTracingGanttChartOptions } from './gantt-chart-model';
 import { DownloadTraceAction } from './PanelActions';
-import { TracingGanttChartPanel, TracingGanttChartPanelProps } from './TracingGanttChartPanel';
+import type { TracingGanttChartPanelProps } from './TracingGanttChartPanel';
+import { TracingGanttChartPanel } from './TracingGanttChartPanel';
 
 export const TracingGanttChart: PanelPlugin<TracingGanttChartOptions, TracingGanttChartPanelProps> = {
   PanelComponent: TracingGanttChartPanel,

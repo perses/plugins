@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { SelectChangeEvent, StackProps } from '@mui/material';
 import {
   Autocomplete,
   Button,
@@ -20,25 +21,24 @@ import {
   IconButton,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Skeleton,
   Stack,
-  StackProps,
   TextField,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ReactElement, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 
 import { MetricChip } from '../../display/MetricChip';
 import { ListboxComponent } from '../../filter/FilterInputs';
-import { LabelFilter, LabelValueCounter, Operator } from '../../types';
+import type { LabelFilter, LabelValueCounter, Operator } from '../../types';
 import { useMetricMetadata, useSeriesStates } from '../../utils';
 
 export interface LabelValuesRowProps extends StackProps {

@@ -13,14 +13,16 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { VariableProvider } from '@perses-dev/dashboards';
-import { PanelData, ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
-import { TraceData } from '@perses-dev/spec';
+import type { PanelData } from '@perses-dev/plugin-system';
+import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import type { TraceData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from './test/mock-trace-data';
-import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
+import type { TraceTablePanelProps } from './TraceTablePanel';
+import { TraceTablePanel } from './TraceTablePanel';
 
 const TEST_TRACE_TABLE_PROPS: Omit<TraceTablePanelProps, 'queryResults'> = {
   contentDimensions: {

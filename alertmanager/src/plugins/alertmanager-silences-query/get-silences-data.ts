@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { datasourceSelectValueToSelector, replaceVariables, SilencesQueryContext } from '@perses-dev/plugin-system';
-import { Silence, SilencesData } from '@perses-dev/spec';
+import type { SilencesQueryContext } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import type { Silence, SilencesData } from '@perses-dev/spec';
 
-import { ALERTMANAGER_DATASOURCE_KIND, AlertManagerClient, DEFAULT_ALERTMANAGER, GettableSilence } from '../../model';
-import { AlertManagerSilencesQuerySpec } from '../types';
+import type { AlertManagerClient, GettableSilence } from '../../model';
+import { ALERTMANAGER_DATASOURCE_KIND, DEFAULT_ALERTMANAGER } from '../../model';
+import type { AlertManagerSilencesQuerySpec } from '../types';
 /**
  * Transform a GettableSilence from the Alertmanager API into our normalized Silence format.
  */

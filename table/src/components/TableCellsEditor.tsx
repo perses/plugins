@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
 
-import { CellSettings, TableOptions } from '../models';
+import type { CellSettings, TableOptions } from '../models';
 import { CellsEditor } from './CellsEditor';
 
 export type TableCellsEditorProps = OptionsEditorProps<TableOptions>;

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
 
 import { getSplunkTimeSeriesData } from './get-splunk-time-series-data';
-import { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
+import type { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
 import { SplunkTimeSeriesQueryEditor } from './SplunkTimeSeriesQueryEditor';
 
 export const SplunkTimeSeriesQuery: TimeSeriesQueryPlugin<SplunkTimeSeriesQuerySpec> = {

@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import type { TracingGanttChartOptions } from '../../gantt-chart-model';
 import { TicksHeader } from '../Ticks';
-import { Trace } from '../trace';
-import { Viewport, rowHeight } from '../utils';
+import type { Trace } from '../trace';
+import type { Viewport } from '../utils';
+import { rowHeight } from '../utils';
 import { Canvas } from './Canvas';
 
 interface MiniGanttChartProps {

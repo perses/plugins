@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryParamValues } from '@perses-dev/components';
-import { DatasourceSelectValue } from '@perses-dev/plugin-system';
-import { DurationString, HTTPProxy } from '@perses-dev/spec';
+import type { QueryParamValues } from '@perses-dev/components';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import type { DurationString, HTTPProxy } from '@perses-dev/spec';
 
-import { PrometheusDatasourceSelector } from '../model';
+import type { PrometheusDatasourceSelector } from '../model';
 
 export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
 

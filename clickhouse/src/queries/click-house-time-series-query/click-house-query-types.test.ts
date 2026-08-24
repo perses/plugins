@@ -15,12 +15,13 @@
 
 vi.mock('echarts/core');
 
-import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import { DatasourceSpec } from '@perses-dev/spec';
+import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
+import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
-import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources';
-import { ClickHouseQueryResponse } from '../../model/click-house-client';
+import type { ClickHouseDatasourceSpec } from '../../datasources';
+import { ClickHouseDatasource } from '../../datasources';
+import type { ClickHouseQueryResponse } from '../../model/click-house-client';
 import { ClickHouseTimeSeriesQuery } from './ClickHouseQuery';
 
 const datasource: ClickHouseDatasourceSpec = {

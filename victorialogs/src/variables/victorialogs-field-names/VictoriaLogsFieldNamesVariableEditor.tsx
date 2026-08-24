@@ -11,24 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { FormControl, Stack, TextField } from '@mui/material';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  OptionsEditorProps,
-  isVariableDatasource,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
+import type { VictoriaLogsDatasourceSelector } from '../../model';
 import {
   DEFAULT_VICTORIALOGS,
   isDefaultVictoriaLogsSelector,
   isVictoriaLogsDatasourceSelector,
   VICTORIALOGS_DATASOURCE_KIND,
-  VictoriaLogsDatasourceSelector,
 } from '../../model';
-import { VictoriaLogsFieldNamesVariableOptions } from '../types';
+import type { VictoriaLogsFieldNamesVariableOptions } from '../types';
 
 export function VictoriaLogsFieldNamesVariableEditor(
   props: OptionsEditorProps<VictoriaLogsFieldNamesVariableOptions>,

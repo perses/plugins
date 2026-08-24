@@ -17,7 +17,7 @@ import { sanitizeFilename } from '@perses-dev/plugin-system';
 import DownloadIcon from 'mdi-material-ui/Download';
 import { useCallback, useMemo } from 'react';
 
-import { LogsTableProps } from './model';
+import type { LogsTableProps } from './model';
 
 export const LogsTableExportAction: React.FC<LogsTableProps> = ({ queryResults, definition }) => {
   const exportedResult = useMemo(() => {

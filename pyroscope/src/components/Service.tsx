@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Stack, TextField, Autocomplete } from '@mui/material';
-import { ReactElement, SyntheticEvent } from 'react';
+import type { ReactElement, SyntheticEvent } from 'react';
 
-import { PyroscopeDatasourceSelector } from '../model';
+import type { PyroscopeDatasourceSelector } from '../model';
 import { useServices } from '../utils/use-query';
 
 export interface ServiceProps {

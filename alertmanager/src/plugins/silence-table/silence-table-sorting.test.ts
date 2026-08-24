@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Silence } from '@perses-dev/spec';
+import type { Silence } from '@perses-dev/spec';
 
-import { compareSilencesByColumn, SilenceSortState } from './silence-table-sorting';
+import type { SilenceSortState } from './silence-table-sorting';
+import { compareSilencesByColumn } from './silence-table-sorting';
 
 const makeSilence = (overrides: Partial<Silence> = {}): Silence => ({
   id: 'silence-1',

@@ -11,18 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  IconButton,
-  MenuItem,
-  Stack,
-  TextField,
-  Select,
-  FormControl,
-  InputLabel,
-  SelectChangeEvent,
-} from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
+import { IconButton, MenuItem, Stack, TextField, Select, FormControl, InputLabel } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/Delete';
-import { ReactElement, useId } from 'react';
+import type { ReactElement } from 'react';
+import { useId } from 'react';
 
 export interface MatcherValue {
   name: string;

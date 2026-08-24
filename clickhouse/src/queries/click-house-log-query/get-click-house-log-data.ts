@@ -11,17 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
-import { LogData, LogEntry } from '@perses-dev/spec';
+import type { LogQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { LogData, LogEntry } from '@perses-dev/spec';
 
-import {
-  ClickHouseClient,
-  ClickHouseQueryResponse,
-  formatClickHouseDateTime,
-  replaceTimeRangePlaceholders,
-} from '../../model/click-house-client';
+import type { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
+import { formatClickHouseDateTime, replaceTimeRangePlaceholders } from '../../model/click-house-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
+import type { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 
 function flattenObject(
   obj: Record<string, unknown>,

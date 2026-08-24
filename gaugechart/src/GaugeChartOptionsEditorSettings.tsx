@@ -12,28 +12,23 @@
 // limitations under the License.
 
 import { Switch, TextField } from '@mui/material';
+import type { FormatControlsProps, ThresholdOptions } from '@perses-dev/components';
 import {
   FormatControls,
-  FormatControlsProps,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
-  ThresholdOptions,
   ThresholdsEditor,
 } from '@perses-dev/components';
-import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
+import type { CalculationSelectorProps } from '@perses-dev/plugin-system';
+import { CalculationSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import {
-  DEFAULT_FORMAT,
-  DEFAULT_MAX_PERCENT,
-  DEFAULT_MAX_PERCENT_DECIMAL,
-  GaugeChartOptions,
-  GaugeChartOptionsEditorProps,
-} from './gauge-chart-model';
+import type { GaugeChartOptions, GaugeChartOptionsEditorProps } from './gauge-chart-model';
+import { DEFAULT_FORMAT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
 
 export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;

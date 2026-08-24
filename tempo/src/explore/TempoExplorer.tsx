@@ -16,11 +16,13 @@ import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay, useTimeZone }
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
-import { isValidTraceId, QueryDefinition } from '@perses-dev/spec';
-import { ReactElement, useState } from 'react';
+import type { QueryDefinition } from '@perses-dev/spec';
+import { isValidTraceId } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
 import { ClosableAlert } from '../components/ClosableAlert';
-import { TempoTraceQuerySpec } from '../model';
+import type { TempoTraceQuerySpec } from '../model';
 import { linkToSpan, linkToTrace } from './links';
 
 interface TracesExplorerQueryParams {

@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { HTTPAllowedEndpoint, TimeSeries } from '@perses-dev/spec';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { HTTPAllowedEndpoint, TimeSeries } from '@perses-dev/spec';
 
-import { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
-import { SplunkJobCreateResponse, SplunkJobStatusResponse, SplunkResultsResponse } from '../../model';
-import { SplunkClient } from '../../model/splunk-client';
+import type { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
+import type { SplunkJobCreateResponse, SplunkJobStatusResponse, SplunkResultsResponse } from '../../model';
+import type { SplunkClient } from '../../model/splunk-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
+import type { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
 
 function convertResultsToTimeSeries(
   results: Array<{ _time: string; [key: string]: string | number }> | { _time: string; [key: string]: string | number },

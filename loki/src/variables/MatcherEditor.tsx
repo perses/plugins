@@ -14,7 +14,7 @@
 import { Stack, TextField, Button, IconButton } from '@mui/material';
 import { produce } from 'immer';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 type MatcherEditorProps = {
   matchers: string[];

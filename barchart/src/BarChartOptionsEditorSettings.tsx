@@ -23,39 +23,36 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-import {
-  FormatControls,
+import type {
   FormatControlsProps,
   FormatOptions,
+  ModeOption,
+  ModeSelectorProps,
+  SortOption,
+  SortSelectorProps,
+} from '@perses-dev/components';
+import {
+  FormatControls,
   isPercentUnit,
   isUnitWithShortValues,
-  ModeOption,
   ModeSelector,
-  ModeSelectorProps,
   OptionsColorPicker,
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
-  SortOption,
   SortSelector,
-  SortSelectorProps,
 } from '@perses-dev/components';
-import {
-  CalculationSelector,
-  CalculationSelectorProps,
-  CalculationType,
-  DEFAULT_CALCULATION,
-} from '@perses-dev/plugin-system';
+import type { CalculationSelectorProps, CalculationType } from '@perses-dev/plugin-system';
+import { CalculationSelector, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import { MouseEventHandler, ReactElement } from 'react';
+import type { MouseEventHandler, ReactElement } from 'react';
 
+import type { BarChartOptions, BarChartOptionsEditorProps } from './bar-chart-model';
 import {
-  BarChartOptions,
-  BarChartOptionsEditorProps,
   DEFAULT_FORMAT,
   DEFAULT_MODE,
   DEFAULT_ORIENTATION,

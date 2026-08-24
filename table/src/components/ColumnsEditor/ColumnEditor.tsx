@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
+import type { StackProps } from '@mui/material';
+import { Button, ButtonGroup, Stack, Switch, TextField, Typography } from '@mui/material';
+import type { FormatOptions } from '@perses-dev/components';
 import {
   AlignSelector,
   FormatControls,
-  FormatOptions,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
@@ -23,9 +24,10 @@ import {
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
-import { ColumnSettings } from '../../models';
+import type { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
 import { DataLinkEditor } from './DataLinkEditorDialog';
 import { EmbeddedPanelOptionsEditor } from './EmbeddedPanelOptionsEditor';

@@ -11,19 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  FormatOptions,
-  formatValue,
-  LegendItem,
-  ModeOption,
-  SortOption,
-  TableColumnConfig,
-} from '@perses-dev/components';
-import { comparisonLegends, ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
+import type { FormatOptions, LegendItem, ModeOption, SortOption, TableColumnConfig } from '@perses-dev/components';
+import { formatValue } from '@perses-dev/components';
+import type { ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
+import { comparisonLegends } from '@perses-dev/plugin-system';
 import { format } from 'echarts';
 
 import { DEFAULT_SORT } from './pie-chart-model';
-import { PieChartData } from './PieChartBase';
+import type { PieChartData } from './PieChartBase';
 
 export function sortSeriesData<T extends PieChartData>(data: T[], sortOrder: SortOption = DEFAULT_SORT): T[] {
   return data.toSorted((a, b) => {

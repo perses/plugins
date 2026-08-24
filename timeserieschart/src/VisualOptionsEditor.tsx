@@ -14,8 +14,9 @@
 import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import { produce } from 'immer';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
+import type { StackOptions, TimeSeriesChartVisualOptions } from './time-series-chart-model';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -24,11 +25,9 @@ import {
   DEFAULT_POINT_RADIUS,
   POINT_SIZE_OFFSET,
   STACK_CONFIG,
-  StackOptions,
   STACK_OPTIONS,
   LINE_STYLE_CONFIG,
   VISUAL_CONFIG,
-  TimeSeriesChartVisualOptions,
   DEFAULT_DISPLAY,
 } from './time-series-chart-model';
 

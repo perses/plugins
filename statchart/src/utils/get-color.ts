@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { applyValueMapping, PersesChartsTheme, ThresholdOptions, ValueMapping } from '@perses-dev/components';
+import type { PersesChartsTheme, ThresholdOptions, ValueMapping } from '@perses-dev/components';
+import { applyValueMapping } from '@perses-dev/components';
 
-import { StatChartOptions } from '../stat-chart-model';
+import type { StatChartOptions } from '../stat-chart-model';
 
 type StatChartValue = number | string | null;
 

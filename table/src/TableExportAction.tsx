@@ -13,12 +13,13 @@
 
 import { IconButton } from '@mui/material';
 import { InfoTooltip, transformData } from '@perses-dev/components';
-import { escapeCsvValue, PanelData, sanitizeFilename } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { PanelData } from '@perses-dev/plugin-system';
+import { escapeCsvValue, sanitizeFilename } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 import DownloadIcon from 'mdi-material-ui/Download';
 import React, { useCallback, useMemo } from 'react';
 
-import { TableProps } from './components';
+import type { TableProps } from './components';
 import type { TableOptions } from './models';
 import { buildRawTableData } from './table-data-utils';
 

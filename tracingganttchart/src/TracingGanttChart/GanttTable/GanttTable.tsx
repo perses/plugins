@@ -12,12 +12,15 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
-import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
-import { Virtuoso, VirtuosoHandle, ListRange } from 'react-virtuoso';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { VirtuosoHandle, ListRange } from 'react-virtuoso';
+import { Virtuoso } from 'react-virtuoso';
 
-import { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
-import { Span, Trace, forEachSpan } from '../trace';
-import { Viewport } from '../utils';
+import type { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
+import type { Span, Trace } from '../trace';
+import { forEachSpan } from '../trace';
+import type { Viewport } from '../utils';
 import { GanttTableHeader } from './GanttTableHeader';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';

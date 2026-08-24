@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Completion, CompletionContext, CompletionResult, insertCompletionText } from '@codemirror/autocomplete';
+import type { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
+import { insertCompletionText } from '@codemirror/autocomplete';
 import { syntaxTree } from '@codemirror/language';
-import { EditorState } from '@codemirror/state';
+import type { EditorState } from '@codemirror/state';
 import {
   Selector,
   Matchers,
@@ -26,11 +27,11 @@ import {
   String as StringType,
   Pipe,
 } from '@grafana/lezer-logql';
-import { SyntaxNode, Tree } from '@lezer/common';
-import { EditorView } from '@uiw/react-codemirror';
+import type { SyntaxNode, Tree } from '@lezer/common';
+import type { EditorView } from '@uiw/react-codemirror';
 
 import { toUnixSeconds } from '../model';
-import { CompletionConfig } from './logql-extension';
+import type { CompletionConfig } from './logql-extension';
 
 /** CompletionScope specifies the completion kind, e.g. whether to complete label names or values */
 type CompletionScope =

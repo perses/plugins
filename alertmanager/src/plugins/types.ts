@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelectValue } from '@perses-dev/plugin-system';
-import { HTTPProxy } from '@perses-dev/spec';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import type { HTTPProxy } from '@perses-dev/spec';
 
-import { AlertManagerDatasourceSelector } from '../model/alertmanager-selectors';
+import type { AlertManagerDatasourceSelector } from '../model/alertmanager-selectors';
 
 /**
  * Datasource spec for the Alert Manager datasource plugin.

@@ -14,9 +14,9 @@
 import { parseVariables } from '@perses-dev/plugin-system';
 
 import { getGreptimeDBLogData } from './get-greptimedb-log-data';
-import { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
+import type { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
 import { GreptimeDBLogQueryEditor } from './GreptimeDBLogQueryEditor';
-import { LogQueryPlugin } from './log-query-plugin-interface';
+import type { LogQueryPlugin } from './log-query-plugin-interface';
 
 export const GreptimeDBLogQuery: LogQueryPlugin<GreptimeDBLogQuerySpec> = {
   getLogData: getGreptimeDBLogData,

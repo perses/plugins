@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialMarkdownPanelOptions, MarkdownPanelOptions } from './markdown-panel-model';
+import type { MarkdownPanelOptions } from './markdown-panel-model';
+import { createInitialMarkdownPanelOptions } from './markdown-panel-model';
 import { MarkdownPanel } from './MarkdownPanel';
 import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';
 

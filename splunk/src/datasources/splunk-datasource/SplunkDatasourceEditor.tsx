@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { SplunkDatasourceSpec } from './splunk-datasource-types';
+import type { SplunkDatasourceSpec } from './splunk-datasource-types';
 
 export interface SplunkDatasourceEditorProps {
   value: SplunkDatasourceSpec;

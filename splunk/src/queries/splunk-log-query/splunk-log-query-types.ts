@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 
-import { SplunkLogResults } from '../../model/splunk-client-types';
+import type { SplunkLogResults } from '../../model/splunk-client-types';
 
 export interface SplunkLogQuerySpec {
   query: string;

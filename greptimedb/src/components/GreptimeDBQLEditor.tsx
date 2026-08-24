@@ -13,8 +13,9 @@
 
 import { EditorView } from '@codemirror/view';
 import { InputLabel, Stack, useTheme } from '@mui/material';
-import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import { ReactElement } from 'react';
+import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
+import type { ReactElement } from 'react';
 
 export function GreptimeDBQLEditor(props: ReactCodeMirrorProps): ReactElement {
   const theme = useTheme();

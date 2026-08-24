@@ -13,25 +13,21 @@
 
 import { FormControl, InputLabel, Stack, TextField, useTheme } from '@mui/material';
 import { useId } from '@perses-dev/components';
-import { DatasourceSelect, DatasourceSelectProps, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { ProfileTypeSelector, Service, Filters } from '../../components';
+import type { PyroscopeDatasourceSelector } from '../../model';
 import {
   DEFAULT_PYROSCOPE,
   isDefaultPyroscopeSelector,
   isPyroscopeDatasourceSelector,
   PYROSCOPE_DATASOURCE_KIND,
-  PyroscopeDatasourceSelector,
 } from '../../model';
-import {
-  ProfileQueryEditorProps,
-  useMaxNodesState,
-  useProfileTypeState,
-  useServiceState,
-  useFiltersState,
-} from './query-editor-model';
+import type { ProfileQueryEditorProps } from './query-editor-model';
+import { useMaxNodesState, useProfileTypeState, useServiceState, useFiltersState } from './query-editor-model';
 
 export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): ReactElement {
   const { onChange, value } = props;

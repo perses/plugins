@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelData } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { PanelData } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 
-import { TableOptions } from './models';
+import type { TableOptions } from './models';
 import { buildTableData } from './TableExportAction';
 
 function makePanelData(series: TimeSeriesData['series']): PanelData<TimeSeriesData> {

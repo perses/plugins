@@ -13,13 +13,13 @@
 
 vi.mock('echarts/core');
 
-import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import { DatasourceSpec } from '@perses-dev/spec';
+import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
+import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
 import { VictoriaLogsDatasource } from '../../datasources/victorialogs-datasource';
-import { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
-import { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
+import type { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
+import type { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsTimeSeriesQuery } from './VictoriaLogsTimeSeriesQuery';
 
 const datasource: VictoriaLogsDatasourceSpec = {

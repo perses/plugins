@@ -13,7 +13,8 @@
 
 import { Box, styled } from '@mui/material';
 import { useEvent } from '@perses-dev/plugin-system';
-import { MouseEvent as ReactMouseEvent, ReactElement, useEffect, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent, ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ResizableDividerProps {
   parentRef: React.RefObject<Element>;

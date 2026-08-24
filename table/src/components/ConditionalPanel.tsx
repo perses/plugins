@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { Grid2Props as GridProps } from '@mui/material';
 import {
   Button,
   Divider,
-  Grid2Props as GridProps,
   IconButton,
   MenuItem,
   Stack,
@@ -26,9 +26,11 @@ import {
 import { OptionsColorPicker } from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
-import { CellSettings, renderConditionEditor } from '../models';
+import type { CellSettings } from '../models';
+import { renderConditionEditor } from '../models';
 
 // Individual conditional formatting rule component
 export interface ConditionalRuleProps extends Omit<GridProps, 'onChange'> {

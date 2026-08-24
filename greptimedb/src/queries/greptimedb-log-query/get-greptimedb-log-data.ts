@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogData, LogEntry } from '@perses-dev/spec';
+import type { LogData, LogEntry } from '@perses-dev/spec';
 
-import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
+import type { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
+import type { GreptimeDBRecords } from '../greptimedb-query-data-model';
 import {
   findTimeColumnIndex,
-  GreptimeDBRecords,
   normalizeRecords,
   replaceQueryVariables,
   toTimestampMs,
 } from '../greptimedb-query-data-model';
-import { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
-import { LogQueryPlugin } from './log-query-plugin-interface';
+import type { GreptimeDBLogQuerySpec } from './greptimedb-log-query-types';
+import type { LogQueryPlugin } from './log-query-plugin-interface';
 
 function buildLogs(records: GreptimeDBRecords | undefined): LogData {
   const columnSchemas = records?.schema?.column_schemas ?? [];

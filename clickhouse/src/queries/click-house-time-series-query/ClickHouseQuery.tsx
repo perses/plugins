@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
 
-import { ClickHouseTimeSeriesQuerySpec } from './click-house-query-types';
+import type { ClickHouseTimeSeriesQuerySpec } from './click-house-query-types';
 import { ClickHouseTimeSeriesQueryEditor } from './ClickHouseQueryEditor';
 import { getTimeSeriesData } from './get-click-house-data';
 

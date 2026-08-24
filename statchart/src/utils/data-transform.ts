@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme } from '@perses-dev/components';
-import { LineSeriesOption } from 'echarts/charts';
+import type { PersesChartsTheme } from '@perses-dev/components';
+import type { LineSeriesOption } from 'echarts/charts';
 
-import { StatChartSparklineOptions } from '../stat-chart-model';
+import type { StatChartSparklineOptions } from '../stat-chart-model';
 
 export function convertSparkline(
   chartsTheme: PersesChartsTheme,

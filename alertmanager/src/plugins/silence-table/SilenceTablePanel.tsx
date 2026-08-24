@@ -28,28 +28,34 @@ import {
   Typography,
 } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { PanelProps, useDatasourceClient } from '@perses-dev/plugin-system';
-import { Silence, SilencesData } from '@perses-dev/spec';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import { useDatasourceClient } from '@perses-dev/plugin-system';
+import type { Silence, SilencesData } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import MagnifyIcon from 'mdi-material-ui/Magnify';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { MatchersList } from '../../components/MatchersList';
 import { StatusBadge } from '../../components/StatusBadge';
-import { AlertManagerClient, extractDatasourceSelector } from '../../model';
-import {
-  ALL_SILENCE_ACTIONS,
-  DEFAULT_COLUMN_HEADERS,
-  DEFAULT_SILENCE_COLUMNS,
+import type { AlertManagerClient } from '../../model';
+import { extractDatasourceSelector } from '../../model';
+import type {
   SilenceAction,
   SilenceColumnDefinition,
   SilenceFieldName,
   SilenceTableOptions,
+} from './silence-table-model';
+import {
+  ALL_SILENCE_ACTIONS,
+  DEFAULT_COLUMN_HEADERS,
+  DEFAULT_SILENCE_COLUMNS,
   getSilenceDuration,
   inferSortMode,
 } from './silence-table-model';
-import { SilenceSortState, compareSilencesByColumn } from './silence-table-sorting';
+import type { SilenceSortState } from './silence-table-sorting';
+import { compareSilencesByColumn } from './silence-table-sorting';
 
 export type SilenceTablePanelProps = PanelProps<SilenceTableOptions, SilencesData>;
 

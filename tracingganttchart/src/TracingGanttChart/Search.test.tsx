@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { fireEvent, screen } from '@testing-library/dom';
-import { render, renderHook, act, RenderResult } from '@testing-library/react';
-import { ReactElement } from 'react';
+import type { RenderResult } from '@testing-library/react';
+import { render, renderHook, act } from '@testing-library/react';
+import type { ReactElement } from 'react';
 
 import * as exampleTrace from '../test/traces/example_otlp.json';
 import { SearchBar, useSpanSearch } from './Search';

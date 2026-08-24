@@ -11,22 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Typography, SxProps } from '@mui/material';
-import {
-  useChartsTheme,
-  GraphSeries,
-  PersesChartsTheme,
-  ValueMapping,
-  applyValueMapping,
-  createRegexFromString,
-} from '@perses-dev/components';
-import { PanelProps, PanelData } from '@perses-dev/plugin-system';
-import { Labels, TimeSeriesData } from '@perses-dev/spec';
-import { TitleComponentOption } from 'echarts';
-import { FC, useMemo } from 'react';
+import type { SxProps } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
+import type { GraphSeries, PersesChartsTheme, ValueMapping } from '@perses-dev/components';
+import { useChartsTheme, applyValueMapping, createRegexFromString } from '@perses-dev/components';
+import type { PanelProps, PanelData } from '@perses-dev/plugin-system';
+import type { Labels, TimeSeriesData } from '@perses-dev/spec';
+import type { TitleComponentOption } from 'echarts';
+import type { FC } from 'react';
+import { useMemo } from 'react';
 
-import { StatChartOptions } from './stat-chart-model';
-import { StatChartBase, StatChartData } from './StatChartBase';
+import type { StatChartOptions } from './stat-chart-model';
+import type { StatChartData } from './StatChartBase';
+import { StatChartBase } from './StatChartBase';
 import { calculateValue } from './utils/calculate-value';
 import { convertSparkline } from './utils/data-transform';
 import { getStatChartColor } from './utils/get-color';

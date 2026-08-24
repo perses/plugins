@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { VariablePlugin, GetVariableOptionsContext } from '@perses-dev/plugin-system';
 import {
-  VariablePlugin,
-  GetVariableOptionsContext,
   replaceVariables,
   parseVariables,
   datasourceSelectValueToSelector,
@@ -28,7 +27,7 @@ import {
   stringArrayToVariableOptions,
   PrometheusPromQLVariableEditor,
 } from './prometheus-variables';
-import { PrometheusPromQLVariableOptions } from './types';
+import type { PrometheusPromQLVariableOptions } from './types';
 
 export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOptions> = {
   getVariableOptions: async (spec: PrometheusPromQLVariableOptions, ctx: GetVariableOptionsContext) => {

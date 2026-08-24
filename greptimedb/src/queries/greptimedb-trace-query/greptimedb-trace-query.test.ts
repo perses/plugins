@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TraceQueryContext } from '@perses-dev/plugin-system';
-import { DatasourceSpec } from '@perses-dev/spec';
+import type { TraceQueryContext } from '@perses-dev/plugin-system';
+import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
-import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
-import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
+import type { GreptimeDBDatasourceSpec } from '../../datasources';
+import { GreptimeDBDatasource } from '../../datasources';
+import type { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { GreptimeDBTraceQuery } from './GreptimeDBTraceQuery';
 
 const datasource: GreptimeDBDatasourceSpec = {

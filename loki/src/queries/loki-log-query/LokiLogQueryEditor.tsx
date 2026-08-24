@@ -14,23 +14,24 @@
 import { InputLabel, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl } from '@perses-dev/components';
 import { createModEnterHandler } from '@perses-dev/dashboards';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
 import {
   DatasourceSelect,
-  DatasourceSelectProps,
   isVariableDatasource,
-  OptionsEditorProps,
   useDatasourceSelectValueToSelector,
   useDatasourceClient,
   useTimeRange,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { LogQLEditor } from '../../components';
-import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND, LokiDatasourceSelector, LokiClient } from '../../model';
+import type { LokiDatasourceSelector, LokiClient } from '../../model';
+import { isDefaultLokiSelector, LOKI_DATASOURCE_KIND } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
-import { LokiLogQuerySpec } from './loki-log-query-types';
+import type { LokiLogQuerySpec } from './loki-log-query-types';
 
 type LokiQueryEditorProps = OptionsEditorProps<LokiLogQuerySpec>;
 

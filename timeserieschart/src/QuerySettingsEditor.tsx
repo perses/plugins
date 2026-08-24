@@ -26,22 +26,22 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { FormatControls, FormatOptions, OptionsColorPicker } from '@perses-dev/components';
+import type { FormatOptions } from '@perses-dev/components';
+import { FormatControls, OptionsColorPicker } from '@perses-dev/components';
 import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import CloseIcon from 'mdi-material-ui/Close';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  DEFAULT_AREA_OPACITY,
-  LINE_STYLE_CONFIG,
-  OPACITY_CONFIG,
+import type {
   QuerySettingsOptions,
   TimeSeriesChartOptions,
   TimeSeriesChartOptionsEditorProps,
 } from './time-series-chart-model';
+import { DEFAULT_AREA_OPACITY, LINE_STYLE_CONFIG, OPACITY_CONFIG } from './time-series-chart-model';
 
 const DEFAULT_COLOR_VALUE = '#555';
 const NO_INDEX_AVAILABLE = -1; // invalid array index value used to represent the fact that no query index is available

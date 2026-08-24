@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { FlameChartPanel, FlameChartPanelProps, FlameChartOptionsEditorSettings } from './components';
-import { createInitialFlameChartOptions, FlameChartOptions } from './flame-chart-model';
+import type { FlameChartPanelProps } from './components';
+import { FlameChartPanel, FlameChartOptionsEditorSettings } from './components';
+import type { FlameChartOptions } from './flame-chart-model';
+import { createInitialFlameChartOptions } from './flame-chart-model';
 
 /**
  * The core FlameChart panel plugin for Perses.

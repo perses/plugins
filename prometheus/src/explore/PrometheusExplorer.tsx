@@ -15,13 +15,14 @@ import { Box, Stack, Tab, Tabs, ToggleButton, ToggleButtonGroup } from '@mui/mat
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import { QueryDefinition } from '@perses-dev/spec';
-import { ReactElement, useState } from 'react';
+import type { QueryDefinition } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
 import { DEFAULT_PROM } from '../model/prometheus-selectors';
 import { PrometheusMetricsFinder } from './PrometheusMetricsFinder';
-import { FinderQueryParams } from './PrometheusMetricsFinder/types';
+import type { FinderQueryParams } from './PrometheusMetricsFinder/types';
 
 interface MetricsExplorerQueryParams extends FinderQueryParams {
   tab?: string;

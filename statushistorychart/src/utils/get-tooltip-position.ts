@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TooltipComponentOption } from 'echarts';
+import type { TooltipComponentOption } from 'echarts';
 
 export const getTooltipPosition: TooltipComponentOption['position'] = (...data) => {
   const point = data[0];

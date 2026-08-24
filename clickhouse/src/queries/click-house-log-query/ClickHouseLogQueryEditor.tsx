@@ -13,20 +13,17 @@
 
 import { Stack } from '@mui/material';
 import { createModEnterHandler } from '@perses-dev/dashboards';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  isVariableDatasource,
-  OptionsEditorProps,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { ClickQLEditor } from '../../components';
 import { queryExample } from '../../components/constants';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
-import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
+import type { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 
 type ClickHouseQueryEditorProps = OptionsEditorProps<ClickHouseLogQuerySpec>;
 

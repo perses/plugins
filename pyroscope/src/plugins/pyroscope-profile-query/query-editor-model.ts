@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { useState } from 'react';
 
-import { PyroscopeProfileQuerySpec } from '../../model/profile-query-model';
-import { LabelFilter } from '../../utils/types';
+import type { PyroscopeProfileQuerySpec } from '../../model/profile-query-model';
+import type { LabelFilter } from '../../utils/types';
 
 export type ProfileQueryEditorProps = OptionsEditorProps<PyroscopeProfileQuerySpec>;
 

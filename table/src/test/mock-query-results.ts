@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { TimeSeriesData } from '@perses-dev/spec';
 
 export const MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE = [
   {

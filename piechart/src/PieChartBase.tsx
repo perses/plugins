@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
-import { EChart, FormatOptions, ModeOption, useChartsTheme } from '@perses-dev/components';
+import type { FormatOptions, ModeOption } from '@perses-dev/components';
+import { EChart, useChartsTheme } from '@perses-dev/components';
 import { PieChart as EChartsPieChart } from 'echarts/charts';
 import { DatasetComponent, GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { getLabelFormatter, getTooltipFormatter } from './utils';
 

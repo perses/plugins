@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { TextField, Autocomplete } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { PyroscopeDatasourceSelector } from '../model';
+import type { PyroscopeDatasourceSelector } from '../model';
 import { useLabelValues } from '../utils/use-query';
 
 export interface LabelValueProps {

@@ -27,13 +27,14 @@ import {
   Typography,
 } from '@mui/material';
 import { OptionsEditorGroup } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
-import { AlertTableOptions, LabelColorMapping, LabelColorOverride } from './alert-table-model';
+import type { AlertTableOptions, LabelColorMapping, LabelColorOverride } from './alert-table-model';
 
 const MODE_LABELS: Record<LabelColorMapping['mode'], string> = {
   auto: 'Auto (hash-derived colors)',

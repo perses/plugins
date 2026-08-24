@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
 
-import { JaegerDatasourceSelector } from './jaeger-selectors';
+import type { JaegerDatasourceSelector } from './jaeger-selectors';
 
 export interface JaegerTraceQuerySpec {
   datasource?: DatasourceSelectValue<JaegerDatasourceSelector>;

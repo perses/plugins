@@ -17,7 +17,7 @@ import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilen
 import DownloadIcon from 'mdi-material-ui/Download';
 import React, { useCallback, useMemo } from 'react';
 
-import { TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import type { TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
 export const TimeSeriesExportAction: React.FC<TimeSeriesChartProps> = ({ queryResults, definition }) => {
   const exportableData = useMemo(() => {

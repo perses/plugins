@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert } from '@perses-dev/spec';
+import type { Alert } from '@perses-dev/spec';
 
+import type { SortState } from './alert-table-sorting';
 import {
   compareAlertsByColumn,
   compareGroupsByColumn,
   SORT_COL_ALERTNAME,
   SORT_COL_STATUS,
-  SortState,
 } from './alert-table-sorting';
 
 const makeAlert = (

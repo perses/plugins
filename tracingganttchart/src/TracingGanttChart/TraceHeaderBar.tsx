@@ -14,10 +14,12 @@
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useTimeZone } from '@perses-dev/components';
 import MagnifyIcon from 'mdi-material-ui/Magnify';
-import { ReactElement, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 
-import { SearchBar, SpanSearch } from './Search';
-import { Trace } from './trace';
+import type { SpanSearch } from './Search';
+import { SearchBar } from './Search';
+import type { Trace } from './trace';
 import { formatDuration } from './utils';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {

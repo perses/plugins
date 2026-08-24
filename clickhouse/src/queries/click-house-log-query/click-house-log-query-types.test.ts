@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { LogQueryContext } from '@perses-dev/plugin-system';
 import type { Mock } from 'vitest';
 
-import { ClickHouseDatasource, ClickHouseDatasourceSpec } from '../../datasources/click-house-datasource';
-import { ClickHouseQueryResponse } from '../../model/click-house-client';
+import type { ClickHouseDatasourceSpec } from '../../datasources/click-house-datasource';
+import { ClickHouseDatasource } from '../../datasources/click-house-datasource';
+import type { ClickHouseQueryResponse } from '../../model/click-house-client';
 import { ClickHouseLogQuery } from './ClickHouseLogQuery';
 
 const datasource: ClickHouseDatasourceSpec = {

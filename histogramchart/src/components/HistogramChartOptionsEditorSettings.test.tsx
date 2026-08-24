@@ -15,7 +15,7 @@ import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { HistogramChartOptions } from '../histogram-chart-model';
+import type { HistogramChartOptions } from '../histogram-chart-model';
 import { HistogramChartOptionsEditorSettings } from './HistogramChartOptionsEditorSettings';
 
 describe('HistogramChartOptionsEditorSettings', () => {

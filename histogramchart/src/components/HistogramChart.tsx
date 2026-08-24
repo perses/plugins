@@ -11,15 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChart, FormatOptions, getFormattedAxis, ThresholdOptions, useChartsTheme } from '@perses-dev/components';
-import { BucketTuple } from '@perses-dev/spec';
-import { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams } from 'echarts';
+import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
+import { EChart, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
+import type { BucketTuple } from '@perses-dev/spec';
+import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams, CustomSeriesRenderItemReturn } from 'echarts';
 import { CustomChart } from 'echarts/charts';
-import { use as registerECharts, EChartsCoreOption } from 'echarts/core';
-import { CustomSeriesRenderItemReturn } from 'echarts/types/dist/echarts';
-import { ReactElement, useMemo } from 'react';
+import type { EChartsCoreOption } from 'echarts/core';
+import { use as registerECharts } from 'echarts/core';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { LOG_BASE } from '../histogram-chart-model';
+import type { LOG_BASE } from '../histogram-chart-model';
 import { getColorFromThresholds } from '../utils';
 
 registerECharts([CustomChart]);

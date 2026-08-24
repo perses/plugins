@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TraceData } from '@perses-dev/spec';
+import type { TraceData } from '@perses-dev/spec';
 
-import { QueryResponse, SearchResponse } from '../model/api-types';
+import type { QueryResponse, SearchResponse } from '../model/api-types';
 
 export const MOCK_TRACE_RESPONSE: QueryResponse = {
   trace: {

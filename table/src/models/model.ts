@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps } from '@perses-dev/plugin-system';
+import type { PanelProps } from '@perses-dev/plugin-system';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface TimeSeriesTableOptions {}

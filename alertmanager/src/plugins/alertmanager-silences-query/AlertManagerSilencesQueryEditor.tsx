@@ -13,9 +13,11 @@
 
 import { FormControl, Stack } from '@mui/material';
 import { useId } from '@perses-dev/components';
-import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { LazyTextField } from '../../components/LazyTextField';
 import {
@@ -24,7 +26,7 @@ import {
   isAlertManagerDatasourceSelector,
   isDefaultAlertManagerSelector,
 } from '../../model';
-import { AlertManagerSilencesQuerySpec } from '../types';
+import type { AlertManagerSilencesQuerySpec } from '../types';
 
 interface AlertManagerSilencesQueryEditorProps {
   value: AlertManagerSilencesQuerySpec;

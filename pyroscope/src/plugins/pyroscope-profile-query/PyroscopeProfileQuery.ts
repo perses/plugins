@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LabelFilter } from '../../utils/types';
+import type { LabelFilter } from '../../utils/types';
 import { getProfileData } from './get-profile-data';
 import { PyroscopeProfileQueryEditor } from './PyroscopeProfileQueryEditor';
 

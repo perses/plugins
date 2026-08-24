@@ -10,6 +10,11 @@
   "bugs": {
     "url": "https://github.com/perses/plugins/issues"
   },
+  "type": "module",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
   "scripts": {
     "dev": "turbo run dev --concurrency 20",
     "build": "turbo run build",
@@ -103,5 +108,5 @@
       "node-fetch": "^3.3.2"
     }
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@11.17.0"
 }

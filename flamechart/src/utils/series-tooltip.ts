@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SeriesSample } from './data-model';
+import type { SeriesSample } from './data-model';
 import { formatItemValue } from './format';
 
 export function getSeriesTooltip(

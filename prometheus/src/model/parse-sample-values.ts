@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ValueTuple } from './api-types';
+import type { ValueTuple } from './api-types';
 
 /**
  * ValueTuple from the Prom server, parsed into ms and floating point number

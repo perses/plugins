@@ -11,21 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { datasourceSelectValueToSelector, replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
-import { AbsoluteTimeRange, isValidTraceId, Notice, TraceSearchResult } from '@perses-dev/spec';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type { TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import type { AbsoluteTimeRange, Notice, TraceSearchResult } from '@perses-dev/spec';
+import { isValidTraceId } from '@perses-dev/spec';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { getUnixTime } from 'date-fns';
 
-import {
-  TEMPO_DATASOURCE_KIND,
+import type {
   TempoDatasourceSelector,
   TempoTraceQuerySpec,
   TempoClient,
-  DEFAULT_SEARCH_LIMIT,
   QueryResponse,
   SearchRequestParameters,
   SearchResponse,
 } from '../../model';
+import { TEMPO_DATASOURCE_KIND, DEFAULT_SEARCH_LIMIT } from '../../model';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;

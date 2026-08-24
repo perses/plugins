@@ -11,19 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, FormControl, Stack, StackProps } from '@mui/material';
+import type { StackProps } from '@mui/material';
+import { Button, FormControl, Stack } from '@mui/material';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
 import {
   DatasourceSelect,
-  DatasourceSelectValue,
   datasourceSelectValueToSelector,
   useListDatasourceSelectItems,
 } from '@perses-dev/plugin-system';
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { PROM_DATASOURCE_KIND } from '../../../model/prometheus-selectors';
-import { LabelFilter } from '../types';
+import type { LabelFilter } from '../types';
 import { LabelFilterInput } from './FilterInputs';
 
 export interface ExplorerFiltersProps extends StackProps {

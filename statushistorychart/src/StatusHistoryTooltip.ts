@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { css, Theme } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { css } from '@mui/material';
 import { getDateAndTime } from '@perses-dev/components';
 
-import { StatusHistoryData } from './StatusHistoryChartBase';
+import type { StatusHistoryData } from './StatusHistoryChartBase';
 
 interface CustomTooltipProps {
   data: StatusHistoryData;

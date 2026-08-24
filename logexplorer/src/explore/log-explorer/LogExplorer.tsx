@@ -14,9 +14,9 @@
 import { Box, Stack } from '@mui/material';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
+import type { LogQueryContext } from '@perses-dev/plugin-system';
 import {
   DataQueriesProvider,
-  LogQueryContext,
   MultiQueryEditor,
   useAllVariableValues,
   useDatasourceStore,
@@ -24,9 +24,10 @@ import {
   usePluginRegistry,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { QueryDefinition } from '@perses-dev/spec';
+import type { QueryDefinition } from '@perses-dev/spec';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useMemo } from 'react';
 
 interface LogExplorerQueryParams {
   queries?: QueryDefinition[];

@@ -12,20 +12,19 @@
 // limitations under the License.
 
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { ColumnsEditor } from '../../components/ColumnsEditor';
-import {
-  DEFAULT_COLUMN_HEADERS,
-  DEFAULT_SILENCE_COLUMNS,
+import type {
   SilenceColumnDefinition,
   SilenceColumnSortMode,
   SilenceFieldName,
   SilenceTableOptions,
-  inferSortMode,
 } from './silence-table-model';
+import { DEFAULT_COLUMN_HEADERS, DEFAULT_SILENCE_COLUMNS, inferSortMode } from './silence-table-model';
 
 const DEFAULT_FIELD_NAMES = new Set(DEFAULT_SILENCE_COLUMNS.map((c) => c.name));
 

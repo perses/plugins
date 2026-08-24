@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ActionOptions, ItemSelectionActionsEditor, SelectionOptions } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ActionOptions, SelectionOptions } from '@perses-dev/plugin-system';
+import { ItemSelectionActionsEditor } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
 
-import { TimeSeriesTableSettingsEditorProps } from '../model';
+import type { TimeSeriesTableSettingsEditorProps } from '../model';
 
 export function TimeSeriesTableItemSelectionActionsEditor({
   value,

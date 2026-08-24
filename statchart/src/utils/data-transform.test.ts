@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { testChartsTheme, ThresholdOptions } from '@perses-dev/components';
-import { LineSeriesOption } from 'echarts';
+import type { ThresholdOptions } from '@perses-dev/components';
+import { testChartsTheme } from '@perses-dev/components';
+import type { LineSeriesOption } from 'echarts';
 
-import { StatChartOptions, StatChartSparklineOptions } from '../stat-chart-model';
+import type { StatChartOptions, StatChartSparklineOptions } from '../stat-chart-model';
 import { convertSparkline } from './data-transform';
 import { getStatChartColor } from './get-color';
 

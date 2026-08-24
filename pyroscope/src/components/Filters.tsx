@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { InputLabel, Stack, useTheme } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { PyroscopeDatasourceSelector } from '../model';
-import { LabelFilter } from '../utils/types';
+import type { PyroscopeDatasourceSelector } from '../model';
+import type { LabelFilter } from '../utils/types';
 import { AddFilterItem } from './AddFilterItem';
 import { FilterItem } from './FilterItem';
 

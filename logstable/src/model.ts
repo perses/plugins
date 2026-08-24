@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ThresholdOptions } from '@perses-dev/components';
-import {
+import type { ThresholdOptions } from '@perses-dev/components';
+import type {
   PanelProps,
   LegendSpecOptions,
   SelectionOptions,
   OptionsEditorProps,
   ActionOptions,
 } from '@perses-dev/plugin-system';
-import { LogData } from '@perses-dev/spec';
+import type { LogData } from '@perses-dev/spec';
 
 export type LogsTableProps = PanelProps<LogsTableOptions, LogsQueryData>;
 

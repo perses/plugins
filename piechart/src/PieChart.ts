@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialPieChartOptions, PieChartOptions } from './pie-chart-model';
+import type { PieChartOptions } from './pie-chart-model';
+import { createInitialPieChartOptions } from './pie-chart-model';
 import { PieChartOptionsEditorSettings } from './PieChartOptionsEditorSettings';
-import { PieChartPanel, PieChartPanelProps } from './PieChartPanel';
+import type { PieChartPanelProps } from './PieChartPanel';
+import { PieChartPanel } from './PieChartPanel';
 
 /**
  * The core PieChart panel plugin for Perses.

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Autocomplete,
   CircularProgress,
@@ -18,25 +19,16 @@ import {
   InputAdornment,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
 } from '@mui/material';
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 import DeleteIcon from 'mdi-material-ui/Delete';
-import {
-  cloneElement,
-  forwardRef,
-  HTMLAttributes,
-  ReactElement,
-  SyntheticEvent,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { HTMLAttributes, ReactElement, SyntheticEvent } from 'react';
+import { cloneElement, forwardRef, useMemo, useRef, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 
-import { LabelFilter, Operator } from '../types';
+import type { LabelFilter, Operator } from '../types';
 import { useLabels, useLabelValues } from '../utils';
 
 export interface LabelFilterInputProps {

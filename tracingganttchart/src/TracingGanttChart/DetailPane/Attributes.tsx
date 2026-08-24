@@ -13,11 +13,12 @@
 
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
-import * as oltpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
-import { ReactElement, useMemo } from 'react';
+import type * as oltpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { CustomLinks } from '../../gantt-chart-model';
-import { Span, Trace } from '../trace';
+import type { CustomLinks } from '../../gantt-chart-model';
+import type { Span, Trace } from '../trace';
 import { formatDuration } from '../utils';
 
 export interface TraceAttributesProps {

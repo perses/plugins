@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Chip, Stack } from '@mui/material';
-import { SilenceMatcher } from '@perses-dev/spec';
-import { ReactElement } from 'react';
+import type { SilenceMatcher } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
 
 export interface MatchersListProps {
   matchers: SilenceMatcher[];

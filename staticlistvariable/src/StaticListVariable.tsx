@@ -13,9 +13,10 @@
 
 import { Autocomplete, Chip, IconButton, TextField, Typography } from '@mui/material';
 /* eslint-disable jsx-a11y/no-autofocus */
-import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
 import PlusCircleIcon from 'mdi-material-ui/PlusCircle';
-import { ReactElement, useCallback, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 
 type StaticListOption = string | VariableOption;
 

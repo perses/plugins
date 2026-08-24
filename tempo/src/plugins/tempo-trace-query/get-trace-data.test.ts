@@ -11,18 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TraceQueryContext, replaceVariables } from '@perses-dev/plugin-system';
-import { DatasourceSpec } from '@perses-dev/spec';
+import type * as PluginSystemModule from '@perses-dev/plugin-system';
+import type { TraceQueryContext } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { TempoClient } from '../../model';
-import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
+import type { TempoClient } from '../../model';
+import type { SearchResponse } from '../../model/api-types';
+import { DEFAULT_SEARCH_LIMIT } from '../../model/api-types';
 import { TempoDatasource } from '../tempo-datasource';
-import { TempoDatasourceSpec } from '../tempo-datasource-types';
+import type { TempoDatasourceSpec } from '../tempo-datasource-types';
 import { getTraceData } from './get-trace-data';
 
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@perses-dev/plugin-system')>();
+  const actual = await importOriginal<typeof PluginSystemModule>();
   return {
     ...actual,
     replaceVariables: vi.fn((query: string) => query),

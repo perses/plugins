@@ -14,10 +14,11 @@
 import { Collapse, Divider, List, ListItemButton, ListItemText } from '@mui/material';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
-import { Fragment, ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { Fragment, useState } from 'react';
 
-import { CustomLinks } from '../../gantt-chart-model';
-import { Trace, Span, Event } from '../trace';
+import type { CustomLinks } from '../../gantt-chart-model';
+import type { Trace, Span, Event } from '../trace';
 import { formatDuration } from '../utils';
 import { AttributeItems, AttributeItem } from './Attributes';
 

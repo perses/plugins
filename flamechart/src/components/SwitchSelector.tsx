@@ -13,7 +13,7 @@
 
 import { Switch } from '@mui/material';
 import { OptionsEditorControl } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface SwitchSelectorProps {
   onChange: (newValue: boolean) => void;

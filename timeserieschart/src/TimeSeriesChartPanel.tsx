@@ -12,50 +12,48 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
-import {
+import type {
   ChartInstance,
-  YAxisLabel,
   ZoomEventData,
-  useChartsTheme,
   SelectedLegendItemState,
-  ContentWithLegend,
   TableColumnConfig,
   LegendItem,
   LegendProps,
-  useId,
   TooltipConfig,
-  DEFAULT_TOOLTIP_CONFIG,
   TimeChartSeriesMapping,
+  StepOptions,
+} from '@perses-dev/components';
+import {
+  YAxisLabel,
+  useChartsTheme,
+  ContentWithLegend,
+  useId,
+  DEFAULT_TOOLTIP_CONFIG,
   getFormattedMultipleYAxes,
   DEFAULT_LEGEND,
-  StepOptions,
   formatValue,
   getTimeSeriesValues,
 } from '@perses-dev/components';
 import { usePanelAnnotationsWithData } from '@perses-dev/dashboards';
+import type { PanelProps, CalculationType } from '@perses-dev/plugin-system';
 import {
   LEGEND_VALUE_CONFIG,
-  PanelProps,
   useTimeRange,
   validateLegendSpec,
   legendValues,
   getCalculations,
-  CalculationType,
 } from '@perses-dev/plugin-system';
-import { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import type { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
-import { ReactElement, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_FORMAT,
-  DEFAULT_VISUAL,
-  THRESHOLD_PLOT_INTERVAL,
-  QuerySettingsOptions,
-} from './time-series-chart-model';
+import type { TimeSeriesChartOptions, QuerySettingsOptions } from './time-series-chart-model';
+import { DEFAULT_FORMAT, DEFAULT_VISUAL, THRESHOLD_PLOT_INTERVAL } from './time-series-chart-model';
 import { TimeSeriesChartBase } from './TimeSeriesChartBase';
-import { convertAnnotationToTimeSeriesAnnotation, TimeSeriesAnnotation } from './utils/annotation';
+import type { TimeSeriesAnnotation } from './utils/annotation';
+import { convertAnnotationToTimeSeriesAnnotation } from './utils/annotation';
 import {
   getTimeSeries,
   getCommonTimeScaleForQueries,

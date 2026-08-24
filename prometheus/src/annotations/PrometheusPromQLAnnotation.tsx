@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationPlugin, AnnotationQueryPluginDependencies, parseVariables } from '@perses-dev/plugin-system';
+import type { AnnotationPlugin, AnnotationQueryPluginDependencies } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
 
-import { PrometheusPromQLAnnotationOptions } from '../plugins';
+import type { PrometheusPromQLAnnotationOptions } from '../plugins';
 import { getAnnotationData } from './get-annotation-data';
 import { PrometheusPromQLAnnotationOptionEditor } from './PrometheusPromQLAnnotationOptionEditor';
 

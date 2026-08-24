@@ -13,10 +13,11 @@
 
 import { Box, Chip, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
-import { CustomLinks } from '../../gantt-chart-model';
-import { Span, Trace } from '../trace';
+import type { CustomLinks } from '../../gantt-chart-model';
+import type { Span, Trace } from '../trace';
 import { TraceAttributes } from './Attributes';
 import { SpanEventList } from './SpanEvents';
 import { SpanLinkList } from './SpanLinks';

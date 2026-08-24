@@ -11,15 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  ActionOptions,
-  ItemSelectionActionsEditor,
-  OptionsEditorProps,
-  SelectionOptions,
-} from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
+import { ItemSelectionActionsEditor } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
 
-import { TraceTableOptions } from './trace-table-model';
+import type { TraceTableOptions } from './trace-table-model';
 
 type TraceTableItemSelectionActionsEditorProps = OptionsEditorProps<TraceTableOptions>;
 

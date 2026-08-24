@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type * as ComponentsModule from '@perses-dev/components';
+
 import { useOptimalFontSize } from './calculate-font-size';
 
 vi.mock('@perses-dev/components', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@perses-dev/components')>();
+  const actual = await importOriginal<typeof ComponentsModule>();
   return {
     ...actual,
     useChartsTheme: vi.fn().mockReturnValue(actual.testChartsTheme),

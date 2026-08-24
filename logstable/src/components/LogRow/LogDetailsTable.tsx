@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Table, TableBody, TableRow, TableCell, useTheme, alpha } from '@mui/material';
-import { Labels } from '@perses-dev/spec';
+import type { Labels } from '@perses-dev/spec';
 
 import './ansiColors.css';
 import React, { useMemo } from 'react';

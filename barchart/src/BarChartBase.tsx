@@ -12,21 +12,17 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import {
-  EChart,
-  FormatOptions,
-  ModeOption,
-  formatValue,
-  getFormattedAxis,
-  useChartsTheme,
-} from '@perses-dev/components';
+import type { FormatOptions, ModeOption } from '@perses-dev/components';
+import { EChart, formatValue, getFormattedAxis, useChartsTheme } from '@perses-dev/components';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
-import { use as registerECharts, EChartsCoreOption } from 'echarts/core';
+import type { EChartsCoreOption } from 'echarts/core';
+import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { ColorOverride } from './bar-chart-model';
+import type { ColorOverride } from './bar-chart-model';
 import { getOverrideColor } from './utils';
 
 registerECharts([

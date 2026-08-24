@@ -26,7 +26,7 @@ vi.mock('@perses-dev/plugin-system', async () => {
   };
 });
 
-import { LogEntry } from '@perses-dev/spec';
+import type { LogEntry } from '@perses-dev/spec';
 
 import { collectLabelKeys, buildLogsCsvString } from './LogsTableCsvExportAction';
 

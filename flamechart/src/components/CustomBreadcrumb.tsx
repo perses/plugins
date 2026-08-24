@@ -18,7 +18,7 @@ import { formatValue } from '@perses-dev/components';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import CloseIcon from 'mdi-material-ui/Close';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface CustomBreadcrumbProps {
   totalValue: string;

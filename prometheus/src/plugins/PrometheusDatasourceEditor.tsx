@@ -12,14 +12,16 @@
 // limitations under the License.
 
 import { Box, IconButton, TextField, Typography } from '@mui/material';
-import { QueryParamValues } from '@perses-dev/components';
+import type { QueryParamValues } from '@perses-dev/components';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { DurationString } from '@perses-dev/spec';
+import type { DurationString } from '@perses-dev/spec';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ReactElement, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useRef, useState } from 'react';
 
-import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
+import type { PrometheusDatasourceSpec } from './types';
+import { DEFAULT_SCRAPE_INTERVAL } from './types';
 
 interface QueryParamEntry {
   // Unique identifier for the entry, added to avoid using array index as key

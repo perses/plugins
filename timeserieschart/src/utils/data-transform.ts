@@ -11,20 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  OPTIMIZED_MODE_SERIES_LIMIT,
+import type {
   LegacyTimeSeries,
   EChartsDataFormat,
   EChartsValues,
   TimeSeriesOption,
   StepOptions,
-  getCommonTimeScale,
 } from '@perses-dev/components';
-import { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
-import { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import { OPTIMIZED_MODE_SERIES_LIMIT, getCommonTimeScale } from '@perses-dev/components';
+import type { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
+import type { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import type { YAXisComponentOption } from 'echarts';
-import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
+import type { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 
+import type {
+  TimeSeriesChartVisualOptions,
+  TimeSeriesChartYAxisOptions,
+  LineStyleType,
+} from '../time-series-chart-model';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -33,9 +37,6 @@ import {
   DEFAULT_Y_AXIS,
   POSITIVE_MIN_VALUE_MULTIPLIER,
   NEGATIVE_MIN_VALUE_MULTIPLIER,
-  TimeSeriesChartVisualOptions,
-  TimeSeriesChartYAxisOptions,
-  LineStyleType,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
@@ -287,5 +288,5 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
 export function roundDown(num: number): number {
   const magnitude = Math.floor(Math.log10(Math.abs(num)));
   const firstDigit = Math.floor(num / Math.pow(10, magnitude));
-  return firstDigit * Math.pow(10, magnitude);
+  return Number((firstDigit * Math.pow(10, magnitude)).toPrecision(1));
 }

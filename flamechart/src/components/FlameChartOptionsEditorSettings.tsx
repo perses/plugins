@@ -18,9 +18,9 @@ import {
   OptionsEditorColumn,
   OptionsEditorControl,
 } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { FlameChartOptionsEditorProps } from '../flame-chart-model';
+import type { FlameChartOptionsEditorProps } from '../flame-chart-model';
 import {
   usePaletteState,
   useShowSettingsState,

@@ -11,6 +11,7 @@
   "bugs": {
     "url": "https://github.com/perses/plugins/issues"
   },
+  "type": "module",
   "scripts": {
     "test:ci": "npx playwright test --workers=1 --reporter=github,list",
     "test:install": "npx playwright install --with-deps",
@@ -20,6 +21,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "@types/node": "^25.2.3"
+    "@types/node": "^24.0.0"
   }
 }

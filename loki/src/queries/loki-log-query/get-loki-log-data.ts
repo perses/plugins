@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
-import { LogData, LogEntry } from '@perses-dev/spec';
+import type { LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { LogData, LogEntry } from '@perses-dev/spec';
 
-import { LokiClient } from '../../model/loki-client';
-import { LokiStreamResult } from '../../model/loki-client-types';
+import type { LokiClient } from '../../model/loki-client';
+import type { LokiStreamResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { LokiLogQuerySpec } from './loki-log-query-types';
+import type { LokiLogQuerySpec } from './loki-log-query-types';
 
 function convertStreamsToLogs(streams: LokiStreamResult[]): LogData {
   const entries: LogEntry[] = [];

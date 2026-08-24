@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StackTrace } from '@perses-dev/spec';
+import type { StackTrace } from '@perses-dev/spec';
 
-import { FlameChartSample as Sample } from './data-model';
+import type { FlameChartSample as Sample } from './data-model';
 import { filterStackTraceById, buildSamples } from './data-transform';
 import { getSpanColor } from './palette-gen';
 

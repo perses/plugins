@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, SxProps, Typography, useTheme } from '@mui/material';
+import type { SxProps } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { EChart, useChartsTheme, useTimeZone } from '@perses-dev/components';
-import { TimeScale } from '@perses-dev/spec';
-import { EChartsCoreOption, TitleComponentOption } from 'echarts';
+import type { TimeScale } from '@perses-dev/spec';
+import type { EChartsCoreOption, TitleComponentOption } from 'echarts';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
+import type { LegendComponentOption } from 'echarts/components';
 import {
   GridComponent,
   DatasetComponent,
   TitleComponent,
   TooltipComponent,
   VisualMapComponent,
-  LegendComponentOption,
 } from 'echarts/components';
 import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { generateTooltipHTML } from './StatusHistoryTooltip';
 import { getFormattedStatusHistoryAxisLabel } from './utils/get-formatted-axis-label';

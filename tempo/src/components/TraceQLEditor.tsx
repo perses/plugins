@@ -14,10 +14,12 @@
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isValidTraceId } from '@perses-dev/spec';
-import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import { ReactElement, useMemo } from 'react';
+import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { TempoClient } from '../model';
+import type { TempoClient } from '../model';
 import { TraceQLExtension } from './TraceQLExtension';
 
 export interface TraceQLEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {

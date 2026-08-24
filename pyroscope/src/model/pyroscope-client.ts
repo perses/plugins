@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/client';
-import { DatasourceClient } from '@perses-dev/plugin-system';
+import type { RequestHeaders } from '@perses-dev/client';
+import type { DatasourceClient } from '@perses-dev/plugin-system';
 
-import {
+import type {
   SearchProfileTypesParameters,
   SearchProfileTypesResponse,
   SearchLabelNamesParameters,

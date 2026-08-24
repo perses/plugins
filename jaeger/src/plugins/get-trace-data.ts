@@ -11,20 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  datasourceSelectValueToSelector,
-  replaceVariables,
-  TraceQueryPlugin,
-  VariableStateMap,
-} from '@perses-dev/plugin-system';
-import { AbsoluteTimeRange, Notice, TraceSearchResult } from '@perses-dev/spec';
-import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type { TraceQueryPlugin, VariableStateMap } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import type { AbsoluteTimeRange, Notice, TraceSearchResult } from '@perses-dev/spec';
+import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 
-import {
-  DEFAULT_JAEGER,
-  DEFAULT_SEARCH_LIMIT,
-  JAEGER_DATASOURCE_KIND,
+import type {
   JaegerApiResponse,
   JaegerClient,
   JaegerLog,
@@ -36,6 +29,7 @@ import {
   JaegerTrace,
   JaegerTraceQuerySpec,
 } from '../model';
+import { DEFAULT_JAEGER, DEFAULT_SEARCH_LIMIT, JAEGER_DATASOURCE_KIND } from '../model';
 
 const TRACE_ID_PATTERN = /^[a-fA-F0-9]{16}(?:[a-fA-F0-9]{16})?$/;
 

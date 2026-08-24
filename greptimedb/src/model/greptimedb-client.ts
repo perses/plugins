@@ -11,10 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/client';
+import type { RequestHeaders } from '@perses-dev/client';
 
-import { GreptimeDBDatasourceResponse, GreptimeDBQueryRequestParameters } from '../datasources/greptimedb-datasource';
-import { GreptimeDBResponseData } from './greptimedb-data-types';
+import type {
+  GreptimeDBDatasourceResponse,
+  GreptimeDBQueryRequestParameters,
+} from '../datasources/greptimedb-datasource';
+import type { GreptimeDBResponseData } from './greptimedb-data-types';
 
 export interface GreptimeDBQueryOptions {
   datasourceUrl: string;

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
-import { PyroscopeDatasourceSpec } from './pyroscope-datasource-types';
+import type { PyroscopeDatasourceSpec } from './pyroscope-datasource-types';
 
 export interface PyroscopeDatasourceEditorProps {
   value: PyroscopeDatasourceSpec;

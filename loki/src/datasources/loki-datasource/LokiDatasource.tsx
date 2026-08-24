@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
+import type { LokiClient } from '../../model/loki-client';
 import {
-  LokiClient,
   query,
   queryRange,
   labels,
@@ -24,7 +24,7 @@ import {
   volumeRange,
   indexStats,
 } from '../../model/loki-client';
-import { LokiDatasourceSpec } from './loki-datasource-types';
+import type { LokiDatasourceSpec } from './loki-datasource-types';
 import { LokiDatasourceEditor } from './LokiDatasourceEditor';
 
 const createClient: DatasourcePlugin<LokiDatasourceSpec, LokiClient>['createClient'] = (spec, options) => {

@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { LogQueryContext } from '@perses-dev/plugin-system';
 import type { Mock } from 'vitest';
 
 import { VictoriaLogsDatasource } from '../../datasources/victorialogs-datasource';
-import { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
-import { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
+import type { VictoriaLogsDatasourceSpec } from '../../datasources/victorialogs-datasource/types';
+import type { VictoriaLogsStreamQueryRangeResponse } from '../../model/types';
 import { VictoriaLogsLogQuery } from './VictoriaLogsLogQuery';
 
 const datasource: VictoriaLogsDatasourceSpec = {

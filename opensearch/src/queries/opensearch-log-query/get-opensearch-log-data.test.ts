@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { LogQueryContext } from '@perses-dev/plugin-system';
 import type { Mock } from 'vitest';
 
 import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
-import { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
-import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
+import type { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
+import type { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { buildBoundedPPL, convertPPLToLogs, parseTimestamp } from './get-opensearch-log-data';
 import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 

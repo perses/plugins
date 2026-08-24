@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { StackProps } from '@mui/material';
 import {
   Button,
   Checkbox,
@@ -21,25 +22,26 @@ import {
   Menu,
   MenuItem,
   Stack,
-  StackProps,
   TextField,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { Fuzzy, FuzzyMatchingInterval } from '@nexucis/fuzzy';
+import type { FuzzyMatchingInterval } from '@nexucis/fuzzy';
+import { Fuzzy } from '@nexucis/fuzzy';
 import { useExplorerQueryParams } from '@perses-dev/explore';
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import CogIcon from 'mdi-material-ui/Cog';
 import Magnify from 'mdi-material-ui/Magnify';
-import { MouseEvent, ReactElement, useMemo, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { DEFAULT_PROM } from '../../model';
 import { MetricList } from './display/list/MetricList';
 import { FinderFilters } from './filter/FinderFilters';
 import { MetricOverview } from './overview/MetricOverview';
-import { LabelFilter, Settings } from './types';
+import type { LabelFilter, Settings } from './types';
 import { useLabelValues } from './utils';
 
 const PERSES_METRICS_FINDER_SETTINGS = 'PERSES_METRICS_FINDER_SETTINGS';

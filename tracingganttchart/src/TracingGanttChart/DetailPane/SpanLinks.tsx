@@ -13,10 +13,11 @@
 
 import { Divider, List } from '@mui/material';
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
-import { Fragment, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import { Fragment } from 'react';
 
-import { CustomLinks } from '../../gantt-chart-model';
-import { Span, Link } from '../trace';
+import type { CustomLinks } from '../../gantt-chart-model';
+import type { Span, Link } from '../trace';
 import { AttributeItem, AttributeItems } from './Attributes';
 
 export interface SpanLinkListProps {

@@ -18,9 +18,10 @@ import ChevronRight from 'mdi-material-ui/ChevronRight';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { ColumnEditor, ColumnEditorProps } from './ColumnEditor';
+import type { ColumnEditorProps } from './ColumnEditor';
+import { ColumnEditor } from './ColumnEditor';
 
 export interface ColumnEditorContainerProps extends ColumnEditorProps {
   isCollapsed: boolean;

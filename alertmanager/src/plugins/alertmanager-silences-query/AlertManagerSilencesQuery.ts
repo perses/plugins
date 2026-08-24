@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isVariableDatasource, parseVariables, SilencesQueryPlugin } from '@perses-dev/plugin-system';
+import type { SilencesQueryPlugin } from '@perses-dev/plugin-system';
+import { isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
 
-import { AlertManagerSilencesQuerySpec } from '../types';
+import type { AlertManagerSilencesQuerySpec } from '../types';
 import { AlertManagerSilencesQueryEditor } from './AlertManagerSilencesQueryEditor';
 import { getSilencesData } from './get-silences-data';
 

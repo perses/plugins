@@ -11,20 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
-import { TraceSearchResult } from '@perses-dev/spec';
-import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import type { TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { TraceSearchResult } from '@perses-dev/spec';
+import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 
-import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
+import type { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import {
-  GreptimeDBColumnSchema,
-  GreptimeDBRecords,
-  normalizeRecords,
-  toTimestampMs,
-} from '../greptimedb-query-data-model';
-import { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
+import type { GreptimeDBColumnSchema, GreptimeDBRecords } from '../greptimedb-query-data-model';
+import { normalizeRecords, toTimestampMs } from '../greptimedb-query-data-model';
+import type { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
 import { isLikelyTraceDetailSQL } from './trace-query-sql';
 
 type Row = unknown[];

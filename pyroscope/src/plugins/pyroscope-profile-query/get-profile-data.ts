@@ -11,20 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProfileQueryPlugin } from '@perses-dev/plugin-system';
-import { AbsoluteTimeRange, ProfileData, StackTrace, Timeline } from '@perses-dev/spec';
+import type { ProfileQueryPlugin } from '@perses-dev/plugin-system';
+import type { AbsoluteTimeRange, ProfileData, StackTrace, Timeline } from '@perses-dev/spec';
 import { getUnixTime } from 'date-fns';
 
-import {
+import type {
   PyroscopeProfileQuerySpec,
-  isProfileQueryComplete,
-  DEFAULT_PYROSCOPE,
   PyroscopeClient,
   SelectMergeStacktracesRequest,
   SelectSeriesRequest,
   FlameGraph,
   Series,
 } from '../../model';
+import { DEFAULT_PYROSCOPE, isProfileQueryComplete } from '../../model';
 import { computeFilterExpr } from '../../utils/types';
 
 // Pyroscope's Connect API expects timestamps in milliseconds; Perses time ranges are in seconds.

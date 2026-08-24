@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GetVariableOptionsContext } from '@perses-dev/plugin-system';
+import type { GetVariableOptionsContext } from '@perses-dev/plugin-system';
 
-import { LokiStreamResult } from '../model/loki-client-types';
+import type { LokiStreamResult } from '../model/loki-client-types';
 import { stringArrayToVariableOptions, capturingMetric, capturingStreams } from './loki-variables';
 import { LokiLabelNamesVariable } from './LokiLabelNamesVariable';
 import { LokiLabelValuesVariable } from './LokiLabelValuesVariable';

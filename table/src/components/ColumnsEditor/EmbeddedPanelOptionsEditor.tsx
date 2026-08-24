@@ -12,10 +12,12 @@
 // limitations under the License.
 
 import { CircularProgress, Stack, Typography } from '@mui/material';
-import { OptionsEditorTabs, PanelPlugin, usePlugin } from '@perses-dev/plugin-system';
-import { UnknownSpec } from '@perses-dev/spec';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
+import { OptionsEditorTabs, usePlugin } from '@perses-dev/plugin-system';
+import type { UnknownSpec } from '@perses-dev/spec';
 import merge from 'lodash/merge';
-import { ReactElement, useEffect, useMemo, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 export interface EmbeddedPanelOptionsEditorProps {
   kind: string;

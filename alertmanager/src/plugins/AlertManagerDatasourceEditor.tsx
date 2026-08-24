@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { AlertManagerDatasourceSpec } from './types';
+import type { AlertManagerDatasourceSpec } from './types';
 
 export interface AlertManagerDatasourceEditorProps {
   value: AlertManagerDatasourceSpec;

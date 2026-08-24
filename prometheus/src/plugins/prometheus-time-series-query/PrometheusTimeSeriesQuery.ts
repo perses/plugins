@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
 
 import { getTimeSeriesData } from './get-time-series-data';
 import { PrometheusTimeSeriesQueryEditor } from './PrometheusTimeSeriesQueryEditor';
-import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
+import type { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 /**
  * The core Prometheus TimeSeriesQuery plugin for Perses.

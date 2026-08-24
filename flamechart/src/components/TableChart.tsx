@@ -12,12 +12,14 @@
 // limitations under the License.
 
 import { Stack, useTheme, Link } from '@mui/material';
-import { Table, TableColumnConfig } from '@perses-dev/components';
-import { ProfileData } from '@perses-dev/spec';
-import { SortingState } from '@tanstack/react-table';
-import { ReactElement, useMemo, useState } from 'react';
+import type { TableColumnConfig } from '@perses-dev/components';
+import { Table } from '@perses-dev/components';
+import type { ProfileData } from '@perses-dev/spec';
+import type { SortingState } from '@tanstack/react-table';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 
-import { TableChartSample } from '../utils/data-model';
+import type { TableChartSample } from '../utils/data-model';
 import { tableRecursionJson } from '../utils/data-transform';
 import { formatItemValue } from '../utils/format';
 import { SearchBar } from './SearchBar';

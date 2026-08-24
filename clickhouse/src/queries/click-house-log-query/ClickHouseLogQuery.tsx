@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables, LogQueryPlugin } from '@perses-dev/plugin-system';
+import type { LogQueryPlugin } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
 
-import { ClickHouseLogQuerySpec } from './click-house-log-query-types';
+import type { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 import { ClickHouseLogQueryEditor } from './ClickHouseLogQueryEditor';
 import { getClickHouseLogData } from './get-click-house-log-data';
 

@@ -13,7 +13,7 @@
 
 import { ToolbarIconButton } from '@perses-dev/components';
 import CloseIcon from 'mdi-material-ui/Close';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface DeleteFilterItemProps {
   onClick: () => void;

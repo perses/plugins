@@ -14,13 +14,15 @@
 import { Box, useTheme, Popover, Button, ButtonGroup, IconButton } from '@mui/material';
 import { useSelection } from '@perses-dev/components';
 import { formatForDisplay, useSelectionItemActions } from '@perses-dev/dashboards';
-import { ActionOptions, useAllVariableValues } from '@perses-dev/plugin-system';
-import { LogEntry } from '@perses-dev/spec';
+import type { ActionOptions } from '@perses-dev/plugin-system';
+import { useAllVariableValues } from '@perses-dev/plugin-system';
+import type { LogEntry } from '@perses-dev/spec';
 import CloseIcon from 'mdi-material-ui/Close';
-import React, { useCallback, useState, useEffect, useRef, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 
-import { LogsTableOptions } from '../model';
+import type { LogsTableOptions } from '../model';
 import { formatLogEntries, formatLogMessage } from '../utils/copyHelpers';
 import { LogRow } from './LogRow';
 

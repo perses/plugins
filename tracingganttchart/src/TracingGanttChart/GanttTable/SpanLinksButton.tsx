@@ -15,10 +15,11 @@ import { IconButton, Menu, MenuItem } from '@mui/material';
 import { InfoTooltip } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import LaunchIcon from 'mdi-material-ui/Launch';
-import { MouseEvent, ReactElement, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { useState } from 'react';
 
-import { CustomLinks } from '../../gantt-chart-model';
-import { Span } from '../trace';
+import type { CustomLinks } from '../../gantt-chart-model';
+import type { Span } from '../trace';
 
 export interface SpanLinksButtonProps {
   customLinks: CustomLinks;

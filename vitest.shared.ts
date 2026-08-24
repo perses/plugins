@@ -21,7 +21,7 @@ type VitestPackageOptions = {
   passWithNoTests?: boolean;
 };
 
-const repoRoot = resolve(__dirname);
+const repoRoot = import.meta.dirname;
 
 // Common Vitest configuration shared across packages
 const sharedConfig = defineConfig({

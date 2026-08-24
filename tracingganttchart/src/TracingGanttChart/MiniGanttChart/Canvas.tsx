@@ -14,13 +14,15 @@
 import { Box, styled, useTheme } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
 import { useEvent } from '@perses-dev/plugin-system';
-import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback, ReactElement } from 'react';
+import type { MouseEvent as ReactMouseEvent, ReactElement } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
-import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import type { TracingGanttChartOptions } from '../../gantt-chart-model';
 import { Ticks } from '../Ticks';
-import { Span, Trace } from '../trace';
-import { getSpanColor, Viewport } from '../utils';
+import type { Span, Trace } from '../trace';
+import type { Viewport } from '../utils';
+import { getSpanColor } from '../utils';
 import { drawSpans } from './draw';
 
 const CANVAS_HEIGHT = 60;

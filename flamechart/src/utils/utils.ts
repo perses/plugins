@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { ChangeEventHandler } from 'react';
+import type { ChangeEventHandler } from 'react';
 
-import { FlameChartOptionsEditorProps } from '../flame-chart-model';
+import type { FlameChartOptionsEditorProps } from '../flame-chart-model';
 
 /**
  * Hook to manage `palette` state.

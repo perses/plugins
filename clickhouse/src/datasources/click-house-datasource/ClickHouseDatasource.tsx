@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
 import { query } from '../../model/click-house-client';
-import { ClickHouseDatasourceSpec, ClickHouseDatasourceClient } from './click-house-datasource-types';
+import type { ClickHouseDatasourceSpec, ClickHouseDatasourceClient } from './click-house-datasource-types';
 import { ClickHouseDatasourceEditor } from './ClickHouseDatasourceEditor';
 
 const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasourceClient>['createClient'] = (

@@ -12,30 +12,22 @@
 // limitations under the License.
 
 import { FormControl, Stack, TextField } from '@mui/material';
+import type { DatasourceSelectProps, OptionsEditorProps, VariableOption } from '@perses-dev/plugin-system';
 import {
   DatasourceSelect,
-  DatasourceSelectProps,
   isVariableDatasource,
-  OptionsEditorProps,
   useDatasourceClient,
   useDatasourceSelectValueToSelector,
-  VariableOption,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback, ChangeEvent, FocusEvent } from 'react';
+import type { ReactElement, ChangeEvent, FocusEvent } from 'react';
+import { useCallback } from 'react';
 
 import { LogQLEditor } from '../components';
-import {
-  DEFAULT_LOKI,
-  isDefaultLokiSelector,
-  isLokiDatasourceSelector,
-  LOKI_DATASOURCE_KIND,
-  LokiDatasourceSelector,
-  LokiClient,
-  LokiStreamResult,
-} from '../model';
+import type { LokiDatasourceSelector, LokiClient, LokiStreamResult } from '../model';
+import { DEFAULT_LOKI, isDefaultLokiSelector, isLokiDatasourceSelector, LOKI_DATASOURCE_KIND } from '../model';
 import { MatcherEditor } from './MatcherEditor';
-import {
+import type {
   LokiLabelNamesVariableOptions,
   LokiLabelValuesVariableOptions,
   LokiLogQLVariableOptions,

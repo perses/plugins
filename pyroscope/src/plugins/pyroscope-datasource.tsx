@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
+import type { PyroscopeClient } from '../model/pyroscope-client';
 import {
-  PyroscopeClient,
   selectMergeStacktraces,
   selectSeries,
   searchProfileTypes,
@@ -22,7 +22,7 @@ import {
   searchLabelValues,
   searchServices,
 } from '../model/pyroscope-client';
-import { PyroscopeDatasourceSpec } from './pyroscope-datasource-types';
+import type { PyroscopeDatasourceSpec } from './pyroscope-datasource-types';
 import { PyroscopeDatasourceEditor } from './PyroscopeDatasourceEditor';
 
 /**

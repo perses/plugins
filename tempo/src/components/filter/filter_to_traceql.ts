@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationField, Filter } from './filter';
+import type { DurationField, Filter } from './filter';
 
 /**
  * Construct a TraceQL query from a filter.

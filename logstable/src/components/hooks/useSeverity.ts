@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useTheme } from '@mui/material';
-import { LogEntry } from '@perses-dev/spec';
+import type { LogEntry } from '@perses-dev/spec';
 
 import { getSeverity } from '../utils';
 

@@ -13,11 +13,12 @@
 
 import { InfoTooltip } from '@perses-dev/components';
 import { HeaderIconButton } from '@perses-dev/dashboards';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
-import { TracingGanttChartPanelProps } from './TracingGanttChartPanel';
+import type { TracingGanttChartPanelProps } from './TracingGanttChartPanel';
 
 export function DownloadTraceAction(props: TracingGanttChartPanelProps): ReactElement | null {
   const { queryResults } = props;

@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { TextField, Stack, MenuItem, Typography } from '@mui/material';
-import { TableDensity, TableCellConfig, FormatOptions, Transform } from '@perses-dev/components';
-import { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
-import { Definition, UnknownSpec } from '@perses-dev/spec';
+import type { TableDensity, TableCellConfig, FormatOptions, Transform } from '@perses-dev/components';
+import type { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
+import type { Definition, UnknownSpec } from '@perses-dev/spec';
 import React from 'react';
 
 export interface ColumnSettings {

@@ -13,26 +13,14 @@
 
 import { Autocomplete, FormControl, Stack, TextField } from '@mui/material';
 import { useId } from '@perses-dev/components';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  DatasourceSelectValue,
-  OptionsEditorProps,
-  useDatasourceClient,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps, DatasourceSelectValue, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { PromQLEditor } from '../components';
-import {
-  DEFAULT_PROM,
-  isDefaultPromSelector,
-  isPrometheusDatasourceSelector,
-  PROM_DATASOURCE_KIND,
-  PrometheusClient,
-  PrometheusDatasourceSelector,
-} from '../model';
+import type { PrometheusClient, PrometheusDatasourceSelector } from '../model';
+import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector, PROM_DATASOURCE_KIND } from '../model';
 
 export interface PrometheusAnnotationsQuerySpec {
   expr: string;

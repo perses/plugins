@@ -11,19 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
+import type { TableProps } from './components';
 import {
   getTablePanelQueryOptions,
   TableCellsEditor,
   TableColumnsEditor,
   TablePanel,
-  TableProps,
   TableSettingsEditor,
   TableTransformsEditor,
 } from './components';
 import { TableItemSelectionActionsEditor } from './components/TableItemSelectionActionsEditor';
-import { createInitialTableOptions, TableOptions } from './models';
+import type { TableOptions } from './models';
+import { createInitialTableOptions } from './models';
 import { TableExportAction } from './TableExportAction';
 
 /**

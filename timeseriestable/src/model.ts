@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
+import type { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
 
 export interface TimeSeriesTableOptions {
   /**

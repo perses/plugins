@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type * as ClientModule from '@perses-dev/client';
+
 import { createSilence, deleteSilence, getAlerts, getSilence, getSilences, getStatus } from './alertmanager-client';
 
 type FetchResponse = {
@@ -22,7 +24,7 @@ type FetchResponse = {
 
 const fetchMock = vi.hoisted(() => vi.fn());
 vi.mock('@perses-dev/client', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@perses-dev/client')>()),
+  ...(await importOriginal<typeof ClientModule>()),
   fetch: (...args: unknown[]): Promise<FetchResponse> => fetchMock(...args),
 }));
 

@@ -11,17 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { VariablePlugin } from '@perses-dev/plugin-system';
 import {
-  VariablePlugin,
   replaceVariables,
   parseVariables,
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
 
-import { LokiClient, DEFAULT_LOKI, getLokiTimeRange, LOKI_DATASOURCE_KIND } from '../model';
+import type { LokiClient } from '../model';
+import { DEFAULT_LOKI, getLokiTimeRange, LOKI_DATASOURCE_KIND } from '../model';
 import { stringArrayToVariableOptions, LokiLabelNamesVariableEditor } from './loki-variables';
-import { LokiLabelNamesVariableOptions } from './types';
+import type { LokiLabelNamesVariableOptions } from './types';
 
 export const LokiLabelNamesVariable: VariablePlugin<LokiLabelNamesVariableOptions> = {
   getVariableOptions: async (spec, ctx) => {

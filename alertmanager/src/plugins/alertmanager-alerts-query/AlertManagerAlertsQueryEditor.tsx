@@ -13,9 +13,11 @@
 
 import { Checkbox, FormControl, FormControlLabel, Stack } from '@mui/material';
 import { useId } from '@perses-dev/components';
-import { DatasourceSelect, DatasourceSelectProps } from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { LazyTextField } from '../../components/LazyTextField';
 import {
@@ -24,7 +26,7 @@ import {
   isAlertManagerDatasourceSelector,
   isDefaultAlertManagerSelector,
 } from '../../model';
-import { AlertManagerAlertsQuerySpec } from '../types';
+import type { AlertManagerAlertsQuerySpec } from '../types';
 
 interface AlertManagerAlertsQueryEditorProps {
   value: AlertManagerAlertsQuerySpec;

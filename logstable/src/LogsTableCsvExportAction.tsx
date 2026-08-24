@@ -14,11 +14,11 @@
 import { IconButton } from '@mui/material';
 import { InfoTooltip } from '@perses-dev/components';
 import { escapeCsvValue, formatTimestampISO, sanitizeFilename } from '@perses-dev/plugin-system';
-import { LogEntry } from '@perses-dev/spec';
+import type { LogEntry } from '@perses-dev/spec';
 import FileDelimitedOutline from 'mdi-material-ui/FileDelimitedOutline';
 import { useCallback, useMemo } from 'react';
 
-import { LogsTableProps } from './model';
+import type { LogsTableProps } from './model';
 import { stripAnsi } from './utils/ansi';
 
 export function collectLabelKeys(entries: LogEntry[]): string[] {

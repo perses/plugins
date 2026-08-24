@@ -12,21 +12,23 @@
 // limitations under the License.
 
 import { Stack, Box, Menu, MenuItem, Divider, useTheme } from '@mui/material';
-import { useChartsTheme, EChart, MouseEventsParameters } from '@perses-dev/components';
-import { ProfileData } from '@perses-dev/spec';
-import {
+import type { MouseEventsParameters } from '@perses-dev/components';
+import { useChartsTheme, EChart } from '@perses-dev/components';
+import type { ProfileData } from '@perses-dev/spec';
+import type {
   CustomSeriesRenderItem,
   CustomSeriesRenderItemAPI,
   CustomSeriesRenderItemParams,
   CustomSeriesRenderItemReturn,
 } from 'echarts';
-import { EChartsCoreOption } from 'echarts/core';
+import type { EChartsCoreOption } from 'echarts/core';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import RefreshIcon from 'mdi-material-ui/Refresh';
-import { ReactElement, useState, useMemo, MouseEvent } from 'react';
+import type { ReactElement, MouseEvent } from 'react';
+import { useState, useMemo } from 'react';
 
-import { FlameChartSample as Sample } from '../utils/data-model';
+import type { FlameChartSample as Sample } from '../utils/data-model';
 import { buildSamples, findTotalSampleByName } from '../utils/data-transform';
 import { generateTooltip } from '../utils/tooltip';
 import { CustomBreadcrumb } from './CustomBreadcrumb';

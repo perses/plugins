@@ -13,19 +13,16 @@
 
 import { InputLabel, Stack } from '@mui/material';
 import { createModEnterHandler } from '@perses-dev/dashboards';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  isVariableDatasource,
-  OptionsEditorProps,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
-import { ReactElement, useCallback, useState, useEffect } from 'react';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 
 import { LogsQLEditor } from '../../components/logsql-editor';
-import { VICTORIALOGS_DATASOURCE_KIND, VictoriaLogsDatasourceSelector } from '../../model';
+import type { VictoriaLogsDatasourceSelector } from '../../model';
+import { VICTORIALOGS_DATASOURCE_KIND } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
-import { VictoriaLogsLogQuerySpec } from './types';
+import type { VictoriaLogsLogQuerySpec } from './types';
 
 type VictoriaLogsQueryEditorProps = OptionsEditorProps<VictoriaLogsLogQuerySpec>;
 

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AlertsQueryPlugin, isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
+import type { AlertsQueryPlugin } from '@perses-dev/plugin-system';
+import { isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
 
-import { AlertManagerAlertsQuerySpec } from '../types';
+import type { AlertManagerAlertsQuerySpec } from '../types';
 import { AlertManagerAlertsQueryEditor } from './AlertManagerAlertsQueryEditor';
 import { getAlertsData } from './get-alerts-data';
 

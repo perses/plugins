@@ -15,9 +15,9 @@ import { IconButton, Stack, Typography } from '@mui/material';
 import { LinkEditorForm } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { ColumnEditorProps } from './ColumnEditor';
+import type { ColumnEditorProps } from './ColumnEditor';
 
 export type Props = Pick<ColumnEditorProps, 'onChange' | 'column'>;
 

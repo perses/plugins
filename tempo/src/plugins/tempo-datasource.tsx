@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
-import { TempoClient, query, search, searchTagValues, searchTags } from '../model/tempo-client';
-import { TempoDatasourceSpec } from './tempo-datasource-types';
+import type { TempoClient } from '../model/tempo-client';
+import { query, search, searchTagValues, searchTags } from '../model/tempo-client';
+import type { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasourceEditor } from './TempoDatasourceEditor';
 
 /**

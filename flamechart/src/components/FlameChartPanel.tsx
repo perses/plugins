@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Typography, SxProps, useMediaQuery, useTheme } from '@mui/material';
+import type { SxProps } from '@mui/material';
+import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { ProfileData, StackTrace } from '@perses-dev/spec';
-import { TitleComponentOption } from 'echarts';
-import { FC, useState, useEffect, useMemo } from 'react';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import type { ProfileData, StackTrace } from '@perses-dev/spec';
+import type { TitleComponentOption } from 'echarts';
+import type { FC } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
-import { FlameChartOptions } from '../flame-chart-model';
+import type { FlameChartOptions } from '../flame-chart-model';
 import { filterStackTraceById, getMaxDepth } from '../utils/data-transform';
 import { FlameChart } from './FlameChart';
 import { SeriesChart } from './SeriesChart';

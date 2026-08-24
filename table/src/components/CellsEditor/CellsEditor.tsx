@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { CellSettings } from '../../models';
+import type { CellSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
 
 export interface CellsEditorProps {

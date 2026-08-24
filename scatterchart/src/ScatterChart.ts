@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialScatterChartOptions, ScatterChartOptions } from './scatter-chart-model';
-import { ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
+import type { ScatterChartOptions } from './scatter-chart-model';
+import { createInitialScatterChartOptions } from './scatter-chart-model';
+import type { ScatterChartPanelProps } from './ScatterChartPanel';
+import { ScatterChartPanel } from './ScatterChartPanel';
 
 /**
  * The core ScatterChart panel plugin for Perses.

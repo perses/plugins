@@ -11,16 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  OptionsEditorColumn,
-  OptionsEditorGrid,
-  ThresholdsEditor,
-  ThresholdsEditorProps,
-} from '@perses-dev/components';
-import { LegendOptionsEditor, LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ThresholdsEditorProps } from '@perses-dev/components';
+import { OptionsEditorColumn, OptionsEditorGrid, ThresholdsEditor } from '@perses-dev/components';
+import type { LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { LegendOptionsEditor } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
 
-import { LogsTableOptions } from './model';
+import type { LogsTableOptions } from './model';
 
 type LogsTableSettingsEditorProps = OptionsEditorProps<LogsTableOptions>;
 

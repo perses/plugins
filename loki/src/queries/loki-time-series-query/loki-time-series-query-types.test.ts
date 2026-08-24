@@ -15,13 +15,17 @@
 
 vi.mock('echarts/core');
 
-import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import { DatasourceSpec } from '@perses-dev/spec';
+import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
+import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
 import { LokiDatasource } from '../../datasources/loki-datasource';
-import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
-import { LokiQueryRangeMatrixResponse, LokiQueryRangeResponse, LokiQueryResponse } from '../../model/loki-client-types';
+import type { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
+import type {
+  LokiQueryRangeMatrixResponse,
+  LokiQueryRangeResponse,
+  LokiQueryResponse,
+} from '../../model/loki-client-types';
 import { LokiTimeSeriesQuery } from './LokiTimeSeriesQuery';
 
 const datasource: LokiDatasourceSpec = {

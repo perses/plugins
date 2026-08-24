@@ -11,14 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Theme } from '@mui/material';
-import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
-import { PanelProps, useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import type { Theme } from '@mui/material';
+import { Box } from '@mui/material';
+import type { PersesChartsTheme } from '@perses-dev/components';
+import { useChartsTheme } from '@perses-dev/components';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
-import React, { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useMemo } from 'react';
 
-import { MarkdownPanelOptions } from './markdown-panel-model';
+import type { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 

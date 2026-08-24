@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SilencesQueryContext } from '@perses-dev/plugin-system';
+import type { SilencesQueryContext } from '@perses-dev/plugin-system';
 
-import { AlertManagerClient } from '../../model';
+import type { AlertManagerClient } from '../../model';
 import { AlertManagerDatasource } from '../alertmanager-datasource';
-import { AlertManagerSilencesQuerySpec } from '../types';
+import type { AlertManagerSilencesQuerySpec } from '../types';
 import { getSilencesData } from './get-silences-data';
 
 const datasource = { directUrl: 'http://am.example' };

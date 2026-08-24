@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Stack, TextField, MenuItem, CircularProgress } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { PyroscopeDatasourceSelector } from '../model';
+import type { PyroscopeDatasourceSelector } from '../model';
 import { useProfileTypes } from '../utils/use-query';
 
 export interface ProfileTypeSelectorProps {

@@ -12,14 +12,16 @@
 // limitations under the License.
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { screen } from '@testing-library/dom';
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
 import { GanttTableProvider } from './GanttTableProvider';
-import { SpanDuration, SpanDurationProps } from './SpanDuration';
+import type { SpanDurationProps } from './SpanDuration';
+import { SpanDuration } from './SpanDuration';
 
 describe('SpanDuration', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
