@@ -65,20 +65,17 @@
     "@rsbuild/plugin-react": "^1.4.2",
     "@swc/cli": "^0.8.1",
     "@swc/core": "^1.15.3",
-    "@swc/jest": "^0.2.39",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/color-hash": "^2.0.0",
     "@types/express": "^5.0.0",
-    "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.5",
     "concurrently": "^10.0.3",
     "cross-env": "^7.0.3",
     "express": "^4.21.2",
-    "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
+    "jsdom": "^27.0.0",
     "mdi-material-ui": "^7.9.2",
     "oxfmt": "0.55.0",
     "oxlint": "1.70.0",
@@ -90,7 +87,8 @@
     "rsbuild-plugin-dts": "^0.18.0",
     "ts-node": "^10.9.2",
     "turbo": "^2.6.1",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "vitest": "^4.1.11"
   },
   "overrides": {
     "@module-federation/rsbuild-plugin": {

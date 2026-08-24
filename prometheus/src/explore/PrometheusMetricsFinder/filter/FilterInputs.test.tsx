@@ -39,7 +39,7 @@ describe('FilterInputs', () => {
   };
 
   it('should set the label name and label value', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderInputs({ onChange });
 
     const nameInput = screen.getByRole('combobox', { name: 'Label Name' });

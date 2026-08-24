@@ -13,20 +13,21 @@
 
 import { replaceVariables, TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock, MockedFunction } from 'vitest';
 
 import { JaegerClient } from '../model';
 import { getTraceData, jaegerTraceToOTLP } from './get-trace-data';
 import { JaegerDatasource } from './jaeger-datasource';
 
-jest.mock('@perses-dev/plugin-system', () => {
-  const actual = jest.requireActual('@perses-dev/plugin-system');
+vi.mock('@perses-dev/plugin-system', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@perses-dev/plugin-system')>();
   return {
     ...actual,
-    replaceVariables: jest.fn((query: string) => query),
+    replaceVariables: vi.fn((query: string) => query),
   };
 });
 
-const mockedReplaceVariables = replaceVariables as jest.MockedFunction<typeof replaceVariables>;
+const mockedReplaceVariables = replaceVariables as MockedFunction<typeof replaceVariables>;
 
 const datasource = {
   directUrl: 'http://jaeger.example',
@@ -82,12 +83,12 @@ const exampleTrace = {
 
 const makeClient = (): JaegerClient => {
   const client = JaegerDatasource.createClient(datasource, {});
-  client.getTrace = jest.fn(async () => ({ data: [exampleTrace] }));
-  client.searchTraces = jest.fn(async () => ({ data: [exampleTrace] }));
+  client.getTrace = vi.fn(async () => ({ data: [exampleTrace] }));
+  client.searchTraces = vi.fn(async () => ({ data: [exampleTrace] }));
   return client;
 };
 
-const getDatasource: jest.Mock = jest.fn(
+const getDatasource: Mock = vi.fn(
   (): DatasourceSpec<typeof datasource> => ({
     default: false,
     plugin: {
@@ -102,12 +103,12 @@ function createContext(client: JaegerClient): TraceQueryContext {
     variableState: {},
     datasourceStore: {
       getDatasource,
-      getDatasourceClient: jest.fn(() => Promise.resolve(client)),
-      listDatasourceSelectItems: jest.fn(async () => []),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      getDatasourceClient: vi.fn(() => Promise.resolve(client)),
+      listDatasourceSelectItems: vi.fn(async () => []),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     absoluteTimeRange: {
       start: new Date('2024-06-11T10:00:00.000Z'),
@@ -211,7 +212,7 @@ describe('getTraceData', () => {
 
   it('keeps one extra search result only to detect additional matches', async () => {
     const client = makeClient();
-    client.searchTraces = jest.fn(async () => ({
+    client.searchTraces = vi.fn(async () => ({
       data: Array.from({ length: 3 }, (_, index) => ({
         ...exampleTrace,
         traceID: `7d73f3ae841bf59a74cf5b52a328cfc${index}`,

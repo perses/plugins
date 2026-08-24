@@ -13,6 +13,7 @@
 
 import { TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock } from 'vitest';
 
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
@@ -23,17 +24,17 @@ const datasource: GreptimeDBDatasourceSpec = {
 };
 
 const greptimedbStubClient = GreptimeDBDatasource.createClient(datasource, {});
-const mockedQuery = jest.fn();
+const mockedQuery = vi.fn();
 greptimedbStubClient.query = mockedQuery;
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return greptimedbStubClient;
 });
 
 const createStubContext = (variableState: TraceQueryContext['variableState'] = {}): TraceQueryContext => {
   const stubTraceContext: Partial<TraceQueryContext> = {
     datasourceStore: {
-      getDatasource: jest.fn(async (): Promise<DatasourceSpec> => {
+      getDatasource: vi.fn(async (): Promise<DatasourceSpec> => {
         return Promise.resolve({
           default: false,
           plugin: {
@@ -43,11 +44,11 @@ const createStubContext = (variableState: TraceQueryContext['variableState'] = {
         } as DatasourceSpec);
       }),
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     variableState,
   };

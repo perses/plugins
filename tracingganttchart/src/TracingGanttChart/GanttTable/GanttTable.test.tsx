@@ -25,7 +25,7 @@ import { GanttTableProvider } from './GanttTableProvider';
 describe('GanttTable', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
   const renderComponent = (props: Omit<GanttTableProps, 'onSpanClick'>): RenderResult => {
-    const onSpanClick = jest.fn();
+    const onSpanClick = vi.fn();
     return render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <VirtuosoMockContext.Provider value={{ viewportHeight: 300, itemHeight: 20 }}>

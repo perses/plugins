@@ -20,7 +20,7 @@ import { DEFAULT_FORMAT, HeatMapChartOptions } from '../heat-map-chart-model';
 import { HeatMapChartOptionsEditorSettings } from './HeatMapChartOptionsEditorSettings';
 
 describe('HeatMapChartOptionsEditorSettings', () => {
-  const renderHeatMapChartOptionsEditorSettings = (value: HeatMapChartOptions, onChange = jest.fn()): void => {
+  const renderHeatMapChartOptionsEditorSettings = (value: HeatMapChartOptions, onChange = vi.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <HeatMapChartOptionsEditorSettings value={value} onChange={onChange} />
@@ -30,7 +30,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
 
   it('can modify visual map', async () => {
     let showVisualMap: boolean | undefined = false;
-    const onChange = jest.fn((e) => {
+    const onChange = vi.fn((e) => {
       showVisualMap = e.showVisualMap;
     });
     renderHeatMapChartOptionsEditorSettings(
@@ -51,7 +51,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
   });
 
   it('can modify y-axis log base', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderHeatMapChartOptionsEditorSettings(
       {
         yAxisFormat: DEFAULT_FORMAT,
@@ -73,7 +73,7 @@ describe('HeatMapChartOptionsEditorSettings', () => {
   });
 
   it('can clear y-axis log base to none', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderHeatMapChartOptionsEditorSettings(
       {
         yAxisFormat: DEFAULT_FORMAT,

@@ -13,6 +13,7 @@
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock } from 'vitest';
 
 import { GreptimeDBDatasource, GreptimeDBDatasourceSpec } from '../../datasources';
 import { GreptimeDBQueryResponse } from '../../model/greptimedb-client';
@@ -24,7 +25,7 @@ const datasource: GreptimeDBDatasourceSpec = {
 
 const greptimedbStubClient = GreptimeDBDatasource.createClient(datasource, {});
 
-greptimedbStubClient.query = jest.fn(async () => {
+greptimedbStubClient.query = vi.fn(async () => {
   const stubResponse: GreptimeDBQueryResponse = {
     status: 'success',
     data: {
@@ -43,11 +44,11 @@ greptimedbStubClient.query = jest.fn(async () => {
   return stubResponse as GreptimeDBQueryResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return greptimedbStubClient;
 });
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<GreptimeDBDatasourceSpec> => {
+const getDatasource: Mock = vi.fn((): DatasourceSpec<GreptimeDBDatasourceSpec> => {
   return {
     default: false,
     plugin: {
@@ -62,11 +63,11 @@ const createStubContext = (): TimeSeriesQueryContext => {
     datasourceStore: {
       getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('01-01-2025'),
@@ -101,7 +102,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
   });
 
   it('should support stat query without time column', async () => {
-    greptimedbStubClient.query = jest.fn(async () => {
+    greptimedbStubClient.query = vi.fn(async () => {
       const stubResponse: GreptimeDBQueryResponse = {
         status: 'success',
         data: {
@@ -133,7 +134,7 @@ describe('GreptimeDBTimeSeriesQuery', () => {
   });
 
   it('should split rows into multiple series by labels', async () => {
-    greptimedbStubClient.query = jest.fn(async () => {
+    greptimedbStubClient.query = vi.fn(async () => {
       const stubResponse: GreptimeDBQueryResponse = {
         status: 'success',
         data: {

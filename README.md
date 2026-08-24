@@ -50,7 +50,6 @@ This will allow you to use the updates from perses core in your plugin so you ca
 "dependencies": {
     "color-hash": "^2.0.2"
 +   "@perses-dev/components": "v0.0.0-snapshot-panel-actions-520389b",
-+   "@perses-dev/core": "v0.0.0-snapshot-panel-actions-520389b",
 +   "@perses-dev/plugin-system": "v0.0.0-snapshot-panel-actions-520389b"
   },
   "peerDependencies": {
@@ -58,7 +57,6 @@ This will allow you to use the updates from perses core in your plugin so you ca
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
 -   "@perses-dev/components": "^0.51.0-rc.1",
--   "@perses-dev/core": "^0.51.0-rc.1",
 -   "@perses-dev/plugin-system": "^0.51.0-rc.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

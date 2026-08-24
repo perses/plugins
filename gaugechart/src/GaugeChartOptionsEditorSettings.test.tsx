@@ -20,7 +20,7 @@ import { GaugeChartOptions } from './gauge-chart-model';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
 describe('GaugeChartOptionsEditorSettings', () => {
-  const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = jest.fn()): void => {
+  const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = vi.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <GaugeChartOptionsEditorSettings value={value} onChange={onChange} />
@@ -29,7 +29,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
   };
 
   it('can modify unit', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderGaugeChartOptionsEditorSettings(
       {
         format: {
@@ -55,7 +55,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
   });
 
   it('can modify calculation', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderGaugeChartOptionsEditorSettings(
       {
         format: {
@@ -80,7 +80,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
 
   it('can modify max', async () => {
     let maxValue: number | undefined = undefined;
-    const onChange = jest.fn((e) => {
+    const onChange = vi.fn((e) => {
       maxValue = e.max;
     });
     renderGaugeChartOptionsEditorSettings(

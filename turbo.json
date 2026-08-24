@@ -2,7 +2,9 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build": {},
-    "test": {},
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.shared.ts", "$TURBO_ROOT$/vitest.setup.ts"]
+    },
     "lint": {},
     "//#format:root": {
       "cache": false,

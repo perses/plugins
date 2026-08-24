@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { MockedFunction } from 'vitest';
+
 import { greptimedbQuery } from '../../model/greptimedb-client';
 import { GreptimeDBDatasource } from './GreptimeDBDatasource';
 
-jest.mock('../../model/greptimedb-client', () => ({
-  greptimedbQuery: jest.fn(),
+vi.mock('../../model/greptimedb-client', () => ({
+  greptimedbQuery: vi.fn(),
 }));
 
-const mockedQuery = greptimedbQuery as jest.MockedFunction<typeof greptimedbQuery>;
+const mockedQuery = greptimedbQuery as MockedFunction<typeof greptimedbQuery>;
 
 describe('GreptimeDBDatasource.createClient', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedQuery.mockResolvedValue({ status: 'success', data: { output: [] } });
   });
 
