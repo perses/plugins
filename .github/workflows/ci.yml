@@ -91,6 +91,7 @@ jobs:
     needs: 'build'
     runs-on: ubuntu-latest
     permissions:
+      id-token: write # Required for OIDC trusted publishing
       contents: write
     if: ${{ github.event.release.tag_name }}
     env:
