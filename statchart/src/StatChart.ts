@@ -13,7 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialStatChartOptions, StatChartOptions } from './stat-chart-model';
+import { createInitialStatChartOptions, getStatChartQueryOptions, StatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 import { StatChartPanel, StatChartPanelProps } from './StatChartPanel';
 import { StatChartValueMappingEditor } from './StatChartValueMappingEditor';
@@ -24,6 +24,7 @@ import { StatChartValueMappingEditor } from './StatChartValueMappingEditor';
 export const StatChart: PanelPlugin<StatChartOptions, StatChartPanelProps> = {
   PanelComponent: StatChartPanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
+  queryOptions: getStatChartQueryOptions,
   panelOptionsEditorComponents: [
     {
       label: 'Settings',
