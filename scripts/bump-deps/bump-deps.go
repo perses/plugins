@@ -28,12 +28,21 @@ import (
 
 var (
 	// sharedPackageNames contains the list of packages release by the repository perses/shared to bump
-	sharedPackageNames = []string{"components", "dashboards", "plugin-system", "explore"}
-	persesPackageName  = "core"
+	sharedPackageNames = []string{"components", "dashboards", "plugin-system", "explore", "client"}
+	// specPackageNames contains the list of packages release by the repository perses/spec to bump
+	specPackageNames = []string{"spec"}
 )
 
-func bumpGoDep(workspace, version string) {
-	goGetCMD := command.Create("go", "get", fmt.Sprintf("github.com/perses/perses@v%s", version))
+func logBumpSuccess(language string, workspace string, version string) {
+	isRootMessage := ""
+	if workspace == "" {
+		isRootMessage = " (root)"
+	}
+	logrus.Infof("successfully bumped %s dependencies for %q%s to version %s", language, workspace, isRootMessage, version)
+}
+
+func bumpGoDep(workspace, version, repository string) {
+	goGetCMD := command.Create("go", "get", fmt.Sprintf("github.com/perses/%s@v%s", repository, version))
 	goGetCMD.Dir = workspace
 	if err := goGetCMD.Run(); err != nil {
 		logrus.WithError(err).WithField("workspace", workspace).Fatal("unable to bump the go dependencies")
@@ -43,18 +52,18 @@ func bumpGoDep(workspace, version string) {
 	if err := goModTidyCMD.Run(); err != nil {
 		logrus.WithError(err).WithField("workspace", workspace).Fatal("unable to run go mod tidy")
 	}
-	logrus.Infof("successfully bumped go dependencies for %s to version %s", workspace, version)
+	logBumpSuccess("go", workspace, version)
 }
 
-func bumpCueDep(workspace, version string, sharedPackage bool) {
+func bumpCueDep(workspace, version string, repository string) {
 	packageName := "github.com/perses/perses/cue"
-	if sharedPackage {
-		packageName = "github.com/perses/shared/cue"
+	if len(repository) > 0 {
+		packageName = fmt.Sprintf("github.com/perses/%s/cue", repository)
 	}
 	cueModPath := filepath.Join(workspace, "cue.mod", "module.cue")
 	data, err := os.ReadFile(cueModPath)
 	if err != nil {
-		logrus.WithError(err).Fatalf("unable to read the file %s", cueModPath)
+		logrus.WithError(err).Errorf("unable to read the file %s", cueModPath)
 	}
 	if bytes.Contains(data, []byte(packageName)) {
 		if cueErr := command.RunInDirectory(workspace, "cue", "mod", "get", fmt.Sprintf("%s@v%s", packageName, version)); cueErr != nil {
@@ -63,7 +72,7 @@ func bumpCueDep(workspace, version string, sharedPackage bool) {
 		if cueErr := command.RunInDirectory(workspace, "cue", "mod", "tidy"); cueErr != nil {
 			logrus.WithError(cueErr).WithField("workspace", workspace).Fatal("unable to run cue mod tidy")
 		}
-		logrus.Infof("successfully bumped cue dependencies for %s to version %s", workspace, version)
+		logBumpSuccess("cue", workspace, version)
 	}
 }
 
@@ -86,44 +95,55 @@ func bumpPackage(workspace string, version string, componentNames ...string) {
 	if writeErr := os.WriteFile(pkgPath, newData, 0644); writeErr != nil {
 		logrus.WithError(writeErr).Fatalf("unable to write the file %s", pkgPath)
 	}
-	logrus.Infof("successfully bumped npm dependencies for %s to version %s", workspace, version)
+	logBumpSuccess("npm", workspace, version)
 }
 
 func bumpPersesDep(workspaces []string, version string) {
 	for _, workspace := range workspaces {
-		bumpGoDep(workspace, version)
-		bumpPackage(workspace, version, persesPackageName)
-		bumpCueDep(workspace, version, false)
+		bumpGoDep(workspace, version, "perses")
+		bumpCueDep(workspace, version, "perses")
+	}
+}
+
+func bumpSpecDep(workspaces []string, version string) {
+	for _, workspace := range workspaces {
+		bumpGoDep(workspace, version, "spec")
+		bumpPackage(workspace, version, specPackageNames...)
+		bumpCueDep(workspace, version, "spec")
 	}
 }
 
 func bumpSharedDep(workspaces []string, version string) {
 	for _, workspace := range workspaces {
 		bumpPackage(workspace, version, sharedPackageNames...)
-		bumpCueDep(workspace, version, true)
+		bumpCueDep(workspace, version, "shared")
 	}
 }
 
 // This script bumps all perse-dev and perses shared dependencies for go, cuelang and npm packages to the provided version.
 // To be used like that: go run ./scripts/bump-deps/bump-deps.go --version=<version>
 // Note: the version provided does not contain the prefix 'v'.
-// Example: go run ./scripts/bump-deps/bump-deps.go --version=0.52.0-beta.4 --shared-version=0.10.0
+// Example: go run ./scripts/bump-deps/bump-deps.go --version=0.52.0-beta.4 --shared-version=0.10.0 --spec-version=0.1.0
 func main() {
 	version := flag.String("version", "", "the version to use for the bump.")
 	sharedVersion := flag.String("shared-version", "", "the version for the shared component to use for the bump.")
+	specVersion := flag.String("spec-version", "", "the version for the spec component to use for the bump.")
 	flag.Parse()
-	if *version == "" && *sharedVersion == "" {
+	if *version == "" && *sharedVersion == "" && *specVersion == "" {
 		logrus.Fatal("you must provide a version to use for the bump")
 	}
 
 	workspaces := npm.MustGetWorkspaces(".")
 	if *version != "" {
-		bumpPackage("", *version, persesPackageName)
 		bumpPersesDep(workspaces, *version)
 	}
 	if *sharedVersion != "" {
 		bumpPackage("", *sharedVersion, sharedPackageNames...)
 		bumpSharedDep(workspaces, *sharedVersion)
+	}
+	if *specVersion != "" {
+		bumpPackage("", *specVersion, specPackageNames...)
+		bumpSpecDep(workspaces, *specVersion)
 	}
 	if npmErr := command.Run("npm", "install"); npmErr != nil {
 		logrus.WithError(npmErr).Fatal("unable to run npm install")
