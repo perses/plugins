@@ -73,12 +73,12 @@ const EMPTY_STACK_TRACE: StackTrace = { id: 0, name: '', level: 0, start: 0, end
 function makeClient(overrides: Partial<PyroscopeClient> = {}): PyroscopeClient {
   return {
     options: { datasourceUrl: 'http://example.com' },
-    selectMergeStacktraces: jest.fn(),
-    selectSeries: jest.fn(),
-    searchProfileTypes: jest.fn(),
-    searchLabelNames: jest.fn(),
-    searchLabelValues: jest.fn(),
-    searchServices: jest.fn(),
+    selectMergeStacktraces: vi.fn(),
+    selectSeries: vi.fn(),
+    searchProfileTypes: vi.fn(),
+    searchLabelNames: vi.fn(),
+    searchLabelValues: vi.fn(),
+    searchServices: vi.fn(),
     ...overrides,
   };
 }
@@ -91,13 +91,13 @@ function createContext(
 ): ProfileQueryContext {
   return {
     datasourceStore: {
-      getDatasource: jest.fn(),
-      getDatasourceClient: jest.fn(() => Promise.resolve(client)),
-      listDatasourceSelectItems: jest.fn(async () => []),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      getDatasource: vi.fn(),
+      getDatasourceClient: vi.fn(() => Promise.resolve(client)),
+      listDatasourceSelectItems: vi.fn(async () => []),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     absoluteTimeRange,
   } as ProfileQueryContext;
@@ -146,8 +146,8 @@ describe('getProfileData', () => {
   });
 
   it('builds the flame graph and timeline requests from the spec and time range', async () => {
-    const selectMergeStacktraces = jest.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
-    const selectSeries = jest.fn().mockResolvedValue({ series: [] });
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
     const client = makeClient({ selectMergeStacktraces, selectSeries });
 
     await getProfileData(BASE_SPEC, createContext(client, TIME_RANGE));
@@ -173,8 +173,8 @@ describe('getProfileData', () => {
   });
 
   it('omits maxNodes from the flame graph request when the spec does not set it', async () => {
-    const selectMergeStacktraces = jest.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
-    const selectSeries = jest.fn().mockResolvedValue({ series: [] });
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
     const client = makeClient({ selectMergeStacktraces, selectSeries });
 
     await getProfileData({ ...BASE_SPEC, maxNodes: undefined }, createContext(client, TIME_RANGE));
@@ -183,8 +183,8 @@ describe('getProfileData', () => {
   });
 
   it('builds a label selector with only service_name when there are no filters', async () => {
-    const selectMergeStacktraces = jest.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
-    const selectSeries = jest.fn().mockResolvedValue({ series: [] });
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
     const client = makeClient({ selectMergeStacktraces, selectSeries });
 
     await getProfileData({ ...BASE_SPEC, filters: undefined }, createContext(client, TIME_RANGE));
@@ -196,10 +196,10 @@ describe('getProfileData', () => {
 
   it('defaults to the last hour ending now when no absolute time range is provided', async () => {
     const fixedNowMs = 1_718_100_000_000;
-    jest.spyOn(Date, 'now').mockReturnValue(fixedNowMs);
+    vi.spyOn(Date, 'now').mockReturnValue(fixedNowMs);
 
-    const selectMergeStacktraces = jest.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
-    const selectSeries = jest.fn().mockResolvedValue({ series: [] });
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
     const client = makeClient({ selectMergeStacktraces, selectSeries });
 
     await getProfileData(BASE_SPEC, createContext(client, undefined));
@@ -208,7 +208,7 @@ describe('getProfileData', () => {
       expect.objectContaining({ start: fixedNowMs - 3_600_000, end: fixedNowMs }),
     );
 
-    jest.spyOn(Date, 'now').mockRestore();
+    vi.spyOn(Date, 'now').mockRestore();
   });
 
   it('assembles the final ProfileData from the flame graph and timeline responses', async () => {
@@ -221,8 +221,8 @@ describe('getProfileData', () => {
         ],
       },
     ];
-    const selectMergeStacktraces = jest.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
-    const selectSeries = jest.fn().mockResolvedValue({ series: seriesResponse });
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: seriesResponse });
     const client = makeClient({ selectMergeStacktraces, selectSeries });
 
     const result = await getProfileData(BASE_SPEC, createContext(client, TIME_RANGE));
@@ -242,8 +242,8 @@ describe('getProfileData', () => {
   });
 
   it('propagates a rejection if either request fails', async () => {
-    const selectMergeStacktraces = jest.fn().mockRejectedValue(new Error('flame graph request failed'));
-    const selectSeries = jest.fn().mockResolvedValue({ series: [] });
+    const selectMergeStacktraces = vi.fn().mockRejectedValue(new Error('flame graph request failed'));
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
     const client = makeClient({ selectMergeStacktraces, selectSeries });
 
     await expect(getProfileData(BASE_SPEC, createContext(client, TIME_RANGE))).rejects.toThrow(
