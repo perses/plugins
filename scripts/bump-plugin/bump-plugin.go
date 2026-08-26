@@ -20,30 +20,43 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func bump(pluginName string, bumpType string) error {
+func bump(pluginName, bumpType, preID string) error {
 	if pluginName == "" {
-		return command.Run("npm", "version", bumpType, "--workspaces", "--no-git-tag-version")
+		if preID == "" {
+			return command.Run("npm", "version", bumpType, "--workspaces", "--no-git-tag-version")
+		}
+		return command.Run("npm", "version", bumpType, "--workspaces", "--preid", preID, "--no-git-tag-version")
 	}
-	return command.Run("npm", "version", bumpType, "--workspace", pluginName, "--no-git-tag-version")
+	if preID == "" {
+		return command.Run("npm", "version", bumpType, "--workspace", pluginName, "--no-git-tag-version")
+	}
+	return command.Run("npm", "version", bumpType, "--workspace", pluginName, "--preid", preID, "--no-git-tag-version")
 }
 
 func main() {
-	bumpAll := flag.Bool("all", false, "bump all the plugins versions to the next minor version")
+	bumpAll := flag.Bool("all", false, `bump all the plugins versions to the next minor version.
+You can also reuse it to create and update beta, rc, ...
+# Creation of the first beta
+go run ./scripts/bump-plugin --all --type preminor --preid beta
+
+# Following betas
+go run ./scripts/bump-plugin --all --type prerelease --preid beta`)
 	bumpSinglePlugin := flag.String("name", "", "bump a single plugin to the next minor version")
 	bumpType := flag.String("type", "minor", "the type of version bump (major, minor, patch)")
+	bumpPreID := flag.String("preid", "", "the preid for the version bump (alpha, beta, rc)")
 	flag.Parse()
 	if !*bumpAll {
 		if len(*bumpSinglePlugin) == 0 {
 			logrus.Fatal("you must provide a plugin name if the --all flag is not set")
 		}
 		logrus.Infof("bumping %s", *bumpSinglePlugin)
-		if err := bump(*bumpSinglePlugin, *bumpType); err != nil {
+		if err := bump(*bumpSinglePlugin, *bumpType, *bumpPreID); err != nil {
 			logrus.WithError(err).Fatalf("unable to bump the version of the plugin %s", *bumpSinglePlugin)
 		}
 		return
 	}
 	logrus.Info("bumping all the plugins")
-	if err := bump("", *bumpType); err != nil {
+	if err := bump("", *bumpType, *bumpPreID); err != nil {
 		logrus.WithError(err).Fatal("unable to bump the versions of the plugins")
 	}
 }
