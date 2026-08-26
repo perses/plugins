@@ -11,12 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProfileData, StackTrace } from '@perses-dev/spec';
+import { ProfileQueryContext } from '@perses-dev/plugin-system';
+import { StackTrace } from '@perses-dev/spec';
 
-import { SearchProfilesResponse } from '../../model';
-import { transformProfileResponse } from './get-profile-data';
+import {
+  FlameGraph,
+  Series,
+  PyroscopeClient,
+  PyroscopeProfileQuerySpec,
+  SelectMergeStacktracesRequest,
+  SelectSeriesRequest,
+} from '../../model';
+import { getProfileData, transformFlameGraph, transformTimeline } from './get-profile-data';
 
-// Flamebearer levels use groups of 4 numbers: [offset, total, self, nameIndex].
+// Flamegraph levels use groups of 4 numbers: [offset, total, self, nameIndex].
 // `offset` is the gap (in samples) since the end of the previous sibling on the same level.
 //
 //            root [0,10)
@@ -24,29 +32,16 @@ import { transformProfileResponse } from './get-profile-data';
 //      foo [0,6)        bar [6,10)
 //      /       \                \
 // baz [0,3) qux [3,5)        quux [6,10)
-const MOCK_RESPONSE: SearchProfilesResponse = {
-  flamebearer: {
-    names: ['root', 'foo', 'bar', 'baz', 'qux', 'quux'],
-    levels: [
-      [0, 10, 2, 0],
-      [0, 6, 1, 1, 0, 4, 4, 2],
-      [0, 3, 3, 3, 0, 2, 2, 4, 1, 4, 4, 5],
-    ],
-    numTicks: 42,
-    maxSelf: 4,
-  },
-  metadata: {
-    format: 'single',
-    spyName: 'gospy',
-    sampleRate: 100,
-    units: 'samples',
-    name: 'process_cpu',
-  },
-  timeline: {
-    startTime: 1_600_000_000,
-    samples: [1, 2, 3],
-    durationDelta: 10,
-  },
+// int64 values arrive as JSON strings over the Connect API; the transform must coerce them.
+const MOCK_FLAMEGRAPH: FlameGraph = {
+  names: ['root', 'foo', 'bar', 'baz', 'qux', 'quux'],
+  levels: [
+    { values: ['0', '10', '2', '0'] },
+    { values: ['0', '6', '1', '1', '0', '4', '4', '2'] },
+    { values: ['0', '3', '3', '3', '0', '2', '2', '4', '1', '4', '4', '5'] },
+  ],
+  total: '42',
+  maxSelf: '4',
 };
 
 // A deeper, wider tree with gaps between siblings (self time) and a function ("recurse")
@@ -59,45 +54,215 @@ const MOCK_RESPONSE: SearchProfilesResponse = {
 //   recurse [2,10)    recurse [12,18)
 //    /         \
 // recurse [2,6) helper [7,9)
-const MOCK_COMPLEX_RESPONSE: SearchProfilesResponse = {
-  flamebearer: {
-    names: ['root', 'main', 'cleanup', 'recurse', 'helper'],
-    levels: [
-      [0, 20, 0, 0],
-      [0, 18, 4, 1, 0, 2, 2, 2],
-      [2, 8, 2, 3, 2, 6, 6, 3],
-      [2, 4, 4, 3, 1, 2, 2, 4],
-    ],
-    numTicks: 20,
-    maxSelf: 6,
-  },
-  metadata: {
-    format: 'single',
-    spyName: 'gospy',
-    sampleRate: 100,
-    units: 'samples',
-    name: 'process_cpu',
-  },
-  timeline: {
-    startTime: 1_600_000_000,
-    samples: [1, 2, 3],
-    durationDelta: 10,
-  },
+const MOCK_COMPLEX_FLAMEGRAPH: FlameGraph = {
+  names: ['root', 'main', 'cleanup', 'recurse', 'helper'],
+  levels: [
+    { values: ['0', '20', '0', '0'] },
+    { values: ['0', '18', '4', '1', '0', '2', '2', '2'] },
+    { values: ['2', '8', '2', '3', '2', '6', '6', '3'] },
+    { values: ['2', '4', '4', '3', '1', '2', '2', '4'] },
+  ],
+  total: '20',
+  maxSelf: '6',
 };
 
-describe('transformProfileResponse', () => {
-  it('returns empty profile data when there is no response', () => {
-    expect(transformProfileResponse(undefined as unknown as SearchProfilesResponse)).toEqual({
-      profile: { stackTrace: { id: 0, name: '', level: 0, start: 0, end: 0, total: 0, self: 0, children: [] } },
+const EMPTY_STACK_TRACE: StackTrace = { id: 0, name: '', level: 0, start: 0, end: 0, total: 0, self: 0, children: [] };
+
+// Builds a stub PyroscopeClient. Individual test cases override the two methods getProfileData
+// actually calls; the rest are present (as no-op mocks) only to satisfy the PyroscopeClient type.
+function makeClient(overrides: Partial<PyroscopeClient> = {}): PyroscopeClient {
+  return {
+    options: { datasourceUrl: 'http://example.com' },
+    selectMergeStacktraces: vi.fn(),
+    selectSeries: vi.fn(),
+    searchProfileTypes: vi.fn(),
+    searchLabelNames: vi.fn(),
+    searchLabelValues: vi.fn(),
+    searchServices: vi.fn(),
+    ...overrides,
+  };
+}
+
+// Builds a stub ProfileQueryContext. `absoluteTimeRange` is omitted by default, matching the
+// "no time range selected" case; individual tests pass one in to exercise the other branch.
+function createContext(
+  client: PyroscopeClient,
+  absoluteTimeRange?: ProfileQueryContext['absoluteTimeRange'],
+): ProfileQueryContext {
+  return {
+    datasourceStore: {
+      getDatasource: vi.fn(),
+      getDatasourceClient: vi.fn(() => Promise.resolve(client)),
+      listDatasourceSelectItems: vi.fn(async () => []),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
+    },
+    absoluteTimeRange,
+  } as ProfileQueryContext;
+}
+
+const BASE_SPEC: PyroscopeProfileQuerySpec = {
+  profileType: 'process_cpu:cpu:nanoseconds:cpu:nanoseconds',
+  service: 'my-service',
+  filters: [{ labelName: 'env', operator: '=', labelValue: 'prod' }],
+  maxNodes: 100,
+};
+
+// A 1-hour window with whole-second boundaries, so the derived milliseconds and step are exact.
+const TIME_RANGE = {
+  start: new Date('2024-06-11T10:00:00.000Z'),
+  end: new Date('2024-06-11T11:00:00.000Z'),
+};
+
+describe('getProfileData', () => {
+  const EMPTY_PROFILE_DATA = {
+    profile: { stackTrace: EMPTY_STACK_TRACE },
+    numTicks: 0,
+    maxSelf: 0,
+    metadata: { spyName: '', sampleRate: 0, units: '', name: '' },
+    timeline: { startTime: 0, samples: [], durationDelta: 0 },
+  };
+
+  it('returns empty profile data without resolving a client when profileType is missing', async () => {
+    const client = makeClient();
+    const context = createContext(client, TIME_RANGE);
+
+    const result = await getProfileData({ ...BASE_SPEC, profileType: '' }, context);
+
+    expect(context.datasourceStore.getDatasourceClient).not.toHaveBeenCalled();
+    expect(result).toEqual(EMPTY_PROFILE_DATA);
+  });
+
+  it('returns empty profile data without resolving a client when service is missing', async () => {
+    const client = makeClient();
+    const context = createContext(client, TIME_RANGE);
+
+    const result = await getProfileData({ ...BASE_SPEC, service: undefined }, context);
+
+    expect(context.datasourceStore.getDatasourceClient).not.toHaveBeenCalled();
+    expect(result).toEqual(EMPTY_PROFILE_DATA);
+  });
+
+  it('builds the flame graph and timeline requests from the spec and time range', async () => {
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
+    const client = makeClient({ selectMergeStacktraces, selectSeries });
+
+    await getProfileData(BASE_SPEC, createContext(client, TIME_RANGE));
+
+    const expectedStacktracesRequest: SelectMergeStacktracesRequest = {
+      profileTypeID: 'process_cpu:cpu:nanoseconds:cpu:nanoseconds',
+      labelSelector: '{service_name="my-service",env="prod"}',
+      start: 1_718_100_000_000,
+      end: 1_718_103_600_000,
+      maxNodes: 100,
+    };
+    expect(selectMergeStacktraces).toHaveBeenCalledWith(expectedStacktracesRequest);
+
+    const expectedSeriesRequest: SelectSeriesRequest = {
+      profileTypeID: 'process_cpu:cpu:nanoseconds:cpu:nanoseconds',
+      labelSelector: '{service_name="my-service",env="prod"}',
+      start: 1_718_100_000_000,
+      end: 1_718_103_600_000,
+      step: 10, // 3600s window / 1000 target points = 3.6, floored to 3, floored up to the 10s minimum
+      aggregation: 'TIME_SERIES_AGGREGATION_TYPE_SUM',
+    };
+    expect(selectSeries).toHaveBeenCalledWith(expectedSeriesRequest);
+  });
+
+  it('omits maxNodes from the flame graph request when the spec does not set it', async () => {
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
+    const client = makeClient({ selectMergeStacktraces, selectSeries });
+
+    await getProfileData({ ...BASE_SPEC, maxNodes: undefined }, createContext(client, TIME_RANGE));
+
+    expect(selectMergeStacktraces).toHaveBeenCalledWith(expect.not.objectContaining({ maxNodes: expect.anything() }));
+  });
+
+  it('builds a label selector with only service_name when there are no filters', async () => {
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
+    const client = makeClient({ selectMergeStacktraces, selectSeries });
+
+    await getProfileData({ ...BASE_SPEC, filters: undefined }, createContext(client, TIME_RANGE));
+
+    expect(selectMergeStacktraces).toHaveBeenCalledWith(
+      expect.objectContaining({ labelSelector: '{service_name="my-service"}' }),
+    );
+  });
+
+  it('defaults to the last hour ending now when no absolute time range is provided', async () => {
+    const fixedNowMs = 1_718_100_000_000;
+    vi.spyOn(Date, 'now').mockReturnValue(fixedNowMs);
+
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
+    const client = makeClient({ selectMergeStacktraces, selectSeries });
+
+    await getProfileData(BASE_SPEC, createContext(client, undefined));
+
+    expect(selectMergeStacktraces).toHaveBeenCalledWith(
+      expect.objectContaining({ start: fixedNowMs - 3_600_000, end: fixedNowMs }),
+    );
+
+    vi.spyOn(Date, 'now').mockRestore();
+  });
+
+  it('assembles the final ProfileData from the flame graph and timeline responses', async () => {
+    const seriesResponse: Series[] = [
+      {
+        labels: [],
+        points: [
+          { timestamp: '1718100000000', value: 1 },
+          { timestamp: '1718100010000', value: 2 },
+        ],
+      },
+    ];
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: seriesResponse });
+    const client = makeClient({ selectMergeStacktraces, selectSeries });
+
+    const result = await getProfileData(BASE_SPEC, createContext(client, TIME_RANGE));
+
+    expect(result.numTicks).toBe(42);
+    expect(result.maxSelf).toBe(4);
+    expect(result.profile.stackTrace.name).toBe('root');
+    expect(result.metadata).toEqual({ spyName: '', sampleRate: 0, units: 'nanoseconds', name: 'process_cpu' });
+    const timeline = result.timeline;
+    expect(timeline).toBeDefined();
+    expect(timeline?.startTime).toBe(1_718_100_000);
+    expect(timeline?.durationDelta).toBe(10);
+    expect(timeline?.samples).toHaveLength(360);
+    expect(timeline?.samples[0]).toBe(1);
+    expect(timeline?.samples[1]).toBe(2);
+    expect(timeline?.samples.slice(2)).toEqual(Array(358).fill(0));
+  });
+
+  it('propagates a rejection if either request fails', async () => {
+    const selectMergeStacktraces = vi.fn().mockRejectedValue(new Error('flame graph request failed'));
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
+    const client = makeClient({ selectMergeStacktraces, selectSeries });
+
+    await expect(getProfileData(BASE_SPEC, createContext(client, TIME_RANGE))).rejects.toThrow(
+      'flame graph request failed',
+    );
+  });
+});
+
+describe('transformFlameGraph', () => {
+  it('returns an empty stack trace when there is no flame graph', () => {
+    expect(transformFlameGraph(undefined)).toEqual({
+      stackTrace: EMPTY_STACK_TRACE,
       numTicks: 0,
       maxSelf: 0,
-      metadata: { spyName: '', sampleRate: 0, units: '', name: '' },
-      timeline: { startTime: 0, samples: [], durationDelta: 0 },
     });
   });
 
-  it('builds the stack trace tree from the flamebearer levels', () => {
-    const result = transformProfileResponse(MOCK_RESPONSE);
+  it('builds the stack trace tree from the flame graph levels', () => {
+    const result = transformFlameGraph(MOCK_FLAMEGRAPH);
 
     const baz: StackTrace = { id: 4, name: 'baz', level: 2, start: 0, end: 3, total: 3, self: 3, children: [] };
     const qux: StackTrace = { id: 5, name: 'qux', level: 2, start: 3, end: 5, total: 2, self: 2, children: [] };
@@ -124,49 +289,24 @@ describe('transformProfileResponse', () => {
       children: [foo, bar],
     };
 
-    expect(result.profile.stackTrace).toEqual(root);
+    expect(result.stackTrace).toEqual(root);
   });
 
-  it('passes through numTicks, maxSelf, metadata and timeline unchanged', () => {
-    const result = transformProfileResponse(MOCK_RESPONSE);
+  it('passes through numTicks (flame graph total) and maxSelf', () => {
+    const result = transformFlameGraph(MOCK_FLAMEGRAPH);
 
     expect(result.numTicks).toBe(42);
     expect(result.maxSelf).toBe(4);
-    expect(result.metadata).toEqual({
-      spyName: 'gospy',
-      sampleRate: 100,
-      units: 'samples',
-      name: 'process_cpu',
-    });
-    expect(result.timeline).toEqual({
-      startTime: 1_600_000_000,
-      samples: [1, 2, 3],
-      durationDelta: 10,
-    });
   });
 
   it('returns an empty stack trace when there are no levels', () => {
-    const response: SearchProfilesResponse = {
-      ...MOCK_RESPONSE,
-      flamebearer: { ...MOCK_RESPONSE.flamebearer, levels: [] },
-    };
+    const result = transformFlameGraph({ ...MOCK_FLAMEGRAPH, levels: [] });
 
-    const result = transformProfileResponse(response);
-
-    expect(result.profile.stackTrace).toEqual({
-      id: 0,
-      name: '',
-      level: 0,
-      start: 0,
-      end: 0,
-      total: 0,
-      self: 0,
-      children: [],
-    });
+    expect(result.stackTrace).toEqual(EMPTY_STACK_TRACE);
   });
 
   it('builds a deeper tree with multiple siblings, gaps between children, and a name reused across call sites', () => {
-    const result = transformProfileResponse(MOCK_COMPLEX_RESPONSE);
+    const result = transformFlameGraph(MOCK_COMPLEX_FLAMEGRAPH);
 
     const recurseLeaf: StackTrace = {
       id: 6,
@@ -230,31 +370,96 @@ describe('transformProfileResponse', () => {
       children: [main, cleanup],
     };
 
-    expect(result.profile.stackTrace).toEqual(root);
+    expect(result.stackTrace).toEqual(root);
+  });
+});
+
+describe('transformTimeline', () => {
+  // 1_600_000_000_000 ms .. 1_600_000_000_000 + 50_000 ms, at a 10s step -> 5 buckets.
+  const START_MS = 1_600_000_000_000;
+  const END_MS = START_MS + 50_000;
+  const STEP_SECONDS = 10;
+
+  it('returns a zero-filled timeline spanning the full requested window when there is no series', () => {
+    expect(transformTimeline(undefined, START_MS, END_MS, STEP_SECONDS)).toEqual({
+      startTime: 1_600_000_000,
+      samples: [0, 0, 0, 0, 0],
+      durationDelta: 10,
+    });
+    expect(transformTimeline([], START_MS, END_MS, STEP_SECONDS)).toEqual({
+      startTime: 1_600_000_000,
+      samples: [0, 0, 0, 0, 0],
+      durationDelta: 10,
+    });
+  });
+
+  it('places each point in the bucket matching its timestamp, always starting at the query start', () => {
+    const series: Series[] = [
+      {
+        labels: [],
+        points: [
+          { timestamp: String(START_MS), value: 1 },
+          { timestamp: String(START_MS + 10_000), value: 2 },
+          { timestamp: String(START_MS + 40_000), value: 5 },
+        ],
+      },
+    ];
+
+    expect(transformTimeline(series, START_MS, END_MS, STEP_SECONDS)).toEqual({
+      startTime: 1_600_000_000,
+      samples: [1, 2, 0, 0, 5],
+      durationDelta: 10,
+    });
+  });
+
+  it('spans the full requested range even when the server has no data near the edges (regression: PR #763 review)', () => {
+    // The server returns a single point in the middle of the window, none at the start or end.
+    // The timeline must still span the whole requested range, not just the returned point(s).
+    const series: Series[] = [{ labels: [], points: [{ timestamp: String(START_MS + 20_000), value: 9 }] }];
+
+    const result = transformTimeline(series, START_MS, END_MS, STEP_SECONDS);
+
+    expect(result.startTime).toBe(1_600_000_000); // the query's start, not the point's timestamp
+    expect(result.samples).toHaveLength(5); // the full window, not just 1 sample
+    expect(result.samples).toEqual([0, 0, 9, 0, 0]);
+  });
+
+  it('ignores points outside the requested window', () => {
+    const series: Series[] = [
+      {
+        labels: [],
+        points: [
+          { timestamp: String(START_MS - 10_000), value: 100 }, // before start
+          { timestamp: String(START_MS + 10_000), value: 2 },
+          { timestamp: String(END_MS + 10_000), value: 100 }, // at/after end
+        ],
+      },
+    ];
+
+    expect(transformTimeline(series, START_MS, END_MS, STEP_SECONDS).samples).toEqual([0, 2, 0, 0, 0]);
+  });
+
+  it('rounds a point that does not land exactly on a bucket boundary down to that bucket', () => {
+    const series: Series[] = [{ labels: [], points: [{ timestamp: String(START_MS + 24_000), value: 7 }] }];
+
+    // 24s falls in the [20s, 30s) bucket, i.e. index 2.
+    expect(transformTimeline(series, START_MS, END_MS, STEP_SECONDS).samples).toEqual([0, 0, 7, 0, 0]);
   });
 });
 
 // copy of transformProfileResponse as it existed before the O(n) rewrite
-function legacyTransformProfileResponse(response: SearchProfilesResponse): ProfileData {
-  const newResponse: ProfileData = {
-    profile: { stackTrace: {} as StackTrace },
-    numTicks: 0,
-    maxSelf: 0,
-    metadata: { spyName: '', sampleRate: 0, units: '', name: '' },
-    timeline: { startTime: 0, samples: [], durationDelta: 0 },
-  };
-
-  if (!response) {
-    return newResponse;
-  }
-
+function legacyTransformFlameGraph(flamegraph: FlameGraph): {
+  stackTrace: StackTrace;
+  numTicks: number;
+  maxSelf: number;
+} {
   const stackTraces: StackTrace[][] = [];
   let id = 1;
 
-  for (let i = 0; i < response.flamebearer.levels.length; i++) {
+  for (let i = 0; i < flamegraph.levels.length; i++) {
     let current = 0;
     const row: StackTrace[] = [];
-    const level = response.flamebearer.levels[i];
+    const level = flamegraph.levels[i]?.values;
     if (!level) {
       continue;
     }
@@ -265,7 +470,7 @@ function legacyTransformProfileResponse(response: SearchProfilesResponse): Profi
       id += 1;
       const indexInNamesArray = level[j + 3];
       if (indexInNamesArray !== undefined) {
-        const name = response.flamebearer.names[indexInNamesArray];
+        const name = flamegraph.names[Number(indexInNamesArray)];
         if (name) {
           temp.name = name;
         }
@@ -274,21 +479,21 @@ function legacyTransformProfileResponse(response: SearchProfilesResponse): Profi
 
       const total = level[j + 1];
       if (total !== undefined) {
-        temp.total = total;
+        temp.total = Number(total);
       }
 
       const self = level[j + 2];
       if (self !== undefined) {
-        temp.self = self;
+        temp.self = Number(self);
       }
 
       const offset = level[j];
       if (offset !== undefined) {
-        current += offset;
+        current += Number(offset);
       }
       temp.start = current;
       if (total !== undefined) {
-        current += total;
+        current += Number(total);
       }
       temp.end = current;
       temp.children = [];
@@ -300,25 +505,9 @@ function legacyTransformProfileResponse(response: SearchProfilesResponse): Profi
   }
 
   legacyAddChildren(stackTraces);
-  if (stackTraces[0]?.[0]) {
-    newResponse.profile.stackTrace = stackTraces[0][0];
-  }
 
-  newResponse.numTicks = response.flamebearer.numTicks;
-  newResponse.maxSelf = response.flamebearer.maxSelf;
-  newResponse.metadata = {
-    spyName: response.metadata.spyName,
-    sampleRate: response.metadata.sampleRate,
-    units: response.metadata.units,
-    name: response.metadata.name,
-  };
-  newResponse.timeline = {
-    startTime: response.timeline.startTime,
-    samples: response.timeline.samples,
-    durationDelta: response.timeline.durationDelta,
-  };
-
-  return newResponse;
+  const stackTrace = stackTraces[0]?.[0] ?? ({} as StackTrace);
+  return { stackTrace, numTicks: Number(flamegraph.total), maxSelf: Number(flamegraph.maxSelf) };
 }
 
 function legacyAddChildren(stackTraces: StackTrace[][]): void {
@@ -414,11 +603,11 @@ function buildRandomTree(
   return { start, end, self: end - cursor, name, children };
 }
 
-// Flattens the generated tree into the same flat, per-level [offset, total, self, nameIndex] encoding
-// used by the real Pyroscope API (offset is cumulative across the whole level, not per-parent).
-function toSearchProfilesResponse(root: GeneratedNode): SearchProfilesResponse {
+// Flattens the generated tree into the same flat, per-level [offset, total, self, nameIndex]
+// encoding used by the real Pyroscope API (offset is cumulative across the whole level).
+function toFlameGraph(root: GeneratedNode): FlameGraph {
   const names: string[] = [];
-  const levels: number[][] = [];
+  const levels: FlameGraph['levels'] = [];
 
   let currentLevel: GeneratedNode[] = [root];
   while (currentLevel.length > 0) {
@@ -437,38 +626,14 @@ function toSearchProfilesResponse(root: GeneratedNode): SearchProfilesResponse {
       nextLevel.push(...node.children);
     }
 
-    levels.push(rawLevel);
+    levels.push({ values: rawLevel });
     currentLevel = nextLevel;
   }
 
-  return {
-    flamebearer: { names, levels, numTicks: root.end - root.start, maxSelf: root.self },
-    metadata: { format: 'single', spyName: 'gospy', sampleRate: 100, units: 'samples', name: 'process_cpu' },
-    timeline: { startTime: 0, samples: [], durationDelta: 0 },
-  };
+  return { names, levels, total: root.end - root.start, maxSelf: root.self };
 }
 
-describe('transformProfileResponse (regression against the pre-optimization implementation)', () => {
-  // this test cases is the only one that create divergent output
-  // the legacy fallback for a missing response returned a {}
-  // but new rewrite of transformProfileResponse returns a fully populated stackTrace
-  it('changes the empty-response fallback from an incomplete object to a valid empty StackTrace', () => {
-    const legacy = legacyTransformProfileResponse(undefined as unknown as SearchProfilesResponse);
-    const current = transformProfileResponse(undefined as unknown as SearchProfilesResponse);
-
-    expect(legacy.profile.stackTrace).toEqual({});
-    expect(current.profile.stackTrace).toEqual({
-      id: 0,
-      name: '',
-      level: 0,
-      start: 0,
-      end: 0,
-      total: 0,
-      self: 0,
-      children: [],
-    });
-  });
-
+describe('transformFlameGraph (regression against the pre-optimization implementation)', () => {
   it('produces identical output to the legacy implementation for many randomly generated profiles', () => {
     // Several independent seeds rather than one, so coverage isn't at the mercy of a single PRNG
     // stream happening (or failing) to hit a given structural edge case.
@@ -480,9 +645,9 @@ describe('transformProfileResponse (regression against the pre-optimization impl
       for (let i = 0; i < 200; i++) {
         const totalSamples = 20 + Math.floor(rng() * 500);
         const maxDepth = 2 + Math.floor(rng() * 6);
-        const response = toSearchProfilesResponse(buildRandomTree(rng, 0, totalSamples, 0, maxDepth, []));
+        const flamegraph = toFlameGraph(buildRandomTree(rng, 0, totalSamples, 0, maxDepth, []));
 
-        expect(transformProfileResponse(response)).toEqual(legacyTransformProfileResponse(response));
+        expect(transformFlameGraph(flamegraph)).toEqual(legacyTransformFlameGraph(flamegraph));
       }
     }
   });
@@ -491,28 +656,26 @@ describe('transformProfileResponse (regression against the pre-optimization impl
     const names = ['w0', 'w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7', 'w8', 'w9'];
     // 10 siblings at the same level, back-to-back with no gaps, each a leaf - stresses the O(n)
     // parentIndex cursor advancing across many same-level nodes under a single parent.
-    const levels: number[][] = [
-      [0, 100, 0, 0],
-      [
-        0, 10, 10, 1, 0, 10, 10, 2, 0, 10, 10, 3, 0, 10, 10, 4, 0, 10, 10, 5, 0, 10, 10, 6, 0, 10, 10, 7, 0, 10, 10, 8,
-        0, 10, 10, 9, 0, 10, 10, 0,
-      ],
+    const levels: FlameGraph['levels'] = [
+      { values: [0, 100, 0, 0] },
+      {
+        values: [
+          0, 10, 10, 1, 0, 10, 10, 2, 0, 10, 10, 3, 0, 10, 10, 4, 0, 10, 10, 5, 0, 10, 10, 6, 0, 10, 10, 7, 0, 10, 10,
+          8, 0, 10, 10, 9, 0, 10, 10, 0,
+        ],
+      },
     ];
-    const response: SearchProfilesResponse = {
-      flamebearer: { names, levels, numTicks: 100, maxSelf: 10 },
-      metadata: { format: 'single', spyName: 'gospy', sampleRate: 100, units: 'samples', name: 'process_cpu' },
-      timeline: { startTime: 0, samples: [], durationDelta: 0 },
-    };
+    const flamegraph: FlameGraph = { names, levels, total: 100, maxSelf: 10 };
 
-    expect(transformProfileResponse(response)).toEqual(legacyTransformProfileResponse(response));
+    expect(transformFlameGraph(flamegraph)).toEqual(legacyTransformFlameGraph(flamegraph));
   });
 
   it('produces identical output to the legacy implementation for a deep single-branch chain (recursion-like)', () => {
     const depth = 30;
     const root = buildChain(depth);
-    const response = toSearchProfilesResponse(root);
+    const flamegraph = toFlameGraph(root);
 
-    expect(transformProfileResponse(response)).toEqual(legacyTransformProfileResponse(response));
+    expect(transformFlameGraph(flamegraph)).toEqual(legacyTransformFlameGraph(flamegraph));
   });
 
   it('produces identical output to the legacy implementation when children exactly touch the parent boundaries', () => {
@@ -528,9 +691,9 @@ describe('transformProfileResponse (regression against the pre-optimization impl
         { start: 5, end: 10, self: 5, name: 'right', children: [] },
       ],
     };
-    const response = toSearchProfilesResponse(root);
+    const flamegraph = toFlameGraph(root);
 
-    expect(transformProfileResponse(response)).toEqual(legacyTransformProfileResponse(response));
+    expect(transformFlameGraph(flamegraph)).toEqual(legacyTransformFlameGraph(flamegraph));
   });
 });
 
