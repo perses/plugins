@@ -28,5 +28,3 @@ spec: close({
 	resolution?:       number
 	instant?:          bool
 })
-
-#variableSyntaxRegex: "^\\$\\w+$"

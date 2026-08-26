@@ -13,6 +13,8 @@
 
 package migrate
 
+import "github.com/perses/shared/cue/common"
+
 #target: {
 	datasource?: {
 		type?: "prometheus"
@@ -32,9 +34,14 @@ package migrate
 kind: "PrometheusTimeSeriesQuery"
 spec: {
 	if #target.datasource != _|_ {
-		datasource: {
-			kind: "PrometheusDatasource"
-			name: #target.datasource.uid
+		if #target.datasource.uid =~ common.#variableSyntaxRegex {
+			datasource: #target.datasource.uid
+		}
+		if #target.datasource.uid !~ common.#variableSyntaxRegex {
+			datasource: {
+				kind: "PrometheusDatasource"
+				name: #target.datasource.uid
+			}
 		}
 	}
 	query:         #target.expr
