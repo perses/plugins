@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { Mock } from 'vitest';
 
 import { LokiDatasource } from '../../datasources/loki-datasource';
 import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
@@ -25,7 +26,7 @@ const datasource: LokiDatasourceSpec = {
 const lokiStubClient = LokiDatasource.createClient(datasource, {});
 
 // Mock range query
-lokiStubClient.queryRange = jest.fn(async () => {
+lokiStubClient.queryRange = vi.fn(async () => {
   const stubResponse: LokiQueryRangeStreamsResponse = {
     status: 'success',
     data: {
@@ -44,20 +45,20 @@ lokiStubClient.queryRange = jest.fn(async () => {
   return stubResponse as LokiQueryRangeResponse;
 });
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return lokiStubClient;
 });
 
 const createStubContext = (): LogQueryContext => {
   const stubLogContext: LogQueryContext = {
     datasourceStore: {
-      getDatasource: jest.fn(),
+      getDatasource: vi.fn(),
       getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     timeRange: {
       end: new Date('01-01-2025'),

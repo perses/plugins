@@ -18,7 +18,7 @@ import {
 } from '../test';
 import { searchProfileTypes, searchLabelNames, searchLabelValues } from './pyroscope-client';
 
-const fetchMock = (global.fetch = jest.fn());
+const fetchMock = (global.fetch = vi.fn());
 
 describe('pyroscope-client', () => {
   beforeEach(() => {

@@ -13,6 +13,7 @@
 
 import { TraceQueryContext, replaceVariables } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock, MockedFunction } from 'vitest';
 
 import { TempoClient } from '../../model';
 import { DEFAULT_SEARCH_LIMIT, SearchResponse } from '../../model/api-types';
@@ -20,15 +21,15 @@ import { TempoDatasource } from '../tempo-datasource';
 import { TempoDatasourceSpec } from '../tempo-datasource-types';
 import { getTraceData } from './get-trace-data';
 
-jest.mock('@perses-dev/plugin-system', () => {
-  const actual = jest.requireActual('@perses-dev/plugin-system');
+vi.mock('@perses-dev/plugin-system', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@perses-dev/plugin-system')>();
   return {
     ...actual,
-    replaceVariables: jest.fn((query: string) => query),
+    replaceVariables: vi.fn((query: string) => query),
   };
 });
 
-const mockedReplaceVariables = replaceVariables as jest.MockedFunction<typeof replaceVariables>;
+const mockedReplaceVariables = replaceVariables as MockedFunction<typeof replaceVariables>;
 
 const datasource: TempoDatasourceSpec = {
   directUrl: '/test',
@@ -36,11 +37,11 @@ const datasource: TempoDatasourceSpec = {
 
 const createMockClient = (searchResponse: SearchResponse): TempoClient => {
   const client = TempoDatasource.createClient(datasource, {});
-  client.search = jest.fn(async () => searchResponse);
+  client.search = vi.fn(async () => searchResponse);
   return client;
 };
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<TempoDatasourceSpec> => {
+const getDatasource: Mock = vi.fn((): DatasourceSpec<TempoDatasourceSpec> => {
   return {
     default: false,
     plugin: {
@@ -51,17 +52,17 @@ const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<TempoDatasourceSpec>
 });
 
 const createStubContext = (mockClient: ReturnType<typeof createMockClient>): TraceQueryContext => {
-  const getDatasourceClient = jest.fn(() => Promise.resolve(mockClient));
+  const getDatasourceClient = vi.fn(() => Promise.resolve(mockClient));
   return {
     variableState: {},
     datasourceStore: {
       getDatasource,
       getDatasourceClient,
-      listDatasourceSelectItems: jest.fn(),
-      getLocalDatasources: jest.fn(),
-      setLocalDatasources: jest.fn(),
-      getSavedDatasources: jest.fn(),
-      setSavedDatasources: jest.fn(),
+      listDatasourceSelectItems: vi.fn(),
+      getLocalDatasources: vi.fn(),
+      setLocalDatasources: vi.fn(),
+      getSavedDatasources: vi.fn(),
+      setSavedDatasources: vi.fn(),
     },
     absoluteTimeRange: {
       start: new Date('2023-12-16T21:57:48.057Z'),
@@ -193,7 +194,7 @@ describe('getTraceData', () => {
       trace: { resourceSpans: [] },
     };
     const mockClient = createMockClient({ traces: [] });
-    mockClient.query = jest.fn(async () => mockResponse);
+    mockClient.query = vi.fn(async () => mockResponse);
     const stubContext = createStubContext(mockClient);
     stubContext.variableState = {
       traceId: { value: traceId, loading: false },
@@ -215,7 +216,7 @@ describe('getTraceData', () => {
       message: 'trace exceeds max size',
     };
     const mockClient = createMockClient({ traces: [] });
-    mockClient.query = jest.fn(async () => mockResponse);
+    mockClient.query = vi.fn(async () => mockResponse);
     const stubContext = createStubContext(mockClient);
 
     const result = await getTraceData({ query: traceId }, stubContext);
@@ -229,7 +230,7 @@ describe('getTraceData', () => {
       trace: { resourceSpans: [] },
     };
     const mockClient = createMockClient({ traces: [] });
-    mockClient.query = jest.fn(async () => mockResponse);
+    mockClient.query = vi.fn(async () => mockResponse);
     const stubContext = createStubContext(mockClient);
 
     const result = await getTraceData({ query: traceId }, stubContext);

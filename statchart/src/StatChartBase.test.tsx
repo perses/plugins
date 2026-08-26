@@ -16,8 +16,8 @@ import { render, screen } from '@testing-library/react';
 
 import { StatChartBase, StatChartData } from './StatChartBase';
 
-jest.mock('./utils/calculate-font-size', () => ({
-  useOptimalFontSize: jest.fn().mockImplementation(() => 12),
+vi.mock('./utils/calculate-font-size', () => ({
+  useOptimalFontSize: vi.fn().mockImplementation(() => 12),
 }));
 
 describe('StatChart', () => {

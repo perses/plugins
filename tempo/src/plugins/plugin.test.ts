@@ -13,27 +13,28 @@
 
 import { TraceQueryContext } from '@perses-dev/plugin-system';
 import { DatasourceSpec } from '@perses-dev/spec';
+import type { Mock } from 'vitest';
 
 import { MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_DATA_SEARCHRESULT, MOCK_TRACE_RESPONSE_SMALL } from '../test';
 import { TempoDatasource } from './tempo-datasource';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoTraceQuery } from './tempo-trace-query/TempoTraceQuery';
 
-jest.mock('echarts/core');
+vi.mock('echarts/core');
 
 const datasource: TempoDatasourceSpec = {
   directUrl: '/test',
 };
 
 const tempoStubClient = TempoDatasource.createClient(datasource, {});
-tempoStubClient.query = jest.fn(async () => MOCK_TRACE_RESPONSE_SMALL);
-tempoStubClient.search = jest.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
+tempoStubClient.query = vi.fn(async () => MOCK_TRACE_RESPONSE_SMALL);
+tempoStubClient.search = vi.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
 
-const getDatasourceClient: jest.Mock = jest.fn(() => {
+const getDatasourceClient: Mock = vi.fn(() => {
   return tempoStubClient;
 });
 
-const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<TempoDatasourceSpec> => {
+const getDatasource: Mock = vi.fn((): DatasourceSpec<TempoDatasourceSpec> => {
   return {
     default: false,
     plugin: {
@@ -48,12 +49,12 @@ const stubTempoContext: TraceQueryContext = {
   datasourceStore: {
     getDatasource: getDatasource,
     getDatasourceClient: getDatasourceClient,
-    listDatasourceSelectItems: jest.fn(),
+    listDatasourceSelectItems: vi.fn(),
 
-    getLocalDatasources: jest.fn(),
-    setLocalDatasources: jest.fn(),
-    getSavedDatasources: jest.fn(),
-    setSavedDatasources: jest.fn(),
+    getLocalDatasources: vi.fn(),
+    setLocalDatasources: vi.fn(),
+    getSavedDatasources: vi.fn(),
+    setSavedDatasources: vi.fn(),
   },
   absoluteTimeRange: {
     start: new Date('2023-12-16T21:57:48.057Z'), // last 1 hour

@@ -24,7 +24,7 @@ func TestReplaceNPMPackage(t *testing.T) {
   "name": "@perses-dev/plugin-example",
   "version": "0.1.0",
   "dependencies": {
-	"@perses-dev/core": "^0.51.0",
+	"@perses-dev/client": "^0.51.0",
 	"@perses-dev/dashboards": "^0.51.0",
 	"@perses-dev/panels": "^0.51.0",
 	"@perses-dev/alerting": "^0.51.0",
@@ -35,7 +35,7 @@ func TestReplaceNPMPackage(t *testing.T) {
   "name": "@perses-dev/plugin-example",
   "version": "0.1.0",
   "dependencies": {
-	"@perses-dev/core": "^0.51.0",
+	"@perses-dev/client": "^0.51.0",
 	"@perses-dev/dashboards": "^0.52.0-beta.4",
 	"@perses-dev/panels": "^0.52.0-beta.4",
 	"@perses-dev/alerting": "^0.52.0-beta.4",

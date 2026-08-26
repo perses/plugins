@@ -13,7 +13,7 @@
 
 import { getTrace, searchOperations, searchServices, searchTraces } from './jaeger-client';
 
-const fetchMock = (global.fetch = jest.fn());
+const fetchMock = (global.fetch = vi.fn());
 
 describe('jaeger-client', () => {
   beforeEach(() => {

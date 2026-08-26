@@ -16,6 +16,8 @@ import {
   Button,
   Chip,
   FormControlLabel,
+  IconButton,
+  Stack,
   Switch,
   TextField,
   ToggleButton,
@@ -30,6 +32,7 @@ import {
   ModeOption,
   ModeSelector,
   ModeSelectorProps,
+  OptionsColorPicker,
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
@@ -46,6 +49,8 @@ import {
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import AddIcon from 'mdi-material-ui/Plus';
 import { MouseEventHandler, ReactElement } from 'react';
 
 import {
@@ -57,7 +62,10 @@ import {
   DEFAULT_SORT,
   DEFAULT_IS_STACKED,
   DEFAULT_GROUP_BY,
+  DEFAULT_VISUAL,
 } from './bar-chart-model';
+
+const DEFAULT_COLOR_VALUE = '#555';
 
 export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
@@ -104,6 +112,43 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
         draft.groupBy = DEFAULT_GROUP_BY;
         draft.isStacked = DEFAULT_IS_STACKED;
         draft.orientation = DEFAULT_ORIENTATION;
+        draft.visual = DEFAULT_VISUAL;
+      }),
+    );
+  };
+
+  const handleAddColorOverride = (): void => {
+    onChange(
+      produce(value, (draft: BarChartOptions) => {
+        if (!draft.visual) draft.visual = {};
+        if (!draft.visual.colorOverrides) draft.visual.colorOverrides = [];
+        draft.visual.colorOverrides.push({ regex: '', color: DEFAULT_COLOR_VALUE });
+      }),
+    );
+  };
+
+  const handleRemoveColorOverride = (index: number): void => {
+    onChange(
+      produce(value, (draft: BarChartOptions) => {
+        draft.visual?.colorOverrides?.splice(index, 1);
+      }),
+    );
+  };
+
+  const handleColorOverrideRegexChange = (index: number, regex: string): void => {
+    onChange(
+      produce(value, (draft: BarChartOptions) => {
+        const override = draft.visual?.colorOverrides?.[index];
+        if (override) override.regex = regex;
+      }),
+    );
+  };
+
+  const handleColorOverrideColorChange = (index: number, color: string): void => {
+    onChange(
+      produce(value, (draft: BarChartOptions) => {
+        const override = draft.visual?.colorOverrides?.[index];
+        if (override) override.color = color;
       }),
     );
   };
@@ -116,6 +161,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   );
   const groupBy = value.groupBy ?? DEFAULT_GROUP_BY;
   const isStacked = value.isStacked ?? DEFAULT_IS_STACKED;
+  const colorOverrides = value.visual?.colorOverrides ?? [];
 
   return (
     <OptionsEditorGrid>
@@ -186,6 +232,30 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>
+        <OptionsEditorGroup title="Color Overrides">
+          {colorOverrides.map((override, i) => (
+            <Stack key={i} direction="row" alignItems="center" spacing={1}>
+              <TextField
+                size="small"
+                label="Regex"
+                value={override.regex}
+                onChange={(e) => handleColorOverrideRegexChange(i, e.target.value)}
+                sx={{ flexGrow: 1 }}
+              />
+              <OptionsColorPicker
+                label={override.regex || `Color override n°${i + 1}`}
+                color={override.color || DEFAULT_COLOR_VALUE}
+                onColorChange={(color) => handleColorOverrideColorChange(i, color)}
+              />
+              <IconButton aria-label={`delete color override n°${i + 1}`} onClick={() => handleRemoveColorOverride(i)}>
+                <DeleteIcon />
+              </IconButton>
+            </Stack>
+          ))}
+          <Button variant="outlined" startIcon={<AddIcon />} onClick={handleAddColorOverride}>
+            Add Color Override
+          </Button>
+        </OptionsEditorGroup>
         <OptionsEditorGroup title="Reset Settings">
           <Button variant="outlined" color="secondary" onClick={handleResetSettings}>
             Reset To Defaults

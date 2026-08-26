@@ -25,8 +25,8 @@ import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPan
 // These tests exercise legend rendering, not annotations. The panel calls usePanelAnnotationsWithData,
 // which pulls in the full dashboard runtime (plugin registry, datasource store, query client). Mock it to
 // return no annotations so the panel can render without wiring those providers here.
-jest.mock('@perses-dev/dashboards', () => ({
-  ...jest.requireActual('@perses-dev/dashboards'),
+vi.mock('@perses-dev/dashboards', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@perses-dev/dashboards')>()),
   usePanelAnnotationsWithData: (): AnnotationSpecWithData[] => [],
 }));
 
@@ -80,7 +80,7 @@ describe('TimeSeriesChartPanel', () => {
       timeRange: TEST_TIME_RANGE,
       setTimeRange: (): Record<string, unknown> => ({}),
       absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     };
 
     render(

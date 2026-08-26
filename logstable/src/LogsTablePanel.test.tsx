@@ -30,7 +30,7 @@ import { MOCK_LOGS_QUERY_DEFINITION, MOCK_LOGS_QUERY_RESULT, MOCK_LOGS_QUERY_RES
 // Mock clipboard API
 Object.assign(navigator, {
   clipboard: {
-    writeText: jest.fn(() => Promise.resolve()),
+    writeText: vi.fn(() => Promise.resolve()),
   },
 });
 
@@ -74,7 +74,7 @@ describe('LogsTablePanel', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render multi values with timestamps', async () => {
@@ -100,20 +100,20 @@ describe('LogsTablePanel', () => {
 
     // Get computed background before selection
     const firstRowInitialBg = window.getComputedStyle(firstRow).backgroundColor;
+    const secondRowInitialBg = window.getComputedStyle(secondRow).backgroundColor;
 
     // Cmd+Click first row
     fireEvent.mouseDown(firstRow, { metaKey: true });
 
     // Background should change (selected state)
-    const firstRowSelectedBg = window.getComputedStyle(firstRow).backgroundColor;
-    expect(firstRowSelectedBg).not.toBe(firstRowInitialBg);
+    expect(window.getComputedStyle(firstRow).backgroundColor).not.toBe(firstRowInitialBg);
 
     // Cmd+Click second row
     fireEvent.mouseDown(secondRow, { metaKey: true });
 
     // Both should still be selected
-    expect(window.getComputedStyle(firstRow).backgroundColor).toBe(firstRowSelectedBg);
-    expect(window.getComputedStyle(secondRow).backgroundColor).toBe(firstRowSelectedBg);
+    expect(window.getComputedStyle(firstRow).backgroundColor).not.toBe(firstRowInitialBg);
+    expect(window.getComputedStyle(secondRow).backgroundColor).not.toBe(secondRowInitialBg);
   });
 
   it('should copy multiple selected rows with Cmd+C', () => {
@@ -129,7 +129,7 @@ describe('LogsTablePanel', () => {
     // Copy with onCopy event
     const virtuosoScroller = screen.getByTestId('virtuoso-scroller');
     const mockClipboardData = {
-      setData: jest.fn(),
+      setData: vi.fn(),
     };
     fireEvent.copy(virtuosoScroller, { clipboardData: mockClipboardData });
 

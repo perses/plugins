@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { MockedFunction } from 'vitest';
+
 import { greptimedbQuery } from './greptimedb-client';
 
-global.fetch = jest.fn();
-const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+global.fetch = vi.fn();
+const mockFetch = fetch as MockedFunction<typeof fetch>;
 
 const queryOptions = { datasourceUrl: 'http://greptimedb.test' };
 

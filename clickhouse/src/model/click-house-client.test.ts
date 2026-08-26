@@ -15,7 +15,7 @@ import { formatClickHouseDateTime, query, replaceTimeRangePlaceholders } from '.
 
 describe('ClickHouse client', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should replace time range placeholders', () => {
@@ -33,9 +33,9 @@ describe('ClickHouse client', () => {
   });
 
   it('should send interpolated query to ClickHouse', async () => {
-    const fetchMock = jest.fn<Promise<Pick<Response, 'ok' | 'json'>>, [string, RequestInit?]>(async () => ({
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Pick<Response, 'ok' | 'json'>>>(async () => ({
       ok: true,
-      json: jest.fn(async () => ({ data: [] })),
+      json: vi.fn(async () => ({ data: [] })),
     }));
     global.fetch = fetchMock as unknown as typeof fetch;
 

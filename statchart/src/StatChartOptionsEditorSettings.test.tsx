@@ -19,7 +19,7 @@ import { StatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 
 describe('StatChartOptionsEditorSettings', () => {
-  const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = jest.fn()): void => {
+  const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = vi.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <StatChartOptionsEditorSettings value={value} onChange={onChange} />
@@ -28,7 +28,7 @@ describe('StatChartOptionsEditorSettings', () => {
   };
 
   it('can modify unit', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderStatChartOptionsEditorSettings(
       {
         format: {
@@ -54,7 +54,7 @@ describe('StatChartOptionsEditorSettings', () => {
   });
 
   it('can modify calculation', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderStatChartOptionsEditorSettings(
       {
         format: {
@@ -78,7 +78,7 @@ describe('StatChartOptionsEditorSettings', () => {
   });
 
   it('can enable a sparkline', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderStatChartOptionsEditorSettings(
       {
         format: {
@@ -100,7 +100,7 @@ describe('StatChartOptionsEditorSettings', () => {
   });
 
   it('can disable a sparkline', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderStatChartOptionsEditorSettings(
       {
         format: {

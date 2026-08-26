@@ -17,7 +17,7 @@ import { TimeSeriesChartVisualOptions, VISUAL_CONFIG } from './time-series-chart
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
-  const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = jest.fn()): void => {
+  const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = vi.fn()): void => {
     render(<VisualOptionsEditor value={value} onChange={onChange} />);
   };
 
@@ -26,7 +26,7 @@ describe('VisualOptionsEditor', () => {
   };
 
   it('can update the line width visual option', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderVisualOptionsEditor({ display: 'line', lineWidth: 3, pointRadius: 2 }, onChange);
 
     expect(screen.getByText(VISUAL_CONFIG.lineWidth.label)).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('VisualOptionsEditor', () => {
     const sliderInput = getLineWidthSlider();
 
     // MUI Slider computes the return value based on span elements, mock initial position
-    sliderInput.getBoundingClientRect = jest.fn(() => {
+    sliderInput.getBoundingClientRect = vi.fn(() => {
       return {
         bottom: 200,
         height: 30,

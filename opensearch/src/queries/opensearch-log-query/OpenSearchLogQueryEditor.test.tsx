@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { Mock } from 'vitest';
 
 import { PPL_DOCS_URL } from '../constants';
 import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 
-jest.mock('@perses-dev/plugin-system', () => ({
-  ...jest.requireActual('@perses-dev/plugin-system'),
+vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@perses-dev/plugin-system')>()),
   DatasourceSelect: (): JSX.Element => <div data-testid="datasource-select" />,
   useDatasourceSelectValueToSelector: (): undefined => undefined,
   isVariableDatasource: (): boolean => false,
@@ -26,12 +27,12 @@ jest.mock('@perses-dev/plugin-system', () => ({
 
 // Make the Mod+Enter handler call its callback on any keydown, decoupling the test
 // from the host lib's platform-specific key detection.
-jest.mock('@perses-dev/dashboards', () => ({
+vi.mock('@perses-dev/dashboards', () => ({
   createModEnterHandler: (cb: () => void) => (): void => cb(),
 }));
 
-function setup(initial: OpenSearchLogQuerySpec = { query: '' }): { onChange: jest.Mock } {
-  const onChange = jest.fn();
+function setup(initial: OpenSearchLogQuerySpec = { query: '' }): { onChange: Mock } {
+  const onChange = vi.fn();
   render(<OpenSearchLogQueryEditor value={initial} onChange={onChange} />);
   return { onChange };
 }

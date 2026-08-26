@@ -19,7 +19,7 @@ import { LogRow } from './LogRow';
 // Mock clipboard API
 Object.assign(navigator, {
   clipboard: {
-    writeText: jest.fn(() => Promise.resolve()),
+    writeText: vi.fn(() => Promise.resolve()),
   },
 });
 
@@ -30,13 +30,13 @@ describe('LogRow', () => {
     labels: { level: 'info', service: 'foo', region: 'bar' },
   };
 
-  const renderLogRow = ({ onSelect = jest.fn(), isSelected = false } = {}): RenderResult => {
+  const renderLogRow = ({ onSelect = vi.fn(), isSelected = false } = {}): RenderResult => {
     return render(
       <LogRow
         log={mockLog}
         index={0}
         isExpanded={false}
-        onToggle={jest.fn()}
+        onToggle={vi.fn()}
         isSelected={isSelected}
         onSelect={onSelect}
       />,
@@ -44,7 +44,7 @@ describe('LogRow', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render log message', () => {
@@ -120,7 +120,7 @@ describe('LogRow', () => {
   });
 
   it('should handle selection click', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     const { container } = renderLogRow({ onSelect });
     const content = container.querySelector('[data-log-index="0"] > div')!;
 
@@ -136,7 +136,7 @@ describe('LogRow', () => {
         line: '\x1b[31mERROR\x1b[0m connection refused',
         labels: { level: 'error' },
       };
-      render(<LogRow log={ansiLog} index={0} isExpanded={false} onToggle={jest.fn()} />);
+      render(<LogRow log={ansiLog} index={0} isExpanded={false} onToggle={vi.fn()} />);
       const errorSpan = document.querySelector('.ansi-red-fg');
       expect(errorSpan).toBeInTheDocument();
       expect(errorSpan).toHaveTextContent('ERROR');

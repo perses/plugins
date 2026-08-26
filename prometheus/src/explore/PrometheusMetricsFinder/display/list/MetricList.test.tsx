@@ -18,14 +18,14 @@ import { VirtuosoMockContext } from 'react-virtuoso';
 import { DEFAULT_PROM } from '../../../../model/prometheus-selectors';
 import { MetricList, MetricListProps } from './MetricList';
 
-jest.mock('../../utils', () => ({
-  useMetricMetadata: jest
+vi.mock('../../utils', () => ({
+  useMetricMetadata: vi
     .fn()
     .mockReturnValue({ metadata: { type: 'gauge', help: 'my super metric desc' }, isLoading: false }),
 }));
 
-jest.mock('@perses-dev/explore', () => ({
-  useExplorerQueryParams: jest.fn().mockReturnValue('?explorer=metrics'),
+vi.mock('@perses-dev/explore', () => ({
+  useExplorerQueryParams: vi.fn().mockReturnValue('?explorer=metrics'),
 }));
 
 describe('MetricList', () => {

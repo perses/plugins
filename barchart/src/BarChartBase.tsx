@@ -26,6 +26,9 @@ import { use as registerECharts, EChartsCoreOption } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { ReactElement, useMemo } from 'react';
 
+import { ColorOverride } from './bar-chart-model';
+import { getOverrideColor } from './utils';
+
 registerECharts([
   EChartsBarChart,
   GridComponent,
@@ -64,6 +67,7 @@ export interface BarChartBaseProps {
   groupedData?: StackedBarChartData | null;
   isStacked?: boolean;
   orientation?: 'horizontal' | 'vertical';
+  colorOverrides?: ColorOverride[];
 }
 
 export function BarChartBase(props: BarChartBaseProps): ReactElement {
@@ -76,6 +80,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
     groupedData,
     isStacked = false,
     orientation = 'horizontal',
+    colorOverrides,
   } = props;
   const chartsTheme = useChartsTheme();
   const isHorizontal = orientation === 'horizontal';
@@ -103,14 +108,20 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
               axisLabel: { overflow: 'truncate', width: width / 3 },
             }
           : getFormattedAxis({}, format),
-        series: series.map((s) => ({
-          name: s.name,
-          type: 'bar',
-          stack: isStacked ? 'total' : undefined,
-          data: s.values,
-          label: { show: false },
-          itemStyle: { borderRadius: isStacked ? 0 : 4 },
-        })),
+        series: series.map((s) => {
+          const overrideColor = getOverrideColor(s.name, colorOverrides);
+          return {
+            name: s.name,
+            type: 'bar',
+            stack: isStacked ? 'total' : undefined,
+            data: s.values,
+            label: { show: false },
+            itemStyle: {
+              borderRadius: isStacked ? 0 : 4,
+              ...(overrideColor ? { color: overrideColor } : {}),
+            },
+          };
+        }),
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
@@ -182,7 +193,12 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
         },
         itemStyle: {
           borderRadius: 4,
-          color: chartsTheme.echartsTheme[0],
+          color: (params: { name: string }): string => {
+            const overrideColor = getOverrideColor(params.name, colorOverrides);
+            if (overrideColor) return overrideColor;
+            const palette = chartsTheme.echartsTheme.color as string[] | undefined;
+            return palette?.[0] ?? '';
+          },
         },
       },
       tooltip: {
@@ -197,7 +213,7 @@ export function BarChartBase(props: BarChartBaseProps): ReactElement {
         right: '5%',
       },
     };
-  }, [data, groupedData, isStacked, chartsTheme, width, mode, format, isHorizontal]);
+  }, [data, groupedData, isStacked, chartsTheme, width, mode, format, isHorizontal, colorOverrides]);
 
   let numGroupedRows = 0;
   if (groupedData) {
