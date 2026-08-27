@@ -18,7 +18,7 @@ vi.mock('@perses-dev/plugin-system', async () => {
     escapeCsvValue: (value: unknown) => string;
     formatTimestampISO: (timestamp: number) => string;
     sanitizeFilename: (filename: string) => string;
-  }>('@perses-dev/plugin-system/dist/cjs/utils/csv-export');
+  }>('@perses-dev/plugin-system/dist/utils/csv-export.js');
   return {
     escapeCsvValue: csvExport.escapeCsvValue,
     formatTimestampISO: csvExport.formatTimestampISO,
