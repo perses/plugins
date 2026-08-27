@@ -18,11 +18,20 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/perses/plugins/scripts/manifest"
 	"github.com/perses/plugins/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
+
+func npmDistTag(version string) string {
+	_, _, found := strings.Cut(version, "-")
+	if !found {
+		return "latest"
+	}
+	return "prerelease"
+}
 
 func main() {
 	t := tag.Flag()
@@ -42,7 +51,7 @@ func main() {
 		logrus.WithError(err).Fatalf("unable to change directory to %s", pluginPath)
 	}
 
-	cmd := exec.Command("npm", "publish", "--access", "public")
+	cmd := exec.Command("npm", "publish", "--access", "public", "--tag", npmDistTag(version))
 	output, execErr := cmd.CombinedOutput()
 	if execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to publish archive %s to npm. Output:\n%s", pluginName, string(output))
