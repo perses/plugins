@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { ModuleFederationOptions, pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { mergeRsbuildConfig, RsbuildConfig } from '@rsbuild/core';
 
@@ -73,7 +76,7 @@ interface PluginConfigOptions {
  * });
  * ```
  */
-export function createConfigForPlugin(options: PluginConfigOptions) {
+export function createConfigForPlugin(options: PluginConfigOptions): RsbuildConfig {
   const { name, rsbuildConfig = {}, moduleFederation = {} } = options;
 
   const mfConfig: ModuleFederationOptions = {
@@ -91,12 +94,31 @@ export function createConfigForPlugin(options: PluginConfigOptions) {
   );
 }
 
-function getAssetPrefix(name: string): string {
-  return `${PLUGINS_PATH}/${name}/`;
+function getAssetPrefix(name: string, version?: string): string {
+  // The Perses server serves plugin files from `/plugins/<name>[~<version>[~<registry>]]/`. Including the version makes
+  // each version's assets resolve from its own directory: without it, every request lands on `/plugins/<name>/`, which
+  // the server resolves to the *latest* installed version, so any non-latest (e.g. pinned/locked) version tries to load
+  // the latest version's files and fails.
+  const identity = version ? `${name}~${version}` : name;
+  return `${PLUGINS_PATH}/${identity}/`;
+}
+
+/**
+ * Reads the plugin version from the `package.json` of the plugin currently being built. Returns `undefined` when it
+ * cannot be determined, in which case asset paths fall back to the version-less prefix.
+ */
+function getPluginVersion(): string | undefined {
+  try {
+    const pkg = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf-8'));
+    return typeof pkg.version === 'string' && pkg.version.length > 0 ? pkg.version : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function getRsbuildConfig(name: string): RsbuildConfig {
   const assetPrefix = getAssetPrefix(name);
+  const version = process.env.NODE_ENV === 'development' ? undefined : getPluginVersion();
 
   return {
     server: {
@@ -131,6 +153,18 @@ function getRsbuildConfig(name: string): RsbuildConfig {
         if (process.env.NODE_ENV !== 'development') {
           config.output.publicPath = 'auto';
         }
+        // Isolate each version's webpack runtime.
+        //
+        // `chunk_<uniqueName>` is the global array async chunks register into. When two versions of the same plugin
+        // share it, the version loaded second pushes its chunks into the first one's runtime, and because module IDs are
+        // deterministic they collide, so both versions end up resolving to the first one's modules (two different
+        // versions rendering identically). `chunkLoadingGlobal` is derived before this hook runs, so it has to be set
+        // explicitly rather than relying on `uniqueName`.
+        if (version) {
+          const uniqueName = toGlobalName(name, version);
+          config.output.uniqueName = uniqueName;
+          config.output.chunkLoadingGlobal = `chunk_${uniqueName}`;
+        }
         return config;
       },
     },
@@ -138,10 +172,36 @@ function getRsbuildConfig(name: string): RsbuildConfig {
 }
 
 function getBaseModuleFederationConfig(name: string): ModuleFederationOptions {
-  return {
+  const config: ModuleFederationOptions = {
     name,
     dts: false,
     runtime: false,
-    getPublicPath: `function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || ""; return prefix + "${getAssetPrefix(name)}"; }`,
   };
+
+  // In development the plugin is served by the rsbuild dev server and proxied by Perses, which strips the whole
+  // `/plugins/<segment>` prefix, so the version-less prefix is what works there.
+  //
+  // For production builds the prefix embeds the plugin version (`/plugins/<name>~<version>/`) so that each installed
+  // version loads its own assets. Without it every request goes to `/plugins/<name>/`, which the server resolves to the
+  // latest installed version, so a pinned/older version ends up requesting the latest version's hashed files (404).
+  const version = process.env.NODE_ENV === 'development' ? undefined : getPluginVersion();
+  config.getPublicPath = `function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || ""; return prefix + "${getAssetPrefix(name, version)}"; }`;
+
+  // Give each version its own global container name.
+  //
+  // The Module Federation runtime resolves a remote's container through `globalThis[globalName]`, where `globalName`
+  // comes from this library name via the manifest (see `assignRemoteInfo` in `@module-federation/runtime-core`). It also
+  // early-returns an already-registered container: `if (remoteEntryExports) return remoteEntryExports`. So when several
+  // versions of the same plugin share the global name, the first version loaded wins and every other version silently
+  // reuses its container instead of loading its own entry, which makes two different versions render identically.
+  if (version) {
+    config.library = { type: 'global', name: toGlobalName(name, version) };
+  }
+
+  return config;
+}
+
+/** Build a JS-identifier-safe global container name that is unique per plugin version. */
+function toGlobalName(name: string, version: string): string {
+  return `${name}_${version}`.replace(/[^a-zA-Z0-9_$]/g, '_');
 }
