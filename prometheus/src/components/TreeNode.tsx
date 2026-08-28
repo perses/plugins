@@ -14,13 +14,15 @@
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/pages/query/TreeNode.tsx
 
 import { Box, CircularProgress, List, ListItem, Stack, Tooltip, Typography, useTheme } from '@mui/material';
-import { StatusError } from '@perses-dev/client';
+import type { StatusError } from '@perses-dev/client';
 import AlertCircle from 'mdi-material-ui/AlertCircle';
 import CircleIcon from 'mdi-material-ui/Circle';
-import { ReactElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
-import { PrometheusDatasourceSelector } from '../model';
-import ASTNode, { nodeType } from './promql/ast';
+import type { PrometheusDatasourceSelector } from '../model';
+import type ASTNode from './promql/ast';
+import { nodeType } from './promql/ast';
 import { formatNode } from './promql/format';
 import { functionSignatures } from './promql/functionSignatures';
 import serializeNode from './promql/serialize';

@@ -15,16 +15,12 @@
 
 import { styled } from '@mui/material';
 import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
-import React, { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React from 'react';
 
-import ASTNode, {
-  VectorSelector,
-  matchType,
-  vectorMatchCardinality,
-  nodeType,
-  StartOrEnd,
-  MatrixSelector,
-} from './ast';
+import type { VectorSelector, StartOrEnd, MatrixSelector } from './ast';
+import type ASTNode from './ast';
+import { matchType, vectorMatchCardinality, nodeType } from './ast';
 import { maybeParenthesizeBinopChild, escapeString } from './utils';
 
 // Styled components that reproduce the theming of CodeMirror:

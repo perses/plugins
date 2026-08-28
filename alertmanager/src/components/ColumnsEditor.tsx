@@ -31,7 +31,8 @@ import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ReactElement, useCallback, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useRef } from 'react';
 
 export interface BaseColumnDefinition {
   name: string;

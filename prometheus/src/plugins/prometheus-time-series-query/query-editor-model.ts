@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { DurationString } from '@perses-dev/spec';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { DurationString } from '@perses-dev/spec';
 import { produce } from 'immer';
 import { useState } from 'react';
 
-import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
+import type { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export type PrometheusTimeSeriesQueryEditorProps = OptionsEditorProps<PrometheusTimeSeriesQuerySpec>;
 

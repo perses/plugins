@@ -13,7 +13,8 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 
-import { TimeSeriesChartVisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
+import type { TimeSeriesChartVisualOptions } from './time-series-chart-model';
+import { VISUAL_CONFIG } from './time-series-chart-model';
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {

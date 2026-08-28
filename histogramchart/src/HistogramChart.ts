@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { HistogramChartOptionsEditorSettings, HistogramChartPanel, HistogramChartPanelProps } from './components';
-import { createInitialHistogramChartOptions, HistogramChartOptions } from './histogram-chart-model';
+import type { HistogramChartPanelProps } from './components';
+import { HistogramChartOptionsEditorSettings, HistogramChartPanel } from './components';
+import type { HistogramChartOptions } from './histogram-chart-model';
+import { createInitialHistogramChartOptions } from './histogram-chart-model';
 
 /**
  * The core HistogramChart panel plugin for Perses.

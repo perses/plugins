@@ -13,10 +13,12 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
-import { PostableSilence } from '../model/api-types';
-import { MatcherEditor, MatcherValue } from './MatcherEditor';
+import type { PostableSilence } from '../model/api-types';
+import type { MatcherValue } from './MatcherEditor';
+import { MatcherEditor } from './MatcherEditor';
 
 export interface SilenceFormProps {
   open: boolean;

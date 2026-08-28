@@ -13,12 +13,14 @@
 
 import { Box } from '@mui/material';
 import { ContentWithLegend, useChartsTheme } from '@perses-dev/components';
-import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import { validateLegendSpec } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 import { merge } from 'lodash';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { StatusHistoryChartOptions } from './status-history-model.js';
+import type { StatusHistoryChartOptions } from './status-history-model.js';
 import { StatusHistoryChartBase } from './StatusHistoryChartBase';
 import { useStatusHistoryDataModel } from './utils/data-transform';
 

@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Labels, PanelData } from '@perses-dev/plugin-system';
-import { TimeSeries, TimeSeriesData } from '@perses-dev/spec';
+import type { Labels, PanelData } from '@perses-dev/plugin-system';
+import type { TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 
-import { TableOptions } from './models';
+import type { TableOptions } from './models';
 
 /**
  * Options for building raw table data.

@@ -6,8 +6,8 @@ This repository contains the core plugins for [Perses](https://github.com/perses
 
 As prerequisites, you need:
 
-- NodeJS [version 22 or greater](https://nodejs.org/).
-- npm [version 10 or greater](https://www.npmjs.com/).
+- NodeJS [version 24 or greater](https://nodejs.org/).
+- npm [version 11 or greater](https://www.npmjs.com/).
 
 You should first run `npm install` at the root of the repository.
 

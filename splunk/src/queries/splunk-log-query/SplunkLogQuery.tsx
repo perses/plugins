@@ -14,8 +14,8 @@
 import { parseVariables } from '@perses-dev/plugin-system';
 
 import { getSplunkLogData } from './get-splunk-log-data';
-import { LogQueryPlugin } from './log-query-plugin-interface';
-import { SplunkLogQuerySpec } from './splunk-log-query-types';
+import type { LogQueryPlugin } from './log-query-plugin-interface';
+import type { SplunkLogQuerySpec } from './splunk-log-query-types';
 import { SplunkLogQueryEditor } from './SplunkLogQueryEditor';
 
 export const SplunkLogQuery: LogQueryPlugin<SplunkLogQuerySpec> = {

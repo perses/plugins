@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LabelFilter } from '../utils/types';
-import { PyroscopeDatasourceSelector } from './pyroscope-selectors';
+import type { LabelFilter } from '../utils/types';
+import type { PyroscopeDatasourceSelector } from './pyroscope-selectors';
 /**
  * The spec/options for the PyroscopeProfileQuery plugin.
  */

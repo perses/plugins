@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
-import { OpenSearchClient, ppl } from '../../model/opensearch-client';
-import { OpenSearchDatasourceSpec } from './opensearch-datasource-types';
+import type { OpenSearchClient } from '../../model/opensearch-client';
+import { ppl } from '../../model/opensearch-client';
+import type { OpenSearchDatasourceSpec } from './opensearch-datasource-types';
 import { OpenSearchDatasourceEditor } from './OpenSearchDatasourceEditor';
 
 const createClient: DatasourcePlugin<OpenSearchDatasourceSpec, OpenSearchClient>['createClient'] = (spec, options) => {

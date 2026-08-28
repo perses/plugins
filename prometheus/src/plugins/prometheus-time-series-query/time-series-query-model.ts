@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelectValue } from '@perses-dev/plugin-system';
-import { DurationString } from '@perses-dev/spec';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import type { DurationString } from '@perses-dev/spec';
 
-import { PrometheusDatasourceSelector } from '../../model';
+import type { PrometheusDatasourceSelector } from '../../model';
 /**
  * The spec/options for the PrometheusTimeSeriesQuery plugin.
  */

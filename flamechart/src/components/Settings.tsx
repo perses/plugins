@@ -15,9 +15,10 @@ import { Stack, Button, useTheme, MenuItem, Menu, Fade } from '@mui/material';
 import { ToolbarIconButton, InfoTooltip } from '@perses-dev/components';
 import PaletteIcon from 'mdi-material-ui/Palette';
 import RefreshIcon from 'mdi-material-ui/Refresh';
-import { ReactElement, useState, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useMemo } from 'react';
 
-import { FlameChartOptions } from '../flame-chart-model';
+import type { FlameChartOptions } from '../flame-chart-model';
 import { TOOLTIP_TEXT } from '../utils/ui-text';
 
 export interface SettingsProps {

@@ -13,8 +13,9 @@
 
 import { EditorView } from '@codemirror/view';
 import { useTheme, InputLabel, Stack } from '@mui/material';
-import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import { ReactElement } from 'react';
+import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
+import type { ReactElement } from 'react';
 
 export type ClickQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
 

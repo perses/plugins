@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Box, Divider, Portal, Stack, Typography } from '@mui/material';
+import type { CursorCoordinates } from '@perses-dev/components';
 import {
   assembleTransform,
-  CursorCoordinates,
   getDateAndTime,
   getTooltipStyles,
   PIN_TOOLTIP_HELP_TEXT,
@@ -29,7 +29,7 @@ import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import useResizeObserver from 'use-resize-observer';
 
-import { TimeSeriesAnnotation } from '../utils/annotation';
+import type { TimeSeriesAnnotation } from '../utils/annotation';
 
 export interface AnnotationTooltipProps {
   annotation: TimeSeriesAnnotation;

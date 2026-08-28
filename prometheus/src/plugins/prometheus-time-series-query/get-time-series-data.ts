@@ -11,35 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import {
-  DatasourceSpec,
-  DurationString,
-  Notice,
-  parseDurationString,
-  TimeSeries,
-  TimeSeriesData,
-} from '@perses-dev/spec';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import type { DatasourceSpec, DurationString, Notice, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
+import { parseDurationString } from '@perses-dev/spec';
 import { fromUnixTime, milliseconds } from 'date-fns';
 
+import type { PrometheusClient, MatrixData, VectorData, ScalarData, InstantQueryResultType } from '../../model';
 import {
   parseValueTuple,
-  PrometheusClient,
   getDurationStringSeconds,
   getPrometheusTimeRange,
   getRangeStep,
   DEFAULT_PROM,
-  MatrixData,
-  VectorData,
-  ScalarData,
-  InstantQueryResultType,
   PROM_DATASOURCE_KIND,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
 import { interpolateDatasourceProxyParams } from '../interpolation';
-import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
+import type { PrometheusDatasourceSpec } from '../types';
+import { DEFAULT_SCRAPE_INTERVAL } from '../types';
 import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
-import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
+import type { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,

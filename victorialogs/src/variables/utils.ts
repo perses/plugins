@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatusError } from '@perses-dev/client';
-import { VariableOption, useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
-import { AbsoluteTimeRange, DatasourceSelector } from '@perses-dev/spec';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import type { StatusError } from '@perses-dev/client';
+import type { VariableOption } from '@perses-dev/plugin-system';
+import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
+import type { AbsoluteTimeRange, DatasourceSelector } from '@perses-dev/spec';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import {
+import type {
   VictoriaLogsClient,
   VictoriaLogsFieldItem,
   VictoriaLogsFieldNamesResponse,

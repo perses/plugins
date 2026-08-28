@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogQueryPlugin, LogQueryContext, calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
-import { QueryDefinition } from '@perses-dev/spec';
+import type { LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
+import { calculateVolumeInterval, parseVariables } from '@perses-dev/plugin-system';
+import type { QueryDefinition } from '@perses-dev/spec';
 
 import { getVictoriaLogsLogData } from './query';
-import { VictoriaLogsLogQuerySpec } from './types';
+import type { VictoriaLogsLogQuerySpec } from './types';
 import { VictoriaLogsLogQueryEditor } from './VictoriaLogsLogQueryEditor';
 
 export const VictoriaLogsLogQuery: LogQueryPlugin<VictoriaLogsLogQuerySpec> = {

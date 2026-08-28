@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AlertsQueryContext, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import { Alert, AlertState, AlertsData, SuppressionRule } from '@perses-dev/spec';
+import type { AlertsQueryContext } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import type { Alert, AlertState, AlertsData, SuppressionRule } from '@perses-dev/spec';
 
-import { ALERTMANAGER_DATASOURCE_KIND, AlertManagerClient, DEFAULT_ALERTMANAGER, GettableAlert } from '../../model';
-import { AlertManagerAlertsQuerySpec } from '../types';
+import type { AlertManagerClient, GettableAlert } from '../../model';
+import { ALERTMANAGER_DATASOURCE_KIND, DEFAULT_ALERTMANAGER } from '../../model';
+import type { AlertManagerAlertsQuerySpec } from '../types';
 
 /**
  * Map Alertmanager API alert state to the generic AlertState.

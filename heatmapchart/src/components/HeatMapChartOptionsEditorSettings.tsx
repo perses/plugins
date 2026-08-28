@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps, TextField } from '@mui/material';
+import type { SwitchProps } from '@mui/material';
+import { Switch, TextField } from '@mui/material';
+import type { FormatControlsProps } from '@perses-dev/components';
 import {
   FormatControls,
-  FormatControlsProps,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
@@ -23,15 +24,10 @@ import {
 } from '@perses-dev/components';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import {
-  DEFAULT_FORMAT,
-  HeatMapChartOptions,
-  HeatMapChartOptionsEditorProps,
-  LOG_BASE_CONFIG,
-  LOG_BASE_OPTIONS,
-} from '../heat-map-chart-model';
+import type { HeatMapChartOptions, HeatMapChartOptionsEditorProps } from '../heat-map-chart-model';
+import { DEFAULT_FORMAT, LOG_BASE_CONFIG, LOG_BASE_OPTIONS } from '../heat-map-chart-model';
 
 export function HeatMapChartOptionsEditorSettings(props: HeatMapChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;

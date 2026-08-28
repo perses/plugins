@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogEntry } from '@perses-dev/spec';
-import { render, screen, waitFor, fireEvent, RenderResult } from '@testing-library/react';
+import type { LogEntry } from '@perses-dev/spec';
+import type { RenderResult } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 
 import { LogRow } from './LogRow';
 

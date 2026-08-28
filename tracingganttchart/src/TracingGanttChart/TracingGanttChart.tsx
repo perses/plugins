@@ -12,19 +12,21 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
-import { ReactElement, useMemo, useRef, useState } from 'react';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type { ReactElement } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
-import { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
+import type { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
 import { DetailPane } from './DetailPane/DetailPane';
 import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { useSpanSearch } from './Search';
-import { getTraceModel, Span } from './trace';
+import type { Span } from './trace';
+import { getTraceModel } from './trace';
 import { TraceHeaderBar } from './TraceHeaderBar';
-import { Viewport } from './utils';
+import type { Viewport } from './utils';
 
 export interface TracingGanttChartProps {
   options: TracingGanttChartOptions;

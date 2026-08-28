@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Chip,
@@ -20,7 +21,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Stack,
   Table,
   TableBody,
@@ -34,14 +34,14 @@ import {
   Typography,
 } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
+import type { PanelProps } from '@perses-dev/plugin-system';
 import {
-  PanelProps,
   parseVariables,
   replaceVariablesInString,
   useAllVariableValues,
   useDatasourceClient,
 } from '@perses-dev/plugin-system';
-import { Alert, AlertsData } from '@perses-dev/spec';
+import type { Alert, AlertsData } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
 import BellOffIcon from 'mdi-material-ui/BellOff';
 import BookOpenIcon from 'mdi-material-ui/BookOpen';
@@ -50,31 +50,35 @@ import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import MagnifyIcon from 'mdi-material-ui/Magnify';
 import UnfoldLessHorizontalIcon from 'mdi-material-ui/UnfoldLessHorizontal';
 import UnfoldMoreHorizontalIcon from 'mdi-material-ui/UnfoldMoreHorizontal';
-import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { SilenceForm } from '../../components/SilenceForm';
 import { StatusBadge } from '../../components/StatusBadge';
-import { AlertManagerClient, extractDatasourceSelector } from '../../model';
-import { PostableSilence } from '../../model/api-types';
-import {
+import type { AlertManagerClient } from '../../model';
+import { extractDatasourceSelector } from '../../model';
+import type { PostableSilence } from '../../model/api-types';
+import type {
   AlertAction,
   AlertTableOptions,
-  ALL_ALERT_ACTIONS,
   ColumnDefinition,
   ColumnSortMode,
+  GroupSummary,
+  LabelColorMapping,
+} from './alert-table-model';
+import {
+  ALL_ALERT_ACTIONS,
   deduplicateAlerts,
   extractLabelKeys,
   getGroupKey,
   getGroupSummary,
-  GroupSummary,
-  LabelColorMapping,
 } from './alert-table-model';
+import type { SortState } from './alert-table-sorting';
 import {
   compareAlertsByColumn,
   compareGroupsByColumn,
   SORT_COL_ALERTNAME,
   SORT_COL_STATUS,
-  SortState,
 } from './alert-table-sorting';
 import { getLabelColor } from './label-colors';
 

@@ -11,49 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Switch,
-  SwitchProps,
-  Typography,
-} from '@mui/material';
+import type { SwitchProps } from '@mui/material';
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, Switch, Typography } from '@mui/material';
+import type {
+  FormatControlsProps,
+  SortSelectorProps,
+  ModeSelectorProps,
+  ModeOption,
+  SortOption,
+  FormatOptions,
+} from '@perses-dev/components';
 import {
   FormatControls,
-  FormatControlsProps,
   OptionsColorPicker,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
   SortSelector,
-  SortSelectorProps,
   ModeSelector,
-  ModeSelectorProps,
-  ModeOption,
-  SortOption,
   OptionsEditorControl,
   useChartsTheme,
-  FormatOptions,
   isPercentUnit,
   isUnitWithShortValues,
 } from '@perses-dev/components';
-import {
-  CalculationSelector,
-  CalculationSelectorProps,
-  CalculationType,
-  LegendOptionsEditor,
-  LegendOptionsEditorProps,
-} from '@perses-dev/plugin-system';
+import type { CalculationSelectorProps, CalculationType, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
+import { CalculationSelector, LegendOptionsEditor } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { PieChartOptions, PieChartOptionsEditorProps, DEFAULT_FORMAT } from './pie-chart-model';
+import type { PieChartOptions, PieChartOptionsEditorProps } from './pie-chart-model';
+import { DEFAULT_FORMAT } from './pie-chart-model';
 
 export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;

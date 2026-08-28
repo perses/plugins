@@ -12,10 +12,13 @@
 // limitations under the License.
 
 import { useTheme } from '@mui/material';
-import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import { ReactElement, useMemo } from 'react';
+import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { LogQLExtension, CompletionConfig } from './logql-extension';
+import type { CompletionConfig } from './logql-extension';
+import { LogQLExtension } from './logql-extension';
 
 export type LogQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> & {
   completionConfig?: CompletionConfig;

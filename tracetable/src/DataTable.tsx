@@ -12,22 +12,19 @@
 // limitations under the License.
 
 import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/material';
-import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import type { GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import { useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
-import { PanelData, replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
-import {
-  convertTimeToDuration,
-  formatDuration,
-  QueryDefinition,
-  ServiceStats,
-  TraceData,
-  TraceSearchResult,
-} from '@perses-dev/spec';
+import type { PanelData } from '@perses-dev/plugin-system';
+import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
+import type { QueryDefinition, ServiceStats, TraceData, TraceSearchResult } from '@perses-dev/spec';
+import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
 import InformationIcon from 'mdi-material-ui/Information';
-import { ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { TraceTableOptions } from './trace-table-model';
+import type { TraceTableOptions } from './trace-table-model';
 import { getServiceColor } from './utils/utils';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LabelColorMapping } from './alert-table-model';
+import type { LabelColorMapping } from './alert-table-model';
 
 const SEVERITY_LEVEL_COLORS: Record<string, string> = {
   critical: '#d32f2f',

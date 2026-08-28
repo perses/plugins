@@ -11,18 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { TimeSeries } from '@perses-dev/spec';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { TimeSeries } from '@perses-dev/spec';
 
-import {
-  ClickHouseClient,
-  ClickHouseQueryResponse,
-  formatClickHouseDateTime,
-  replaceTimeRangePlaceholders,
-} from '../../model/click-house-client';
-import { TimeSeriesEntry } from '../../model/click-house-data-types';
+import type { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
+import { formatClickHouseDateTime, replaceTimeRangePlaceholders } from '../../model/click-house-client';
+import type { TimeSeriesEntry } from '../../model/click-house-data-types';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './click-house-query-types';
+import type { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './click-house-query-types';
 
 const DEFAULT_STEP_MS = 30 * 1000;
 

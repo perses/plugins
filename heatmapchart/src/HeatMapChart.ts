@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { HeatMapChartOptionsEditorSettings, HeatMapChartPanel, HeatMapChartPanelProps } from './components';
-import { createInitialHeatMapChartOptions, HeatMapChartOptions } from './heat-map-chart-model';
+import type { HeatMapChartPanelProps } from './components';
+import { HeatMapChartOptionsEditorSettings, HeatMapChartPanel } from './components';
+import type { HeatMapChartOptions } from './heat-map-chart-model';
+import { createInitialHeatMapChartOptions } from './heat-map-chart-model';
 
 /**
  * The core HeatMapChart panel plugin for Perses.

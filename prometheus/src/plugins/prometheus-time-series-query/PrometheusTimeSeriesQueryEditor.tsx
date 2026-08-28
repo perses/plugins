@@ -14,9 +14,9 @@
 import { Button, ButtonGroup, FormControl, Stack, TextField } from '@mui/material';
 import { useId } from '@perses-dev/components';
 import { PanelEditorContext } from '@perses-dev/dashboards';
+import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import {
   DatasourceSelect,
-  DatasourceSelectProps,
   replaceVariables,
   useAllVariableValues,
   useDatasource,
@@ -26,29 +26,24 @@ import {
   useTimeRange,
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useContext, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useContext, useMemo } from 'react';
 
 import { PromQLEditor } from '../../components';
+import type { DurationString, PrometheusClient, PrometheusDatasourceSelector } from '../../model';
 import {
   DEFAULT_PROM,
-  DurationString,
   getDurationStringSeconds,
   getPrometheusTimeRange,
   getRangeStep,
   isDefaultPromSelector,
   isPrometheusDatasourceSelector,
   PROM_DATASOURCE_KIND,
-  PrometheusClient,
-  PrometheusDatasourceSelector,
 } from '../../model';
-import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
-import {
-  PrometheusTimeSeriesQueryEditorProps,
-  useQueryState,
-  useFormatState,
-  useMinStepState,
-  useInstantState,
-} from './query-editor-model';
+import type { PrometheusDatasourceSpec } from '../types';
+import { DEFAULT_SCRAPE_INTERVAL } from '../types';
+import type { PrometheusTimeSeriesQueryEditorProps } from './query-editor-model';
+import { useQueryState, useFormatState, useMinStepState, useInstantState } from './query-editor-model';
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
  */

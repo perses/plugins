@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
+import type { TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
 
 import { getGreptimeDBTraceData } from './get-greptimedb-trace-data';
-import { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
+import type { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
 import { GreptimeDBTraceQueryEditor } from './GreptimeDBTraceQueryEditor';
 
 export const GreptimeDBTraceQuery: TraceQueryPlugin<GreptimeDBTraceQuerySpec> = {

@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
-import * as otlpresourcev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/resource/v1/resource';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
+import type * as otlpresourcev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/resource/v1/resource';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { sortedIndexBy } from 'lodash';
 
 /** holds the trace and computed properties required for the Gantt chart */

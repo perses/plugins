@@ -13,11 +13,12 @@
 
 import { Autocomplete, Chip, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { OptionsEditorGroup } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, SyntheticEvent, useCallback } from 'react';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useCallback } from 'react';
 
-import { AlertDeduplicationConfig, AlertTableOptions } from './alert-table-model';
+import type { AlertDeduplicationConfig, AlertTableOptions } from './alert-table-model';
 
 const MODE_DESCRIPTIONS: Record<AlertDeduplicationConfig['mode'], string> = {
   none: 'No deduplication. All alerts from all datasources are shown as-is.',

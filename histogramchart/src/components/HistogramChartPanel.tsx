@@ -13,13 +13,16 @@
 
 import { Box, Stack, Typography } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 import merge from 'lodash/merge';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { DEFAULT_FORMAT, DEFAULT_THRESHOLDS, HistogramChartOptions } from '../histogram-chart-model';
-import { HistogramChart, HistogramChartData } from './HistogramChart';
+import type { HistogramChartOptions } from '../histogram-chart-model';
+import { DEFAULT_FORMAT, DEFAULT_THRESHOLDS } from '../histogram-chart-model';
+import type { HistogramChartData } from './HistogramChart';
+import { HistogramChart } from './HistogramChart';
 
 const HISTOGRAM_MIN_WIDTH = 90;
 

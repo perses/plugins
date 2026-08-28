@@ -13,7 +13,7 @@
 
 import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-logql';
-import { Extension } from '@uiw/react-codemirror';
+import type { Extension } from '@uiw/react-codemirror';
 
 import { logsqlHighlight } from './logsql-highlight';
 

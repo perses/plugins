@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CellContext, ColumnDefTemplate } from '@tanstack/react-table';
+import type { CellContext, ColumnDefTemplate } from '@tanstack/react-table';
 
-import { PieChartData } from './PieChartBase';
+import type { PieChartData } from './PieChartBase';
 import { PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 
 const MOCK_DATA: Array<Required<PieChartData>> = [

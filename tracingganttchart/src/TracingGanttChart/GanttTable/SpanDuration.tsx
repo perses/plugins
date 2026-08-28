@@ -13,12 +13,13 @@
 
 import { Box, useTheme } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import type { TracingGanttChartOptions } from '../../gantt-chart-model';
 import { Ticks } from '../Ticks';
-import { Span } from '../trace';
-import { Viewport, formatDuration, getSpanColor, minSpanWidthPx } from '../utils';
+import type { Span } from '../trace';
+import type { Viewport } from '../utils';
+import { formatDuration, getSpanColor, minSpanWidthPx } from '../utils';
 
 export interface SpanDurationProps {
   options: TracingGanttChartOptions;

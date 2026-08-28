@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SortOption } from '@perses-dev/components';
+import type { SortOption } from '@perses-dev/components';
 
-import { ColorOverride, DEFAULT_SORT } from './bar-chart-model';
-import { BarChartData } from './BarChartBase';
+import type { ColorOverride } from './bar-chart-model';
+import { DEFAULT_SORT } from './bar-chart-model';
+import type { BarChartData } from './BarChartBase';
 
 export function calculatePercentages(data: BarChartData[]): Array<{ label: string; value: number }> {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);

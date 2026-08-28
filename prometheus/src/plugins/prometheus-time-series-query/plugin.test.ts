@@ -15,13 +15,13 @@
 
 vi.mock('echarts/core');
 
-import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import { DatasourceSpec } from '@perses-dev/spec';
+import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
+import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
-import { RangeQueryResponse, InstantQueryResponse } from '../../model';
+import type { RangeQueryResponse, InstantQueryResponse } from '../../model';
 import { PrometheusDatasource } from '../prometheus-datasource';
-import { PrometheusDatasourceSpec } from '../types';
+import type { PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuery } from './';
 
 const datasource: PrometheusDatasourceSpec = {

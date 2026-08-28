@@ -13,7 +13,8 @@
 
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/promql/utils.ts
 
-import ASTNode, { binaryOperatorType, nodeType } from './ast';
+import type ASTNode from './ast';
+import { binaryOperatorType, nodeType } from './ast';
 
 const binOpPrecedence = {
   [binaryOperatorType.add]: 3,

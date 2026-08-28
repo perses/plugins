@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
+import type { SplunkClient } from '../../model/splunk-client';
 import {
-  SplunkClient,
   createJob,
   getJobStatus,
   getJobResults,
@@ -22,7 +22,7 @@ import {
   exportSearch,
   getIndexes,
 } from '../../model/splunk-client';
-import { SplunkDatasourceSpec } from './splunk-datasource-types';
+import type { SplunkDatasourceSpec } from './splunk-datasource-types';
 import { SplunkDatasourceEditor } from './SplunkDatasourceEditor';
 
 const createClient: DatasourcePlugin<SplunkDatasourceSpec, SplunkClient>['createClient'] = (spec, options) => {

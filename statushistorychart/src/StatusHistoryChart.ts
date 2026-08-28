@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialStatusHistoryChartOptions, StatusHistoryChartOptions } from './status-history-model';
+import type { StatusHistoryChartOptions } from './status-history-model';
+import { createInitialStatusHistoryChartOptions } from './status-history-model';
 import { StatusHistoryChartOptionsEditorSettings } from './StatusHistoryChartOptionsEditorSettings';
-import { StatusHistoryChartPanelProps, StatusHistoryPanel } from './StatusHistoryPanel';
+import type { StatusHistoryChartPanelProps } from './StatusHistoryPanel';
+import { StatusHistoryPanel } from './StatusHistoryPanel';
 import { StatusHistoryValueMappingEditor } from './StatusHistoryValueMappingEditor';
 
 export const StatusHistoryChart: PanelPlugin<StatusHistoryChartOptions, StatusHistoryChartPanelProps> = {

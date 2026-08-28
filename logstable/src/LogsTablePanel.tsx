@@ -13,10 +13,10 @@
 
 import { Box } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { LogsTableComponent } from './LogsTableComponent';
-import { LogsTableProps } from './model';
+import type { LogsTableProps } from './model';
 
 export function LogsTablePanel(props: LogsTableProps): ReactElement {
   const { contentDimensions, queryResults, spec } = props;

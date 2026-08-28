@@ -14,9 +14,10 @@
 import { Stack, styled, useTheme } from '@mui/material';
 import { memo } from 'react';
 
-import { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
-import { Span } from '../trace';
-import { Viewport, rowHeight } from '../utils';
+import type { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
+import type { Span } from '../trace';
+import type { Viewport } from '../utils';
+import { rowHeight } from '../utils';
 import { SpanDuration } from './SpanDuration';
 import { SpanName } from './SpanName';
 

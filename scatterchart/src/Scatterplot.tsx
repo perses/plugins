@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChart, formatValue, OnEventsType, useChartsTheme, useTimeZone } from '@perses-dev/components';
+import type { OnEventsType } from '@perses-dev/components';
+import { EChart, formatValue, useChartsTheme, useTimeZone } from '@perses-dev/components';
 import {
   replaceVariablesInString,
   useAllVariableValues,
   useRouterContext,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { EChartsOption, ScatterSeriesOption } from 'echarts';
+import type { EChartsOption, ScatterSeriesOption } from 'echarts';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import {
   DatasetComponent,
@@ -28,11 +29,13 @@ import {
   TitleComponent,
   TooltipComponent,
 } from 'echarts/components';
-import { use as registerECharts, EChartsCoreOption } from 'echarts/core';
+import type { EChartsCoreOption } from 'echarts/core';
+import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { ReactElement, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { EChartTraceValue } from './ScatterChartPanel';
+import type { EChartTraceValue } from './ScatterChartPanel';
 import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
 
 registerECharts([

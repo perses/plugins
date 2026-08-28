@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table-model';
+import type { TraceTableOptions } from './trace-table-model';
+import { createInitialTraceTableOptions } from './trace-table-model';
 import { TraceTableItemSelectionActionsEditor } from './TraceTableItemSelectionActionsEditor';
-import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
+import type { TraceTablePanelProps } from './TraceTablePanel';
+import { TraceTablePanel } from './TraceTablePanel';
 
 /**
  * The core TraceTable panel plugin for Perses.

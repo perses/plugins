@@ -11,12 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationContext, datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import { AnnotationData, DatasourceSpec, parseDurationString } from '@perses-dev/spec';
+import type { AnnotationContext } from '@perses-dev/plugin-system';
+import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
+import type { AnnotationData, DatasourceSpec } from '@perses-dev/spec';
+import { parseDurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
 
-import { DEFAULT_PROM, getPrometheusTimeRange, getRangeStep, PROM_DATASOURCE_KIND, PrometheusClient } from '../model';
-import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
+import type { PrometheusClient } from '../model';
+import { DEFAULT_PROM, getPrometheusTimeRange, getRangeStep, PROM_DATASOURCE_KIND } from '../model';
+import type { PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
+import { DEFAULT_SCRAPE_INTERVAL } from '../plugins';
 import { interpolateDatasourceProxyParams } from '../plugins/interpolation';
 import { formatSeriesName } from '../utils';
 

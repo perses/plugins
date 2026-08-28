@@ -11,16 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables, TraceQueryContext } from '@perses-dev/plugin-system';
-import { DatasourceSpec } from '@perses-dev/spec';
+import type * as PluginSystemModule from '@perses-dev/plugin-system';
+import type { TraceQueryContext } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { JaegerClient } from '../model';
+import type { JaegerClient } from '../model';
 import { getTraceData, jaegerTraceToOTLP } from './get-trace-data';
 import { JaegerDatasource } from './jaeger-datasource';
 
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@perses-dev/plugin-system')>();
+  const actual = await importOriginal<typeof PluginSystemModule>();
   return {
     ...actual,
     replaceVariables: vi.fn((query: string) => query),

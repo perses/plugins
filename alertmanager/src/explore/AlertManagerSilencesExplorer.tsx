@@ -16,13 +16,15 @@ import { useSnackbar } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor, useDatasourceClient } from '@perses-dev/plugin-system';
-import { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
+import type { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
 import BellOffIcon from 'mdi-material-ui/BellOff';
-import { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { SilenceForm } from '../components/SilenceForm';
-import { AlertManagerClient, DEFAULT_ALERTMANAGER, PostableSilence } from '../model';
+import type { AlertManagerClient, PostableSilence } from '../model';
+import { DEFAULT_ALERTMANAGER } from '../model';
 
 interface SilencesExplorerQueryParams {
   queries?: QueryDefinition[];

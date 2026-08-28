@@ -12,31 +12,34 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import {
+import type {
   ChartInstance,
   ChartInstanceFocusOpts,
-  clearHighlightedSeries,
   CursorCoordinates,
+  FormatOptions,
+  OnEventsType,
+  TimeChartSeriesMapping,
+  TooltipConfig,
+  ZoomEventData,
+} from '@perses-dev/components';
+import {
+  clearHighlightedSeries,
   DEFAULT_PINNED_CROSSHAIR,
   DEFAULT_TOOLTIP_CONFIG,
   EChart,
   enableDataZoom,
-  FormatOptions,
   getClosestTimestamp,
   getCommonTimeScale,
   getFormattedAxis,
   getPointInGrid,
-  OnEventsType,
   restoreChart,
-  TimeChartSeriesMapping,
   TimeChartTooltip,
-  TooltipConfig,
   useChartsContext,
   useTimeZone,
-  ZoomEventData,
 } from '@perses-dev/components';
-import { TimeScale, TimeSeries } from '@perses-dev/spec';
+import type { TimeScale, TimeSeries } from '@perses-dev/spec';
 import type {
+  DatasetComponentOption as DatasetOption,
   EChartsCoreOption,
   GridComponentOption,
   LineSeriesOption,
@@ -55,15 +58,16 @@ import {
   ToolboxComponent,
   TooltipComponent,
 } from 'echarts/components';
-import { ECharts as EChartsInstance, use as registerECharts } from 'echarts/core';
+import type { ECharts as EChartsInstance } from 'echarts/core';
+import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { DatasetOption } from 'echarts/types/dist/shared';
 import isEqual from 'lodash/isEqual';
 import merge from 'lodash/merge';
-import { forwardRef, MouseEvent, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import type { MouseEvent } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
-import { TimeSeriesAnnotation } from './utils/annotation';
+import type { TimeSeriesAnnotation } from './utils/annotation';
 import { createTimezoneAwareAxisFormatter } from './utils/timezone-formatter';
 
 registerECharts([

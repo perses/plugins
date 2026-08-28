@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
 
-import { VictoriaLogsDatasourceSelector } from '../model';
+import type { VictoriaLogsDatasourceSelector } from '../model';
 
 export interface VictoriaLogsVariableOptionsBase {
   datasource?: DatasourceSelectValue<VictoriaLogsDatasourceSelector>;

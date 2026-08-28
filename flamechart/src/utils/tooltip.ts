@@ -13,7 +13,7 @@
 
 import * as echarts from 'echarts';
 
-import { FlameChartSample } from './data-model';
+import type { FlameChartSample } from './data-model';
 import { formatItemValue } from './format';
 
 /**

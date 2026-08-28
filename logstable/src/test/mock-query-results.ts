@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogsQueryData } from '../model';
+import type { LogsQueryData } from '../model';
 
 export const MOCK_LOGS_QUERY_RESULT: LogsQueryData = {
   logs: {

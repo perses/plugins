@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, RequestHeaders } from '@perses-dev/client';
-import { QueryParamValues } from '@perses-dev/components';
-import { DatasourceClient } from '@perses-dev/plugin-system';
+import type { RequestHeaders } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { QueryParamValues } from '@perses-dev/components';
+import type { DatasourceClient } from '@perses-dev/plugin-system';
 
-import {
+import type {
   InstantQueryRequestParameters,
   InstantQueryResponse,
   LabelNamesRequestParameters,

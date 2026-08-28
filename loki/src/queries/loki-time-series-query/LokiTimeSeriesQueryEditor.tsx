@@ -13,21 +13,18 @@
 
 import { InputLabel, Stack } from '@mui/material';
 import { createModEnterHandler } from '@perses-dev/dashboards';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  isVariableDatasource,
-  OptionsEditorProps,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { LogQLEditor } from '../../components';
-import { LOKI_DATASOURCE_KIND, LokiDatasourceSelector } from '../../model';
+import type { LokiDatasourceSelector } from '../../model';
+import { LOKI_DATASOURCE_KIND } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
-import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
+import type { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 
 type LokiQueryEditorProps = OptionsEditorProps<LokiTimeSeriesQuerySpec>;
 

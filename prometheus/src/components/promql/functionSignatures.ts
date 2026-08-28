@@ -13,7 +13,8 @@
 
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/promql/functionSignatures.ts
 
-import { valueType, Func } from './ast';
+import type { Func } from './ast';
+import { valueType } from './ast';
 
 export const functionSignatures: Record<string, Func> = {
   abs: { name: 'abs', argTypes: [valueType.vector], variadic: 0, returnType: valueType.vector },

@@ -13,9 +13,9 @@
 
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PanelPluginLoader } from '@perses-dev/dashboards';
-import { PanelData } from '@perses-dev/plugin-system';
-import { QueryDataType, UnknownSpec } from '@perses-dev/spec';
-import { ReactElement } from 'react';
+import type { PanelData } from '@perses-dev/plugin-system';
+import type { QueryDataType, UnknownSpec } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
 interface EmbeddedPanelProps {

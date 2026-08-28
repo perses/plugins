@@ -11,14 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Autocomplete, Checkbox, Stack, TextField, TextFieldProps } from '@mui/material';
+import type { TextFieldProps } from '@mui/material';
+import { Autocomplete, Checkbox, Stack, TextField } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { ReactElement, SyntheticEvent, useCallback, useEffect, useState } from 'react';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { TempoClient } from '../model';
+import type { TempoClient } from '../model';
 import { getUnixTimeRange } from '../plugins';
-import { filterToTraceQL, traceQLToFilter, DurationField, Filter, splitByUnquotedWhitespace } from './filter';
+import type { DurationField, Filter } from './filter';
+import { filterToTraceQL, traceQLToFilter, splitByUnquotedWhitespace } from './filter';
 
 const statusOptions = ['unset', 'ok', 'error'];
 

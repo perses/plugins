@@ -12,20 +12,16 @@
 // limitations under the License.
 
 import { ChartsProvider, ItemActionsProvider, SelectionProvider, testChartsTheme } from '@perses-dev/components';
-import {
-  dynamicImportPluginLoader,
-  PluginLoader,
-  PluginModuleResource,
-  PluginRegistry,
-  VariableStateMap,
-} from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type * as PluginSystemModule from '@perses-dev/plugin-system';
+import type { PluginLoader, PluginModuleResource, VariableStateMap } from '@perses-dev/plugin-system';
+import { dynamicImportPluginLoader, PluginRegistry } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
-import { TableOptions, TimeSeriesTableProps } from '../models';
+import type { TableOptions, TimeSeriesTableProps } from '../models';
 import {
   MOCK_MULTI_QUERY_DATA_EMPTY,
   MOCK_MULTI_QUERY_DATA_Q1,
@@ -45,7 +41,7 @@ const MOCK_VARIABLE_STATE_MAP = vi.hoisted(
   }),
 );
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@perses-dev/plugin-system')>()),
+  ...(await importOriginal<typeof PluginSystemModule>()),
   // Return a stable reference (like the real hook, which memoizes) so consumers
   // that depend on it in a useMemo/useEffect dependency array don't recompute/rerun on every render.
   useAllVariableValues: (): VariableStateMap => MOCK_VARIABLE_STATE_MAP,

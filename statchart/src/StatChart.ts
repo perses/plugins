@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialStatChartOptions, StatChartOptions } from './stat-chart-model';
+import type { StatChartOptions } from './stat-chart-model';
+import { createInitialStatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
-import { StatChartPanel, StatChartPanelProps } from './StatChartPanel';
+import type { StatChartPanelProps } from './StatChartPanel';
+import { StatChartPanel } from './StatChartPanel';
 import { StatChartValueMappingEditor } from './StatChartValueMappingEditor';
 
 /**

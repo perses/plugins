@@ -13,12 +13,12 @@
 
 import { Switch, TextField } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, FormatControls, SettingsAutocomplete } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
+import type { TimeSeriesChartYAxisOptions } from './time-series-chart-model';
 import {
   DEFAULT_FORMAT,
   DEFAULT_Y_AXIS,
-  TimeSeriesChartYAxisOptions,
   Y_AXIS_CONFIG,
   LOG_BASE_CONFIG,
   LOG_BASE_OPTIONS,

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormatOptions, StepOptions, ThresholdColorPalette, ThresholdOptions } from '@perses-dev/components';
+import type { FormatOptions, StepOptions, ThresholdColorPalette, ThresholdOptions } from '@perses-dev/components';
 import zip from 'lodash/zip';
 
 export type GaugeColorStop = [number, string];

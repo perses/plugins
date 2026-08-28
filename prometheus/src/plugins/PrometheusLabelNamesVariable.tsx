@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { VariablePlugin, GetVariableOptionsContext } from '@perses-dev/plugin-system';
 import {
-  VariablePlugin,
-  GetVariableOptionsContext,
   replaceVariables,
   parseVariables,
   datasourceSelectValueToSelector,
@@ -23,7 +22,7 @@ import {
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
 import { resolvePrometheusDatasource } from './interpolation';
 import { stringArrayToVariableOptions, PrometheusLabelNamesVariableEditor } from './prometheus-variables';
-import { PrometheusLabelNamesVariableOptions } from './types';
+import type { PrometheusLabelNamesVariableOptions } from './types';
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec: PrometheusLabelNamesVariableOptions, ctx: GetVariableOptionsContext) => {

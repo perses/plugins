@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { PrometheusDatasource } from './prometheus-datasource';
-import { PrometheusDatasourceSpec } from './types';
+import type { PrometheusDatasourceSpec } from './types';
 
 describe('PrometheusDatasource query parameters', () => {
   it('should not alter the base URL', () => {

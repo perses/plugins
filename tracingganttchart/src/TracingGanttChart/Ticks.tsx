@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Box, styled } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { Trace } from './trace';
-import { Viewport, formatDuration } from './utils';
+import type { Trace } from './trace';
+import type { Viewport } from './utils';
+import { formatDuration } from './utils';
 
 export interface TicksHeaderProps {
   trace: Trace;

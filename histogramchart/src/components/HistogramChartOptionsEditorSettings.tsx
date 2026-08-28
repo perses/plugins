@@ -12,21 +12,21 @@
 // limitations under the License.
 
 import { TextField } from '@mui/material';
+import type { FormatControlsProps, ThresholdsEditorProps } from '@perses-dev/components';
 import {
   FormatControls,
-  FormatControlsProps,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   ThresholdsEditor,
-  ThresholdsEditorProps,
   SettingsAutocomplete,
 } from '@perses-dev/components';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
+import type { HistogramChartOptions, HistogramChartOptionsEditorProps } from '../histogram-chart-model';
 import {
   DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,
@@ -34,8 +34,6 @@ import {
   DEFAULT_MIN_PERCENT,
   DEFAULT_MIN_PERCENT_DECIMAL,
   DEFAULT_THRESHOLDS,
-  HistogramChartOptions,
-  HistogramChartOptionsEditorProps,
   LOG_BASE_CONFIG,
   LOG_BASE_OPTIONS,
 } from '../histogram-chart-model';

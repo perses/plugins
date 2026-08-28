@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { screen } from '@testing-library/dom';
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import * as otlpTrace from '../test/traces/example_otlp.json';
-import { TicksHeader, TicksHeaderProps } from './Ticks';
+import type { TicksHeaderProps } from './Ticks';
+import { TicksHeader } from './Ticks';
 import { getTraceModel } from './trace';
 
 describe('Ticks', () => {

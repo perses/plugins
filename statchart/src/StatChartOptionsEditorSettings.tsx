@@ -11,40 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps } from '@mui/material';
-import {
+import type { SwitchProps } from '@mui/material';
+import { Switch } from '@mui/material';
+import type {
   FontSizeOption,
-  FontSizeSelector,
   FontSizeSelectorProps,
-  FormatControls,
   FormatControlsProps,
   FormatOptions,
+  ThresholdsEditorProps,
+} from '@perses-dev/components';
+import {
+  FontSizeSelector,
+  FormatControls,
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   SettingsAutocomplete,
   ThresholdsEditor,
-  ThresholdsEditorProps,
 } from '@perses-dev/components';
-import {
-  CalculationSelector,
-  CalculationSelectorProps,
-  MetricLabelInput,
-  MetricLabelInputProps,
-} from '@perses-dev/plugin-system';
+import type { CalculationSelectorProps, MetricLabelInputProps } from '@perses-dev/plugin-system';
+import { CalculationSelector, MetricLabelInput } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import merge from 'lodash/merge';
-import { ReactElement, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import {
-  COLOR_MODE_LABELS,
+import type {
   ColorModeLabelItem,
-  SHOW_LEGEND_LABELS,
   ShowLegendLabelItem,
   StatChartOptions,
   StatChartOptionsEditorProps,
 } from './stat-chart-model';
+import { COLOR_MODE_LABELS, SHOW_LEGEND_LABELS } from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
 

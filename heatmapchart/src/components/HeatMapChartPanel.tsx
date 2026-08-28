@@ -12,14 +12,17 @@
 // limitations under the License.
 
 import { Stack, Typography } from '@mui/material';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { TimeScale, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import type { TimeScale, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 import merge from 'lodash/merge';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { DEFAULT_FORMAT, HeatMapChartOptions, LOG_BASE } from '../heat-map-chart-model';
+import type { HeatMapChartOptions, LOG_BASE } from '../heat-map-chart-model';
+import { DEFAULT_FORMAT } from '../heat-map-chart-model';
 import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils';
-import { HeatMapChart, HeatMapDataItem } from './HeatMapChart';
+import type { HeatMapDataItem } from './HeatMapChart';
+import { HeatMapChart } from './HeatMapChart';
 
 /**
  * Helper function to get the effective lower bound for log scale.

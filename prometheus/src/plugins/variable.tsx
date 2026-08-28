@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Autocomplete, TextField } from '@mui/material';
-import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
 
 type StaticListOption = string | VariableOption;
 

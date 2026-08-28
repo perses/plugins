@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Select, MenuItem } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface OperatorProps {
   value: string;

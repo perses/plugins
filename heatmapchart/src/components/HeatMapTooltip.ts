@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { css, Theme } from '@mui/material';
-import { FormatOptions, formatValue, getDateAndTime } from '@perses-dev/components';
+import type { Theme } from '@mui/material';
+import { css } from '@mui/material';
+import type { FormatOptions } from '@perses-dev/components';
+import { formatValue, getDateAndTime } from '@perses-dev/components';
 
-import { HeatMapData } from './HeatMapChart';
+import type { HeatMapData } from './HeatMapChart';
 
 interface CustomTooltipProps {
   data: HeatMapData;

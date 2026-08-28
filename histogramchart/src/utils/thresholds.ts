@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme, ThresholdOptions } from '@perses-dev/components';
+import type { PersesChartsTheme, ThresholdOptions } from '@perses-dev/components';
 
 export function getColorFromThresholds(
   value: number,

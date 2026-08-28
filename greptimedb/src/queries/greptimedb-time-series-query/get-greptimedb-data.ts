@@ -11,18 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 
-import { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
+import type { GreptimeDBClient, GreptimeDBQueryResponse } from '../../model/greptimedb-client';
 import { DEFAULT_DATASOURCE } from '../constants';
+import type { GreptimeDBRecords } from '../greptimedb-query-data-model';
 import {
   findTimeColumnIndex,
-  GreptimeDBRecords,
   normalizeRecords,
   replaceQueryVariables,
   toTimestampMs,
 } from '../greptimedb-query-data-model';
-import { GreptimeDBTimeSeriesQuerySpec } from './greptimedb-query-types';
+import type { GreptimeDBTimeSeriesQuerySpec } from './greptimedb-query-types';
 
 function isLikelyNumericType(dataType: string | undefined): boolean {
   if (!dataType) return false;

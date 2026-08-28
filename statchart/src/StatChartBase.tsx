@@ -12,16 +12,20 @@
 // limitations under the License.
 
 import { Box, Typography, styled, useTheme } from '@mui/material';
-import { EChart, FontSizeOption, FormatOptions, GraphSeries, useChartsTheme } from '@perses-dev/components';
+import type { FontSizeOption, FormatOptions, GraphSeries } from '@perses-dev/components';
+import { EChart, useChartsTheme } from '@perses-dev/components';
 import chroma from 'chroma-js';
-import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
+import type { LineSeriesOption } from 'echarts/charts';
+import { LineChart as EChartsLineChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
-import { use as registerECharts, EChartsCoreOption } from 'echarts/core';
+import type { EChartsCoreOption } from 'echarts/core';
+import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import merge from 'lodash/merge';
-import { FC, ReactNode, useMemo } from 'react';
+import type { FC, ReactNode } from 'react';
+import { useMemo } from 'react';
 
-import { ColorMode } from './stat-chart-model';
+import type { ColorMode } from './stat-chart-model';
 import { useOptimalFontSize } from './utils/calculate-font-size';
 import { formatStatChartValue } from './utils/format-stat-chart-value';
 

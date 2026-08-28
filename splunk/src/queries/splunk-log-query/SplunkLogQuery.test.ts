@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogQueryContext } from './log-query-plugin-interface';
+import type { LogQueryContext } from './log-query-plugin-interface';
 import { SplunkLogQuery } from './SplunkLogQuery';
 
 const createStubContext = (): LogQueryContext => ({

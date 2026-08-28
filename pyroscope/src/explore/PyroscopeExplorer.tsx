@@ -15,10 +15,12 @@ import { Alert, Box, Stack } from '@mui/material';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
 import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
-import { QueryDefinition } from '@perses-dev/spec';
-import { ReactElement, useState } from 'react';
+import type { QueryDefinition } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
-import { isProfileQueryComplete, PyroscopeProfileQuerySpec } from '../model';
+import type { PyroscopeProfileQuerySpec } from '../model';
+import { isProfileQueryComplete } from '../model';
 
 interface ProfilesExplorerQueryParams {
   queries?: QueryDefinition[];

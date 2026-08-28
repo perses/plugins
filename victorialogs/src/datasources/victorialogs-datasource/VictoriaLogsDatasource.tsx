@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
-import { VictoriaLogsClient, streamQueryRange, statsQueryRange, fieldNames, fieldValues } from '../../model/client';
-import { VictoriaLogsDatasourceSpec } from './types';
+import type { VictoriaLogsClient } from '../../model/client';
+import { streamQueryRange, statsQueryRange, fieldNames, fieldValues } from '../../model/client';
+import type { VictoriaLogsDatasourceSpec } from './types';
 import { VictoriaLogsDatasourceEditor } from './VictoriaLogsDatasourceEditor';
 
 const createClient: DatasourcePlugin<VictoriaLogsDatasourceSpec, VictoriaLogsClient>['createClient'] = (

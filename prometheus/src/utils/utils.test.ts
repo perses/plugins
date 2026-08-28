@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metric } from '../model/api-types';
+import type { Metric } from '../model/api-types';
 import { formatSeriesName, getFormattedPrometheusSeriesName, getUniqueKeyForPrometheusResult } from './utils';
 
 describe('formatSeriesName', () => {

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QuerySettingsOptions, TimeSeriesChartVisualOptions } from '../time-series-chart-model';
+import type { QuerySettingsOptions, TimeSeriesChartVisualOptions } from '../time-series-chart-model';
 import { getConsistentColor } from './palette';
 
 export interface SeriesColorProps {

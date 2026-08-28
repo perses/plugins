@@ -13,7 +13,7 @@
 
 import { AttributeField, FieldExpression, FieldOp, IntrinsicField, Static, parser } from '@grafana/lezer-traceql';
 
-import { DurationField, Filter } from './filter';
+import type { DurationField, Filter } from './filter';
 
 interface Matcher {
   operator: string;

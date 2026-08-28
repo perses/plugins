@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { LokiDatasourceSpec } from './loki-datasource-types';
+import type { LokiDatasourceSpec } from './loki-datasource-types';
 
 export interface LokiDatasourceEditorProps {
   value: LokiDatasourceSpec;

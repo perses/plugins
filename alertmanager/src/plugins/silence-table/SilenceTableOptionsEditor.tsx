@@ -13,11 +13,13 @@
 
 import { Checkbox, FormControlLabel } from '@mui/material';
 import { OptionsEditorGroup } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
-import { ALL_SILENCE_ACTIONS, SilenceAction, SilenceTableOptions } from './silence-table-model';
+import type { SilenceAction, SilenceTableOptions } from './silence-table-model';
+import { ALL_SILENCE_ACTIONS } from './silence-table-model';
 
 const ACTION_LABELS: Record<SilenceAction, string> = {
   expire: 'Expire silence',

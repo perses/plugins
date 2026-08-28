@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { screen } from '@testing-library/dom';
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
 import { GanttTableProvider } from './GanttTableProvider';
-import { SpanName, SpanNameProps } from './SpanName';
+import type { SpanNameProps } from './SpanName';
+import { SpanName } from './SpanName';
 
 describe('SpanName', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);

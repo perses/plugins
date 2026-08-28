@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { TextField } from '@mui/material';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { ColumnsEditor } from '../../components/ColumnsEditor';
-import { AlertTableOptions, ColumnDefinition, ColumnSortMode } from './alert-table-model';
+import type { AlertTableOptions, ColumnDefinition, ColumnSortMode } from './alert-table-model';
 
 const SORT_MODE_LABELS: Record<ColumnSortMode, string> = {
   alphabetical: 'Alphabetical',

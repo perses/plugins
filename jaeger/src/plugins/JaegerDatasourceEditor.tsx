@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { JaegerDatasourceSpec } from './jaeger-datasource-types';
+import type { JaegerDatasourceSpec } from './jaeger-datasource-types';
 
 export interface JaegerDatasourceEditorProps {
   value: JaegerDatasourceSpec;

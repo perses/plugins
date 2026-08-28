@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 
-import { JaegerTrace, jaegerTraceToOTLP } from '../test/convert/jaeger';
+import type { JaegerTrace } from '../test/convert/jaeger';
+import { jaegerTraceToOTLP } from '../test/convert/jaeger';
 import * as asyncTrace from '../test/traces/async_jaeger.json';
 import * as exampleTrace from '../test/traces/example_otlp.json';
 import * as incompleteTrace from '../test/traces/pushbytes_incomplete_otlp.json';
 import * as missingRootSpanTrace from '../test/traces/pushbytes_no_root_span_otlp.json';
-import { forEachSpan, getTraceModel, Span } from './trace';
+import type { Span } from './trace';
+import { forEachSpan, getTraceModel } from './trace';
 
 describe('trace', () => {
   it('computes a GanttTrace model from a trace', (): void => {

@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { interpolateHeaders, interpolateQueryParams, VariableStateMap } from '@perses-dev/components';
-import { DatasourceStore } from '@perses-dev/plugin-system';
-import { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+import type { VariableStateMap } from '@perses-dev/components';
+import { interpolateHeaders, interpolateQueryParams } from '@perses-dev/components';
+import type { DatasourceStore } from '@perses-dev/plugin-system';
+import type { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 
-import { ClientRequestOptions, PrometheusClient } from '../model';
-import { PrometheusDatasourceSpec } from './types';
+import type { ClientRequestOptions, PrometheusClient } from '../model';
+import type { PrometheusDatasourceSpec } from './types';
 
 export interface ResolvedPrometheusDatasource {
   client: PrometheusClient;

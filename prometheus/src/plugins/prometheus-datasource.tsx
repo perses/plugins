@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/client';
-import { QueryParamValues } from '@perses-dev/components';
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { BuiltinVariableDefinition } from '@perses-dev/spec';
+import type { RequestHeaders } from '@perses-dev/client';
+import type { QueryParamValues } from '@perses-dev/components';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { BuiltinVariableDefinition } from '@perses-dev/spec';
 
+import type { ClientRequestOptions, PrometheusClient, QueryOptions } from '../model';
 import {
-  ClientRequestOptions,
   healthCheck,
   instantQuery,
   labelNames,
@@ -25,13 +25,11 @@ import {
   mergeQueryParams,
   metricMetadata,
   parseQuery,
-  PrometheusClient,
-  QueryOptions,
   rangeQuery,
   series,
 } from '../model';
 import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
-import { PrometheusDatasourceSpec } from './types';
+import type { PrometheusDatasourceSpec } from './types';
 
 function wrapClientMethod<P, R>(
   fn: (params: P, opts: QueryOptions) => Promise<R>,

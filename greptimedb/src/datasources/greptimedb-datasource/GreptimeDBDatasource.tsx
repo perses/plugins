@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
 import { greptimedbQuery } from '../../model/greptimedb-client';
-import { GreptimeDBDatasourceClient, GreptimeDBDatasourceSpec } from './greptimedb-datasource-types';
+import type { GreptimeDBDatasourceClient, GreptimeDBDatasourceSpec } from './greptimedb-datasource-types';
 import { GreptimeDBDatasourceEditor } from './GreptimeDBDatasourceEditor';
 
 const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasourceClient>['createClient'] = (

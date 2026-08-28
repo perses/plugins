@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 
-import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
+import type { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 
 export interface OpenSearchLogQuerySpec {
   query: string;

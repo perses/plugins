@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, useContext, useState } from 'react';
+import type { ReactElement } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 interface GanttTableContextType {
   collapsedSpans: Set<string>;

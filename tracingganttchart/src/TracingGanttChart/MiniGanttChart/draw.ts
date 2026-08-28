@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Span, Trace, forEachSpan } from '../trace';
+import type { Span, Trace } from '../trace';
+import { forEachSpan } from '../trace';
 import { minSpanWidthPx } from '../utils';
 
 const MIN_BAR_HEIGHT = 1;

@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogQueryContext } from '@perses-dev/plugin-system';
+import type { LogQueryContext } from '@perses-dev/plugin-system';
 import type { Mock } from 'vitest';
 
 import { LokiDatasource } from '../../datasources/loki-datasource';
-import { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
-import { LokiQueryRangeStreamsResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
+import type { LokiDatasourceSpec } from '../../datasources/loki-datasource/loki-datasource-types';
+import type { LokiQueryRangeStreamsResponse, LokiQueryRangeResponse } from '../../model/loki-client-types';
 import { LokiLogQuery } from './LokiLogQuery';
 
 const datasource: LokiDatasourceSpec = {

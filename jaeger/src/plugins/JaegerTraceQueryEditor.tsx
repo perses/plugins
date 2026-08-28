@@ -11,34 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Autocomplete,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  TextFieldProps,
-} from '@mui/material';
+import type { TextFieldProps } from '@mui/material';
+import { Autocomplete, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
 import { useId } from '@perses-dev/components';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  useDatasourceClient,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ChangeEvent, ReactElement, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent, ReactElement, SyntheticEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  DEFAULT_JAEGER,
-  JaegerClient,
-  isDefaultJaegerSelector,
-  isJaegerDatasourceSelector,
-  JAEGER_DATASOURCE_KIND,
-  JaegerTraceQuerySpec,
-} from '../model';
+import type { JaegerClient, JaegerTraceQuerySpec } from '../model';
+import { DEFAULT_JAEGER, isDefaultJaegerSelector, isJaegerDatasourceSelector, JAEGER_DATASOURCE_KIND } from '../model';
 
 interface JaegerTraceQueryEditorProps {
   value: JaegerTraceQuerySpec;

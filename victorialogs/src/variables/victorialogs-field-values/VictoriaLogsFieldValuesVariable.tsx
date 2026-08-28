@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { VariablePlugin, GetVariableOptionsContext } from '@perses-dev/plugin-system';
 import {
-  VariablePlugin,
-  GetVariableOptionsContext,
   replaceVariables,
   parseVariables,
   datasourceSelectValueToSelector,
   isVariableDatasource,
 } from '@perses-dev/plugin-system';
 
-import { VictoriaLogsClient, DEFAULT_VICTORIALOGS, VICTORIALOGS_DATASOURCE_KIND } from '../../model';
-import { VictoriaLogsFieldValuesVariableOptions } from '../types';
+import type { VictoriaLogsClient } from '../../model';
+import { DEFAULT_VICTORIALOGS, VICTORIALOGS_DATASOURCE_KIND } from '../../model';
+import type { VictoriaLogsFieldValuesVariableOptions } from '../types';
 import { fieldItemsToVariableOptions, getVictoriaLogsTimeRange } from '../utils';
 import { VictoriaLogsFieldValuesVariableEditor } from './VictoriaLogsFieldValuesVariableEditor';
 

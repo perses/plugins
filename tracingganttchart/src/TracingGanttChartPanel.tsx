@@ -13,11 +13,11 @@
 
 import { Box } from '@mui/material';
 import { NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { TraceData } from '@perses-dev/spec';
-import { ReactElement } from 'react';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import type { TraceData } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
 
-import { CustomLinks, TracingGanttChartOptions } from './gantt-chart-model';
+import type { CustomLinks, TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 
 export type TracingGanttChartPanelProps = PanelProps<TracingGanttChartOptions, TraceData>;

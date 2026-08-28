@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { Mock } from 'vitest';
 
 import { PPL_DOCS_URL } from '../constants';
-import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
+import type { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@perses-dev/plugin-system')>()),
+  ...(await importOriginal<typeof PluginSystemModule>()),
   DatasourceSelect: (): JSX.Element => <div data-testid="datasource-select" />,
   useDatasourceSelectValueToSelector: (): undefined => undefined,
   isVariableDatasource: (): boolean => false,

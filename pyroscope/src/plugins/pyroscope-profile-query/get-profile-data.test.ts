@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProfileQueryContext } from '@perses-dev/plugin-system';
-import { StackTrace } from '@perses-dev/spec';
+import type { ProfileQueryContext } from '@perses-dev/plugin-system';
+import type { StackTrace } from '@perses-dev/spec';
 
-import {
+import type {
   FlameGraph,
   Series,
   PyroscopeClient,

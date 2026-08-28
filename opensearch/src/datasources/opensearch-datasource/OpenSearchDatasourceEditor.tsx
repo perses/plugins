@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { OpenSearchDatasourceSpec } from './opensearch-datasource-types';
+import type { OpenSearchDatasourceSpec } from './opensearch-datasource-types';
 
 export interface OpenSearchDatasourceEditorProps {
   value: OpenSearchDatasourceSpec;

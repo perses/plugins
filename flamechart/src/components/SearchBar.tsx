@@ -13,7 +13,7 @@
 
 import { TextField, InputAdornment, Chip } from '@mui/material';
 import Magnify from 'mdi-material-ui/Magnify';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface SearchBarProps {
   searchValue: string;

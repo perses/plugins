@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
-import { createInitialGaugeChartOptions, GaugeChartOptions } from './gauge-chart-model';
+import type { GaugeChartOptions } from './gauge-chart-model';
+import { createInitialGaugeChartOptions } from './gauge-chart-model';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
-import { GaugeChartLoading, GaugeChartPanel, GaugeChartPanelProps } from './GaugeChartPanel';
+import type { GaugeChartPanelProps } from './GaugeChartPanel';
+import { GaugeChartLoading, GaugeChartPanel } from './GaugeChartPanel';
 
 /**
  * The core GaugeChart panel plugin for Perses.

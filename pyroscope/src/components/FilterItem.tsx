@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { Grid2 as Grid, Stack } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { PyroscopeDatasourceSelector } from '../model';
-import { LabelFilter, OperatorType } from '../utils/types';
+import type { PyroscopeDatasourceSelector } from '../model';
+import type { LabelFilter, OperatorType } from '../utils/types';
 import { DeleteFilterItem } from './DeleteFilterItem';
 import { LabelName } from './LabelName';
 import { LabelValue } from './LabelValue';

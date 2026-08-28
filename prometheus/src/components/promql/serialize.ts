@@ -15,14 +15,9 @@
 
 import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
 
-import ASTNode, {
-  VectorSelector,
-  matchType,
-  vectorMatchCardinality,
-  nodeType,
-  StartOrEnd,
-  MatrixSelector,
-} from './ast';
+import type { VectorSelector, StartOrEnd, MatrixSelector } from './ast';
+import type ASTNode from './ast';
+import { matchType, vectorMatchCardinality, nodeType } from './ast';
 import { aggregatorsWithParam, maybeParenthesizeBinopChild, escapeString } from './utils';
 
 const serializeAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, offset: number): string => {

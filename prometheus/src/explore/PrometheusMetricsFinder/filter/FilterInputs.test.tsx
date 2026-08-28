@@ -13,7 +13,8 @@
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
-import { RawFilterInput, RawFilterInputProps } from './FilterInputs';
+import type { RawFilterInputProps } from './FilterInputs';
+import { RawFilterInput } from './FilterInputs';
 
 describe('FilterInputs', () => {
   const renderInputs = ({

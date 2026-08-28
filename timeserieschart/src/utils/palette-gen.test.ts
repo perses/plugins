@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesChartVisualOptions } from '../time-series-chart-model';
-import { getSeriesColor, getAutoPaletteColor, getCategoricalPaletteColor, SeriesColorProps } from './palette-gen';
+import type { TimeSeriesChartVisualOptions } from '../time-series-chart-model';
+import type { SeriesColorProps } from './palette-gen';
+import { getSeriesColor, getAutoPaletteColor, getCategoricalPaletteColor } from './palette-gen';
 
 describe('getSeriesColor', () => {
   const fallbackColor = '#000';

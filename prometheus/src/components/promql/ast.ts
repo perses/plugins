@@ -223,4 +223,4 @@ type ASTNode =
   | VectorSelector
   | Placeholder;
 
-export default ASTNode;
+export type { ASTNode as default };

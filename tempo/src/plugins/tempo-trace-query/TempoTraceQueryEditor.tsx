@@ -13,25 +13,18 @@
 
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
 import { useId } from '@perses-dev/components';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  useDatasourceClient,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 
 import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
 import { AttributeFilters } from '../../components/AttributeFilters';
-import {
-  TempoClient,
-  DEFAULT_TEMPO,
-  isDefaultTempoSelector,
-  isTempoDatasourceSelector,
-  TEMPO_DATASOURCE_KIND,
-} from '../../model';
-import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
+import type { TempoClient } from '../../model';
+import { DEFAULT_TEMPO, isDefaultTempoSelector, isTempoDatasourceSelector, TEMPO_DATASOURCE_KIND } from '../../model';
+import type { TraceQueryEditorProps } from './query-editor-model';
+import { useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
   const {

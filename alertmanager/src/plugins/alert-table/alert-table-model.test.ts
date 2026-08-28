@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert } from '@perses-dev/spec';
+import type { Alert } from '@perses-dev/spec';
 
 import { deduplicateAlerts, extractLabelKeys, getGroupKey, getGroupSummary } from './alert-table-model';
 

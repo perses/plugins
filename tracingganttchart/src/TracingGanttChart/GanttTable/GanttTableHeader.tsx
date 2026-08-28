@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { Box, Stack, useTheme } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { TicksHeader } from '../Ticks';
-import { Trace } from '../trace';
-import { Viewport, rowHeight } from '../utils';
+import type { Trace } from '../trace';
+import type { Viewport } from '../utils';
+import { rowHeight } from '../utils';
 
 interface GanttTableHeaderProps {
   trace: Trace;

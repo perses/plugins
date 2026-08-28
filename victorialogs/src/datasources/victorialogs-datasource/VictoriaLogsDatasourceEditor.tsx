@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { VictoriaLogsDatasourceSpec } from './types';
+import type { VictoriaLogsDatasourceSpec } from './types';
 
 export interface VictoriaLogsDatasourceEditorProps {
   value: VictoriaLogsDatasourceSpec;

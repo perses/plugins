@@ -11,32 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Theme, Typography, useTheme } from '@mui/material';
-import {
-  FormatOptions,
-  formatValue,
-  Table,
-  TableCellConfigs,
-  TableColumnConfig,
-  transformData,
-  useSelection,
-} from '@perses-dev/components';
+import type { Theme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
+import type { FormatOptions, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import { formatValue, Table, transformData, useSelection } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
-import {
-  ActionOptions,
-  CalculationsMap,
-  PanelData,
-  PanelProps,
-  replaceVariablesInString,
-  useAllVariableValues,
-  VariableStateMap,
-} from '@perses-dev/plugin-system';
-import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
-import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
-import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ActionOptions, PanelData, PanelProps, VariableStateMap } from '@perses-dev/plugin-system';
+import { CalculationsMap, replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
+import type { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
+import type { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { CellSettings, ColumnSettings, evaluateConditionalFormatting, TableOptions } from '../models';
+import type { CellSettings, ColumnSettings, TableOptions } from '../models';
+import { evaluateConditionalFormatting } from '../models';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
 

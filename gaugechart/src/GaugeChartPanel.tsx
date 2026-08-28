@@ -12,20 +12,20 @@
 // limitations under the License.
 
 import { Box, Skeleton, Stack } from '@mui/material';
-import { FormatOptions, formatValue, useChartsTheme } from '@perses-dev/components';
-import { CalculationsMap, DEFAULT_CALCULATION, PanelProps } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { FormatOptions } from '@perses-dev/components';
+import { formatValue, useChartsTheme } from '@perses-dev/components';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import { CalculationsMap, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import {
-  DEFAULT_FORMAT,
-  DEFAULT_MAX_PERCENT,
-  DEFAULT_MAX_PERCENT_DECIMAL,
-  GaugeChartOptions,
-} from './gauge-chart-model';
-import { GaugeChartBase, GaugeSeries } from './GaugeChartBase';
+import type { GaugeChartOptions } from './gauge-chart-model';
+import { DEFAULT_FORMAT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
+import type { GaugeSeries } from './GaugeChartBase';
+import { GaugeChartBase } from './GaugeChartBase';
 import { convertThresholds, defaultThresholdInput } from './thresholds';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };

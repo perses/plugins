@@ -12,19 +12,19 @@
 // limitations under the License.
 
 import { replaceVariables } from '@perses-dev/plugin-system';
-import { HTTPAllowedEndpoint, LogData, LogEntry } from '@perses-dev/spec';
+import type { HTTPAllowedEndpoint, LogData, LogEntry } from '@perses-dev/spec';
 
-import { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
-import { SplunkClient } from '../../model/splunk-client';
-import {
+import type { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
+import type { SplunkClient } from '../../model/splunk-client';
+import type {
   SplunkIndexResponse,
   SplunkJobCreateResponse,
   SplunkJobStatusResponse,
   SplunkResultsResponse,
 } from '../../model/splunk-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
-import { SplunkLogQuerySpec } from './splunk-log-query-types';
+import type { LogQueryPlugin, LogQueryContext } from './log-query-plugin-interface';
+import type { SplunkLogQuerySpec } from './splunk-log-query-types';
 
 function convertResultsToLogs(
   results:

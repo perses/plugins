@@ -21,7 +21,7 @@ type VitestPackageOptions = {
   passWithNoTests?: boolean;
 };
 
-const repoRoot = resolve(__dirname);
+const repoRoot = import.meta.dirname;
 
 // Common Vitest configuration shared across packages
 const sharedConfig = defineConfig({
@@ -38,6 +38,11 @@ const sharedConfig = defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.test.{ts,tsx,js,jsx}', 'src/**/*.spec.{ts,tsx,js,jsx}'],
+    server: {
+      deps: {
+        inline: [/@perses-dev\/(components|dashboards|plugin-system)/],
+      },
+    },
     setupFiles: [resolve(repoRoot, 'vitest.setup.ts')],
     testTimeout: 15_000,
   },

@@ -13,14 +13,16 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { VariableProvider } from '@perses-dev/dashboards';
-import { PanelData, ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
-import { TraceData } from '@perses-dev/spec';
+import type { PanelData } from '@perses-dev/plugin-system';
+import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import type { TraceData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { screen, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT, MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY } from './mock-trace-data';
-import { getSymbolSize, ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
+import type { ScatterChartPanelProps } from './ScatterChartPanel';
+import { getSymbolSize, ScatterChartPanel } from './ScatterChartPanel';
 
 const TEST_SCATTER_PANEL: Omit<ScatterChartPanelProps, 'queryResults'> = {
   contentDimensions: {

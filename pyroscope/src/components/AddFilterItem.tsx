@@ -13,7 +13,7 @@
 
 import { ToolbarIconButton } from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface AddFilterItemProps {
   onClick: () => void;

@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariables, LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
-import { LogEntry, LogData } from '@perses-dev/spec';
+import type { LogQueryPlugin, LogQueryContext } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { LogEntry, LogData } from '@perses-dev/spec';
 
-import { OpenSearchClient } from '../../model/opensearch-client';
-import { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
+import type { OpenSearchClient } from '../../model/opensearch-client';
+import type { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
 import { DEFAULT_DATASOURCE, DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../constants';
-import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
+import type { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 
 /**
  * Bound the query to the panel time range using a PPL `where` clause on the

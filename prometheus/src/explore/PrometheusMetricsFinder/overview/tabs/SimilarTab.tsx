@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CircularProgress, Stack, StackProps } from '@mui/material';
-import { DatasourceSelector } from '@perses-dev/spec';
-import { ReactElement, useMemo } from 'react';
+import type { StackProps } from '@mui/material';
+import { CircularProgress, Stack } from '@mui/material';
+import type { DatasourceSelector } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 import { MetricList } from '../../display/list/MetricList';
-import { LabelFilter } from '../../types';
+import type { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';
 
 export interface SimilarTabProps extends StackProps {

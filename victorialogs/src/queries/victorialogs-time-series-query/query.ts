@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { DurationString, parseDurationString, TimeSeries } from '@perses-dev/spec';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { DurationString, TimeSeries } from '@perses-dev/spec';
+import { parseDurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
 
-import { VictoriaLogsClient } from '../../model/client';
-import { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
+import type { VictoriaLogsClient } from '../../model/client';
+import type { VictoriaLogsStatsQueryRangeResponse } from '../../model/types';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { VictoriaLogsTimeSeriesQuerySpec } from './types';
+import type { VictoriaLogsTimeSeriesQuerySpec } from './types';
 
 export type VictoriaLogsMatrixResult = {
   metric: Record<string, string>;

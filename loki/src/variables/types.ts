@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
 
-import { LokiDatasourceSelector } from '../model/loki-selectors';
+import type { LokiDatasourceSelector } from '../model/loki-selectors';
 
 export interface LokiVariableOptionsBase {
   datasource?: DatasourceSelectValue<LokiDatasourceSelector>;

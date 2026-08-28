@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelectValue, isVariableDatasource } from '@perses-dev/plugin-system';
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import { isVariableDatasource } from '@perses-dev/plugin-system';
+import type { DatasourceSelector } from '@perses-dev/spec';
 
 export const LOKI_DATASOURCE_KIND = 'LokiDatasource' as const;
 

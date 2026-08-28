@@ -13,12 +13,12 @@
 
 import { Box } from '@mui/material';
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { TraceData } from '@perses-dev/spec';
-import { ReactElement } from 'react';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import type { TraceData } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
 
 import { DataTable } from './DataTable';
-import { TraceTableOptions } from './trace-table-model';
+import type { TraceTableOptions } from './trace-table-model';
 
 export type TraceTablePanelProps = PanelProps<TraceTableOptions, TraceData>;
 

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
 
 import { getVictoriaLogsTimeSeriesData } from './query';
-import { VictoriaLogsTimeSeriesQuerySpec } from './types';
+import type { VictoriaLogsTimeSeriesQuerySpec } from './types';
 import { VictoriaLogsQueryEditor } from './VictoriaLogsTimeSeriesQueryEditor';
 
 export const VictoriaLogsTimeSeriesQuery: TimeSeriesQueryPlugin<VictoriaLogsTimeSeriesQuerySpec> = {

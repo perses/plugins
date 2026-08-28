@@ -12,21 +12,24 @@
 // limitations under the License.
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { AnnotationSpecWithData } from '@perses-dev/dashboards';
+import type * as DashboardsModule from '@perses-dev/dashboards';
+import type { AnnotationSpecWithData } from '@perses-dev/dashboards';
 import { TimeRangeContext } from '@perses-dev/plugin-system';
-import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/spec';
+import type { TimeRangeValue } from '@perses-dev/spec';
+import { toAbsoluteTimeRange } from '@perses-dev/spec';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
 import { MOCK_TIME_SERIES_DATA_MULTIVALUE } from './test/mock-query-results';
-import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import type { TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import { TimeSeriesChartPanel } from './TimeSeriesChartPanel';
 
 // These tests exercise legend rendering, not annotations. The panel calls usePanelAnnotationsWithData,
 // which pulls in the full dashboard runtime (plugin registry, datasource store, query client). Mock it to
 // return no annotations so the panel can render without wiring those providers here.
 vi.mock('@perses-dev/dashboards', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@perses-dev/dashboards')>()),
+  ...(await importOriginal<typeof DashboardsModule>()),
   usePanelAnnotationsWithData: (): AnnotationSpecWithData[] => [],
 }));
 

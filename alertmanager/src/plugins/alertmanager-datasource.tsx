@@ -11,19 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
-import {
-  AlertManagerClient,
-  getAlerts,
-  getSilences,
-  getSilence,
-  createSilence,
-  deleteSilence,
-  getStatus,
-} from '../model';
+import type { AlertManagerClient } from '../model';
+import { getAlerts, getSilences, getSilence, createSilence, deleteSilence, getStatus } from '../model';
 import { AlertManagerDatasourceEditor } from './AlertManagerDatasourceEditor';
-import { AlertManagerDatasourceSpec } from './types';
+import type { AlertManagerDatasourceSpec } from './types';
 
 const createClient: DatasourcePlugin<AlertManagerDatasourceSpec, AlertManagerClient>['createClient'] = (
   spec,

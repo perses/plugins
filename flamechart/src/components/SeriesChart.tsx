@@ -12,15 +12,20 @@
 // limitations under the License.
 
 import { Stack, useTheme } from '@mui/material';
-import { useChartsTheme, EChart, ZoomEventData, OnEventsType, enableDataZoom } from '@perses-dev/components';
+import type { ZoomEventData, OnEventsType } from '@perses-dev/components';
+import { useChartsTheme, EChart, enableDataZoom } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { ProfileData, Timeline } from '@perses-dev/spec';
-import type { EChartsCoreOption, LineSeriesOption } from 'echarts';
-import { ECharts as EChartsInstance } from 'echarts/core';
-import { CallbackDataParams } from 'echarts/types/dist/shared';
-import { ReactElement, useMemo, useRef } from 'react';
+import type { ProfileData, Timeline } from '@perses-dev/spec';
+import type {
+  DefaultLabelFormatterCallbackParams as CallbackDataParams,
+  EChartsCoreOption,
+  LineSeriesOption,
+} from 'echarts';
+import type { ECharts as EChartsInstance } from 'echarts/core';
+import type { ReactElement } from 'react';
+import { useMemo, useRef } from 'react';
 
-import { SeriesSample } from '../utils/data-model';
+import type { SeriesSample } from '../utils/data-model';
 import { formatItemValue } from '../utils/format';
 import { getSeriesTooltip } from '../utils/series-tooltip';
 

@@ -17,7 +17,7 @@ import { exportDataAsCSV, extractExportableData, isExportableData, sanitizeFilen
 import DownloadIcon from 'mdi-material-ui/Download';
 import React, { useCallback, useMemo } from 'react';
 
-import { BarChartPanelProps } from './BarChartPanel';
+import type { BarChartPanelProps } from './BarChartPanel';
 
 export const BarChartExportAction: React.FC<BarChartPanelProps> = ({ queryResults, definition }) => {
   const exportableData = useMemo(() => {

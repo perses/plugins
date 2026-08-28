@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert } from '@perses-dev/spec';
+import type { Alert } from '@perses-dev/spec';
 
-import { ColumnSortMode, SortDirection } from './alert-table-model';
+import type { ColumnSortMode, SortDirection } from './alert-table-model';
 import { getSeverityWeight, SEVERITY_ORDER } from './label-colors';
 
 export const SORT_COL_STATUS = '__status__';

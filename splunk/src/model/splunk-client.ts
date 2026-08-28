@@ -13,7 +13,7 @@
 
 import { fetchJson } from '@perses-dev/client';
 
-import {
+import type {
   SplunkJobCreateResponse,
   SplunkJobStatusResponse,
   SplunkResultsResponse,

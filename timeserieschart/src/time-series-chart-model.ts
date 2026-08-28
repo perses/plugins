@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormatOptions, ThresholdOptions } from '@perses-dev/components';
-import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
-import { Definition } from '@perses-dev/spec';
+import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
+import type { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
+import type { Definition } from '@perses-dev/spec';
 
 /**
  * Line style options for time series charts.

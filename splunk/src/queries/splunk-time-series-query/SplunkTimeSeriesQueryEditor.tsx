@@ -12,17 +12,12 @@
 // limitations under the License.
 
 import { Box, InputLabel, Stack, TextField } from '@mui/material';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  isVariableDatasource,
-  OptionsEditorProps,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
+import type { SplunkTimeSeriesQuerySpec } from './splunk-time-series-query-types';
 
 const DATASOURCE_KIND = 'SplunkDatasource';
 const DEFAULT_DATASOURCE = { kind: DATASOURCE_KIND };

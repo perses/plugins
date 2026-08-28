@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CompletionContext } from '@codemirror/autocomplete';
+import type { CompletionContext } from '@codemirror/autocomplete';
 import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-traceql';
-import { AbsoluteTimeRange } from '@perses-dev/spec';
-import { Extension } from '@uiw/react-codemirror';
+import type { AbsoluteTimeRange } from '@perses-dev/spec';
+import type { Extension } from '@uiw/react-codemirror';
 
-import { TempoClient } from '../model/tempo-client';
+import type { TempoClient } from '../model/tempo-client';
 import { complete } from './complete';
 import { traceQLHighlight } from './highlight';
 

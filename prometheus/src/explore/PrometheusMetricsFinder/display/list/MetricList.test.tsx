@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, RenderResult, screen } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
 import { DEFAULT_PROM } from '../../../../model/prometheus-selectors';
-import { MetricList, MetricListProps } from './MetricList';
+import type { MetricListProps } from './MetricList';
+import { MetricList } from './MetricList';
 
 vi.mock('../../utils', () => ({
   useMetricMetadata: vi

@@ -11,14 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { DurationString, parseDurationString, TimeSeries } from '@perses-dev/spec';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { DurationString, TimeSeries } from '@perses-dev/spec';
+import { parseDurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
 
-import { LokiClient, toUnixSeconds } from '../../model/loki-client';
-import { LokiMatrixResult, LokiVectorResult } from '../../model/loki-client-types';
+import type { LokiClient } from '../../model/loki-client';
+import { toUnixSeconds } from '../../model/loki-client';
+import type { LokiMatrixResult, LokiVectorResult } from '../../model/loki-client-types';
 import { DEFAULT_DATASOURCE } from '../constants';
-import { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
+import type { LokiTimeSeriesQuerySpec } from './loki-time-series-query-types';
 
 export type LokiMatrixResponse = {
   resultType: 'matrix';

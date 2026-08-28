@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { PanelProps } from '@perses-dev/plugin-system';
-import { TraceData, TraceSearchResult } from '@perses-dev/spec';
-import { EChartsOption, SeriesOption } from 'echarts';
-import { ReactElement, useMemo } from 'react';
+import type { PanelProps } from '@perses-dev/plugin-system';
+import type { TraceData, TraceSearchResult } from '@perses-dev/spec';
+import type { EChartsOption, SeriesOption } from 'echarts';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-import { ScatterChartOptions } from './scatter-chart-model';
+import type { ScatterChartOptions } from './scatter-chart-model';
 import { Scatterplot } from './Scatterplot';
 
 export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnixMs' | 'serviceStats'> {

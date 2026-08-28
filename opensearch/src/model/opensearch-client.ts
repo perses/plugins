@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OpenSearchPPLResponse, OpenSearchRequestHeaders } from './opensearch-client-types';
+import type { OpenSearchPPLResponse, OpenSearchRequestHeaders } from './opensearch-client-types';
 
 export interface OpenSearchPPLParams {
   query: string;

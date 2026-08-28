@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isVariableDatasource, parseVariables, TraceQueryPlugin } from '@perses-dev/plugin-system';
+import type { TraceQueryPlugin } from '@perses-dev/plugin-system';
+import { isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
 
-import { TempoTraceQuerySpec } from '../../model';
+import type { TempoTraceQuerySpec } from '../../model';
 import { getTraceData } from './get-trace-data';
 import { TempoTraceQueryEditor } from './TempoTraceQueryEditor';
 

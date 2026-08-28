@@ -13,20 +13,16 @@
 
 import { Box, Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
 import { createModEnterHandler } from '@perses-dev/dashboards';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  isVariableDatasource,
-  OptionsEditorProps,
-  useDatasourceSelectValueToSelector,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND, OpenSearchDatasourceSelector } from '../../model';
+import type { OpenSearchDatasourceSelector } from '../../model';
+import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND } from '../../model';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE, PPL_DOCS_URL, PPL_QUERY_EXAMPLES } from '../constants';
 import { useQueryState } from '../query-editor-model';
-import { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
+import type { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 
 type OpenSearchQueryEditorProps = OptionsEditorProps<OpenSearchLogQuerySpec>;
 

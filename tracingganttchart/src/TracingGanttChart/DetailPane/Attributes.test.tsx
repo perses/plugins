@@ -13,16 +13,18 @@
 
 import { VariableProvider } from '@perses-dev/dashboards';
 import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
-import * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { screen } from '@testing-library/dom';
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { CustomLinks } from '../../gantt-chart-model';
+import type { CustomLinks } from '../../gantt-chart-model';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
 import { getTraceModel } from '../trace';
-import { AttributeList, AttributeListProps, TraceAttributes, TraceAttributesProps } from './Attributes';
+import type { AttributeListProps, TraceAttributesProps } from './Attributes';
+import { AttributeList, TraceAttributes } from './Attributes';
 
 describe('Attributes', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);

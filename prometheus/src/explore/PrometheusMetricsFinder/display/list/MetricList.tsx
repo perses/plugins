@@ -11,16 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Divider, Skeleton, Stack, StackProps, TableCell, Typography } from '@mui/material';
-import { Fuzzy, FuzzyMatchingInterval } from '@nexucis/fuzzy';
+import type { StackProps } from '@mui/material';
+import { Button, Divider, Skeleton, Stack, TableCell, Typography } from '@mui/material';
+import type { FuzzyMatchingInterval } from '@nexucis/fuzzy';
+import { Fuzzy } from '@nexucis/fuzzy';
 import { useExplorerQueryParams } from '@perses-dev/explore';
-import { DatasourceSelector } from '@perses-dev/spec';
+import type { DatasourceSelector } from '@perses-dev/spec';
 import CompassIcon from 'mdi-material-ui/Compass';
-import { ReactElement, ReactNode, useMemo } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { TableVirtuoso } from 'react-virtuoso';
 
-import { LabelFilter } from '../../types';
+import type { LabelFilter } from '../../types';
 import { useMetricMetadata } from '../../utils';
 import { MetricChip } from '../MetricChip';
 

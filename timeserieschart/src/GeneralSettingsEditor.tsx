@@ -12,25 +12,19 @@
 // limitations under the License.
 
 import { Button } from '@mui/material';
-import {
-  OptionsEditorGroup,
-  OptionsEditorGrid,
-  OptionsEditorColumn,
-  ThresholdsEditor,
-  ThresholdsEditorProps,
-} from '@perses-dev/components';
-import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
+import type { ThresholdsEditorProps } from '@perses-dev/components';
+import { OptionsEditorGroup, OptionsEditorGrid, OptionsEditorColumn, ThresholdsEditor } from '@perses-dev/components';
+import type { LegendOptionsEditorProps } from '@perses-dev/plugin-system';
+import { LegendOptionsEditor } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_VISUAL,
-  DEFAULT_Y_AXIS,
-  TimeSeriesChartOptionsEditorProps,
-} from './time-series-chart-model';
-import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
-import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEditor';
+import type { TimeSeriesChartOptions, TimeSeriesChartOptionsEditorProps } from './time-series-chart-model';
+import { DEFAULT_VISUAL, DEFAULT_Y_AXIS } from './time-series-chart-model';
+import type { VisualOptionsEditorProps } from './VisualOptionsEditor';
+import { VisualOptionsEditor } from './VisualOptionsEditor';
+import type { YAxisOptionsEditorProps } from './YAxisOptionsEditor';
+import { YAxisOptionsEditor } from './YAxisOptionsEditor';
 
 export function TimeSeriesChartGeneralSettings(props: TimeSeriesChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;

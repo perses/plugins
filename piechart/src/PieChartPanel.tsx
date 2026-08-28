@@ -12,24 +12,21 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import {
-  ChartInstance,
-  ContentWithLegend,
-  DEFAULT_LEGEND,
-  LegendProps,
-  SelectedLegendItemState,
-  useChartsTheme,
-  useId,
-} from '@perses-dev/components';
-import { CalculationsMap, CalculationType, PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
-import { TimeSeriesData } from '@perses-dev/spec';
+import type { ChartInstance, LegendProps, SelectedLegendItemState } from '@perses-dev/components';
+import { ContentWithLegend, DEFAULT_LEGEND, useChartsTheme, useId } from '@perses-dev/components';
+import type { CalculationType, PanelProps } from '@perses-dev/plugin-system';
+import { CalculationsMap, validateLegendSpec } from '@perses-dev/plugin-system';
+import type { TimeSeriesData } from '@perses-dev/spec';
 import merge from 'lodash/merge';
-import { ReactElement, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { getSeriesColor } from './colors';
-import { PieChartOptions } from './pie-chart-model';
-import { PieChartBase, PieChartData } from './PieChartBase';
-import { PieChartLegendMapper, PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
+import type { PieChartOptions } from './pie-chart-model';
+import type { PieChartData } from './PieChartBase';
+import { PieChartBase } from './PieChartBase';
+import type { PieChartLegendMapper } from './utils';
+import { PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 

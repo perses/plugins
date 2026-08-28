@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { TextField } from '@mui/material';
-import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface LazyTextFieldProps {
   label: string;

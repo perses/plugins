@@ -12,19 +12,16 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
-import {
-  DatasourceSelect,
-  DatasourceSelectProps,
-  isVariableDatasource,
-  OptionsEditorProps,
-} from '@perses-dev/plugin-system';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { GreptimeDBQLEditor } from '../../components';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
-import { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
+import type { GreptimeDBTraceQuerySpec } from './greptimedb-trace-query-types';
 
 type GreptimeDBTraceQueryEditorProps = OptionsEditorProps<GreptimeDBTraceQuerySpec>;
 

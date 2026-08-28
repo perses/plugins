@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AlertsQueryContext } from '@perses-dev/plugin-system';
+import type { AlertsQueryContext } from '@perses-dev/plugin-system';
 
-import { AlertManagerClient, GettableAlert } from '../../model';
+import type { AlertManagerClient, GettableAlert } from '../../model';
 import { AlertManagerDatasource } from '../alertmanager-datasource';
-import { AlertManagerAlertsQuerySpec } from '../types';
+import type { AlertManagerAlertsQuerySpec } from '../types';
 import { getAlertsData } from './get-alerts-data';
 
 const datasource = { directUrl: 'http://am.example' };

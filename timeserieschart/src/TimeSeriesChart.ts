@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
+import type { PanelPlugin } from '@perses-dev/plugin-system';
 
 import { TimeSeriesChartGeneralSettings } from './GeneralSettingsEditor';
 import { QuerySettingsEditor } from './QuerySettingsEditor';
-import { createInitialTimeSeriesChartOptions, TimeSeriesChartOptions } from './time-series-chart-model';
-import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import type { TimeSeriesChartOptions } from './time-series-chart-model';
+import { createInitialTimeSeriesChartOptions } from './time-series-chart-model';
+import type { TimeSeriesChartProps } from './TimeSeriesChartPanel';
+import { TimeSeriesChartPanel } from './TimeSeriesChartPanel';
 import { TimeSeriesExportAction } from './TimeSeriesExportAction';
 
 export const TimeSeriesChart: PanelPlugin<TimeSeriesChartOptions, TimeSeriesChartProps> = {
