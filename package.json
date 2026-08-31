@@ -16,16 +16,16 @@
     "pnpm": ">=12"
   },
   "scripts": {
-    "dev": "turbo run dev --concurrency 20",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --fix",
-    "format": "turbo run format:root",
-    "format:check": "turbo run format:root:check",
+    "dev": "pnpm -r --parallel --workspace-concurrency=20 --if-present run dev",
+    "build": "pnpm -r --if-present run build",
+    "lint": "pnpm -r --if-present run lint",
+    "lint:fix": "pnpm -r --if-present run lint -- --fix",
+    "format": "pnpm run format:root",
+    "format:check": "pnpm run format:root:check",
     "format:root": "oxfmt",
     "format:root:check": "oxfmt --check",
-    "test": "turbo run test",
-    "type-check": "turbo run type-check",
+    "test": "pnpm -r --if-present run test",
+    "type-check": "pnpm -r --if-present run type-check",
     "doctor": "pnpm dlx react-doctor@latest"
   },
   "workspaces": [
@@ -99,7 +99,6 @@
     "react-router-dom": "^6.30.3",
     "rsbuild-plugin-dts": "^0.18.0",
     "ts-node": "^10.9.2",
-    "turbo": "^2.6.1",
     "typescript": "5.9.3",
     "vitest": "^4.1.11"
   },

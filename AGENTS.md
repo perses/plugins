@@ -20,7 +20,7 @@ Before editing:
 - `<plugin>/cue.mod/`: CUE module metadata and dependencies.
 - `e2e/`: Playwright coverage for integrated plugin behavior.
 - `scripts/` and the root `Makefile`: plugin validation, generation, packaging, schema tests, and documentation checks.
-- Upper-case plugin directories, `dist/`, `.turbo/`, `node_modules/`, and `cue.mod/pkg/` are generated or downloaded
+- Upper-case plugin directories, `dist/`, `node_modules/`, and `cue.mod/pkg/` are generated or downloaded
   outputs. Do not edit or commit them unless a documented release process explicitly requires it.
 
 Reusable UI primitives and plugin APIs belong in `perses/shared`; canonical resource contracts belong in `perses/spec`.
