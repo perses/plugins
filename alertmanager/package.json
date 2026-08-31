@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/alert-manager-plugin",
-  "version": "0.2.0-beta.0",
+  "version": "0.2.0-beta.1",
   "description": "Alert Manager plugin for Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
