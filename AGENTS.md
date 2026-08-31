@@ -41,22 +41,22 @@ Consume their public exports instead of copying their internals or deep-importin
 
 ## Validation
 
-Use Go 1.26.x, Node.js from `.nvmrc`, and npm from `package.json`. While iterating, run the affected workspace first:
+Use Go 1.26.x, Node.js from `.nvmrc`, and pnpm 12 from `package.json`. While iterating, run the affected workspace first:
 
 ```sh
-npm ci
-npm run lint -w <workspace>
-npm run type-check -w <workspace>
-npm run test -w <workspace>
+pnpm install --frozen-lockfile
+pnpm --filter <workspace> lint
+pnpm --filter <workspace> type-check
+pnpm --filter <workspace> test
 ```
 
 Before completion of a TypeScript change, run the relevant repository checks:
 
 ```sh
-npm run lint
-npm run format:check
-npm run type-check
-npm run test
+pnpm lint
+pnpm format:check
+pnpm type-check
+pnpm test
 ```
 
 For schema, SDK, or repository-wide changes, select the relevant Make targets:

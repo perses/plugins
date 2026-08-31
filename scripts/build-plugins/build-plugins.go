@@ -35,7 +35,7 @@ func main() {
 	flag.Parse()
 
 	buildPlugin := func(path string) (string, error) {
-		return path, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", path), "--skip.npm-install=true")
+		return path, command.Run("percli", "plugin", "build", fmt.Sprintf("--plugin.path=%s", path), "--skip.pnpm-install=true")
 	}
 
 	if *t != "" {

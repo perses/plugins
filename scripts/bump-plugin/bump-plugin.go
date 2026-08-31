@@ -23,14 +23,14 @@ import (
 func bump(pluginName, bumpType, preID string) error {
 	if pluginName == "" {
 		if preID == "" {
-			return command.Run("npm", "version", bumpType, "--workspaces", "--no-git-tag-version")
+			return command.Run("pnpm", "--recursive", "version", bumpType, "--no-git-tag-version")
 		}
-		return command.Run("npm", "version", bumpType, "--workspaces", "--preid", preID, "--no-git-tag-version")
+		return command.Run("pnpm", "--recursive", "version", bumpType, "--preid", preID, "--no-git-tag-version")
 	}
 	if preID == "" {
-		return command.Run("npm", "version", bumpType, "--workspace", pluginName, "--no-git-tag-version")
+		return command.Run("pnpm", "--filter", pluginName, "version", bumpType, "--no-git-tag-version")
 	}
-	return command.Run("npm", "version", bumpType, "--workspace", pluginName, "--preid", preID, "--no-git-tag-version")
+	return command.Run("pnpm", "--filter", pluginName, "version", bumpType, "--preid", preID, "--no-git-tag-version")
 }
 
 func main() {

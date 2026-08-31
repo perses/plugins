@@ -1,0 +1,44 @@
+packages:
+  - alertmanager
+  - barchart
+  - clickhouse
+  - datasourcevariable
+  - e2e
+  - flamechart
+  - gaugechart
+  - greptimedb
+  - heatmapchart
+  - histogramchart
+  - jaeger
+  - logexplorer
+  - logstable
+  - loki
+  - markdown
+  - opensearch
+  - piechart
+  - prometheus
+  - pyroscope
+  - scatterchart
+  - splunk
+  - statchart
+  - staticlistvariable
+  - statushistorychart
+  - table
+  - tempo
+  - timeserieschart
+  - timeseriestable
+  - tracetable
+  - tracingganttchart
+  - victorialogs
+
+linkWorkspacePackages: true
+
+nodeLinker: hoisted
+
+overrides:
+  '@module-federation/rsbuild-plugin>node-fetch': ^3.3.2
+
+allowBuilds:
+  '@swc/core': true
+  core-js: false
+  esbuild: true

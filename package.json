@@ -13,7 +13,7 @@
   "type": "module",
   "engines": {
     "node": ">=24",
-    "npm": ">=11"
+    "pnpm": ">=12"
   },
   "scripts": {
     "dev": "turbo run dev --concurrency 20",
@@ -26,7 +26,7 @@
     "format:root:check": "oxfmt --check",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "pnpm dlx react-doctor@latest"
   },
   "workspaces": [
     "alertmanager",
@@ -62,7 +62,7 @@
     "e2e"
   ],
   "peerDependencies": {
-    "@types/react-dom": "^18.3.0",
+    "@types/react-dom": "^18.3.5",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
   },
@@ -84,9 +84,9 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/color-hash": "^2.0.0",
     "@types/express": "^5.0.0",
-    "@types/lodash": "^4.17.5",
+    "@types/lodash": "^4.17.20",
     "concurrently": "^10.0.3",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "express": "^4.21.2",
     "jsdom": "^27.0.0",
     "mdi-material-ui": "^7.9.2",
@@ -100,13 +100,8 @@
     "rsbuild-plugin-dts": "^0.18.0",
     "ts-node": "^10.9.2",
     "turbo": "^2.6.1",
-    "typescript": "^5.4.2",
+    "typescript": "5.9.3",
     "vitest": "^4.1.11"
   },
-  "overrides": {
-    "@module-federation/rsbuild-plugin": {
-      "node-fetch": "^3.3.2"
-    }
-  },
-  "packageManager": "npm@11.17.0"
+  "packageManager": "pnpm@12.1.0"
 }

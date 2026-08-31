@@ -13,14 +13,14 @@
   },
   "type": "module",
   "scripts": {
-    "test:ci": "npx playwright test --workers=1 --reporter=github,list",
-    "test:install": "npx playwright install --with-deps",
-    "test:local": "npx playwright test --ui",
+    "test:ci": "playwright test --workers=1 --reporter=github,list",
+    "test:install": "playwright install --with-deps",
+    "test:local": "playwright test --ui",
     "build": "echo 'Skipping build for e2e tests'",
     "lint": "oxlint src"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.13.3"
   }
 }
