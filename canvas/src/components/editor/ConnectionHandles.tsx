@@ -19,6 +19,7 @@ import type { NodeSpec, AnchorPoint } from '../../model';
 import { ANCHOR_KEYS, anchorPosition } from '../../utils/edgeUtils';
 
 const CROSS_LENGTH = 8;
+const CROSSHAIR_STYLE = { cursor: 'crosshair' };
 
 interface ConnectionHandlesProps {
   node: NodeSpec;
@@ -46,7 +47,7 @@ export function ConnectionHandles({ node, onDragStart }: ConnectionHandlesProps)
           <g
             key={anchor}
             transform={`translate(${pos.x},${pos.y})`}
-            style={{ cursor: 'crosshair' }}
+            style={CROSSHAIR_STYLE}
             onPointerDown={makePointerDownHandler(anchor, pos.x, pos.y)}
           >
             <circle r={armLen} fill="transparent" />

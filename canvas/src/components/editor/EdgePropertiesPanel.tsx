@@ -90,6 +90,11 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
     [edge, onChange],
   );
 
+  const bidirectionalCheckbox = useMemo(
+    () => <Checkbox size="small" checked={edge.bidirectional ?? false} onChange={onBidirectionalChange} />,
+    [edge.bidirectional, onBidirectionalChange],
+  );
+
   const onThicknessModeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...edge, thicknessMode: e.target.value as EdgeSpec['thicknessMode'] });
@@ -174,10 +179,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         ))}
       </SelectField>
 
-      <FormControlLabel
-        control={<Checkbox size="small" checked={edge.bidirectional ?? false} onChange={onBidirectionalChange} />}
-        label="Bidirectional"
-      />
+      <FormControlLabel control={bidirectionalCheckbox} label="Bidirectional" />
 
       <SelectField label="Thickness mode" value={edge.thicknessMode ?? 'fixed'} onChange={onThicknessModeChange}>
         <MenuItem value="fixed">Fixed</MenuItem>

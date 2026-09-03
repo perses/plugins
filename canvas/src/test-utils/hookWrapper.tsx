@@ -50,11 +50,13 @@ interface WrapperProps {
   children: ReactNode;
 }
 
+const EMPTY_SPEC: CanvasSpec = {};
+
 /**
  * Provides all three contexts needed by canvas hooks.
  * SpecContext is wired to local state so onChange calls are reflected in the hook.
  */
-export function HookWrapper({ initialSpec = {}, children }: WrapperProps): React.ReactElement {
+export function HookWrapper({ initialSpec = EMPTY_SPEC, children }: WrapperProps): React.ReactElement {
   const [spec, setSpec] = useState<CanvasSpec>(initialSpec);
 
   const nodeById = useMemo(() => new Map((spec.nodes ?? []).map((n) => [n.id, n])), [spec.nodes]);

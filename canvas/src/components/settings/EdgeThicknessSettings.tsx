@@ -40,16 +40,21 @@ interface ThresholdWidthRowProps {
   step: StepOptions;
   strokeWidth: number | undefined;
   format: CanvasSpec['format'];
-  onChange: (strokeWidth: number | undefined) => void;
+  onThresholdWidthChange: (stepValue: number, strokeWidth: number | undefined) => void;
 }
 
-function ThresholdWidthRow({ step, strokeWidth, format, onChange }: ThresholdWidthRowProps): ReactElement {
+function ThresholdWidthRow({
+  step,
+  strokeWidth,
+  format,
+  onThresholdWidthChange,
+}: ThresholdWidthRowProps): ReactElement {
   const onWidthChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
       const parsed = parseFloat(event.target.value);
-      onChange(Number.isFinite(parsed) && parsed > 0 ? parsed : undefined);
+      onThresholdWidthChange(step.value, Number.isFinite(parsed) && parsed > 0 ? parsed : undefined);
     },
-    [onChange],
+    [step.value, onThresholdWidthChange],
   );
 
   return (
@@ -121,19 +126,15 @@ export function EdgeThicknessSettings({ value, onChange }: EdgeThicknessSettings
           <Typography variant="caption" color="text.secondary" sx={BLOCK_CAPTION_SX}>
             Per-threshold widths
           </Typography>
-          {thresholdSteps.map((step) => {
-            const handleChange = (strokeWidth: number | undefined): void =>
-              onThresholdWidthChange(step.value, strokeWidth);
-            return (
-              <ThresholdWidthRow
-                key={step.value}
-                step={step}
-                strokeWidth={value.edgeThresholdWidths?.find((w) => w.value === step.value)?.strokeWidth}
-                format={value.format}
-                onChange={handleChange}
-              />
-            );
-          })}
+          {thresholdSteps.map((step) => (
+            <ThresholdWidthRow
+              key={step.value}
+              step={step}
+              strokeWidth={value.edgeThresholdWidths?.find((w) => w.value === step.value)?.strokeWidth}
+              format={value.format}
+              onThresholdWidthChange={onThresholdWidthChange}
+            />
+          ))}
         </Box>
       ) : null}
     </>

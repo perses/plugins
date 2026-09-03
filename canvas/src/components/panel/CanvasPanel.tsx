@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useChartsTheme } from '@perses-dev/components';
+import type { ThresholdOptions } from '@perses-dev/components';
 import type { TimeSeries } from '@perses-dev/spec';
 import type { MouseEvent, ReactElement } from 'react';
 import { useCallback, useMemo } from 'react';
@@ -24,6 +25,9 @@ import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLaye
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
 import { ThresholdLegend } from './ThresholdLegend';
+
+const SVG_STYLE = { display: 'block', cursor: 'grab' };
+const EMPTY_THRESHOLDS: ThresholdOptions = {};
 
 interface PanelSvgProps {
   svgRef: (node: SVGSVGElement | null) => void;
@@ -57,7 +61,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
   );
 
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;
-  const thresholds = spec.thresholds ?? {};
+  const thresholds = spec.thresholds ?? EMPTY_THRESHOLDS;
   const legendPosition = spec.legend?.position ?? 'bottom';
   const LEGEND_MARGIN = 8;
   const legendX = legendPosition === 'right' ? width - 118 - LEGEND_MARGIN : LEGEND_MARGIN;
@@ -65,13 +69,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
     legendPosition === 'right' ? LEGEND_MARGIN : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
 
   return (
-    <svg
-      ref={svgRef}
-      width={width}
-      height={height}
-      style={{ display: 'block', cursor: 'grab' }}
-      onDoubleClick={handleDoubleClick}
-    >
+    <svg ref={svgRef} width={width} height={height} style={SVG_STYLE} onDoubleClick={handleDoubleClick}>
       <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
       <g transform={transform.toString()}>
         <BackgroundLayer backgrounds={backgrounds} />

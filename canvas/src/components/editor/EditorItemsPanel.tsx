@@ -14,7 +14,7 @@
 import type { SelectChangeEvent } from '@mui/material';
 import { Box, Button, FormControl, InputLabel, ListSubheader, MenuItem, Select } from '@mui/material';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
@@ -29,6 +29,20 @@ const CANVAS_HEIGHT = 400;
 const PROPERTIES_HEIGHT = 700;
 const DEFAULT_BACKGROUND_WIDTH = 200;
 const DEFAULT_BACKGROUND_HEIGHT = 150;
+const ITEMS_ROW_SX = { display: 'flex', gap: 1, alignItems: 'center' };
+const FORM_CONTROL_SX = { minWidth: 0, flex: 1 };
+const EMPTY_STATE_SX = {
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'text.disabled',
+};
+const MENU_PAPER_STYLE = { maxHeight: 240 };
+const MENU_PROPS = { PaperProps: { style: MENU_PAPER_STYLE } };
+const OUTER_BOX_SX = { display: 'flex', flexDirection: 'column' as const, gap: 2 };
+const BUTTON_NO_WRAP_SX = { whiteSpace: 'nowrap' as const };
+const PROPERTIES_BOX_SX = { height: PROPERTIES_HEIGHT, overflowY: 'auto' as const };
 
 export function EditorItemsPanel(): ReactElement {
   const {
@@ -49,6 +63,14 @@ export function EditorItemsPanel(): ReactElement {
   } = useEditorContext();
   const { svgRef, toCanvasPoint, transform, fitView, resetPan } = useZoom();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  const containerCallbackRef = useCallback((node: HTMLDivElement | null): void => {
+    containerRef.current = node;
+    if (node) {
+      setContainerWidth(node.clientWidth);
+    }
+  }, []);
   const [firstSelectedId] = selectedIds;
   const selectedNode = selectedIds.size === 1 && firstSelectedId ? (nodeById.get(firstSelectedId) ?? null) : null;
   const selectedEdge = selectedIds.size === 1 && firstSelectedId ? (edgeById.get(firstSelectedId) ?? null) : null;
@@ -56,21 +78,19 @@ export function EditorItemsPanel(): ReactElement {
     selectedIds.size === 1 && firstSelectedId ? (backgroundById.get(firstSelectedId) ?? null) : null;
 
   const onAddNode = useCallback((): void => {
-    const canvasWidth = containerRef.current?.clientWidth ?? 0;
-    const cx = transform.invertX(canvasWidth / 2);
+    const cx = transform.invertX(containerWidth / 2);
     const cy = transform.invertY(CANVAS_HEIGHT / 2);
     addNode({ x: cx, y: cy });
-  }, [transform, addNode]);
+  }, [containerWidth, transform, addNode]);
 
   const onAddBackground = useCallback((): void => {
-    const canvasWidth = containerRef.current?.clientWidth ?? 0;
     const k = transform.k > 0 ? transform.k : 1;
-    const width = canvasWidth > 0 ? canvasWidth / k : DEFAULT_BACKGROUND_WIDTH;
+    const width = containerWidth > 0 ? containerWidth / k : DEFAULT_BACKGROUND_WIDTH;
     const height = CANVAS_HEIGHT > 0 ? CANVAS_HEIGHT / k : DEFAULT_BACKGROUND_HEIGHT;
     const x = transform.invertX(0);
     const y = transform.invertY(0);
     addBackground({ x, y }, width, height);
-  }, [transform, addBackground]);
+  }, [containerWidth, transform, addBackground]);
 
   const onItemSelect = useCallback(
     (event: SelectChangeEvent): void => {
@@ -90,23 +110,21 @@ export function EditorItemsPanel(): ReactElement {
     [toCanvasPoint, transform, fitView, resetPan],
   );
 
-  const canvasWidth = containerRef.current?.clientWidth ?? 0;
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box ref={containerRef}>
+    <Box sx={OUTER_BOX_SX}>
+      <Box ref={containerCallbackRef}>
         <ZoomProvider value={zoomValue}>
-          <EditorCanvas svgRef={svgRef} width={canvasWidth} height={CANVAS_HEIGHT} />
+          <EditorCanvas svgRef={svgRef} width={containerWidth} height={CANVAS_HEIGHT} />
         </ZoomProvider>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <FormControl size="small" sx={{ minWidth: 0, flex: 1 }}>
+      <Box sx={ITEMS_ROW_SX}>
+        <FormControl size="small" sx={FORM_CONTROL_SX}>
           <InputLabel>Item</InputLabel>
           <Select
             label="Item"
             value={selectedNode?.id ?? selectedEdge?.id ?? selectedBackground?.id ?? ''}
-            MenuProps={{ PaperProps: { style: { maxHeight: 240 } } }}
+            MenuProps={MENU_PROPS}
             onChange={onItemSelect}
           >
             <MenuItem value="">
@@ -132,10 +150,10 @@ export function EditorItemsPanel(): ReactElement {
             ))}
           </Select>
         </FormControl>
-        <Button variant="outlined" size="small" sx={{ whiteSpace: 'nowrap' }} onClick={onAddNode}>
+        <Button variant="outlined" size="small" sx={BUTTON_NO_WRAP_SX} onClick={onAddNode}>
           Add node
         </Button>
-        <Button variant="outlined" size="small" sx={{ whiteSpace: 'nowrap' }} onClick={onAddBackground}>
+        <Button variant="outlined" size="small" sx={BUTTON_NO_WRAP_SX} onClick={onAddBackground}>
           Add background
         </Button>
         <Button
@@ -149,7 +167,7 @@ export function EditorItemsPanel(): ReactElement {
         </Button>
       </Box>
 
-      <Box sx={{ height: PROPERTIES_HEIGHT, overflowY: 'auto' }}>
+      <Box sx={PROPERTIES_BOX_SX}>
         {selectedNode ? <NodePropertiesPanel node={selectedNode} onChange={onNodePropertiesChange} /> : null}
         {selectedEdge ? (
           <EdgePropertiesPanel edge={selectedEdge} nodes={specNodes} onChange={onEdgePropertiesChange} />
@@ -158,17 +176,7 @@ export function EditorItemsPanel(): ReactElement {
           <BackgroundPropertiesPanel background={selectedBackground} onChange={onBackgroundPropertiesChange} />
         ) : null}
         {!selectedNode && !selectedEdge && !selectedBackground ? (
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'text.disabled',
-            }}
-          >
-            Select a node or edge to edit its properties
-          </Box>
+          <Box sx={EMPTY_STATE_SX}>Select a node or edge to edit its properties</Box>
         ) : null}
       </Box>
     </Box>

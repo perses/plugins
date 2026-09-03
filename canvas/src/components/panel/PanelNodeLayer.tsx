@@ -17,9 +17,50 @@ import type { ReactElement } from 'react';
 import { useCallback, useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import type { CanvasSpec } from '../../model';
+import type { CanvasSpec, NodeSpec } from '../../model';
 import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
 import { NodeRenderer } from '../shared/NodeRenderer';
+
+const POINTER_STYLE = { cursor: 'pointer' };
+
+interface PanelNodeProps {
+  node: NodeSpec;
+  defaultFill: string;
+  rectProps: React.SVGProps<SVGRectElement>;
+  labelOverride: string | undefined;
+  fillOverride: string | undefined;
+  onNodeClick: (url: string) => void;
+}
+
+function PanelNode({
+  node,
+  defaultFill,
+  rectProps,
+  labelOverride,
+  fillOverride,
+  onNodeClick,
+}: PanelNodeProps): ReactElement {
+  const { url } = node;
+  const handleClick = useCallback((): void => {
+    if (url) onNodeClick(url);
+  }, [url, onNodeClick]);
+
+  const groupProps = useMemo(
+    () => (url ? { onClick: handleClick, style: POINTER_STYLE } : undefined),
+    [url, handleClick],
+  );
+
+  return (
+    <NodeRenderer
+      node={node}
+      defaultFill={defaultFill}
+      groupProps={groupProps}
+      rectProps={rectProps}
+      labelOverride={labelOverride}
+      fillOverride={fillOverride}
+    />
+  );
+}
 
 interface PanelNodeLayerProps {
   spec: CanvasSpec;
@@ -61,19 +102,15 @@ export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
             fillOverride = colorFromThresholds(lastValue, spec.thresholds, paletteColors, fallbackColor);
           }
         }
-        const { url } = node;
-        const groupProps = url
-          ? { onClick: (): void => handleNodeClick(url), style: { cursor: 'pointer' } }
-          : undefined;
         return (
-          <NodeRenderer
+          <PanelNode
             key={node.id}
             node={node}
             defaultFill={nodeDefaultFill}
-            groupProps={groupProps}
             rectProps={rectProps}
             labelOverride={labelOverride}
             fillOverride={fillOverride}
+            onNodeClick={handleNodeClick}
           />
         );
       })}
