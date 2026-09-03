@@ -31,6 +31,9 @@ import { EditorItemsPanel } from '../editor/EditorItemsPanel';
 import { EdgeThicknessSettings } from './EdgeThicknessSettings';
 import { LegendSettings } from './LegendSettings';
 
+const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
+const EDITOR_COLUMN_SX = { display: 'flex', flexDirection: 'column' as const, gap: 3 };
+
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
 
 export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorProps): ReactElement {
@@ -49,14 +52,14 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={EDITOR_COLUMN_SX}>
       <OptionsEditorGrid>
         <OptionsEditorColumn>
           <OptionsEditorGroup title="Legend">
             <LegendSettings value={value} onChange={onChange} />
           </OptionsEditorGroup>
           <OptionsEditorGroup title="Format">
-            <FormatControls value={value.format ?? { unit: 'decimal' }} onChange={onFormatChange} />
+            <FormatControls value={value.format ?? DEFAULT_FORMAT} onChange={onFormatChange} />
           </OptionsEditorGroup>
         </OptionsEditorColumn>
         <OptionsEditorColumn>

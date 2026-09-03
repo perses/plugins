@@ -3,7 +3,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// https://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,8 +41,8 @@ spec: close({
 }]
 
 #background: {
-	id:        string
-	name?:     string
+	id:    string
+	name?: string
 	position: {
 		x: number
 		y: number
@@ -57,7 +57,7 @@ spec: close({
 }
 
 #node: {
-	id:               string
+	id: string
 	position: {
 		x: number
 		y: number
@@ -78,12 +78,12 @@ spec: close({
 }
 
 #edge: {
-	id:                   string
-	name?:                string
-	source:               string
-	target?:              string
-	sourceAnchor?:        "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se"
-	targetAnchor?:        "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se"
+	id:            string
+	name?:         string
+	source:        string
+	target?:       string
+	sourceAnchor?: "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se"
+	targetAnchor?: "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se"
 	freeEndpoint?: {
 		x: number
 		y: number

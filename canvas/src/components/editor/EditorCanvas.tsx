@@ -34,6 +34,7 @@ import { SelectionBoundingBox } from './SelectionBoundingBox';
 import { SelectionRectOverlay } from './SelectionRectOverlay';
 
 const NS_PREFIX = 'wm-editor';
+const NO_SELECT_STYLE = { userSelect: 'none' as const };
 
 function isActivePointerMove(event: PointerEvent): boolean {
   return event.buttons !== 0;
@@ -276,7 +277,7 @@ export function EditorCanvas({
             fontSize={14}
             fill="currentColor"
             fillOpacity={0.5}
-            style={{ userSelect: 'none' }}
+            style={NO_SELECT_STYLE}
           >
             No nodes — add nodes in the panel editor
           </text>

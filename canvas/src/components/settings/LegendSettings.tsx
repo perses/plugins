@@ -14,9 +14,12 @@
 import type { SelectChangeEvent } from '@mui/material';
 import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch } from '@mui/material';
 import type { ReactElement } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { CanvasSpec } from '../../model';
+
+const LEGEND_POSITION_SX = { width: 180 };
+const MENU_PAPER_STYLE = { maxHeight: 240 };
 
 interface LegendSettingsProps {
   value: CanvasSpec;
@@ -41,20 +44,24 @@ export function LegendSettings({ value, onChange }: LegendSettingsProps): ReactE
     [value, onChange],
   );
 
+  const legendToggle = useMemo(
+    () => <Switch checked={value.legend !== undefined} onChange={onToggle} />,
+    [value.legend, onToggle],
+  );
+
+  const menuProps = useMemo(() => ({ PaperProps: { style: MENU_PAPER_STYLE } }), []);
+
   return (
     <>
-      <FormControlLabel
-        control={<Switch checked={value.legend !== undefined} onChange={onToggle} />}
-        label="Show legend"
-      />
+      <FormControlLabel control={legendToggle} label="Show legend" />
       {value.legend !== undefined ? (
-        <FormControl size="small" sx={{ width: 180 }}>
+        <FormControl size="small" sx={LEGEND_POSITION_SX}>
           <InputLabel>Position</InputLabel>
           <Select
             label="Position"
             value={value.legend.position ?? 'bottom'}
             onChange={onPositionChange}
-            MenuProps={{ PaperProps: { style: { maxHeight: 240 } } }}
+            MenuProps={menuProps}
           >
             <MenuItem value="bottom">Bottom</MenuItem>
             <MenuItem value="right">Right</MenuItem>

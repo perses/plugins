@@ -31,16 +31,16 @@ import { OptionsColorPicker } from '@perses-dev/components';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import type { ReactElement } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useSpecContext } from '../../contexts/SpecContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import type { BackgroundSpec, CanvasSpec } from '../../model';
 
-const IMAGE_FIT_OPTIONS: Array<BackgroundSpec['imageFit']> = new Set(['cover', 'contain', 'stretch']);
+const IMAGE_FIT_OPTIONS = new Set(['cover', 'contain', 'stretch']);
 
 function parseImageFit(value: string): BackgroundSpec['imageFit'] {
-  return IMAGE_FIT_OPTIONS.has(value as BackgroundSpec['imageFit']) ? (value as BackgroundSpec['imageFit']) : undefined;
+  return IMAGE_FIT_OPTIONS.has(value) ? (value as BackgroundSpec['imageFit']) : undefined;
 }
 
 function formatOpacityLabel(v: number): string {
@@ -135,6 +135,11 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
     moveBackground(background.id, 'down');
   }, [background.id, moveBackground]);
 
+  const globalCheckbox = useMemo(
+    () => <Checkbox size="small" checked={background.global ?? false} onChange={onGlobalChange} />,
+    [background.global, onGlobalChange],
+  );
+
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={1} alignItems="center">
@@ -157,10 +162,7 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
         </Tooltip>
       </Stack>
 
-      <FormControlLabel
-        control={<Checkbox size="small" checked={background.global ?? false} onChange={onGlobalChange} />}
-        label="Global (fit panel)"
-      />
+      <FormControlLabel control={globalCheckbox} label="Global (fit panel)" />
 
       <TextField
         label="Name"
