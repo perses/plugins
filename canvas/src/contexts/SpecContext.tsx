@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { createContext, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import { DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT } from '../components/shared/NodeRenderer';
-import { BackgroundSpec, EdgeSpec, NodeSpec, CanvasSpec, Point } from '../model';
+import type { BackgroundSpec, EdgeSpec, NodeSpec, CanvasSpec, Point } from '../model';
 import { generateId } from '../utils/generateId';
 import { useEditorContext } from './EditorContext';
 

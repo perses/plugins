@@ -11,20 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, useCallback, useMemo, useState } from 'react';
+import type { PointerEvent } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useEditorContext } from '../contexts/EditorContext';
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import { CanvasSpec, FloatingEdge, isFloatingEdge } from '../model';
-import {
-  BoundingBox,
-  HANDLE_POSITIONS,
-  handlePosition,
-  nodeBoundingBox,
-  OPPOSITE_HANDLE,
-  ResizeHandleId,
-} from '../utils/resizeUtils';
+import type { CanvasSpec, FloatingEdge } from '../model';
+import { isFloatingEdge } from '../model';
+import type { BoundingBox, ResizeHandleId } from '../utils/resizeUtils';
+import { HANDLE_POSITIONS, handlePosition, nodeBoundingBox, OPPOSITE_HANDLE } from '../utils/resizeUtils';
 
 const MIN_NODE_SIZE = 8;
 

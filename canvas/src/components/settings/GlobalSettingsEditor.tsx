@@ -12,21 +12,21 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import {
   FormatControls,
-  FormatOptions,
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
   ThresholdsEditor,
-  ThresholdOptions,
 } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement, useCallback } from 'react';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
-import { CanvasSpec } from '../../model';
+import type { CanvasSpec } from '../../model';
 import { EditorItemsPanel } from '../editor/EditorItemsPanel';
 import { EdgeThicknessSettings } from './EdgeThicknessSettings';
 import { LegendSettings } from './LegendSettings';

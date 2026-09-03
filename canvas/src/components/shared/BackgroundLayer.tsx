@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { BackgroundSpec } from '../../model';
+import type { BackgroundSpec } from '../../model';
 import { imageFitToPreserveAspectRatio, isSafeImageUrl } from '../../utils/panelUtils';
 
 const BG_GROUP_STYLE = { pointerEvents: 'none' } as const;

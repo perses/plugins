@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, PointerEvent, ReactElement, useCallback } from 'react';
+import type { PointerEvent, ReactElement } from 'react';
+import { memo, useCallback } from 'react';
 
-import { AnchorPoint, NodeSpec } from '../../model';
+import type { AnchorPoint, NodeSpec } from '../../model';
 import { EditorNode } from './EditorNode';
 
 interface EditorNodeItemProps {

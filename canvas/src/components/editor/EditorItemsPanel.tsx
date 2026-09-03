@@ -11,17 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Box,
-  Button,
-  FormControl,
-  InputLabel,
-  ListSubheader,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from '@mui/material';
-import { ReactElement, useCallback, useMemo, useRef } from 'react';
+import type { SelectChangeEvent } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, ListSubheader, MenuItem, Select } from '@mui/material';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';

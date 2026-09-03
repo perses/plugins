@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { NodeSpec } from '../../model';
+import type { NodeSpec } from '../../model';
 import { ICON_PATHS } from '../../utils/icons';
 import { labelAttrs } from '../../utils/labelPosition';
 import { isSafeImageUrl } from '../../utils/panelUtils';

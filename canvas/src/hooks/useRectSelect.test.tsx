@@ -15,7 +15,7 @@ import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
-import { NodeSpec } from '../model';
+import type { NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
 import { useRectSelect } from './useRectSelect';
 

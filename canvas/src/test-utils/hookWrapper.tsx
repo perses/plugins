@@ -11,13 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import { vi } from 'vitest';
 
 import { EditorStateProvider } from '../contexts/EditorContext';
-import { SpecContext, SpecContextValue } from '../contexts/SpecContext';
-import { ZoomContext, ZoomContextValue } from '../contexts/ZoomContext';
-import { CanvasSpec } from '../model';
+import type { SpecContextValue } from '../contexts/SpecContext';
+import { SpecContext } from '../contexts/SpecContext';
+import type { ZoomContextValue } from '../contexts/ZoomContext';
+import { ZoomContext } from '../contexts/ZoomContext';
+import type { CanvasSpec } from '../model';
 
 // Minimal identity-transform stub — d3-zoom is ESM-only and not transformable by Jest.
 const identityTransform = {

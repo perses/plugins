@@ -13,9 +13,10 @@
 
 import { Checkbox, FormControlLabel, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
+import type { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
 import { SelectField } from '../shared/SelectField';
 
 const ANCHOR_OPTIONS: Array<{ value: AnchorPoint; label: string }> = [

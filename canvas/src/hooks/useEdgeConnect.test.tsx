@@ -16,7 +16,7 @@ import { produce } from 'immer';
 import React from 'react';
 import { vi } from 'vitest';
 
-import { CanvasSpec, NodeSpec } from '../model';
+import type { CanvasSpec, NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
 import { useEdgeConnect } from './useEdgeConnect';
 

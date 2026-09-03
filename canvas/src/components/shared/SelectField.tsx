@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextField, TextFieldProps } from '@mui/material';
-import { ReactElement } from 'react';
+import type { TextFieldProps } from '@mui/material';
+import { TextField } from '@mui/material';
+import type { ReactElement } from 'react';
 
 const MENU_PROPS = { PaperProps: { style: { maxHeight: 240 } } } as const;
 const SLOT_PROPS = { select: { MenuProps: MENU_PROPS } } as const;

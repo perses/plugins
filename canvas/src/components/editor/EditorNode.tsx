@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, ReactElement, useMemo } from 'react';
+import type { PointerEvent, ReactElement } from 'react';
+import { useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { NodeSpec, AnchorPoint } from '../../model';
+import type { NodeSpec, AnchorPoint } from '../../model';
 import { editorStyles } from '../../utils/editorStyles';
 import { NodeRenderer } from '../shared/NodeRenderer';
 import { ConnectionHandles } from './ConnectionHandles';

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { NodeSpec, AnchorPoint } from '../../model';
+import type { NodeSpec, AnchorPoint } from '../../model';
 import { ANCHOR_KEYS, anchorPosition } from '../../utils/edgeUtils';
 
 const CROSS_LENGTH = 8;

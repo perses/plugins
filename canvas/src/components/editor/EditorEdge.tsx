@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, ReactElement, useCallback, useMemo } from 'react';
+import type { PointerEvent, ReactElement } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { AnchorPoint, EdgeEnd, EdgeSpec, NodeSpec } from '../../model';
+import type { AnchorPoint, EdgeEnd, EdgeSpec, NodeSpec } from '../../model';
 import { edgeEndpoints } from '../../utils/edgeUtils';
 import { editorStyles } from '../../utils/editorStyles';
-import { EdgeLines, LineStyle } from '../shared/EdgeLines';
+import type { LineStyle } from '../shared/EdgeLines';
+import { EdgeLines } from '../shared/EdgeLines';
 
 const POINTER_STYLE = { pointerEvents: 'none' } as const;
 const LINE_PROPS = { style: POINTER_STYLE };

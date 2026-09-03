@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeries } from '@perses-dev/spec';
+import type { TimeSeries } from '@perses-dev/spec';
 
 import { colorFromThresholds, interpolateLabel, isSafeImageUrl } from './panelUtils';
 

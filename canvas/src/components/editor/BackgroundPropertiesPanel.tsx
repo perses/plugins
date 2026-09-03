@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Checkbox,
@@ -20,7 +21,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Slider,
   Stack,
   TextField,
@@ -30,18 +30,17 @@ import {
 import { OptionsColorPicker } from '@perses-dev/components';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
-import React, { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback } from 'react';
 
 import { useSpecContext } from '../../contexts/SpecContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { BackgroundSpec, CanvasSpec } from '../../model';
+import type { BackgroundSpec, CanvasSpec } from '../../model';
 
-const IMAGE_FIT_OPTIONS: Array<BackgroundSpec['imageFit']> = ['cover', 'contain', 'stretch'];
+const IMAGE_FIT_OPTIONS: Array<BackgroundSpec['imageFit']> = new Set(['cover', 'contain', 'stretch']);
 
 function parseImageFit(value: string): BackgroundSpec['imageFit'] {
-  return IMAGE_FIT_OPTIONS.includes(value as BackgroundSpec['imageFit'])
-    ? (value as BackgroundSpec['imageFit'])
-    : undefined;
+  return IMAGE_FIT_OPTIONS.has(value as BackgroundSpec['imageFit']) ? (value as BackgroundSpec['imageFit']) : undefined;
 }
 
 function formatOpacityLabel(v: number): string {

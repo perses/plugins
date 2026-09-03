@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { DragEdge } from '../../hooks/useEdgeConnect';
+import type { DragEdge } from '../../hooks/useEdgeConnect';
 import { editorStyles } from '../../utils/editorStyles';
 import { EdgeLines } from '../shared/EdgeLines';
 

@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import React, { KeyboardEvent, MouseEvent, PointerEvent, ReactElement, useCallback, useLayoutEffect, useMemo } from 'react';
+import type { KeyboardEvent, MouseEvent, PointerEvent, ReactElement } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
@@ -21,8 +22,10 @@ import { useEdgeConnect } from '../../hooks/useEdgeConnect';
 import { useNodeMove } from '../../hooks/useNodeMove';
 import { useRectSelect } from '../../hooks/useRectSelect';
 import { useResize } from '../../hooks/useResize';
-import { CanvasSpec, FloatingEdge, isFloatingEdge } from '../../model';
-import { nodeBoundingBox, ResizeHandleId } from '../../utils/resizeUtils';
+import type { CanvasSpec, FloatingEdge } from '../../model';
+import { isFloatingEdge } from '../../model';
+import type { ResizeHandleId } from '../../utils/resizeUtils';
+import { nodeBoundingBox } from '../../utils/resizeUtils';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { DragEdgeLine } from './DragEdgeLine';
 import { EditorEdgeItem } from './EditorEdgeItem';
@@ -205,6 +208,7 @@ export function EditorCanvas({
       <svg
         ref={svgRef}
         role="application"
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={0}
         width={width}
         height={height}

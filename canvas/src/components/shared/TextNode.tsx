@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { NodeSpec } from '../../model';
+import type { NodeSpec } from '../../model';
 
 const DEFAULT_TEXT_COLOR = 'currentColor';
 const NO_INTERACTION_STYLE = { pointerEvents: 'none', userSelect: 'none' } as const;

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { act, renderHook } from '@testing-library/react';
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 
-import { BackgroundSpec, CanvasSpec } from '../model';
+import type { BackgroundSpec, CanvasSpec } from '../model';
 import { EditorStateProvider, useEditorContext } from './EditorContext';
 import { SpecProvider, useSpecContext } from './SpecContext';
 
