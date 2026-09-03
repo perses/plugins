@@ -58,6 +58,24 @@ export type ThicknessMode = 'fixed' | 'threshold';
 
 export type Line = { start: Point; end: Point };
 
+export interface SelectionRect {
+  anchor: Point;
+  corner: Point;
+}
+
+export interface NormRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export function normRect(rect: SelectionRect): NormRect {
+  const x = Math.min(rect.anchor.x, rect.corner.x);
+  const y = Math.min(rect.anchor.y, rect.corner.y);
+  return { x, y, width: Math.abs(rect.corner.x - rect.anchor.x), height: Math.abs(rect.corner.y - rect.anchor.y) };
+}
+
 export interface EdgeSpec {
   id: string;
   name?: string;

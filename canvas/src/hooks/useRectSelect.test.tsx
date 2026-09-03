@@ -52,7 +52,7 @@ describe('useRectSelect', () => {
     await act(async () => {
       result.current.beginSelection(makePointerEvent(10, 20));
     });
-    expect(result.current.selectionRect).toEqual({ x0: 10, y0: 20, x1: 10, y1: 20 });
+    expect(result.current.selectionRect).toEqual({ anchor: { x: 10, y: 20 }, corner: { x: 10, y: 20 } });
   });
 
   it('updateSelection extends the rect', async () => {
@@ -63,7 +63,7 @@ describe('useRectSelect', () => {
     await act(async () => {
       result.current.updateSelection(makePointerEvent(50, 60));
     });
-    expect(result.current.selectionRect).toEqual({ x0: 10, y0: 20, x1: 50, y1: 60 });
+    expect(result.current.selectionRect).toEqual({ anchor: { x: 10, y: 20 }, corner: { x: 50, y: 60 } });
   });
 
   it('applySelection returns ids of nodes inside the rect and clears it', async () => {
