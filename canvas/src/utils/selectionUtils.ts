@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { SelectionRect } from '../hooks/useRectSelect';
-import type { EdgeSpec, NodeSpec } from '../model';
+import type { EdgeSpec, NodeSpec, SelectionRect } from '../model';
+import { normRect } from '../model';
 
 export function computeSelectionFromRect(rect: SelectionRect, nodes: NodeSpec[], edges: EdgeSpec[]): Set<string> {
-  const minX = Math.min(rect.x0, rect.x1);
-  const maxX = Math.max(rect.x0, rect.x1);
-  const minY = Math.min(rect.y0, rect.y1);
-  const maxY = Math.max(rect.y0, rect.y1);
-  const inBox = (x: number, y: number): boolean => x >= minX && x <= maxX && y >= minY && y <= maxY;
+  const { x, y, width, height } = normRect(rect);
+  const maxX = x + width;
+  const maxY = y + height;
+  const inBox = (px: number, py: number): boolean => px >= x && px <= maxX && py >= y && py <= maxY;
   return new Set([
     ...nodes.filter((n) => inBox(n.position.x, n.position.y)).map((n) => n.id),
     ...edges

@@ -22,41 +22,41 @@ describe('computeSelectionFromRect', () => {
   const nodes = [makeNode('a', 10, 10), makeNode('b', 50, 50), makeNode('c', 100, 100)];
 
   it('selects nodes whose center is inside the rect', () => {
-    const result = computeSelectionFromRect({ x0: 0, y0: 0, x1: 60, y1: 60 }, nodes, []);
+    const result = computeSelectionFromRect({ anchor: { x: 0, y: 0 }, corner: { x: 60, y: 60 } }, nodes, []);
     expect(result).toEqual(new Set(['a', 'b']));
   });
 
   it('returns empty set when rect is empty', () => {
-    const result = computeSelectionFromRect({ x0: 200, y0: 200, x1: 300, y1: 300 }, nodes, []);
+    const result = computeSelectionFromRect({ anchor: { x: 200, y: 200 }, corner: { x: 300, y: 300 } }, nodes, []);
     expect(result.size).toBe(0);
   });
 
   it('handles inverted rect coordinates (drag from bottom-right to top-left)', () => {
-    const result = computeSelectionFromRect({ x0: 60, y0: 60, x1: 0, y1: 0 }, nodes, []);
+    const result = computeSelectionFromRect({ anchor: { x: 60, y: 60 }, corner: { x: 0, y: 0 } }, nodes, []);
     expect(result).toEqual(new Set(['a', 'b']));
   });
 
   it('includes floating edge endpoints inside the rect', () => {
     const edges = [{ id: 'e1', source: 'a', freeEndpoint: { x: 20, y: 20 } }];
-    const result = computeSelectionFromRect({ x0: 0, y0: 0, x1: 30, y1: 30 }, nodes, edges);
+    const result = computeSelectionFromRect({ anchor: { x: 0, y: 0 }, corner: { x: 30, y: 30 } }, nodes, edges);
     expect(result.has('e1')).toBe(true);
   });
 
   it('excludes floating edges outside the rect', () => {
     const edges = [{ id: 'e1', source: 'a', freeEndpoint: { x: 200, y: 200 } }];
-    const result = computeSelectionFromRect({ x0: 0, y0: 0, x1: 60, y1: 60 }, nodes, edges);
+    const result = computeSelectionFromRect({ anchor: { x: 0, y: 0 }, corner: { x: 60, y: 60 } }, nodes, edges);
     expect(result.has('e1')).toBe(false);
   });
 
   it('excludes edges with no free endpoint (target-connected edges)', () => {
     const edges = [{ id: 'e1', source: 'a', target: 'b' }];
-    const result = computeSelectionFromRect({ x0: 0, y0: 0, x1: 200, y1: 200 }, nodes, edges);
+    const result = computeSelectionFromRect({ anchor: { x: 0, y: 0 }, corner: { x: 200, y: 200 } }, nodes, edges);
     expect(result.has('e1')).toBe(false);
   });
 
   it('selects floating edge with freeEndpoint at origin when origin is inside rect', () => {
     const edges = [{ id: 'e1', source: 'a', freeEndpoint: { x: 0, y: 0 } }];
-    const result = computeSelectionFromRect({ x0: -10, y0: -10, x1: 10, y1: 10 }, nodes, edges);
+    const result = computeSelectionFromRect({ anchor: { x: -10, y: -10 }, corner: { x: 10, y: 10 } }, nodes, edges);
     expect(result.has('e1')).toBe(true);
   });
 });

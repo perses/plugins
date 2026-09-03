@@ -16,14 +16,10 @@ import { useCallback, useRef, useState } from 'react';
 
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
+import type { SelectionRect } from '../model';
 import { computeSelectionFromRect } from '../utils/selectionUtils';
 
-export interface SelectionRect {
-  x0: number;
-  y0: number;
-  x1: number;
-  y1: number;
-}
+export type { SelectionRect } from '../model';
 
 function isPanGesture(event: PointerEvent): boolean {
   return event.button === 1;
@@ -57,7 +53,7 @@ export function useRectSelect(): UseRectSelectResult {
       event.currentTarget.focus();
       event.currentTarget.setPointerCapture(event.pointerId);
       const pt = toCanvasPoint(event);
-      const rect = { x0: pt.x, y0: pt.y, x1: pt.x, y1: pt.y };
+      const rect: SelectionRect = { anchor: pt, corner: pt };
       rectRef.current = rect;
       setSelectionRect(rect);
       return true;
@@ -70,8 +66,8 @@ export function useRectSelect(): UseRectSelectResult {
       if (!rectRef.current) {
         return;
       }
-      const point = toCanvasPoint(event);
-      const updated = { ...rectRef.current, x1: point.x, y1: point.y };
+      const corner = toCanvasPoint(event);
+      const updated: SelectionRect = { ...rectRef.current, corner };
       rectRef.current = updated;
       setSelectionRect(updated);
     },
@@ -79,7 +75,7 @@ export function useRectSelect(): UseRectSelectResult {
   );
 
   const applySelection = useCallback((): Set<string> => {
-    const rect = rectRef.current ?? { x0: 0, y0: 0, x1: 0, y1: 0 };
+    const rect = rectRef.current ?? { anchor: { x: 0, y: 0 }, corner: { x: 0, y: 0 } };
     const nodes = spec.nodes ?? [];
     const edges = spec.edges ?? [];
     const hit = computeSelectionFromRect(rect, nodes, edges);
