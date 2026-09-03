@@ -27,8 +27,9 @@ spec: close({
 		color?: string
 		width?: number
 	})
-	valueFontSize?: number
-	colorMode?:     *"value" | "background_solid" | "none"
+	valueFontSize?:  number
+	legendFontSize?: number
+	colorMode?:      *"value" | "background_solid" | "none"
 	legendMode?:    *"auto" | "on" | "off"
 	mappings?: [...common.#mappings]
 })

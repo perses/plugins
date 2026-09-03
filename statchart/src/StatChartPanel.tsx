@@ -38,7 +38,7 @@ export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions, queryResults } = props;
 
-  const { format, sparkline, valueFontSize, colorMode } = spec;
+  const { format, sparkline, valueFontSize, legendFontSize, colorMode } = spec;
   const chartsTheme = useChartsTheme();
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
@@ -95,7 +95,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   let chartWidth = (contentDimensions.width - spacing) / statChartData.length;
   if (isMultiSeries) {
     const fontFamily = chartsTheme.echartsTheme.textStyle?.fontFamily ?? 'Lato';
-    const seriesNameFontSize = Math.max(14, Math.min((contentDimensions.height * 0.15) / 1.2, 30));
+    const seriesNameFontSize = legendFontSize ?? Math.max(14, Math.min((contentDimensions.height * 0.15) / 1.2, 30));
     const padding = chartsTheme.container.padding.default;
     let maxTextWidth = MIN_WIDTH;
     for (const series of statChartData) {
@@ -159,6 +159,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               showSeriesName={shouldShowLegend}
               valueFontSize={valueFontSize}
               colorMode={colorMode}
+              legendFontSize={legendFontSize}
               alignmentText={alignmentText}
               alignmentSeriesName={alignmentSeriesName}
             />
