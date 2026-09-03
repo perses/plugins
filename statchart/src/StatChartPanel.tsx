@@ -48,7 +48,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const alignmentText = useMemo(() => {
     if (!isMultiSeries) return undefined;
     const fontFamily = chartsTheme.echartsTheme.textStyle?.fontFamily ?? 'Lato';
-    const fontSize = Number(chartsTheme.echartsTheme.textStyle?.fontSize) ?? 12;
+    const fontSize = Number(chartsTheme.echartsTheme.textStyle?.fontSize) || 12;
     let widest = '';
     let maxWidth = 0;
     for (const series of statChartData) {
@@ -66,7 +66,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const alignmentSeriesName = useMemo(() => {
     if (!isMultiSeries) return undefined;
     const fontFamily = chartsTheme.echartsTheme.textStyle?.fontFamily ?? 'Lato';
-    const fontSize = Number(chartsTheme.echartsTheme.textStyle?.fontSize) ?? 12;
+    const fontSize = Number(chartsTheme.echartsTheme.textStyle?.fontSize) || 12;
     let widest = '';
     let maxWidth = 0;
     for (const series of statChartData) {
@@ -104,7 +104,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
         formatStatChartValue(series.calculatedValue, format),
         700,
         seriesNameFontSize * 1.5,
-        fontFamily
+        fontFamily,
       );
       const needed = Math.max(nameWidth, valWidth) + padding * 2;
       if (needed > maxTextWidth) maxTextWidth = needed;

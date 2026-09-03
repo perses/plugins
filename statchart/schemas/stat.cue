@@ -30,6 +30,6 @@ spec: close({
 	valueFontSize?:  number
 	legendFontSize?: number
 	colorMode?:      *"value" | "background_solid" | "none"
-	legendMode?:    *"auto" | "on" | "off"
+	legendMode?:     *"auto" | "on" | "off"
 	mappings?: [...common.#mappings]
 })
