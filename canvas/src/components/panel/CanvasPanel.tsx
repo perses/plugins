@@ -26,7 +26,7 @@ import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
 import { ThresholdLegend } from './ThresholdLegend';
 
-const SVG_STYLE = { display: 'block', cursor: 'grab' };
+const SVG_STYLE_BASE = { display: 'block' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
 
 interface PanelSvgProps {
@@ -38,7 +38,7 @@ interface PanelSvgProps {
 
 function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvgProps): ReactElement {
   const { contentDimensions, spec } = props;
-  const { transform, fitView, resetPan } = useZoomContext();
+  const { transform, isPanning, fitView, resetPan } = useZoomContext();
 
   const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
   const backgrounds = useMemo(() => spec.backgrounds ?? [], [spec.backgrounds]);
@@ -68,8 +68,10 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
   const legendY =
     legendPosition === 'right' ? LEGEND_MARGIN : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
 
+  const svgStyle = useMemo(() => ({ ...SVG_STYLE_BASE, cursor: isPanning ? 'grabbing' : 'grab' }), [isPanning]);
+
   return (
-    <svg ref={svgRef} width={width} height={height} style={SVG_STYLE} onDoubleClick={handleDoubleClick}>
+    <svg ref={svgRef} width={width} height={height} style={svgStyle} onDoubleClick={handleDoubleClick}>
       <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
       <g transform={transform.toString()}>
         <BackgroundLayer backgrounds={backgrounds} />
@@ -116,11 +118,11 @@ export function CanvasPanel(props: CanvasProps): ReactElement | null {
     return map;
   }, [queryResults]);
 
-  const { svgRef, toCanvasPoint, transform, fitView, resetPan } = useZoom();
+  const { svgRef, toCanvasPoint, transform, isPanning, fitView, resetPan } = useZoom();
 
   const zoomValue = useMemo(
-    () => ({ toCanvasPoint, transform, fitView, resetPan }),
-    [toCanvasPoint, transform, fitView, resetPan],
+    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan }),
+    [toCanvasPoint, transform, isPanning, fitView, resetPan],
   );
 
   return (

@@ -22,6 +22,7 @@ const FIT_PADDING = 40;
 export interface UseZoomResult {
   svgRef: (node: SVGSVGElement | null) => void;
   transform: ZoomTransform;
+  isPanning: boolean;
   fitView: (
     boundingBox: { minX: number; minY: number; maxX: number; maxY: number },
     canvasWidth: number,
@@ -33,6 +34,7 @@ export interface UseZoomResult {
 
 export function useZoom(): UseZoomResult {
   const [transform, setTransform] = useState<ZoomTransform>(zoomIdentity);
+  const [isPanning, setIsPanning] = useState(false);
   const nodeRef = useRef<SVGSVGElement | null>(null);
 
   const zoomBehavior = useMemo(() => zoom<SVGSVGElement, unknown>(), []);
@@ -52,9 +54,11 @@ export function useZoom(): UseZoomResult {
         }
         return event instanceof MouseEvent && event.button === 1;
       });
+      zoomBehavior.on('start', () => setIsPanning(true));
       zoomBehavior.on('zoom', ({ transform: t }: { transform: ZoomTransform }) => {
         setTransform(t);
       });
+      zoomBehavior.on('end', () => setIsPanning(false));
       select<SVGSVGElement, unknown>(node).call(zoomBehavior);
     },
     [zoomBehavior],
@@ -100,5 +104,5 @@ export function useZoom(): UseZoomResult {
     [transform],
   );
 
-  return { svgRef, transform, fitView, toCanvasPoint, resetPan };
+  return { svgRef, transform, isPanning, fitView, toCanvasPoint, resetPan };
 }

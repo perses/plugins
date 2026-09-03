@@ -61,7 +61,7 @@ export function EditorCanvas({
     startResize,
     endInteraction,
   } = useEditorContext();
-  const { transform, fitView, resetPan } = useZoomContext();
+  const { transform, isPanning, fitView, resetPan } = useZoomContext();
 
   const { selectNode, updateMove, applyMove, resetMove } = useNodeMove();
   const { dragEdge, beginEdgeDrag, beginEndpointDrag, updateEdgeDrag, resetEdgeDrag, applyEdgeDrag } = useEdgeConnect();
@@ -100,16 +100,13 @@ export function EditorCanvas({
       : null;
   }, [displayEdges, displayNodes, mode.type, selectedIds]);
 
-  const svgStyle = useMemo(
-    () => ({
-      display: 'block' as const,
-      cursor: mode.type === 'dragging-edge' ? 'crosshair' : 'default',
-      border: '1px solid',
-      borderColor: 'divider',
-      outline: 'none',
-    }),
-    [mode.type],
-  );
+  const svgStyle = useMemo(() => {
+    let cursor = 'default';
+    if (isPanning) cursor = 'grabbing';
+    else if (mode.type === 'dragging-edge' || mode.type === 'selecting') cursor = 'crosshair';
+    else if (mode.type === 'moving') cursor = 'move';
+    return { display: 'block' as const, cursor, border: '1px solid', borderColor: 'divider', outline: 'none' };
+  }, [isPanning, mode.type]);
 
   const onSvgPointerDown = useCallback(
     (event: PointerEvent<SVGSVGElement>): void => {

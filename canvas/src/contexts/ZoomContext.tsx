@@ -16,7 +16,10 @@ import { createContext, useContext } from 'react';
 
 import type { UseZoomResult } from '../hooks/useZoom';
 
-export type ZoomContextValue = Pick<UseZoomResult, 'toCanvasPoint' | 'transform' | 'fitView' | 'resetPan'>;
+export type ZoomContextValue = Pick<
+  UseZoomResult,
+  'toCanvasPoint' | 'transform' | 'isPanning' | 'fitView' | 'resetPan'
+>;
 
 export const ZoomContext = createContext<ZoomContextValue | null>(null);
 
