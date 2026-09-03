@@ -54,6 +54,8 @@ export interface NodeSpec {
 
 export type AnchorPoint = 'n' | 's' | 'e' | 'w' | 'nw' | 'ne' | 'sw' | 'se';
 
+export type ThicknessMode = 'fixed' | 'threshold';
+
 export interface EdgeSpec {
   id: string;
   name?: string;
@@ -63,7 +65,7 @@ export interface EdgeSpec {
   targetAnchor?: AnchorPoint;
   freeEndpoint?: Point;
   bidirectional?: boolean;
-  thicknessMode?: 'fixed' | 'threshold';
+  thicknessMode?: ThicknessMode;
   strokeWidth?: number;
   sourceQueryIndex?: number;
   targetQueryIndex?: number;

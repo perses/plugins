@@ -16,7 +16,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import type { CanvasSpec } from '../../model';
+import type { CanvasSpec, ThicknessMode } from '../../model';
 import { edgeEndpoints, strokeWidthFromThresholds } from '../../utils/edgeUtils';
 import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
 import { EdgeLabel } from '../shared/EdgeLabel';
@@ -27,7 +27,7 @@ const NS_PREFIX = 'wm-panel';
 
 function resolveEdgeStyle(
   queryIndex: number | undefined,
-  thicknessMode: 'fixed' | 'threshold' | undefined,
+  thicknessMode: ThicknessMode | undefined,
   edgeStrokeWidth: number | undefined,
   seriesByQueryIndex: Map<number, TimeSeries>,
   spec: CanvasSpec,

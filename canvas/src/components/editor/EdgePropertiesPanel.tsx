@@ -16,7 +16,7 @@ import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-sy
 import type { ReactElement } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import type { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
+import type { AnchorPoint, EdgeSpec, NodeSpec, ThicknessMode } from '../../model';
 import { ANCHOR_LABELS, ANCHOR_KEYS } from '../../utils/edgeUtils';
 import { SelectField } from '../shared/SelectField';
 
@@ -89,7 +89,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
 
   const onThicknessModeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...edge, thicknessMode: e.target.value as EdgeSpec['thicknessMode'] });
+      onChange({ ...edge, thicknessMode: e.target.value as ThicknessMode });
     },
     [edge, onChange],
   );
