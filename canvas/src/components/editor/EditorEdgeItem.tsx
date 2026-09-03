@@ -14,7 +14,7 @@
 import type { PointerEvent, ReactElement } from 'react';
 import { memo, useCallback } from 'react';
 
-import type { AnchorPoint, EdgeEnd, EdgeSpec, NodeSpec } from '../../model';
+import type { AnchorPoint, EdgeEnd, EdgeSpec, NodeSpec, Point } from '../../model';
 import { EditorEdge } from './EditorEdge';
 
 interface EditorEdgeItemProps {
@@ -28,8 +28,7 @@ interface EditorEdgeItemProps {
     event: PointerEvent<SVGCircleElement>,
     edgeId: string,
     end: EdgeEnd,
-    fixedX: number,
-    fixedY: number,
+    fixedPoint: Point,
     fixedNodeId: string,
     fixedAnchor: AnchorPoint,
   ) => boolean;
@@ -60,12 +59,11 @@ export const EditorEdgeItem = memo(function EditorEdgeItem({
     (
       event: PointerEvent<SVGCircleElement>,
       end: EdgeEnd,
-      fixedX: number,
-      fixedY: number,
+      fixedPoint: Point,
       fixedNodeId: string,
       fixedAnchor: AnchorPoint,
     ): void => {
-      if (beginEndpointDrag(event, edgeId, end, fixedX, fixedY, fixedNodeId, fixedAnchor)) {
+      if (beginEndpointDrag(event, edgeId, end, fixedPoint, fixedNodeId, fixedAnchor)) {
         startDragEdge();
       }
     },

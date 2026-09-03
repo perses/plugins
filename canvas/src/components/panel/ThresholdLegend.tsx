@@ -17,6 +17,8 @@ import { formatValue } from '@perses-dev/components';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
+import type { Point } from '../../model';
+
 const SWATCH_SIZE = 12;
 const ROW_HEIGHT = 18;
 const LABEL_OFFSET = SWATCH_SIZE + 6;
@@ -28,11 +30,10 @@ interface ThresholdLegendProps {
   thresholds: ThresholdOptions;
   format: FormatOptions | undefined;
   paletteColors: string[];
-  x: number;
-  y: number;
+  position: Point;
 }
 
-export function ThresholdLegend({ thresholds, format, paletteColors, x, y }: ThresholdLegendProps): ReactElement {
+export function ThresholdLegend({ thresholds, format, paletteColors, position }: ThresholdLegendProps): ReactElement {
   const muiTheme = useTheme();
   const defaultColor = thresholds.defaultColor ?? paletteColors[0] ?? muiTheme.palette.success.main;
   const steps = useMemo(() => thresholds.steps ?? [], [thresholds.steps]);
@@ -55,8 +56,8 @@ export function ThresholdLegend({ thresholds, format, paletteColors, x, y }: Thr
   return (
     <g>
       <rect
-        x={x}
-        y={y}
+        x={position.x}
+        y={position.y}
         width={boxWidth}
         height={boxHeight}
         fill={muiTheme.palette.background.paper}
@@ -66,12 +67,12 @@ export function ThresholdLegend({ thresholds, format, paletteColors, x, y }: Thr
         rx={4}
       />
       {rows.map((row, i) => {
-        const ry = y + PADDING + i * ROW_HEIGHT + (ROW_HEIGHT - SWATCH_SIZE) / 2;
+        const ry = position.y + PADDING + i * ROW_HEIGHT + (ROW_HEIGHT - SWATCH_SIZE) / 2;
         return (
           <g key={row.key}>
-            <rect x={x + PADDING} y={ry} width={SWATCH_SIZE} height={SWATCH_SIZE} fill={row.color} rx={2} />
+            <rect x={position.x + PADDING} y={ry} width={SWATCH_SIZE} height={SWATCH_SIZE} fill={row.color} rx={2} />
             <text
-              x={x + PADDING + LABEL_OFFSET}
+              x={position.x + PADDING + LABEL_OFFSET}
               y={ry + SWATCH_SIZE - 2}
               fontSize={FONT_SIZE}
               fill={muiTheme.palette.text.primary}

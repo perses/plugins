@@ -42,15 +42,20 @@ describe('useEdgeConnect', () => {
   it('beginEdgeDrag sets dragEdge', async () => {
     const { result } = renderHook(() => useEdgeConnect(), { wrapper: makeWrapper() });
     await act(async () => {
-      result.current.beginEdgeDrag('a', 'n', 10, 20);
+      result.current.beginEdgeDrag('a', 'n', { x: 10, y: 20 });
     });
-    expect(result.current.dragEdge).toMatchObject({ sourceId: 'a', sourceAnchor: 'n', x1: 10, y1: 20, x2: 10, y2: 20 });
+    expect(result.current.dragEdge).toMatchObject({
+      sourceId: 'a',
+      sourceAnchor: 'n',
+      start: { x: 10, y: 20 },
+      end: { x: 10, y: 20 },
+    });
   });
 
   it('resetEdgeDrag clears dragEdge', async () => {
     const { result } = renderHook(() => useEdgeConnect(), { wrapper: makeWrapper() });
     await act(async () => {
-      result.current.beginEdgeDrag('a', 'n', 0, 0);
+      result.current.beginEdgeDrag('a', 'n', { x: 0, y: 0 });
     });
     await act(async () => {
       result.current.resetEdgeDrag();
@@ -62,12 +67,11 @@ describe('useEdgeConnect', () => {
     const spec: CanvasSpec = { nodes: [makeNode('a', 0, 0)] };
     const { result } = renderHook(() => useEdgeConnect(), { wrapper: makeWrapper(spec) });
     await act(async () => {
-      result.current.beginEdgeDrag('a', 'e', 50, 0);
+      result.current.beginEdgeDrag('a', 'e', { x: 50, y: 0 });
     });
     const draft = produce({ ...spec, edges: [] as CanvasSpec['edges'] }, (d) => {
       if (result.current.dragEdge) {
-        result.current.dragEdge.x2 = 300;
-        result.current.dragEdge.y2 = 300;
+        result.current.dragEdge.end = { x: 300, y: 300 };
       }
       result.current.applyEdgeDrag(d);
     });
@@ -82,14 +86,12 @@ describe('useEdgeConnect', () => {
     const spec: CanvasSpec = { nodes };
     const { result } = renderHook(() => useEdgeConnect(), { wrapper: makeWrapper(spec) });
     await act(async () => {
-      result.current.beginEdgeDrag('a', 'e', 50, 0);
+      result.current.beginEdgeDrag('a', 'e', { x: 50, y: 0 });
     });
     const draft = produce({ ...spec, edges: [] as CanvasSpec['edges'] }, (d) => {
       if (result.current.dragEdge) {
-        result.current.dragEdge.x2 = 150;
-        result.current.dragEdge.y2 = 0;
-        result.current.dragEdge.snapTargetId = 'b';
-        result.current.dragEdge.snapTargetAnchor = 'w';
+        result.current.dragEdge.end = { x: 150, y: 0 };
+        result.current.dragEdge.snapTarget = { id: 'b', anchor: 'w' };
       }
       result.current.applyEdgeDrag(d);
     });
@@ -102,7 +104,7 @@ describe('useEdgeConnect', () => {
     const { result } = renderHook(() => useEdgeConnect(), { wrapper: makeWrapper() });
     let ok = true;
     await act(async () => {
-      ok = result.current.beginEndpointDrag(makeCircleEvent(), 'no-such-edge', 'target', 0, 0, 'src', 'n');
+      ok = result.current.beginEndpointDrag(makeCircleEvent(), 'no-such-edge', 'target', { x: 0, y: 0 }, 'src', 'n');
     });
     expect(ok).toBe(false);
   });
@@ -114,11 +116,11 @@ describe('useEdgeConnect', () => {
     const { result } = renderHook(() => useEdgeConnect(), { wrapper: makeWrapper(spec) });
     let ok = false;
     await act(async () => {
-      ok = result.current.beginEndpointDrag(makeCircleEvent(), 'e1', 'target', 50, 0, 'a', 'e');
+      ok = result.current.beginEndpointDrag(makeCircleEvent(), 'e1', 'target', { x: 50, y: 0 }, 'a', 'e');
     });
     expect(ok).toBe(true);
-    expect(result.current.dragEdge?.editingEdgeId).toBe('e1');
-    expect(result.current.dragEdge?.editingEnd).toBe('target');
+    expect(result.current.dragEdge?.editingEdge?.id).toBe('e1');
+    expect(result.current.dragEdge?.editingEdge?.end).toBe('target');
   });
 
   it('applyEdgeDrag reconnects target when editingEnd is target', async () => {
@@ -127,12 +129,11 @@ describe('useEdgeConnect', () => {
     const spec: CanvasSpec = { nodes, edges };
     const { result } = renderHook(() => useEdgeConnect(), { wrapper: makeWrapper(spec) });
     await act(async () => {
-      result.current.beginEndpointDrag(makeCircleEvent(), 'e1', 'target', 50, 0, 'a', 'e');
+      result.current.beginEndpointDrag(makeCircleEvent(), 'e1', 'target', { x: 50, y: 0 }, 'a', 'e');
     });
     const draft = produce(spec, (d) => {
       if (result.current.dragEdge) {
-        result.current.dragEdge.snapTargetId = 'c';
-        result.current.dragEdge.snapTargetAnchor = 'n';
+        result.current.dragEdge.snapTarget = { id: 'c', anchor: 'n' };
       }
       result.current.applyEdgeDrag(d);
     });

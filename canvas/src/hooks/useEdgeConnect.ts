@@ -16,23 +16,27 @@ import { useCallback, useState } from 'react';
 
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import type { AnchorPoint, EdgeSpec, CanvasSpec, EdgeEnd, Point } from '../model';
+import type { AnchorPoint, EdgeSpec, CanvasSpec, EdgeEnd, Line, Point } from '../model';
 import { anchorPosition, edgeEndpoints, pointInsideNode, snapTarget } from '../utils/edgeUtils';
 import { generateId } from '../utils/generateId';
 
 const SNAP_RADIUS = 20;
 
-export interface DragEdge {
+export interface SnapTarget {
+  id: string;
+  anchor: AnchorPoint;
+}
+
+export interface EditingEdge {
+  id: string;
+  end: EdgeEnd;
+}
+
+export interface DragEdge extends Line {
   sourceId: string;
   sourceAnchor: AnchorPoint;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  snapTargetId?: string;
-  snapTargetAnchor?: AnchorPoint;
-  editingEdgeId?: string;
-  editingEnd?: EdgeEnd;
+  snapTarget?: SnapTarget;
+  editingEdge?: EditingEdge;
 }
 
 interface SnapResult {
@@ -94,13 +98,12 @@ function buildNewEdge(dragEdge: DragEdge, snap: SnapResult | null, pt: Point): E
 
 interface UseEdgeConnectResult {
   dragEdge: DragEdge | null;
-  beginEdgeDrag: (nodeId: string, anchor: AnchorPoint, x: number, y: number) => void;
+  beginEdgeDrag: (nodeId: string, anchor: AnchorPoint, point: Point) => void;
   beginEndpointDrag: (
     event: PointerEvent<SVGCircleElement>,
     edgeId: string,
     end: EdgeEnd,
-    fixedX: number,
-    fixedY: number,
+    fixedPoint: Point,
     fixedNodeId: string,
     fixedAnchor: AnchorPoint,
   ) => boolean;
@@ -114,8 +117,8 @@ export function useEdgeConnect(): UseEdgeConnectResult {
   const { toCanvasPoint } = useZoomContext();
   const [dragEdge, setDragEdge] = useState<DragEdge | null>(null);
 
-  const beginEdgeDrag = useCallback((nodeId: string, anchor: AnchorPoint, x: number, y: number): void => {
-    setDragEdge({ sourceId: nodeId, sourceAnchor: anchor, x1: x, y1: y, x2: x, y2: y });
+  const beginEdgeDrag = useCallback((nodeId: string, anchor: AnchorPoint, point: Point): void => {
+    setDragEdge({ sourceId: nodeId, sourceAnchor: anchor, start: point, end: point });
   }, []);
 
   const beginEndpointDrag = useCallback(
@@ -123,8 +126,7 @@ export function useEdgeConnect(): UseEdgeConnectResult {
       event: PointerEvent<SVGCircleElement>,
       edgeId: string,
       end: EdgeEnd,
-      fixedX: number,
-      fixedY: number,
+      fixedPoint: Point,
       fixedNodeId: string,
       fixedAnchor: AnchorPoint,
     ): boolean => {
@@ -138,17 +140,13 @@ export function useEdgeConnect(): UseEdgeConnectResult {
       if (!pts) {
         return false;
       }
-      const movingX = end === 'target' ? pts.x2 : pts.x1;
-      const movingY = end === 'target' ? pts.y2 : pts.y1;
+      const movingPoint = end === 'target' ? pts.end : pts.start;
       setDragEdge({
         sourceId: fixedNodeId,
         sourceAnchor: fixedAnchor,
-        x1: fixedX,
-        y1: fixedY,
-        x2: movingX,
-        y2: movingY,
-        editingEdgeId: edgeId,
-        editingEnd: end,
+        start: fixedPoint,
+        end: movingPoint,
+        editingEdge: { id: edgeId, end },
       });
       return true;
     },
@@ -166,10 +164,8 @@ export function useEdgeConnect(): UseEdgeConnectResult {
         const snap = snapTarget(nodes, point, current.sourceId, SNAP_RADIUS);
         return {
           ...current,
-          x2: snap ? anchorPosition(snap.node, snap.anchor).x : point.x,
-          y2: snap ? anchorPosition(snap.node, snap.anchor).y : point.y,
-          snapTargetId: snap?.node.id,
-          snapTargetAnchor: snap?.anchor,
+          end: snap ? anchorPosition(snap.node, snap.anchor) : point,
+          snapTarget: snap ? { id: snap.node.id, anchor: snap.anchor } : undefined,
         };
       });
     },
@@ -181,19 +177,19 @@ export function useEdgeConnect(): UseEdgeConnectResult {
       if (!dragEdge) {
         return;
       }
-      const pt = { x: dragEdge.x2, y: dragEdge.y2 };
-      const snapNode = dragEdge.snapTargetId ? nodeById.get(dragEdge.snapTargetId) : undefined;
+      const pt = dragEdge.end;
+      const snapNode = dragEdge.snapTarget ? nodeById.get(dragEdge.snapTarget.id) : undefined;
       const snap =
-        snapNode !== undefined && dragEdge.snapTargetAnchor !== undefined
-          ? { node: snapNode, anchor: dragEdge.snapTargetAnchor }
+        snapNode !== undefined && dragEdge.snapTarget !== undefined
+          ? { node: snapNode, anchor: dragEdge.snapTarget.anchor }
           : null;
 
-      if (dragEdge.editingEdgeId !== undefined && dragEdge.editingEnd !== undefined) {
-        const edge = (draft.edges ?? []).find((ed) => ed.id === dragEdge.editingEdgeId);
+      if (dragEdge.editingEdge !== undefined) {
+        const edge = (draft.edges ?? []).find((ed) => ed.id === dragEdge.editingEdge?.id);
         if (!edge) {
           return;
         }
-        if (dragEdge.editingEnd === 'target') {
+        if (dragEdge.editingEdge.end === 'target') {
           reconnectTarget(edge, snap, pt);
         } else {
           reconnectSource(edge, snap, pt);

@@ -17,6 +17,8 @@ import { zoom, zoomIdentity } from 'd3-zoom';
 import type { PointerEvent } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+import type { Point } from '../model';
+
 const FIT_PADDING = 40;
 
 export interface UseZoomResult {
@@ -28,7 +30,7 @@ export interface UseZoomResult {
     canvasWidth: number,
     canvasHeight: number,
   ) => void;
-  toCanvasPoint: (event: PointerEvent<SVGSVGElement>) => { x: number; y: number };
+  toCanvasPoint: (event: PointerEvent<SVGSVGElement>) => Point;
   resetPan: () => void;
 }
 
@@ -92,7 +94,7 @@ export function useZoom(): UseZoomResult {
   );
 
   const toCanvasPoint = useCallback(
-    (event: PointerEvent<SVGSVGElement>): { x: number; y: number } => {
+    (event: PointerEvent<SVGSVGElement>): Point => {
       const rect = nodeRef.current?.getBoundingClientRect();
       if (!rect) {
         throw new Error('SVG element is not available');

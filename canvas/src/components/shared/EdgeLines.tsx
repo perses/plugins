@@ -14,9 +14,8 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 
+import type { Line, Point } from '../../model';
 import { midpoint } from '../../utils/edgeUtils';
-
-type Line = { x1: number; y1: number; x2: number; y2: number };
 
 interface EdgeGeometry {
   fwd: Line;
@@ -24,12 +23,12 @@ interface EdgeGeometry {
 }
 
 function shortenEnd(line: Line, amount: number): Line {
-  const dx = line.x2 - line.x1;
-  const dy = line.y2 - line.y1;
+  const dx = line.end.x - line.start.x;
+  const dy = line.end.y - line.start.y;
   const len = Math.hypot(dx, dy);
   if (len <= amount) return line;
   const t = (len - amount) / len;
-  return { x1: line.x1, y1: line.y1, x2: line.x1 + dx * t, y2: line.y1 + dy * t };
+  return { start: line.start, end: { x: line.start.x + dx * t, y: line.start.y + dy * t } };
 }
 
 function computeEdgeGeometry(
@@ -46,8 +45,8 @@ function computeEdgeGeometry(
   }
   const mid = midpoint(pts);
   return {
-    fwd: shortenEnd({ x1: pts.x1, y1: pts.y1, x2: mid.x, y2: mid.y }, fwdShorten),
-    bwd: shortenEnd({ x1: pts.x2, y1: pts.y2, x2: mid.x, y2: mid.y }, bwdShorten),
+    fwd: shortenEnd({ start: pts.start, end: mid }, fwdShorten),
+    bwd: shortenEnd({ start: pts.end, end: mid }, bwdShorten),
   };
 }
 
@@ -112,10 +111,10 @@ export function EdgeLines({
         {bwd ? <EdgeArrowMarker nsPrefix={nsPrefix} direction="bwd" fill={resolvedBwdStyle.stroke} /> : null}
       </defs>
       <line
-        x1={fwd.x1}
-        y1={fwd.y1}
-        x2={fwd.x2}
-        y2={fwd.y2}
+        x1={fwd.start.x}
+        y1={fwd.start.y}
+        x2={fwd.end.x}
+        y2={fwd.end.y}
         stroke={fwdStyle.stroke}
         strokeWidth={fwdStyle.strokeWidth}
         strokeOpacity={fwdStyle.strokeOpacity}
@@ -124,10 +123,10 @@ export function EdgeLines({
       />
       {bwd ? (
         <line
-          x1={bwd.x1}
-          y1={bwd.y1}
-          x2={bwd.x2}
-          y2={bwd.y2}
+          x1={bwd.start.x}
+          y1={bwd.start.y}
+          x2={bwd.end.x}
+          y2={bwd.end.y}
           stroke={resolvedBwdStyle.stroke}
           strokeWidth={resolvedBwdStyle.strokeWidth}
           strokeOpacity={resolvedBwdStyle.strokeOpacity}
@@ -144,7 +143,7 @@ export function edgeLabelPoints(
   bidirectional: boolean,
   fwdStrokeWidth: number,
   bwdStrokeWidth: number,
-): { fwd: { x: number; y: number }; bwd: { x: number; y: number } | null } {
+): { fwd: Point; bwd: Point | null } {
   const { fwd, bwd } = computeEdgeGeometry(pts, bidirectional, fwdStrokeWidth, bwdStrokeWidth);
   return { fwd: midpoint(fwd), bwd: bwd ? midpoint(bwd) : null };
 }

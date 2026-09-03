@@ -37,6 +37,7 @@ const identityTransform = {
 
 export const stubZoom: ZoomContextValue = {
   transform: identityTransform as ZoomContextValue['transform'],
+  isPanning: false,
   toCanvasPoint: (event) => ({
     x: (event as unknown as MouseEvent).clientX,
     y: (event as unknown as MouseEvent).clientY,
