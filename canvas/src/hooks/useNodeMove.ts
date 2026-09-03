@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, useCallback, useState } from 'react';
+import type { PointerEvent } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useEditorContext } from '../contexts/EditorContext';
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import { CanvasSpec, isFloatingEdge } from '../model';
+import type { CanvasSpec } from '../model';
+import { isFloatingEdge } from '../model';
 
 interface MoveDrag {
   totalDx: number;

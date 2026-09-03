@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, ReactNode, useCallback, useContext, useMemo, useReducer } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
 
-import { EditorState, editorReducer, INITIAL_EDITOR_STATE } from '../utils/editorReducer';
+import type { EditorState } from '../utils/editorReducer';
+import { editorReducer, INITIAL_EDITOR_STATE } from '../utils/editorReducer';
 
 export interface EditorContextValue {
   state: EditorState;

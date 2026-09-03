@@ -14,10 +14,11 @@
 import { Autocomplete, Box, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { OptionsColorPicker } from '@perses-dev/components';
 import { generateQueryNames, useDataQueriesContext } from '@perses-dev/plugin-system';
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { NodeSpec } from '../../model';
+import type { NodeSpec } from '../../model';
 import { ICON_NAMES } from '../../utils/icons';
 import { SelectField } from '../shared/SelectField';
 import { IconPreview } from './IconPreview';

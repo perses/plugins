@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { SelectionRect } from '../../hooks/useRectSelect';
+import type { SelectionRect } from '../../hooks/useRectSelect';
 import { editorStyles } from '../../utils/editorStyles';
 
 const NO_POINTER_EVENTS = { pointerEvents: 'none' } as const;

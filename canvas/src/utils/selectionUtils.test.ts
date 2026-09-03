@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NodeSpec } from '../model';
+import type { NodeSpec } from '../model';
 import { computeSelectionFromRect } from './selectionUtils';
 
 function makeNode(id: string, x: number, y: number): NodeSpec {

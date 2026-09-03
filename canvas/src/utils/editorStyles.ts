@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CanvasTheme } from '../hooks/useCanvasTheme';
+import type { CanvasTheme } from '../hooks/useCanvasTheme';
 
 export interface EditorStyles {
   edgeHit: { strokeWidth: number };

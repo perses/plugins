@@ -12,11 +12,13 @@
 // limitations under the License.
 
 import { Box, InputAdornment, TextField, Typography } from '@mui/material';
-import { formatValue, StepOptions } from '@perses-dev/components';
+import type { StepOptions } from '@perses-dev/components';
+import { formatValue } from '@perses-dev/components';
 import { produce } from 'immer';
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { CanvasSpec } from '../../model';
+import type { CanvasSpec } from '../../model';
 
 const STROKE_SLOT_PROPS = {
   htmlInput: { min: 1, step: 1 },

@@ -11,15 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeries } from '@perses-dev/spec';
-import { ReactElement, useMemo } from 'react';
+import type { TimeSeries } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { CanvasSpec } from '../../model';
+import type { CanvasSpec } from '../../model';
 import { edgeEndpoints, strokeWidthFromThresholds } from '../../utils/edgeUtils';
 import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
 import { EdgeLabel } from '../shared/EdgeLabel';
-import { EdgeLines, edgeLabelPoints, LineStyle } from '../shared/EdgeLines';
+import type { LineStyle } from '../shared/EdgeLines';
+import { EdgeLines, edgeLabelPoints } from '../shared/EdgeLines';
 
 const NS_PREFIX = 'wm-panel';
 

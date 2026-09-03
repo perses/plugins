@@ -25,7 +25,7 @@ export type ResizeHandleId = (typeof RESIZE_HANDLE_IDS)[number];
 
 export function nodeBoundingBox(
   nodes: Array<{ position: Point; width: number; height: number }>,
-  floatingPoints: Array<Point> = [],
+  floatingPoints: Point[] = [],
 ): BoundingBox | null {
   if (nodes.length === 0 && floatingPoints.length === 0) {
     return null;

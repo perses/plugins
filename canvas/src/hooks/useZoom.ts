@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { select } from 'd3-selection';
-import { zoom, zoomIdentity, ZoomTransform } from 'd3-zoom';
-import { PointerEvent, useCallback, useMemo, useRef, useState } from 'react';
+import type { ZoomTransform } from 'd3-zoom';
+import { zoom, zoomIdentity } from 'd3-zoom';
+import type { PointerEvent } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 const FIT_PADDING = 40;
 

@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, SelectChangeEvent, Switch } from '@mui/material';
-import React, { ReactElement, useCallback } from 'react';
+import type { SelectChangeEvent } from '@mui/material';
+import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch } from '@mui/material';
+import type { ReactElement } from 'react';
+import React, { useCallback } from 'react';
 
-import { CanvasSpec } from '../../model';
+import type { CanvasSpec } from '../../model';
 
 interface LegendSettingsProps {
   value: CanvasSpec;

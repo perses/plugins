@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EdgeSpec, isFloatingEdge } from './model';
+import type { EdgeSpec } from './model';
+import { isFloatingEdge } from './model';
 
 function makeEdge(overrides: Partial<EdgeSpec> = {}): EdgeSpec {
   return { id: 'e1', source: 'a', target: 'b', ...overrides };

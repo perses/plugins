@@ -11,19 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, ReactElement, useCallback } from 'react';
+import type { PointerEvent, ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import { editorStyles } from '../../utils/editorStyles';
-import {
-  BoundingBox,
-  HANDLE_POSITIONS,
-  handlePosition,
-  RESIZE_CURSORS,
-  RESIZE_HANDLE_IDS,
-  ResizeHandleId,
-} from '../../utils/resizeUtils';
+import type { BoundingBox, ResizeHandleId } from '../../utils/resizeUtils';
+import { HANDLE_POSITIONS, handlePosition, RESIZE_CURSORS, RESIZE_HANDLE_IDS } from '../../utils/resizeUtils';
 
 const NO_POINTER_EVENTS = { pointerEvents: 'none' } as const;
 const HANDLE_CURSOR_STYLES = Object.fromEntries(

@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { useTheme } from '@mui/material';
-import { FormatOptions, formatValue, ThresholdOptions } from '@perses-dev/components';
-import { ReactElement, useMemo } from 'react';
+import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
+import { formatValue } from '@perses-dev/components';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 const SWATCH_SIZE = 12;
 const ROW_HEIGHT = 18;
@@ -36,15 +38,14 @@ export function ThresholdLegend({ thresholds, format, paletteColors, x, y }: Thr
   const steps = useMemo(() => thresholds.steps ?? [], [thresholds.steps]);
 
   const rows = useMemo(
-    () =>
-      [
-        ...steps.map((step, i) => ({
-          color: step.color ?? paletteColors[i] ?? defaultColor,
-          label: `≥ ${formatValue(step.value, format)}`,
-          key: String(step.value),
-        })),
-        { color: defaultColor, label: 'default', key: 'default' },
-      ],
+    () => [
+      ...steps.map((step, i) => ({
+        color: step.color ?? paletteColors[i] ?? defaultColor,
+        label: `≥ ${formatValue(step.value, format)}`,
+        key: String(step.value),
+      })),
+      { color: defaultColor, label: 'default', key: 'default' },
+    ],
     [steps, paletteColors, defaultColor, format],
   );
 

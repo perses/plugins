@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
-import { TimeSeries } from '@perses-dev/spec';
-import { ReactElement, useCallback, useMemo } from 'react';
+import type { TimeSeries } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { CanvasSpec } from '../../model';
+import type { CanvasSpec } from '../../model';
 import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
 import { NodeRenderer } from '../shared/NodeRenderer';
 

@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PointerEvent, useCallback, useState } from 'react';
+import type { PointerEvent } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import { AnchorPoint, EdgeSpec, CanvasSpec, EdgeEnd, Point } from '../model';
+import type { AnchorPoint, EdgeSpec, CanvasSpec, EdgeEnd, Point } from '../model';
 import { anchorPosition, edgeEndpoints, pointInsideNode, snapTarget } from '../utils/edgeUtils';
 import { generateId } from '../utils/generateId';
 

@@ -17,7 +17,7 @@ import React from 'react';
 import { vi } from 'vitest';
 
 import { useEditorContext } from '../contexts/EditorContext';
-import { CanvasSpec, NodeSpec } from '../model';
+import type { CanvasSpec, NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
 import { useResize } from './useResize';
 

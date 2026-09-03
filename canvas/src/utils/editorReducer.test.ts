@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { INITIAL_EDITOR_STATE, editorReducer, EditorState, EditorAction } from './editorReducer';
+import type { EditorState, EditorAction } from './editorReducer';
+import { INITIAL_EDITOR_STATE, editorReducer } from './editorReducer';
 
 describe('editorReducer', () => {
   const state: EditorState = INITIAL_EDITOR_STATE;

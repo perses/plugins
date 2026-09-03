@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactNode, useContext } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, useContext } from 'react';
 
-import { UseZoomResult } from '../hooks/useZoom';
+import type { UseZoomResult } from '../hooks/useZoom';
 
 export type ZoomContextValue = Pick<UseZoomResult, 'toCanvasPoint' | 'transform' | 'fitView' | 'resetPan'>;
 

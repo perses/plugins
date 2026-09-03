@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnchorPoint, EdgeSpec, EdgeThresholdStep, NodeSpec, Point } from '../model';
+import type { AnchorPoint, EdgeSpec, EdgeThresholdStep, NodeSpec, Point } from '../model';
 
 export const ANCHOR_OFFSETS: Record<AnchorPoint, [number, number]> = {
   n: [0, -1],

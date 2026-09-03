@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { useChartsTheme } from '@perses-dev/components';
-import { TimeSeries } from '@perses-dev/spec';
-import { MouseEvent, ReactElement, useCallback, useMemo } from 'react';
+import type { TimeSeries } from '@perses-dev/spec';
+import type { MouseEvent, ReactElement } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useZoomContext, ZoomProvider } from '../../contexts/ZoomContext';
 import { useZoom } from '../../hooks/useZoom';
-import { CanvasProps } from '../../model';
+import type { CanvasProps } from '../../model';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { PanelEdgeLayer } from './PanelEdgeLayer';
