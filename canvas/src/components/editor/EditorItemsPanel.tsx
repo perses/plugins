@@ -61,7 +61,7 @@ export function EditorItemsPanel(): ReactElement {
     state: { selectedIds },
     selectItems,
   } = useEditorContext();
-  const { svgRef, toCanvasPoint, transform, fitView, resetPan } = useZoom();
+  const { svgRef, toCanvasPoint, transform, isPanning, fitView, resetPan } = useZoom();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
@@ -78,7 +78,7 @@ export function EditorItemsPanel(): ReactElement {
     selectedIds.size === 1 && firstSelectedId ? (backgroundById.get(firstSelectedId) ?? null) : null;
 
   const onAddNode = useCallback((): void => {
-    if(containerRef.current === null) {
+    if (containerRef.current === null) {
       return;
     }
     const cx = transform.invertX(containerWidth / 2);
@@ -87,7 +87,7 @@ export function EditorItemsPanel(): ReactElement {
   }, [containerWidth, transform, addNode]);
 
   const onAddBackground = useCallback((): void => {
-    if(containerRef.current === null) {
+    if (containerRef.current === null) {
       return;
     }
     const k = transform.k > 0 ? transform.k : 1;
@@ -112,8 +112,8 @@ export function EditorItemsPanel(): ReactElement {
   const specNodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
 
   const zoomValue = useMemo(
-    () => ({ toCanvasPoint, transform, fitView, resetPan }),
-    [toCanvasPoint, transform, fitView, resetPan],
+    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan }),
+    [toCanvasPoint, transform, isPanning, fitView, resetPan],
   );
 
   return (
