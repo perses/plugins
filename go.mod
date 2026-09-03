@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/perses/common v0.31.2
 	github.com/perses/perses v0.54.0
-	github.com/sirupsen/logrus v1.10.1
+	github.com/sirupsen/logrus v1.10.2
 	github.com/stretchr/testify v1.12.1
 )
 
