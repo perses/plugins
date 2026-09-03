@@ -78,12 +78,18 @@ export function EditorItemsPanel(): ReactElement {
     selectedIds.size === 1 && firstSelectedId ? (backgroundById.get(firstSelectedId) ?? null) : null;
 
   const onAddNode = useCallback((): void => {
+    if(containerRef.current === null) {
+      return;
+    }
     const cx = transform.invertX(containerWidth / 2);
     const cy = transform.invertY(CANVAS_HEIGHT / 2);
     addNode({ x: cx, y: cy });
   }, [containerWidth, transform, addNode]);
 
   const onAddBackground = useCallback((): void => {
+    if(containerRef.current === null) {
+      return;
+    }
     const k = transform.k > 0 ? transform.k : 1;
     const width = containerWidth > 0 ? containerWidth / k : DEFAULT_BACKGROUND_WIDTH;
     const height = CANVAS_HEIGHT > 0 ? CANVAS_HEIGHT / k : DEFAULT_BACKGROUND_HEIGHT;

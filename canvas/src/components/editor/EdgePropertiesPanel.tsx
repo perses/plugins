@@ -17,18 +17,10 @@ import type { ReactElement } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import type { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
+import { ANCHOR_LABELS, ANCHOR_KEYS } from '../../utils/edgeUtils';
 import { SelectField } from '../shared/SelectField';
 
-const ANCHOR_OPTIONS: Array<{ value: AnchorPoint; label: string }> = [
-  { value: 'n', label: 'North' },
-  { value: 'ne', label: 'North East' },
-  { value: 'e', label: 'East' },
-  { value: 'se', label: 'South East' },
-  { value: 's', label: 'South' },
-  { value: 'sw', label: 'South West' },
-  { value: 'w', label: 'West' },
-  { value: 'nw', label: 'North West' },
-];
+const ANCHOR_OPTIONS = ANCHOR_KEYS.map((key) => ({ value: key, label: ANCHOR_LABELS[key] }));
 
 interface EdgePropertiesPanelProps {
   edge: EdgeSpec;

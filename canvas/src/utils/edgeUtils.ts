@@ -26,6 +26,17 @@ export const ANCHOR_OFFSETS: Record<AnchorPoint, [number, number]> = {
 
 export const ANCHOR_KEYS = Object.keys(ANCHOR_OFFSETS) as AnchorPoint[];
 
+export const ANCHOR_LABELS: Record<AnchorPoint, string> = {
+  n: 'North',
+  ne: 'North East',
+  e: 'East',
+  se: 'South East',
+  s: 'South',
+  sw: 'South West',
+  w: 'West',
+  nw: 'North West',
+};
+
 export function anchorPosition(node: NodeSpec, anchor: AnchorPoint): Point {
   const halfW = node.width / 2;
   const halfH = node.height / 2;
