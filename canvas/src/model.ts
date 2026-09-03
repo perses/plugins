@@ -56,6 +56,8 @@ export type AnchorPoint = 'n' | 's' | 'e' | 'w' | 'nw' | 'ne' | 'sw' | 'se';
 
 export type ThicknessMode = 'fixed' | 'threshold';
 
+export type Line = { start: Point; end: Point };
+
 export interface EdgeSpec {
   id: string;
   name?: string;

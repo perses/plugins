@@ -140,8 +140,7 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
             />
             {fwdLabel ? (
               <EdgeLabel
-                x={labelPts.fwd.x}
-                y={labelPts.fwd.y}
+                position={labelPts.fwd}
                 text={fwdLabel}
                 k={k}
                 background={labelBackground}
@@ -151,8 +150,7 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
             ) : null}
             {bwdLabel && labelPts.bwd ? (
               <EdgeLabel
-                x={labelPts.bwd.x}
-                y={labelPts.bwd.y}
+                position={labelPts.bwd}
                 text={bwdLabel}
                 k={k}
                 background={labelBackground}

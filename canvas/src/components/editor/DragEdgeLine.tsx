@@ -31,10 +31,7 @@ export function DragEdgeLine({ dragEdge }: DragEdgeLineProps): ReactElement {
     transform: { k },
   } = useZoomContext();
   const theme = editorStyles(useCanvasTheme(), k);
-  const pts = useMemo(
-    () => ({ x1: dragEdge.x1, y1: dragEdge.y1, x2: dragEdge.x2, y2: dragEdge.y2 }),
-    [dragEdge.x1, dragEdge.y1, dragEdge.x2, dragEdge.y2],
-  );
+  const pts = useMemo(() => ({ start: dragEdge.start, end: dragEdge.end }), [dragEdge.start, dragEdge.end]);
   const fwdStyle = useMemo(
     () => ({ stroke: theme.dragEdge.stroke, strokeWidth: theme.dragEdge.strokeWidth }),
     [theme.dragEdge.stroke, theme.dragEdge.strokeWidth],

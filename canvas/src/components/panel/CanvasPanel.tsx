@@ -94,8 +94,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
           thresholds={thresholds}
           format={spec.format}
           paletteColors={paletteColors}
-          x={legendX}
-          y={legendY}
+          position={{ x: legendX, y: legendY }}
         />
       ) : null}
     </svg>

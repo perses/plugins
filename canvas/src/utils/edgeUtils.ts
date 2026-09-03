@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { AnchorPoint, EdgeSpec, EdgeThresholdStep, NodeSpec, Point } from '../model';
+import type { AnchorPoint, EdgeSpec, EdgeThresholdStep, Line, NodeSpec, Point } from '../model';
 
 export const ANCHOR_OFFSETS: Record<AnchorPoint, [number, number]> = {
   n: [0, -1],
@@ -58,10 +58,7 @@ export function closestAnchor(node: NodeSpec, pt: Point): AnchorPoint {
   return best;
 }
 
-export function edgeEndpoints(
-  edge: EdgeSpec,
-  nodeById: Map<string, NodeSpec>,
-): { x1: number; y1: number; x2: number; y2: number } | null {
+export function edgeEndpoints(edge: EdgeSpec, nodeById: Map<string, NodeSpec>): Line | null {
   const src = nodeById.get(edge.source);
   if (!src) return null;
 
@@ -77,11 +74,11 @@ export function edgeEndpoints(
     p2 = edge.freeEndpoint;
   }
 
-  return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y };
+  return { start: p1, end: p2 };
 }
 
-export function midpoint(pts: { x1: number; y1: number; x2: number; y2: number }): Point {
-  return { x: (pts.x1 + pts.x2) / 2, y: (pts.y1 + pts.y2) / 2 };
+export function midpoint(line: Line): Point {
+  return { x: (line.start.x + line.end.x) / 2, y: (line.start.y + line.end.y) / 2 };
 }
 
 export function strokeWidthFromThresholds(value: number, steps: EdgeThresholdStep[], defaultWidth: number): number {

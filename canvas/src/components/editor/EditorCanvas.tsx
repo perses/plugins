@@ -226,7 +226,7 @@ export function EditorCanvas({
               node={node}
               isHovered={hoveredId === node.id}
               isSelected={selectedIds.has(node.id)}
-              snapTarget={dragEdge?.snapTargetId === node.id}
+              snapTarget={dragEdge?.snapTarget?.id === node.id}
               isDragging={mode.type === 'dragging-edge'}
               selectNode={selectNode}
               selectItems={selectItems}

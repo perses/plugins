@@ -17,14 +17,14 @@ import { useCallback, useState } from 'react';
 import { useEditorContext } from '../contexts/EditorContext';
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import type { CanvasSpec } from '../model';
+import type { CanvasSpec, Point } from '../model';
 import { isFloatingEdge } from '../model';
 
 interface MoveDrag {
   totalDx: number;
   totalDy: number;
-  origNodes: Array<{ id: string; position: { x: number; y: number } }>;
-  origEdges: Array<{ id: string; freeEndpoint: { x: number; y: number } }>;
+  origNodes: Array<{ id: string; position: Point }>;
+  origEdges: Array<{ id: string; freeEndpoint: Point }>;
 }
 
 interface UseNodeMoveResult {

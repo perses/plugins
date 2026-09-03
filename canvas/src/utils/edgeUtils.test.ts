@@ -93,43 +93,39 @@ describe('edgeEndpoints', () => {
 
   it('uses node centers when no anchors specified', () => {
     expect(edgeEndpoints({ id: 'e1', source: 'a', target: 'b' }, nodeById)).toEqual({
-      x1: 0,
-      y1: 0,
-      x2: 200,
-      y2: 0,
+      start: { x: 0, y: 0 },
+      end: { x: 200, y: 0 },
     });
   });
 
   it('uses source anchor when specified', () => {
     const pts = edgeEndpoints({ id: 'e1', source: 'a', target: 'b', sourceAnchor: 'e' }, nodeById);
-    expect(pts?.x1).toBe(50);
-    expect(pts?.y1).toBe(0);
+    expect(pts?.start.x).toBe(50);
+    expect(pts?.start.y).toBe(0);
   });
 
   it('uses freeEndpoint when target is empty', () => {
     expect(edgeEndpoints({ id: 'e1', source: 'a', freeEndpoint: { x: 0, y: 0 } }, nodeById)).toEqual({
-      x1: 0,
-      y1: 0,
-      x2: 0,
-      y2: 0,
+      start: { x: 0, y: 0 },
+      end: { x: 0, y: 0 },
     });
   });
 
   it('handles freeEndpoint at origin', () => {
     const pts = edgeEndpoints({ id: 'e1', source: 'a', freeEndpoint: { x: 0, y: 0 } }, nodeById);
     expect(pts).not.toBeNull();
-    expect(pts?.x2).toBe(0);
-    expect(pts?.y2).toBe(0);
+    expect(pts?.end.x).toBe(0);
+    expect(pts?.end.y).toBe(0);
   });
 });
 
 describe('midpoint', () => {
   it('returns the midpoint of a line segment', () => {
-    expect(midpoint({ x1: 0, y1: 0, x2: 100, y2: 60 })).toEqual({ x: 50, y: 30 });
+    expect(midpoint({ start: { x: 0, y: 0 }, end: { x: 100, y: 60 } })).toEqual({ x: 50, y: 30 });
   });
 
   it('handles negative coordinates', () => {
-    expect(midpoint({ x1: -50, y1: -20, x2: 50, y2: 20 })).toEqual({ x: 0, y: 0 });
+    expect(midpoint({ start: { x: -50, y: -20 }, end: { x: 50, y: 20 } })).toEqual({ x: 0, y: 0 });
   });
 });
 

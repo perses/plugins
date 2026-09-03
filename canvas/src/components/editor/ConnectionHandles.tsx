@@ -15,7 +15,7 @@ import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import type { NodeSpec, AnchorPoint } from '../../model';
+import type { AnchorPoint, NodeSpec, Point } from '../../model';
 import { ANCHOR_KEYS, anchorPosition } from '../../utils/edgeUtils';
 
 const CROSS_LENGTH = 8;
@@ -23,7 +23,7 @@ const CROSSHAIR_STYLE = { cursor: 'crosshair' };
 
 interface ConnectionHandlesProps {
   node: NodeSpec;
-  onDragStart: (anchor: AnchorPoint, x: number, y: number) => void;
+  onDragStart: (anchor: AnchorPoint, point: Point) => void;
 }
 
 export function ConnectionHandles({ node, onDragStart }: ConnectionHandlesProps): ReactElement {
@@ -31,10 +31,10 @@ export function ConnectionHandles({ node, onDragStart }: ConnectionHandlesProps)
   const armLen = CROSS_LENGTH;
 
   const makePointerDownHandler = useCallback(
-    (anchor: AnchorPoint, x: number, y: number) =>
+    (anchor: AnchorPoint, point: Point) =>
       (event: React.PointerEvent): void => {
         event.stopPropagation();
-        onDragStart(anchor, x, y);
+        onDragStart(anchor, point);
       },
     [onDragStart],
   );
@@ -48,7 +48,7 @@ export function ConnectionHandles({ node, onDragStart }: ConnectionHandlesProps)
             key={anchor}
             transform={`translate(${pos.x},${pos.y})`}
             style={CROSSHAIR_STYLE}
-            onPointerDown={makePointerDownHandler(anchor, pos.x, pos.y)}
+            onPointerDown={makePointerDownHandler(anchor, pos)}
           >
             <circle r={armLen} fill="transparent" />
             <line x1={-armLen / 2} y1={0} x2={armLen / 2} y2={0} stroke={connection} strokeWidth={1.5} />

@@ -16,7 +16,7 @@ import { useCallback, useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import type { AnchorPoint, EdgeEnd, EdgeSpec, NodeSpec } from '../../model';
+import type { AnchorPoint, EdgeEnd, EdgeSpec, NodeSpec, Point } from '../../model';
 import { edgeEndpoints } from '../../utils/edgeUtils';
 import { editorStyles } from '../../utils/editorStyles';
 import type { LineStyle } from '../shared/EdgeLines';
@@ -37,8 +37,7 @@ interface EditorEdgeProps {
   onEndpointPointerDown: (
     event: PointerEvent<SVGCircleElement>,
     end: EdgeEnd,
-    fixedX: number,
-    fixedY: number,
+    fixedPoint: Point,
     fixedNodeId: string,
     fixedAnchor: AnchorPoint,
   ) => void;
@@ -74,7 +73,7 @@ export function EditorEdge({
   const onSourcePointerDown = useCallback(
     (event: PointerEvent<SVGCircleElement>): void => {
       if (!pts) return;
-      onEndpointPointerDown(event, 'source', pts.x2, pts.y2, edge.target || edge.source, tgtAnchor);
+      onEndpointPointerDown(event, 'source', pts.end, edge.target || edge.source, tgtAnchor);
     },
     [onEndpointPointerDown, pts, edge.target, edge.source, tgtAnchor],
   );
@@ -82,7 +81,7 @@ export function EditorEdge({
   const onTargetPointerDown = useCallback(
     (event: PointerEvent<SVGCircleElement>): void => {
       if (!pts) return;
-      onEndpointPointerDown(event, 'target', pts.x1, pts.y1, edge.source, srcAnchor);
+      onEndpointPointerDown(event, 'target', pts.start, edge.source, srcAnchor);
     },
     [onEndpointPointerDown, pts, edge.source, srcAnchor],
   );
@@ -94,10 +93,10 @@ export function EditorEdge({
   return (
     <g>
       <line
-        x1={pts.x1}
-        y1={pts.y1}
-        x2={pts.x2}
-        y2={pts.y2}
+        x1={pts.start.x}
+        y1={pts.start.y}
+        x2={pts.end.x}
+        y2={pts.end.y}
         stroke="transparent"
         {...theme.edgeHit}
         style={CURSOR_POINTER}
@@ -113,15 +112,15 @@ export function EditorEdge({
       {isSelected && !isDragging ? (
         <>
           <circle
-            cx={pts.x1}
-            cy={pts.y1}
+            cx={pts.start.x}
+            cy={pts.start.y}
             {...theme.edgeHandle}
             style={CURSOR_GRAB}
             onPointerDown={onSourcePointerDown}
           />
           <circle
-            cx={pts.x2}
-            cy={pts.y2}
+            cx={pts.end.x}
+            cy={pts.end.y}
             {...theme.edgeHandle}
             style={CURSOR_GRAB}
             onPointerDown={onTargetPointerDown}

@@ -16,7 +16,7 @@ import { useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import type { NodeSpec, AnchorPoint } from '../../model';
+import type { AnchorPoint, NodeSpec, Point } from '../../model';
 import { editorStyles } from '../../utils/editorStyles';
 import { NodeRenderer } from '../shared/NodeRenderer';
 import { ConnectionHandles } from './ConnectionHandles';
@@ -31,7 +31,7 @@ interface EditorNodeProps {
   onPointerMove: (event: PointerEvent<SVGRectElement>) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  onCrossDragStart: (anchor: AnchorPoint, x: number, y: number) => void;
+  onCrossDragStart: (anchor: AnchorPoint, point: Point) => void;
 }
 
 export function EditorNode({

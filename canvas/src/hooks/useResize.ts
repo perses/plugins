@@ -17,7 +17,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useEditorContext } from '../contexts/EditorContext';
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import type { CanvasSpec, FloatingEdge } from '../model';
+import type { CanvasSpec, FloatingEdge, Point } from '../model';
 import { isFloatingEdge } from '../model';
 import type { BoundingBox, ResizeHandleId } from '../utils/resizeUtils';
 import { HANDLE_POSITIONS, handlePosition, nodeBoundingBox, OPPOSITE_HANDLE } from '../utils/resizeUtils';
@@ -60,12 +60,7 @@ function resolveFinalBoundingBox(drag: ResizeDrag): FinalBoundingBox | null {
   };
 }
 
-function scalePoint(
-  px: number,
-  py: number,
-  origBoundingBox: BoundingBox,
-  final: FinalBoundingBox,
-): { x: number; y: number } {
+function scalePoint(px: number, py: number, origBoundingBox: BoundingBox, final: FinalBoundingBox): Point {
   const origWidth = origBoundingBox.maxX - origBoundingBox.minX;
   const origHeight = origBoundingBox.maxY - origBoundingBox.minY;
   const relX = (px - origBoundingBox.minX) / origWidth;

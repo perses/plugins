@@ -14,7 +14,7 @@
 import type { PointerEvent, ReactElement } from 'react';
 import { memo, useCallback } from 'react';
 
-import type { AnchorPoint, NodeSpec } from '../../model';
+import type { AnchorPoint, NodeSpec, Point } from '../../model';
 import { EditorNode } from './EditorNode';
 
 interface EditorNodeItemProps {
@@ -29,7 +29,7 @@ interface EditorNodeItemProps {
   updateMove: (event: PointerEvent<SVGRectElement>, nodeId: string) => void;
   hoverNode: (nodeId: string) => void;
   unhoverNode: (nodeId: string) => void;
-  beginEdgeDrag: (nodeId: string, anchor: AnchorPoint, x: number, y: number) => void;
+  beginEdgeDrag: (nodeId: string, anchor: AnchorPoint, point: Point) => void;
   startDragEdge: () => void;
 }
 
@@ -80,8 +80,8 @@ export const EditorNodeItem = memo(function EditorNodeItem({
   }, [nodeId, unhoverNode]);
 
   const onCrossDragStart = useCallback(
-    (anchor: AnchorPoint, x: number, y: number): void => {
-      beginEdgeDrag(nodeId, anchor, x, y);
+    (anchor: AnchorPoint, point: Point): void => {
+      beginEdgeDrag(nodeId, anchor, point);
       startDragEdge();
     },
     [nodeId, beginEdgeDrag, startDragEdge],

@@ -13,14 +13,15 @@
 
 import type { ReactElement } from 'react';
 
+import type { Point } from '../../model';
+
 const FONT_SIZE = 12;
 const PADDING_X = 4;
 const PADDING_Y = 2;
 const HEIGHT = FONT_SIZE + PADDING_Y * 2;
 
 interface EdgeLabelProps {
-  x: number;
-  y: number;
+  position: Point;
   text: string;
   k?: number;
   background: string;
@@ -28,12 +29,12 @@ interface EdgeLabelProps {
   color: string;
 }
 
-export function EdgeLabel({ x, y, text, k = 1, background, border, color }: EdgeLabelProps): ReactElement {
+export function EdgeLabel({ position, text, k = 1, background, border, color }: EdgeLabelProps): ReactElement {
   const approxWidth = text.length * FONT_SIZE * 0.55 + PADDING_X * 2;
   const scale = 1 / k;
 
   return (
-    <g transform={`translate(${x},${y}) scale(${scale})`}>
+    <g transform={`translate(${position.x},${position.y}) scale(${scale})`}>
       <rect
         x={-approxWidth / 2}
         y={-HEIGHT / 2}
