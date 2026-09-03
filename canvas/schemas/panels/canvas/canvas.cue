@@ -43,8 +43,10 @@ spec: close({
 #background: {
 	id:        string
 	name?:     string
-	x:         number
-	y:         number
+	position: {
+		x: number
+		y: number
+	}
 	width:     number & >0
 	height:    number & >0
 	color?:    =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
@@ -56,8 +58,10 @@ spec: close({
 
 #node: {
 	id:               string
-	x:                number
-	y:                number
+	position: {
+		x: number
+		y: number
+	}
 	width:            number & >0
 	height:           number & >0
 	kind:             "rectangle" | "icon" | "text"
@@ -65,7 +69,7 @@ spec: close({
 	labelPosition?:   "above" | "below" | "left" | "right" | "center"
 	labelPadding?:    number & >=0
 	icon?:            string
-	link?:            string
+	url?:             string
 	background?:      =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundImage?: string
 	queryIndex?:      int & >=0
@@ -77,11 +81,13 @@ spec: close({
 	id:                   string
 	name?:                string
 	source:               string
-	target:               string
+	target?:              string
 	sourceAnchor?:        "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se"
 	targetAnchor?:        "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se"
-	x2?:                  number
-	y2?:                  number
+	freeEndpoint?: {
+		x: number
+		y: number
+	}
 	bidirectional?:       bool
 	thicknessMode?:       "fixed" | "threshold"
 	strokeWidth?:         number & >0

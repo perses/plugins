@@ -15,7 +15,7 @@ import { PointerEvent, useCallback, useState } from 'react';
 
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import { AnchorPoint, EdgeSpec, CanvasSpec } from '../model';
+import { AnchorPoint, EdgeSpec, CanvasSpec, EdgeEnd, Point } from '../model';
 import { anchorPosition, edgeEndpoints, pointInsideNode, snapTarget } from '../utils/edgeUtils';
 import { generateId } from '../utils/generateId';
 
@@ -31,7 +31,7 @@ export interface DragEdge {
   snapTargetId?: string;
   snapTargetAnchor?: AnchorPoint;
   editingEdgeId?: string;
-  editingEnd?: 'source' | 'target';
+  editingEnd?: EdgeEnd;
 }
 
 interface SnapResult {
@@ -39,21 +39,19 @@ interface SnapResult {
   anchor: AnchorPoint;
 }
 
-function reconnectTarget(edge: EdgeSpec, snap: SnapResult | null, pt: { x: number; y: number }): void {
+function reconnectTarget(edge: EdgeSpec, snap: SnapResult | null, pt: Point): void {
   if (snap) {
     edge.target = snap.node.id;
     edge.targetAnchor = snap.anchor;
-    edge.x2 = undefined;
-    edge.y2 = undefined;
+    edge.freeEndpoint = undefined;
   } else {
-    edge.target = '';
+    edge.target = undefined;
     edge.targetAnchor = undefined;
-    edge.x2 = pt.x;
-    edge.y2 = pt.y;
+    edge.freeEndpoint = pt;
   }
 }
 
-function reconnectSource(edge: EdgeSpec, snap: SnapResult | null, pt: { x: number; y: number }): void {
+function reconnectSource(edge: EdgeSpec, snap: SnapResult | null, pt: Point): void {
   if (snap) {
     edge.source = snap.node.id;
     edge.sourceAnchor = snap.anchor;
@@ -66,17 +64,15 @@ function reconnectSource(edge: EdgeSpec, snap: SnapResult | null, pt: { x: numbe
     edge.targetAnchor = edge.sourceAnchor;
     edge.source = oldTarget;
     edge.sourceAnchor = oldTargetAnchor;
-    edge.x2 = pt.x;
-    edge.y2 = pt.y;
-    edge.target = '';
+    edge.freeEndpoint = pt;
+    edge.target = undefined;
     edge.targetAnchor = undefined;
   } else {
-    edge.x2 = pt.x;
-    edge.y2 = pt.y;
+    edge.freeEndpoint = pt;
   }
 }
 
-function buildNewEdge(dragEdge: DragEdge, snap: SnapResult | null, pt: { x: number; y: number }): EdgeSpec {
+function buildNewEdge(dragEdge: DragEdge, snap: SnapResult | null, pt: Point): EdgeSpec {
   const id = generateId('edge');
   if (snap) {
     return {
@@ -90,10 +86,8 @@ function buildNewEdge(dragEdge: DragEdge, snap: SnapResult | null, pt: { x: numb
   return {
     id,
     source: dragEdge.sourceId,
-    target: '',
     sourceAnchor: dragEdge.sourceAnchor,
-    x2: pt.x,
-    y2: pt.y,
+    freeEndpoint: pt,
   };
 }
 
@@ -103,7 +97,7 @@ interface UseEdgeConnectResult {
   beginEndpointDrag: (
     event: PointerEvent<SVGCircleElement>,
     edgeId: string,
-    end: 'source' | 'target',
+    end: EdgeEnd,
     fixedX: number,
     fixedY: number,
     fixedNodeId: string,
@@ -127,7 +121,7 @@ export function useEdgeConnect(): UseEdgeConnectResult {
     (
       event: PointerEvent<SVGCircleElement>,
       edgeId: string,
-      end: 'source' | 'target',
+      end: EdgeEnd,
       fixedX: number,
       fixedY: number,
       fixedNodeId: string,

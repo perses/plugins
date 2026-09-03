@@ -23,7 +23,7 @@ function useTestHook(): { spec: ReturnType<typeof useSpecContext>; editor: Retur
 }
 
 function makeBackground(id: string, x = 0, y = 0, width = 100, height = 50): BackgroundSpec {
-  return { id, x, y, width, height };
+  return { id, position: { x, y }, width, height };
 }
 
 function makeWrapper(initialSpec: CanvasSpec) {
@@ -44,20 +44,20 @@ describe('SpecContext — background operations', () => {
     it('appends a background with the given geometry', async () => {
       const { result } = renderHook(() => useSpecContext(), { wrapper: makeWrapper({}) });
       await act(async () => {
-        result.current.addBackground(10, 20, 300, 150);
+        result.current.addBackground({ x: 10, y: 20 }, 300, 150);
       });
       const backgrounds = result.current.spec.backgrounds ?? [];
       expect(backgrounds).toHaveLength(1);
-      expect(backgrounds[0]).toMatchObject({ x: 10, y: 20, width: 300, height: 150 });
+      expect(backgrounds[0]).toMatchObject({ position: { x: 10, y: 20 }, width: 300, height: 150 });
     });
 
     it('assigns a unique id', async () => {
       const { result } = renderHook(() => useSpecContext(), { wrapper: makeWrapper({}) });
       await act(async () => {
-        result.current.addBackground(0, 0, 100, 100);
+        result.current.addBackground({ x: 0, y: 0 }, 100, 100);
       });
       await act(async () => {
-        result.current.addBackground(0, 0, 100, 100);
+        result.current.addBackground({ x: 0, y: 0 }, 100, 100);
       });
       const ids = (result.current.spec.backgrounds ?? []).map((bg) => bg.id);
       expect(new Set(ids).size).toBe(2);
@@ -67,7 +67,7 @@ describe('SpecContext — background operations', () => {
       const initial: CanvasSpec = { backgrounds: [makeBackground('existing')] };
       const { result } = renderHook(() => useSpecContext(), { wrapper: makeWrapper(initial) });
       await act(async () => {
-        result.current.addBackground(5, 5, 50, 50);
+        result.current.addBackground({ x: 5, y: 5 }, 50, 50);
       });
       expect(result.current.spec.backgrounds).toHaveLength(2);
       expect(result.current.spec.backgrounds?.[0]?.id).toBe('existing');
@@ -166,8 +166,8 @@ describe('SpecContext — background operations', () => {
     it('does not remove nodes or edges when only a background is selected', async () => {
       const initial: CanvasSpec = {
         backgrounds: [makeBackground('bg1')],
-        nodes: [{ id: 'n1', x: 0, y: 0, width: 40, height: 40, kind: 'rectangle' }],
-        edges: [{ id: 'e1', source: 'n1', target: '' }],
+        nodes: [{ id: 'n1', position: { x: 0, y: 0 }, width: 40, height: 40, kind: 'rectangle' }],
+        edges: [{ id: 'e1', source: 'n1' }],
       };
       const { result } = renderHook(() => useTestHook(), { wrapper: makeWrapper(initial) });
       await act(async () => {

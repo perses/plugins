@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnchorPoint, EdgeSpec, EdgeThresholdStep, NodeSpec } from '../model';
+import { AnchorPoint, EdgeSpec, EdgeThresholdStep, NodeSpec, Point } from '../model';
 
 export const ANCHOR_OFFSETS: Record<AnchorPoint, [number, number]> = {
   n: [0, -1],
@@ -26,14 +26,14 @@ export const ANCHOR_OFFSETS: Record<AnchorPoint, [number, number]> = {
 
 export const ANCHOR_KEYS = Object.keys(ANCHOR_OFFSETS) as AnchorPoint[];
 
-export function anchorPosition(node: NodeSpec, anchor: AnchorPoint): { x: number; y: number } {
+export function anchorPosition(node: NodeSpec, anchor: AnchorPoint): Point {
   const halfW = node.width / 2;
   const halfH = node.height / 2;
   const [ox, oy] = ANCHOR_OFFSETS[anchor];
-  return { x: node.x + ox * halfW, y: node.y + oy * halfH };
+  return { x: node.position.x + ox * halfW, y: node.position.y + oy * halfH };
 }
 
-export function closestAnchor(node: NodeSpec, pt: { x: number; y: number }): AnchorPoint {
+export function closestAnchor(node: NodeSpec, pt: Point): AnchorPoint {
   let best: AnchorPoint = 'n';
   let bestDist = Infinity;
   for (const a of ANCHOR_KEYS) {
@@ -54,22 +54,22 @@ export function edgeEndpoints(
   const src = nodeById.get(edge.source);
   if (!src) return null;
 
-  const p1 = edge.sourceAnchor ? anchorPosition(src, edge.sourceAnchor) : { x: src.x, y: src.y };
+  const p1 = edge.sourceAnchor ? anchorPosition(src, edge.sourceAnchor) : src.position;
 
-  let p2: { x: number; y: number };
+  let p2: Point;
   if (edge.target) {
     const tgt = nodeById.get(edge.target);
     if (!tgt) return null;
-    p2 = edge.targetAnchor ? anchorPosition(tgt, edge.targetAnchor) : { x: tgt.x, y: tgt.y };
+    p2 = edge.targetAnchor ? anchorPosition(tgt, edge.targetAnchor) : tgt.position;
   } else {
-    if (edge.x2 === undefined || edge.y2 === undefined) return null;
-    p2 = { x: edge.x2, y: edge.y2 };
+    if (!edge.freeEndpoint) return null;
+    p2 = edge.freeEndpoint;
   }
 
   return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y };
 }
 
-export function midpoint(pts: { x1: number; y1: number; x2: number; y2: number }): { x: number; y: number } {
+export function midpoint(pts: { x1: number; y1: number; x2: number; y2: number }): Point {
   return { x: (pts.x1 + pts.x2) / 2, y: (pts.y1 + pts.y2) / 2 };
 }
 
@@ -85,14 +85,19 @@ export function strokeWidthFromThresholds(value: number, steps: EdgeThresholdSte
 }
 
 // Returns true if pt is within the node's bounding box plus an extra margin (in SVG space)
-export function pointInsideNode(node: NodeSpec, pt: { x: number; y: number }, margin: number): boolean {
+export function pointInsideNode(node: NodeSpec, pt: Point, margin: number): boolean {
   const halfW = node.width / 2 + margin;
   const halfH = node.height / 2 + margin;
-  return pt.x >= node.x - halfW && pt.x <= node.x + halfW && pt.y >= node.y - halfH && pt.y <= node.y + halfH;
+  return (
+    pt.x >= node.position.x - halfW &&
+    pt.x <= node.position.x + halfW &&
+    pt.y >= node.position.y - halfH &&
+    pt.y <= node.position.y + halfH
+  );
 }
 export function snapTarget(
   nodes: NodeSpec[],
-  pt: { x: number; y: number },
+  pt: Point,
   excludeId: string,
   snapRadius: number,
 ): { node: NodeSpec; anchor: AnchorPoint } | null {

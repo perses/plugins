@@ -18,7 +18,16 @@ import React, { ReactElement, useCallback, useMemo } from 'react';
 import { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
 import { SelectField } from '../shared/SelectField';
 
-const ANCHOR_OPTIONS: AnchorPoint[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
+const ANCHOR_OPTIONS: Array<{ value: AnchorPoint; label: string }> = [
+  { value: 'n', label: 'North' },
+  { value: 'ne', label: 'North East' },
+  { value: 'e', label: 'East' },
+  { value: 'se', label: 'South East' },
+  { value: 's', label: 'South' },
+  { value: 'sw', label: 'South West' },
+  { value: 'w', label: 'West' },
+  { value: 'nw', label: 'North West' },
+];
 
 interface EdgePropertiesPanelProps {
   edge: EdgeSpec;
@@ -27,7 +36,7 @@ interface EdgePropertiesPanelProps {
 }
 
 export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPanelProps): ReactElement {
-  const hasFreeTarget = edge.target === '';
+  const hasFreeTarget = !edge.target;
   const { queryDefinitions } = useDataQueriesContext();
   const queryCount = queryDefinitions.length;
   const queryNames = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
@@ -58,10 +67,9 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({
         ...edge,
-        target: e.target.value,
-        targetAnchor: edge.targetAnchor ?? 'n',
-        x2: undefined,
-        y2: undefined,
+        target: e.target.value || undefined,
+        targetAnchor: e.target.value ? (edge.targetAnchor ?? 'n') : undefined,
+        freeEndpoint: e.target.value ? undefined : edge.freeEndpoint,
       });
     },
     [edge, onChange],
@@ -83,7 +91,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
 
   const onThicknessModeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...edge, thicknessMode: e.target.value as 'fixed' | 'threshold' });
+      onChange({ ...edge, thicknessMode: e.target.value as EdgeSpec['thicknessMode'] });
     },
     [edge, onChange],
   );
@@ -96,33 +104,24 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
     [edge, onChange],
   );
 
-  const onSourceQueryIndexChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      const v = e.target.value;
-      onChange({ ...edge, sourceQueryIndex: v === '' ? undefined : Number(v) });
-    },
+  const onQueryIndexChange = useCallback(
+    (key: 'sourceQueryIndex' | 'targetQueryIndex') =>
+      (e: React.ChangeEvent<HTMLInputElement>): void => {
+        const v = e.target.value;
+        const parsed = v === '' ? undefined : parseInt(v, 10);
+        onChange({
+          ...edge,
+          [key]: Number.isFinite(parsed) && parsed !== undefined && parsed >= 0 ? parsed : undefined,
+        });
+      },
     [edge, onChange],
   );
 
-  const onSourceLabelTemplateChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...edge, sourceLabelTemplate: e.target.value || undefined });
-    },
-    [edge, onChange],
-  );
-
-  const onTargetQueryIndexChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      const v = e.target.value;
-      onChange({ ...edge, targetQueryIndex: v === '' ? undefined : Number(v) });
-    },
-    [edge, onChange],
-  );
-
-  const onTargetLabelTemplateChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...edge, targetLabelTemplate: e.target.value || undefined });
-    },
+  const onLabelTemplateChange = useCallback(
+    (key: 'sourceLabelTemplate' | 'targetLabelTemplate') =>
+      (e: React.ChangeEvent<HTMLInputElement>): void => {
+        onChange({ ...edge, [key]: e.target.value || undefined });
+      },
     [edge, onChange],
   );
 
@@ -144,13 +143,16 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
 
       <SelectField label="Source anchor" value={edge.sourceAnchor ?? 'n'} onChange={onSourceAnchorChange}>
         {ANCHOR_OPTIONS.map((a) => (
-          <MenuItem key={a} value={a}>
-            {a}
+          <MenuItem key={a.value} value={a.value}>
+            {a.label}
           </MenuItem>
         ))}
       </SelectField>
 
-      <SelectField label="Target" value={edge.target} onChange={onTargetChange}>
+      <SelectField label="Target" value={edge.target ?? ''} onChange={onTargetChange}>
+        <MenuItem value="">
+          <em>Free endpoint</em>
+        </MenuItem>
         {nodes.map((n) => (
           <MenuItem key={n.id} value={n.id}>
             {n.label ?? n.id}
@@ -165,8 +167,8 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         onChange={onTargetAnchorChange}
       >
         {ANCHOR_OPTIONS.map((a) => (
-          <MenuItem key={a} value={a}>
-            {a}
+          <MenuItem key={a.value} value={a.value}>
+            {a.label}
           </MenuItem>
         ))}
       </SelectField>
@@ -196,7 +198,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
       <SelectField
         label="Source → target query"
         value={edge.sourceQueryIndex ?? ''}
-        onChange={onSourceQueryIndexChange}
+        onChange={onQueryIndexChange('sourceQueryIndex')}
       >
         <MenuItem value="">
           <em>None</em>
@@ -212,7 +214,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
         label="Source label template"
         size="small"
         value={edge.sourceLabelTemplate ?? ''}
-        onChange={onSourceLabelTemplateChange}
+        onChange={onLabelTemplateChange('sourceLabelTemplate')}
         helperText="Use {{value}} to show query result"
       />
 
@@ -221,7 +223,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
           <SelectField
             label="Target → source query"
             value={edge.targetQueryIndex ?? ''}
-            onChange={onTargetQueryIndexChange}
+            onChange={onQueryIndexChange('targetQueryIndex')}
           >
             <MenuItem value="">
               <em>None</em>
@@ -237,7 +239,7 @@ export function EdgePropertiesPanel({ edge, nodes, onChange }: EdgePropertiesPan
             label="Target label template"
             size="small"
             value={edge.targetLabelTemplate ?? ''}
-            onChange={onTargetLabelTemplateChange}
+            onChange={onLabelTemplateChange('targetLabelTemplate')}
             helperText="Use {{value}} to show query result"
           />
         </>

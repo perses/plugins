@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { KeyboardEvent, MouseEvent, PointerEvent, ReactElement, useCallback, useLayoutEffect, useMemo } from 'react';
+import React, { KeyboardEvent, MouseEvent, PointerEvent, ReactElement, useCallback, useLayoutEffect, useMemo } from 'react';
 
 import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
@@ -81,17 +81,17 @@ export function EditorCanvas({
   const displayNodes = useMemo(() => unsavedSpec.nodes ?? [], [unsavedSpec.nodes]);
   const displayEdges = useMemo(() => unsavedSpec.edges ?? [], [unsavedSpec.edges]);
   const displayBackgrounds = useMemo(() => unsavedSpec.backgrounds ?? [], [unsavedSpec.backgrounds]);
-  const nodeById = useMemo(() => new Map(displayNodes.map((n) => [n.id, n])), [displayNodes]);
+  const nodesById = useMemo(() => new Map(displayNodes.map((n) => [n.id, n])), [displayNodes]);
 
   const selectionBoundingBox = useMemo(() => {
     const selectedNodes = displayNodes.filter((n) => selectedIds.has(n.id));
     const selectedFloatingEdges = displayEdges.filter(
       (ed): ed is FloatingEdge => selectedIds.has(ed.id) && isFloatingEdge(ed),
     );
-    return (mode.type === 'idle' || mode.type === 'resizing') && selectedNodes.length >= 1
+    return (mode.type === 'idle' || mode.type === 'resizing') && selectedNodes.length > 0
       ? nodeBoundingBox(
           selectedNodes,
-          selectedFloatingEdges.map((ed) => ({ x: ed.x2, y: ed.y2 })),
+          selectedFloatingEdges.map((ed) => ed.freeEndpoint),
         )
       : null;
   }, [displayEdges, displayNodes, mode.type, selectedIds]);
@@ -106,17 +106,6 @@ export function EditorCanvas({
     }),
     [mode.type],
   );
-
-  useLayoutEffect(() => {
-    if (displayNodes.length === 0) {
-      return;
-    }
-    const bbox = nodeBoundingBox(displayNodes);
-    if (bbox) {
-      fitView(bbox, width, height);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fitView, height, width]);
 
   const onSvgPointerDown = useCallback(
     (event: PointerEvent<SVGSVGElement>): void => {
@@ -216,6 +205,7 @@ export function EditorCanvas({
       <svg
         ref={svgRef}
         role="application"
+        tabIndex={0}
         width={width}
         height={height}
         style={svgStyle}
@@ -254,7 +244,7 @@ export function EditorCanvas({
               isSelected={!selectionBoundingBox && selectedIds.has(edge.id)}
               isDragging={mode.type === 'dragging-edge'}
               nsPrefix={`${NS_PREFIX}-${edge.id}`}
-              nodeById={nodeById}
+              nodeById={nodesById}
               selectItems={selectItems}
               beginEndpointDrag={beginEndpointDrag}
               startDragEdge={startDragEdge}
@@ -272,6 +262,21 @@ export function EditorCanvas({
 
           {selectionRect && <SelectionRectOverlay rect={selectionRect} />}
         </g>
+
+        {!displayNodes.length ? (
+          <text
+            x={width / 2}
+            y={height / 2}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={14}
+            fill="currentColor"
+            fillOpacity={0.5}
+            style={{ userSelect: 'none' }}
+          >
+            No nodes — add nodes in the panel editor
+          </text>
+        ) : null}
       </svg>
     </>
   );

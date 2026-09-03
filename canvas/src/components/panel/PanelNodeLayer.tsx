@@ -33,8 +33,8 @@ export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
   const { connection: fallbackColor, nodeDefaultFill } = useCanvasTheme();
 
   const handleNodeClick = useCallback(
-    (link: string) => {
-      window.open(replaceVariablesInString(link, variableValues), '_blank', 'noopener,noreferrer');
+    (url: string) => {
+      window.open(replaceVariablesInString(url, variableValues), '_blank', 'noopener,noreferrer');
     },
     [variableValues],
   );
@@ -60,9 +60,9 @@ export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
             fillOverride = colorFromThresholds(lastValue, spec.thresholds, paletteColors, fallbackColor);
           }
         }
-        const { link } = node;
-        const groupProps = link
-          ? { onClick: (): void => handleNodeClick(link), style: { cursor: 'pointer' } }
+        const { url } = node;
+        const groupProps = url
+          ? { onClick: (): void => handleNodeClick(url), style: { cursor: 'pointer' } }
           : undefined;
         return (
           <NodeRenderer

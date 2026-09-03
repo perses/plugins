@@ -16,13 +16,13 @@ import { PointerEvent, useCallback, useState } from 'react';
 import { useEditorContext } from '../contexts/EditorContext';
 import { useSpecContext } from '../contexts/SpecContext';
 import { useZoomContext } from '../contexts/ZoomContext';
-import { CanvasSpec } from '../model';
+import { CanvasSpec, isFloatingEdge } from '../model';
 
 interface MoveDrag {
   totalDx: number;
   totalDy: number;
-  origNodes: Array<{ id: string; x: number; y: number }>;
-  origEdges: Array<{ id: string; x2: number; y2: number }>;
+  origNodes: Array<{ id: string; position: { x: number; y: number } }>;
+  origEdges: Array<{ id: string; freeEndpoint: { x: number; y: number } }>;
 }
 
 interface UseNodeMoveResult {
@@ -49,13 +49,13 @@ export function useNodeMove(): UseNodeMoveResult {
       }
       const origNodes = (spec.nodes ?? [])
         .filter((n) => selectedIds.has(n.id))
-        .map((n) => ({ id: n.id, x: n.x, y: n.y }));
+        .map((n) => ({ id: n.id, position: n.position }));
       const origEdges = (spec.edges ?? [])
         .filter(
-          (ed): ed is typeof ed & { x2: number; y2: number } =>
-            selectedIds.has(ed.id) && ed.x2 !== undefined && ed.y2 !== undefined,
+          (ed): ed is typeof ed & Required<Pick<typeof ed, 'freeEndpoint'>> =>
+            selectedIds.has(ed.id) && isFloatingEdge(ed),
         )
-        .map((ed) => ({ id: ed.id, x2: ed.x2, y2: ed.y2 }));
+        .map((ed) => ({ id: ed.id, freeEndpoint: ed.freeEndpoint }));
       setMoveDrag({ totalDx: 0, totalDy: 0, origNodes, origEdges });
       return null;
     },
@@ -90,15 +90,13 @@ export function useNodeMove(): UseNodeMoveResult {
       (draft.nodes ?? []).forEach((n) => {
         const orig = origNodeMap.get(n.id);
         if (orig) {
-          n.x = orig.x + totalDx;
-          n.y = orig.y + totalDy;
+          n.position = { x: orig.position.x + totalDx, y: orig.position.y + totalDy };
         }
       });
       (draft.edges ?? []).forEach((edge) => {
         const orig = origEdgeMap.get(edge.id);
         if (orig) {
-          edge.x2 = orig.x2 + totalDx;
-          edge.y2 = orig.y2 + totalDy;
+          edge.freeEndpoint = { x: orig.freeEndpoint.x + totalDx, y: orig.freeEndpoint.y + totalDy };
         }
       });
     },

@@ -13,13 +13,14 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
 import { useRectSelect } from './useRectSelect';
 
 function makeNode(id: string, x: number, y: number): NodeSpec {
-  return { id, x, y, width: 10, height: 10, kind: 'rectangle' };
+  return { id, position: { x, y }, width: 10, height: 10, kind: 'rectangle' };
 }
 
 function makePointerEvent(
@@ -34,8 +35,8 @@ function makePointerEvent(
     buttons: 1,
     pointerId: 1,
     target: document.createElement('svg'),
-    currentTarget: { focus: jest.fn(), setPointerCapture: jest.fn() },
-    stopPropagation: jest.fn(),
+    currentTarget: { focus: vi.fn(), setPointerCapture: vi.fn() },
+    stopPropagation: vi.fn(),
     ...overrides,
   } as unknown as React.PointerEvent<SVGSVGElement>;
 }

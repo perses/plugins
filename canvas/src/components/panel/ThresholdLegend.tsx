@@ -44,7 +44,7 @@ export function ThresholdLegend({ thresholds, format, paletteColors, x, y }: Thr
           key: String(step.value),
         })),
         { color: defaultColor, label: 'default', key: 'default' },
-      ].reverse(),
+      ],
     [steps, paletteColors, defaultColor, format],
   );
 

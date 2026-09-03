@@ -14,6 +14,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { produce } from 'immer';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { useEditorContext } from '../contexts/EditorContext';
 import { CanvasSpec, NodeSpec } from '../model';
@@ -21,14 +22,14 @@ import { makeWrapper } from '../test-utils/hookWrapper';
 import { useResize } from './useResize';
 
 function makeNode(id: string, x: number, y: number, width = 100, height = 60): NodeSpec {
-  return { id, x, y, width, height, kind: 'rectangle' };
+  return { id, position: { x, y }, width, height, kind: 'rectangle' };
 }
 
 function makeCircleEvent(overrides: Partial<PointerEvent> = {}): React.PointerEvent<SVGCircleElement> {
   return {
     pointerId: 1,
-    stopPropagation: jest.fn(),
-    currentTarget: { setPointerCapture: jest.fn() },
+    stopPropagation: vi.fn(),
+    currentTarget: { setPointerCapture: vi.fn() },
     ...overrides,
   } as unknown as React.PointerEvent<SVGCircleElement>;
 }
@@ -87,14 +88,14 @@ describe('useResize', () => {
     const node = draft.nodes?.[0];
     expect(node?.width).toBeCloseTo(200);
     expect(node?.height).toBeCloseTo(120);
-    expect(node?.x).toBeCloseTo(100);
-    expect(node?.y).toBeCloseTo(60);
+    expect(node?.position.x).toBeCloseTo(100);
+    expect(node?.position.y).toBeCloseTo(60);
   });
 
   it('applyResize also scales free edge endpoints', async () => {
     const spec: CanvasSpec = {
       nodes: [makeNode('a', 50, 30, 100, 60)],
-      edges: [{ id: 'e1', source: 'a', target: '', x2: 100, y2: 60 }],
+      edges: [{ id: 'e1', source: 'a', freeEndpoint: { x: 100, y: 60 } }],
     };
     const { result } = renderHook(() => useTestHook(), { wrapper: makeWrapper(spec) });
     await act(async () => {
@@ -107,8 +108,8 @@ describe('useResize', () => {
       result.current.resize.updateResize(makeSvgEvent(200, 120));
     });
     const draft = produce(spec, (d) => result.current.resize.applyResize(d));
-    expect(draft.edges?.[0]?.x2).toBeCloseTo(200);
-    expect(draft.edges?.[0]?.y2).toBeCloseTo(120);
+    expect(draft.edges?.[0]?.freeEndpoint?.x).toBeCloseTo(200);
+    expect(draft.edges?.[0]?.freeEndpoint?.y).toBeCloseTo(120);
   });
 
   it('resetResize makes applyResize a no-op', async () => {

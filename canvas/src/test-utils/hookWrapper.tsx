@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, ReactNode, useMemo, useState } from 'react';
+import { vi } from 'vitest';
 
 import { EditorStateProvider } from '../contexts/EditorContext';
 import { SpecContext, SpecContextValue } from '../contexts/SpecContext';
@@ -37,8 +38,8 @@ export const stubZoom: ZoomContextValue = {
     x: (event as unknown as MouseEvent).clientX,
     y: (event as unknown as MouseEvent).clientY,
   }),
-  fitView: jest.fn(),
-  resetPan: jest.fn(),
+  fitView: vi.fn(),
+  resetPan: vi.fn(),
 };
 
 interface WrapperProps {
@@ -64,13 +65,13 @@ export function HookWrapper({ initialSpec = {}, children }: WrapperProps): React
       edgeById,
       backgroundById,
       updateSpec: setSpec,
-      addNode: jest.fn(),
-      addBackground: jest.fn(),
-      moveBackground: jest.fn(),
-      deleteSelected: jest.fn(),
-      onNodePropertiesChange: jest.fn(),
-      onEdgePropertiesChange: jest.fn(),
-      onBackgroundPropertiesChange: jest.fn(),
+      addNode: vi.fn(),
+      addBackground: vi.fn(),
+      moveBackground: vi.fn(),
+      deleteSelected: vi.fn(),
+      onNodePropertiesChange: vi.fn(),
+      onEdgePropertiesChange: vi.fn(),
+      onBackgroundPropertiesChange: vi.fn(),
     }),
     [spec, nodeById, edgeById, backgroundById],
   );

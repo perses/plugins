@@ -86,15 +86,15 @@ export function EdgeThicknessSettings({ value, onChange }: EdgeThicknessSettings
       onChange(
         produce(value, (draft) => {
           draft.edgeThresholdWidths ??= [];
-          const existing = draft.edgeThresholdWidths.findIndex((w) => w.value === stepValue);
+          const existingIdx = draft.edgeThresholdWidths.findIndex((w) => w.value === stepValue);
           if (strokeWidth !== undefined) {
-            if (existing >= 0) {
-              draft.edgeThresholdWidths[existing]!.strokeWidth = strokeWidth;
+            if (existingIdx >= 0) {
+              draft.edgeThresholdWidths[existingIdx]!.strokeWidth = strokeWidth;
             } else {
               draft.edgeThresholdWidths.push({ value: stepValue, strokeWidth });
             }
-          } else if (existing >= 0) {
-            draft.edgeThresholdWidths.splice(existing, 1);
+          } else if (existingIdx >= 0) {
+            draft.edgeThresholdWidths.splice(existingIdx, 1);
           }
         }),
       );

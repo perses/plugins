@@ -36,13 +36,24 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
   const shape = node.kind;
 
   const onIntFieldChange = useCallback(
-    (key: 'x' | 'y' | 'width' | 'height' | 'labelPadding', min = -Infinity, optional = false) =>
+    (key: 'width' | 'height' | 'labelPadding', min = -Infinity, optional = false) =>
       (e: React.ChangeEvent<HTMLInputElement>): void => {
         const v = e.target.valueAsNumber;
         if (Number.isFinite(v) && v >= min) {
           onChange({ ...node, [key]: v });
         } else if (optional && e.target.value === '') {
           onChange({ ...node, [key]: undefined });
+        }
+      },
+    [node, onChange],
+  );
+
+  const onPositionChange = useCallback(
+    (axis: 'x' | 'y') =>
+      (e: React.ChangeEvent<HTMLInputElement>): void => {
+        const v = e.target.valueAsNumber;
+        if (Number.isFinite(v)) {
+          onChange({ ...node, position: { ...node.position, [axis]: v } });
         }
       },
     [node, onChange],
@@ -69,9 +80,9 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
     [node, onChange],
   );
 
-  const onLinkChange = useCallback(
+  const onUrlChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...node, link: e.target.value || undefined });
+      onChange({ ...node, url: e.target.value || undefined });
     },
     [node, onChange],
   );
@@ -152,16 +163,16 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           label="X"
           size="small"
           type="number"
-          value={Math.round(node.x)}
-          onChange={onIntFieldChange('x')}
+          value={Math.round(node.position.x)}
+          onChange={onPositionChange('x')}
           sx={{ width: 80 }}
         />
         <TextField
           label="Y"
           size="small"
           type="number"
-          value={Math.round(node.y)}
-          onChange={onIntFieldChange('y')}
+          value={Math.round(node.position.y)}
+          onChange={onPositionChange('y')}
           sx={{ width: 80 }}
         />
         <TextField
@@ -213,10 +224,10 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
       ) : null}
 
       <TextField
-        label="Link URL"
+        label="URL"
         size="small"
-        value={node.link ?? ''}
-        onChange={onLinkChange}
+        value={node.url ?? ''}
+        onChange={onUrlChange}
         helperText="Navigate to this URL on click. Use ${varName} for dashboard variables."
       />
 

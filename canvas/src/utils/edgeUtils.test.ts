@@ -23,7 +23,7 @@ import {
 } from './edgeUtils';
 
 function makeNode(id: string, x: number, y: number, width = 100, height = 60): NodeSpec {
-  return { id, x, y, width, height, kind: 'rectangle' };
+  return { id, position: { x, y }, width, height, kind: 'rectangle' };
 }
 
 describe('anchorPosition', () => {
@@ -87,8 +87,8 @@ describe('edgeEndpoints', () => {
     expect(edgeEndpoints({ id: 'e1', source: 'a', target: 'x' }, nodeById)).toBeNull();
   });
 
-  it('returns null for free target with no x2/y2', () => {
-    expect(edgeEndpoints({ id: 'e1', source: 'a', target: '' }, nodeById)).toBeNull();
+  it('returns null for free target with no freeEndpoint', () => {
+    expect(edgeEndpoints({ id: 'e1', source: 'a' }, nodeById)).toBeNull();
   });
 
   it('uses node centers when no anchors specified', () => {
@@ -106,8 +106,8 @@ describe('edgeEndpoints', () => {
     expect(pts?.y1).toBe(0);
   });
 
-  it('uses free endpoint x2/y2 when target is empty', () => {
-    expect(edgeEndpoints({ id: 'e1', source: 'a', target: '', x2: 0, y2: 0 }, nodeById)).toEqual({
+  it('uses freeEndpoint when target is empty', () => {
+    expect(edgeEndpoints({ id: 'e1', source: 'a', freeEndpoint: { x: 0, y: 0 } }, nodeById)).toEqual({
       x1: 0,
       y1: 0,
       x2: 0,
@@ -115,8 +115,8 @@ describe('edgeEndpoints', () => {
     });
   });
 
-  it('handles free endpoint at origin (x2=0, y2=0)', () => {
-    const pts = edgeEndpoints({ id: 'e1', source: 'a', target: '', x2: 0, y2: 0 }, nodeById);
+  it('handles freeEndpoint at origin', () => {
+    const pts = edgeEndpoints({ id: 'e1', source: 'a', freeEndpoint: { x: 0, y: 0 } }, nodeById);
     expect(pts).not.toBeNull();
     expect(pts?.x2).toBe(0);
     expect(pts?.y2).toBe(0);

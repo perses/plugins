@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { Point } from '../model';
+
 export interface BoundingBox {
   minX: number;
   minY: number;
@@ -22,8 +24,8 @@ export const RESIZE_HANDLE_IDS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as
 export type ResizeHandleId = (typeof RESIZE_HANDLE_IDS)[number];
 
 export function nodeBoundingBox(
-  nodes: Array<{ x: number; y: number; width: number; height: number }>,
-  floatingPoints: Array<{ x: number; y: number }> = [],
+  nodes: Array<{ position: Point; width: number; height: number }>,
+  floatingPoints: Array<Point> = [],
 ): BoundingBox | null {
   if (nodes.length === 0 && floatingPoints.length === 0) {
     return null;
@@ -35,10 +37,10 @@ export function nodeBoundingBox(
   for (const n of nodes) {
     const halfW = n.width / 2;
     const halfH = n.height / 2;
-    minX = Math.min(minX, n.x - halfW);
-    minY = Math.min(minY, n.y - halfH);
-    maxX = Math.max(maxX, n.x + halfW);
-    maxY = Math.max(maxY, n.y + halfH);
+    minX = Math.min(minX, n.position.x - halfW);
+    minY = Math.min(minY, n.position.y - halfH);
+    maxX = Math.max(maxX, n.position.x + halfW);
+    maxY = Math.max(maxY, n.position.y + halfH);
   }
   for (const p of floatingPoints) {
     minX = Math.min(minX, p.x);
@@ -71,7 +73,7 @@ export const OPPOSITE_HANDLE = {
   se: 'nw',
 } as const;
 
-export function handlePosition(boundingBox: BoundingBox, h: ResizeHandleId): { x: number; y: number } {
+export function handlePosition(boundingBox: BoundingBox, h: ResizeHandleId): Point {
   const [tx, ty] = HANDLE_POSITIONS[h];
   return {
     x: boundingBox.minX + (boundingBox.maxX - boundingBox.minX) * tx,

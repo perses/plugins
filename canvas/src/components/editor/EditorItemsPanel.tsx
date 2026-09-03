@@ -34,6 +34,8 @@ import { NodePropertiesPanel } from './NodePropertiesPanel';
 
 const CANVAS_HEIGHT = 400;
 const PROPERTIES_HEIGHT = 700;
+const DEFAULT_BACKGROUND_WIDTH = 200;
+const DEFAULT_BACKGROUND_HEIGHT = 150;
 
 export function EditorItemsPanel(): ReactElement {
   const {
@@ -64,17 +66,17 @@ export function EditorItemsPanel(): ReactElement {
     const canvasWidth = containerRef.current?.clientWidth ?? 0;
     const cx = transform.invertX(canvasWidth / 2);
     const cy = transform.invertY(CANVAS_HEIGHT / 2);
-    addNode(cx, cy);
+    addNode({ x: cx, y: cy });
   }, [transform, addNode]);
 
   const onAddBackground = useCallback((): void => {
     const canvasWidth = containerRef.current?.clientWidth ?? 0;
     const k = transform.k > 0 ? transform.k : 1;
-    const width = canvasWidth > 0 ? canvasWidth / k : 200;
-    const height = CANVAS_HEIGHT > 0 ? CANVAS_HEIGHT / k : 150;
+    const width = canvasWidth > 0 ? canvasWidth / k : DEFAULT_BACKGROUND_WIDTH;
+    const height = CANVAS_HEIGHT > 0 ? CANVAS_HEIGHT / k : DEFAULT_BACKGROUND_HEIGHT;
     const x = transform.invertX(0);
     const y = transform.invertY(0);
-    addBackground(x, y, width, height);
+    addBackground({ x, y }, width, height);
   }, [transform, addBackground]);
 
   const onItemSelect = useCallback(
@@ -85,9 +87,9 @@ export function EditorItemsPanel(): ReactElement {
     [selectItems],
   );
 
-  const hasBackgrounds = (spec.backgrounds?.length ?? 0) > 0;
-  const hasNodes = (spec.nodes?.length ?? 0) > 0;
-  const hasEdges = (spec.edges?.length ?? 0) > 0;
+  const hasBackgrounds = !!spec.backgrounds?.length;
+  const hasNodes = !!spec.nodes?.length;
+  const hasEdges = !!spec.edges?.length;
   const specNodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
 
   const zoomValue = useMemo(

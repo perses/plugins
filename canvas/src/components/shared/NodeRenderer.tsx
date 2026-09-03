@@ -43,7 +43,7 @@ export function NodeRenderer({
   const displayLabel = labelOverride ?? node.label;
 
   return (
-    <g transform={`translate(${node.x},${node.y})`} {...groupProps}>
+    <g transform={`translate(${node.position.x},${node.position.y})`} {...groupProps}>
       {kind === 'rectangle' && (
         <RectangleNode
           node={node}
