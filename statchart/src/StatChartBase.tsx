@@ -52,6 +52,7 @@ export interface StatChartProps {
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
   valueFontSize?: FontSizeOption;
+  legendFontSize?: FontSizeOption;
   colorMode?: ColorMode;
   alignmentText?: string;
   alignmentSeriesName?: string;
@@ -67,6 +68,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     showSeriesName,
     format,
     valueFontSize,
+    legendFontSize,
     colorMode,
     alignmentText,
     alignmentSeriesName,
@@ -94,7 +96,9 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     maxSize: SERIES_NAME_MAX_FONT_SIZE,
   });
 
-  if (alignmentSeriesName !== undefined) {
+  if (legendFontSize !== undefined) {
+    seriesNameFontSize = legendFontSize;
+  } else if (alignmentSeriesName !== undefined) {
     // multi-series: use 15% of cell height for legend, clamped between 14px and 30px
     seriesNameFontSize = Math.max(14, Math.min((height * 0.15) / LINE_HEIGHT, SERIES_NAME_MAX_FONT_SIZE));
   }
@@ -112,8 +116,8 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   });
   const valueFontHeight = optimalValueFontSize * LINE_HEIGHT;
 
-  // single-series: keep legend smaller than value
-  if (alignmentSeriesName === undefined) {
+  // single-series: keep legend smaller than value (unless explicitly set)
+  if (alignmentSeriesName === undefined && legendFontSize === undefined) {
     seriesNameFontSize = Math.min(optimalValueFontSize * 0.7, seriesNameFontSize);
   }
 
