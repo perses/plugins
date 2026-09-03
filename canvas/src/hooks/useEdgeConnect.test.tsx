@@ -14,20 +14,21 @@
 import { act, renderHook } from '@testing-library/react';
 import { produce } from 'immer';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { CanvasSpec, NodeSpec } from '../model';
 import { makeWrapper } from '../test-utils/hookWrapper';
 import { useEdgeConnect } from './useEdgeConnect';
 
 function makeNode(id: string, x: number, y: number, width = 100, height = 60): NodeSpec {
-  return { id, x, y, width, height, kind: 'rectangle' };
+  return { id, position: { x, y }, width, height, kind: 'rectangle' };
 }
 
 function makeCircleEvent(overrides: Partial<PointerEvent> = {}): React.PointerEvent<SVGCircleElement> {
   return {
     pointerId: 1,
-    stopPropagation: jest.fn(),
-    currentTarget: { setPointerCapture: jest.fn() },
+    stopPropagation: vi.fn(),
+    currentTarget: { setPointerCapture: vi.fn() },
     ...overrides,
   } as unknown as React.PointerEvent<SVGCircleElement>;
 }
@@ -72,8 +73,8 @@ describe('useEdgeConnect', () => {
     });
     expect(draft.edges?.length).toBe(1);
     expect(draft.edges?.[0]?.source).toBe('a');
-    expect(draft.edges?.[0]?.target).toBe('');
-    expect(draft.edges?.[0]?.x2).toBe(300);
+    expect(draft.edges?.[0]?.target).toBeUndefined();
+    expect(draft.edges?.[0]?.freeEndpoint?.x).toBe(300);
   });
 
   it('applyEdgeDrag creates a node-connected edge when snapped', async () => {
@@ -94,7 +95,7 @@ describe('useEdgeConnect', () => {
     });
     expect(draft.edges?.[0]?.target).toBe('b');
     expect(draft.edges?.[0]?.targetAnchor).toBe('w');
-    expect(draft.edges?.[0]?.x2).toBeUndefined();
+    expect(draft.edges?.[0]?.freeEndpoint).toBeUndefined();
   });
 
   it('beginEndpointDrag returns false for unknown edge id', async () => {

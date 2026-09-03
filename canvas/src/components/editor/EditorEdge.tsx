@@ -15,7 +15,7 @@ import { PointerEvent, ReactElement, useCallback, useMemo } from 'react';
 
 import { useZoomContext } from '../../contexts/ZoomContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
-import { AnchorPoint, EdgeSpec, NodeSpec } from '../../model';
+import { AnchorPoint, EdgeEnd, EdgeSpec, NodeSpec } from '../../model';
 import { edgeEndpoints } from '../../utils/edgeUtils';
 import { editorStyles } from '../../utils/editorStyles';
 import { EdgeLines, LineStyle } from '../shared/EdgeLines';
@@ -34,7 +34,7 @@ interface EditorEdgeProps {
   onEdgeClick: (event: PointerEvent<SVGLineElement>) => void;
   onEndpointPointerDown: (
     event: PointerEvent<SVGCircleElement>,
-    end: 'source' | 'target',
+    end: EdgeEnd,
     fixedX: number,
     fixedY: number,
     fixedNodeId: string,

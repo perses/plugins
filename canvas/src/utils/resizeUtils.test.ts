@@ -19,20 +19,20 @@ describe('nodeBoundingBox', () => {
   });
 
   it('computes bounding box for a single node', () => {
-    const result = nodeBoundingBox([{ x: 0, y: 0, width: 100, height: 60 }]);
+    const result = nodeBoundingBox([{ position: { x: 0, y: 0 }, width: 100, height: 60 }]);
     expect(result).toEqual({ minX: -50, minY: -30, maxX: 50, maxY: 30 });
   });
 
   it('expands to cover multiple nodes', () => {
     const result = nodeBoundingBox([
-      { x: 0, y: 0, width: 100, height: 60 },
-      { x: 200, y: 100, width: 100, height: 60 },
+      { position: { x: 0, y: 0 }, width: 100, height: 60 },
+      { position: { x: 200, y: 100 }, width: 100, height: 60 },
     ]);
     expect(result).toEqual({ minX: -50, minY: -30, maxX: 250, maxY: 130 });
   });
 
   it('expands to cover free edge endpoints', () => {
-    const result = nodeBoundingBox([{ x: 0, y: 0, width: 100, height: 60 }], [{ x: 300, y: 200 }]);
+    const result = nodeBoundingBox([{ position: { x: 0, y: 0 }, width: 100, height: 60 }], [{ x: 300, y: 200 }]);
     expect(result?.maxX).toBe(300);
     expect(result?.maxY).toBe(200);
   });

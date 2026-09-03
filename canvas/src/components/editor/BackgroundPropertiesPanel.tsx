@@ -61,11 +61,22 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
   const idx = backgrounds.findIndex((bg) => bg.id === background.id);
 
   const onIntFieldChange = useCallback(
-    (key: 'x' | 'y' | 'width' | 'height', min = -Infinity) =>
+    (key: 'width' | 'height', min = -Infinity) =>
       (e: React.ChangeEvent<HTMLInputElement>): void => {
         const v = e.target.valueAsNumber;
         if (Number.isFinite(v) && v >= min) {
           onChange({ ...background, [key]: v });
+        }
+      },
+    [background, onChange],
+  );
+
+  const onPositionChange = useCallback(
+    (axis: 'x' | 'y') =>
+      (e: React.ChangeEvent<HTMLInputElement>): void => {
+        const v = e.target.valueAsNumber;
+        if (Number.isFinite(v)) {
+          onChange({ ...background, position: { ...background.position, [axis]: v } });
         }
       },
     [background, onChange],
@@ -165,8 +176,8 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           label="X"
           size="small"
           type="number"
-          value={Math.round(background.x)}
-          onChange={onIntFieldChange('x')}
+          value={Math.round(background.position.x)}
+          onChange={onPositionChange('x')}
           sx={{ width: 80 }}
           disabled={background.global}
         />
@@ -174,8 +185,8 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           label="Y"
           size="small"
           type="number"
-          value={Math.round(background.y)}
-          onChange={onIntFieldChange('y')}
+          value={Math.round(background.position.y)}
+          onChange={onPositionChange('y')}
           sx={{ width: 80 }}
           disabled={background.global}
         />

@@ -128,7 +128,7 @@ export function useResize(): UseResizeResult {
     (event: PointerEvent<SVGCircleElement>, handleId: ResizeHandleId): boolean => {
       event.stopPropagation();
       event.currentTarget.setPointerCapture(event.pointerId);
-      const freeEndpoints = selectedFloatingEdges.map((ed) => ({ x: ed.x2, y: ed.y2 }));
+      const freeEndpoints = selectedFloatingEdges.map((ed) => ed.freeEndpoint);
       const selectionBounds = nodeBoundingBox(selectedNodes, freeEndpoints);
       if (!selectionBounds) {
         return false;
@@ -171,26 +171,23 @@ export function useResize(): UseResizeResult {
         return;
       }
       const { origBoundingBox } = resizeDrag;
-      selectedNodes.forEach(({ id, x, y, width, height, kind }) => {
+      selectedNodes.forEach(({ id, position, width, height, kind }) => {
         const node = (draft.nodes ?? []).find((n) => n.id === id);
         if (!node) {
           return;
         }
-        const pos = scalePoint(x, y, origBoundingBox, final);
+        const pos = scalePoint(position.x, position.y, origBoundingBox, final);
         const size = scaleNodeSize(width, height, kind, origBoundingBox, final);
-        node.x = pos.x;
-        node.y = pos.y;
+        node.position = pos;
         node.width = size.width;
         node.height = size.height;
       });
-      selectedFloatingEdges.forEach(({ id, x2, y2 }) => {
+      selectedFloatingEdges.forEach(({ id, freeEndpoint }) => {
         const edge = (draft.edges ?? []).find((ed) => ed.id === id);
         if (!edge) {
           return;
         }
-        const pos = scalePoint(x2, y2, origBoundingBox, final);
-        edge.x2 = pos.x;
-        edge.y2 = pos.y;
+        edge.freeEndpoint = scalePoint(freeEndpoint.x, freeEndpoint.y, origBoundingBox, final);
       });
     },
     [resizeDrag, selectedNodes, selectedFloatingEdges],

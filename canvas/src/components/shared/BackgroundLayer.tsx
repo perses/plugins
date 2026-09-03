@@ -58,7 +58,12 @@ export function BackgroundLayer({ backgrounds }: BackgroundLayerProps): ReactEle
       {backgrounds
         .filter((bg) => !bg.global)
         .map((bg) => (
-          <g key={bg.id} transform={`translate(${bg.x},${bg.y})`} style={BG_GROUP_STYLE} opacity={bg.opacity ?? 1}>
+          <g
+            key={bg.id}
+            transform={`translate(${bg.position.x},${bg.position.y})`}
+            style={BG_GROUP_STYLE}
+            opacity={bg.opacity ?? 1}
+          >
             <rect x={0} y={0} width={bg.width} height={bg.height} fill={bg.color ?? 'transparent'} stroke="none" />
             {bg.image && isSafeImageUrl(bg.image) ? (
               <image

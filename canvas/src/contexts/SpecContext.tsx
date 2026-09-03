@@ -15,7 +15,7 @@ import { produce } from 'immer';
 import { createContext, ReactElement, ReactNode, useCallback, useContext, useMemo } from 'react';
 
 import { DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT } from '../components/shared/NodeRenderer';
-import { BackgroundSpec, EdgeSpec, NodeSpec, CanvasSpec } from '../model';
+import { BackgroundSpec, EdgeSpec, NodeSpec, CanvasSpec, Point } from '../model';
 import { generateId } from '../utils/generateId';
 import { useEditorContext } from './EditorContext';
 
@@ -25,8 +25,8 @@ export interface SpecContextValue {
   edgeById: Map<string, EdgeSpec>;
   backgroundById: Map<string, BackgroundSpec>;
   updateSpec: (spec: CanvasSpec) => void;
-  addNode: (x: number, y: number) => void;
-  addBackground: (x: number, y: number, width: number, height: number) => void;
+  addNode: (position: Point) => void;
+  addBackground: (position: Point, width: number, height: number) => void;
   moveBackground: (id: string, direction: 'up' | 'down') => void;
   deleteSelected: () => void;
   onNodePropertiesChange: (updated: NodeSpec) => void;
@@ -69,14 +69,13 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
   }, [spec.backgrounds]);
 
   const addNode = useCallback(
-    (x: number, y: number): void => {
+    (position: Point): void => {
       const id = generateId('node');
       onChange(
         produce(spec, (draft) => {
           (draft.nodes ??= []).push({
             id,
-            x,
-            y,
+            position,
             width: DEFAULT_NODE_WIDTH,
             height: DEFAULT_NODE_HEIGHT,
             kind: 'icon',
@@ -89,11 +88,11 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
   );
 
   const addBackground = useCallback(
-    (x: number, y: number, width: number, height: number): void => {
+    (position: Point, width: number, height: number): void => {
       const id = generateId('bg');
       onChange(
         produce(spec, (draft) => {
-          (draft.backgrounds ??= []).push({ id, x, y, width, height });
+          (draft.backgrounds ??= []).push({ id, position, width, height });
         }),
       );
       selectItems(new Set([id]));
@@ -127,7 +126,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
         draft.backgrounds = (draft.backgrounds ?? []).filter((bg) => !selectedIds.has(bg.id));
         draft.nodes = (draft.nodes ?? []).filter((n) => !selectedIds.has(n.id));
         draft.edges = (draft.edges ?? []).filter(
-          (ed) => !selectedIds.has(ed.id) && !selectedIds.has(ed.source) && !selectedIds.has(ed.target),
+          (ed) => !selectedIds.has(ed.id) && !selectedIds.has(ed.source) && !(ed.target && selectedIds.has(ed.target)),
         );
       }),
     );
@@ -138,9 +137,11 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
     (updated: NodeSpec): void => {
       onChange(
         produce(spec, (draft) => {
-          const idx = (draft.nodes ?? []).findIndex((n) => n.id === updated.id);
-          if (idx !== -1 && draft.nodes) {
-            draft.nodes[idx] = updated;
+          const nodes = draft.nodes;
+          if (!nodes) return;
+          const idx = nodes.findIndex((n) => n.id === updated.id);
+          if (idx !== -1) {
+            nodes[idx] = updated;
           }
         }),
       );

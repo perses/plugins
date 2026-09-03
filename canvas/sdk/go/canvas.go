@@ -68,15 +68,19 @@ const (
 type ImageFit string
 
 const (
-	CoverImageFit    ImageFit = "cover"
-	ContainImageFit  ImageFit = "contain"
-	StretchImageFit  ImageFit = "stretch"
+	CoverImageFit   ImageFit = "cover"
+	ContainImageFit ImageFit = "contain"
+	StretchImageFit ImageFit = "stretch"
 )
+
+type Point struct {
+	X float64 `json:"x" yaml:"x"`
+	Y float64 `json:"y" yaml:"y"`
+}
 
 type NodeSpec struct {
 	ID              string        `json:"id" yaml:"id"`
-	X               float64       `json:"x" yaml:"x"`
-	Y               float64       `json:"y" yaml:"y"`
+	Position        Point         `json:"position" yaml:"position"`
 	Width           float64       `json:"width" yaml:"width"`
 	Height          float64       `json:"height" yaml:"height"`
 	Kind            NodeKind      `json:"kind" yaml:"kind"`
@@ -84,11 +88,12 @@ type NodeSpec struct {
 	LabelPosition   LabelPosition `json:"labelPosition,omitempty" yaml:"labelPosition,omitempty"`
 	LabelPadding    float64       `json:"labelPadding,omitempty" yaml:"labelPadding,omitempty"`
 	Icon            string        `json:"icon,omitempty" yaml:"icon,omitempty"`
-	Link            string        `json:"link,omitempty" yaml:"link,omitempty"`
+	URL             string        `json:"url,omitempty" yaml:"url,omitempty"`
 	Background      string        `json:"background,omitempty" yaml:"background,omitempty"`
 	BackgroundImage string        `json:"backgroundImage,omitempty" yaml:"backgroundImage,omitempty"`
 	QueryIndex      *uint         `json:"queryIndex,omitempty" yaml:"queryIndex,omitempty"`
 	ColorMode       ColorMode     `json:"colorMode,omitempty" yaml:"colorMode,omitempty"`
+	// Color is a hex color string (e.g. "#ff0000").
 	Color           string        `json:"color,omitempty" yaml:"color,omitempty"`
 }
 
@@ -96,11 +101,10 @@ type EdgeSpec struct {
 	ID                  string        `json:"id" yaml:"id"`
 	Name                string        `json:"name,omitempty" yaml:"name,omitempty"`
 	Source              string        `json:"source" yaml:"source"`
-	Target              string        `json:"target" yaml:"target"`
+	Target              *string       `json:"target,omitempty" yaml:"target,omitempty"`
 	SourceAnchor        AnchorPoint   `json:"sourceAnchor,omitempty" yaml:"sourceAnchor,omitempty"`
 	TargetAnchor        AnchorPoint   `json:"targetAnchor,omitempty" yaml:"targetAnchor,omitempty"`
-	X2                  *float64      `json:"x2,omitempty" yaml:"x2,omitempty"`
-	Y2                  *float64      `json:"y2,omitempty" yaml:"y2,omitempty"`
+	FreeEndpoint        *Point        `json:"freeEndpoint,omitempty" yaml:"freeEndpoint,omitempty"`
 	Bidirectional       bool          `json:"bidirectional,omitempty" yaml:"bidirectional,omitempty"`
 	ThicknessMode       ThicknessMode `json:"thicknessMode,omitempty" yaml:"thicknessMode,omitempty"`
 	StrokeWidth         *float64      `json:"strokeWidth,omitempty" yaml:"strokeWidth,omitempty"`
@@ -113,8 +117,7 @@ type EdgeSpec struct {
 type BackgroundSpec struct {
 	ID       string   `json:"id" yaml:"id"`
 	Name     string   `json:"name,omitempty" yaml:"name,omitempty"`
-	X        float64  `json:"x" yaml:"x"`
-	Y        float64  `json:"y" yaml:"y"`
+	Position Point    `json:"position" yaml:"position"`
 	Width    float64  `json:"width" yaml:"width"`
 	Height   float64  `json:"height" yaml:"height"`
 	Color    string   `json:"color,omitempty" yaml:"color,omitempty"`

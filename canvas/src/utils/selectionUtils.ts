@@ -21,7 +21,9 @@ export function computeSelectionFromRect(rect: SelectionRect, nodes: NodeSpec[],
   const maxY = Math.max(rect.y0, rect.y1);
   const inBox = (x: number, y: number): boolean => x >= minX && x <= maxX && y >= minY && y <= maxY;
   return new Set([
-    ...nodes.filter((n) => inBox(n.x, n.y)).map((n) => n.id),
-    ...edges.filter((ed) => ed.x2 !== undefined && ed.y2 !== undefined && inBox(ed.x2, ed.y2)).map((ed) => ed.id),
+    ...nodes.filter((n) => inBox(n.position.x, n.position.y)).map((n) => n.id),
+    ...edges
+      .filter((ed) => ed.freeEndpoint !== undefined && inBox(ed.freeEndpoint.x, ed.freeEndpoint.y))
+      .map((ed) => ed.id),
   ]);
 }

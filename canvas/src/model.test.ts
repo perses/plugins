@@ -18,31 +18,23 @@ function makeEdge(overrides: Partial<EdgeSpec> = {}): EdgeSpec {
 }
 
 describe('isFloatingEdge', () => {
-  it('returns false when both x2 and y2 are undefined', () => {
+  it('returns false when freeEndpoint is undefined', () => {
     expect(isFloatingEdge(makeEdge())).toBe(false);
   });
 
-  it('returns false when only x2 is defined', () => {
-    expect(isFloatingEdge(makeEdge({ x2: 10 }))).toBe(false);
+  it('returns true when freeEndpoint is defined', () => {
+    expect(isFloatingEdge(makeEdge({ freeEndpoint: { x: 10, y: 20 } }))).toBe(true);
   });
 
-  it('returns false when only y2 is defined', () => {
-    expect(isFloatingEdge(makeEdge({ y2: 10 }))).toBe(false);
+  it('returns true when freeEndpoint is at origin', () => {
+    expect(isFloatingEdge(makeEdge({ freeEndpoint: { x: 0, y: 0 } }))).toBe(true);
   });
 
-  it('returns true when both x2 and y2 are defined', () => {
-    expect(isFloatingEdge(makeEdge({ x2: 10, y2: 20 }))).toBe(true);
-  });
-
-  it('returns true when both x2 and y2 are 0', () => {
-    expect(isFloatingEdge(makeEdge({ x2: 0, y2: 0 }))).toBe(true);
-  });
-
-  it('narrows the type so x2 and y2 are number after the check', () => {
-    const edge = makeEdge({ x2: 5, y2: 7 });
+  it('narrows the type so freeEndpoint is a Point after the check', () => {
+    const edge = makeEdge({ freeEndpoint: { x: 5, y: 7 } });
     if (isFloatingEdge(edge)) {
-      const x: number = edge.x2;
-      const y: number = edge.y2;
+      const x: number = edge.freeEndpoint.x;
+      const y: number = edge.freeEndpoint.y;
       expect(x).toBe(5);
       expect(y).toBe(7);
     } else {

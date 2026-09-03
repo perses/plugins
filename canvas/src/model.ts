@@ -17,6 +17,13 @@ import { TimeSeriesData } from '@perses-dev/spec';
 
 export type QueryData = TimeSeriesData;
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export type EdgeEnd = 'source' | 'target';
+
 export type CanvasProps = PanelProps<CanvasSpec, QueryData>;
 
 export interface QueryColorSettings {
@@ -29,8 +36,7 @@ export type LabelPosition = 'above' | 'below' | 'left' | 'right' | 'center';
 
 export interface NodeSpec {
   id: string;
-  x: number;
-  y: number;
+  position: Point;
   width: number;
   height: number;
   kind: 'rectangle' | 'icon' | 'text';
@@ -38,7 +44,7 @@ export interface NodeSpec {
   labelPosition?: LabelPosition;
   labelPadding?: number;
   icon?: string;
-  link?: string;
+  url?: string;
   background?: string;
   backgroundImage?: string;
   queryIndex?: number;
@@ -52,11 +58,10 @@ export interface EdgeSpec {
   id: string;
   name?: string;
   source: string;
-  target: string;
+  target?: string;
   sourceAnchor?: AnchorPoint;
   targetAnchor?: AnchorPoint;
-  x2?: number;
-  y2?: number;
+  freeEndpoint?: Point;
   bidirectional?: boolean;
   thicknessMode?: 'fixed' | 'threshold';
   strokeWidth?: number;
@@ -71,17 +76,16 @@ export interface EdgeThresholdStep {
   strokeWidth: number;
 }
 
-export type FloatingEdge = EdgeSpec & { x2: number; y2: number };
+export type FloatingEdge = EdgeSpec & { freeEndpoint: Point };
 
 export function isFloatingEdge(edge: EdgeSpec): edge is FloatingEdge {
-  return edge.x2 !== undefined && edge.y2 !== undefined;
+  return edge.freeEndpoint !== undefined;
 }
 
 export interface BackgroundSpec {
   id: string;
   name?: string;
-  x: number;
-  y: number;
+  position: Point;
   width: number;
   height: number;
   color?: string;

@@ -15,7 +15,7 @@ import { NodeSpec } from '../model';
 import { computeSelectionFromRect } from './selectionUtils';
 
 function makeNode(id: string, x: number, y: number): NodeSpec {
-  return { id, x, y, width: 10, height: 10, kind: 'rectangle' };
+  return { id, position: { x, y }, width: 10, height: 10, kind: 'rectangle' };
 }
 
 describe('computeSelectionFromRect', () => {
@@ -37,13 +37,13 @@ describe('computeSelectionFromRect', () => {
   });
 
   it('includes floating edge endpoints inside the rect', () => {
-    const edges = [{ id: 'e1', source: 'a', target: '', x2: 20, y2: 20 }];
+    const edges = [{ id: 'e1', source: 'a', freeEndpoint: { x: 20, y: 20 } }];
     const result = computeSelectionFromRect({ x0: 0, y0: 0, x1: 30, y1: 30 }, nodes, edges);
     expect(result.has('e1')).toBe(true);
   });
 
   it('excludes floating edges outside the rect', () => {
-    const edges = [{ id: 'e1', source: 'a', target: '', x2: 200, y2: 200 }];
+    const edges = [{ id: 'e1', source: 'a', freeEndpoint: { x: 200, y: 200 } }];
     const result = computeSelectionFromRect({ x0: 0, y0: 0, x1: 60, y1: 60 }, nodes, edges);
     expect(result.has('e1')).toBe(false);
   });
@@ -54,8 +54,8 @@ describe('computeSelectionFromRect', () => {
     expect(result.has('e1')).toBe(false);
   });
 
-  it('selects floating edge with x2=0, y2=0 when origin is inside rect', () => {
-    const edges = [{ id: 'e1', source: 'a', target: '', x2: 0, y2: 0 }];
+  it('selects floating edge with freeEndpoint at origin when origin is inside rect', () => {
+    const edges = [{ id: 'e1', source: 'a', freeEndpoint: { x: 0, y: 0 } }];
     const result = computeSelectionFromRect({ x0: -10, y0: -10, x1: 10, y1: 10 }, nodes, edges);
     expect(result.has('e1')).toBe(true);
   });
