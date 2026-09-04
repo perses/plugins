@@ -20,10 +20,10 @@ import React, { useCallback, useMemo } from 'react';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import type { NodeSpec } from '../../model';
 import { ICON_NAMES } from '../../utils/icons';
+import { parseNumberInput } from '../../utils/inputUtils';
+import { NumberField } from '../shared/NumberField';
 import { SelectField } from '../shared/SelectField';
 import { IconPreview } from './IconPreview';
-
-const NUMERIC_INPUT_WIDTH = { width: 80 };
 
 interface NodePropertiesPanelProps {
   node: NodeSpec;
@@ -37,20 +37,6 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
   const queryNames = useMemo(() => generateQueryNames(queryDefinitions), [queryDefinitions]);
   const queryIndexes = useMemo(() => Array.from({ length: queryCount }, (_, i) => i), [queryCount]);
   const shape = node.kind;
-
-  const parseNumberInput = useCallback(
-    (
-      currentValue: number | undefined,
-      e: React.ChangeEvent<HTMLInputElement>,
-      opts: { min?: number; optional?: boolean } = {},
-    ) => {
-      const v = e.target.valueAsNumber;
-      if (Number.isFinite(v) && (opts.min === undefined || v >= opts.min)) return v;
-      if (opts.optional && e.target.value === '') return undefined;
-      return currentValue;
-    },
-    [],
-  );
 
   const onNodeSpecChange = useCallback(
     (key: keyof NodeSpec, map: (e: React.ChangeEvent<HTMLInputElement>, node: NodeSpec) => NodeSpec[typeof key]) =>
@@ -69,17 +55,17 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
     (
       key: keyof Pick<NodeSpec, 'width' | 'height' | 'labelPadding' | 'queryIndex'>,
       opts: { min?: number; optional?: boolean } = { min: 8 },
-    ) => onNodeSpecChange(key, (e, n) => parseNumberInput(n[key], e, opts)),
-    [onNodeSpecChange, parseNumberInput],
+    ) => onNodeSpecChange(key, (e, n) => parseNumberInput(e.target.value, n[key], opts)),
+    [onNodeSpecChange],
   );
 
   const onPositionChange = useCallback(
     (axis: 'x' | 'y') =>
       onNodeSpecChange('position', (e, n) => ({
         ...n.position,
-        [axis]: parseNumberInput(n.position[axis], e) ?? n.position[axis],
+        [axis]: parseNumberInput(e.target.value, n.position[axis]) ?? n.position[axis],
       })),
-    [onNodeSpecChange, parseNumberInput],
+    [onNodeSpecChange],
   );
 
   const onIconChange = useCallback(
@@ -131,39 +117,19 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
       <Typography variant="subtitle2">Node properties</Typography>
 
       <Stack direction="row" spacing={1}>
-        <TextField
-          label="X"
-          size="small"
-          type="number"
-          value={Math.round(node.position.x)}
-          onChange={onPositionChange('x')}
-          sx={NUMERIC_INPUT_WIDTH}
-        />
-        <TextField
-          label="Y"
-          size="small"
-          type="number"
-          value={Math.round(node.position.y)}
-          onChange={onPositionChange('y')}
-          sx={NUMERIC_INPUT_WIDTH}
-        />
-        <TextField
+        <NumberField label="X" value={Math.round(node.position.x)} onChange={onPositionChange('x')} />
+        <NumberField label="Y" value={Math.round(node.position.y)} onChange={onPositionChange('y')} />
+        <NumberField
           label="Width"
-          size="small"
-          type="number"
+          min={8}
           value={Math.round(node.width)}
-          slotProps={{ htmlInput: { min: 8 } }}
           onChange={onNodeSpecChangeNumberValue('width')}
-          sx={NUMERIC_INPUT_WIDTH}
         />
-        <TextField
+        <NumberField
           label="Height"
-          size="small"
-          type="number"
+          min={8}
           value={Math.round(node.height)}
-          slotProps={{ htmlInput: { min: 8 } }}
           onChange={onNodeSpecChangeNumberValue('height')}
-          sx={NUMERIC_INPUT_WIDTH}
         />
       </Stack>
 
@@ -225,15 +191,13 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
             <MenuItem value="right">Right</MenuItem>
             <MenuItem value="center">Center</MenuItem>
           </SelectField>
-          <TextField
+          <NumberField
             label="Label padding"
-            size="small"
-            type="number"
-            slotProps={{ htmlInput: { min: 0, step: 1 } }}
+            min={0}
+            step={1}
             value={node.labelPadding ?? ''}
             placeholder="12"
             onChange={onNodeSpecChangeNumberValue('labelPadding', { min: 0, optional: true })}
-            sx={NUMERIC_INPUT_WIDTH}
           />
         </Stack>
       ) : null}
