@@ -1,6 +1,6 @@
 module github.com/perses/plugins/table
 
-go 1.26.5
+go 1.27.1
 
 require (
 	github.com/perses/perses v0.54.0
@@ -9,6 +9,6 @@ require (
 
 require (
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/perses/spec v0.3.0-beta.4 // indirect
+	github.com/perses/spec v0.3.0-beta.5 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

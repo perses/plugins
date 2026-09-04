@@ -56,6 +56,7 @@ export interface StatChartOptions {
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
+  legendFontSize?: FontSizeOption;
   mappings?: ValueMapping[];
   colorMode?: ColorMode;
   legendMode?: legendMode;

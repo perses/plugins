@@ -37,6 +37,15 @@ function getGlobalCanvasContext(): CanvasRenderingContext2D {
 }
 
 /**
+ * Measure the pixel width of text at a given font weight and size.
+ */
+export function measureTextWidth(text: string, fontWeight: number, fontSize: number, fontFamily: string): number {
+  const ctx = getGlobalCanvasContext();
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  return ctx.measureText(text).width;
+}
+
+/**
  * Find the optimal font size given available space
  */
 export function useOptimalFontSize({
