@@ -115,6 +115,14 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
+  const handleLegendFontSizeChange: FontSizeSelectorProps['onChange'] = (fontSize: FontSizeOption) => {
+    onChange(
+      produce(value, (draft: StatChartOptions) => {
+        draft.legendFontSize = fontSize;
+      }),
+    );
+  };
+
   const handleColorModeChange = useCallback(
     (_: unknown, newColorMode: ColorModeLabelItem): void => {
       onChange(
@@ -167,7 +175,10 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <OptionsEditorGroup title="Legend">{selectShowLegend}</OptionsEditorGroup>
+        <OptionsEditorGroup title="Legend">
+          {selectShowLegend}
+          <FontSizeSelector value={value.legendFontSize} onChange={handleLegendFontSizeChange} />
+        </OptionsEditorGroup>
         <OptionsEditorGroup title="Misc">
           <OptionsEditorControl
             label="Sparkline"
