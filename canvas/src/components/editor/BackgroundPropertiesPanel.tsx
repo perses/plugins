@@ -36,12 +36,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useSpecContext } from '../../contexts/SpecContext';
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import type { BackgroundSpec, CanvasSpec } from '../../model';
-
-const IMAGE_FIT_OPTIONS = new Set(['cover', 'contain', 'stretch']);
-
-function parseImageFit(value: string): BackgroundSpec['imageFit'] {
-  return IMAGE_FIT_OPTIONS.has(value) ? (value as BackgroundSpec['imageFit']) : undefined;
-}
+import { parseNumberInput } from '../../utils/inputUtils';
+import { NumberField } from '../shared/NumberField';
 
 function formatOpacityLabel(v: number): string {
   return `${Math.round(v * 100)}%`;
@@ -59,38 +55,40 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
   const backgrounds: CanvasSpec['backgrounds'] = spec.backgrounds ?? [];
   const idx = backgrounds.findIndex((bg) => bg.id === background.id);
 
-  const onIntFieldChange = useCallback(
-    (key: 'width' | 'height', min = -Infinity) =>
+  const onBgSpecChange = useCallback(
+    (
+      key: keyof BackgroundSpec,
+      map: (e: React.ChangeEvent<HTMLInputElement>, bg: BackgroundSpec) => BackgroundSpec[typeof key],
+    ) =>
       (e: React.ChangeEvent<HTMLInputElement>): void => {
-        const v = e.target.valueAsNumber;
-        if (Number.isFinite(v) && v >= min) {
-          onChange({ ...background, [key]: v });
-        }
+        onChange({ ...background, [key]: map(e, background) });
       },
     [background, onChange],
   );
 
+  const onFieldChange = useCallback(
+    (key: keyof BackgroundSpec) => onBgSpecChange(key, (e) => e.target.value || undefined),
+    [onBgSpecChange],
+  );
+
+  const onNumberFieldChange = useCallback(
+    (key: 'width' | 'height', opts: { min?: number } = {}) =>
+      onBgSpecChange(key, (e, bg) => parseNumberInput(e.target.value, bg[key], opts) ?? bg[key]),
+    [onBgSpecChange],
+  );
+
   const onPositionChange = useCallback(
     (axis: 'x' | 'y') =>
-      (e: React.ChangeEvent<HTMLInputElement>): void => {
-        const v = e.target.valueAsNumber;
-        if (Number.isFinite(v)) {
-          onChange({ ...background, position: { ...background.position, [axis]: v } });
-        }
-      },
-    [background, onChange],
+      onBgSpecChange('position', (e, bg) => ({
+        ...bg.position,
+        [axis]: parseNumberInput(e.target.value, bg.position[axis]) ?? bg.position[axis],
+      })),
+    [onBgSpecChange],
   );
 
   const onGlobalChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       onChange({ ...background, global: e.target.checked || undefined });
-    },
-    [background, onChange],
-  );
-
-  const onNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...background, name: e.target.value || undefined });
     },
     [background, onChange],
   );
@@ -113,16 +111,9 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
     [background, onChange],
   );
 
-  const onImageUrlChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...background, image: e.target.value || undefined });
-    },
-    [background, onChange],
-  );
-
   const onImageFitChange = useCallback(
     (e: SelectChangeEvent<BackgroundSpec['imageFit']>): void => {
-      onChange({ ...background, imageFit: parseImageFit(e.target.value ?? '') });
+      onChange({ ...background, imageFit: e.target.value as BackgroundSpec['imageFit'] });
     },
     [background, onChange],
   );
@@ -168,47 +159,35 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
         label="Name"
         size="small"
         value={background.name ?? ''}
-        onChange={onNameChange}
+        onChange={onFieldChange('name')}
         placeholder={background.id}
       />
 
       <Stack direction="row" spacing={1}>
-        <TextField
+        <NumberField
           label="X"
-          size="small"
-          type="number"
           value={Math.round(background.position.x)}
           onChange={onPositionChange('x')}
-          sx={{ width: 80 }}
           disabled={background.global}
         />
-        <TextField
+        <NumberField
           label="Y"
-          size="small"
-          type="number"
           value={Math.round(background.position.y)}
           onChange={onPositionChange('y')}
-          sx={{ width: 80 }}
           disabled={background.global}
         />
-        <TextField
+        <NumberField
           label="Width"
-          size="small"
-          type="number"
+          min={1}
           value={Math.round(background.width)}
-          slotProps={{ htmlInput: { min: 1 } }}
-          onChange={onIntFieldChange('width', 1)}
-          sx={{ width: 80 }}
+          onChange={onNumberFieldChange('width', { min: 1 })}
           disabled={background.global}
         />
-        <TextField
+        <NumberField
           label="Height"
-          size="small"
-          type="number"
+          min={1}
           value={Math.round(background.height)}
-          slotProps={{ htmlInput: { min: 1 } }}
-          onChange={onIntFieldChange('height', 1)}
-          sx={{ width: 80 }}
+          onChange={onNumberFieldChange('height', { min: 1 })}
           disabled={background.global}
         />
       </Stack>
@@ -246,7 +225,7 @@ export function BackgroundPropertiesPanel({ background, onChange }: BackgroundPr
           label="Image URL"
           size="small"
           value={background.image ?? ''}
-          onChange={onImageUrlChange}
+          onChange={onFieldChange('image')}
           sx={{ flex: 1 }}
         />
         <FormControl size="small" sx={{ width: 110 }} disabled={!background.image}>
