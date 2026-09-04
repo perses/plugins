@@ -23,6 +23,8 @@ import { ICON_NAMES } from '../../utils/icons';
 import { SelectField } from '../shared/SelectField';
 import { IconPreview } from './IconPreview';
 
+const NUMERIC_INPUT_WIDTH = { width: 80 };
+
 interface NodePropertiesPanelProps {
   node: NodeSpec;
   onChange: (updated: NodeSpec) => void;
@@ -36,84 +38,53 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
   const queryIndexes = useMemo(() => Array.from({ length: queryCount }, (_, i) => i), [queryCount]);
   const shape = node.kind;
 
-  const onIntFieldChange = useCallback(
-    (key: 'width' | 'height' | 'labelPadding', min = -Infinity, optional = false) =>
+  const parseNumberInput = useCallback(
+    (
+      currentValue: number | undefined,
+      e: React.ChangeEvent<HTMLInputElement>,
+      opts: { min?: number; optional?: boolean } = {},
+    ) => {
+      const v = e.target.valueAsNumber;
+      if (Number.isFinite(v) && (opts.min === undefined || v >= opts.min)) return v;
+      if (opts.optional && e.target.value === '') return undefined;
+      return currentValue;
+    },
+    [],
+  );
+
+  const onNodeSpecChange = useCallback(
+    (key: keyof NodeSpec, map: (e: React.ChangeEvent<HTMLInputElement>, node: NodeSpec) => NodeSpec[typeof key]) =>
       (e: React.ChangeEvent<HTMLInputElement>): void => {
-        const v = e.target.valueAsNumber;
-        if (Number.isFinite(v) && v >= min) {
-          onChange({ ...node, [key]: v });
-        } else if (optional && e.target.value === '') {
-          onChange({ ...node, [key]: undefined });
-        }
+        onChange({ ...node, [key]: map(e, node) });
       },
     [node, onChange],
+  );
+
+  const onFieldChange = useCallback(
+    (key: keyof NodeSpec) => onNodeSpecChange(key, (e) => e.target.value),
+    [onNodeSpecChange],
+  );
+
+  const onNodeSpecChangeNumberValue = useCallback(
+    (
+      key: keyof Pick<NodeSpec, 'width' | 'height' | 'labelPadding' | 'queryIndex'>,
+      opts: { min?: number; optional?: boolean } = { min: 8 },
+    ) => onNodeSpecChange(key, (e, n) => parseNumberInput(n[key], e, opts)),
+    [onNodeSpecChange, parseNumberInput],
   );
 
   const onPositionChange = useCallback(
     (axis: 'x' | 'y') =>
-      (e: React.ChangeEvent<HTMLInputElement>): void => {
-        const v = e.target.valueAsNumber;
-        if (Number.isFinite(v)) {
-          onChange({ ...node, position: { ...node.position, [axis]: v } });
-        }
-      },
-    [node, onChange],
-  );
-
-  const onKindChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...node, kind: e.target.value as NodeSpec['kind'] });
-    },
-    [node, onChange],
+      onNodeSpecChange('position', (e, n) => ({
+        ...n.position,
+        [axis]: parseNumberInput(n.position[axis], e) ?? n.position[axis],
+      })),
+    [onNodeSpecChange, parseNumberInput],
   );
 
   const onIconChange = useCallback(
     (_: React.SyntheticEvent, newIcon: string | null): void => {
       onChange({ ...node, icon: newIcon ?? undefined });
-    },
-    [node, onChange],
-  );
-
-  const onBackgroundImageChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...node, backgroundImage: e.target.value || undefined });
-    },
-    [node, onChange],
-  );
-
-  const onUrlChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...node, url: e.target.value || undefined });
-    },
-    [node, onChange],
-  );
-
-  const onLabelChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...node, label: e.target.value || undefined });
-    },
-    [node, onChange],
-  );
-
-  const onLabelPositionChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...node, labelPosition: e.target.value as NodeSpec['labelPosition'] });
-    },
-    [node, onChange],
-  );
-
-  const onQueryIndexChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      const v = e.target.value;
-      onChange({ ...node, queryIndex: v === '' ? undefined : Number(v) });
-    },
-    [node, onChange],
-  );
-
-  const onColorModeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      const v = e.target.value as '' | 'threshold' | 'fixed';
-      onChange({ ...node, colorMode: v === '' ? undefined : v });
     },
     [node, onChange],
   );
@@ -166,7 +137,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           type="number"
           value={Math.round(node.position.x)}
           onChange={onPositionChange('x')}
-          sx={{ width: 80 }}
+          sx={NUMERIC_INPUT_WIDTH}
         />
         <TextField
           label="Y"
@@ -174,7 +145,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           type="number"
           value={Math.round(node.position.y)}
           onChange={onPositionChange('y')}
-          sx={{ width: 80 }}
+          sx={NUMERIC_INPUT_WIDTH}
         />
         <TextField
           label="Width"
@@ -182,8 +153,8 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           type="number"
           value={Math.round(node.width)}
           slotProps={{ htmlInput: { min: 8 } }}
-          onChange={onIntFieldChange('width', 8)}
-          sx={{ width: 80 }}
+          onChange={onNodeSpecChangeNumberValue('width')}
+          sx={NUMERIC_INPUT_WIDTH}
         />
         <TextField
           label="Height"
@@ -191,12 +162,12 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           type="number"
           value={Math.round(node.height)}
           slotProps={{ htmlInput: { min: 8 } }}
-          onChange={onIntFieldChange('height', 8)}
-          sx={{ width: 80 }}
+          onChange={onNodeSpecChangeNumberValue('height')}
+          sx={NUMERIC_INPUT_WIDTH}
         />
       </Stack>
 
-      <SelectField label="Kind" value={shape} onChange={onKindChange}>
+      <SelectField label="Kind" value={shape} onChange={onFieldChange('kind')}>
         <MenuItem value="rectangle">Rectangle</MenuItem>
         <MenuItem value="icon">Icon</MenuItem>
         <MenuItem value="text">Text</MenuItem>
@@ -220,7 +191,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           label="Background image URL"
           size="small"
           value={node.backgroundImage ?? ''}
-          onChange={onBackgroundImageChange}
+          onChange={onFieldChange('backgroundImage')}
         />
       ) : null}
 
@@ -228,7 +199,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
         label="URL"
         size="small"
         value={node.url ?? ''}
-        onChange={onUrlChange}
+        onChange={onFieldChange('url')}
         helperText="Navigate to this URL on click. Use ${varName} for dashboard variables."
       />
 
@@ -236,7 +207,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
         label="Label"
         size="small"
         value={node.label ?? ''}
-        onChange={onLabelChange}
+        onChange={onFieldChange('label')}
         helperText="Use {{label_name}} or {{value}} to interpolate query data"
       />
 
@@ -245,7 +216,7 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
           <SelectField
             label="Label position"
             value={node.labelPosition ?? 'below'}
-            onChange={onLabelPositionChange}
+            onChange={onFieldChange('labelPosition')}
             sx={{ flex: 1 }}
           >
             <MenuItem value="below">Below</MenuItem>
@@ -261,13 +232,18 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
             slotProps={{ htmlInput: { min: 0, step: 1 } }}
             value={node.labelPadding ?? ''}
             placeholder="12"
-            onChange={onIntFieldChange('labelPadding', 0, true)}
-            sx={{ width: 100 }}
+            onChange={onNodeSpecChangeNumberValue('labelPadding', { min: 0, optional: true })}
+            sx={NUMERIC_INPUT_WIDTH}
           />
         </Stack>
       ) : null}
 
-      <SelectField label="Query" value={node.queryIndex ?? ''} onChange={onQueryIndexChange} sx={{ minWidth: 120 }}>
+      <SelectField
+        label="Query"
+        value={node.queryIndex ?? ''}
+        onChange={onNodeSpecChangeNumberValue('queryIndex', { min: 0 })}
+        sx={{ minWidth: 120 }}
+      >
         <MenuItem value="">
           <em>None</em>
         </MenuItem>
@@ -279,7 +255,12 @@ export function NodePropertiesPanel({ node, onChange }: NodePropertiesPanelProps
       </SelectField>
 
       <Stack direction="row" spacing={1} alignItems="center">
-        <SelectField label="Color mode" value={node.colorMode ?? ''} onChange={onColorModeChange} sx={{ flex: 1 }}>
+        <SelectField
+          label="Color mode"
+          value={node.colorMode ?? ''}
+          onChange={onFieldChange('colorMode')}
+          sx={{ flex: 1 }}
+        >
           <MenuItem value="">
             <em>None (default)</em>
           </MenuItem>
