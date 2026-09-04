@@ -14,7 +14,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v2.1.0
         with:
           install: false
           cache: true
@@ -31,7 +31,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v2.1.0
         with:
           install: false
           cache: true
@@ -48,7 +48,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v2.1.0
         with:
           install: false
           cache: true

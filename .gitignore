@@ -9,8 +9,6 @@
 node_modules
 dist/
 
-# Ignore turborepo cache
-.turbo
 # IDE
 .vscode/*
 !.vscode/extensions.json
