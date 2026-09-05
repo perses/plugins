@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build": "pnpm build-mf && concurrently \"pnpm build:esm\" \"pnpm build:types\"",
     "build-mf": "rsbuild build",
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
@@ -28,22 +28,22 @@
     "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {
-    "@emotion/react": "^11.7.1",
-    "@emotion/styled": "^11.6.0",
-    "@hookform/resolvers": "^3.2.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^3.10.0",
     "@perses-dev/components": "^0.55.0-beta.7",
     "@perses-dev/plugin-system": "^0.55.0-beta.7",
     "@perses-dev/spec": "^0.3.0-beta.5",
-    "date-fns": "^4.1.0",
+    "date-fns": "^4.2.1",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "use-resize-observer": "^9.0.0"
   },
   "devDependencies": {
-    "react-router-dom": "^5 || ^6 || ^7"
+    "react-router-dom": "^6.30.4"
   },
   "files": [
     "lib/**/*",

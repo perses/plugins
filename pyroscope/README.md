@@ -5,7 +5,7 @@
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## Get Started
@@ -13,11 +13,11 @@ npm install
 Start the dev server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Build the plugin for distribution:
 
 ```bash
-npm run build
+pnpm build
 ```
