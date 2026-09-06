@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'HistogramChart',
   rsbuildConfig: {
-    server: { port: 3020 },
+    server: { port: 3026 },
     plugins: [pluginReact()],
   },
   moduleFederation: {

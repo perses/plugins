@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'ClickHouse',
   rsbuildConfig: {
-    server: { port: 3119 },
+    server: { port: 3029 },
     plugins: [pluginReact()],
   },
   moduleFederation: {
