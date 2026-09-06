@@ -11,17 +11,17 @@ pivot from a trace to the related logs in OpenSearch.
 This plugin requires react and react-dom 18.
 
 ```bash
-npm install react@18 react-dom@18
-npm install @perses-dev/opensearch-plugin
+pnpm add react@18 react-dom@18
+pnpm add @perses-dev/opensearch-plugin
 ```
 
 ## Development
 
 ```bash
-npm install
-npm run dev      # start the dev server
-npm run build    # build the plugin
-npm test         # run unit tests
+pnpm install
+pnpm dev      # start the dev server
+pnpm build    # build the plugin
+pnpm test         # run unit tests
 ```
 
 ## Trace to logs

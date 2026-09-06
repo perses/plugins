@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'LogsTable',
   rsbuildConfig: {
-    server: { port: 3017 },
+    server: { port: 3025 },
     plugins: [pluginReact()],
   },
   moduleFederation: {

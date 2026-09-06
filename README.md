@@ -7,9 +7,9 @@ This repository contains the core plugins for [Perses](https://github.com/perses
 As prerequisites, you need:
 
 - NodeJS [version 24 or greater](https://nodejs.org/).
-- npm [version 11 or greater](https://www.npmjs.com/).
+- pnpm [version 12](https://pnpm.io/installation).
 
-You should first run `npm install` at the root of the repository.
+You should first run `pnpm install` at the root of the repository.
 
 Then in [`perses`](https://github.com/perses/perses) repository:
 
@@ -26,15 +26,15 @@ Then in [`perses`](https://github.com/perses/perses) repository:
 
 ### Code quality
 
-Run `npm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`. Run
-`npm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in GitHub
+Run `pnpm lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`. Run
+`pnpm doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in GitHub
 Actions.
 
 ### Working with Snapshots
 
 This will allow you to use the updates from perses core in your plugin so you can test the changes.
 
-1. In perses/shared create a [snapshot](https://github.com/perses/perses/blob/30758a963337564ab58c78646a1134e51d74e146/RELEASE.md?plain=1#L109-L146). Snapshots will be released in npm:
+1. In perses/shared create a [snapshot](https://github.com/perses/perses/blob/30758a963337564ab58c78646a1134e51d74e146/RELEASE.md?plain=1#L109-L146). Snapshots will be released to the npm registry:
 - https://www.npmjs.com/package/@perses-dev/components/
 - https://www.npmjs.com/package/@perses-dev/plugin-system
 - https://www.npmjs.com/package/@perses-dev/dashboards
@@ -42,7 +42,7 @@ This will allow you to use the updates from perses core in your plugin so you ca
 
 2. Copy the name of your snapshot, for example `v0.0.0-snapshot-panel-actions-520389b`.
 
-3. In perses/plugin, navigate to the plugin you are changing and install the snapshot npm packages, this should be installed as "dependencies" NOT "peerDependencies" for example:
+3. In perses/plugin, navigate to the plugin you are changing and install the snapshot packages. They should be installed as "dependencies", not "peerDependencies", for example:
 
 ```
 # perses/plugins/timeserieschart/package.json
@@ -69,4 +69,4 @@ This will allow you to use the updates from perses core in your plugin so you ca
   }
 ```
 
-4. Then run `npm install` on the plugin folder to update the dependencies of your plugin (e.g., `cd perses/plugins/timeserieschart && npm install`).
+4. Then run `pnpm install` on the plugin folder to update the dependencies of your plugin (e.g., `cd perses/plugins/timeserieschart && pnpm install`).

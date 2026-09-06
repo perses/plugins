@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'GreptimeDB',
   rsbuildConfig: {
-    server: { port: 3119 },
+    server: { port: 3028 },
     plugins: [pluginReact()],
   },
   moduleFederation: {

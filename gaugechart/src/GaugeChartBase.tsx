@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { FormatOptions } from '@perses-dev/components';
-import { EChart, formatValue, useChartsTheme, useDeepMemo } from '@perses-dev/components';
+import { EChart, formatValue, useChartsTheme } from '@perses-dev/components';
 import type { GaugeSeriesOption } from 'echarts/charts';
 import { GaugeChart as EChartsGaugeChart } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
@@ -20,6 +20,7 @@ import type { EChartsCoreOption } from 'echarts/core';
 import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 registerECharts([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -49,8 +50,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
   const { width, height, data, format, axisLine, max, valueFontSize, progressWidth, titleFontSize } = props;
   const chartsTheme = useChartsTheme();
 
-  // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
-  const option: EChartsCoreOption = useDeepMemo(() => {
+  const option: EChartsCoreOption = useMemo(() => {
     if (data.value === undefined) return chartsTheme.noDataOption;
 
     // Base configuration shared by both series (= progress & scale)
@@ -170,7 +170,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
         },
       ],
     };
-  }, [data, width, height, chartsTheme, format, axisLine, max, valueFontSize, progressWidth, titleFontSize]);
+  }, [data.value, data.label, width, chartsTheme, format, axisLine, max, valueFontSize, progressWidth, titleFontSize]);
 
   return (
     <EChart

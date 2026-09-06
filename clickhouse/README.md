@@ -7,13 +7,13 @@ This plugin requires react and react-dom 18
 Install peer dependencies:
 
 ```bash
-npm install react@18 react-dom@18
+pnpm add react@18 react-dom@18
 ```
 
 Install the plugin:
 
 ```bash
-npm install @my-org/click-house
+pnpm add @my-org/click-house
 ```
 
 ## Development
@@ -23,7 +23,7 @@ npm install @my-org/click-house
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Get Started
@@ -31,11 +31,11 @@ npm install
 Start the dev server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Build the plugin for distribution:
 
 ```bash
-npm run build
+pnpm build
 ```

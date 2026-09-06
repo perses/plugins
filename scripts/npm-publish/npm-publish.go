@@ -51,7 +51,7 @@ func main() {
 		logrus.WithError(err).Fatalf("unable to change directory to %s", pluginPath)
 	}
 
-	cmd := exec.Command("npm", "publish", "--access", "public", "--tag", npmDistTag(version))
+	cmd := exec.Command("pnpm", "publish", "--no-git-checks", "--access", "public", "--tag", npmDistTag(version))
 	output, execErr := cmd.CombinedOutput()
 	if execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to publish archive %s to npm. Output:\n%s", pluginName, string(output))
