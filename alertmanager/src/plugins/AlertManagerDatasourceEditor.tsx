@@ -11,19 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { DatasourceEditorProps } from '@perses-dev/plugin-system';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 
 import type { AlertManagerDatasourceSpec } from './types';
 
-export interface AlertManagerDatasourceEditorProps {
-  value: AlertManagerDatasourceSpec;
-  onChange: (next: AlertManagerDatasourceSpec) => void;
-  isReadonly?: boolean;
-}
+export type AlertManagerDatasourceEditorProps = DatasourceEditorProps<AlertManagerDatasourceSpec>;
 
 export function AlertManagerDatasourceEditor(props: AlertManagerDatasourceEditorProps): ReactElement {
-  const { value, onChange, isReadonly } = props;
+  const { value, onChange, isReadonly, testConnection } = props;
 
   const initialSpecDirect: AlertManagerDatasourceSpec = {
     directUrl: '',
@@ -71,6 +68,7 @@ export function AlertManagerDatasourceEditor(props: AlertManagerDatasourceEditor
       isReadonly={isReadonly}
       initialSpecDirect={initialSpecDirect}
       initialSpecProxy={initialSpecProxy}
+      testConnection={testConnection}
     />
   );
 }

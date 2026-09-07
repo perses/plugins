@@ -49,4 +49,5 @@ export const AlertManagerDatasource: DatasourcePlugin<AlertManagerDatasourceSpec
   createClient,
   OptionsEditorComponent: AlertManagerDatasourceEditor,
   createInitialOptions: () => ({ directUrl: '' }),
+  healthCheckPath: '/api/v2/status',
 };
