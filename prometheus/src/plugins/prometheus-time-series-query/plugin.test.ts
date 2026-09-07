@@ -19,7 +19,7 @@ import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
-import type { RangeQueryResponse, InstantQueryResponse } from '../../model';
+import type { RangeQueryResponse, InstantQueryResponse, QueryExemplarsResponse } from '../../model';
 import { PrometheusDatasource } from '../prometheus-datasource';
 import type { PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuery } from './';
@@ -81,6 +81,30 @@ const getDatasource: Mock = vi.fn((): DatasourceSpec<PrometheusDatasourceSpec> =
       spec: datasource,
     },
   };
+});
+
+// Mock exemplars query
+promStubClient.queryExemplars = vi.fn(async (): Promise<QueryExemplarsResponse> => {
+  const stubResponse: QueryExemplarsResponse = {
+    status: 'success',
+    data: [
+      {
+        seriesLabels: {
+          __name__: 'up',
+        },
+        exemplars: [
+          {
+            labels: {
+              traceID: 'abc123',
+            },
+            value: '10',
+            timestamp: 1686141338.877,
+          },
+        ],
+      },
+    ],
+  };
+  return stubResponse;
 });
 
 const createStubContext = (): TimeSeriesQueryContext => {
@@ -169,6 +193,67 @@ describe('PrometheusTimeSeriesQuery', () => {
 
     expect(promStubClient.rangeQuery).toHaveBeenCalledTimes(1);
     expect(promStubClient.instantQuery).not.toHaveBeenCalled();
+  });
+
+  it('should not query exemplars when the datasource does not enable them', async () => {
+    const ctx = createStubContext();
+    (promStubClient.rangeQuery as Mock).mockClear();
+    (promStubClient.queryExemplars as Mock).mockClear();
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up' }, ctx);
+
+    expect(promStubClient.queryExemplars).not.toHaveBeenCalled();
+    expect(results.exemplars).toBeUndefined();
+  });
+
+  it('should query exemplars and convert them when the datasource enables them', async () => {
+    const ctx = createStubContext();
+    getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {
+      return {
+        default: false,
+        plugin: {
+          kind: 'PrometheusDatasource',
+          spec: {
+            ...datasource,
+            exemplars: { enable: true },
+          },
+        },
+      };
+    });
+    (promStubClient.queryExemplars as Mock).mockClear();
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up' }, ctx);
+
+    expect(promStubClient.queryExemplars).toHaveBeenCalledTimes(1);
+    expect(results.exemplars).toEqual([
+      {
+        seriesLabels: { __name__: 'up' },
+        exemplars: [{ labels: { traceID: 'abc123' }, value: 10, timestamp: 1686141338877 }],
+      },
+    ]);
+  });
+
+  it('should keep the query working when the exemplar query fails', async () => {
+    const ctx = createStubContext();
+    getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {
+      return {
+        default: false,
+        plugin: {
+          kind: 'PrometheusDatasource',
+          spec: {
+            ...datasource,
+            exemplars: { enable: true },
+          },
+        },
+      };
+    });
+    (promStubClient.queryExemplars as Mock).mockClear();
+    (promStubClient.queryExemplars as Mock).mockRejectedValueOnce(new Error('exemplar endpoint unavailable'));
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up' }, ctx);
+
+    expect(results.series.length).toBeGreaterThan(0);
+    expect(results.exemplars).toBeUndefined();
   });
 
   it('should use instantQuery when spec.instant is unset and context mode is instant', async () => {
