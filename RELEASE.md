@@ -1,12 +1,22 @@
 # Release process
 
+## Pre-requisite
+
+All plugins depend on the plugin-system coming from the shared repository. As soon as the plugin-system is starting a
+new release cycle (usually with a beta), releasing of the plugin will have to follow the same thing. Meaning you will
+have to start a new release cycle for all plugins starting with a beta.
+
+You **MUST NOT** cut a new minor release of a plugin if it depends on the plugin-system in beta/rc.
+
+## How to cut a release
+
 To release a new version of one or multiple plugins, you should:
 
 1. Checkout to a new branch
-2. Update the version number in its(their) respective `package.json` file(s).
+2. Update the version number in its (their) respective `package.json` file (s).
 3. Run `npm install` at the root of the repo to propagate this update to the root `package-lock.json`.
 4. Commit these changes - as a standalone commit ("Prepare \<plugin\> release vX.Y.Z") or as part of your changes.
-5. Push the changes (new version(s)) and create a PR.
+5. Push the changes (new version (s)) and create a PR.
 6. After the PR is merged, checkout to and update the main.
 7. Run [release.go](./scripts/release/release.go) (see instructions there).
 
