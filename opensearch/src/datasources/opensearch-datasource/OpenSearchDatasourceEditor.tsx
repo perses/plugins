@@ -11,19 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { DatasourceEditorProps } from '@perses-dev/plugin-system';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 
 import type { OpenSearchDatasourceSpec } from './opensearch-datasource-types';
 
-export interface OpenSearchDatasourceEditorProps {
-  value: OpenSearchDatasourceSpec;
-  onChange: (next: OpenSearchDatasourceSpec) => void;
-  isReadonly?: boolean;
-}
+export type OpenSearchDatasourceEditorProps = DatasourceEditorProps<OpenSearchDatasourceSpec>;
 
 export function OpenSearchDatasourceEditor(props: OpenSearchDatasourceEditorProps): ReactElement {
-  const { value, onChange, isReadonly } = props;
+  const { value, onChange, isReadonly, testConnection } = props;
 
   const initialSpecDirect: OpenSearchDatasourceSpec = {
     directUrl: '',
@@ -51,6 +48,7 @@ export function OpenSearchDatasourceEditor(props: OpenSearchDatasourceEditorProp
       isReadonly={isReadonly}
       initialSpecDirect={initialSpecDirect}
       initialSpecProxy={initialSpecProxy}
+      testConnection={testConnection}
     />
   );
 }

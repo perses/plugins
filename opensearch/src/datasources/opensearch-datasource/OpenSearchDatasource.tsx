@@ -41,4 +41,5 @@ export const OpenSearchDatasource: DatasourcePlugin<OpenSearchDatasourceSpec, Op
   createClient,
   OptionsEditorComponent: OpenSearchDatasourceEditor,
   createInitialOptions: () => ({ directUrl: '' }),
+  healthCheckPath: '/_cluster/health',
 };
