@@ -101,6 +101,26 @@ export interface RangeQueryRequestParameters {
 
 export type RangeQueryResponse = ApiResponse<MatrixData>;
 
+// Ref https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars
+export interface QueryExemplarsRequestParameters {
+  query: string;
+  start: UnixTimestampSeconds;
+  end: UnixTimestampSeconds;
+}
+
+export interface ExemplarData {
+  labels: Metric;
+  value: string;
+  timestamp: UnixTimestampSeconds;
+}
+
+export interface ExemplarSeries {
+  seriesLabels: Metric;
+  exemplars: ExemplarData[];
+}
+
+export type QueryExemplarsResponse = ApiResponse<ExemplarSeries[]>;
+
 export interface SeriesRequestParameters {
   'match[]': string[];
   start?: UnixTimestampSeconds;
