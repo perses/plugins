@@ -15,7 +15,16 @@ import type { LegacyTimeSeries } from '@perses-dev/components';
 import type { TimeScale } from '@perses-dev/spec';
 
 import type { TimeSeriesChartVisualOptions, TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
-import { convertPercentThreshold, convertPanelYAxis, getTimeSeries, roundDown } from './data-transform';
+import type { ExemplarChartData } from './data-transform';
+import {
+  EXEMPLAR_SERIES_ID_PREFIX,
+  EXEMPLAR_SYMBOL_SIZE,
+  convertPercentThreshold,
+  convertPanelYAxis,
+  getExemplarSeries,
+  getTimeSeries,
+  roundDown,
+} from './data-transform';
 
 const MAX_VALUE = 120;
 const MOCK_ECHART_TIME_SERIES_DATA: LegacyTimeSeries[] = [
@@ -26,6 +35,38 @@ const MOCK_ECHART_TIME_SERIES_DATA: LegacyTimeSeries[] = [
     data: [20, MAX_VALUE, 17, 30],
   },
 ];
+
+describe('getExemplarSeries', () => {
+  const exemplarData: ExemplarChartData = {
+    seriesId: 'chart1http_requests_total0',
+    seriesName: 'http_requests_total',
+    color: '#5f6caf',
+    seriesLabels: { __name__: 'http_requests_total', job: 'demo' },
+    yAxisIndex: 0,
+    exemplars: [
+      { labels: { trace_id: 'abc-123' }, value: 42, timestamp: 1700000000000 },
+      { labels: { trace_id: 'def-456' }, value: 7, timestamp: 1700000150000 },
+    ],
+  };
+
+  it('should render a diamond scatter series prefixed with the exemplar series id', () => {
+    const series = getExemplarSeries(exemplarData);
+    expect(series.type).toEqual('scatter');
+    expect(series.id).toEqual(`${EXEMPLAR_SERIES_ID_PREFIX}${exemplarData.seriesId}`);
+    expect(series.symbol).toEqual('diamond');
+    expect(series.symbolSize).toEqual(EXEMPLAR_SYMBOL_SIZE);
+    expect(series.color).toEqual('#5f6caf');
+  });
+
+  it('should embed exemplar metadata in each data item so the dialog can be populated on click', () => {
+    const series = getExemplarSeries(exemplarData);
+    const data = series.data as Array<{ value: [number, number]; exemplar: unknown; seriesLabels: unknown }>;
+    expect(data).toHaveLength(2);
+    expect(data[0]?.value).toEqual([1700000000000, 42]);
+    expect(data[0]?.exemplar).toEqual(exemplarData.exemplars[0]);
+    expect(data[0]?.seriesLabels).toEqual(exemplarData.seriesLabels);
+  });
+});
 
 describe('convertPercentThreshold', () => {
   it('should return 25 if percent threshold is 25 and max is 100', () => {

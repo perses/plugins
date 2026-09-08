@@ -19,11 +19,6 @@ import type { PrometheusDatasourceSelector } from '../model';
 
 export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
 
-/**
- * Optional section enabling the exemplars feature for this datasource.
- * When enabled, the PrometheusTimeSeriesQuery plugin also queries the
- * `/api/v1/query_exemplars` endpoint and returns exemplar data.
- */
 export interface PrometheusExemplarsSpec {
   enable: boolean;
 }

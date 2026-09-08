@@ -43,7 +43,7 @@ import {
   legendValues,
   getCalculations,
 } from '@perses-dev/plugin-system';
-import type { TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import type { Labels, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import type { ReactElement } from 'react';
@@ -54,6 +54,7 @@ import { DEFAULT_FORMAT, DEFAULT_VISUAL, THRESHOLD_PLOT_INTERVAL } from './time-
 import { TimeSeriesChartBase } from './TimeSeriesChartBase';
 import type { TimeSeriesAnnotation } from './utils/annotation';
 import { convertAnnotationToTimeSeriesAnnotation } from './utils/annotation';
+import type { ExemplarChartData } from './utils/data-transform';
 import {
   getTimeSeries,
   getCommonTimeScaleForQueries,
@@ -64,6 +65,18 @@ import {
 import { getSeriesColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions, TimeSeriesData>;
+
+/**
+ * Stable string key for a labels record, so exemplars can be matched to their
+ * series regardless of the labels order.
+ */
+function labelsKey(labels: Labels): string {
+  return JSON.stringify(
+    Object.keys(labels)
+      .toSorted()
+      .map((labelName) => [labelName, labels[labelName]]),
+  );
+}
 
 // Using an "ALL" value to handle the case on first loading the chart where we
 // want to select all, but do not want all of the legend items to be visually highlighted.
@@ -168,14 +181,17 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     timeChartData,
     timeSeriesMapping,
     legendItems,
+    chartExemplars,
     seriesFormatMap: computedSeriesFormatMap,
     maxValuesByFormat,
   } = useMemo(() => {
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
       return {
-        timeChartData: [],
-        timeSeriesMapping: [],
+        timeChartData: [] as TimeSeries[],
+        timeSeriesMapping: [] as TimeChartSeriesMapping,
+        chartExemplars: [] as ExemplarChartData[],
+        legendItems: [] as LegendItem[],
         seriesFormatMap: new Map(),
         maxValuesByFormat: new Map<string, number>(),
       };
@@ -193,6 +209,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
+
+    const seriesByLabels = new Map<string, ExemplarChartData>();
+
+    const chartExemplars: ExemplarChartData[] = [];
 
     // Mapping of each set of query results to be ECharts option compatible
     // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
@@ -214,7 +234,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
         for (let i = 0; i < result.data.series.length; i++) {
           const timeSeries: TimeSeries | undefined = result.data.series[i];
           if (timeSeries === undefined) {
-            return { timeChartData: [], timeSeriesMapping: [], legendItems: [] };
+            return {
+              timeChartData: [] as TimeSeries[],
+              timeSeriesMapping: [] as TimeChartSeriesMapping,
+              chartExemplars: [] as ExemplarChartData[],
+              legendItems: [] as LegendItem[],
+            };
           }
 
           // Format is determined by seriesNameFormat in query spec
@@ -302,6 +327,17 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
               name: formattedSeriesName,
               values: renderedValues,
             });
+
+            if (timeSeries.labels) {
+              seriesByLabels.set(labelsKey(timeSeries.labels), {
+                seriesId,
+                seriesName: formattedSeriesName,
+                color: seriesColor,
+                seriesLabels: timeSeries.labels,
+                yAxisIndex,
+                exemplars: [],
+              });
+            }
           }
 
           if (legend && legendItems) {
@@ -315,6 +351,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
           // Used for repeating colors in Categorical palette
           seriesIndex++;
+        }
+      }
+
+      const queryExemplars = result?.data.exemplars;
+      if (queryExemplars) {
+        for (const seriesExemplars of queryExemplars) {
+          if (seriesExemplars.exemplars.length === 0) continue;
+          const matched = seriesByLabels.get(labelsKey(seriesExemplars.seriesLabels));
+          if (matched === undefined) continue;
+          chartExemplars.push({ ...matched, exemplars: seriesExemplars.exemplars });
         }
       }
     }
@@ -362,6 +408,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       timeChartData,
       timeSeriesMapping,
       legendItems,
+      chartExemplars,
       seriesFormatMap,
       maxValuesByFormat,
     };
@@ -517,6 +564,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 height={height}
                 data={timeChartData}
                 seriesMapping={timeSeriesMapping}
+                exemplars={chartExemplars}
                 annotations={annotations}
                 timeScale={timeScale}
                 yAxis={multipleYAxes ?? echartsYAxis}

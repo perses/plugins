@@ -181,12 +181,6 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   return chartData;
 };
 
-/**
- * Converts the raw exemplar data from the Prometheus API into the
- * TimeSeriesExemplars shape of the TimeSeriesData contract.
- * Returns undefined when there is no exemplar data, so other panels/queries
- * that don't use exemplars keep the payload unchanged.
- */
 function buildExemplars(data?: ExemplarSeries[]): TimeSeriesExemplars[] | undefined {
   if (!data) return undefined;
 
