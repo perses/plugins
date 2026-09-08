@@ -248,6 +248,59 @@ spec:
       labelName: "job"
 ```
 
+## PrometheusPromQLAnnotation
+
+```yaml
+kind: "PrometheusPromQLAnnotation"
+spec:
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
+  # See the documentation about the datasources to understand how it is selected.
+  datasource: <Prometheus Datasource selector> # Optional
+
+  # The promql expression, executed as a range query over the time range of the dashboard.
+  # Each series returned becomes an annotation, spanning from the timestamp of its first sample
+  # to the timestamp of its last one.
+  expr: <string>
+
+  # Title displayed in the annotation tooltip.
+  # Labels of the series can be interpolated with the `{{label_name}}` syntax.
+  title: <string> # Optional
+
+  # Text displayed below the title in the annotation tooltip.
+  # Labels of the series can be interpolated with the `{{label_name}}` syntax.
+  legend: <string> # Optional
+
+  # Label names to display as tags in the annotation tooltip. All the labels are displayed if not provided.
+  tags:
+    - <string> # Optional
+```
+
+- See [Prometheus Datasource selector](#prometheus-datasource-selector)
+
+### Example
+
+A simple Prometheus PromQL annotation defined in a dashboard would look like:
+
+```yaml
+kind: "Dashboard"
+metadata:
+  name: "MyDashboard"
+  project: "perses"
+spec:
+  annotations:
+    - display:
+        name: "Deployments"
+        color: "#EE6C6C"
+      plugin:
+        kind: "PrometheusPromQLAnnotation"
+        spec:
+          expr: "changes(kube_deployment_status_observed_generation{namespace=\"$namespace\"}[5m]) > 0"
+          title: "Deployment of {{deployment}}"
+          tags:
+            - "deployment"
+  # ...
+```
+
 ## Shared definitions
 
 ### Prometheus Datasource selector
