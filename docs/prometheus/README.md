@@ -78,6 +78,15 @@ See also technical docs related to this plugin:
 - [Data model](./model.md#prometheustimeseriesquery)
 - [Dashboard-as-Code Go lib](./go-sdk/query.md)
 
+## Annotation (`PrometheusPromQLAnnotation`)
+
+The annotation plugin overlays contextual events on the panels of a dashboard, like deployments, incidents or maintenance windows. The provided PromQL expression is executed as a range query over the time range of the dashboard, and each series it returns becomes an annotation spanning from the timestamp of its first sample to the timestamp of its last one.
+
+The `title` and `legend` displayed in the annotation tooltip can be built from the labels of the series, using the `{{label_name}}` syntax (e.g `Deployment {{service}}`). The labels shown as tags can be restricted with `tags`, all of them being displayed otherwise.
+
+See also technical docs related to this plugin:
+- [Data model](./model.md#prometheuspromqlannotation)
+
 ## Explore (`PrometheusExplorer`)
 
 The Prometheus package comes also with a built-in metrics explorer that mirror Prometheus's native UI experience.
