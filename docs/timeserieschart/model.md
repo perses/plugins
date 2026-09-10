@@ -24,6 +24,15 @@ See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#c
 
 ```yaml
 enablePinning: <boolean | default = false> # Optional
+axisPointer: <AxisPointer specification> # Optional
+```
+
+### AxisPointer specification
+
+```yaml
+# "cross" adds a horizontal line at the cursor's y position while hovering the panel.
+# The horizontal line only shows on the hovered panel.
+type: <enum = "cross"> # Optional
 ```
 
 ## YAxis specification
