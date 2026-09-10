@@ -11,9 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { HTTPProxy } from '@perses-dev/spec';
+import type { DurationString, HTTPProxy } from '@perses-dev/spec';
+
+export const DEFAULT_MIN_STEP: DurationString = '15s';
 
 export interface PyroscopeDatasourceSpec {
   directUrl?: string;
   proxy?: HTTPProxy;
+  minStep?: DurationString;
 }

@@ -15,6 +15,7 @@ package datasource
 
 import (
 	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/spec/go/common"
 	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
@@ -40,6 +41,7 @@ func create(options ...Option) (Builder, error) {
 
 type Builder struct {
 	datasourceSpec.HTTPDatasourceSpec `json:",inline" yaml:",inline"`
+	MinStep                           common.Duration `json:"minStep,omitempty" yaml:"minStep,omitempty"`
 }
 
 func Pyroscope(options ...Option) datasource.Option {
@@ -50,7 +52,7 @@ func Pyroscope(options ...Option) datasource.Option {
 		}
 
 		builder.Spec.Plugin.Kind = PluginKind
-		builder.Spec.Plugin.Spec = plugin.HTTPDatasourceSpec
+		builder.Spec.Plugin.Spec = plugin
 		return nil
 	}
 }

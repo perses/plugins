@@ -15,11 +15,19 @@ package datasource
 
 import (
 	"github.com/perses/perses/go-sdk/http"
+	"github.com/perses/spec/go/common"
 )
 
 func DirectURL(url string) Option {
 	return func(builder *Builder) error {
 		builder.DirectURL = url
+		return nil
+	}
+}
+
+func MinStep(duration common.Duration) Option {
+	return func(builder *Builder) error {
+		builder.MinStep = duration
 		return nil
 	}
 }

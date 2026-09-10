@@ -23,6 +23,9 @@ import (
 kind: #kind
 spec: {
 	datasource.#HTTPDatasourceSpec
+	minStep?: =~#durationRegex
 }
+
+#durationRegex: "^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"
 
 #selector: common.#datasourceSelector & {_kind: #kind}

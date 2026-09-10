@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
+import { parseDurationString } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
 
 import type { PyroscopeClient } from '../model/pyroscope-client';
 import {
@@ -23,13 +25,14 @@ import {
   searchServices,
 } from '../model/pyroscope-client';
 import type { PyroscopeDatasourceSpec } from './pyroscope-datasource-types';
+import { DEFAULT_MIN_STEP } from './pyroscope-datasource-types';
 import { PyroscopeDatasourceEditor } from './PyroscopeDatasourceEditor';
 
 /**
  * Creates a PyroscopeClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<PyroscopeDatasourceSpec, PyroscopeClient>['createClient'] = (spec, options) => {
-  const { directUrl, proxy } = spec;
+  const { directUrl, proxy, minStep } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -40,9 +43,12 @@ const createClient: DatasourcePlugin<PyroscopeDatasourceSpec, PyroscopeClient>['
 
   const specHeaders = proxy?.spec.headers;
 
+  const minStepSeconds = Math.floor(milliseconds(parseDurationString(minStep || DEFAULT_MIN_STEP)) / 1000);
+
   return {
     options: {
       datasourceUrl,
+      minStepSeconds,
     },
     selectMergeStacktraces: (body, headers) =>
       selectMergeStacktraces(body, { datasourceUrl, headers: headers ?? specHeaders }),
