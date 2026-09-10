@@ -29,6 +29,9 @@ spec: close({
 
 #tooltip: {
 	enablePinning?: bool
+	axisPointer?: {
+		type?: "cross"
+	}
 }
 
 #palette: {

@@ -66,8 +66,13 @@ export interface TimeSeriesChartYAxisOptions {
   logBase?: LOG_BASE;
 }
 
+export interface TooltipAxisPointerOptions {
+  type?: 'cross';
+}
+
 export interface TooltipSpecOptions {
   enablePinning: boolean;
+  axisPointer?: TooltipAxisPointerOptions;
 }
 
 export interface TimeSeriesChartPaletteOptions {
