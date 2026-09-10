@@ -402,6 +402,16 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
       }
     }
+    // A pinned exemplar tooltip is also unpinned when a tooltip is pinned in another chart,
+    // unless it is the one just pinned by this chart at these exact coordinates.
+    if (
+      pinnedExemplarPos !== null &&
+      lastTooltipPinnedCoords !== null &&
+      !isEqual(lastTooltipPinnedCoords, pinnedExemplarPos)
+    ) {
+      setPinnedExemplar(null);
+      setPinnedExemplarPos(null);
+    }
     // tooltipPinnedCoords CANNOT be in dep array or tooltip pinning breaks in the current chart's onClick
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastTooltipPinnedCoords, seriesMapping]);
@@ -414,8 +424,16 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       //   e.preventDefault(); // Prevent the default behaviour when right clicked
       // }}
       onClick={(e) => {
+        // Allows user to opt-in to multi tooltip pinning when Ctrl or Cmd key held down
+        const isControlKeyPressed = e.ctrlKey || e.metaKey;
+        if (isControlKeyPressed) {
+          e.preventDefault();
+        }
+
         // If clicking while hovering an exemplar marker, toggle the exemplar tooltip pin
-        // instead of pinning the TimeChartTooltip, so pinned TimeChartTooltip is preserved.
+        // instead of pinning the TimeChartTooltip. Pinning an exemplar tooltip unpins the
+        // pinned TimeChartTooltip, so only one tooltip stays pinned at a time unless
+        // Ctrl or Cmd is held down.
         if (hoveredExemplar !== null && e.target instanceof HTMLCanvasElement) {
           const pinnedPos: CursorCoordinates = {
             page: { x: e.pageX, y: e.pageY },
@@ -423,6 +441,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             plotCanvas: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY },
             target: e.target,
           };
+          const isUnpinClick = pinnedExemplar !== null && pinnedExemplar.exemplar === hoveredExemplar.exemplar;
           setPinnedExemplar((current) => {
             if (current !== null && current.exemplar === hoveredExemplar.exemplar) {
               setPinnedExemplarPos(null);
@@ -431,15 +450,21 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             setPinnedExemplarPos(pinnedPos);
             return hoveredExemplar;
           });
+          if (!isUnpinClick && !isControlKeyPressed) {
+            // Unpin the pinned TimeChartTooltip and let adjacent charts know a tooltip is
+            // pinned at these coordinates, so only one tooltip is pinned at a time.
+            setTooltipPinnedCoords(null);
+            setPinnedCrosshair(null);
+            setLastTooltipPinnedCoords(pinnedPos);
+          }
           return;
         }
 
-        // Clicking elsewhere on the chart canvas unpins a pinned exemplar tooltip.
-        // Return so the unpin click does not also pin the TimeChartTooltip.
-        if (pinnedExemplar !== null && e.target instanceof HTMLCanvasElement) {
+        // Unpin a pinned exemplar tooltip when clicking elsewhere on the chart canvas,
+        // so the same click can pin the TimeChartTooltip instead. Ctrl or Cmd keeps both.
+        if (pinnedExemplar !== null && !isControlKeyPressed && e.target instanceof HTMLCanvasElement) {
           setPinnedExemplar(null);
           setPinnedExemplarPos(null);
-          return;
         }
 
         // If clicking while hovering an annotation, toggle the annotation tooltip pin
@@ -460,12 +485,6 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             return hoveredAnnotation;
           });
           return;
-        }
-
-        // Allows user to opt-in to multi tooltip pinning when Ctrl or Cmd key held down
-        const isControlKeyPressed = e.ctrlKey || e.metaKey;
-        if (isControlKeyPressed) {
-          e.preventDefault();
         }
 
         // Determine where on chart canvas to plot pinned crosshair as markLine.
@@ -552,10 +571,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           if (current === null || chartRef.current === undefined) return current;
           let markerPixel: number[] | undefined;
           try {
-            markerPixel = chartRef.current.convertToPixel('grid', [
-              current.exemplar.timestamp,
-              current.exemplar.value,
-            ]);
+            markerPixel = chartRef.current.convertToPixel('grid', [current.exemplar.timestamp, current.exemplar.value]);
           } catch {
             // Coordinates cannot be resolved (e.g. grid not ready yet), keep the current hover.
             return current;
@@ -608,9 +624,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       }}
     >
       {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead.
-          Keep the time chart tooltip visible when pinned even if user hovers an annotation. */}
+          Keep the time chart tooltip visible when pinned even if user hovers an annotation or exemplar,
+          but do not show the mouse-following tooltip on top of a pinned exemplar tooltip. */}
       {showTooltip === true &&
-        (tooltipPinnedCoords !== null || (hoveredAnnotation === null && hoveredExemplar === null)) &&
+        (tooltipPinnedCoords !== null ||
+          (pinnedExemplar === null && hoveredAnnotation === null && hoveredExemplar === null)) &&
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
           <TimeChartTooltip
@@ -631,8 +649,9 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             }}
           />
         )}
-      {/* Pinned exemplar takes priority over hovered. */}
-      {(pinnedExemplar ?? hoveredExemplar) !== null && (
+      {/* Pinned exemplar takes priority over hovered. While a TimeChartTooltip is pinned, the
+          mouse-following exemplar tooltip is not rendered so it does not appear on top of it. */}
+      {(pinnedExemplar !== null || (hoveredExemplar !== null && tooltipPinnedCoords === null)) && (
         <ExemplarMetadataTooltip
           exemplar={(pinnedExemplar ?? hoveredExemplar)!.exemplar}
           seriesLabels={(pinnedExemplar ?? hoveredExemplar)!.seriesLabels}
