@@ -56,6 +56,7 @@ export interface StatChartProps {
   colorMode?: ColorMode;
   alignmentText?: string;
   alignmentSeriesName?: string;
+  maxValueFontSize?: number;
 }
 
 export const StatChartBase: FC<StatChartProps> = (props) => {
@@ -72,6 +73,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     colorMode,
     alignmentText,
     alignmentSeriesName,
+    maxValueFontSize,
   } = props;
 
   const {
@@ -113,6 +115,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
     width: sparkline ? availableWidth : availableWidth * 0.5,
     height: sparkline ? availableHeight * 0.25 : availableHeight * 0.9,
     lineHeight: LINE_HEIGHT,
+    maxSize: maxValueFontSize,
   });
   const valueFontHeight = optimalValueFontSize * LINE_HEIGHT;
 
@@ -242,7 +245,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   return (
     <Box
       sx={{
-        height: '100%',
+        height,
         width: width,
         minWidth: width,
         flexShrink: 0,
