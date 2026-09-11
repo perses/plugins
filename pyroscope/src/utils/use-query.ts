@@ -55,7 +55,7 @@ export function useLabelValues(
   const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
-    enabled: !!client,
+    enabled: !!client && labelName !== '', // do not trigger query if no labelName is set
     queryKey: ['searchLabelValues', labelName, client],
     queryFn: async () => {
       return await client!.searchLabelValues(
