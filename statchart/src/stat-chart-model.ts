@@ -37,6 +37,8 @@ export const COLOR_MODE_LABELS: ColorModeLabelItem[] = [
 
 export type legendMode = 'auto' | 'on' | 'off';
 
+export type StatChartOrientation = 'auto' | 'horizontal' | 'vertical';
+
 export type ShowLegendLabelItem = {
   id: legendMode;
   label: string;
@@ -47,6 +49,12 @@ export const SHOW_LEGEND_LABELS: ShowLegendLabelItem[] = [
   { id: 'auto', label: 'Auto', description: 'Show legend for multi-series, hide legend for single series' },
   { id: 'on', label: 'On', description: 'Always show legend' },
   { id: 'off', label: 'Off', description: 'Always hide legend' },
+];
+
+export const STAT_CHART_ORIENTATION_LABELS: Array<{ id: StatChartOrientation; label: string }> = [
+  { id: 'auto', label: 'Auto' },
+  { id: 'horizontal', label: 'Horizontal' },
+  { id: 'vertical', label: 'Vertical' },
 ];
 
 export interface StatChartOptions {
@@ -60,6 +68,7 @@ export interface StatChartOptions {
   mappings?: ValueMapping[];
   colorMode?: ColorMode;
   legendMode?: legendMode;
+  orientation?: StatChartOrientation;
 }
 
 export interface StatChartSparklineOptions {
@@ -75,7 +84,7 @@ export function createInitialStatChartOptions(): StatChartOptions {
     format: {
       unit: 'decimal',
     },
-    sparkline: {},
-    legendMode: 'auto',
+    legendMode: 'off',
+    orientation: 'auto',
   };
 }
