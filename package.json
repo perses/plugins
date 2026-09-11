@@ -40,6 +40,7 @@
     "heatmapchart",
     "histogramchart",
     "jaeger",
+    "json",
     "logexplorer",
     "logstable",
     "loki",

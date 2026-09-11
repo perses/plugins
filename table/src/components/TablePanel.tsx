@@ -18,7 +18,7 @@ import { formatValue, Table, transformData, useSelection } from '@perses-dev/com
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import type { ActionOptions, PanelData, PanelProps, VariableStateMap } from '@perses-dev/plugin-system';
 import { CalculationsMap, replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
-import type { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
+import type { JsonData, QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import type { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -373,7 +373,7 @@ export function getTablePanelQueryOptions(spec: TableOptions): { mode: 'instant'
   };
 }
 
-export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
+export type TableProps = PanelProps<TableOptions, TimeSeriesData | JsonData>;
 
 export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
   const theme = useTheme();

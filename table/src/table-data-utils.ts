@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { Labels, PanelData } from '@perses-dev/plugin-system';
-import type { TimeSeries, TimeSeriesData } from '@perses-dev/spec';
+import type { JsonData, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 
 import type { TableOptions } from './models';
 
@@ -42,12 +42,26 @@ export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' 
  * and TableExportAction (for CSV export). Extracting this ensures both use the
  * same transformation logic, reducing drift.
  *
- * @param queryResults - The panel query results containing time series data
+ * @param queryResults - The panel query results containing data to be transformed into a table
  * @param spec - The table options specification
  * @param options - Build options (e.g., forExport mode)
  * @returns Array of row objects with column keys and values
  */
 export function buildRawTableData(
+  queryResults: PanelData[],
+  spec: TableOptions,
+  options: BuildRawTableDataOptions = {},
+): Array<Record<string, unknown>> {
+  const timeSeriesResults: Array<PanelData<TimeSeriesData>> = queryResults.filter(
+    (r): r is PanelData<TimeSeriesData> => r.definition.kind === 'TimeSeriesQuery',
+  );
+  const jsonResults: Array<PanelData<JsonData>> = queryResults.filter(
+    (r): r is PanelData<JsonData> => r.definition.kind === 'JsonQuery',
+  );
+  return [...buildTimeSeriesTableData(timeSeriesResults, spec, options), ...buildJsonTableData(jsonResults)];
+}
+
+function buildTimeSeriesTableData(
   queryResults: Array<PanelData<TimeSeriesData>>,
   spec: TableOptions,
   options: BuildRawTableDataOptions = {},
@@ -95,4 +109,33 @@ export function buildRawTableData(
         return { [valueColumnName]: columnValue, ...labels };
       }
     });
+}
+
+function safeStringify(v: object): string {
+  try {
+    return JSON.stringify(v);
+  } catch {
+    return String(v);
+  }
+}
+
+function toItemArray<T>(data: T): T[] {
+  if (Array.isArray(data)) return data;
+  if (data !== null) return [data];
+  return [];
+}
+
+export function buildJsonTableData(queryResults: Array<PanelData<JsonData>>): Array<Record<string, unknown>> {
+  return queryResults.flatMap((r: PanelData<JsonData>) => {
+    return toItemArray(r.data).map(({ data }) => {
+      if (typeof data !== 'object' || data === null) {
+        return { value: data };
+      }
+      const row: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+        row[k] = typeof v === 'object' && v !== null ? safeStringify(v) : v;
+      }
+      return row;
+    });
+  });
 }
