@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './click-house-time-series-query';
-export * from './click-house-log-query';
-export * from './click-house-trace-query';
+export * from './ClickHouseTraceQuery';
+export * from './ClickHouseTraceQueryEditor';
+export * from './get-click-house-trace-data';
+export * from './click-house-trace-query-types';
