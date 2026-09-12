@@ -1,0 +1,103 @@
+{
+  "id": 7,
+  "type": "table",
+  "title": "Uptime Max [$module - $status - $operated_by - $nodename]",
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "align": "auto",
+        "cellOptions": {
+          "type": "auto"
+        },
+        "inspect": false,
+        "filterable": true
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "blue",
+            "value": null
+          },
+          {
+            "color": "dark-green",
+            "value": 86400
+          },
+          {
+            "color": "#EAB839",
+            "value": 7776000
+          },
+          {
+            "color": "dark-red",
+            "value": 15552000
+          }
+        ]
+      },
+      "color": {
+        "mode": "thresholds"
+      },
+      "unit": null
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Nodename"
+        },
+        "properties": [
+          {
+            "id": "custom.cellOptions",
+            "value": {
+              "type": "color-text"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Uptime"
+        },
+        "properties": [
+          {
+            "id": "custom.cellOptions",
+            "value": {
+              "type": "color-text"
+            }
+          },
+          {
+            "id": "unit",
+            "value": "s"
+          }
+        ]
+      }
+    ]
+  },
+  "transformations": [
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {
+          "Time": true
+        },
+        "renameByName": {
+          "Value": "Uptime",
+          "nodename": "Nodename"
+        }
+      }
+    }
+  ],
+  "targets": [
+    {
+      "expr": "sort_desc(avg by(nodename) (sysUpTime{} /100))",
+      "format": "table",
+      "instant": true,
+      "refId": "uptime_max"
+    }
+  ],
+  "options": {
+    "showHeader": true,
+    "cellHeight": "sm"
+  }
+}
