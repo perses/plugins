@@ -33,6 +33,53 @@ import { getStatChartColor } from './utils/get-color';
 const MIN_WIDTH = 100;
 const SPACING = 2;
 
+/**
+ * Layout for multi-series stats.
+ * - Default (few series): single horizontal row (historical behavior).
+ * - When a one-row layout would shrink cells below MIN_WIDTH: wrap into a grid.
+ *   Column count = max that keeps cell width ≥ MIN_WIDTH (e.g. 9 series → 3×3).
+ */
+export function multiSeriesLayout(
+  seriesCount: number,
+  containerWidth: number,
+  containerHeight: number,
+): { cols: number; rows: number; chartWidth: number; chartHeight: number; wrap: boolean } {
+  if (seriesCount <= 1) {
+    return {
+      cols: 1,
+      rows: 1,
+      chartWidth: containerWidth,
+      chartHeight: containerHeight,
+      wrap: false,
+    };
+  }
+  const singleRowWidth = (containerWidth - SPACING * (seriesCount - 1)) / seriesCount;
+  const wrap = singleRowWidth < MIN_WIDTH;
+  if (!wrap) {
+    return {
+      cols: seriesCount,
+      rows: 1,
+      wrap: false,
+      chartWidth: Math.max(singleRowWidth, MIN_WIDTH),
+      chartHeight: containerHeight,
+    };
+  }
+  // Prefer a near-square grid, capped by how many MIN_WIDTH columns fit.
+  const maxColsByWidth = Math.max(1, Math.floor((containerWidth + SPACING) / (MIN_WIDTH + SPACING)));
+  const idealCols = Math.ceil(Math.sqrt(seriesCount));
+  const cols = Math.max(2, Math.min(maxColsByWidth, idealCols, seriesCount));
+  const rows = Math.ceil(seriesCount / cols);
+  const spacingX = SPACING * Math.max(cols - 1, 0);
+  const spacingY = SPACING * Math.max(rows - 1, 0);
+  return {
+    cols,
+    rows,
+    wrap: true,
+    chartWidth: Math.max(MIN_WIDTH, (containerWidth - spacingX) / cols),
+    chartHeight: Math.max(48, (containerHeight - spacingY) / rows),
+  };
+}
+
 export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
@@ -90,27 +137,12 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 
   if (!contentDimensions) return null;
 
-  // Calculates chart width — ensure cells are wide enough to show full series names
-  const spacing = SPACING * (statChartData.length - 1);
-  let chartWidth = (contentDimensions.width - spacing) / statChartData.length;
-  if (isMultiSeries) {
-    const fontFamily = chartsTheme.echartsTheme.textStyle?.fontFamily ?? 'Lato';
-    const seriesNameFontSize = legendFontSize ?? Math.max(14, Math.min((contentDimensions.height * 0.15) / 1.2, 30));
-    const padding = chartsTheme.container.padding.default;
-    let maxTextWidth = MIN_WIDTH;
-    for (const series of statChartData) {
-      const nameWidth = measureTextWidth(series.seriesData?.name ?? '', 400, seriesNameFontSize, fontFamily);
-      const valWidth = measureTextWidth(
-        formatStatChartValue(series.calculatedValue, format),
-        700,
-        seriesNameFontSize * 1.5,
-        fontFamily,
-      );
-      const needed = Math.max(nameWidth, valWidth) + padding * 2;
-      if (needed > maxTextWidth) maxTextWidth = needed;
-    }
-    chartWidth = Math.max(chartWidth, maxTextWidth);
-  }
+  // Default: one horizontal row (unchanged). Wrap to 2 columns only when cells would be too narrow.
+  const { chartWidth, chartHeight, wrap } = multiSeriesLayout(
+    statChartData.length,
+    contentDimensions.width,
+    contentDimensions.height,
+  );
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
 
@@ -120,11 +152,16 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
       width={contentDimensions.width}
       spacing={`${SPACING}px`}
       direction="row"
-      justifyContent={isMultiSeries ? 'left' : 'center'}
-      alignItems="center"
+      flexWrap={wrap ? 'wrap' : 'nowrap'}
+      justifyContent={isMultiSeries ? (wrap ? 'flex-start' : 'left') : 'center'}
+      alignItems={wrap ? 'stretch' : 'center'}
+      useFlexGap
       sx={{
-        overflowX: isMultiSeries ? 'auto' : 'hidden',
+        overflowX: wrap ? 'hidden' : isMultiSeries ? 'auto' : 'hidden',
+        overflowY: wrap ? 'auto' : 'hidden',
+        alignContent: wrap ? 'flex-start' : undefined,
         '&::-webkit-scrollbar': {
+          width: '4px',
           height: '4px',
         },
         '&::-webkit-scrollbar-track': {
@@ -152,7 +189,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
             <StatChartBase
               key={index}
               width={chartWidth}
-              height={contentDimensions.height}
+              height={chartHeight}
               data={series}
               format={format}
               sparkline={sparklineConfig}
