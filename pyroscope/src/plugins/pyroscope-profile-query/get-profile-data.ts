@@ -29,9 +29,8 @@ import { computeFilterExpr } from '../../utils/types';
 // Pyroscope's Connect API expects timestamps in milliseconds; Perses time ranges are in seconds.
 const MILLISECONDS = 1_000;
 
-// Timeline resolution: target at most this many points, but never a step below MIN_STEP_SECONDS
 const TIMELINE_TARGET_POINTS = 1_000;
-const MIN_STEP_SECONDS = 10;
+const DEFAULT_MIN_STEP_SECONDS = 15;
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
@@ -77,7 +76,8 @@ export const getProfileData: ProfileQueryPlugin<PyroscopeProfileQuerySpec>['getP
     stacktracesRequest.maxNodes = spec.maxNodes;
   }
 
-  const step = Math.max(MIN_STEP_SECONDS, Math.floor((endSeconds - startSeconds) / TIMELINE_TARGET_POINTS));
+  const minStepSeconds = client.options.minStepSeconds ?? DEFAULT_MIN_STEP_SECONDS;
+  const step = Math.max(minStepSeconds, Math.floor((endSeconds - startSeconds) / TIMELINE_TARGET_POINTS));
   const seriesRequest: SelectSeriesRequest = {
     profileTypeID,
     labelSelector,

@@ -16,6 +16,10 @@ spec:
 
   # It is the http configuration that will be used by the Perses' server to redirect to the datasource any query sent by the UI.
   proxy: <HTTP Proxy specification> # Optional
+
+  # Lower bound for the timeline resolution (step) of profile queries, as a duration (e.g. "15s", "1m").
+  # Defaults to "15s".
+  minStep: <duration> # Optional
 ```
 
 ### HTTP Proxy specification
