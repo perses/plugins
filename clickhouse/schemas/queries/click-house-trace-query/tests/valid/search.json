@@ -1,0 +1,12 @@
+{
+  "kind": "ClickHouseTraceQuery",
+  "spec": {
+    "datasource": {
+      "kind": "ClickHouseDatasource",
+      "name": "clickhouse"
+    },
+    "query": "SELECT TraceId, ParentSpanId, SpanName, ServiceName, Timestamp, Duration, StatusCode FROM otel.otel_traces WHERE Timestamp BETWEEN '{start}' AND '{end}'",
+    "table": "otel.otel_traces",
+    "limit": 50
+  }
+}

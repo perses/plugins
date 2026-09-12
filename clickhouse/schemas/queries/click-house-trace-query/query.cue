@@ -11,6 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './click-house-time-series-query';
-export * from './click-house-log-query';
-export * from './click-house-trace-query';
+package model
+
+import (
+	"strings"
+	ds "github.com/perses/plugins/clickhouse/schemas/datasources/click-house-datasource:model"
+)
+
+kind: "ClickHouseTraceQuery"
+spec: close({
+	ds.#selector
+	query: strings.MinRunes(1)
+	// table name, optionally prefixed with its database, read when looking up a trace by ID
+	table?: =~"^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?$"
+	limit?: int & >0
+})
