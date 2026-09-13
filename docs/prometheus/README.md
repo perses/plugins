@@ -12,6 +12,8 @@ The Prometheus data source is the base building block that enables the connectio
 
 It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature of Perses that allows to restrict the access to your data source.
 
+It also provides an opt-in support for [exemplars](#exemplars).
+
 See also technical docs related to this plugin:
 
 - [Data model](./model.md#prometheusdatasource)
@@ -77,6 +79,33 @@ The Time series query plugin to be used in panels compatible with metrics displa
 See also technical docs related to this plugin:
 - [Data model](./model.md#prometheustimeseriesquery)
 - [Dashboard-as-Code Go lib](./go-sdk/query.md)
+
+## Exemplars
+
+[Exemplars](https://prometheus.io/docs/concepts/exemplars/) are references to related data — typically a trace ID — attached to individual samples of a metric. They let you go from an aggregate metric to a concrete representative request, which is handy to investigate a spike or a latency outlier directly from a dashboard.
+
+The Prometheus package supports displaying exemplars on the [Time Series Chart](../timeserieschart/README.md) panel:
+
+- When exemplars are enabled on the datasource (see below), the `PrometheusTimeSeriesQuery` plugin calls the Prometheus [`/api/v1/query_exemplars`](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars) endpoint in parallel with every range query, and attaches the returned exemplars to the series matching their labels.
+- On the chart, each exemplar is rendered as a diamond marker placed at its value and timestamp, using the color of the series it belongs to. Hovering a marker displays its labels (like `trace_id`) along with its value and timestamp, and clicking it pins the tooltip so you can inspect the labels at ease (e.g. to copy a trace ID and open the corresponding trace in your tracing UI).
+- A failed exemplars request never impacts the panel itself: the query results are displayed without exemplars.
+
+### Enabling exemplars
+
+Exemplars are opt-in and configured at the datasource level. You can either toggle the **Enable exemplars** switch in the Prometheus datasource editor, or set the following in the datasource spec:
+
+```yaml
+kind: "PrometheusDatasource"
+spec:
+  exemplars:
+    enable: true
+```
+
+Some requirements and caveats to be aware of:
+
+- The Prometheus instance (or any Prometheus-compatible backend) must have the [exemplar storage](https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplar-storage) enabled, and your telemetry pipeline must actually attach exemplars to the samples (e.g. via the OTLP receiver).
+- Exemplars are only fetched for range queries: queries executed in instant mode never display exemplars.
+- When relying on the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature, make sure the `/api/v1/query_exemplars` endpoint is allowed so exemplars can be fetched through the Perses server.
 
 ## Annotation (`PrometheusPromQLAnnotation`)
 
