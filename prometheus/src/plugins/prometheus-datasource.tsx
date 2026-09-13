@@ -25,6 +25,7 @@ import {
   mergeQueryParams,
   metricMetadata,
   parseQuery,
+  queryExemplars,
   rangeQuery,
   series,
 } from '../model';
@@ -69,6 +70,7 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     healthCheck: healthCheck({ datasourceUrl, headers: specHeaders, queryParams }),
     instantQuery: wrapClientMethod(instantQuery, datasourceUrl, specHeaders, queryParams),
     rangeQuery: wrapClientMethod(rangeQuery, datasourceUrl, specHeaders, queryParams),
+    queryExemplars: wrapClientMethod(queryExemplars, datasourceUrl, specHeaders, queryParams),
     labelNames: wrapClientMethod(labelNames, datasourceUrl, specHeaders, queryParams),
     labelValues: wrapClientMethod(labelValues, datasourceUrl, specHeaders, queryParams),
     metricMetadata: wrapClientMethod(metricMetadata, datasourceUrl, specHeaders, queryParams),

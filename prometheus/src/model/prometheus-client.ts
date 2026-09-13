@@ -27,6 +27,8 @@ import type {
   MetricMetadataResponse,
   ParseQueryRequestParameters,
   ParseQueryResponse,
+  QueryExemplarsRequestParameters,
+  QueryExemplarsResponse,
   RangeQueryRequestParameters,
   RangeQueryResponse,
   SeriesRequestParameters,
@@ -49,6 +51,10 @@ export interface PrometheusClient extends DatasourceClient {
   options: PrometheusClientOptions;
   instantQuery(params: InstantQueryRequestParameters, options?: ClientRequestOptions): Promise<InstantQueryResponse>;
   rangeQuery(params: RangeQueryRequestParameters, options?: ClientRequestOptions): Promise<RangeQueryResponse>;
+  queryExemplars(
+    params: QueryExemplarsRequestParameters,
+    options?: ClientRequestOptions,
+  ): Promise<QueryExemplarsResponse>;
   labelNames(params: LabelNamesRequestParameters, options?: ClientRequestOptions): Promise<LabelNamesResponse>;
   labelValues(params: LabelValuesRequestParameters, options?: ClientRequestOptions): Promise<LabelValuesResponse>;
   metricMetadata(
@@ -132,6 +138,20 @@ export function rangeQuery(
   queryOptions: QueryOptions,
 ): Promise<RangeQueryResponse> {
   return fetchWithPost<RangeQueryRequestParameters, RangeQueryResponse>('/api/v1/query_range', params, queryOptions);
+}
+
+/**
+ * Calls the `/api/v1/query_exemplars` endpoint to get exemplar data for a query.
+ */
+export function queryExemplars(
+  params: QueryExemplarsRequestParameters,
+  queryOptions: QueryOptions,
+): Promise<QueryExemplarsResponse> {
+  return fetchWithGet<QueryExemplarsRequestParameters, QueryExemplarsResponse>(
+    '/api/v1/query_exemplars',
+    params,
+    queryOptions,
+  );
 }
 
 /**

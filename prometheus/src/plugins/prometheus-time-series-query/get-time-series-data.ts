@@ -13,13 +13,28 @@
 
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import type { DatasourceSpec, DurationString, Notice, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
+import type {
+  DatasourceSpec,
+  DurationString,
+  Notice,
+  TimeSeries,
+  TimeSeriesData,
+  TimeSeriesExemplars,
+} from '@perses-dev/spec';
 import { parseDurationString } from '@perses-dev/spec';
 import { fromUnixTime, milliseconds } from 'date-fns';
 
-import type { PrometheusClient, MatrixData, VectorData, ScalarData, InstantQueryResultType } from '../../model';
+import type {
+  PrometheusClient,
+  MatrixData,
+  VectorData,
+  ScalarData,
+  InstantQueryResultType,
+  ExemplarSeries,
+} from '../../model';
 import {
   parseValueTuple,
+  parseSampleValue,
   getDurationStringSeconds,
   getPrometheusTimeRange,
   getRangeStep,
@@ -119,12 +134,26 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(selectedDatasource);
 
   // Make the request to Prom
+  const exemplarsEnabled = datasource.plugin.spec.exemplars?.enable === true && !isInstant;
 
   let response;
+  let exemplarResponse: Awaited<ReturnType<PrometheusClient['queryExemplars']>> | undefined;
   if (isInstant) {
     response = await client.instantQuery({ query, time: end }, { ...interpolatedOptions, signal: abortSignal });
   } else {
+    const exemplarPromise = exemplarsEnabled
+      ? client.queryExemplars({ query, start, end }, { ...interpolatedOptions, signal: abortSignal })
+      : undefined;
+
     response = await client.rangeQuery({ query, start, end, step }, { ...interpolatedOptions, signal: abortSignal });
+
+    if (exemplarPromise) {
+      try {
+        exemplarResponse = await exemplarPromise;
+      } catch (err) {
+        console.warn('Failed to fetch exemplars', err);
+      }
+    }
   }
 
   // TODO: What about error responses from Prom that have a response body?
@@ -150,6 +179,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     stepMs: step * 1000,
 
     series: buildTimeSeries(query, result, seriesNameFormat),
+    exemplars: buildExemplars(exemplarResponse?.data),
     metadata: {
       notices,
       executedQueryString: query,
@@ -158,6 +188,19 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
 
   return chartData;
 };
+
+function buildExemplars(data?: ExemplarSeries[]): TimeSeriesExemplars[] | undefined {
+  if (!data) return undefined;
+
+  return data.map((res) => ({
+    seriesLabels: res.seriesLabels,
+    exemplars: res.exemplars.map((exemplar) => ({
+      labels: exemplar.labels,
+      value: parseSampleValue(exemplar.value),
+      timestamp: exemplar.timestamp * 1000,
+    })),
+  }));
+}
 
 function buildVectorData(query: string, data: VectorData, seriesNameFormat: string | undefined): TimeSeries[] {
   return data.result.map((res) => {

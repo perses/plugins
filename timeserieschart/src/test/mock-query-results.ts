@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { TimeSeriesData } from '@perses-dev/spec';
+import type { TimeSeriesData, TimeSeriesExemplars } from '@perses-dev/spec';
 
 export const MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE = [
   {
@@ -174,6 +174,43 @@ export const MOCK_TIME_SERIES_DATA_MULTIVALUE: TimeSeriesData = {
     },
   ],
 };
+
+export const MOCK_TIME_SERIES_EXEMPLARS: TimeSeriesExemplars[] = [
+  {
+    seriesLabels: {
+      device: '/dev/vda1',
+      env: 'demo',
+      fstype: 'ext4',
+      instance: 'demo.do.prometheus.io:9100',
+      job: 'node',
+      mountpoint: '/',
+    },
+    exemplars: [
+      {
+        labels: { trace_id: 'trace-vda1' },
+        value: 0.27700745551584494,
+        timestamp: 1666479357903,
+      },
+    ],
+  },
+  {
+    seriesLabels: {
+      device: '/dev/vda15',
+      env: 'demo',
+      fstype: 'vfat',
+      instance: 'demo.do.prometheus.io:9100',
+      job: 'node',
+      mountpoint: '/boot/efi',
+    },
+    exemplars: [
+      {
+        labels: { trace_id: 'trace-vda15' },
+        value: 0.08486496097624485,
+        timestamp: 1666479382282,
+      },
+    ],
+  },
+];
 
 export const MOCK_TIME_SERIES_DATA_SINGLEVALUE: TimeSeriesData = {
   timeRange: {

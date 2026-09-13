@@ -20,9 +20,9 @@ import type {
 } from '@perses-dev/components';
 import { OPTIMIZED_MODE_SERIES_LIMIT, getCommonTimeScale } from '@perses-dev/components';
 import type { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
-import type { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import type { Exemplar, Labels, TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import type { YAXisComponentOption } from 'echarts';
-import type { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
+import type { LineSeriesOption, BarSeriesOption, ScatterSeriesOption } from 'echarts/charts';
 
 import type {
   TimeSeriesChartVisualOptions,
@@ -50,6 +50,23 @@ export const EMPTY_GRAPH_DATA: EChartsDataFormat = {
 export const HIDE_DATAPOINTS_LIMIT = 70;
 
 export const BLUR_FADEOUT_OPACITY = 0.5;
+
+export const EXEMPLAR_SERIES_ID_PREFIX = 'exemplar-';
+
+export const EXEMPLAR_SYMBOL_SIZE = 14;
+
+/**
+ * The exemplars of one series, converted to a chart-friendly shape with the
+ * rendering attributes (color, y axis) of the matching time series.
+ */
+export interface ExemplarChartData {
+  seriesId: string;
+  seriesName: string;
+  color: string;
+  seriesLabels?: Labels;
+  yAxisIndex?: number;
+  exemplars: Exemplar[];
+}
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -142,6 +159,30 @@ export function getTimeSeries(
     },
   };
   return series;
+}
+
+/**
+ * Gets an ECharts scatter series rendering exemplar markers for a single series.
+ * Each data item embeds its exemplar (and series labels) so the metadata dialog
+ * can be populated when a marker is clicked.
+ */
+export function getExemplarSeries(data: ExemplarChartData): ScatterSeriesOption {
+  return {
+    type: 'scatter',
+    id: `${EXEMPLAR_SERIES_ID_PREFIX}${data.seriesId}`,
+    name: data.seriesName,
+    color: data.color,
+    yAxisIndex: data.yAxisIndex,
+    symbol: 'diamond',
+    symbolSize: EXEMPLAR_SYMBOL_SIZE,
+    z: 10,
+    cursor: 'pointer',
+    data: data.exemplars.map((exemplar) => ({
+      value: [exemplar.timestamp, exemplar.value],
+      exemplar,
+      seriesLabels: data.seriesLabels,
+    })),
+  };
 }
 
 /**
