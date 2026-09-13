@@ -18,6 +18,8 @@ import (
 	prometheusDatasource "github.com/perses/plugins/prometheus/schemas/datasource:model"
 	pyroscopeDatasource "github.com/perses/plugins/pyroscope/schemas/datasource:model"
 	tempoDatasource "github.com/perses/plugins/tempo/schemas/datasource:model"
+	jaegerDatasource "github.com/perses/plugins/jaeger/schemas/datasource:model"
+	opensearchDatasource "github.com/perses/plugins/opensearch/schemas/datasource:model"
 )
 
 #grafanaVar: {
@@ -28,10 +30,12 @@ import (
 
 // key = Grafana kind, value = Perses kind
 #kindMapping: {
-	"loki":                         lokiDatasource.#kind
-	"prometheus":                   prometheusDatasource.#kind
-	"grafana-pyroscope-datasource": pyroscopeDatasource.#kind
-	"tempo":                        tempoDatasource.#kind
+	"loki":                          lokiDatasource.#kind
+	"prometheus":                    prometheusDatasource.#kind
+	"grafana-pyroscope-datasource":  pyroscopeDatasource.#kind
+	"tempo":                         tempoDatasource.#kind
+	"jaeger":                        jaegerDatasource.#kind
+	"grafana-opensearch-datasource": opensearchDatasource.#kind
 }
 
 kind: "DatasourceVariable"
