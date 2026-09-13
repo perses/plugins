@@ -88,24 +88,33 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
 
-  // Align the time range so that it's a multiple of the step
+  // `spec.instant` is a per-query override: `true` forces instant, `false` forces range.
+  // When left unset (Auto), defer to the panel-provided `context.mode`.
+  const isInstant = spec.instant ?? context.mode === 'instant';
+
   let { start, end } = timeRange;
 
-  const utcOffsetSec = new Date().getTimezoneOffset() * 60;
+  // Range queries are aligned so that start and end are multiples of the step.
+  // Instant queries have no step: they are evaluated at the exact end of the time range.
+  // Aligning them too would move the evaluation time back by up to one step, i.e. by
+  // several minutes on long time ranges and by a different amount for each panel width.
+  if (!isInstant) {
+    const utcOffsetSec = new Date().getTimezoneOffset() * 60;
 
-  const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
-  const alignedStart = Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
-  start = alignedStart;
-  end = alignedEnd;
+    const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
+    const alignedStart = Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
+    start = alignedStart;
+    end = alignedEnd;
 
-  /* Ensure end is always greater than start:
-     If the step is greater than equal to the diff of end and start,
-     both start, and end will eventually be rounded to the same value,
-     Consequently, the time range will be zero, which does not return any valid value
-  */
-  if (end === start) {
-    end = start + step;
-    console.warn(`Step (${step}) was larger than the time range! end of time range was set accordingly.`);
+    /* Ensure end is always greater than start:
+       If the step is greater than equal to the diff of end and start,
+       both start, and end will eventually be rounded to the same value,
+       Consequently, the time range will be zero, which does not return any valid value
+    */
+    if (end === start) {
+      end = start + step;
+      console.warn(`Step (${step}) was larger than the time range! end of time range was set accordingly.`);
+    }
   }
 
   // Replace variable placeholders in PromQL query
@@ -125,7 +134,6 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(selectedDatasource);
 
   // Make the request to Prom
-  const isInstant = spec.instant ?? context.mode === 'instant';
   const exemplarsEnabled = datasource.plugin.spec.exemplars?.enable === true && !isInstant;
 
   let response;

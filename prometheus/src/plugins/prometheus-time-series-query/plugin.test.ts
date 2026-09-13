@@ -160,6 +160,24 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(results.series[0]?.formattedName).toEqual('bar - format');
   });
 
+  it('should evaluate instant queries at the exact end of the time range, not the step-aligned end', async () => {
+    const ctx = createStubContext();
+    ctx.mode = 'instant';
+    // An end that is not a multiple of the step, with a step large enough that
+    // aligning the end to it would move the evaluation time by several minutes.
+    ctx.timeRange = { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-01T06:07:23Z') };
+    ctx.suggestedStepMs = 30 * 60 * 1000;
+    (promStubClient.instantQuery as Mock).mockClear();
+    (promStubClient.rangeQuery as Mock).mockClear();
+
+    await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up' }, ctx);
+
+    expect(promStubClient.instantQuery).toHaveBeenCalledTimes(1);
+    expect(promStubClient.rangeQuery).not.toHaveBeenCalled();
+    const [params] = (promStubClient.instantQuery as Mock).mock.calls[0] as [{ query: string; time: number }];
+    expect(params.time).toBe(Math.floor(ctx.timeRange.end.getTime() / 1000));
+  });
+
   it('should use instantQuery when spec.instant is true', async () => {
     const ctx = createStubContext();
     (promStubClient.instantQuery as Mock).mockClear();
