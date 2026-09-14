@@ -96,6 +96,11 @@ registerECharts([
 interface HoveredExemplar {
   exemplar: Exemplar;
   seriesLabels?: Labels;
+  /**
+   * The Y value actually plotted for the marker. Differs from `exemplar.value` when the
+   * matching series is rendered with the negativeY transform (value negated for display).
+   */
+  plottedValue: number;
 }
 
 /**
@@ -243,7 +248,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)
         ) {
           if (params.data?.exemplar) {
-            setHoveredExemplar({ exemplar: params.data.exemplar, seriesLabels: params.data.seriesLabels });
+            setHoveredExemplar({
+              exemplar: params.data.exemplar,
+              seriesLabels: params.data.seriesLabels,
+              plottedValue: params.data?.value?.[1] ?? params.data.exemplar.value,
+            });
             return;
           }
         }
@@ -442,14 +451,10 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
             target: e.target,
           };
           const isUnpinClick = pinnedExemplar !== null && pinnedExemplar.exemplar === hoveredExemplar.exemplar;
-          setPinnedExemplar((current) => {
-            if (current !== null && current.exemplar === hoveredExemplar.exemplar) {
-              setPinnedExemplarPos(null);
-              return null;
-            }
-            setPinnedExemplarPos(pinnedPos);
-            return hoveredExemplar;
-          });
+          // Compute the next state first and call the setters separately: updater functions
+          // may run more than once (e.g. StrictMode), so they must stay side-effect free.
+          setPinnedExemplar(isUnpinClick ? null : hoveredExemplar);
+          setPinnedExemplarPos(isUnpinClick ? null : pinnedPos);
           if (!isUnpinClick && !isControlKeyPressed) {
             // Unpin the pinned TimeChartTooltip and let adjacent charts know a tooltip is
             // pinned at these coordinates, so only one tooltip is pinned at a time.
@@ -571,7 +576,8 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           if (current === null || chartRef.current === undefined) return current;
           let markerPixel: number[] | undefined;
           try {
-            markerPixel = chartRef.current.convertToPixel('grid', [current.exemplar.timestamp, current.exemplar.value]);
+            // Use the plotted value so negated markers (negativeY) are tracked correctly.
+            markerPixel = chartRef.current.convertToPixel('grid', [current.exemplar.timestamp, current.plottedValue]);
           } catch {
             // Coordinates cannot be resolved (e.g. grid not ready yet), keep the current hover.
             return current;

@@ -66,6 +66,16 @@ describe('getExemplarSeries', () => {
     expect(data[0]?.exemplar).toEqual(exemplarData.exemplars[0]);
     expect(data[0]?.seriesLabels).toEqual(exemplarData.seriesLabels);
   });
+
+  it('should negate plotted Y values while keeping original exemplar values when negativeY is enabled', () => {
+    const series = getExemplarSeries({ ...exemplarData, negativeY: true });
+    const data = series.data as Array<{ value: [number, number]; exemplar: unknown }>;
+    expect(data[0]?.value).toEqual([1700000000000, -42]);
+    expect(data[1]?.value).toEqual([1700000150000, -7]);
+    // The embedded exemplar keeps the original (positive) value for the metadata tooltip.
+    expect(data[0]?.exemplar).toEqual(exemplarData.exemplars[0]);
+    expect(data[1]?.exemplar).toEqual(exemplarData.exemplars[1]);
+  });
 });
 
 describe('convertPercentThreshold', () => {

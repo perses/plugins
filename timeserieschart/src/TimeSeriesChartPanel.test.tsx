@@ -116,10 +116,6 @@ describe('TimeSeriesChartPanel', () => {
     );
   };
 
-  it('should render the legend with unformatted series labels', async () => {
-    renderPanel();
-  });
-
   describe('exemplars', () => {
     const getExemplarSeries = (): unknown[] => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,6 +164,8 @@ describe('TimeSeriesChartPanel', () => {
         expect(getExemplarSeries()).toHaveLength(2);
       });
 
+      // NOTE: the project pins @testing-library/user-event v13, whose direct
+      // `userEvent.click` API is synchronous (the v14 `setup()` API is not available).
       userEvent.click(getLegendByName(MOCK_TIME_SERIES_DATA_MULTIVALUE.series[0]?.name));
 
       await waitFor(() => {

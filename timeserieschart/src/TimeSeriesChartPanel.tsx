@@ -335,6 +335,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 color: seriesColor,
                 seriesLabels: timeSeries.labels,
                 yAxisIndex,
+                // Exemplar markers must render on the same side of the X axis as their
+                // series, so they inherit the negativeY visual transform of the query.
+                negativeY: querySettings?.negativeY,
                 exemplars: [],
               });
             }

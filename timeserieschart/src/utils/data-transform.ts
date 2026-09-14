@@ -65,6 +65,13 @@ export interface ExemplarChartData {
   color: string;
   seriesLabels?: Labels;
   yAxisIndex?: number;
+  /**
+   * When the matching series is rendered with `querySettings.negativeY`, its values are
+   * visually negated so it renders below the X axis. The same transform is applied to
+   * the exemplar markers' plotted Y values so they stay next to their series. The
+   * original (positive) values remain on each `exemplar` for metadata display.
+   */
+  negativeY?: boolean;
   exemplars: Exemplar[];
 }
 
@@ -178,7 +185,9 @@ export function getExemplarSeries(data: ExemplarChartData): ScatterSeriesOption 
     z: 10,
     cursor: 'pointer',
     data: data.exemplars.map((exemplar) => ({
-      value: [exemplar.timestamp, exemplar.value],
+      // The plotted Y value is negated when negativeY is enabled for the matching series,
+      // while `exemplar.value` keeps the original value for the metadata tooltip.
+      value: [exemplar.timestamp, data.negativeY ? -exemplar.value : exemplar.value],
       exemplar,
       seriesLabels: data.seriesLabels,
     })),

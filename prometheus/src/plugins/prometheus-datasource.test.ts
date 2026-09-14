@@ -15,6 +15,11 @@ import { PrometheusDatasource } from './prometheus-datasource';
 import type { PrometheusDatasourceSpec } from './types';
 
 describe('PrometheusDatasource query parameters', () => {
+  // Restore the real fetch after each test so the stub never leaks into other tests.
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('should not alter the base URL', () => {
     const spec: PrometheusDatasourceSpec = {
       proxy: {
@@ -52,7 +57,7 @@ describe('PrometheusDatasource query parameters', () => {
       status: 200,
       json: () => Promise.resolve({ data: [] }),
     });
-    global.fetch = mockFetch;
+    vi.stubGlobal('fetch', mockFetch);
 
     // Test healthCheck includes query parameters
     if (client.healthCheck) {
@@ -86,7 +91,7 @@ describe('PrometheusDatasource query parameters', () => {
       statusText: 'OK',
       json: () => Promise.resolve({ data: [] }),
     });
-    global.fetch = mockFetch;
+    vi.stubGlobal('fetch', mockFetch);
 
     const response = await client.queryExemplars({
       query: 'up',
