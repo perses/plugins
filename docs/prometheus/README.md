@@ -87,7 +87,7 @@ See also technical docs related to this plugin:
 The Prometheus package supports displaying exemplars on the [Time Series Chart](../timeserieschart/README.md) panel:
 
 - When exemplars are enabled on the datasource (see below), the `PrometheusTimeSeriesQuery` plugin calls the Prometheus [`/api/v1/query_exemplars`](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars) endpoint in parallel with every range query, and attaches the returned exemplars to the series matching their labels.
-- On the chart, each exemplar is rendered as a diamond marker placed at its value and timestamp, using the color of the series it belongs to. Hovering a marker displays its labels (like `trace_id`) along with its value and timestamp, and clicking it pins the tooltip so you can inspect the labels at ease (e.g. to copy a trace ID and open the corresponding trace in your tracing UI).
+- On the chart, each exemplar is rendered as a diamond marker placed at its value and timestamp, using the color of the series it belongs to. Clicking a marker opens a dialog with its metadata: the labels of the series it belongs to, the exemplar labels (like `trace_id`), its value and its timestamp (e.g. to copy a trace ID and open the corresponding trace in your tracing UI).
 - A failed exemplars request never impacts the panel itself: the query results are displayed without exemplars.
 
 ### Enabling exemplars
