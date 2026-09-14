@@ -274,6 +274,33 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(results.exemplars).toBeUndefined();
   });
 
+  it('should keep the query working when the exemplar query resolves with an error response', async () => {
+    const ctx = createStubContext();
+    getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {
+      return {
+        default: false,
+        plugin: {
+          kind: 'PrometheusDatasource',
+          spec: {
+            ...datasource,
+            exemplars: { enable: true },
+          },
+        },
+      };
+    });
+    (promStubClient.queryExemplars as Mock).mockClear();
+    (promStubClient.queryExemplars as Mock).mockResolvedValueOnce({
+      status: 'error',
+      errorType: 'bad_data',
+      error: 'exemplars storage is not enabled',
+    });
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up' }, ctx);
+
+    expect(results.series.length).toBeGreaterThan(0);
+    expect(results.exemplars).toBeUndefined();
+  });
+
   it('should use instantQuery when spec.instant is unset and context mode is instant', async () => {
     const ctx = createStubContext();
     ctx.mode = 'instant';

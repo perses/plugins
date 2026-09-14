@@ -101,6 +101,8 @@ spec:
     enable: true
 ```
 
+When using the Dashboard-as-Code Go lib, the same can be achieved with the `datasource.EnableExemplars()` option (see [Go SDK](./go-sdk/datasource.md#exemplars)).
+
 Some requirements and caveats to be aware of:
 
 - The Prometheus instance (or any Prometheus-compatible backend) must have the [exemplar storage](https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplar-storage) enabled, and your telemetry pipeline must actually attach exemplars to the samples (e.g. via the OTLP receiver).
