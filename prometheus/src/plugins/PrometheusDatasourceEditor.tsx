@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, IconButton, TextField, Typography } from '@mui/material';
+import { Box, FormControlLabel, IconButton, Switch, TextField, Typography } from '@mui/material';
 import type { QueryParamValues } from '@perses-dev/components';
 import type { DatasourceEditorProps } from '@perses-dev/plugin-system';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
@@ -134,6 +134,10 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             method: 'POST',
           },
           {
+            endpointPattern: '/api/v1/query_exemplars',
+            method: 'GET',
+          },
+          {
             endpointPattern: '/api/v1/label/([a-zA-Z0-9_-]+)/values',
             method: 'GET',
           },
@@ -164,6 +168,24 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
         onChange={(e) => onChange({ ...value, scrapeInterval: e.target.value as DurationString })}
         helperText="Set it to match the typical scrape interval used in your Prometheus instance."
+      />
+      <Typography variant="h5" mt={2} mb={1}>
+        Exemplars
+      </Typography>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={value.exemplars?.enable ?? false}
+            disabled={isReadonly}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                exemplars: e.target.checked ? { enable: true } : undefined,
+              })
+            }
+          />
+        }
+        label="Enable exemplars"
       />
       <HTTPSettingsEditor
         value={value}
