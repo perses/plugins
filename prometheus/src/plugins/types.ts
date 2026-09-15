@@ -19,11 +19,16 @@ import type { PrometheusDatasourceSelector } from '../model';
 
 export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
 
+export interface PrometheusExemplarsSpec {
+  enable: boolean;
+}
+
 export interface PrometheusDatasourceSpec {
   directUrl?: string;
   proxy?: HTTPProxy;
   scrapeInterval?: DurationString; // default to 1m
   queryParams?: QueryParamValues;
+  exemplars?: PrometheusExemplarsSpec;
 }
 
 export interface PrometheusVariableOptionsBase {
