@@ -42,8 +42,9 @@ import type {
   ShowLegendLabelItem,
   StatChartOptions,
   StatChartOptionsEditorProps,
+  StatChartOrientation,
 } from './stat-chart-model';
-import { COLOR_MODE_LABELS, SHOW_LEGEND_LABELS } from './stat-chart-model';
+import { COLOR_MODE_LABELS, SHOW_LEGEND_LABELS, STAT_CHART_ORIENTATION_LABELS } from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
 
@@ -134,6 +135,17 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     [onChange, value],
   );
 
+  const handleOrientationChange = useCallback(
+    (_: unknown, newOrientation: { id: StatChartOrientation; label: string }): void => {
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          draft.orientation = newOrientation.id;
+        }),
+      );
+    },
+    [onChange, value],
+  );
+
   const selectShowLegend = useMemo((): ReactElement => {
     return (
       <OptionsEditorControl
@@ -172,6 +184,25 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   }, [value.colorMode, handleColorModeChange]);
 
+  const selectOrientation = useMemo((): ReactElement => {
+    return (
+      <OptionsEditorControl
+        label="Orientation"
+        control={
+          <SettingsAutocomplete
+            onChange={handleOrientationChange}
+            options={STAT_CHART_ORIENTATION_LABELS}
+            disableClearable
+            value={
+              STAT_CHART_ORIENTATION_LABELS.find((i) => i.id === value.orientation) ??
+              STAT_CHART_ORIENTATION_LABELS.find((i) => i.id === 'auto')!
+            }
+          />
+        }
+      />
+    );
+  }, [value.orientation, handleOrientationChange]);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -189,6 +220,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <MetricLabelInput value={value.metricLabel} onChange={handleMetricLabelChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
           {selectColorMode}
+          {selectOrientation}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

@@ -123,4 +123,29 @@ describe('StatChartOptionsEditorSettings', () => {
       }),
     );
   });
+
+  it('can change orientation', () => {
+    const onChange = vi.fn();
+    renderStatChartOptionsEditorSettings(
+      {
+        format: {
+          unit: 'days',
+        },
+        calculation: 'sum',
+        orientation: 'horizontal',
+      },
+      onChange,
+    );
+
+    const orientationSelector = screen.getByRole('combobox', { name: 'Orientation' });
+    userEvent.click(orientationSelector);
+    const verticalOption = screen.getByRole('option', { name: 'Vertical' });
+    userEvent.click(verticalOption);
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orientation: 'vertical',
+      }),
+    );
+  });
 });
