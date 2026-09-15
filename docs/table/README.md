@@ -12,6 +12,26 @@ The Table plugin displays data in a structured tabular format in Perses dashboar
 - **Item actions**: add row/item selection actions to trigger links or interactions from selected items.
 - **Transformations**: define transformations to manipulate data before rendering
 
+## Embedded panels
+
+Table columns can render a panel plugin inside each cell instead of plain text. This is configured with `plugin` in `columnSettings`, and is useful when a value is easier to read as a compact visualization such as a gauge, stat, or sparkline.
+
+For example, the following column setting renders the `value` column with a Gauge Chart:
+
+```yaml
+columnSettings:
+  - name: "value"
+    header: "CPU usage"
+    plugin:
+      kind: "GaugeChart"
+      spec:
+        calculation: "last-number"
+        format:
+          unit: "percent"
+```
+
+Some visualizations like `GaugeChart` have their customization options fully supported through the form. For the others, you can still provide customization with direct JSON editing.
+
 ## Cell links
 The cell link feature turns static tables into powerful navigation hubs. By pulling cell values and variables directly into your URLs, you can build context-aware links that bridge your dashboards with other workflows.
 
