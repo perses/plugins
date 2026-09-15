@@ -30,6 +30,7 @@ import type {
 interface PyroscopeClientOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  minStepSeconds?: number;
 }
 
 export interface PyroscopeClient extends DatasourceClient {

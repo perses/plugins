@@ -11,11 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TextField, Typography } from '@mui/material';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
+import type { DurationString } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 import React from 'react';
 
 import type { PyroscopeDatasourceSpec } from './pyroscope-datasource-types';
+import { DEFAULT_MIN_STEP } from './pyroscope-datasource-types';
 
 export interface PyroscopeDatasourceEditorProps {
   value: PyroscopeDatasourceSpec;
@@ -63,12 +66,30 @@ export function PyroscopeDatasourceEditor(props: PyroscopeDatasourceEditorProps)
   };
 
   return (
-    <HTTPSettingsEditor
-      value={value}
-      onChange={onChange}
-      isReadonly={isReadonly}
-      initialSpecDirect={initialSpecDirect}
-      initialSpecProxy={initialSpecProxy}
-    />
+    <>
+      <Typography variant="h4" mb={2}>
+        General Settings
+      </Typography>
+      <TextField
+        size="small"
+        fullWidth
+        label="Minimal Step"
+        value={value.minStep || ''}
+        placeholder={`Default: ${DEFAULT_MIN_STEP}`}
+        InputProps={{
+          readOnly: isReadonly,
+        }}
+        InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+        onChange={(e) => onChange({ ...value, minStep: e.target.value as DurationString })}
+        helperText="Lower bound for the timeline resolution. Set it at or above your Pyroscope ingestion interval to avoid gaps when zooming in."
+      />
+      <HTTPSettingsEditor
+        value={value}
+        onChange={onChange}
+        isReadonly={isReadonly}
+        initialSpecDirect={initialSpecDirect}
+        initialSpecProxy={initialSpecProxy}
+      />
+    </>
   );
 }

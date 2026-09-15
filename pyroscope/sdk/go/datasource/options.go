@@ -14,12 +14,23 @@
 package datasource
 
 import (
+	"time"
+
 	"github.com/perses/perses/go-sdk/http"
+	"github.com/perses/spec/go/common"
 )
 
 func DirectURL(url string) Option {
 	return func(builder *Builder) error {
 		builder.DirectURL = url
+		return nil
+	}
+}
+
+// MinStep sets the lower bound for the timeline resolution of profile queries.
+func MinStep(step time.Duration) Option {
+	return func(builder *Builder) error {
+		builder.MinStep = common.Duration(step)
 		return nil
 	}
 }
