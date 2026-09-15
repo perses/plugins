@@ -92,6 +92,10 @@ describe('buildJsonTableData', () => {
     expect(buildJsonTableData([makeJsonPanelData(null)])).toEqual([{ value: null }]);
   });
 
+  it('returns empty array for undefined data', () => {
+    expect(buildJsonTableData([{} as unknown as PanelData<JsonData>])).toEqual([]);
+  });
+
   it('JSON-stringifies nested object values', () => {
     const rows = buildJsonTableData([makeJsonPanelData({ meta: { env: 'prod' }, count: 1 })]);
     expect(rows).toEqual([{ meta: '{"env":"prod"}', count: 1 }]);
