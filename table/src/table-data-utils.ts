@@ -121,7 +121,7 @@ function safeStringify(v: object): string {
 
 function toItemArray<T>(data: T): T[] {
   if (Array.isArray(data)) return data;
-  if (data !== null) return [data];
+  if (data !== null && data !== undefined) return [data];
   return [];
 }
 
