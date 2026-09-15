@@ -37,6 +37,23 @@ datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 
 Configure the access to the Pyroscope datasource with a proxy URL. More info at [HTTP Proxy](https://perses.dev/perses/docs/dac/go/helper/http-proxy).
 
+#### Minimal Step
+
+```golang
+import (
+	"time"
+
+	"github.com/perses/perses-plugins/pyroscope/sdk/go/v1/datasource"
+)
+
+datasource.MinStep(30 * time.Second)
+```
+
+Configure the lower bound for the timeline resolution (step) of profile queries. Defaults to `15s` when unset.
+Set it at or above your Pyroscope ingestion interval, so zooming in does not request a finer resolution than the
+data actually has and leave gaps in the timeline. Values are rounded up to whole seconds, since the underlying
+Pyroscope `SelectSeries` API only accepts integer seconds.
+
 ## Example
 
 ```golang
