@@ -147,9 +147,70 @@ spec: {
 							}
 						}
 					}
+					if property.id == "custom.cellOptions" if property.value.type != _|_ {
+						"\({_reuseMatchingName & {#var: override.matcher.options}}.output)": cellStyles: "\(property.value.type)": true
+					}
 					// NB: enrich this part when this is done https://github.com/perses/perses/issues/2852
 				}
 			}
+		}
+
+		// Absolute thresholds ladder (shared by global + per-column cellSettings).
+		_thresholdColorMode: *#panel.fieldConfig.defaults.color.mode | "palette-classic"
+		_thresholdMode:      *#panel.fieldConfig.defaults.thresholds.mode | "absolute"
+		_defaultCellType:    *#panel.fieldConfig.defaults.custom.cellOptions.type | "auto"
+		_thresholdNumericSteps: [
+			for step in (*#panel.fieldConfig.defaults.thresholds.steps | [])
+			if step.value != null && step.value != _|_ && step.color != _|_ {
+				min:   step.value
+				color: step.color
+			},
+		]
+		_thresholdBaseColors: [
+			for step in (*#panel.fieldConfig.defaults.thresholds.steps | [])
+			if (step.value == null || step.value == _|_) && step.color != _|_ {
+				color: step.color
+			},
+		]
+		_thresholdEnabled: _thresholdColorMode == "thresholds" && _thresholdMode == "absolute" && len(_thresholdNumericSteps) > 0
+		// #useText true → textColor; false → backgroundColor.
+		// Highest min first; base covers values below the lowest numeric step (incl. negatives).
+		// Range schema requires max>=min when both set — use min floor + max: lowest.
+		_thresholdLadder: {
+			#useText: bool
+			cells: list.Concat([
+				list.Reverse([
+					for s in _thresholdNumericSteps {
+						condition: {
+							kind: "Range"
+							spec: min: s.min
+						}
+						_hex: *commonMigrate.#mapping.color[s.color] | s.color
+						if #useText {
+							textColor: _hex
+						}
+						if !#useText {
+							backgroundColor: _hex
+						}
+					},
+				]),
+				[for b in _thresholdBaseColors if len(_thresholdNumericSteps) > 0 {
+					condition: {
+						kind: "Range"
+						spec: {
+							min: -1e15
+							max: list.Min([for s in _thresholdNumericSteps {s.min}])
+						}
+					}
+					_hex: *commonMigrate.#mapping.color[b.color] | b.color
+					if #useText {
+						textColor: _hex
+					}
+					if !#useText {
+						backgroundColor: _hex
+					}
+				}],
+			])
 		}
 
 		// Build a last intermediary object merging both sources of settings
@@ -204,7 +265,16 @@ spec: {
 							}
 						}},
 					]
-					_columnCellSettings: list.Concat([_noValueEntries, _mappingEntries])
+					// Field-scoped cell style keeps thresholds on this column only.
+					_columnThresholdEntries: [
+						if _thresholdEnabled && settings.cellStyles != _|_ if len(settings.cellStyles) > 0
+						if {_getLastKey & {#map: settings.cellStyles}}.output == "color-text"
+						for c in (_thresholdLadder & {#useText: true}).cells {c},
+						if _thresholdEnabled && settings.cellStyles != _|_ if len(settings.cellStyles) > 0
+						if {_getLastKey & {#map: settings.cellStyles}}.output == "color-background"
+						for c in (_thresholdLadder & {#useText: false}).cells {c},
+					]
+					_columnCellSettings: list.Concat([_noValueEntries, _mappingEntries, _columnThresholdEntries])
 					if len(_columnCellSettings) > 0 {
 						cellSettings: _columnCellSettings
 					}
@@ -245,7 +315,7 @@ spec: {
 
 		// Using flatten to get rid of the nested array for "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
-		#cellSettings: list.FlattenN([
+		#cellSettingsFromMappings: list.FlattenN([
 			for mapping in (*#panel.fieldConfig.defaults.mappings | []) {
 				if mapping.type == "value" {
 					[for key, option in mapping.options {
@@ -303,6 +373,16 @@ spec: {
 				}
 			},
 		], 1)
+
+		// Global thresholds only when the default cell style is color-text / color-background.
+		// Field overrides attach their own ladder on columnSettings[].cellSettings above.
+		_globalThresholdEntries: [
+			if _thresholdEnabled && _defaultCellType == "color-text"
+			for c in (_thresholdLadder & {#useText: true}).cells {c},
+			if _thresholdEnabled && _defaultCellType == "color-background"
+			for c in (_thresholdLadder & {#useText: false}).cells {c},
+		]
+		#cellSettings: list.Concat([#cellSettingsFromMappings, _globalThresholdEntries])
 		if len(#cellSettings) != 0 {
 			cellSettings: #cellSettings
 		}
