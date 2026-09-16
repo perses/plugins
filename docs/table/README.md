@@ -206,6 +206,46 @@ After:
 | 1630000000 | 1        | 3        | /         |
 | 1630000000 | 2        | 4        | /boot/efi |
 
+### Pivot by label
+
+This transformation pivots multi-series rows into a **time × label** matrix (Grafana `groupingToMatrix` style).
+
+- **Rows** are grouped by a row field (default `timestamp`)
+- **Columns** are created from distinct values of a label field (e.g. `instance`, `job`, `region`)
+- **Cells** hold the metric value field (default `value`)
+- Missing series at a given time stay sparse (no cell)
+- On duplicate `(row, label)`, the last value wins
+
+Useful for checkerboard / heat-map style tables (metric values per label over time) combined with Table `cellSettings` range colors.
+
+Before (one row per series sample):
+
+| timestamp  | instance  | value |
+|------------|-----------|-------|
+| 100        | host-b    | 0     |
+| 100        | host-a    | 3     |
+| 200        | host-a    | 7     |
+| 200        | host-b    | 1     |
+| 300        | host-a    | 12    |
+
+After pivot with `columnLabel: instance`, `rowColumnName: Time` (newest row first):
+
+| Time | host-a | host-b |
+|------|--------|--------|
+| 300  | 12     |        |
+| 200  | 7      | 1      |
+| 100  | 3      | 0      |
+
+Spec fields:
+
+| Field | Description |
+|-------|-------------|
+| `columnLabel` | Label that becomes dynamic column headers (required) |
+| `rowField` | Field used for row identity (default `timestamp`) |
+| `valueField` | Field used for cell values (default `value`) |
+| `rowColumnName` | Optional display name for the row column (default: `rowField`) |
+| `disabled` | Skip this transform when true |
+
 ## References
 
 See also technical docs related to this plugin:
