@@ -141,18 +141,19 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   if (isInstant) {
     response = await client.instantQuery({ query, time: end }, { ...interpolatedOptions, signal: abortSignal });
   } else {
+    // The rejection handler is attached right away: a fast-failing exemplar request (e.g. backend
+    // without exemplar support) must not surface as an unhandled rejection while the range query runs.
     const exemplarPromise = exemplarsEnabled
-      ? client.queryExemplars({ query, start, end }, { ...interpolatedOptions, signal: abortSignal })
+      ? client.queryExemplars({ query, start, end }, { ...interpolatedOptions, signal: abortSignal }).catch((err) => {
+          console.warn('Failed to fetch exemplars', err);
+          return undefined;
+        })
       : undefined;
 
     response = await client.rangeQuery({ query, start, end, step }, { ...interpolatedOptions, signal: abortSignal });
 
     if (exemplarPromise) {
-      try {
-        exemplarResponse = await exemplarPromise;
-      } catch (err) {
-        console.warn('Failed to fetch exemplars', err);
-      }
+      exemplarResponse = await exemplarPromise;
     }
   }
 
@@ -179,7 +180,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     stepMs: step * 1000,
 
     series: buildTimeSeries(query, result, seriesNameFormat),
-    exemplars: buildExemplars(exemplarResponse?.data),
+    exemplars: buildExemplars(exemplarResponse?.status === 'success' ? exemplarResponse.data : undefined),
     metadata: {
       notices,
       executedQueryString: query,
@@ -189,6 +190,12 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   return chartData;
 };
 
+/**
+ * Converts the raw exemplar data from the Prometheus API into the
+ * TimeSeriesExemplars shape of the TimeSeriesData contract.
+ * Returns undefined when there is no exemplar data, so other panels/queries
+ * that don't use exemplars keep the payload unchanged.
+ */
 function buildExemplars(data?: ExemplarSeries[]): TimeSeriesExemplars[] | undefined {
   if (!data) return undefined;
 

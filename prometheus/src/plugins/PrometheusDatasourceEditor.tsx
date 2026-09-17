@@ -169,14 +169,6 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         onChange={(e) => onChange({ ...value, scrapeInterval: e.target.value as DurationString })}
         helperText="Set it to match the typical scrape interval used in your Prometheus instance."
       />
-      <HTTPSettingsEditor
-        value={value}
-        onChange={onChange}
-        isReadonly={isReadonly}
-        initialSpecDirect={initialSpecDirect}
-        initialSpecProxy={initialSpecProxy}
-        testConnection={testConnection}
-      />
       <Typography variant="h5" mt={2} mb={1}>
         Exemplars
       </Typography>
@@ -194,6 +186,14 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
           />
         }
         label="Enable exemplars"
+      />
+      <HTTPSettingsEditor
+        value={value}
+        onChange={onChange}
+        isReadonly={isReadonly}
+        initialSpecDirect={initialSpecDirect}
+        initialSpecProxy={initialSpecProxy}
+        testConnection={testConnection}
       />
       <Typography variant="h5" mt={2} mb={1}>
         Query Parameters
