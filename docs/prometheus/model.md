@@ -18,6 +18,11 @@ spec:
   proxy: <HTTP Proxy specification> # Optional
 
   scrapeInterval: <duration> # Optional
+
+  # Optional, enables the exemplars support: the Prometheus query plugin
+  # will also query the /api/v1/query_exemplars endpoint.
+  exemplars:
+    enable: <boolean>
 ```
 
 ### HTTP Proxy specification

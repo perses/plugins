@@ -23,6 +23,9 @@ spec: {
 	datasource.#HTTPDatasourceSpec
 	scrapeInterval?: =~#durationRegex
 	queryParams?: {[string]: string}
+	exemplars?: {
+		enable: bool
+	}
 }
 
 #kind: "PrometheusDatasource"
