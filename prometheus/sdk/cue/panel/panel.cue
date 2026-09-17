@@ -18,7 +18,7 @@ package panel
 
 import (
 	"strings"
-	"github.com/perses/perses/cue/model/api/v1"
+	"github.com/perses/spec/cue/dashboard"
 )
 
 // expected user inputs
@@ -38,4 +38,4 @@ if #clause != "" {
 }
 
 // - the Perses panel datamodel is appended at the root
-v1.#Panel
+dashboard.#Panel
