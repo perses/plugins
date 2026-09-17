@@ -78,7 +78,7 @@ export function JsonQueryEditor(props: JsonQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const selectedDatasource = value.datasource ?? DEFAULT_DATASOURCE;
 
-  const { register, handleSubmit, control } = useForm<JsonQueryFormValues>({
+  const { register, handleSubmit, control, setValue } = useForm<JsonQueryFormValues>({
     mode: 'onBlur',
     defaultValues: specToForm(value),
   });
@@ -103,11 +103,14 @@ export function JsonQueryEditor(props: JsonQueryEditorProps): ReactElement {
   };
 
   const handleMethodChange = (e: SelectChangeEvent<HttpMethod>): void => {
+    const nextMethod = e.target.value as HttpMethod;
+    if (nextMethod === 'GET') {
+      setValue('body', undefined);
+    }
     onChange(
       produce(value, (draft) => {
-        const method = e.target.value as HttpMethod;
-        draft.method = method;
-        if (method === 'GET') {
+        draft.method = nextMethod;
+        if (nextMethod === 'GET') {
           draft.body = undefined;
         }
       }),
