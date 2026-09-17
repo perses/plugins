@@ -31,8 +31,10 @@ import { formatStatChartValue } from './utils/format-stat-chart-value';
 import { getStatChartColor } from './utils/get-color';
 
 const MIN_WIDTH = 100;
+const MIN_TILE_HEIGHT = 60;
 const SPACING = 2;
 const AUTO_TILE_HEIGHT = 72;
+const MAX_VALUE_FONT_SIZE = 96;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 
@@ -100,18 +102,12 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 
   const autoColumnCount = useMemo(() => {
     if (!isAutoWrapped) return 1;
-    return Math.max(
-      1,
-      Math.min(statChartData.length, Math.floor((panelWidth + SPACING) / (MIN_WIDTH + SPACING))),
-    );
+    return Math.max(1, Math.min(statChartData.length, Math.floor((panelWidth + SPACING) / (MIN_WIDTH + SPACING))));
   }, [panelWidth, isAutoWrapped, statChartData.length]);
 
   const autoGridWidth = useMemo(() => {
     if (!isAutoWrapped) return chartWidth;
-    return Math.max(
-      MIN_WIDTH,
-      Math.floor((panelWidth - (autoColumnCount - 1) * SPACING) / autoColumnCount),
-    );
+    return Math.max(MIN_WIDTH, Math.floor((panelWidth - (autoColumnCount - 1) * SPACING) / autoColumnCount));
   }, [autoColumnCount, chartWidth, panelWidth, isAutoWrapped]);
 
   const autoRowCount = useMemo(() => {
@@ -121,10 +117,10 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 
   const statTileHeight = useMemo(() => {
     if (isVerticalLayout) {
-      return Math.max(60, Math.floor(panelHeight / Math.max(1, statChartData.length)));
+      return Math.max(MIN_TILE_HEIGHT, Math.floor(panelHeight / Math.max(1, statChartData.length)));
     }
     if (isAutoWrapped) {
-      return Math.min(AUTO_TILE_HEIGHT, Math.max(60, Math.floor(panelHeight / autoRowCount)));
+      return Math.min(AUTO_TILE_HEIGHT, Math.max(MIN_TILE_HEIGHT, Math.floor(panelHeight / autoRowCount)));
     }
     return panelHeight;
   }, [autoRowCount, panelHeight, isAutoWrapped, isVerticalLayout, statChartData.length]);
@@ -132,6 +128,13 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   if (!contentDimensions) return null;
 
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
+  let justifyContent = 'center';
+  if (isAutoWrapped) {
+    justifyContent = 'flex-start';
+  } else if (isMultiSeries) {
+    justifyContent = 'left';
+  }
+  const overflowX = !isVerticalLayout && !isAutoWrapped && isMultiSeries ? 'auto' : 'hidden';
 
   return (
     <Stack
@@ -140,7 +143,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
       spacing={`${SPACING}px`}
       direction={isVerticalLayout ? 'column' : 'row'}
       flexWrap={isAutoWrapped ? 'wrap' : 'nowrap'}
-      justifyContent={isAutoWrapped ? 'flex-start' : isMultiSeries ? 'left' : 'center'}
+      justifyContent={justifyContent}
       alignItems={isAutoWrapped ? 'flex-start' : 'center'}
       alignContent={isAutoWrapped ? 'flex-start' : 'center'}
       sx={{
@@ -150,7 +153,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
           gridAutoRows: `${statTileHeight}px`,
           gap: `${SPACING}px`,
         }),
-        overflowX: isVerticalLayout || isAutoWrapped ? 'hidden' : isMultiSeries ? 'auto' : 'hidden',
+        overflowX,
         overflowY: isVerticalLayout || isAutoWrapped ? 'auto' : 'hidden',
         '&::-webkit-scrollbar': {
           height: '4px',
@@ -175,11 +178,17 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
       {statChartData.length ? (
         statChartData.map((series, index) => {
           const sparklineConfig = convertSparkline(chartsTheme, series.color, sparkline);
+          let tileWidth = chartWidth;
+          if (isAutoWrapped) {
+            tileWidth = autoGridWidth;
+          } else if (isVerticalLayout) {
+            tileWidth = panelWidth;
+          }
 
           return (
             <StatChartBase
               key={index}
-              width={isAutoWrapped ? autoGridWidth : isVerticalLayout ? panelWidth : chartWidth}
+              width={tileWidth}
               height={statTileHeight}
               data={series}
               format={format}
@@ -190,7 +199,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               legendFontSize={legendFontSize}
               alignmentText={isAutoWrapped || !isVerticalLayout ? undefined : alignmentText}
               alignmentSeriesName={alignmentSeriesName}
-              maxValueFontSize={!isAutoWrapped && !isVerticalLayout ? 96 : undefined}
+              maxValueFontSize={!isAutoWrapped && !isVerticalLayout ? MAX_VALUE_FONT_SIZE : undefined}
             />
           );
         })

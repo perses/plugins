@@ -193,10 +193,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
             onChange={handleOrientationChange}
             options={STAT_CHART_ORIENTATION_LABELS}
             disableClearable
-            value={
-              STAT_CHART_ORIENTATION_LABELS.find((i) => i.id === value.orientation) ??
-              STAT_CHART_ORIENTATION_LABELS.find((i) => i.id === 'auto')!
-            }
+            value={STAT_CHART_ORIENTATION_LABELS.find((i) => i.id === value.orientation)}
           />
         }
       />
