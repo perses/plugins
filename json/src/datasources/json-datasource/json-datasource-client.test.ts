@@ -50,4 +50,26 @@ describe('buildUrl', () => {
     const url = buildUrl('http://api.example', '/search', { q: 'hello world' });
     expect(url).toBe('http://api.example/search?q=hello+world');
   });
+
+  describe('relative datasourceUrl (proxy mode)', () => {
+    it('builds URL from a relative base path', () => {
+      expect(buildUrl('/proxy/api', '/data')).toBe('/proxy/api/data');
+    });
+
+    it('strips trailing slash from relative base', () => {
+      expect(buildUrl('/proxy/api/', '/data')).toBe('/proxy/api/data');
+    });
+
+    it('prepends slash to path when missing, relative base', () => {
+      expect(buildUrl('/proxy/api', 'data')).toBe('/proxy/api/data');
+    });
+
+    it('appends query params with relative base', () => {
+      expect(buildUrl('/proxy/api', '/data', { foo: 'bar' })).toBe('/proxy/api/data?foo=bar');
+    });
+
+    it('handles root-relative base with no prefix', () => {
+      expect(buildUrl('/', '/data')).toBe('/data');
+    });
+  });
 });

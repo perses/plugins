@@ -15,7 +15,10 @@ import type { JsonQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
 import jsonata from 'jsonata';
 
-import type { JsonDatasourceClient } from '../../datasources/json-datasource/json-datasource-types';
+import type {
+  JsonDatasourceClient,
+  QueryRequestParameters,
+} from '../../datasources/json-datasource/json-datasource-types';
 import { DEFAULT_DATASOURCE } from './constants';
 import type { JsonQuerySpec } from './json-query-types';
 
@@ -37,12 +40,16 @@ export const getJsonData: JsonQueryPlugin<JsonQuerySpec>['getJsonData'] = async 
     spec.datasource ?? DEFAULT_DATASOURCE,
   );
 
-  let response = await client.query({
-    endpointUrl,
-    method: spec.method ?? 'GET',
-    queryParams,
-    body: spec.body ? replaceVariables(spec.body, context.variableState) : undefined,
-  });
+  const request =
+    spec.method === 'POST'
+      ? buildPostRequest(
+          endpointUrl,
+          queryParams,
+          spec.body ? replaceVariables(spec.body, context.variableState) : undefined,
+        )
+      : buildGetRequest(endpointUrl, queryParams);
+
+  let response = await client.query(request);
 
   if (spec.jsonataExpression) {
     response = await applyJsonata(response, spec.jsonataExpression);
@@ -52,4 +59,28 @@ export const getJsonData: JsonQueryPlugin<JsonQuerySpec>['getJsonData'] = async 
   }
 
   return { data: response };
+};
+
+const buildGetRequest = (
+  endpointUrl: string,
+  queryParams: Record<string, string> | undefined,
+): QueryRequestParameters => {
+  return {
+    endpointUrl,
+    method: 'GET',
+    queryParams,
+  };
+};
+
+const buildPostRequest = (
+  endpointUrl: string,
+  queryParams: Record<string, string> | undefined,
+  body: string | undefined,
+): QueryRequestParameters => {
+  return {
+    endpointUrl,
+    method: 'POST',
+    queryParams,
+    body,
+  };
 };
