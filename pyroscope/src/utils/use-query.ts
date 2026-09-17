@@ -69,6 +69,7 @@ export function useLabelValues(
 
 export function useProfileTypes(
   datasource: DatasourceSelector,
+  service?: string,
 ): UseQueryResult<SearchProfileTypesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
   const { absoluteTimeRange } = useTimeRange();
@@ -76,13 +77,35 @@ export function useProfileTypes(
 
   return useQuery<SearchProfileTypesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchProfileTypes', client],
+    queryKey: ['searchProfileTypes', service, client],
     queryFn: async () => {
-      return await client!.searchProfileTypes(
+      const profileTypesResponse = await client!.searchProfileTypes(
         {},
         { 'content-type': 'application/json' },
         { start: start * MILLISECONDS, end: end * MILLISECONDS },
       );
+
+      // if a service name is given, narrow profile types list to only the existing ones for this service
+      // otherwise return all existing profile types on the server
+      if (!service) {
+        return profileTypesResponse;
+      }
+
+      const labelValuesResponse = await client!.searchLabelValues(
+        {},
+        { 'content-type': 'application/json' },
+        {
+          name: '__name__',
+          matchers: [`{service_name="${service}"}`],
+          start: start * MILLISECONDS,
+          end: end * MILLISECONDS,
+        },
+      );
+      const profileTypeNames = new Set(labelValuesResponse.names);
+
+      return {
+        profileTypes: profileTypesResponse.profileTypes.filter((profileType) => profileTypeNames.has(profileType.name)),
+      };
     },
   });
 }

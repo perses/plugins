@@ -87,7 +87,12 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
         }}
       >
         <Service datasource={selectedDatasource} value={service} onChange={handleServiceChange} />
-        <ProfileTypeSelector datasource={selectedDatasource} value={profileType} onChange={handleProfileTypeChange} />
+        <ProfileTypeSelector
+          datasource={selectedDatasource}
+          value={profileType}
+          service={service}
+          onChange={handleProfileTypeChange}
+        />
         <TextField
           type="number"
           size="small"
