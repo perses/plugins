@@ -144,12 +144,10 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     // The rejection handler is attached right away: a fast-failing exemplar request (e.g. backend
     // without exemplar support) must not surface as an unhandled rejection while the range query runs.
     const exemplarPromise = exemplarsEnabled
-      ? client
-          .queryExemplars({ query, start, end }, { ...interpolatedOptions, signal: abortSignal })
-          .catch((err) => {
-            console.warn('Failed to fetch exemplars', err);
-            return undefined;
-          })
+      ? client.queryExemplars({ query, start, end }, { ...interpolatedOptions, signal: abortSignal }).catch((err) => {
+          console.warn('Failed to fetch exemplars', err);
+          return undefined;
+        })
       : undefined;
 
     response = await client.rangeQuery({ query, start, end, step }, { ...interpolatedOptions, signal: abortSignal });

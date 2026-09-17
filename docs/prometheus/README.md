@@ -82,7 +82,7 @@ See also technical docs related to this plugin:
 
 ## Exemplars
 
-[Exemplars](https://prometheus.io/docs/concepts/exemplars/) are references to related data — typically a trace ID — attached to individual samples of a metric. They let you go from an aggregate metric to a concrete representative request, which is handy to investigate a spike or a latency outlier directly from a dashboard.
+[Exemplars](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars) are references to related data — typically a trace ID — attached to individual samples of a metric. They let you go from an aggregate metric to a concrete representative request, which is handy to investigate a spike or a latency outlier directly from a dashboard.
 
 The Prometheus package supports displaying exemplars on the [Time Series Chart](../timeserieschart/README.md) panel:
 
@@ -105,7 +105,7 @@ When using the Dashboard-as-Code Go lib, the same can be achieved with the `data
 
 Some requirements and caveats to be aware of:
 
-- The Prometheus instance (or any Prometheus-compatible backend) must have the [exemplar storage](https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplar-storage) enabled, and your telemetry pipeline must actually attach exemplars to the samples (e.g. via the OTLP receiver).
+- The Prometheus instance (or any Prometheus-compatible backend) must have the [exemplar storage](https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage) enabled, and your telemetry pipeline must actually attach exemplars to the samples (e.g. via the OTLP receiver).
 - Exemplars are only fetched for range queries: queries executed in instant mode never display exemplars.
 - When relying on the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature, make sure the `/api/v1/query_exemplars` endpoint is allowed so exemplars can be fetched through the Perses server.
 
