@@ -164,19 +164,19 @@ A trace ID returns all the spans of this trace from `table`, whatever the time r
 
 ### Search query columns
 
-A search query must return one row per span, with the column names of the exporter schema:
+A search query returns one row per span, with the column names of the exporter schema. The plugin uses it as a subquery and lets ClickHouse group the spans into traces, so all of these columns are required, and the query has to be a single `SELECT` without its own `FORMAT` clause. A trailing `;` is removed.
 
-| Column         | Required | Usage                                                                                  |
-|----------------|----------|----------------------------------------------------------------------------------------|
-| `TraceId`      | Yes      | Groups the spans into traces.                                                          |
-| `Timestamp`    | Yes      | Start time of the span. Values without a timezone are read as UTC.                     |
-| `Duration`     | No       | Duration of the span in nanoseconds, used to compute the duration of the trace.        |
-| `ParentSpanId` | No       | Identifies the root span, which names the trace. Otherwise the earliest span is used. |
-| `SpanName`     | No       | Name of the trace, taken from its root span.                                           |
-| `ServiceName`  | No       | Counts the spans of each service.                                                      |
-| `StatusCode`   | No       | Counts the spans with an error in each service.                                        |
+| Column | Usage |
+| :- | :- |
+| `TraceId` | Groups the spans into traces. |
+| `Timestamp` | Start time of the span, as any date-time type. |
+| `Duration` | Duration of the span in nanoseconds, used to compute the duration of the trace. |
+| `ParentSpanId` | Identifies the root span, which names the trace. When the query does not return it, the earliest span is used. |
+| `SpanName` | Name of the trace, taken from its root span. |
+| `ServiceName` | Counts the spans of each service. |
+| `StatusCode` | Counts the spans with an error in each service. |
 
-The span counts and the root span are computed from the returned spans only. To list whole traces, select the trace IDs in a subquery, as in the example below.
+`limit` is applied by ClickHouse, which returns one trace more than asked for, so that the panels can tell whether more traces match. The span counts and the root span are computed from the spans the query returns: to list whole traces, select the trace IDs in a subquery, as in the example below.
 
 Like the other ClickHouse queries, `{start}` and `{end}` are replaced with the time range of the dashboard.
 

@@ -33,16 +33,16 @@ export interface ClickHouseTraceQuerySpec {
 }
 
 /**
- * A span returned by a search query. Column names follow the OpenTelemetry Collector ClickHouse exporter schema.
+ * A trace of a search, as grouped by ClickHouse. See `buildSearchQuery`.
  */
-export interface ClickHouseSpanRow {
-  TraceId?: string;
-  ParentSpanId?: string;
-  SpanName?: string;
-  ServiceName?: string;
-  Timestamp?: string;
-  Duration?: string | number;
-  StatusCode?: string;
+export interface ClickHouseTraceSummaryRow {
+  TraceId: string;
+  StartTimeUnixNano: string;
+  EndTimeUnixNano: string;
+  RootServiceName: string;
+  RootSpanName: string;
+  SpanCounts: Record<string, number | string>;
+  ErrorCounts: Record<string, number | string>;
 }
 
 /**

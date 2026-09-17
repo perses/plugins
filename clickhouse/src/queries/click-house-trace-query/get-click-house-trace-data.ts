@@ -21,15 +21,15 @@ import type { ClickHouseClient, ClickHouseQueryResponse } from '../../model/clic
 import { formatClickHouseDateTime, replaceTimeRangePlaceholders } from '../../model/click-house-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import type {
-  ClickHouseSpanRow,
   ClickHouseTraceQuerySpec,
   ClickHouseTraceSpanRow,
+  ClickHouseTraceSummaryRow,
 } from './click-house-trace-query-types';
 import { DEFAULT_TRACE_SEARCH_LIMIT, DEFAULT_TRACE_TABLE } from './click-house-trace-query-types';
 
 const TRACE_ID_PATTERN = /^[a-fA-F0-9]{16}(?:[a-fA-F0-9]{16})?$/;
 const TABLE_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?$/;
-const CLICKHOUSE_DATETIME_PATTERN = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?$/;
+const FORMAT_CLAUSE_PATTERN = /\bFORMAT\s+[A-Za-z0-9_]+\s*$/i;
 
 // The exporter writes the short names (Server, Error). The OTLP enum names (SPAN_KIND_SERVER) are accepted as well.
 const SPAN_KIND_MAP: Record<string, otlptracev1.Span['kind']> = {
@@ -47,13 +47,6 @@ const STATUS_CODE_MAP: Record<string, otlptracev1.Status['code']> = {
   error: 'STATUS_CODE_ERROR',
 };
 
-interface TraceSummary {
-  startTimeUnixMs: number;
-  endTimeUnixMs: number;
-  root: { hasParent: boolean; startTimeUnixMs: number; serviceName: string; spanName: string };
-  serviceStats: Record<string, ServiceStats>;
-}
-
 export const getClickHouseTraceData: TraceQueryPlugin<ClickHouseTraceQuerySpec>['getTraceData'] = async (
   spec,
   context,
@@ -69,8 +62,9 @@ export const getClickHouseTraceData: TraceQueryPlugin<ClickHouseTraceQuerySpec>[
 
   /**
    * determine type of query:
-   * if the query is a valid trace ID, fetch the spans of this trace from the trace table
-   * otherwise, run the query as SQL and group the spans it returns into search results
+   * if the query is 16 or 32 hexadecimal characters it is a trace ID, and the spans of this trace are read from the
+   * trace table. SQL cannot match that pattern: it always contains spaces, or letters outside a-f.
+   * otherwise, the query is run as SQL, and ClickHouse groups the spans it returns into traces
    */
   if (TRACE_ID_PATTERN.test(query)) {
     return getTraceById(client, query, spec.table || DEFAULT_TRACE_TABLE);
@@ -109,37 +103,62 @@ async function searchTraces(
 ): Promise<TraceData> {
   const start = timeRange ? formatClickHouseDateTime(timeRange.start) : undefined;
   const end = timeRange ? formatClickHouseDateTime(timeRange.end) : undefined;
-  const executedQueryString = replaceTimeRangePlaceholders(query, start, end);
+  // One trace more than asked for is fetched, to know whether more traces match, as the Tempo plugin does
+  const executedQueryString = buildSearchQuery(replaceTimeRangePlaceholders(query, start, end), limit + 1);
   // Without a time range the placeholders are left in place, instead of letting the client replace them with ''
   const response = await client.query({ start: start ?? '{start}', end: end ?? '{end}', query: executedQueryString });
-  const { searchResult, skippedRows } = clickHouseSpansToSearchResults(getRows<ClickHouseSpanRow>(response));
+  const rows = getRows<ClickHouseTraceSummaryRow>(response);
 
   const notices: Notice[] = [];
-  if (skippedRows > 0) {
-    notices.push({
-      type: 'warning',
-      message: `${skippedRows} rows were ignored because they have no TraceId or no valid Timestamp.`,
-    });
-  }
-
-  // Unlike Tempo, the limit cannot be pushed down into a user-written query, so it is applied to the grouped traces
-  const hasMoreResults = searchResult.length > limit;
+  const hasMoreResults = rows.length > limit;
   if (hasMoreResults) {
     notices.push({
       type: 'info',
       message: 'Not all matching traces are currently displayed. Increase the result limit to view additional traces.',
     });
-    searchResult.splice(limit);
   }
 
   return {
-    searchResult,
+    searchResult: rows.slice(0, limit).map(toTraceSearchResult),
     metadata: {
       executedQueryString,
       hasMoreResults,
       notices,
     },
   };
+}
+
+/**
+ * Wraps a search query so that ClickHouse groups the spans into traces and applies the limit. Without it, every
+ * matching span would be transferred and then grouped and discarded in the browser. The query is therefore used as a
+ * subquery: it must be a single SELECT, and all the columns it is documented to return are required.
+ */
+function buildSearchQuery(searchQuery: string, limit: number): string {
+  const subQuery = searchQuery.trim().replace(/;+$/, '').trimEnd();
+  if (FORMAT_CLAUSE_PATTERN.test(subQuery)) {
+    throw new Error('A search query cannot end with a FORMAT clause: its rows are grouped into traces in SQL.');
+  }
+
+  const timestampNano = 'toUnixTimestamp64Nano(toDateTime64(Timestamp, 9))';
+  // The root span is the one without a parent; when the query doesn't return it, the earliest span stands in for it
+  const rootValue = (column: string): string =>
+    `if(countIf(ParentSpanId = '') > 0, argMinIf(${column}, Timestamp, ParentSpanId = ''), argMin(${column}, Timestamp))`;
+
+  return `SELECT
+  TraceId,
+  toString(min(${timestampNano})) AS StartTimeUnixNano,
+  toString(max(${timestampNano} + toUInt64(Duration))) AS EndTimeUnixNano,
+  ${rootValue('ServiceName')} AS RootServiceName,
+  ${rootValue('SpanName')} AS RootSpanName,
+  sumMap(map(ServiceName, toUInt64(1))) AS SpanCounts,
+  sumMap(map(ServiceName, toUInt64(lower(StatusCode) IN ('error', 'status_code_error')))) AS ErrorCounts
+FROM (
+${subQuery}
+)
+WHERE TraceId != ''
+GROUP BY TraceId
+ORDER BY min(toDateTime64(Timestamp, 9)) DESC
+LIMIT ${limit}`;
 }
 
 /**
@@ -260,72 +279,28 @@ function normalizeEnumName(value: string | undefined, prefix: string): string {
   return name.startsWith(prefix) ? name.slice(prefix.length) : name;
 }
 
-function clickHouseSpansToSearchResults(rows: ClickHouseSpanRow[]): {
-  searchResult: TraceSearchResult[];
-  skippedRows: number;
-} {
-  const summaries = new Map<string, TraceSummary>();
-  let skippedRows = 0;
+function toTraceSearchResult(row: ClickHouseTraceSummaryRow): TraceSearchResult {
+  const startTimeUnixNano = BigInt(row.StartTimeUnixNano);
 
-  for (const row of rows) {
-    const startTimeUnixMs = parseTimestampMs(row.Timestamp);
-    if (!row.TraceId || startTimeUnixMs === undefined) {
-      skippedRows++;
-      continue;
+  const serviceStats: Record<string, ServiceStats> = {};
+  for (const [serviceName, spanCount] of Object.entries(row.SpanCounts)) {
+    serviceStats[serviceName || 'unknown'] = { spanCount: Number(spanCount) };
+  }
+  for (const [serviceName, errorCount] of Object.entries(row.ErrorCounts)) {
+    const stats = serviceStats[serviceName || 'unknown'];
+    // ClickHouse also returns the services without errors, where the panels expect no count at all
+    if (stats !== undefined && Number(errorCount) > 0) {
+      stats.errorCount = Number(errorCount);
     }
-
-    // Duration is stored in nanoseconds
-    const durationMs = Number(row.Duration ?? 0) / 1e6;
-    const endTimeUnixMs = startTimeUnixMs + (Number.isFinite(durationMs) ? durationMs : 0);
-    const serviceName = row.ServiceName || 'unknown';
-    const span = { hasParent: !!row.ParentSpanId, startTimeUnixMs, serviceName, spanName: row.SpanName ?? '' };
-
-    let summary = summaries.get(row.TraceId);
-    if (summary === undefined) {
-      summary = { startTimeUnixMs, endTimeUnixMs, root: span, serviceStats: {} };
-      summaries.set(row.TraceId, summary);
-    } else {
-      summary.startTimeUnixMs = Math.min(summary.startTimeUnixMs, startTimeUnixMs);
-      summary.endTimeUnixMs = Math.max(summary.endTimeUnixMs, endTimeUnixMs);
-      // The root is the span without a parent. If the query didn't return it, the earliest span stands in for it.
-      const isBetterRoot =
-        span.hasParent === summary.root.hasParent
-          ? span.startTimeUnixMs < summary.root.startTimeUnixMs
-          : !span.hasParent;
-      if (isBetterRoot) {
-        summary.root = span;
-      }
-    }
-
-    const stats = summary.serviceStats[serviceName] ?? { spanCount: 0 };
-    stats.spanCount += 1;
-    if (STATUS_CODE_MAP[normalizeEnumName(row.StatusCode, 'status_code_')] === 'STATUS_CODE_ERROR') {
-      stats.errorCount = (stats.errorCount ?? 0) + 1;
-    }
-    summary.serviceStats[serviceName] = stats;
   }
 
-  const searchResult = Array.from(summaries, ([traceId, summary]) => ({
-    traceId,
-    rootServiceName: summary.root.serviceName,
-    rootTraceName: summary.root.spanName || traceId,
-    startTimeUnixMs: summary.startTimeUnixMs,
-    durationMs: summary.endTimeUnixMs - summary.startTimeUnixMs,
-    serviceStats: summary.serviceStats,
-  })).toSorted((a, b) => b.startTimeUnixMs - a.startTimeUnixMs);
-
-  return { searchResult, skippedRows };
-}
-
-function parseTimestampMs(timestamp: string | undefined): number | undefined {
-  if (timestamp === undefined) {
-    return undefined;
-  }
-
-  // ClickHouse renders DateTime64 without a timezone: read it as UTC, like the {start} and {end} placeholders
-  const match = CLICKHOUSE_DATETIME_PATTERN.exec(timestamp);
-  const unixMs = match
-    ? Date.parse(`${match[1]}T${match[2]}Z`) + Number(`0.${match[3] ?? '0'}`) * 1000
-    : Date.parse(timestamp);
-  return Number.isNaN(unixMs) ? undefined : unixMs;
+  return {
+    traceId: row.TraceId,
+    rootServiceName: row.RootServiceName || 'unknown',
+    rootTraceName: row.RootSpanName || row.TraceId,
+    // Microseconds keep the value a safe integer, nanoseconds since the epoch do not
+    startTimeUnixMs: Number(startTimeUnixNano / 1000n) / 1000,
+    durationMs: Number(BigInt(row.EndTimeUnixNano) - startTimeUnixNano) / 1e6,
+    serviceStats,
+  };
 }

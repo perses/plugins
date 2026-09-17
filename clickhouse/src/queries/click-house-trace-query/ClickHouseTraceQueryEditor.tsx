@@ -103,8 +103,8 @@ export function ClickHouseTraceQueryEditor(props: ClickHouseTraceQueryEditorProp
       />
       <Typography variant="caption" color="text.secondary">
         A trace ID shows that trace. A SQL query searches traces: return one row per span with the columns TraceId,
-        Timestamp, Duration, ParentSpanId, SpanName, ServiceName and StatusCode. {'{start}'} and {'{end}'} are replaced
-        with the dashboard time range.
+        Timestamp, Duration, ParentSpanId, SpanName, ServiceName and StatusCode, which ClickHouse groups into traces.
+        {'{start}'} and {'{end}'} are replaced with the dashboard time range.
       </Typography>
       <Stack direction="row" spacing={2}>
         <TextField

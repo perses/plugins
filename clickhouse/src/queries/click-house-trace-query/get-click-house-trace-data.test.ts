@@ -16,7 +16,7 @@ import type { Mock } from 'vitest';
 
 import { ClickHouseDatasource } from '../../datasources/click-house-datasource';
 import type { ClickHouseQueryResponse } from '../../model/click-house-client';
-import type { ClickHouseSpanRow, ClickHouseTraceSpanRow } from './click-house-trace-query-types';
+import type { ClickHouseTraceSpanRow, ClickHouseTraceSummaryRow } from './click-house-trace-query-types';
 import { getClickHouseTraceData } from './get-click-house-trace-data';
 
 const TRACE_ID = '5b8efff798038103d269b633813fc60c';
@@ -73,6 +73,17 @@ const traceSpanRow = (row: Partial<ClickHouseTraceSpanRow>): ClickHouseTraceSpan
   LinkTraceIds: [],
   LinkSpanIds: [],
   LinkAttributes: [],
+  ...row,
+});
+
+const summaryRow = (row: Partial<ClickHouseTraceSummaryRow>): ClickHouseTraceSummaryRow => ({
+  TraceId: TRACE_ID,
+  StartTimeUnixNano: '1735689600000000000',
+  EndTimeUnixNano: '1735689600400000000',
+  RootServiceName: 'frontend',
+  RootSpanName: 'GET /cart',
+  SpanCounts: { frontend: 1, cart: 2 },
+  ErrorCounts: { frontend: 0, cart: 1 },
   ...row,
 });
 
@@ -274,58 +285,25 @@ describe('getClickHouseTraceData', () => {
   });
 
   describe('with a SQL query', () => {
-    it('should group spans into one search result per trace, most recent first', async () => {
-      const rows: ClickHouseSpanRow[] = [
-        {
-          TraceId: TRACE_ID,
-          ParentSpanId: '',
-          SpanName: 'GET /cart',
-          ServiceName: 'frontend',
-          Timestamp: '2025-01-01 00:00:00.000000000',
-          Duration: '250000000',
-          StatusCode: 'Ok',
-        },
-        {
-          TraceId: TRACE_ID,
-          ParentSpanId: 'eee19b7ec3c1b174',
-          SpanName: 'cart.get',
-          ServiceName: 'cart',
-          Timestamp: '2025-01-01 00:00:00.100000000',
-          Duration: '300000000',
-          StatusCode: 'Error',
-        },
-        {
-          TraceId: TRACE_ID,
-          ParentSpanId: '53995c3f42cd8ad8',
-          SpanName: 'redis GET',
-          ServiceName: 'cart',
-          Timestamp: '2025-01-01 00:00:00.150000000',
-          Duration: '1000000',
-          StatusCode: 'Unset',
-        },
-        {
+    it('should group the spans into traces in ClickHouse, and ask for one trace more than the limit', async () => {
+      const { context, query } = createStubContext([
+        summaryRow({}),
+        summaryRow({
           TraceId: OTHER_TRACE_ID,
-          ParentSpanId: '',
-          SpanName: 'POST /checkout',
-          ServiceName: 'frontend',
-          Timestamp: '2025-01-01T00:10:00Z',
-          Duration: 50000000,
-          StatusCode: 'Unset',
-        },
-      ];
-      const { context } = createStubContext(rows);
+          StartTimeUnixNano: '1735690200000000000',
+          EndTimeUnixNano: '1735690200050000000',
+          RootSpanName: 'POST /checkout',
+          SpanCounts: { frontend: 1 },
+          ErrorCounts: { frontend: 0 },
+        }),
+      ]);
 
       const result = await getClickHouseTraceData({ query: 'SELECT * FROM otel_traces' }, context);
 
+      expect(executedQuery(query)).toContain('FROM (\nSELECT * FROM otel_traces\n)');
+      expect(executedQuery(query)).toContain('GROUP BY TraceId');
+      expect(executedQuery(query)).toContain('LIMIT 21');
       expect(result.searchResult).toEqual([
-        {
-          traceId: OTHER_TRACE_ID,
-          rootServiceName: 'frontend',
-          rootTraceName: 'POST /checkout',
-          startTimeUnixMs: Date.parse('2025-01-01T00:10:00Z'),
-          durationMs: 50,
-          serviceStats: { frontend: { spanCount: 1 } },
-        },
         {
           traceId: TRACE_ID,
           rootServiceName: 'frontend',
@@ -334,64 +312,31 @@ describe('getClickHouseTraceData', () => {
           durationMs: 400,
           serviceStats: { frontend: { spanCount: 1 }, cart: { spanCount: 2, errorCount: 1 } },
         },
+        {
+          traceId: OTHER_TRACE_ID,
+          rootServiceName: 'frontend',
+          rootTraceName: 'POST /checkout',
+          startTimeUnixMs: Date.parse('2025-01-01T00:10:00Z'),
+          durationMs: 50,
+          serviceStats: { frontend: { spanCount: 1 } },
+        },
       ]);
       expect(result.trace).toBeUndefined();
       expect(result.metadata?.hasMoreResults).toBe(false);
       expect(result.metadata?.notices).toEqual([]);
     });
 
-    it('should use the earliest span as root when the query does not return the root span', async () => {
-      const { context } = createStubContext([
-        {
-          TraceId: TRACE_ID,
-          ParentSpanId: 'b7ad6b7169203331',
-          SpanName: 'redis GET',
-          ServiceName: 'cart',
-          Timestamp: '2025-01-01 00:00:02',
-        },
-        {
-          TraceId: TRACE_ID,
-          ParentSpanId: 'eee19b7ec3c1b174',
-          SpanName: 'cart.get',
-          ServiceName: 'cart',
-          Timestamp: '2025-01-01 00:00:01',
-        },
-      ]);
-
-      const result = await getClickHouseTraceData({ query: 'SELECT * FROM otel_traces' }, context);
-
-      expect(result.searchResult?.[0]).toMatchObject({ rootServiceName: 'cart', rootTraceName: 'cart.get' });
-    });
-
-    it('should replace the time range placeholders', async () => {
-      const { context, query } = createStubContext([]);
-
-      const result = await getClickHouseTraceData(
-        { query: "SELECT * FROM otel_traces WHERE Timestamp BETWEEN '{start}' AND '{end}'" },
-        context,
-      );
-
-      const expectedQuery =
-        "SELECT * FROM otel_traces WHERE Timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00'";
-      expect(query).toHaveBeenCalledWith({
-        start: '2025-01-01 00:00:00',
-        end: '2025-01-02 00:00:00',
-        query: expectedQuery,
-      });
-      expect(result.metadata?.executedQueryString).toBe(expectedQuery);
-      expect(result.searchResult).toEqual([]);
-    });
-
-    it('should limit the number of traces and report that more are available', async () => {
-      const { context } = createStubContext([
-        { TraceId: 'a', Timestamp: '2025-01-01 00:00:01' },
-        { TraceId: 'b', Timestamp: '2025-01-01 00:00:03' },
-        { TraceId: 'c', Timestamp: '2025-01-01 00:00:02' },
+    it('should report that more traces match when ClickHouse returns more rows than the limit', async () => {
+      const { context, query } = createStubContext([
+        summaryRow({ TraceId: 'a' }),
+        summaryRow({ TraceId: 'b' }),
+        summaryRow({ TraceId: 'c' }),
       ]);
 
       const result = await getClickHouseTraceData({ query: 'SELECT * FROM otel_traces', limit: 2 }, context);
 
-      expect(result.searchResult?.map((trace) => trace.traceId)).toEqual(['b', 'c']);
+      expect(executedQuery(query)).toContain('LIMIT 3');
+      expect(result.searchResult?.map((trace) => trace.traceId)).toEqual(['a', 'b']);
       expect(result.metadata?.hasMoreResults).toBe(true);
       expect(result.metadata?.notices).toEqual([
         {
@@ -402,19 +347,54 @@ describe('getClickHouseTraceData', () => {
       ]);
     });
 
-    it('should ignore rows without a trace ID or a valid timestamp and report them', async () => {
-      const { context } = createStubContext([
-        { TraceId: TRACE_ID, Timestamp: '2025-01-01 00:00:00' },
-        { Timestamp: '2025-01-01 00:00:00' },
-        { TraceId: OTHER_TRACE_ID, Timestamp: 'yesterday' },
-      ]);
+    it('should run a 16 or 32 character SQL query as a search, not as a trace ID lookup', async () => {
+      const { context, query } = createStubContext([]);
+
+      await getClickHouseTraceData({ query: 'SELECT * FROM t1' }, context);
+
+      expect('SELECT * FROM t1'.length).toBe(16);
+      expect(executedQuery(query)).toContain('GROUP BY TraceId');
+      expect(executedQuery(query)).not.toContain("WHERE TraceId = '");
+    });
+
+    it('should replace the time range placeholders in the search query', async () => {
+      const { context, query } = createStubContext([]);
+
+      const result = await getClickHouseTraceData(
+        { query: "SELECT * FROM otel_traces WHERE Timestamp BETWEEN '{start}' AND '{end}'" },
+        context,
+      );
+
+      const expectedSubQuery =
+        "SELECT * FROM otel_traces WHERE Timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00'";
+      expect(executedQuery(query)).toContain(`FROM (\n${expectedSubQuery}\n)`);
+      expect(result.metadata?.executedQueryString).toBe(executedQuery(query));
+      expect(result.searchResult).toEqual([]);
+    });
+
+    it('should strip a trailing semicolon from the search query', async () => {
+      const { context, query } = createStubContext([]);
+
+      await getClickHouseTraceData({ query: 'SELECT * FROM otel_traces;  ' }, context);
+
+      expect(executedQuery(query)).toContain('FROM (\nSELECT * FROM otel_traces\n)');
+    });
+
+    it('should reject a search query that ends with a FORMAT clause', async () => {
+      const { context, query } = createStubContext([]);
+
+      await expect(
+        getClickHouseTraceData({ query: 'SELECT * FROM otel_traces FORMAT JSONEachRow' }, context),
+      ).rejects.toThrow('cannot end with a FORMAT clause');
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to unknown when the root span has no service name', async () => {
+      const { context } = createStubContext([summaryRow({ RootServiceName: '', RootSpanName: '' })]);
 
       const result = await getClickHouseTraceData({ query: 'SELECT * FROM otel_traces' }, context);
 
-      expect(result.searchResult?.map((trace) => trace.traceId)).toEqual([TRACE_ID]);
-      expect(result.metadata?.notices).toEqual([
-        { type: 'warning', message: '2 rows were ignored because they have no TraceId or no valid Timestamp.' },
-      ]);
+      expect(result.searchResult?.[0]).toMatchObject({ rootServiceName: 'unknown', rootTraceName: TRACE_ID });
     });
 
     it('should throw when ClickHouse returns an error', async () => {
