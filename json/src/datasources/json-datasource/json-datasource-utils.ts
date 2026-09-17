@@ -11,13 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/**
+ * Builds a request URL by combining the datasource base URL, endpoint path, and optional query parameters.
+ * @param datasourceUrl Base datasource URL.
+ * @param endpointUrl Endpoint path, with or without a leading slash.
+ * @param queryParams Optional query parameters to append.
+ * @returns The fully qualified request URL.
+ */
 export function buildUrl(datasourceUrl: string, endpointUrl: string, queryParams?: Record<string, string>): string {
   const base = datasourceUrl.replace(/\/$/, '');
   const path = endpointUrl.startsWith('/') ? endpointUrl : `/${endpointUrl}`;
-  let url = `${base}${path}`;
-  if (queryParams && Object.keys(queryParams).length > 0) {
-    const searchParams = new URLSearchParams(queryParams);
-    url = `${url}?${searchParams.toString()}`;
+  const combined = `${base}${path}`;
+
+  const query = new URLSearchParams(queryParams).toString();
+  if (!query) {
+    return combined;
   }
-  return url;
+
+  // Use '&' when the path already contains a query string, otherwise start one with '?'.
+  const separator = combined.includes('?') ? '&' : '?';
+  return `${combined}${separator}${query}`;
 }

@@ -28,6 +28,12 @@ describe('buildUrl', () => {
     );
   });
 
+  it('appends query params to url with existing params', () => {
+    expect(buildUrl('http://api.example', '/data?foo=qwe', { foo: 'bar', baz: 'qux' })).toBe(
+      'http://api.example/data?foo=qwe&foo=bar&baz=qux',
+    );
+  });
+
   it('omits query string when params is empty', () => {
     expect(buildUrl('http://api.example', '/data', {})).toBe('http://api.example/data');
   });
