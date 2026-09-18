@@ -15,9 +15,9 @@ module github.com/perses/plugins/canvas
 
 go 1.27.1
 
-require github.com/perses/perses v0.54.0
+require github.com/perses/perses v0.55.0-beta.2
 
 require (
-	github.com/perses/spec v0.3.0-beta.8 // indirect
+	github.com/perses/spec v0.3.0-beta.9 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
