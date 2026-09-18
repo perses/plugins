@@ -7,7 +7,9 @@
       "position": "bottom"
     },
     "showLabels": true,
-    "colorPalette": ["#e02f44"],
-    "radius": 50
+    "visual": {
+      "colorPalette": ["#e02f44"],
+      "outerRadius": "90%"
+    }
   }
 }

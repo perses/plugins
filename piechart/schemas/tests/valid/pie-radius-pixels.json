@@ -1,0 +1,10 @@
+{
+  "kind": "PieChart",
+  "spec": {
+    "calculation": "last-number",
+    "visual": {
+      "innerRadius": "40",
+      "outerRadius": "200"
+    }
+  }
+}
