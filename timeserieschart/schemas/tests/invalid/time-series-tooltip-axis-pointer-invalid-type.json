@@ -1,0 +1,10 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "tooltip": {
+      "axisPointer": {
+        "type": "shadow"
+      }
+    }
+  }
+}
