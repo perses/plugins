@@ -20,6 +20,7 @@ import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ReactElement } from 'react';
 
+import { DEFAULT_OUTER_RADIUS } from './pie-chart-model';
 import { getLabelFormatter, getTooltipFormatter } from './utils';
 
 registerECharts([
@@ -47,12 +48,24 @@ export interface PieChartBaseProps {
   mode?: ModeOption;
   showLabels?: boolean;
   formatOptions?: FormatOptions;
+  innerRadius?: string;
+  outerRadius?: string;
 }
 
 export function PieChartBase(props: PieChartBaseProps): ReactElement {
-  const { width, height, data, mode, formatOptions, showLabels } = props;
+  const {
+    width,
+    height,
+    data,
+    mode,
+    formatOptions,
+    showLabels,
+    innerRadius,
+    outerRadius = DEFAULT_OUTER_RADIUS,
+  } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
+  const radius = innerRadius ? [innerRadius, outerRadius] : outerRadius;
 
   const option = {
     tooltip: {
@@ -64,7 +77,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
     series: [
       {
         type: 'pie',
-        radius: '90%',
+        radius,
         label: {
           show: Boolean(showLabels),
           position: 'inner',

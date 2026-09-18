@@ -12,7 +12,10 @@
     },
     "sort": "desc",
     "mode": "value",
-    "radius": 50,
-    "showLabels": true
+    "showLabels": true,
+    "visual": {
+      "innerRadius": "40%",
+      "outerRadius": "90%"
+    }
   }
 }

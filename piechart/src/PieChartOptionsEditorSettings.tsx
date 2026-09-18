@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { SwitchProps } from '@mui/material';
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack, Switch, Typography } from '@mui/material';
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, Switch, TextField, Typography } from '@mui/material';
 import type {
   FormatControlsProps,
   SortSelectorProps,
@@ -39,18 +39,100 @@ import { CalculationSelector, LegendOptionsEditor } from '@perses-dev/plugin-sys
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
-import type { ReactElement } from 'react';
-import { useMemo } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
-import type { PieChartOptions, PieChartOptionsEditorProps } from './pie-chart-model';
-import { DEFAULT_FORMAT } from './pie-chart-model';
+import { DEFAULT_FORMAT, DEFAULT_OUTER_RADIUS, DEFAULT_VISUAL, resolvePieChartVisualOptions } from './pie-chart-model';
+import type { PieChartOptions, PieChartOptionsEditorProps, PieChartVisualOptions } from './pie-chart-model';
+
+interface RadiusInputs {
+  innerRadius?: string;
+  outerRadius: string;
+}
+
+interface RadiusControlsProps {
+  innerRadius?: string;
+  outerRadius: string;
+  onChange: (radius: RadiusInputs) => void;
+}
+
+function RadiusControls({ innerRadius = '', outerRadius, onChange }: RadiusControlsProps): ReactElement {
+  const [isOuterRadiusEmpty, setIsOuterRadiusEmpty] = useState(false);
+
+  const updateRadius = useCallback(
+    (inner: string, outer: string): void => {
+      if (outer === '') return;
+
+      onChange({ innerRadius: inner || undefined, outerRadius: outer });
+    },
+    [onChange],
+  );
+
+  const handleOuterRadiusChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      const outer = event.target.value;
+      if (outer === '') {
+        setIsOuterRadiusEmpty(true);
+        return;
+      }
+
+      setIsOuterRadiusEmpty(false);
+      updateRadius(innerRadius, outer);
+    },
+    [innerRadius, updateRadius],
+  );
+
+  const handleInnerRadiusChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      const outer = isOuterRadiusEmpty ? DEFAULT_OUTER_RADIUS : outerRadius;
+      setIsOuterRadiusEmpty(false);
+      updateRadius(event.target.value, outer);
+    },
+    [isOuterRadiusEmpty, outerRadius, updateRadius],
+  );
+
+  const handleOuterRadiusBlur = useCallback((): void => {
+    if (!isOuterRadiusEmpty) return;
+
+    setIsOuterRadiusEmpty(false);
+    updateRadius(innerRadius, DEFAULT_OUTER_RADIUS);
+  }, [innerRadius, isOuterRadiusEmpty, updateRadius]);
+
+  return (
+    <Stack spacing={2}>
+      <TextField
+        label="Outer Radius"
+        required
+        size="small"
+        value={isOuterRadiusEmpty ? '' : outerRadius}
+        onChange={handleOuterRadiusChange}
+        onBlur={handleOuterRadiusBlur}
+      />
+      <TextField label="Inner Radius" size="small" value={innerRadius} onChange={handleInnerRadiusChange} />
+    </Stack>
+  );
+}
+
+function normalizePieChartOptions(value: PieChartOptions): PieChartOptions & { visual: PieChartVisualOptions } {
+  const normalizedValue = { ...value };
+  delete normalizedValue.radius;
+  delete normalizedValue.colorPalette;
+  return {
+    ...normalizedValue,
+    visual: resolvePieChartVisualOptions(value),
+  };
+}
 
 export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps): ReactElement {
-  const { onChange, value } = props;
+  const { onChange, value: persistedValue } = props;
+  const value: PieChartOptions & { visual: PieChartVisualOptions } = useMemo(
+    () => normalizePieChartOptions(persistedValue),
+    [persistedValue],
+  );
 
   const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation: CalculationType) => {
     onChange(
-      produce(value, (draft: PieChartOptions) => {
+      produce(value, (draft) => {
         draft.calculation = newCalculation;
       }),
     );
@@ -58,7 +140,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
 
   const handleLegendChange: LegendOptionsEditorProps['onChange'] = (newLegend) => {
     onChange(
-      produce(value, (draft: PieChartOptions) => {
+      produce(value, (draft) => {
         draft.legend = newLegend;
       }),
     );
@@ -66,7 +148,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
 
   const handleUnitChange: FormatControlsProps['onChange'] = (newFormat: FormatOptions) => {
     onChange(
-      produce(value, (draft: PieChartOptions) => {
+      produce(value, (draft) => {
         draft.format = newFormat;
       }),
     );
@@ -74,7 +156,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
 
   const handleSortChange: SortSelectorProps['onChange'] = (newSort: SortOption) => {
     onChange(
-      produce(value, (draft: PieChartOptions) => {
+      produce(value, (draft) => {
         draft.sort = newSort;
       }),
     );
@@ -82,7 +164,7 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
 
   const handleModeChange: ModeSelectorProps['onChange'] = (newMode: ModeOption) => {
     onChange(
-      produce(value, (draft: PieChartOptions) => {
+      produce(value, (draft) => {
         draft.mode = newMode;
       }),
     );
@@ -90,28 +172,40 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
 
   const handleShowLabelsChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     onChange(
-      produce(value, (draft: PieChartOptions) => {
+      produce(value, (draft) => {
         draft.showLabels = checked;
       }),
     );
   };
 
+  const handleRadiusChange: RadiusControlsProps['onChange'] = useCallback(
+    ({ innerRadius, outerRadius }) => {
+      onChange(
+        produce(value, (draft) => {
+          draft.visual.innerRadius = innerRadius;
+          draft.visual.outerRadius = outerRadius;
+        }),
+      );
+    },
+    [onChange, value],
+  );
+
   const chartsTheme = useChartsTheme();
   const themePalette = chartsTheme.echartsTheme.color;
 
   const colorPalette: string[] | undefined = useMemo(() => {
-    return value.colorPalette || undefined;
-  }, [value.colorPalette]);
+    return value.visual.colorPalette || undefined;
+  }, [value.visual.colorPalette]);
 
   const handleColorChange = (color?: string[]): void => {
     onChange(
-      produce(value, (draft: PieChartOptions) => {
+      produce(value, (draft) => {
         if (Array.isArray(color)) {
-          draft.colorPalette = color;
+          draft.visual.colorPalette = color;
         } else if (typeof color === 'string') {
-          draft.colorPalette = [color];
+          draft.visual.colorPalette = [color];
         } else {
-          draft.colorPalette = undefined;
+          draft.visual.colorPalette = undefined;
         }
       }),
     );
@@ -165,19 +259,12 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <LegendOptionsEditor calculation="comparison" value={value.legend} onChange={handleLegendChange} />
-        <OptionsEditorGroup title="Misc">
-          <OptionsEditorControl
-            label="Show Labels"
-            control={<Switch checked={Boolean(value.showLabels)} onChange={handleShowLabelsChange} />}
+        <OptionsEditorGroup title="Visual">
+          <RadiusControls
+            innerRadius={value.visual.innerRadius}
+            outerRadius={value.visual.outerRadius}
+            onChange={handleRadiusChange}
           />
-          <FormatControls value={format} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
-          <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
-          <SortSelector value={value.sort} onChange={handleSortChange} />
-          <ModeSelector value={value.mode} onChange={handleModeChange} disablePercentageMode={isPercentUnit(format)} />
-        </OptionsEditorGroup>
-      </OptionsEditorColumn>
-      <OptionsEditorColumn>
-        <OptionsEditorGroup title="Colors">
           <Stack spacing={2}>
             <Stack direction="row" spacing={2} alignItems="center">
               <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -207,16 +294,31 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
             )}
           </Stack>
         </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Misc">
+          <OptionsEditorControl
+            label="Show Labels"
+            control={<Switch checked={Boolean(value.showLabels)} onChange={handleShowLabelsChange} />}
+          />
+          <FormatControls value={format} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
+          <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
+          <SortSelector value={value.sort} onChange={handleSortChange} />
+          <ModeSelector value={value.mode} onChange={handleModeChange} disablePercentageMode={isPercentUnit(format)} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
         <OptionsEditorGroup title="Reset Settings">
           <Button
             variant="outlined"
             color="secondary"
             onClick={() => {
               onChange(
-                produce(value, (draft: PieChartOptions) => {
-                  // reset button removes all optional panel options
+                produce(value, (draft) => {
+                  // Reset the configurable visual options and optional legend.
                   draft.legend = undefined;
-                  draft.colorPalette = undefined;
+                  draft.showLabels = false;
+                  draft.visual = { ...DEFAULT_VISUAL };
                 }),
               );
             }}

@@ -15,7 +15,8 @@ Need a list of options.
 
 ## Default options
 
-- None
+- Calculation: `last`
+- Visual outer radius: `"90%"`
 
 ## Available options
 
@@ -43,13 +44,29 @@ package main
 import pie "github.com/perses/plugins/piechart/sdk/go"
 
 pie.WithVisual(pie.Visual{
-	Palette: pie.Palette{
-		Mode: pie.AutoMode, // or pie.CategoricalMode
-	},
+	OuterRadius: "90%",
 })
 ```
 
-Define visual properties of the pie chart including color palette mode.
+Define the pie chart's radii and colors. Radius values can be percentages or unitless pixel strings.
+
+```golang
+pie.WithVisual(pie.Visual{
+	InnerRadius:  "40%",
+	OuterRadius:  "90%",
+	ColorPalette: []string{"#3366cc", "#dc3912"},
+})
+```
+
+Set `InnerRadius` to create a doughnut chart. When omitted, the chart renders as a pie.
+
+### WithShowLabels
+
+```golang
+pie.WithShowLabels(true)
+```
+
+Show labels inside the pie chart segments.
 
 ### WithFormat
 
@@ -69,33 +86,15 @@ pie.WithFormat(&common.Format{
 
 Define the format for pie chart values.
 
-### WithQuerySettings
-
-```golang
-package main
-
-import pie "github.com/perses/plugins/piechart/sdk/go"
-
-pie.WithQuerySettings([]pie.QuerySettingsItem{
-	{
-		QueryIndex: 0,
-		ColorMode:  pie.FixedMode,
-		ColorValue: "#FF5733",
-	},
-})
-```
-
-Define color settings for specific queries. Available color modes: `FixedMode`, `FixedSingleMode`.
-
 ## Example
 
 ```golang
 package main
 
 import (
+	"github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
-	"github.com/perses/perses/go-sdk/common"
 	pie "github.com/perses/plugins/piechart/sdk/go"
 )
 
@@ -110,7 +109,8 @@ func main() {
 						Size:     pie.MediumSize,
 					}),
 					pie.WithVisual(pie.Visual{
-						Palette: pie.Palette{Mode: pie.CategoricalMode},
+						InnerRadius: "40%",
+						OuterRadius: "90%",
 					}),
 					pie.WithFormat(&common.Format{
 						Unit:          &common.BytesUnit,
@@ -120,5 +120,5 @@ func main() {
 			),
 		),
 	)
-}```
+}
 ```

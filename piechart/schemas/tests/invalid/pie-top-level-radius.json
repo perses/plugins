@@ -1,0 +1,7 @@
+{
+  "kind": "PieChart",
+  "spec": {
+    "calculation": "last",
+    "outerRadius": "50"
+  }
+}

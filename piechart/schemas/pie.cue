@@ -30,7 +30,15 @@ spec: close({
 	format?:     common.#format
 	sort?:       "asc" | "desc"
 	mode?:       "value" | "percentage"
+
 	showLabels?: bool
-	radius:      number
+
+	// Deprecated top-level visual options remain accepted for persisted dashboards.
+	radius?: number
 	colorPalette?: [...string]
+	visual?: close({
+		innerRadius?: string
+		outerRadius:  string
+		colorPalette?: [...string]
+	})
 })

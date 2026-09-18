@@ -19,6 +19,21 @@ import type { Definition } from '@perses-dev/spec';
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal', shortValues: true };
 export const DEFAULT_SORT: SortOption = 'desc';
 export const DEFAULT_MODE: ModeOption = 'value';
+export const DEFAULT_OUTER_RADIUS = '90%';
+
+/** Visual settings that control the pie chart's size and colors. */
+export interface PieChartVisualOptions {
+  /** Inner radius as a percentage or a unitless pixel value. When omitted, the chart renders as a pie. */
+  innerRadius?: string;
+  /** Outer radius as a percentage or a unitless pixel value. */
+  outerRadius: string;
+  /** Colors used for the pie chart segments. */
+  colorPalette?: string[];
+}
+
+export const DEFAULT_VISUAL: PieChartVisualOptions = {
+  outerRadius: DEFAULT_OUTER_RADIUS,
+};
 
 export interface BarChartDefinition extends Definition<PieChartOptions> {
   kind: 'PieChart';
@@ -27,12 +42,15 @@ export interface BarChartDefinition extends Definition<PieChartOptions> {
 export interface PieChartOptions {
   calculation: CalculationType;
   format?: FormatOptions;
-  colorPalette?: string[];
   legend?: LegendSpecOptions;
   mode?: ModeOption;
-  radius: number;
   showLabels?: boolean;
   sort?: SortOption;
+  visual?: PieChartVisualOptions;
+  /** @deprecated Use visual.colorPalette. */
+  colorPalette?: string[];
+  /** @deprecated Retained when reading persisted charts; visual.outerRadius controls the rendered radius. */
+  radius?: number;
 }
 
 export type PieChartOptionsEditorProps = OptionsEditorProps<PieChartOptions>;
@@ -42,8 +60,16 @@ export function createInitialPieChartOptions(): PieChartOptions {
     calculation: DEFAULT_CALCULATION,
     format: DEFAULT_FORMAT,
     mode: DEFAULT_MODE,
-    radius: 50,
     showLabels: false,
     sort: DEFAULT_SORT,
+    visual: { ...DEFAULT_VISUAL },
+  };
+}
+
+export function resolvePieChartVisualOptions(options: PieChartOptions): PieChartVisualOptions {
+  return {
+    innerRadius: options.visual?.innerRadius,
+    outerRadius: options.visual?.outerRadius ?? DEFAULT_OUTER_RADIUS,
+    colorPalette: options.visual?.colorPalette ?? options.colorPalette,
   };
 }
