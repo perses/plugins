@@ -7,23 +7,31 @@ source: {
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.54.0"
+		v:       "v0.55.0-beta.1"
+		default: true
+	}
+	"github.com/perses/plugins/jaeger@v0": {
+		v:       "v0.2.0-beta.4"
 		default: true
 	}
 	"github.com/perses/plugins/loki@v0": {
-		v:       "v0.5.0-rc.1"
+		v:       "v0.7.0-beta.4"
+		default: true
+	}
+	"github.com/perses/plugins/opensearch@v0": {
+		v:       "v0.2.0-beta.4"
 		default: true
 	}
 	"github.com/perses/plugins/prometheus@v0": {
-		v:       "v0.56.0"
+		v:       "v0.59.0-beta.4"
 		default: true
 	}
 	"github.com/perses/plugins/pyroscope@v0": {
-		v:       "v0.5.0-rc.1"
+		v:       "v0.7.0-beta.4"
 		default: true
 	}
 	"github.com/perses/plugins/tempo@v0": {
-		v:       "v0.56.0"
+		v:       "v0.60.0-beta.4"
 		default: true
 	}
 	"github.com/perses/shared/cue@v0": {
