@@ -15,3 +15,14 @@ import '@testing-library/jest-dom/vitest';
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
 vi.mock('echarts/core');
+
+if (typeof ResizeObserver === 'undefined') {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    },
+  );
+}
