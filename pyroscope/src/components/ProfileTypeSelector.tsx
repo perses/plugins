@@ -20,13 +20,14 @@ import { useProfileTypes } from '../utils/use-query';
 export interface ProfileTypeSelectorProps {
   datasource: PyroscopeDatasourceSelector;
   value: string;
+  service?: string;
   onChange?(value: string): void;
 }
 
 export function ProfileTypeSelector(props: ProfileTypeSelectorProps): ReactElement {
-  const { datasource, value, onChange } = props;
+  const { datasource, value, service, onChange } = props;
 
-  const { data: profileTypesOptions, isLoading: isProfileTypesOptionsLoading } = useProfileTypes(datasource);
+  const { data: profileTypesOptions, isLoading: isProfileTypesOptionsLoading } = useProfileTypes(datasource, service);
 
   return (
     <Stack position="relative" sx={{ width: '100%' }}>
