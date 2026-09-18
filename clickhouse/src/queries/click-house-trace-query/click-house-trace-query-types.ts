@@ -55,18 +55,18 @@ export interface ClickHouseTraceSpanRow {
   SpanName: string;
   SpanKind: string;
   ServiceName: string;
-  ResourceAttributes: Record<string, string>;
+  ResourceAttributes: Record<string, unknown>;
   ScopeName: string;
   ScopeVersion: string;
-  SpanAttributes: Record<string, string>;
+  SpanAttributes: Record<string, unknown>;
   StartTimeUnixNano: string;
   DurationNano: string;
   StatusCode: string;
   StatusMessage: string;
   EventTimesUnixNano: string[];
   EventNames: string[];
-  EventAttributes: Array<Record<string, string>>;
+  EventAttributes: Array<Record<string, unknown>>;
   LinkTraceIds: string[];
   LinkSpanIds: string[];
-  LinkAttributes: Array<Record<string, string>>;
+  LinkAttributes: Array<Record<string, unknown>>;
 }

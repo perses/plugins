@@ -132,6 +132,9 @@ async function searchTraces(
  * Wraps a search query so that ClickHouse groups the spans into traces and applies the limit. Without it, every
  * matching span would be transferred and then grouped and discarded in the browser. The query is therefore used as a
  * subquery: it must be a single SELECT, and all the columns it is documented to return are required.
+ *
+ * The output format is explicit. The ClickHouse client only appends FORMAT JSON when the query doesn't contain the
+ * word FORMAT, and a search query may well contain it, in formatDateTime() for example.
  */
 function buildSearchQuery(searchQuery: string, limit: number): string {
   const subQuery = searchQuery.trim().replace(/;+$/, '').trimEnd();
@@ -158,7 +161,8 @@ ${subQuery}
 WHERE TraceId != ''
 GROUP BY TraceId
 ORDER BY min(toDateTime64(Timestamp, 9)) DESC
-LIMIT ${limit}`;
+LIMIT ${limit}
+FORMAT JSON`;
 }
 
 /**
@@ -195,7 +199,8 @@ function buildTraceByIdQuery(traceId: string, table: string): string {
   Links.Attributes AS LinkAttributes
 FROM ${table}
 WHERE TraceId = '${traceId}'
-ORDER BY Timestamp`;
+ORDER BY Timestamp
+FORMAT JSON`;
 }
 
 function getRows<T>(response: ClickHouseQueryResponse): T[] {
@@ -241,9 +246,38 @@ function toResourceAttributes(row: ClickHouseTraceSpanRow): otlpcommonv1.KeyValu
   return attributes;
 }
 
-// The exporter stores every attribute value as a string, so the original value types cannot be recovered
-function toKeyValues(attributes: Record<string, string> = {}): otlpcommonv1.KeyValue[] {
-  return Object.entries(attributes).map(([key, value]) => ({ key, value: { stringValue: value } }));
+// The exporter's Map schema stores every attribute value as a string. Its JSON schema (`json: true`) keeps the
+// value types, and ClickHouse's JSON type turns the dots of attribute names into nesting: `http.response.status_code`
+// comes back as `{http: {response: {status_code: 200}}}`. Objects are therefore flattened back into dotted keys.
+function toKeyValues(attributes: Record<string, unknown> = {}, prefix = ''): otlpcommonv1.KeyValue[] {
+  return Object.entries(attributes).flatMap(([key, value]) =>
+    isPlainObject(value)
+      ? toKeyValues(value, `${prefix}${key}.`)
+      : [{ key: `${prefix}${key}`, value: toAnyValue(value) }],
+  );
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toAnyValue(value: unknown): otlpcommonv1.AnyValue {
+  switch (typeof value) {
+    case 'string':
+      return { stringValue: value };
+    case 'boolean':
+      return { boolValue: value };
+    case 'number':
+      return Number.isInteger(value) ? { intValue: String(value) } : { doubleValue: value };
+    case 'bigint':
+      return { intValue: value.toString() };
+    default:
+      if (Array.isArray(value)) {
+        return { arrayValue: { values: value.map(toAnyValue) } };
+      }
+      // null comes from the JSON schema for absent paths; objects inside arrays are JSON encoded
+      return { stringValue: value === null || value === undefined ? '' : JSON.stringify(value) };
+  }
 }
 
 function toOTLPSpan(row: ClickHouseTraceSpanRow): otlptracev1.Span {
@@ -282,15 +316,17 @@ function normalizeEnumName(value: string | undefined, prefix: string): string {
 function toTraceSearchResult(row: ClickHouseTraceSummaryRow): TraceSearchResult {
   const startTimeUnixNano = BigInt(row.StartTimeUnixNano);
 
+  // An empty service name and a service named "unknown" share a key, so the counts are added, not assigned
   const serviceStats: Record<string, ServiceStats> = {};
   for (const [serviceName, spanCount] of Object.entries(row.SpanCounts)) {
-    serviceStats[serviceName || 'unknown'] = { spanCount: Number(spanCount) };
+    const stats = (serviceStats[serviceName || 'unknown'] ??= { spanCount: 0 });
+    stats.spanCount += Number(spanCount);
   }
   for (const [serviceName, errorCount] of Object.entries(row.ErrorCounts)) {
     const stats = serviceStats[serviceName || 'unknown'];
     // ClickHouse also returns the services without errors, where the panels expect no count at all
     if (stats !== undefined && Number(errorCount) > 0) {
-      stats.errorCount = Number(errorCount);
+      stats.errorCount = (stats.errorCount ?? 0) + Number(errorCount);
     }
   }
 

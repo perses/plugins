@@ -240,6 +240,43 @@ describe('getClickHouseTraceData', () => {
       });
     });
 
+    it('should request the JSON output format explicitly', async () => {
+      const { context, query } = createStubContext([traceSpanRow({})]);
+
+      await getClickHouseTraceData({ query: TRACE_ID }, context);
+
+      expect(executedQuery(query).endsWith('FORMAT JSON')).toBe(true);
+    });
+
+    it('should keep the value types of attributes stored with the JSON schema, and flatten their nesting', async () => {
+      const { context } = createStubContext([
+        traceSpanRow({
+          // ClickHouse's JSON type renders dotted attribute names as nested objects
+          SpanAttributes: {
+            http: { response: { status_code: 200 }, request: { body: { size: 12.5 } } },
+            retry: true,
+            tags: ['a', 1, { k: 'v' }],
+            nested: { feature: { flag: 'on' } },
+            absent: null,
+          },
+        }),
+      ]);
+
+      const result = await getClickHouseTraceData({ query: TRACE_ID }, context);
+
+      expect(result.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[0]?.attributes).toEqual([
+        { key: 'http.response.status_code', value: { intValue: '200' } },
+        { key: 'http.request.body.size', value: { doubleValue: 12.5 } },
+        { key: 'retry', value: { boolValue: true } },
+        {
+          key: 'tags',
+          value: { arrayValue: { values: [{ stringValue: 'a' }, { intValue: '1' }, { stringValue: '{"k":"v"}' }] } },
+        },
+        { key: 'nested.feature.flag', value: { stringValue: 'on' } },
+        { key: 'absent', value: { stringValue: '' } },
+      ]);
+    });
+
     it('should normalize 16 character and uppercase trace IDs to the format stored by the exporter', async () => {
       const { context, query } = createStubContext([traceSpanRow({})]);
 
@@ -378,6 +415,31 @@ describe('getClickHouseTraceData', () => {
       await getClickHouseTraceData({ query: 'SELECT * FROM otel_traces;  ' }, context);
 
       expect(executedQuery(query)).toContain('FROM (\nSELECT * FROM otel_traces\n)');
+    });
+
+    it('should request the JSON output format even when the search query contains formatDateTime', async () => {
+      const { context, query } = createStubContext([]);
+
+      await getClickHouseTraceData(
+        { query: "SELECT TraceId, formatDateTime(Timestamp, '%T') AS Timestamp FROM otel_traces" },
+        context,
+      );
+
+      expect(executedQuery(query).endsWith('FORMAT JSON')).toBe(true);
+      expect(executedQuery(query)).toContain("formatDateTime(Timestamp, '%T') AS Timestamp FROM otel_traces\n)");
+    });
+
+    it('should add up the counts of an empty service name and of a service named unknown', async () => {
+      const { context } = createStubContext([
+        summaryRow({ SpanCounts: { '': 2, unknown: 3, frontend: 1 }, ErrorCounts: { '': 1, unknown: 2, frontend: 0 } }),
+      ]);
+
+      const result = await getClickHouseTraceData({ query: 'SELECT * FROM otel_traces' }, context);
+
+      expect(result.searchResult?.[0]?.serviceStats).toEqual({
+        unknown: { spanCount: 5, errorCount: 3 },
+        frontend: { spanCount: 1 },
+      });
     });
 
     it('should reject a search query that ends with a FORMAT clause', async () => {

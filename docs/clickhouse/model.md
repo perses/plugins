@@ -131,7 +131,7 @@ spec:
 
 ## ClickHouseTraceQuery
 
-Perses supports trace queries for ClickHouse: `ClickHouseTraceQuery`. It reads traces stored with the schema of the [OpenTelemetry Collector ClickHouse exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/clickhouseexporter).
+Perses supports trace queries for ClickHouse: `ClickHouseTraceQuery`. It reads traces stored with the schema of the [OpenTelemetry Collector ClickHouse exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/clickhouseexporter), with attributes stored either as `Map` columns (the exporter's default) or as `JSON` columns (its `json: true` option). With the latter the value types are kept, and the nesting ClickHouse's JSON type makes of dotted attribute names is flattened back into the original names.
 
 ```yaml
 kind: "ClickHouseTraceQuery"
