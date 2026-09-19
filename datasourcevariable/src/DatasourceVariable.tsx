@@ -50,7 +50,7 @@ export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticL
     ) {
       onChange({ datasourcePluginKind: datasourcePluginKindArray[0] });
     }
-  }, [selectedKind, datasourcePluginKind, onChange, datasourcePluginKindSet]);
+  }, [selectedKind, onChange, datasourcePluginKindSet]);
 
   return (
     <Autocomplete

@@ -201,9 +201,11 @@ function LazyTextField(props: LazyTextFieldProps): ReactElement {
   const { value, onCommit, ...textFieldProps } = props;
   const [draftValue, setDraftValue] = useState(value ?? '');
 
-  useEffect(() => {
+  const [previousValue, setPreviousValue] = useState(value);
+  if (value !== previousValue) {
+    setPreviousValue(value);
     setDraftValue(value ?? '');
-  }, [value]);
+  }
 
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     setDraftValue(event.target.value);
@@ -226,9 +228,11 @@ function LazyAutocompleteTextField(props: LazyAutocompleteTextFieldProps): React
   const { value, options, onCommit, ...textFieldProps } = props;
   const [draftValue, setDraftValue] = useState(value ?? '');
 
-  useEffect(() => {
+  const [previousValue, setPreviousValue] = useState(value);
+  if (value !== previousValue) {
+    setPreviousValue(value);
     setDraftValue(value ?? '');
-  }, [value]);
+  }
 
   const commitValue = useCallback(
     (nextValue: string): void => {
@@ -271,11 +275,16 @@ function LazyAutocompleteTextField(props: LazyAutocompleteTextFieldProps): React
 function useServiceOptions(client: JaegerClient | undefined): string[] {
   const [serviceOptions, setServiceOptions] = useState<string[]>([]);
 
+  const [previousClient, setPreviousClient] = useState(client);
+  if (client !== previousClient) {
+    setPreviousClient(client);
+    if (!client) setServiceOptions([]);
+  }
+
   useEffect(() => {
     let ignore = false;
 
     if (!client) {
-      setServiceOptions([]);
       return;
     }
 
@@ -306,11 +315,16 @@ function useOperationOptions(client: JaegerClient | undefined, service: string |
   const [operationOptions, setOperationOptions] = useState<string[]>([]);
   const normalizedService = useMemo(() => service?.trim(), [service]);
 
+  const [previousSource, setPreviousSource] = useState({ client, normalizedService });
+  if (client !== previousSource.client || normalizedService !== previousSource.normalizedService) {
+    setPreviousSource({ client, normalizedService });
+    if (!client || !normalizedService) setOperationOptions([]);
+  }
+
   useEffect(() => {
     let ignore = false;
 
     if (!client || normalizedService === undefined || normalizedService === '') {
-      setOperationOptions([]);
       return;
     }
 

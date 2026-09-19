@@ -37,14 +37,14 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const { value, onChange, isReadonly, testConnection } = props;
 
   // Counter for generating unique IDs
-  const nextIdRef = useRef(0);
+  const nextIdRef = useRef(Object.keys(value.queryParams ?? {}).length);
 
   // Use local state to maintain an array of entries during editing, instead of
   // manipulating a map directly which causes weird UX.
   const [entries, setEntries] = useState<QueryParamEntry[]>(() => {
     const queryParams: QueryParamValues = value.queryParams ?? {};
-    return Object.entries(queryParams).map(([key, val]) => ({
-      id: String(nextIdRef.current++),
+    return Object.entries(queryParams).map(([key, val], index) => ({
+      id: String(index),
       key,
       value: Array.isArray(val) ? val.join(',') : val,
     }));

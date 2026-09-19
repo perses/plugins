@@ -21,7 +21,7 @@ import { CalculationsMap, replaceVariablesInString, useAllVariableValues } from 
 import type { JsonData, QueryDataType, TimeSeriesData } from '@perses-dev/spec';
 import type { ColumnFiltersState, PaginationState, RowSelectionState, SortingState } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { CellSettings, ColumnSettings, TableOptions } from '../models';
@@ -395,7 +395,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   const filteredDataRef = useRef<Array<Record<string, unknown>>>([]);
   // Refs used to keep the filter row in sync with the table's horizontal
-  const panelContainerRef = useRef<HTMLDivElement>(null);
+  const [panelContainer, setPanelContainer] = useState<HTMLDivElement | null>(null);
   const filterRowInnerRef = useRef<HTMLDivElement>(null);
   const filterCellRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -699,10 +699,10 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     setOpenFilterColumn(columnId);
   };
 
-  const handleFilterClose = (): void => {
+  const handleFilterClose = useCallback((): void => {
     setFilterAnchorEl({});
     setOpenFilterColumn(null);
-  };
+  }, []);
 
   // Close filter when clicking outside
   useEffect(() => {
@@ -723,23 +723,22 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       clearTimeout(timer);
       document.removeEventListener('click', handleClick);
     };
-  }, [openFilterColumn]);
+  }, [openFilterColumn, handleFilterClose]);
 
   // Keep ref in sync with filtered data for use in selection handler
-  filteredDataRef.current = filteredData;
+  useLayoutEffect(() => {
+    filteredDataRef.current = filteredData;
+  }, [filteredData]);
 
   const [pagination, setPagination] = useState<PaginationState | undefined>(
     spec.pagination ? { pageIndex: 0, pageSize: 10 } : undefined,
   );
 
-  useEffect(() => {
-    // If the pagination setting changes from no pagination to pagination, but the pagination state is undefined, update the pagination state
-    if (spec.pagination && !pagination) {
-      setPagination({ pageIndex: 0, pageSize: 10 });
-    } else if (!spec.pagination && pagination) {
-      setPagination(undefined);
-    }
-  }, [spec.pagination, pagination]);
+  if (spec.pagination && !pagination) {
+    setPagination({ pageIndex: 0, pageSize: 10 });
+  } else if (!spec.pagination && pagination) {
+    setPagination(undefined);
+  }
 
   // Sync the filter row's horizontal position with the table scroll.
   useEffect(() => {
@@ -747,7 +746,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       return;
     }
 
-    const scrollContainer = panelContainerRef.current?.querySelector<HTMLElement>('.MuiTableContainer-root');
+    const scrollContainer = panelContainer?.querySelector<HTMLElement>('.MuiTableContainer-root');
     const filterRowInner = filterRowInnerRef.current;
 
     if (!scrollContainer || !filterRowInner) {
@@ -761,13 +760,13 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       setFilterAnchorEl((current) => (Object.keys(current).length === 0 ? current : {}));
     };
 
-    syncFilterRowScroll();
+    filterRowInner.style.transform = `translateX(-${scrollContainer.scrollLeft}px)`;
 
     scrollContainer.addEventListener('scroll', syncFilterRowScroll, { passive: true });
     return (): void => {
       scrollContainer.removeEventListener('scroll', syncFilterRowScroll);
     };
-  }, [spec.enableFiltering, columns, contentDimensions]);
+  }, [panelContainer, spec.enableFiltering]);
 
   // Sync filter cell widths with the actual rendered table column widths to keep them aligned.
   useEffect(() => {
@@ -775,7 +774,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       return;
     }
 
-    const scrollContainer = panelContainerRef.current?.querySelector<HTMLElement>('.MuiTableContainer-root');
+    const scrollContainer = panelContainer?.querySelector<HTMLElement>('.MuiTableContainer-root');
     if (!scrollContainer) {
       return;
     }
@@ -813,7 +812,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     return (): void => {
       resizeObserver.disconnect();
     };
-  }, [spec.enableFiltering, columns, contentDimensions, selectionEnabled, actionButtons]);
+  }, [panelContainer, spec.enableFiltering, columns]);
 
   if (contentDimensions === undefined) {
     return null;
@@ -835,7 +834,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }
 
   return (
-    <div ref={panelContainerRef} style={{ display: 'contents' }}>
+    <div ref={setPanelContainer} style={{ display: 'contents' }}>
       {confirmDialog}
       {spec.enableFiltering && (
         <div

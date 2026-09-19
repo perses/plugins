@@ -59,10 +59,6 @@ export function Settings(props: SettingsProps): ReactElement {
     setAnchorEl(null);
   };
 
-  const isTableSelected = (): boolean => selectedView === 'table';
-  const isFlameGraphSelected = (): boolean => selectedView === 'flame-graph';
-  const isBothSelected = (): boolean => selectedView === 'both';
-
   // Update selected view based on the value of showTable and showFlameGraph
   const selectedView: 'table' | 'flame-graph' | 'both' | 'none' = useMemo(() => {
     if (!value.showTable && !value.showFlameGraph) {
@@ -75,6 +71,10 @@ export function Settings(props: SettingsProps): ReactElement {
       return 'flame-graph';
     }
   }, [value.showTable, value.showFlameGraph]);
+
+  const isTableSelected = (): boolean => selectedView === 'table';
+  const isFlameGraphSelected = (): boolean => selectedView === 'flame-graph';
+  const isBothSelected = (): boolean => selectedView === 'both';
 
   return (
     <Stack spacing="10px" direction="row" justifyContent="center" alignItems="center">
