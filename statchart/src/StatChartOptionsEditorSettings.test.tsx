@@ -99,6 +99,49 @@ describe('StatChartOptionsEditorSettings', () => {
     );
   });
 
+  it('can change series layout to grid', () => {
+    const onChange = vi.fn();
+    renderStatChartOptionsEditorSettings(
+      {
+        format: { unit: 'percent' },
+        calculation: 'last',
+        seriesLayout: 'auto',
+      },
+      onChange,
+    );
+    const layoutSelector = screen.getByRole('combobox', { name: 'Series layout' });
+    userEvent.click(layoutSelector);
+    userEvent.click(screen.getByRole('option', { name: /Grid/ }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        seriesLayout: 'grid',
+      }),
+    );
+  });
+
+  it('clears seriesColumns when switching layout away from grid', () => {
+    const onChange = vi.fn();
+    renderStatChartOptionsEditorSettings(
+      {
+        format: { unit: 'percent' },
+        calculation: 'last',
+        seriesLayout: 'grid',
+        seriesColumns: 2,
+      },
+      onChange,
+    );
+    const layoutSelector = screen.getByRole('combobox', { name: 'Series layout' });
+    userEvent.click(layoutSelector);
+    // Autocomplete option name includes description ("Row Single horizontal…")
+    userEvent.click(screen.getByRole('option', { name: /Row/i }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        seriesLayout: 'row',
+        seriesColumns: undefined,
+      }),
+    );
+  });
+
   it('can disable a sparkline', () => {
     const onChange = vi.fn();
     renderStatChartOptionsEditorSettings(

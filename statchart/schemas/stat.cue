@@ -31,5 +31,11 @@ spec: close({
 	legendFontSize?: number
 	colorMode?:      *"value" | "background_solid" | "none"
 	legendMode?:     *"auto" | "on" | "off"
+	// Multi-series cell arrangement.
+	// auto  — pick columns from series count (2→1×2, 3–4→2×2, 5–6→2×3 / 3×2, …)
+	// row   — single horizontal row (legacy)
+	// grid  — wrap; seriesColumns forces column count when set (2, 3, …)
+	seriesLayout?:  *"auto" | "row" | "grid"
+	seriesColumns?: number & >=1 & <=12
 	mappings?: [...common.#mappings]
 })

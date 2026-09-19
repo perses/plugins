@@ -39,11 +39,12 @@ import { useCallback, useMemo } from 'react';
 
 import type {
   ColorModeLabelItem,
+  SeriesLayoutMode,
   ShowLegendLabelItem,
   StatChartOptions,
   StatChartOptionsEditorProps,
 } from './stat-chart-model';
-import { COLOR_MODE_LABELS, SHOW_LEGEND_LABELS } from './stat-chart-model';
+import { COLOR_MODE_LABELS, SERIES_LAYOUT_LABELS, SHOW_LEGEND_LABELS } from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
 
@@ -172,6 +173,43 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   }, [value.colorMode, handleColorModeChange]);
 
+  const handleSeriesLayoutChange = useCallback(
+    (_: unknown, newValue: { id: SeriesLayoutMode }) => {
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          draft.seriesLayout = newValue.id;
+          if (newValue.id !== 'grid') {
+            draft.seriesColumns = undefined;
+          }
+        }),
+      );
+    },
+    [onChange, value],
+  );
+
+  const selectSeriesLayout = useMemo((): ReactElement => {
+    return (
+      <OptionsEditorControl
+        label="Series layout"
+        control={
+          <SettingsAutocomplete
+            onChange={handleSeriesLayoutChange}
+            options={SERIES_LAYOUT_LABELS.map(({ id, label, description }) => ({
+              id,
+              label,
+              description,
+            }))}
+            disableClearable
+            value={
+              SERIES_LAYOUT_LABELS.find((i) => i.id === value.seriesLayout) ??
+              SERIES_LAYOUT_LABELS.find((i) => i.id === 'auto')!
+            }
+          />
+        }
+      />
+    );
+  }, [value.seriesLayout, handleSeriesLayoutChange]);
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -189,6 +227,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <MetricLabelInput value={value.metricLabel} onChange={handleMetricLabelChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
           {selectColorMode}
+          {selectSeriesLayout}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>
