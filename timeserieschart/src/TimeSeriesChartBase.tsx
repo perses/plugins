@@ -248,7 +248,6 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           enableDataZoom(chartRef.current);
         }
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mouseover: (params: any): void => {
         if (
           params.componentType === 'series' &&
@@ -278,7 +277,6 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
         setHoveredAnnotation(null);
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mouseout: (params: any): void => {
         if (
           params.componentType === 'series' &&

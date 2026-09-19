@@ -119,7 +119,6 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
       axisPointer: {
         type: 'cross',
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: function (params: any) {
         // TODO: import type from ECharts instead of using any
         const data = params[0].data as EChartTraceValue;
