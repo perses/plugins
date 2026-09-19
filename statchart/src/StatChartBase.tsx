@@ -237,7 +237,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
         {data.seriesData?.name}
       </SeriesName>
     );
-  }, [colorMode, showSeriesName, secondary, color, containerPadding, seriesNameFontSize, data?.seriesData?.name]);
+  }, [colorMode, showSeriesName, secondary, color, containerPadding, seriesNameFontSize, data.seriesData?.name]);
 
   return (
     <Box

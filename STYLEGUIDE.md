@@ -37,7 +37,7 @@ touch without expanding the task into unrelated cleanup.
   for dynamic values passed across memoized boundaries. Do not add memoization blindly or omit dependencies.
 - Memoize React context values when they contain objects or functions whose identity would otherwise change each render.
 - Avoid array-index keys when a stable domain identifier exists.
-- Treat `react/react-compiler` and `react-perf` diagnostics as design feedback. Fix new warnings rather than disabling
+- Treat React Compiler and `react-perf` diagnostics as design feedback. Fix errors and new warnings rather than disabling
   the rule or increasing the repository warning ceiling.
 
 ## Components, state, and accessibility

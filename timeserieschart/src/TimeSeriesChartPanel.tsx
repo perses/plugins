@@ -314,7 +314,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           }
 
           // Used for repeating colors in Categorical palette
-          seriesIndex++;
+          seriesIndex += 1;
         }
       }
     }
@@ -353,7 +353,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           values: thresholdTimeValueTuple,
         });
         timeSeriesMapping.push(getThresholdSeries(thresholdName, stepOption, seriesIndex));
-        seriesIndex++;
+        seriesIndex += 1;
       });
     }
 

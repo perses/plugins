@@ -18,12 +18,11 @@ import { useEffect, useState } from 'react';
 
 interface ResizableDividerProps {
   parentRef: React.RefObject<Element>;
-  spacing?: number;
   onMove: (left: number) => void;
 }
 
 export function ResizableDivider(props: ResizableDividerProps): ReactElement {
-  const { parentRef, spacing = 0, onMove } = props;
+  const { parentRef, onMove } = props;
   const [isResizing, setResizing] = useState(false);
 
   const handleMouseDown = (e: ReactMouseEvent): void => {
@@ -38,6 +37,7 @@ export function ResizableDivider(props: ResizableDividerProps): ReactElement {
     if (!parentRef.current) return;
 
     const parentRect = parentRef.current.getBoundingClientRect();
+    const spacing = parseFloat(getComputedStyle(parentRef.current).columnGap) || 0;
 
     // The parent can be a flex row, for example: [leftPercent] [gap] [divider] [gap] [1-leftPercent].
     // Without considering spacing, leftPercent would be wrong because it ignores the flex gap between the divider and the element.

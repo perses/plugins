@@ -34,12 +34,10 @@ import {
 import { TablePanel } from './TablePanel';
 
 /* mock all variables */
-const MOCK_VARIABLE_STATE_MAP = vi.hoisted(
-  (): VariableStateMap => ({
-    myproject: { loading: false, value: 'my_project' },
-    __range: { loading: false, value: '1h' },
-  }),
-);
+const MOCK_VARIABLE_STATE_MAP = vi.hoisted((): VariableStateMap => ({
+  myproject: { loading: false, value: 'my_project' },
+  __range: { loading: false, value: '1h' },
+}));
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
   ...(await importOriginal<typeof PluginSystemModule>()),
   // Return a stable reference (like the real hook, which memoizes) so consumers
