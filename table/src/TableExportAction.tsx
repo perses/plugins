@@ -71,6 +71,20 @@ export function buildTableData(
   return { data: transformed, columns };
 }
 
+function downloadCsv(csvBlob: Blob, filename: string): void {
+  const url = URL.createObjectURL(csvBlob);
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 export const TableExportAction: React.FC<TableProps> = ({ queryResults, spec, definition }) => {
   const tableData = useMemo(() => buildTableData(queryResults, spec), [queryResults, spec]);
 
@@ -92,17 +106,7 @@ export const TableExportAction: React.FC<TableProps> = ({ queryResults, spec, de
       const baseFilename = sanitizeFilename(title);
       const filename = `${baseFilename}_data.csv`;
 
-      const url = URL.createObjectURL(csvBlob);
-      try {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } finally {
-        URL.revokeObjectURL(url);
-      }
+      downloadCsv(csvBlob, filename);
     } catch (error) {
       console.error('Table CSV export failed:', error);
     }

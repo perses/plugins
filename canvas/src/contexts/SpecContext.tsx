@@ -74,7 +74,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
       const id = generateId('node');
       onChange(
         produce(spec, (draft) => {
-          (draft.nodes ??= []).push({
+          (draft.nodes = draft.nodes ?? []).push({
             id,
             position,
             width: DEFAULT_NODE_WIDTH,
@@ -93,7 +93,7 @@ export function SpecProvider({ spec, onChange, children }: SpecProviderProps): R
       const id = generateId('bg');
       onChange(
         produce(spec, (draft) => {
-          (draft.backgrounds ??= []).push({ id, position, width, height });
+          (draft.backgrounds = draft.backgrounds ?? []).push({ id, position, width, height });
         }),
       );
       selectItems(new Set([id]));

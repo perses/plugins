@@ -199,7 +199,7 @@ export function useEdgeConnect(): UseEdgeConnectResult {
         if (!snap && sourceNode && pointInsideNode(sourceNode, pt, SNAP_RADIUS)) {
           return;
         }
-        (draft.edges ??= []).push(buildNewEdge(dragEdge, snap, pt));
+        (draft.edges = draft.edges ?? []).push(buildNewEdge(dragEdge, snap, pt));
       }
     },
     [dragEdge, nodeById],
