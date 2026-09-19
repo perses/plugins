@@ -52,7 +52,7 @@ export function definePackageVitestConfig({
   packageDir,
   setupFiles = [],
   passWithNoTests = false,
-}: VitestPackageOptions) {
+}: VitestPackageOptions): ReturnType<typeof mergeConfig> {
   return mergeConfig(
     sharedConfig,
     defineConfig({

@@ -171,7 +171,6 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
     label?: { show: boolean };
     annotationIndex?: number;
   }> = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markPointData: any[] = [];
 
   annotations.forEach((annotation, index) => {

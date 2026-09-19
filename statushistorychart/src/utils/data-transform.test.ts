@@ -51,7 +51,6 @@ describe('useStatusHistoryDataModel', () => {
             },
           ],
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         definition: { query: 'some-query' } as any,
       },
     ];
