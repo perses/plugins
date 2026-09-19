@@ -32,6 +32,9 @@ const mockedUseDatasourceSelectValueToSelector = useDatasourceSelectValueToSelec
   typeof useDatasourceSelectValueToSelector
 >;
 
+const initialValue = { service: 'frontend', traceId: 'initial' };
+const updatedValue = { service: 'backend', traceId: 'updated' };
+
 describe('JaegerTraceQueryEditor', () => {
   beforeEach(() => {
     mockedUseDatasourceSelectValueToSelector.mockImplementation(
@@ -118,5 +121,21 @@ describe('JaegerTraceQueryEditor', () => {
 
     await waitFor(() => expect(searchServices).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(searchOperations).toHaveBeenCalledWith('frontend'));
+  });
+  it('preserves drafts until committed values change', () => {
+    mockedUseDatasourceClient.mockReturnValue({ data: undefined } as never);
+    const onChange = vi.fn();
+    const { rerender } = render(<JaegerTraceQueryEditor value={initialValue} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText('Trace ID'), { target: { value: 'draft' } });
+    fireEvent.change(screen.getByLabelText('Service'), { target: { value: 'draft-service' } });
+    rerender(<JaegerTraceQueryEditor value={initialValue} onChange={onChange} />);
+    expect(screen.getByLabelText('Trace ID')).toHaveValue('draft');
+    expect(screen.getByLabelText('Service')).toHaveValue('draft-service');
+    expect(onChange).not.toHaveBeenCalled();
+
+    rerender(<JaegerTraceQueryEditor value={updatedValue} onChange={onChange} />);
+    expect(screen.getByLabelText('Trace ID')).toHaveValue('updated');
+    expect(screen.getByLabelText('Service')).toHaveValue('backend');
   });
 });

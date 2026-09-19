@@ -148,24 +148,23 @@ export function SilenceTablePanel({ spec, queryResults, contentDimensions }: Sil
   const handleExpire = useCallback(async () => {
     if (!amClient || !expireTarget) return;
     setIsExpiring(true);
-    try {
-      await amClient.deleteSilence(expireTarget.id);
-      setExpireTarget(null);
-      successSnackbar('Silence expired successfully');
-      queryClient.invalidateQueries({ queryKey: ['query', 'AlertsQuery'] });
-      queryClient.invalidateQueries({ queryKey: ['query', 'SilencesQuery'] });
-    } catch (err) {
-      exceptionSnackbar(err);
-    } finally {
-      setIsExpiring(false);
-    }
+    await amClient
+      .deleteSilence(expireTarget.id)
+      .then(() => {
+        setExpireTarget(null);
+        successSnackbar('Silence expired successfully');
+        queryClient.invalidateQueries({ queryKey: ['query', 'AlertsQuery'] });
+        queryClient.invalidateQueries({ queryKey: ['query', 'SilencesQuery'] });
+      })
+      .catch(exceptionSnackbar)
+      .finally(() => setIsExpiring(false));
   }, [amClient, expireTarget, queryClient, successSnackbar, exceptionSnackbar]);
 
   const [search, setSearch] = useState('');
 
   const effectiveActions = useMemo<SilenceAction[]>(
-    () => spec?.allowedActions ?? ALL_SILENCE_ACTIONS,
-    [spec?.allowedActions],
+    () => spec.allowedActions ?? ALL_SILENCE_ACTIONS,
+    [spec.allowedActions],
   );
   const showActionsColumn = effectiveActions.length > 0;
 

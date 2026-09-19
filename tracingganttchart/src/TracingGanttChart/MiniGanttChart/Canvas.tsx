@@ -60,13 +60,13 @@ export function Canvas(props: CanvasProps): ReactElement {
   );
 
   useEffect(() => {
-    if (!canvasRef.current || !width || !height) return;
+    if (!canvasRef.current || !width) return;
 
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
 
-    drawSpans(ctx, width, height, trace, spanColorGenerator);
-  }, [width, height, trace, spanColorGenerator]);
+    drawSpans(ctx, width, CANVAS_HEIGHT, trace, spanColorGenerator);
+  }, [width, trace, spanColorGenerator]);
 
   const translateCursorToTime = (e: ReactMouseEvent | MouseEvent): number => {
     if (!canvasRef.current || !width) return 0;

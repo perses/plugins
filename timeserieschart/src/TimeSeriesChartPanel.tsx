@@ -238,7 +238,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
             exemplars: [],
           });
         }
-        seriesIndex++;
+        seriesIndex += 1;
       }
       for (const group of exemplars ?? []) {
         if (group.exemplars.length === 0) continue;
@@ -405,7 +405,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
           values: thresholdTimeValueTuple,
         });
         timeSeriesMapping.push(getThresholdSeries(thresholdName, stepOption, seriesIndex));
-        seriesIndex++;
+        seriesIndex += 1;
       });
     }
 

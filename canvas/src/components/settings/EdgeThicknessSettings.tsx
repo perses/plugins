@@ -92,7 +92,7 @@ export function EdgeThicknessSettings({ value, onChange }: EdgeThicknessSettings
     (stepValue: number, strokeWidth: number | undefined): void => {
       onChange(
         produce(value, (draft) => {
-          draft.edgeThresholdWidths ??= [];
+          draft.edgeThresholdWidths = draft.edgeThresholdWidths ?? [];
           const existingIdx = draft.edgeThresholdWidths.findIndex((w) => w.value === stepValue);
           if (strokeWidth !== undefined) {
             if (existingIdx >= 0) {
