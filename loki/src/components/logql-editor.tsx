@@ -18,7 +18,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import type { CompletionConfig } from './logql-extension';
-import { LogQLExtension } from './logql-extension';
+import { LogQLExtension as createLogQLExtension } from './logql-extension';
 
 export type LogQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> & {
   completionConfig?: CompletionConfig;
@@ -30,7 +30,7 @@ export function LogQLEditor(props: LogQLEditorProps): ReactElement {
   const isDarkMode = theme.palette.mode === 'dark';
 
   const logqlExtension = useMemo(() => {
-    return LogQLExtension(completionConfig);
+    return createLogQLExtension(completionConfig);
   }, [completionConfig]);
 
   const codemirrorTheme = useMemo(() => {

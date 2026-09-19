@@ -51,7 +51,7 @@ import MagnifyIcon from 'mdi-material-ui/Magnify';
 import UnfoldLessHorizontalIcon from 'mdi-material-ui/UnfoldLessHorizontal';
 import UnfoldMoreHorizontalIcon from 'mdi-material-ui/UnfoldMoreHorizontal';
 import type { ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { SilenceForm } from '../../components/SilenceForm';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -345,9 +345,9 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
   const queryClient = useQueryClient();
 
   const [silenceTarget, setSilenceTarget] = useState<Alert | null>(null);
-  const silenceKeyRef = useRef(0);
+  const [silenceKey, setSilenceKey] = useState(0);
   const handleSetSilenceTarget = useCallback((alert: Alert) => {
-    silenceKeyRef.current++;
+    setSilenceKey((previous) => previous + 1);
     setSilenceTarget(alert);
   }, []);
   const [search, setSearch] = useState('');
@@ -414,9 +414,11 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
 
   const [groupBy, setGroupBy] = useState<string[]>(resolvedDefaultGroupBy);
 
-  useEffect(() => {
+  const [previousDefaultGroupBy, setPreviousDefaultGroupBy] = useState(resolvedDefaultGroupBy);
+  if (resolvedDefaultGroupBy !== previousDefaultGroupBy) {
+    setPreviousDefaultGroupBy(resolvedDefaultGroupBy);
     setGroupBy(resolvedDefaultGroupBy);
-  }, [resolvedDefaultGroupBy]);
+  }
 
   const effectiveActions = useMemo<AlertAction[]>(
     () => spec.allowedActions ?? ALL_ALERT_ACTIONS,
@@ -517,18 +519,17 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
     return result;
   }, [alerts, groupBy, allTrackedKeys, sortState]);
 
-  const prevGroupKeysRef = useRef<string>('');
-  useEffect(() => {
-    const currentKeys = groups.map((g) => g.key).join('\0');
-    if (currentKeys === prevGroupKeysRef.current) return;
-    prevGroupKeysRef.current = currentKeys;
+  const currentKeys = groups.map((g) => g.key).join('\0');
+  const [previousGroupKeys, setPreviousGroupKeys] = useState('');
+  if (currentKeys !== previousGroupKeys) {
+    setPreviousGroupKeys(currentKeys);
 
     if (groups.length === 1) {
       setExpandedGroups(new Set(groups.map((g) => g.key)));
     } else {
       setExpandedGroups(new Set());
     }
-  }, [groups]);
+  }
 
   const handleToggleGroup = useCallback((key: string) => {
     setExpandedGroups((prev) => {
@@ -699,7 +700,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
         </Table>
       </TableContainer>
       <SilenceForm
-        key={silenceKeyRef.current}
+        key={silenceKey}
         open={!!silenceTarget}
         onClose={() => setSilenceTarget(null)}
         onSubmit={handleSilenceSubmit}
