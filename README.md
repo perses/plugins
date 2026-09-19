@@ -28,7 +28,8 @@ Then in [`perses`](https://github.com/perses/perses) repository:
 
 Run `npm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`. Run
 `npm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in GitHub
-Actions. React Compiler rules are enforced as errors; resolve their diagnostics before merging.
+Actions. React Compiler rules and the configured React Doctor rules are enforced as errors; resolve their diagnostics
+before merging.
 
 ### Working with Snapshots
 
