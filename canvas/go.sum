@@ -1,7 +1,7 @@
-github.com/perses/perses v0.54.0 h1:zfq0wkyjRPs1Em76PdTfWyzdPZKGyJDzo7QqxiBTkz0=
-github.com/perses/perses v0.54.0/go.mod h1:Xq5Tv7gDdsx2sqph5Gbvx1GCym5un6GgjoOaDKhe9Qw=
-github.com/perses/spec v0.3.0-beta.8 h1:/78DI29K3dltmxzFJihvqcH9fXa8eqJeJzBJ6uZdICw=
-github.com/perses/spec v0.3.0-beta.8/go.mod h1:p08A4KJtH/7yP/nWdf7As/l0RE74kTYLKIP/8mvqC9E=
+github.com/perses/perses v0.55.0-beta.2 h1:Fk/JY7w7nFEthvx59OXJgYS+vGGsX12xiH5ZgyROuKQ=
+github.com/perses/perses v0.55.0-beta.2/go.mod h1:zshmpMe5BnONXaGxDKtn7HzRGgDkeF3FHb4ga4QfXOc=
+github.com/perses/spec v0.3.0-beta.9 h1:TSntWfAnBR7M0aBZEUDpnD6pboChL1JYepDMeBL5YxE=
+github.com/perses/spec v0.3.0-beta.9/go.mod h1:p08A4KJtH/7yP/nWdf7As/l0RE74kTYLKIP/8mvqC9E=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
