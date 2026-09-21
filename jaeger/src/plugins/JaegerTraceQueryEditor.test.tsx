@@ -17,10 +17,6 @@ import type { MockedFunction } from 'vitest';
 
 import { JaegerTraceQueryEditor } from './JaegerTraceQueryEditor';
 
-vi.mock('@perses-dev/components', () => ({
-  useId: vi.fn(() => 'jaeger-datasource-label'),
-}));
-
 vi.mock('@perses-dev/plugin-system', () => ({
   DatasourceSelect: vi.fn(() => null),
   useDatasourceClient: vi.fn(),
