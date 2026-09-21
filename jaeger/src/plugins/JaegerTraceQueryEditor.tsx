@@ -13,12 +13,11 @@
 
 import type { TextFieldProps } from '@mui/material';
 import { Autocomplete, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
-import { useId } from '@perses-dev/components';
 import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ChangeEvent, ReactElement, SyntheticEvent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useId, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { JaegerClient, JaegerTraceQuerySpec } from '../model';
 import { DEFAULT_JAEGER, isDefaultJaegerSelector, isJaegerDatasourceSelector, JAEGER_DATASOURCE_KIND } from '../model';
@@ -46,7 +45,7 @@ export function JaegerTraceQueryEditor(props: JaegerTraceQueryEditorProps): Reac
   const { onChange, value } = props;
   const datasourceSelectValue = value.datasource ?? DEFAULT_JAEGER;
   const selectedDatasource = useDatasourceSelectValueToSelector(datasourceSelectValue, JAEGER_DATASOURCE_KIND);
-  const datasourceSelectLabelID = useId('jaeger-datasource-label');
+  const datasourceSelectLabelID = useId();
   const { data: client } = useDatasourceClient<JaegerClient>(selectedDatasource);
   const serviceOptions = useServiceOptions(client);
   const operationOptions = useOperationOptions(client, value.service);

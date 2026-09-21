@@ -12,12 +12,11 @@
 // limitations under the License.
 
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
-import { useId } from '@perses-dev/components';
 import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
-import { useCallback, useState } from 'react';
+import { useId, useCallback, useState } from 'react';
 
 import { TraceQLEditor, filterToTraceQL, traceQLToFilter } from '../../components';
 import { AttributeFilters } from '../../components/AttributeFilters';
@@ -35,7 +34,7 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElemen
 
   const datasourceSelectValue = datasource ?? DEFAULT_TEMPO;
   const selectedDatasource = useDatasourceSelectValueToSelector(datasourceSelectValue, TEMPO_DATASOURCE_KIND);
-  const datasourceSelectLabelID = useId('tempo-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
+  const datasourceSelectLabelID = useId(); // for panels with multiple queries, this component is rendered multiple times on the same page
 
   const { data: client } = useDatasourceClient<TempoClient>(selectedDatasource);
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);

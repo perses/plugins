@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { Autocomplete, FormControl, Stack, TextField } from '@mui/material';
-import { useId } from '@perses-dev/components';
 import type { DatasourceSelectProps, DatasourceSelectValue, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, useDatasourceClient, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
+import { useId } from 'react';
 
 import { PromQLEditor } from '../components';
 import type { PrometheusClient, PrometheusDatasourceSelector } from '../model';
@@ -42,7 +42,7 @@ export function PrometheusPromQLAnnotationOptionEditor(props: PrometheusAnnotati
 
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
 
-  const datasourceSelectLabelID = useId('prom-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
+  const datasourceSelectLabelID = useId(); // for panels with multiple queries, this component is rendered multiple times on the same page
 
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,

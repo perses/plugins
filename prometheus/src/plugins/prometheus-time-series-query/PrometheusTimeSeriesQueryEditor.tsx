@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, FormControl, Stack, TextField } from '@mui/material';
-import { useId } from '@perses-dev/components';
 import { PanelEditorContext } from '@perses-dev/dashboards';
 import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import {
@@ -27,7 +26,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
-import { useContext, useMemo } from 'react';
+import { useId, useContext, useMemo } from 'react';
 
 import { PromQLEditor } from '../../components';
 import type { DurationString, PrometheusClient, PrometheusDatasourceSelector } from '../../model';
@@ -57,7 +56,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
 
-  const datasourceSelectLabelID = useId('prom-datasource-label'); // for panels with multiple queries, this component is rendered multiple times on the same page
+  const datasourceSelectLabelID = useId(); // for panels with multiple queries, this component is rendered multiple times on the same page
 
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
