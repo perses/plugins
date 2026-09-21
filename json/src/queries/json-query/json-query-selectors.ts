@@ -1,0 +1,32 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { DatasourceSelectValue } from '@perses-dev/plugin-system';
+import { isVariableDatasource } from '@perses-dev/plugin-system';
+import type { DatasourceSelector } from '@perses-dev/spec';
+
+import { DATASOURCE_KIND } from './constants';
+
+export interface JsonDatasourceSelector extends DatasourceSelector {
+  kind: typeof DATASOURCE_KIND;
+}
+
+export function isDefaultJsonDatasourceSelector(datasourceSelectValue: DatasourceSelectValue): boolean {
+  return !isVariableDatasource(datasourceSelectValue) && datasourceSelectValue.name === undefined;
+}
+
+export function isJsonDatasourceSelector(
+  datasourceSelectValue: DatasourceSelectValue,
+): datasourceSelectValue is JsonDatasourceSelector {
+  return isVariableDatasource(datasourceSelectValue) || datasourceSelectValue.kind === DATASOURCE_KIND;
+}
