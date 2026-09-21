@@ -40,78 +40,10 @@ import { produce } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 import type { ChangeEvent, ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { DEFAULT_FORMAT, DEFAULT_OUTER_RADIUS, DEFAULT_VISUAL, resolvePieChartVisualOptions } from './pie-chart-model';
 import type { PieChartOptions, PieChartOptionsEditorProps, PieChartVisualOptions } from './pie-chart-model';
-
-interface RadiusInputs {
-  innerRadius?: string;
-  outerRadius: string;
-}
-
-interface RadiusControlsProps {
-  innerRadius?: string;
-  outerRadius: string;
-  onChange: (radius: RadiusInputs) => void;
-}
-
-function RadiusControls({ innerRadius = '', outerRadius, onChange }: RadiusControlsProps): ReactElement {
-  const [isOuterRadiusEmpty, setIsOuterRadiusEmpty] = useState(false);
-
-  const updateRadius = useCallback(
-    (inner: string, outer: string): void => {
-      if (outer === '') return;
-
-      onChange({ innerRadius: inner || undefined, outerRadius: outer });
-    },
-    [onChange],
-  );
-
-  const handleOuterRadiusChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>): void => {
-      const outer = event.target.value;
-      if (outer === '') {
-        setIsOuterRadiusEmpty(true);
-        return;
-      }
-
-      setIsOuterRadiusEmpty(false);
-      updateRadius(innerRadius, outer);
-    },
-    [innerRadius, updateRadius],
-  );
-
-  const handleInnerRadiusChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>): void => {
-      const outer = isOuterRadiusEmpty ? DEFAULT_OUTER_RADIUS : outerRadius;
-      setIsOuterRadiusEmpty(false);
-      updateRadius(event.target.value, outer);
-    },
-    [isOuterRadiusEmpty, outerRadius, updateRadius],
-  );
-
-  const handleOuterRadiusBlur = useCallback((): void => {
-    if (!isOuterRadiusEmpty) return;
-
-    setIsOuterRadiusEmpty(false);
-    updateRadius(innerRadius, DEFAULT_OUTER_RADIUS);
-  }, [innerRadius, isOuterRadiusEmpty, updateRadius]);
-
-  return (
-    <Stack spacing={2}>
-      <TextField
-        label="Outer Radius"
-        required
-        size="small"
-        value={isOuterRadiusEmpty ? '' : outerRadius}
-        onChange={handleOuterRadiusChange}
-        onBlur={handleOuterRadiusBlur}
-      />
-      <TextField label="Inner Radius" size="small" value={innerRadius} onChange={handleInnerRadiusChange} />
-    </Stack>
-  );
-}
 
 function normalizePieChartOptions(value: PieChartOptions): PieChartOptions & { visual: PieChartVisualOptions } {
   const normalizedValue = { ...value };
@@ -178,17 +110,37 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     );
   };
 
-  const handleRadiusChange: RadiusControlsProps['onChange'] = useCallback(
-    ({ innerRadius, outerRadius }) => {
+  const updateRadius = useCallback(
+    (innerRadius: string, outerRadius: string): void => {
       onChange(
         produce(value, (draft) => {
-          draft.visual.innerRadius = innerRadius;
+          draft.visual.innerRadius = innerRadius || undefined;
           draft.visual.outerRadius = outerRadius;
         }),
       );
     },
     [onChange, value],
   );
+
+  const handleOuterRadiusChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      updateRadius(value.visual.innerRadius ?? '', event.target.value);
+    },
+    [updateRadius, value.visual.innerRadius],
+  );
+
+  const handleInnerRadiusChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      updateRadius(event.target.value, value.visual.outerRadius);
+    },
+    [updateRadius, value.visual.outerRadius],
+  );
+
+  const handleOuterRadiusBlur = useCallback((): void => {
+    if (value.visual.outerRadius !== '') return;
+
+    updateRadius(value.visual.innerRadius ?? '', DEFAULT_OUTER_RADIUS);
+  }, [updateRadius, value.visual.innerRadius, value.visual.outerRadius]);
 
   const chartsTheme = useChartsTheme();
   const themePalette = chartsTheme.echartsTheme.color;
@@ -260,11 +212,22 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
       <OptionsEditorColumn>
         <LegendOptionsEditor calculation="comparison" value={value.legend} onChange={handleLegendChange} />
         <OptionsEditorGroup title="Visual">
-          <RadiusControls
-            innerRadius={value.visual.innerRadius}
-            outerRadius={value.visual.outerRadius}
-            onChange={handleRadiusChange}
-          />
+          <Stack spacing={2}>
+            <TextField
+              label="Outer Radius"
+              required
+              size="small"
+              value={value.visual.outerRadius}
+              onChange={handleOuterRadiusChange}
+              onBlur={handleOuterRadiusBlur}
+            />
+            <TextField
+              label="Inner Radius"
+              size="small"
+              value={value.visual.innerRadius ?? ''}
+              onChange={handleInnerRadiusChange}
+            />
+          </Stack>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2} alignItems="center">
               <FormControl size="small" sx={{ minWidth: 150 }}>

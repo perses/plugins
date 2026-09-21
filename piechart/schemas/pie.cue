@@ -33,7 +33,7 @@ spec: close({
 
 	showLabels?: bool
 
-	// Deprecated top-level visual options remain accepted for persisted dashboards.
+	// Deprecated: radius and colorPalette moved to visual options, but remain accepted at the top level for persisted dashboards.
 	radius?: number
 	colorPalette?: [...string]
 	visual?: close({

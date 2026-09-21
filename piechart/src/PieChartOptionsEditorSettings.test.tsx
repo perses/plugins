@@ -150,10 +150,14 @@ describe('PieChartOptionsEditorSettings', () => {
 
   it('restores the default when the required outer radius is left blank', () => {
     const onChange = vi.fn();
-    renderEditor(createInitialPieChartOptions(), onChange);
+    renderControlledEditor(onChange);
 
     const outerRadius = getOuterRadius();
     fireEvent.change(outerRadius, { target: { value: '' } });
+
+    expect(onChange).toHaveBeenLastCalledWith(withVisual({ outerRadius: '' }));
+    expect(outerRadius).toHaveValue('');
+
     fireEvent.blur(outerRadius);
 
     expect(onChange).toHaveBeenLastCalledWith(withVisual({ outerRadius: '90%' }));
