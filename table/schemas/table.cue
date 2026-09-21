@@ -16,7 +16,7 @@ package model
 import (
 	"strings"
 	"github.com/perses/shared/cue/common"
-	model "github.com/perses/perses/cue/model/api/v1/common"
+	pluginSpec "github.com/perses/spec/cue/plugin"
 )
 
 kind: "Table"
@@ -40,7 +40,7 @@ spec: close({
 	header?:            string
 	headerDescription?: string
 	cellDescription?:   string
-	plugin?:            model.#Plugin
+	plugin?:            pluginSpec.#Plugin
 	format?:            common.#format
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool

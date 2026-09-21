@@ -6,12 +6,12 @@ source: {
 	kind: "git"
 }
 deps: {
-	"github.com/perses/perses/cue@v0": {
-		v:       "v0.54.0"
+	"github.com/perses/shared/cue@v0": {
+		v:       "v0.55.0-beta.12"
 		default: true
 	}
-	"github.com/perses/shared/cue@v0": {
-		v:       "v0.55.0-beta.10"
+	"github.com/perses/spec/cue@v0": {
+		v:       "v0.3.0-beta.8"
 		default: true
 	}
 }
