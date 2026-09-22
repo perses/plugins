@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { SwitchProps } from '@mui/material';
-import { Button, FormControl, InputLabel, MenuItem, Select, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, Switch, Typography } from '@mui/material';
 import type {
   FormatControlsProps,
   SortSelectorProps,
@@ -39,11 +39,15 @@ import { CalculationSelector, LegendOptionsEditor } from '@perses-dev/plugin-sys
 import { produce } from 'immer';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
-import type { ChangeEvent, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useCallback, useMemo } from 'react';
 
-import { DEFAULT_FORMAT, DEFAULT_OUTER_RADIUS, DEFAULT_VISUAL, resolvePieChartVisualOptions } from './pie-chart-model';
+import { DEFAULT_FORMAT, DEFAULT_VISUAL, resolvePieChartVisualOptions } from './pie-chart-model';
 import type { PieChartOptions, PieChartOptionsEditorProps, PieChartVisualOptions } from './pie-chart-model';
+import { PieChartRadiusControl } from './PieChartRadiusControl';
+import type { PieChartRadiusValues } from './PieChartRadiusControl';
+
+const COLOR_CONTROLS_SX = { pt: 3 };
 
 function normalizePieChartOptions(value: PieChartOptions): PieChartOptions & { visual: PieChartVisualOptions } {
   const normalizedValue = { ...value };
@@ -110,37 +114,17 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
     );
   };
 
-  const updateRadius = useCallback(
-    (innerRadius: string, outerRadius: string): void => {
+  const saveRadius = useCallback(
+    (radius: PieChartRadiusValues): void => {
       onChange(
         produce(value, (draft) => {
-          draft.visual.innerRadius = innerRadius || undefined;
-          draft.visual.outerRadius = outerRadius;
+          draft.visual.innerRadius = radius.innerRadius;
+          draft.visual.outerRadius = radius.outerRadius;
         }),
       );
     },
     [onChange, value],
   );
-
-  const handleOuterRadiusChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>): void => {
-      updateRadius(value.visual.innerRadius ?? '', event.target.value);
-    },
-    [updateRadius, value.visual.innerRadius],
-  );
-
-  const handleInnerRadiusChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>): void => {
-      updateRadius(event.target.value, value.visual.outerRadius);
-    },
-    [updateRadius, value.visual.outerRadius],
-  );
-
-  const handleOuterRadiusBlur = useCallback((): void => {
-    if (value.visual.outerRadius !== '') return;
-
-    updateRadius(value.visual.innerRadius ?? '', DEFAULT_OUTER_RADIUS);
-  }, [updateRadius, value.visual.innerRadius, value.visual.outerRadius]);
 
   const chartsTheme = useChartsTheme();
   const themePalette = chartsTheme.echartsTheme.color;
@@ -213,22 +197,13 @@ export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps)
         <LegendOptionsEditor calculation="comparison" value={value.legend} onChange={handleLegendChange} />
         <OptionsEditorGroup title="Visual">
           <Stack spacing={2}>
-            <TextField
-              label="Outer Radius"
-              required
-              size="small"
-              value={value.visual.outerRadius}
-              onChange={handleOuterRadiusChange}
-              onBlur={handleOuterRadiusBlur}
-            />
-            <TextField
-              label="Inner Radius"
-              size="small"
-              value={value.visual.innerRadius ?? ''}
-              onChange={handleInnerRadiusChange}
+            <PieChartRadiusControl
+              innerRadius={value.visual.innerRadius}
+              outerRadius={value.visual.outerRadius}
+              onChange={saveRadius}
             />
           </Stack>
-          <Stack spacing={2}>
+          <Stack spacing={2} sx={COLOR_CONTROLS_SX}>
             <Stack direction="row" spacing={2} alignItems="center">
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Color Scheme</InputLabel>

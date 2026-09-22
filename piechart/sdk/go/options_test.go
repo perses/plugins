@@ -20,32 +20,32 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestVisualOuterRadiusDefaultsToNinetyPercent(t *testing.T) {
+func TestVisualOuterRadiusDefaultsToOneHundredPercent(t *testing.T) {
 	builder, err := create()
 	if err != nil {
 		t.Fatalf("create failed: %v", err)
 	}
 
-	if builder.Visual.OuterRadius != "90%" {
-		t.Errorf("expected default outer radius to be 90%%, got %q", builder.Visual.OuterRadius)
+	if builder.Visual.OuterRadius != 100 {
+		t.Errorf("expected default outer radius to be 100, got %d", builder.Visual.OuterRadius)
 	}
 }
 
-func TestWithVisualRetainsDefaultRadiusWhenOmitted(t *testing.T) {
-	builder, err := create(WithVisual(Visual{ColorPalette: []string{"#3366cc"}}))
+func TestWithVisualPreservesZeroOuterRadius(t *testing.T) {
+	builder, err := create(WithVisual(Visual{OuterRadius: 0}))
 	if err != nil {
 		t.Fatalf("create failed: %v", err)
 	}
 
-	if builder.Visual.OuterRadius != "90%" {
-		t.Errorf("expected default outer radius to be retained, got %q", builder.Visual.OuterRadius)
+	if builder.Visual.OuterRadius != 0 {
+		t.Errorf("expected outer radius to remain zero, got %d", builder.Visual.OuterRadius)
 	}
 }
 
 func TestWithVisualSerializesPieOptions(t *testing.T) {
 	builder, err := create(WithVisual(Visual{
-		InnerRadius:  "40%",
-		OuterRadius:  "90%",
+		InnerRadius:  40,
+		OuterRadius:  90,
 		ColorPalette: []string{"#3366cc", "#dc3912"},
 	}))
 	if err != nil {
@@ -66,7 +66,7 @@ func TestWithVisualSerializesPieOptions(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected visual options, got %#v", result["visual"])
 	}
-	if visual["innerRadius"] != "40%" || visual["outerRadius"] != "90%" {
+	if visual["innerRadius"] != float64(40) || visual["outerRadius"] != float64(90) {
 		t.Errorf("unexpected radii: %#v", visual)
 	}
 	colorPalette, ok := visual["colorPalette"].([]any)
@@ -104,8 +104,8 @@ func TestWithShowLabelsSerializesAtTheTopLevel(t *testing.T) {
 
 func TestWithVisualSerializesRadiiAsYAML(t *testing.T) {
 	builder, err := create(WithVisual(Visual{
-		InnerRadius: "40%",
-		OuterRadius: "90%",
+		InnerRadius: 40,
+		OuterRadius: 90,
 	}))
 	if err != nil {
 		t.Fatalf("create failed: %v", err)
@@ -116,7 +116,7 @@ func TestWithVisualSerializesRadiiAsYAML(t *testing.T) {
 		t.Fatalf("marshal failed: %v", err)
 	}
 
-	if string(bytes) != "calculation: last\nvisual:\n    innerRadius: 40%\n    outerRadius: 90%\n" {
+	if string(bytes) != "calculation: last\nvisual:\n    innerRadius: 40\n    outerRadius: 90\n" {
 		t.Errorf("unexpected YAML: %s", bytes)
 	}
 }

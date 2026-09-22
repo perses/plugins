@@ -19,14 +19,14 @@ import type { Definition } from '@perses-dev/spec';
 export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal', shortValues: true };
 export const DEFAULT_SORT: SortOption = 'desc';
 export const DEFAULT_MODE: ModeOption = 'value';
-export const DEFAULT_OUTER_RADIUS = '90%';
+export const DEFAULT_OUTER_RADIUS = 100;
 
 /** Visual settings that control the pie chart's size and colors. */
 export interface PieChartVisualOptions {
-  /** Inner radius as a percentage or a unitless pixel value. When omitted, the chart renders as a pie. */
-  innerRadius?: string;
-  /** Outer radius as a percentage or a unitless pixel value. */
-  outerRadius: string;
+  /** Inner radius as a whole percentage from 0 to 100. When omitted, the chart renders as a pie. */
+  innerRadius?: number;
+  /** Outer radius as a whole percentage from 0 to 100. */
+  outerRadius: number;
   /** Colors used for the pie chart segments. */
   colorPalette?: string[];
 }

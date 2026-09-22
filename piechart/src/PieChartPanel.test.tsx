@@ -57,7 +57,7 @@ describe('PieChartPanel', () => {
     expect(pieChartBaseSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
         data: [expect.objectContaining({ itemStyle: { color: '#3366cc' } })],
-        outerRadius: '90%',
+        outerRadius: 100,
         showLabels: true,
       }),
     );

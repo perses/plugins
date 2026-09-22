@@ -3,8 +3,7 @@
   "spec": {
     "calculation": "last",
     "visual": {
-      "outerRadius": 90,
-      "lineWidth": 1
+      "outerRadius": 50.5
     }
   }
 }

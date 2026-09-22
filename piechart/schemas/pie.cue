@@ -37,8 +37,8 @@ spec: close({
 	radius?: number
 	colorPalette?: [...string]
 	visual?: close({
-		innerRadius?: string
-		outerRadius:  string
+		innerRadius?: int & >=0 & <=100
+		outerRadius:  int & >=0 & <=100
 		colorPalette?: [...string]
 	})
 })

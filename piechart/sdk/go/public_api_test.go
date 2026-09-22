@@ -26,8 +26,8 @@ func TestVisualRadiiAreUsableThroughThePublicSDK(t *testing.T) {
 		Calculation: common.LastCalculation,
 		ShowLabels:  true,
 		Visual: &pie.Visual{
-			InnerRadius: "40%",
-			OuterRadius: "90%",
+			InnerRadius: 40,
+			OuterRadius: 90,
 		},
 	}
 
@@ -36,7 +36,7 @@ func TestVisualRadiiAreUsableThroughThePublicSDK(t *testing.T) {
 		t.Fatalf("marshal failed: %v", err)
 	}
 
-	if string(bytes) != `{"calculation":"last","showLabels":true,"visual":{"innerRadius":"40%","outerRadius":"90%"}}` {
+	if string(bytes) != `{"calculation":"last","showLabels":true,"visual":{"innerRadius":40,"outerRadius":90}}` {
 		t.Errorf("unexpected JSON: %s", bytes)
 	}
 }

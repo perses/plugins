@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import type { RenderResult } from '@testing-library/react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { useCallback, useState } from 'react';
 
@@ -21,21 +21,13 @@ import { createInitialPieChartOptions, DEFAULT_VISUAL } from './pie-chart-model'
 import type { PieChartOptions, PieChartVisualOptions } from './pie-chart-model';
 import { PieChartOptionsEditorSettings } from './PieChartOptionsEditorSettings';
 
-function renderEditor(value: PieChartOptions = createInitialPieChartOptions(), onChange = vi.fn()): void {
-  render(
-    <ChartsProvider chartsTheme={testChartsTheme}>
-      <PieChartOptionsEditorSettings value={value} onChange={onChange} />
-    </ChartsProvider>,
-  );
-}
-
 interface ControlledEditorProps {
+  initialValue: PieChartOptions;
   onChange: (value: PieChartOptions) => void;
 }
 
-function ControlledEditor({ onChange }: ControlledEditorProps): ReactElement {
-  const [value, setValue] = useState(createInitialPieChartOptions);
-
+function ControlledEditor({ initialValue, onChange }: ControlledEditorProps): ReactElement {
+  const [value, setValue] = useState(initialValue);
   const handleChange = useCallback(
     (nextValue: PieChartOptions): void => {
       setValue(nextValue);
@@ -43,24 +35,23 @@ function ControlledEditor({ onChange }: ControlledEditorProps): ReactElement {
     },
     [onChange],
   );
-
   return <PieChartOptionsEditorSettings value={value} onChange={handleChange} />;
 }
 
-function renderControlledEditor(onChange = vi.fn()): void {
-  render(
+function renderEditor(value: PieChartOptions = createInitialPieChartOptions(), onChange = vi.fn()): RenderResult {
+  return render(
     <ChartsProvider chartsTheme={testChartsTheme}>
-      <ControlledEditor onChange={onChange} />
+      <ControlledEditor initialValue={value} onChange={onChange} />
     </ChartsProvider>,
   );
 }
 
 function getOuterRadius(): HTMLInputElement {
-  return screen.getByRole('textbox', { name: 'Outer Radius' });
+  return screen.getByRole('slider', { name: 'Outer Radius slider' });
 }
 
 function getInnerRadius(): HTMLInputElement {
-  return screen.getByRole('textbox', { name: 'Inner Radius' });
+  return screen.getByRole('slider', { name: 'Inner Radius slider' });
 }
 
 function withVisual(visual: Partial<PieChartVisualOptions>): PieChartOptions {
@@ -95,7 +86,7 @@ describe('PieChartOptionsEditorSettings', () => {
     };
     renderEditor(legacyOptions, onChange);
 
-    fireEvent.change(getOuterRadius(), { target: { value: '75%' } });
+    fireEvent.change(getOuterRadius(), { target: { value: '75' } });
 
     expect(onChange).toHaveBeenLastCalledWith({
       calculation: legacyOptions.calculation,
@@ -104,7 +95,7 @@ describe('PieChartOptionsEditorSettings', () => {
       showLabels: true,
       sort: legacyOptions.sort,
       visual: {
-        outerRadius: '75%',
+        outerRadius: 75,
         colorPalette: ['#3366cc', '#dc3912'],
       },
     });
@@ -113,69 +104,131 @@ describe('PieChartOptionsEditorSettings', () => {
   it('shows the default outer radius and no inner radius', () => {
     renderEditor();
 
-    expect(getOuterRadius()).toHaveValue('90%');
-    expect(getInnerRadius()).toHaveValue('');
+    expect(getOuterRadius()).toHaveValue('100');
+    expect(getInnerRadius()).toHaveValue('0');
   });
 
-  it('stores a unitless outer radius', () => {
+  it('updates radius controls when the persisted value changes', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <ChartsProvider chartsTheme={testChartsTheme}>
+        <PieChartOptionsEditorSettings value={withVisual({ innerRadius: 20, outerRadius: 80 })} onChange={onChange} />
+      </ChartsProvider>,
+    );
+
+    rerender(
+      <ChartsProvider chartsTheme={testChartsTheme}>
+        <PieChartOptionsEditorSettings value={withVisual({ innerRadius: 40, outerRadius: 75 })} onChange={onChange} />
+      </ChartsProvider>,
+    );
+
+    expect(getOuterRadius()).toHaveValue('75');
+    expect(getInnerRadius()).toHaveValue('40');
+
+    fireEvent.change(getInnerRadius(), { target: { value: '45' } });
+    expect(onChange).toHaveBeenLastCalledWith(withVisual({ innerRadius: 45, outerRadius: 75 }));
+  });
+
+  it('allows an outer radius of zero', () => {
     const onChange = vi.fn();
     renderEditor(createInitialPieChartOptions(), onChange);
 
-    fireEvent.change(getOuterRadius(), { target: { value: '200' } });
+    fireEvent.change(getOuterRadius(), { target: { value: '0' } });
 
-    expect(onChange).toHaveBeenLastCalledWith(withVisual({ outerRadius: '200' }));
-  });
-
-  it('keeps the outer radius focused while typing in a controlled editor', () => {
-    const onChange = vi.fn();
-    renderControlledEditor(onChange);
-
-    const outerRadius = getOuterRadius();
-    userEvent.clear(outerRadius);
-    userEvent.type(outerRadius, '75%');
-
-    expect(outerRadius).toHaveFocus();
-    expect(outerRadius).toHaveValue('75%');
-    expect(onChange).toHaveBeenLastCalledWith(withVisual({ outerRadius: '75%' }));
+    expect(onChange).toHaveBeenLastCalledWith(withVisual({ outerRadius: 0 }));
   });
 
   it('stores an inner radius for a doughnut chart', () => {
     const onChange = vi.fn();
     renderEditor(createInitialPieChartOptions(), onChange);
 
-    fireEvent.change(getInnerRadius(), { target: { value: '40%' } });
+    fireEvent.change(getInnerRadius(), { target: { value: '40' } });
 
-    expect(onChange).toHaveBeenLastCalledWith(withVisual({ innerRadius: '40%', outerRadius: '90%' }));
+    expect(onChange).toHaveBeenLastCalledWith(withVisual({ innerRadius: 40, outerRadius: 100 }));
   });
 
-  it('restores the default when the required outer radius is left blank', () => {
+  it('labels the inner and outer slider thumbs', () => {
+    renderEditor();
+
+    expect(getOuterRadius()).toHaveAttribute('aria-valuetext', 'Outer: 100%');
+    expect(getInnerRadius()).toHaveAttribute('aria-valuetext', 'Inner: 0%');
+    expect(screen.getByText('0%')).toBeVisible();
+    expect(screen.getByText('100%')).toBeVisible();
+  });
+
+  it('insets the slider endpoints from the editor edges', () => {
+    renderEditor();
+    const sliderContainer = getInnerRadius().closest('.MuiSlider-root')?.parentElement;
+
+    expect(sliderContainer).toHaveStyle({ paddingLeft: '24px', paddingRight: '24px' });
+  });
+
+  it('reserves space between radius marks and color controls', () => {
+    renderEditor();
+    const colorSchemeRow = screen.getAllByRole('combobox')[0]?.closest('.MuiStack-root');
+    const colorSection = colorSchemeRow?.parentElement;
+
+    expect(colorSection).toHaveStyle({ paddingTop: '24px' });
+  });
+
+  it('omits an inner radius of zero', () => {
     const onChange = vi.fn();
-    renderControlledEditor(onChange);
+    renderEditor(withVisual({ innerRadius: 40, outerRadius: 90 }), onChange);
 
-    const outerRadius = getOuterRadius();
-    fireEvent.change(outerRadius, { target: { value: '' } });
+    fireEvent.change(getInnerRadius(), { target: { value: '0' } });
 
-    expect(onChange).toHaveBeenLastCalledWith(withVisual({ outerRadius: '' }));
-    expect(outerRadius).toHaveValue('');
-
-    fireEvent.blur(outerRadius);
-
-    expect(onChange).toHaveBeenLastCalledWith(withVisual({ outerRadius: '90%' }));
+    expect(getInnerRadius()).toHaveValue('0');
+    expect(onChange).toHaveBeenLastCalledWith(withVisual({ innerRadius: undefined, outerRadius: 90 }));
   });
 
-  it('displays unitless pixel radius values', () => {
-    renderEditor(withVisual({ innerRadius: '40', outerRadius: '90%' }));
+  it('allows equal radii', () => {
+    const onChange = vi.fn();
+    renderEditor(withVisual({ innerRadius: 40, outerRadius: 75 }), onChange);
 
-    expect(getInnerRadius()).toHaveValue('40');
-    expect(getOuterRadius()).toHaveValue('90%');
+    fireEvent.change(getOuterRadius(), {
+      target: { value: '40' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith(withVisual({ innerRadius: 40, outerRadius: 40 }));
+    expect(getOuterRadius()).toHaveValue('40');
+  });
+
+  it('previews a drag locally and commits when the drag ends', () => {
+    const onChange = vi.fn();
+    renderEditor(createInitialPieChartOptions(), onChange);
+    const innerSlider = getInnerRadius();
+    const sliderRoot = innerSlider.closest('.MuiSlider-root');
+    if (!(sliderRoot instanceof HTMLElement)) {
+      throw new Error('Expected the range slider to have a slider root');
+    }
+    vi.spyOn(sliderRoot, 'getBoundingClientRect').mockReturnValue({
+      bottom: 10,
+      height: 10,
+      left: 0,
+      right: 100,
+      top: 0,
+      width: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => undefined,
+    });
+
+    fireEvent.mouseDown(sliderRoot, { button: 0, clientX: 25, clientY: 5 });
+
+    expect(getInnerRadius()).toHaveValue('25');
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.mouseUp(document, { clientX: 25, clientY: 5 });
+
+    expect(onChange).toHaveBeenLastCalledWith(withVisual({ innerRadius: 25, outerRadius: 100 }));
   });
 
   it('resets visual settings to their defaults', () => {
     const onChange = vi.fn();
     const value = {
       ...withVisual({
-        innerRadius: '40%',
-        outerRadius: '90%',
+        innerRadius: 40,
+        outerRadius: 90,
         colorPalette: ['#3366cc'],
       }),
       showLabels: true,

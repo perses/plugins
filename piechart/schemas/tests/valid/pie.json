@@ -14,8 +14,8 @@
     "mode": "value",
     "showLabels": true,
     "visual": {
-      "innerRadius": "40%",
-      "outerRadius": "90%"
+      "innerRadius": 40,
+      "outerRadius": 90
     }
   }
 }

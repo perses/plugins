@@ -38,12 +38,6 @@ func WithShowLabels(showLabels bool) Option {
 
 func WithVisual(visual Visual) Option {
 	return func(builder *Builder) error {
-		if visual.OuterRadius == "" {
-			visual.OuterRadius = defaultOuterRadius
-			if builder.Visual != nil {
-				visual.OuterRadius = builder.Visual.OuterRadius
-			}
-		}
 		builder.Visual = &visual
 		return nil
 	}

@@ -59,6 +59,6 @@ spec: {
 			colorPalette: [#mappedColor]
 		}
 
-		outerRadius: "90%"
+		outerRadius: 100
 	}
 }

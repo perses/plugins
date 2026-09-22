@@ -9,7 +9,7 @@
     "showLabels": true,
     "visual": {
       "colorPalette": ["#e02f44"],
-      "outerRadius": "90%"
+      "outerRadius": 100
     }
   }
 }

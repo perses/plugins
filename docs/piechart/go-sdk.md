@@ -16,7 +16,7 @@ Need a list of options.
 ## Default options
 
 - Calculation: `last`
-- Visual outer radius: `"90%"`
+- Visual outer radius: `100` (100%)
 
 ## Available options
 
@@ -44,16 +44,18 @@ package main
 import pie "github.com/perses/plugins/piechart/sdk/go"
 
 pie.WithVisual(pie.Visual{
-	OuterRadius: "90%",
+	OuterRadius: 90,
 })
 ```
 
-Define the pie chart's radii and colors. Radius values can be percentages or unitless pixel strings.
+Define the pie chart's radii and colors. Radius values are whole-number percentages from `0` through `100`. Inner and
+outer radii are passed to ECharts without enforcing an order. `WithVisual` preserves an `OuterRadius` of `0` rather
+than replacing it with the default.
 
 ```golang
 pie.WithVisual(pie.Visual{
-	InnerRadius:  "40%",
-	OuterRadius:  "90%",
+	InnerRadius:  40,
+	OuterRadius:  90,
 	ColorPalette: []string{"#3366cc", "#dc3912"},
 })
 ```
@@ -109,8 +111,8 @@ func main() {
 						Size:     pie.MediumSize,
 					}),
 					pie.WithVisual(pie.Visual{
-						InnerRadius: "40%",
-						OuterRadius: "90%",
+						InnerRadius: 40,
+						OuterRadius: 90,
 					}),
 					pie.WithFormat(&common.Format{
 						Unit:          &common.BytesUnit,

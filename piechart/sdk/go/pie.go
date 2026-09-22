@@ -20,7 +20,7 @@ import (
 
 const (
 	PluginKind         = "PieChart"
-	defaultOuterRadius = "90%"
+	defaultOuterRadius = 100
 )
 
 type LegendPosition string
@@ -119,8 +119,8 @@ type QuerySettingsItem struct {
 }
 
 type Visual struct {
-	InnerRadius  string   `json:"innerRadius,omitempty" yaml:"innerRadius,omitempty"`
-	OuterRadius  string   `json:"outerRadius" yaml:"outerRadius"`
+	InnerRadius  int      `json:"innerRadius,omitempty" yaml:"innerRadius,omitempty"`
+	OuterRadius  int      `json:"outerRadius" yaml:"outerRadius"`
 	ColorPalette []string `json:"colorPalette,omitempty" yaml:"colorPalette,omitempty"`
 
 	// Deprecated fields retained for source compatibility. They are not PieChart settings.

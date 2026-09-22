@@ -3,8 +3,8 @@
   "spec": {
     "calculation": "last-number",
     "visual": {
-      "innerRadius": "40",
-      "outerRadius": "200"
+      "innerRadius": 80,
+      "outerRadius": 60
     }
   }
 }
