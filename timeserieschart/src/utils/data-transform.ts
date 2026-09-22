@@ -97,14 +97,16 @@ export function getTimeSeries(
   paletteColor: string,
   querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number; stack?: boolean },
   yAxisIndex?: number,
+  visibleSeriesCount = 1,
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
   const shouldStack = querySettings?.stack !== undefined ? querySettings.stack : visual.stack === 'all';
 
-  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  // Show automatic point markers only on short, sparse charts. Dense charts
+  // otherwise create a symbol for every sample across every visible series.
   const minuteMs = 60000;
-  let showPoints = timeScale.rangeMs <= minuteMs * 15;
+  let showPoints = timeScale.rangeMs <= minuteMs * 15 && visibleSeriesCount <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.showPoints === 'always') {
     showPoints = true;

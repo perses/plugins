@@ -11,15 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import type * as ComponentsModule from '@perses-dev/components';
+import { ChartsProvider, testChartsTheme, getTimeSeriesValues } from '@perses-dev/components';
 import type * as DashboardsModule from '@perses-dev/dashboards';
 import type { AnnotationSpecWithData } from '@perses-dev/dashboards';
-import { TimeRangeContext } from '@perses-dev/plugin-system';
-import type { TimeRangeValue } from '@perses-dev/spec';
+import type * as PluginSystemModule from '@perses-dev/plugin-system';
+import { TimeRangeContext, getCalculations } from '@perses-dev/plugin-system';
+import type { TimeSeriesData, TimeRangeValue } from '@perses-dev/spec';
 import { toAbsoluteTimeRange } from '@perses-dev/spec';
 import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { EChartsCoreOption, ScatterSeriesOption } from 'echarts';
 import type { ReactElement } from 'react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
@@ -27,12 +29,15 @@ import { MOCK_TIME_SERIES_DATA_MULTIVALUE, MOCK_TIME_SERIES_EXEMPLARS } from './
 
 // jsdom has no canvas, so ECharts cannot render. Capture the option passed to
 // the EChart component so tests can assert on the resulting series config.
-const { lastChartOption } = vi.hoisted(() => ({ lastChartOption: { current: undefined as unknown } }));
+const { lastChartOption } = vi.hoisted(() => ({
+  lastChartOption: { current: undefined as EChartsCoreOption | undefined },
+}));
 vi.mock('@perses-dev/components', async (importOriginal) => {
   const actual = await importOriginal<typeof ComponentsModule>();
   return {
     ...actual,
-    EChart: (props: Record<string, unknown>): ReactElement => {
+    getTimeSeriesValues: vi.fn(actual.getTimeSeriesValues),
+    EChart: (props: { option: EChartsCoreOption }): ReactElement => {
       lastChartOption.current = props.option;
       return <div data-testid="echart-mock" />;
     },
@@ -48,6 +53,11 @@ vi.mock('@perses-dev/dashboards', async (importOriginal) => ({
   ...(await importOriginal<typeof DashboardsModule>()),
   usePanelAnnotationsWithData: (): AnnotationSpecWithData[] => [],
 }));
+
+vi.mock('@perses-dev/plugin-system', async (importOriginal) => {
+  const original = await importOriginal<typeof PluginSystemModule>();
+  return { ...original, getCalculations: vi.fn(original.getCalculations) };
+});
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
@@ -92,7 +102,11 @@ function getLegendByName(name?: string): HTMLElement {
 
 describe('TimeSeriesChartPanel', () => {
   // Helper to render the panel with some context set
-  const renderPanel = (data = MOCK_TIME_SERIES_DATA_MULTIVALUE): void => {
+  const renderPanel = (
+    data = MOCK_TIME_SERIES_DATA_MULTIVALUE,
+    spec: TimeSeriesChartProps['spec'] = TEST_TIME_SERIES_PANEL.spec,
+    additionalData: TimeSeriesData[] = [],
+  ): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
       setRefreshInterval: (): Record<string, unknown> => ({}),
@@ -108,7 +122,11 @@ describe('TimeSeriesChartPanel', () => {
           <TimeRangeContext.Provider value={mockTimeRangeContext}>
             <TimeSeriesChartPanel
               {...TEST_TIME_SERIES_PANEL}
-              queryResults={[{ definition: TEST_QUERY_DEFINITION, data }]}
+              spec={spec}
+              queryResults={[data, ...additionalData].map((queryData) => ({
+                definition: TEST_QUERY_DEFINITION,
+                data: queryData,
+              }))}
             />
           </TimeRangeContext.Provider>
         </ChartsProvider>
@@ -117,13 +135,9 @@ describe('TimeSeriesChartPanel', () => {
   };
 
   describe('exemplars', () => {
-    const getExemplarSeries = (): unknown[] => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const option = lastChartOption.current as any;
-      return (option?.series ?? []).filter(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (s: any) => typeof s?.id === 'string' && s.id.startsWith('exemplar-'),
-      );
+    const getExemplarSeries = (): ScatterSeriesOption[] => {
+      const allSeries = lastChartOption.current?.series as ScatterSeriesOption[] | undefined;
+      return (allSeries ?? []).filter((series) => typeof series.id === 'string' && series.id.startsWith('exemplar-'));
     };
 
     it('should render exemplars as diamond scatter series with embedded metadata', async () => {
@@ -136,18 +150,15 @@ describe('TimeSeriesChartPanel', () => {
 
       expect(exemplarSeries).toHaveLength(2);
       for (const series of exemplarSeries) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const s = series as any;
-        expect(s.type).toEqual('scatter');
-        expect(s.symbol).toEqual('diamond');
+        expect(series.type).toEqual('scatter');
+        expect(series.symbol).toEqual('diamond');
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const vda1Series = exemplarSeries.find((s) => (s as any)?.id?.includes('vda1')) as any;
-      const firstItem = vda1Series?.data?.[0];
-      const expectedExemplars = MOCK_TIME_SERIES_EXEMPLARS[0]?.exemplars ?? [];
-      expect(firstItem?.exemplar).toEqual(expectedExemplars[0]);
-      expect(firstItem?.seriesLabels).toEqual(MOCK_TIME_SERIES_EXEMPLARS[0]?.seriesLabels);
+      const vda1Series = exemplarSeries[0];
+      expect(vda1Series?.data?.[0]).toMatchObject({
+        exemplar: MOCK_TIME_SERIES_EXEMPLARS[0]?.exemplars[0],
+        seriesLabels: MOCK_TIME_SERIES_EXEMPLARS[0]?.seriesLabels,
+      });
     });
 
     it('should not render exemplar series when the query data has no exemplars', async () => {
@@ -164,6 +175,8 @@ describe('TimeSeriesChartPanel', () => {
         expect(getExemplarSeries()).toHaveLength(2);
       });
 
+      const initialSeries = getExemplarSeries();
+
       // NOTE: the project pins @testing-library/user-event v13, whose direct
       // `userEvent.click` API is synchronous (the v14 `setup()` API is not available).
       userEvent.click(getLegendByName(MOCK_TIME_SERIES_DATA_MULTIVALUE.series[0]?.name));
@@ -171,10 +184,76 @@ describe('TimeSeriesChartPanel', () => {
       await waitFor(() => {
         const exemplarSeries = getExemplarSeries();
         expect(exemplarSeries).toHaveLength(1);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect((exemplarSeries[0] as any)?.id).toContain('vda1');
+        expect(exemplarSeries[0]?.id).toContain('vda1');
+        expect(exemplarSeries[0]).toBe(initialSeries[0]);
       });
+      userEvent.click(getLegendByName(MOCK_TIME_SERIES_DATA_MULTIVALUE.series[1]?.name));
+      expect(getExemplarSeries()[0]).toBe(initialSeries[1]);
+      userEvent.click(getLegendByName(MOCK_TIME_SERIES_DATA_MULTIVALUE.series[1]?.name), { shiftKey: true });
+      expect(getExemplarSeries()).toHaveLength(0);
+      userEvent.click(getLegendByName(MOCK_TIME_SERIES_DATA_MULTIVALUE.series[0]?.name));
+      expect(getExemplarSeries()[0]).toBe(initialSeries[0]);
     });
+
+    it('keeps exemplar matching query-local and preserves negative Y, color, and axis overrides', () => {
+      const firstSeries = MOCK_TIME_SERIES_DATA_MULTIVALUE.series[0];
+      const group = MOCK_TIME_SERIES_EXEMPLARS[0];
+      if (!firstSeries || !group) throw new Error('Missing exemplar fixture');
+      const data = {
+        ...MOCK_TIME_SERIES_DATA_MULTIVALUE,
+        series: [{ ...firstSeries, name: 'first query' }],
+        exemplars: [group],
+      };
+      renderPanel(
+        data,
+        {
+          ...TEST_TIME_SERIES_PANEL.spec,
+          querySettings: [
+            { queryIndex: 1, negativeY: true, colorMode: 'fixed', colorValue: '#ff0000', format: { unit: 'bytes' } },
+          ],
+        },
+        [
+          {
+            ...data,
+            series: [{ ...firstSeries, name: 'second query' }],
+            exemplars: [
+              { ...group, seriesLabels: Object.fromEntries(Object.entries(group.seriesLabels).toReversed()) },
+            ],
+          },
+          { ...data, series: [] },
+        ],
+      );
+      const initialSeries = getExemplarSeries();
+      expect(initialSeries).toHaveLength(2);
+      expect(initialSeries[1]).toMatchObject({ color: '#ff0000', yAxisIndex: 1 });
+      expect(initialSeries[1]?.data?.[0]).toMatchObject({
+        value: [group.exemplars[0]?.timestamp, -(group.exemplars[0]?.value ?? 0)],
+        exemplar: group.exemplars[0],
+      });
+      userEvent.click(getLegendByName('first query'));
+      expect(getExemplarSeries()).toEqual([initialSeries[0]]);
+      userEvent.click(getLegendByName('second query'));
+      expect(getExemplarSeries()[0]).toBe(initialSeries[1]);
+    });
+  });
+
+  it('reuses sample arrays and legend statistics when selecting series', () => {
+    vi.mocked(getTimeSeriesValues).mockClear();
+    vi.mocked(getCalculations).mockClear();
+    renderPanel(MOCK_TIME_SERIES_DATA_MULTIVALUE, {
+      ...TEST_TIME_SERIES_PANEL.spec,
+      legend: { position: 'right', mode: 'list', values: ['mean'] },
+    });
+    const samplePasses = vi.mocked(getTimeSeriesValues).mock.calls.length;
+    const calculationPasses = vi.mocked(getCalculations).mock.calls.length;
+    expect(samplePasses).toBe(MOCK_TIME_SERIES_DATA_MULTIVALUE.series.length);
+    expect(calculationPasses).toBe(MOCK_TIME_SERIES_DATA_MULTIVALUE.series.length);
+
+    const item = getLegendByName(MOCK_TIME_SERIES_DATA_MULTIVALUE.series[0]?.name);
+    userEvent.click(item);
+    expect(item).toHaveClass('Mui-selected');
+    expect(getTimeSeriesValues).toHaveBeenCalledTimes(samplePasses);
+    expect(getCalculations).toHaveBeenCalledTimes(calculationPasses);
   });
 
   it('should render the legend with unformatted series labels', async () => {
