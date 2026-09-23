@@ -17,6 +17,7 @@ import type * as DashboardsModule from '@perses-dev/dashboards';
 import type { AnnotationSpecWithData } from '@perses-dev/dashboards';
 import { TimeRangeContext } from '@perses-dev/plugin-system';
 import type { TimeRangeValue } from '@perses-dev/spec';
+import type { TimeSeriesExemplars } from '@perses-dev/spec';
 import { toAbsoluteTimeRange } from '@perses-dev/spec';
 import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -173,6 +174,25 @@ describe('TimeSeriesChartPanel', () => {
         expect(exemplarSeries).toHaveLength(1);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((exemplarSeries[0] as any)?.id).toContain('vda1');
+      });
+    });
+
+    it('should match exemplars whose Prometheus labels include __name__', async () => {
+      // Prometheus includes `__name__` in /query_exemplars seriesLabels but omits it
+      // from /query_range metric labels, so the mock exemplars are augmented with it
+      // to reproduce a raw API payload.
+      const exemplarsWithName: TimeSeriesExemplars[] = MOCK_TIME_SERIES_EXEMPLARS.map((series) =>
+        Object.assign({}, series, {
+          seriesLabels: Object.assign({}, series.seriesLabels, { __name__: 'node_filesystem_avail_bytes' }),
+        }),
+      );
+      renderPanel({
+        ...MOCK_TIME_SERIES_DATA_MULTIVALUE,
+        exemplars: exemplarsWithName,
+      });
+
+      await waitFor(() => {
+        expect(getExemplarSeries()).toHaveLength(2);
       });
     });
   });
