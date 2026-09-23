@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/json",
-  "version": "0.1.0-beta.0",
+  "version": "0.1.0-beta.1",
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",
@@ -20,9 +20,9 @@
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@perses-dev/client": "^0.55.0-beta.6",
-    "@perses-dev/plugin-system": "^0.55.0-beta.6",
-    "@perses-dev/spec": "^0.3.0-beta.5",
+    "@perses-dev/client": "^0.55.0-beta.13",
+    "@perses-dev/plugin-system": "^0.55.0-beta.13",
+    "@perses-dev/spec": "^0.3.0-beta.9",
     "immer": "^10.1.1",
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0",
