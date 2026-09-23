@@ -214,7 +214,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     };
   }, []);
 
-  const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
+  const handleEvents = useMemo<OnEventsType<unknown>>(() => {
     return {
       datazoom: (params): void => {
         if (onDataZoom === undefined) {
@@ -239,18 +239,21 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           enableDataZoom(chartRef.current);
         }
       },
-      mouseover: (params: any): void => {
+      mouseover: (params): void => {
         if (
           params.componentType === 'series' &&
           params.seriesType === 'scatter' &&
+          'seriesId' in params &&
           typeof params.seriesId === 'string' &&
           params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)
         ) {
-          if (params.data?.exemplar) {
+          // This series ID identifies the metadata embedded by getExemplarSeries.
+          const point = params.data as { exemplar?: Exemplar; seriesLabels?: Labels; value?: number[] };
+          if (point?.exemplar) {
             setHoveredExemplar({
-              exemplar: params.data.exemplar,
-              seriesLabels: params.data.seriesLabels,
-              plottedValue: params.data?.value?.[1] ?? params.data.exemplar.value,
+              exemplar: point.exemplar,
+              seriesLabels: point.seriesLabels,
+              plottedValue: point.value?.[1] ?? point.exemplar.value,
             });
             return;
           }
@@ -259,7 +262,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         // Only markPoint (triangles under the X-axis) opens the annotation tooltip.
         // Hovering markLine or anything else keeps the regular TimeSeries tooltip visible
         // and clears any stale hovered annotation (mouseout is sometimes missed by ECharts).
-        if (annotations && params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
+        if (annotations && params.componentType === 'markPoint' && typeof params.data?.annotationIndex === 'number') {
           const matchedAnnotation = annotations[params.data.annotationIndex] || null;
           if (matchedAnnotation) {
             setHoveredAnnotation(matchedAnnotation);
@@ -268,10 +271,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
         setHoveredAnnotation(null);
       },
-      mouseout: (params: any): void => {
+      mouseout: (params): void => {
         if (
           params.componentType === 'series' &&
           params.seriesType === 'scatter' &&
+          'seriesId' in params &&
           typeof params.seriesId === 'string' &&
           params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)
         ) {
@@ -281,7 +285,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         if (
           annotations &&
           params.componentType === 'markPoint' &&
-          params.data?.annotationIndex !== undefined &&
+          typeof params.data?.annotationIndex === 'number' &&
           annotations
         ) {
           // Only clear if the mouseout corresponds to the currently hovered annotation, so that

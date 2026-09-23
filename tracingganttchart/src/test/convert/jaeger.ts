@@ -107,12 +107,13 @@ function buildKeyValue(tag: Tag): otlpcommonv1.KeyValue {
 }
 
 function buildAnyValue(tags: Tag): otlpcommonv1.AnyValue {
+  const tagType = tags.type;
   switch (tags.type) {
     case 'string':
       return { stringValue: tags.value };
     case 'int64':
       return { intValue: tags.value.toString() };
     default:
-      throw new Error(`unknown jaeger tag type ${(tags as any).type}`);
+      throw new Error(`unknown jaeger tag type ${tagType}`);
   }
 }

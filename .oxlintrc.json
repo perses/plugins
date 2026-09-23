@@ -14,6 +14,7 @@
     "browser": true
   },
   "rules": {
+    "typescript/no-explicit-any": "error",
     "typescript/explicit-function-return-type": "error",
     "typescript/explicit-module-boundary-types": "error",
     "typescript/array-type": ["error", { "default": "array-simple" }],
