@@ -3,10 +3,10 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+import fieldnames "github.com/perses/plugins/victorialogs/sdk/go/variable/field-names"
 
-var options []variable.Option
-variable.FieldNames(options...)
+var options []fieldnames.Option
+fieldnames.VictoriaLogsFieldNames(options...)
 ```
 
 Need a list of options.
@@ -20,9 +20,9 @@ Need a list of options.
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+import fieldnames "github.com/perses/plugins/victorialogs/sdk/go/variable/field-names"
 
-variable.Datasource("MyVictoriaLogsDatasource")
+fieldnames.Datasource("MyVictoriaLogsDatasource")
 ```
 
 Define the datasource the variable will use.
@@ -30,9 +30,9 @@ Define the datasource the variable will use.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+import fieldnames "github.com/perses/plugins/victorialogs/sdk/go/variable/field-names"
 
-variable.Query(`_stream:{environment="production"}`)
+fieldnames.Query(`_stream:{environment="production"}`)
 ```
 
 Define an optional LogsQL query to filter the results.
@@ -44,12 +44,12 @@ package main
 
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
-	"github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+	fieldnames "github.com/perses/plugins/victorialogs/sdk/go/variable/field-names"
 )
 
 func main() {
 	dashboard.New("VictoriaLogs Dashboard",
-		dashboard.AddVariable("available_fields", variable.FieldNames()),
+		dashboard.AddVariable("available_fields", fieldnames.VictoriaLogsFieldNames()),
 	)
 }
 ```
