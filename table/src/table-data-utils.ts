@@ -28,24 +28,48 @@ export interface BuildRawTableDataOptions {
 }
 
 /**
+ * True when transforms need one table row per timestamp (e.g. PivotByLabel time × label).
+ * Without this, buildRawTableData keeps only the last sample per series → pivot collapses to one row.
+ */
+export function needsTimeSeriesExpansion(spec: TableOptions): boolean {
+  return (spec.transforms ?? []).some(
+    (t) => t.kind === 'PivotByLabel' && t.spec?.disabled !== true,
+  );
+}
+
+/**
  * Determines the query mode based on table options.
- * If any column has a plugin (embedded panel), use range mode; otherwise instant.
+ * Range mode when embedded panel plugins need history, or PivotByLabel needs all timestamps.
  */
 export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' {
+  if (needsTimeSeriesExpansion(spec)) {
+    return 'range';
+  }
   return (spec.columnSettings ?? []).some((c) => c.plugin) ? 'range' : 'instant';
+}
+
+function labelColumns(
+  ts: TimeSeries,
+  queryIndex: number,
+  multiQuery: boolean,
+): Labels {
+  if (!multiQuery) {
+    return ts.labels ?? {};
+  }
+  return Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
+    if (key) acc[`${key} #${queryIndex + 1}`] = value;
+    return acc;
+  }, {} as Labels);
+}
+
+function valueColumnName(queryIndex: number, multiQuery: boolean): string {
+  return multiQuery ? `value #${queryIndex + 1}` : 'value';
 }
 
 /**
  * Converts raw query results into a tabular format.
- *
- * This is the shared data-building logic used by both TablePanel (for rendering)
- * and TableExportAction (for CSV export). Extracting this ensures both use the
- * same transformation logic, reducing drift.
- *
- * @param queryResults - The panel query results containing data to be transformed into a table
- * @param spec - The table options specification
- * @param options - Build options (e.g., forExport mode)
- * @returns Array of row objects with column keys and values
+ * Shared by TablePanel (render) and TableExportAction (CSV).
+ * Default: last sample per series. With enabled PivotByLabel: one row per timestamp.
  */
 export function buildRawTableData(
   queryResults: PanelData[],
@@ -68,47 +92,64 @@ function buildTimeSeriesTableData(
 ): Array<Record<string, unknown>> {
   const { forExport = false } = options;
   const queryMode = getTablePanelQueryMode(spec);
+  const expandTime = needsTimeSeriesExpansion(spec);
+  const multiQuery = queryResults.length > 1;
 
-  return queryResults
-    .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
-      (data.data?.series ?? []).map((ts: TimeSeries) => ({ data, ts, queryIndex })),
-    )
-    .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
-      // Pick the last (most recent) data point. For range responses the last
-      // value covers the window ending at the selected time range's end.
-      const lastPoint = ts.values[ts.values.length - 1];
-      if (lastPoint === undefined) {
-        return { ...ts.labels };
+  const rows: Array<Record<string, unknown>> = [];
+
+  for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
+    const data = queryResults[queryIndex];
+    if (!data) continue;
+    const seriesList = data.data?.series ?? [];
+
+    for (const ts of seriesList) {
+      const labels = labelColumns(ts, queryIndex, multiQuery);
+      const valueCol = valueColumnName(queryIndex, multiQuery);
+      const points = ts.values ?? [];
+
+      if (points.length === 0) {
+        rows.push({ ...labels });
+        continue;
       }
 
-      // If there are multiple queries, add query index to value key and label keys to avoid conflicts
-      const valueColumnName = queryResults.length === 1 ? 'value' : `value #${queryIndex + 1}`;
-      const labels =
-        queryResults.length === 1
-          ? ts.labels
-          : Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
-              if (key) acc[`${key} #${queryIndex + 1}`] = value;
-              return acc;
-            }, {} as Labels);
+      if (expandTime) {
+        for (const point of points) {
+          const [tsMs, value] = point;
+          rows.push({
+            timestamp: tsMs,
+            [valueCol]: value,
+            ...labels,
+          });
+        }
+        continue;
+      }
 
-      // For export: always use raw scalar values
-      // For rendering: plugin columns get embedded PanelData objects
+      // Default: last sample only
+      const lastPoint = points[points.length - 1];
+      if (lastPoint === undefined) {
+        rows.push({ ...labels });
+        continue;
+      }
+
       let columnValue: unknown;
       if (forExport) {
         columnValue = lastPoint[1];
       } else {
-        const hasPlugin = (spec.columnSettings ?? []).find((x) => x.name === valueColumnName)?.plugin;
+        const hasPlugin = (spec.columnSettings ?? []).find((x) => x.name === valueCol)?.plugin;
         columnValue = hasPlugin
           ? { ...data, data: { ...data.data, series: data.data.series.filter((s) => s === ts) } }
           : lastPoint[1];
       }
 
       if (queryMode === 'instant') {
-        return { timestamp: lastPoint[0], [valueColumnName]: columnValue, ...labels };
+        rows.push({ timestamp: lastPoint[0], [valueCol]: columnValue, ...labels });
       } else {
-        return { [valueColumnName]: columnValue, ...labels };
+        rows.push({ [valueCol]: columnValue, ...labels });
       }
-    });
+    }
+  }
+
+  return rows;
 }
 
 function safeStringify(v: object): string {
