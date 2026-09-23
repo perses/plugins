@@ -19,7 +19,7 @@ import {
   useRouterContext,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import type { EChartsOption, ScatterSeriesOption } from 'echarts';
+import type { EChartsOption, ScatterSeriesOption, TooltipComponentFormatterCallbackParams } from 'echarts';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import {
   DatasetComponent,
@@ -119,9 +119,10 @@ export function Scatterplot(props: ScatterplotProps): ReactElement {
       axisPointer: {
         type: 'cross',
       },
-      formatter: function (params: any) {
-        // TODO: import type from ECharts instead of using any
-        const data = params[0].data as EChartTraceValue;
+      formatter: function (params: TooltipComponentFormatterCallbackParams): string {
+        const item = Array.isArray(params) ? params[0] : params;
+        if (!item) return '';
+        const data = item.data as EChartTraceValue;
         return [
           `<b>Service name</b>: ${data.rootServiceName}<br/>`,
           `<b>Span name</b>: ${data.rootTraceName}<br/>`,
