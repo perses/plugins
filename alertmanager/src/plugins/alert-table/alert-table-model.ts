@@ -122,6 +122,18 @@ export function deduplicateAlerts(alerts: Alert[], config: AlertDeduplicationCon
 }
 
 /**
+ * Whether a runbook annotation is an absolute http(s) URL, the only kind the panel links to.
+ */
+export function isSafeRunbookUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Extract all unique label keys from a list of alerts.
  */
 export function extractLabelKeys(alerts: Alert[]): string[] {

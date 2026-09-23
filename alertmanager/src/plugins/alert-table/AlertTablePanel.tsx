@@ -72,6 +72,7 @@ import {
   extractLabelKeys,
   getGroupKey,
   getGroupSummary,
+  isSafeRunbookUrl,
 } from './alert-table-model';
 import type { SortState } from './alert-table-sorting';
 import {
@@ -156,7 +157,8 @@ function AlertRow({
   duplicateCount?: number;
   showDuplicates: boolean;
 }): ReactElement {
-  const runbookUrl = alert.annotations?.[runbookAnnotationKey];
+  const runbookAnnotation = alert.annotations?.[runbookAnnotationKey];
+  const runbookUrl = runbookAnnotation && isSafeRunbookUrl(runbookAnnotation) ? runbookAnnotation : undefined;
   const showActions = allowedActions.length > 0;
 
   return (
