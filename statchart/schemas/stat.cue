@@ -31,5 +31,6 @@ spec: close({
 	legendFontSize?: number
 	colorMode?:      *"value" | "background_solid" | "none"
 	legendMode?:     *"auto" | "on" | "off"
+	orientation?:    *"auto" | "horizontal" | "vertical"
 	mappings?: [...common.#mappings]
 })

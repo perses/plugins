@@ -3,7 +3,7 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/tempo/sdk/go/v1/datasource"
+import "github.com/perses/plugins/tempo/sdk/go/datasource"
 
 var options []datasource.Option
 datasource.Tempo(options...)
@@ -20,7 +20,7 @@ Need a list of options. At least direct URL or proxy URL, in order to work.
 #### Direct URL
 
 ```golang
-import "github.com/perses/perses-plugins/tempo/sdk/go/v1/datasource"
+import "github.com/perses/plugins/tempo/sdk/go/datasource"
 
 datasource.DirectURL("http://tempo.example.com:3200")
 ```
@@ -30,7 +30,7 @@ Set Tempo plugin for the datasource with a direct URL.
 #### Proxy
 
 ```golang
-import "github.com/perses/perses-plugins/tempo/sdk/go/v1/datasource"
+import "github.com/perses/plugins/tempo/sdk/go/datasource"
 
 datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 ```
@@ -45,7 +45,7 @@ package main
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	
-	tempoDs "github.com/perses/perses-plugins/tempo/sdk/go/v1/datasource"
+	tempoDs "github.com/perses/plugins/tempo/sdk/go/datasource"
 )
 
 func main() {
