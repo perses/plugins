@@ -29,6 +29,13 @@ func WithLegend(legend Legend) Option {
 	}
 }
 
+func WithShowLabels(showLabels bool) Option {
+	return func(builder *Builder) error {
+		builder.ShowLabels = showLabels
+		return nil
+	}
+}
+
 func WithVisual(visual Visual) Option {
 	return func(builder *Builder) error {
 		builder.Visual = &visual
@@ -36,16 +43,17 @@ func WithVisual(visual Visual) Option {
 	}
 }
 
-func WithFormat(format *common.Format) Option {
+// WithQuerySettings is deprecated. PieChart does not support query-specific colors.
+func WithQuerySettings(querySettingsList []QuerySettingsItem) Option {
 	return func(builder *Builder) error {
-		builder.Format = format
+		builder.QuerySettings = &querySettingsList
 		return nil
 	}
 }
 
-func WithQuerySettings(querySettingsList []QuerySettingsItem) Option {
+func WithFormat(format *common.Format) Option {
 	return func(builder *Builder) error {
-		builder.QuerySettings = &querySettingsList
+		builder.Format = format
 		return nil
 	}
 }
