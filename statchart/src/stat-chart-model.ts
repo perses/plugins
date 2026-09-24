@@ -80,11 +80,7 @@ export function idealSeriesColumns(seriesCount: number): number {
 }
 
 /** Resolve auto grid columns: optional fixed seriesColumns, else min(width, ideal). */
-export function resolveAutoColumns(
-  seriesCount: number,
-  widthBasedColumns: number,
-  seriesColumns?: number,
-): number {
+export function resolveAutoColumns(seriesCount: number, widthBasedColumns: number, seriesColumns?: number): number {
   if (seriesCount <= 1) return 1;
   if (seriesColumns !== undefined && seriesColumns !== null && seriesColumns >= 1) {
     return Math.min(12, Math.floor(seriesColumns), seriesCount);
