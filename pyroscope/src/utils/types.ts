@@ -25,3 +25,19 @@ export function computeFilterExpr(filters: LabelFilter[]): string {
     .map((filter) => `${filter.labelName}${filter.operator}"${filter.labelValue}"`)
     .join(',')}`;
 }
+
+/**
+ * Builds the selector used to scope label name/value lookups, e.g. `{service_name="app",__profile_type__="..."}`.
+ * Returns an empty string when no service is set: Pyroscope only narrows the blocks it reads on `service_name`,
+ * so an unscoped lookup scans every block in the time range and can exceed the query-backend concurrency limit.
+ */
+export function computeLabelScopeSelector(service?: string, profileType?: string): string {
+  if (!service) {
+    return '';
+  }
+  const selectors = [`service_name="${service}"`];
+  if (profileType) {
+    selectors.push(`__profile_type__="${profileType}"`);
+  }
+  return `{${selectors.join(',')}}`;
+}
