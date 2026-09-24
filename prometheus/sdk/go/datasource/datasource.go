@@ -31,6 +31,13 @@ type PluginSpec struct {
 	Proxy          *http.Proxy       `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 	ScrapeInterval common.Duration   `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
 	QueryParams    map[string]string `json:"queryParams,omitempty" yaml:"queryParams,omitempty"`
+	Exemplars      *Exemplars        `json:"exemplars,omitempty" yaml:"exemplars,omitempty"`
+}
+
+// Exemplars mirrors the exemplars section of the PrometheusDatasource CUE schema.
+// When enabled, the Prometheus query plugin also queries the /api/v1/query_exemplars endpoint.
+type Exemplars struct {
+	Enable bool `json:"enable" yaml:"enable"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {

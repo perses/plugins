@@ -58,6 +58,19 @@ Configure query parameters to be appended to all Prometheus API requests. This i
 - Resolution control (`max_source_resolution=0s`)
 - Any custom query parameters required by your Prometheus setup
 
+#### Exemplars
+
+```golang
+import "github.com/perses/plugins/prometheus/sdk/go/datasource"
+
+datasource.EnableExemplars()
+```
+
+Enable exemplar support on the datasource: the Prometheus query plugin will also query the
+`/api/v1/query_exemplars` endpoint when running range queries, so exemplars can be displayed on
+capable panels like the Time Series Chart. See the [plugin documentation](../README.md#exemplars) for
+the requirements (exemplar storage enabled on the Prometheus side, etc.).
+
 ## Examples
 
 ```golang

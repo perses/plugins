@@ -51,3 +51,12 @@ func QueryParam(key, value string) Option {
 		return nil
 	}
 }
+
+// EnableExemplars enables exemplar support on the datasource: the Prometheus query plugin
+// will also query the /api/v1/query_exemplars endpoint when running range queries.
+func EnableExemplars() Option {
+	return func(builder *Builder) error {
+		builder.Exemplars = &Exemplars{Enable: true}
+		return nil
+	}
+}

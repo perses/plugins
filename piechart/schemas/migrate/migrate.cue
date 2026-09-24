@@ -52,11 +52,13 @@ spec: {
 		showLabels: true
 	}
 
-	#colorMode: *#panel.fieldConfig.defaults.color.mode | null
-	if #colorMode == "shades" {
-		#mappedColor: *commonMigrate.#mapping.color[#panel.fieldConfig.defaults.color.fixedColor] | "#555555"
-		colorPalette: [#mappedColor]
-	}
+	visual: {
+		#colorMode: *#panel.fieldConfig.defaults.color.mode | null
+		if #colorMode == "shades" {
+			#mappedColor: *commonMigrate.#mapping.color[#panel.fieldConfig.defaults.color.fixedColor] | "#555555"
+			colorPalette: [#mappedColor]
+		}
 
-	radius: 50
+		outerRadius: 100
+	}
 }

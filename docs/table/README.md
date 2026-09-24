@@ -12,6 +12,26 @@ The Table plugin displays data in a structured tabular format in Perses dashboar
 - **Item actions**: add row/item selection actions to trigger links or interactions from selected items.
 - **Transformations**: define transformations to manipulate data before rendering
 
+## Embedded panels
+
+Table columns can render a panel plugin inside each cell instead of plain text. This is configured with `plugin` in `columnSettings`, and is useful when a value is easier to read as a compact visualization such as a gauge, stat, or sparkline.
+
+For example, the following column setting renders the `value` column with a Gauge Chart:
+
+```yaml
+columnSettings:
+  - name: "value"
+    header: "CPU usage"
+    plugin:
+      kind: "GaugeChart"
+      spec:
+        calculation: "last-number"
+        format:
+          unit: "percent"
+```
+
+Some visualizations like `GaugeChart` have their customization options fully supported through the form. For the others, you can still provide customization with direct JSON editing.
+
 ## Cell links
 The cell link feature turns static tables into powerful navigation hubs. By pulling cell values and variables directly into your URLs, you can build context-aware links that bridge your dashboards with other workflows.
 
@@ -185,6 +205,46 @@ After:
 |------------|----------|----------|-----------|
 | 1630000000 | 1        | 3        | /         |
 | 1630000000 | 2        | 4        | /boot/efi |
+
+### Pivot by label
+
+This transformation pivots multi-series rows into a **time × label** matrix (Grafana `groupingToMatrix` style).
+
+- **Rows** are grouped by a row field (default `timestamp`)
+- **Columns** are created from distinct values of a label field (e.g. `instance`, `job`, `region`)
+- **Cells** hold the metric value field (default `value`)
+- Missing series at a given time stay sparse (no cell)
+- On duplicate `(row, label)`, the last value wins
+
+Useful for checkerboard / heat-map style tables (metric values per label over time) combined with Table `cellSettings` range colors.
+
+Before (one row per series sample):
+
+| timestamp  | instance  | value |
+|------------|-----------|-------|
+| 100        | host-b    | 0     |
+| 100        | host-a    | 3     |
+| 200        | host-a    | 7     |
+| 200        | host-b    | 1     |
+| 300        | host-a    | 12    |
+
+After pivot with `columnLabel: instance`, `rowColumnName: Time` (newest row first):
+
+| Time | host-a | host-b |
+|------|--------|--------|
+| 300  | 12     |        |
+| 200  | 7      | 1      |
+| 100  | 3      | 0      |
+
+Spec fields:
+
+| Field | Description |
+|-------|-------------|
+| `columnLabel` | Label that becomes dynamic column headers (required) |
+| `rowField` | Field used for row identity (default `timestamp`) |
+| `valueField` | Field used for cell values (default `value`) |
+| `rowColumnName` | Optional display name for the row column (default: `rowField`) |
+| `disabled` | Skip this transform when true |
 
 ## References
 

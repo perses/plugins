@@ -26,6 +26,30 @@ import type { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 
+// Isolated DOMPurify instance so afterSanitizeAttributes does not affect other plugins
+// that import the default DOMPurify singleton (review: jgbernalp / shahrokni on #815).
+// Default export is a factory: DOMPurify(window) returns a separate purifier.
+const markdownPurifier = typeof window !== 'undefined' ? DOMPurify(window) : DOMPurify;
+
+/**
+ * Ensure markdown links open safely (markdown plugin only):
+ * - absolute http(s) URLs → target=_blank + rel=noopener noreferrer
+ * - explicit target=_blank kept / reinforced
+ * - relative in-app paths (e.g. /explore) stay same-tab unless target=_blank was set
+ */
+markdownPurifier.addHook('afterSanitizeAttributes', (node) => {
+  if (!(node instanceof Element) || node.tagName !== 'A') {
+    return;
+  }
+  const href = node.getAttribute('href') ?? '';
+  const isAbsoluteHttp = /^https?:\/\//i.test(href) || href.startsWith('//');
+  const wantsBlank = node.getAttribute('target') === '_blank' || isAbsoluteHttp;
+  if (wantsBlank) {
+    node.setAttribute('target', '_blank');
+    node.setAttribute('rel', 'noopener noreferrer');
+  }
+});
+
 function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme): Record<string, unknown> {
   return {
     padding: `${chartsTheme.container.padding.default}px`,
@@ -76,8 +100,10 @@ function markdownToHTML(text: string): string {
 }
 
 // Prevent XSS attacks by removing the vectors for attacks
-function sanitizeHTML(html: string): string {
-  return DOMPurify.sanitize(html);
+export function sanitizeHTML(html: string): string {
+  return markdownPurifier.sanitize(html, {
+    ADD_ATTR: ['target', 'rel'],
+  });
 }
 
 export function MarkdownPanel(props: MarkdownPanelProps): ReactElement {

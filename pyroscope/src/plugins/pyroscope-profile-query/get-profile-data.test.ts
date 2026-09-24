@@ -166,10 +166,25 @@ describe('getProfileData', () => {
       labelSelector: '{service_name="my-service",env="prod"}',
       start: 1_718_100_000_000,
       end: 1_718_103_600_000,
-      step: 10, // 3600s window / 1000 target points = 3.6, floored to 3, floored up to the 10s minimum
+      step: 15, // 3600s window / 1000 target points = 3.6, floored to 3, floored up to the 15s default minimum
       aggregation: 'TIME_SERIES_AGGREGATION_TYPE_SUM',
     };
     expect(selectSeries).toHaveBeenCalledWith(expectedSeriesRequest);
+  });
+
+  it('uses the datasource minStep as the timeline step floor when configured', async () => {
+    const selectMergeStacktraces = vi.fn().mockResolvedValue({ flamegraph: MOCK_FLAMEGRAPH });
+    const selectSeries = vi.fn().mockResolvedValue({ series: [] });
+    const client = makeClient({
+      options: { datasourceUrl: 'http://example.com', minStepSeconds: 60 },
+      selectMergeStacktraces,
+      selectSeries,
+    });
+
+    await getProfileData(BASE_SPEC, createContext(client, TIME_RANGE));
+
+    // The configured 60s floor wins over both the candidate step (3s) and the 15s default.
+    expect(selectSeries).toHaveBeenCalledWith(expect.objectContaining({ step: 60 }));
   });
 
   it('omits maxNodes from the flame graph request when the spec does not set it', async () => {
@@ -217,7 +232,7 @@ describe('getProfileData', () => {
         labels: [],
         points: [
           { timestamp: '1718100000000', value: 1 },
-          { timestamp: '1718100010000', value: 2 },
+          { timestamp: '1718100015000', value: 2 },
         ],
       },
     ];
@@ -234,11 +249,11 @@ describe('getProfileData', () => {
     const timeline = result.timeline;
     expect(timeline).toBeDefined();
     expect(timeline?.startTime).toBe(1_718_100_000);
-    expect(timeline?.durationDelta).toBe(10);
-    expect(timeline?.samples).toHaveLength(360);
+    expect(timeline?.durationDelta).toBe(15);
+    expect(timeline?.samples).toHaveLength(240);
     expect(timeline?.samples[0]).toBe(1);
     expect(timeline?.samples[1]).toBe(2);
-    expect(timeline?.samples.slice(2)).toEqual(Array(358).fill(0));
+    expect(timeline?.samples.slice(2)).toEqual(Array(238).fill(0));
   });
 
   it('propagates a rejection if either request fails', async () => {
