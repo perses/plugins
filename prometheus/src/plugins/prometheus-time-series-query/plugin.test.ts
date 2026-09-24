@@ -91,6 +91,7 @@ promStubClient.queryExemplars = vi.fn(async (): Promise<QueryExemplarsResponse> 
       {
         seriesLabels: {
           __name__: 'up',
+          job: 'node',
         },
         exemplars: [
           {
@@ -245,7 +246,7 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(promStubClient.queryExemplars).toHaveBeenCalledTimes(1);
     expect(results.exemplars).toEqual([
       {
-        seriesLabels: { __name__: 'up' },
+        seriesLabels: { job: 'node' },
         exemplars: [{ labels: { traceID: 'abc123' }, value: 10, timestamp: 1686141338877 }],
       },
     ]);
