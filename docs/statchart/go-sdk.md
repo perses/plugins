@@ -25,7 +25,7 @@ import (
     "github.com/perses/plugins/statchart/sdk/go"
 )
 
-stat.Calculation(common.Last)
+stat.Calculation(common.LastCalculation)
 ```
 
 Define the chart calculation.

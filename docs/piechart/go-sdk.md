@@ -20,6 +20,21 @@ Need a list of options.
 
 ## Available options
 
+### Calculation
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/common"
+	pie "github.com/perses/plugins/piechart/sdk/go"
+)
+
+pie.Calculation(common.LastCalculation)
+```
+
+Define how the pie chart calculates the value for each series.
+
 ### WithLegend
 
 ```golang

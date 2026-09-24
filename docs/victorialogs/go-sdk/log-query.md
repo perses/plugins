@@ -3,10 +3,10 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
+import log "github.com/perses/plugins/victorialogs/sdk/go/query/log"
 
-var options []query.Option
-query.LogQuery(`_stream:{job="nginx"} AND error`, options...)
+var options []log.Option
+log.VictoriaLogsLogQuery(`_stream:{job="nginx"} AND error`, options...)
 ```
 
 Need to provide the LogsQL expression and a list of options.
@@ -20,9 +20,9 @@ Need to provide the LogsQL expression and a list of options.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
+import log "github.com/perses/plugins/victorialogs/sdk/go/query/log"
 
-query.Query(`_stream:{service="api"} AND level:error`)
+log.Query(`_stream:{service="api"} AND level:error`)
 ```
 
 Define the LogsQL query expression for log data.
@@ -30,9 +30,9 @@ Define the LogsQL query expression for log data.
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
+import log "github.com/perses/plugins/victorialogs/sdk/go/query/log"
 
-query.Datasource("MyVictoriaLogsDatasource")
+log.Datasource("MyVictoriaLogsDatasource")
 ```
 
 Define the datasource the query will use.
@@ -46,17 +46,17 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
-	logstable "github.com/perses/perses-plugins/logstable/sdk/go"
+	log "github.com/perses/plugins/victorialogs/sdk/go/query/log"
+	logstable "github.com/perses/plugins/logstable/sdk/go"
 )
 
 func main() {
 	dashboard.New("VictoriaLogs Dashboard",
 		dashboard.AddPanelGroup("Application Logs",
 			panelgroup.AddPanel("Error Logs",
-				logstable.Panel(),
+				logstable.LogsTable(),
 				panel.AddQuery(
-					query.LogQuery(`_stream:{job="nginx"} AND error`),
+					log.VictoriaLogsLogQuery(`_stream:{job="nginx"} AND error`),
 				),
 			),
 		),
