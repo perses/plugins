@@ -20,14 +20,15 @@ import { useLabelNames, filterLabelNamesOptions } from '../utils/use-query';
 
 export interface LabelNameProps {
   datasource: PyroscopeDatasourceSelector;
+  labelSelector: string;
   value: string;
   onChange?(value: string): void;
 }
 
 export function LabelName(props: LabelNameProps): ReactElement {
-  const { datasource, value, onChange } = props;
+  const { datasource, labelSelector, value, onChange } = props;
 
-  const { data: labelNamesOptions, isLoading: isLabelNamesOptionsLoading } = useLabelNames(datasource);
+  const { data: labelNamesOptions, isLoading: isLabelNamesOptionsLoading } = useLabelNames(datasource, labelSelector);
 
   const filteredLabelNamesOptions = useMemo(
     () => filterLabelNamesOptions(labelNamesOptions?.names ?? []),
