@@ -73,9 +73,6 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions, TimeSeries
 function labelsKey(labels: Labels): string {
   return JSON.stringify(
     Object.keys(labels)
-      // Prometheus includes `__name__` in /query_exemplars seriesLabels but omits
-      // it from /query_range metric labels. Thus we ignore it otherwise the series never matches correctly.
-      .filter((labelName) => labelName !== '__name__')
       .toSorted()
       .map((labelName) => [labelName, labels[labelName]]),
   );
