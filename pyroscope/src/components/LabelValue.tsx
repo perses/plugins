@@ -19,15 +19,20 @@ import { useLabelValues } from '../utils/use-query';
 
 export interface LabelValueProps {
   datasource: PyroscopeDatasourceSelector;
+  labelSelector: string;
   value: string;
   labelName: string;
   onChange?(value: string): void;
 }
 
 export function LabelValue(props: LabelValueProps): ReactElement {
-  const { datasource, value, labelName, onChange } = props;
+  const { datasource, labelSelector, value, labelName, onChange } = props;
 
-  const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useLabelValues(datasource, labelName);
+  const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useLabelValues(
+    datasource,
+    labelName,
+    labelSelector,
+  );
 
   return (
     <Autocomplete
