@@ -16,51 +16,34 @@ import type { JsonData, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 
 import type { TableOptions } from './models';
 
-/**
- * Options for building raw table data.
- */
 export interface BuildRawTableDataOptions {
-  /**
-   * When true, always use raw scalar values for cell data (for export).
-   * When false, plugin columns will contain embedded PanelData objects (for rendering).
-   */
   forExport?: boolean;
+  expandTimeSeries?: boolean;
+  queryMode?: 'instant' | 'range';
 }
 
-/**
- * True when transforms need one table row per timestamp (e.g. PivotByLabel).
- * Without this, buildRawTableData keeps only the last sample per series.
- */
 export function needsTimeSeriesExpansion(spec: TableOptions): boolean {
-  return (spec.transforms ?? []).some((t) => t.kind === 'PivotByLabel' && t.spec?.disabled !== true);
+  const transforms = spec.transforms ?? [];
+  for (let i = transforms.length - 1; i >= 0; i--) {
+    const t = transforms[i];
+    if (!t || t.spec?.disabled === true) {
+      continue;
+    }
+    return t.kind === 'PivotByLabel';
+  }
+  return false;
 }
 
-/**
- * Determines the query mode based on table options.
- * Range mode when embedded panel plugins need history, or PivotByLabel needs all timestamps.
- */
 export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' {
+  if ((spec.columnSettings ?? []).some((c) => c.plugin)) {
+    return 'range';
+  }
   if (needsTimeSeriesExpansion(spec)) {
     return 'range';
   }
-  return (spec.columnSettings ?? []).some((c) => c.plugin) ? 'range' : 'instant';
+  return 'instant';
 }
 
-/**
- * Converts raw query results into a tabular format.
- *
- * This is the shared data-building logic used by both TablePanel (for rendering)
- * and TableExportAction (for CSV export). Extracting this ensures both use the
- * same transformation logic, reducing drift.
- *
- * Default: one row per series (last sample). With enabled PivotByLabel: one row
- * per timestamp per series so time x label pivots retain the full matrix.
- *
- * @param queryResults - The panel query results containing data to be transformed into a table
- * @param spec - The table options specification
- * @param options - Build options (e.g., forExport mode)
- * @returns Array of row objects with column keys and values
- */
 export function buildRawTableData(
   queryResults: PanelData[],
   spec: TableOptions,
@@ -81,8 +64,8 @@ function buildTimeSeriesTableData(
   options: BuildRawTableDataOptions = {},
 ): Array<Record<string, unknown>> {
   const { forExport = false } = options;
-  const queryMode = getTablePanelQueryMode(spec);
-  const expandTime = needsTimeSeriesExpansion(spec);
+  const queryMode = options.queryMode ?? getTablePanelQueryMode(spec);
+  const expandTime = options.expandTimeSeries ?? needsTimeSeriesExpansion(spec);
 
   return queryResults.flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
     (data.data?.series ?? []).flatMap((ts: TimeSeries) => {
@@ -108,15 +91,11 @@ function buildTimeSeriesTableData(
         }));
       }
 
-      // Pick the last (most recent) data point. For range responses the last
-      // value covers the window ending at the selected time range's end.
       const lastPoint = points[points.length - 1];
       if (lastPoint === undefined) {
         return [{ ...labels }];
       }
 
-      // For export: always use raw scalar values
-      // For rendering: plugin columns get embedded PanelData objects
       let columnValue: unknown;
       if (forExport) {
         columnValue = lastPoint[1];
