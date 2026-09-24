@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { SwitchProps } from '@mui/material';
-import { Switch } from '@mui/material';
+import { Switch, TextField } from '@mui/material';
 import type {
   FontSizeOption,
   FontSizeSelectorProps,
@@ -200,6 +200,29 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   }, [value.orientation, handleOrientationChange]);
 
+  const handleSeriesColumnsChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      const raw = e.target.value.trim();
+      onChange(
+        produce(value, (draft: StatChartOptions) => {
+          if (raw === '') {
+            delete draft.seriesColumns;
+            return;
+          }
+          const n = Number(raw);
+          if (!Number.isFinite(n) || n < 1) {
+            delete draft.seriesColumns;
+            return;
+          }
+          draft.seriesColumns = Math.min(12, Math.floor(n));
+        }),
+      );
+    },
+    [onChange, value],
+  );
+
+  const isAutoOrientation = (value.orientation ?? 'auto') === 'auto';
+
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
@@ -218,6 +241,21 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
           {selectColorMode}
           {selectOrientation}
+          {isAutoOrientation && (
+            <OptionsEditorControl
+              label="Series columns"
+              control={
+                <TextField
+                  type="number"
+                  size="small"
+                  inputProps={{ min: 1, max: 12, step: 1 }}
+                  placeholder="auto"
+                  value={value.seriesColumns ?? ''}
+                  onChange={handleSeriesColumnsChange}
+                />
+              }
+            />
+          )}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

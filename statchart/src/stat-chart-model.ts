@@ -69,6 +69,29 @@ export interface StatChartOptions {
   colorMode?: ColorMode;
   legendMode?: legendMode;
   orientation?: StatChartOrientation;
+  /** Fixed column count when orientation is auto (1–12). */
+  seriesColumns?: number;
+}
+
+/** Ideal columns for a series-count matrix (4→2, 6→3, 9→3, …). */
+export function idealSeriesColumns(seriesCount: number): number {
+  if (seriesCount <= 1) return 1;
+  return Math.ceil(Math.sqrt(seriesCount));
+}
+
+/** Resolve auto grid columns: optional fixed seriesColumns, else min(width, ideal). */
+export function resolveAutoColumns(
+  seriesCount: number,
+  widthBasedColumns: number,
+  seriesColumns?: number,
+): number {
+  if (seriesCount <= 1) return 1;
+  if (seriesColumns !== undefined && seriesColumns !== null && seriesColumns >= 1) {
+    return Math.min(12, Math.floor(seriesColumns), seriesCount);
+  }
+  const ideal = idealSeriesColumns(seriesCount);
+  const width = Math.max(1, widthBasedColumns);
+  return Math.max(1, Math.min(seriesCount, width, ideal));
 }
 
 export interface StatChartSparklineOptions {
