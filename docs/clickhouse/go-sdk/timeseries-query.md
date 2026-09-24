@@ -3,10 +3,10 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/clickhouse/sdk/go/query/time-series"
 
-var options []query.Option
-query.TimeSeriesQuery("SELECT toStartOfMinute(timestamp) as time, count() as requests FROM events GROUP BY time ORDER BY time", options...)
+var options []timeseries.Option
+timeseries.ClickHouseTimeSeriesQuery("SELECT toStartOfMinute(timestamp) as time, count() as requests FROM events GROUP BY time ORDER BY time", options...)
 ```
 
 Need to provide the SQL query expression and a list of options.
@@ -20,9 +20,9 @@ Need to provide the SQL query expression and a list of options.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/clickhouse/sdk/go/query/time-series"
 
-query.Query("SELECT toStartOfHour(timestamp) as time, avg(response_time) FROM requests GROUP BY time ORDER BY time")
+timeseries.Query("SELECT toStartOfHour(timestamp) as time, avg(response_time) FROM requests GROUP BY time ORDER BY time")
 ```
 
 Define the SQL query expression.
@@ -30,22 +30,12 @@ Define the SQL query expression.
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/clickhouse/sdk/go/query/time-series"
 
-query.Datasource("MyClickHouseDatasource")
+timeseries.Datasource("MyClickHouseDatasource")
 ```
 
 Define the datasource the query will use.
-
-#### Format
-
-```golang
-import "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/query"
-
-query.Format("JSONEachRow")
-```
-
-Define the output format for the query results.
 
 ## Example
 
@@ -56,8 +46,8 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses-plugins/clickhouse/sdk/go/v1/query"
-	timeseries "github.com/perses/perses-plugins/timeserieschart/sdk/go"
+	clickhousequery "github.com/perses/plugins/clickhouse/sdk/go/query/time-series"
+	timeseries "github.com/perses/plugins/timeserieschart/sdk/go"
 )
 
 func main() {
@@ -66,7 +56,7 @@ func main() {
 			panelgroup.AddPanel("Request Rate",
 				timeseries.Chart(),
 				panel.AddQuery(
-					query.TimeSeriesQuery(`
+					clickhousequery.ClickHouseTimeSeriesQuery(`
 						SELECT 
 							toStartOfMinute(timestamp) as time,
 							count() as requests

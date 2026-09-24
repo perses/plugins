@@ -25,7 +25,7 @@ import (
     "github.com/perses/plugins/gaugechart/sdk/go"
 )
 
-gauge.Calculation(common.Last)
+gauge.Calculation(common.LastCalculation)
 ```
 
 Define the chart calculation.
@@ -65,6 +65,16 @@ gauge.Max(20)
 ```
 
 Define the chart max value.
+
+### Legend
+
+```golang
+import gauge "github.com/perses/plugins/gaugechart/sdk/go"
+
+gauge.Legend(gauge.LegendSpec{Show: true})
+```
+
+Configure whether to show the gauge legend.
 
 ## Example
 

@@ -3,25 +3,24 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/query"
+import query "github.com/perses/plugins/pyroscope/sdk/go/query"
 
 var options []query.Option
-query.ProfileQuery("cpu", `{service_name="api"}`, options...)
+query.ProfileQL(options...)
 ```
 
-Need to provide the profile type, query expression and a list of options.
+Provide profile query options with `ProfileQL`.
 
 ## Default options
 
-- [ProfileType()](#profiletype): with the profile type provided in the constructor.
-- [Query()](#query): with the expression provided in the constructor.
+- [ProfileType()](#profiletype): the profile type to query.
 
 ## Available options
 
 #### ProfileType
 
 ```golang
-import "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/query"
+import query "github.com/perses/plugins/pyroscope/sdk/go/query"
 
 query.ProfileType("memory")
 ```
@@ -31,22 +30,42 @@ Define the profile type to query.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/query"
+import query "github.com/perses/plugins/pyroscope/sdk/go/query"
 
-query.Query(`{service_name="api", environment="prod"}`)
+query.MaxNodes(1000)
 ```
 
-Define the query expression using label selectors.
+Limit the number of profile nodes returned.
 
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/query"
+import query "github.com/perses/plugins/pyroscope/sdk/go/query"
 
 query.Datasource("MyPyroscopeDatasource")
 ```
 
 Define the datasource the query will use.
+
+#### Filters
+
+```golang
+import query "github.com/perses/plugins/pyroscope/sdk/go/query"
+
+query.Filters([]query.LabelFilter{{}})
+```
+
+Define label filters for the profile query.
+
+#### Service
+
+```golang
+import query "github.com/perses/plugins/pyroscope/sdk/go/query"
+
+query.Service("api")
+```
+
+Set the service to query.
 
 ## Example
 
@@ -57,17 +76,20 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses-plugins/pyroscope/sdk/go/v1/query"
-	flamechart "github.com/perses/perses-plugins/flamechart/sdk/go"
+	query "github.com/perses/plugins/pyroscope/sdk/go/query"
+	flamechart "github.com/perses/plugins/flamechart/sdk/go"
 )
 
 func main() {
 	dashboard.New("Pyroscope Dashboard",
 		dashboard.AddPanelGroup("CPU Profiling",
 			panelgroup.AddPanel("API CPU Profile",
-				flamechart.Panel(),
+				flamechart.Chart(),
 				panel.AddQuery(
-					query.ProfileQuery("cpu", `{service_name="api", environment="production"}`),
+					query.ProfileQL(
+						query.ProfileType("cpu"),
+						query.Service("api"),
+					),
 				),
 			),
 		),
