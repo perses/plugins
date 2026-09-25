@@ -23,13 +23,14 @@ import { Operator } from './Operator';
 
 export interface FilterItemProps {
   datasource: PyroscopeDatasourceSelector;
+  labelSelector: string;
   value: LabelFilter;
   onChange?: (value: LabelFilter) => void;
   deleteItem?: () => void; // this function is used to delete the current filter
 }
 
 export function FilterItem(props: FilterItemProps): ReactElement {
-  const { datasource, value, onChange, deleteItem } = props;
+  const { datasource, labelSelector, value, onChange, deleteItem } = props;
 
   const handleLabelNameChange = (label: string): void => {
     onChange?.({ labelName: label, labelValue: '', operator: value.operator });
@@ -55,7 +56,12 @@ export function FilterItem(props: FilterItemProps): ReactElement {
     >
       <Grid container sx={{ width: '100%' }}>
         <Grid size={{ xs: 9.5, md: 4.5 }}>
-          <LabelName datasource={datasource} value={value.labelName} onChange={handleLabelNameChange} />
+          <LabelName
+            datasource={datasource}
+            labelSelector={labelSelector}
+            value={value.labelName}
+            onChange={handleLabelNameChange}
+          />
         </Grid>
         <Grid size={{ xs: 2.5, md: 1.5 }}>
           <Operator value={value.operator} onChange={handleOperatorChange} />
@@ -63,6 +69,7 @@ export function FilterItem(props: FilterItemProps): ReactElement {
         <Grid size={{ xs: 10, md: 5 }}>
           <LabelValue
             datasource={datasource}
+            labelSelector={labelSelector}
             value={value.labelValue}
             labelName={value.labelName}
             onChange={handleLabelValueChange}

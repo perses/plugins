@@ -48,7 +48,7 @@ export interface PyroscopeClient extends DatasourceClient {
   searchLabelNames(
     params: SearchLabelNamesParameters,
     headers: RequestHeaders,
-    body: Record<string, string | number>,
+    body: Record<string, string | number | string[]>,
   ): Promise<SearchLabelNamesResponse>;
   searchLabelValues(
     params: SearchLabelValuesParameters,
@@ -152,7 +152,7 @@ export function searchProfileTypes(
 export function searchLabelNames(
   params: SearchLabelNamesParameters,
   queryOptions: QueryOptions,
-  body: Record<string, string | number>,
+  body: Record<string, string | number | string[]>,
 ): Promise<SearchLabelNamesResponse> {
   return fetchWithPost<SearchLabelNamesParameters, SearchLabelNamesResponse>(
     '/querier.v1.QuerierService/LabelNames',
