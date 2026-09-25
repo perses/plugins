@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { SwitchProps } from '@mui/material';
-import { Switch, TextField } from '@mui/material';
+import { Switch } from '@mui/material';
 import type {
   FontSizeOption,
   FontSizeSelectorProps,
@@ -39,12 +39,18 @@ import { useCallback, useMemo } from 'react';
 
 import type {
   ColorModeLabelItem,
+  SeriesColumnsLabelItem,
   ShowLegendLabelItem,
   StatChartOptions,
   StatChartOptionsEditorProps,
   StatChartOrientation,
 } from './stat-chart-model';
-import { COLOR_MODE_LABELS, SHOW_LEGEND_LABELS, STAT_CHART_ORIENTATION_LABELS } from './stat-chart-model';
+import {
+  COLOR_MODE_LABELS,
+  SERIES_COLUMNS_LABELS,
+  SHOW_LEGEND_LABELS,
+  STAT_CHART_ORIENTATION_LABELS,
+} from './stat-chart-model';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
 
@@ -201,25 +207,36 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
   }, [value.orientation, handleOrientationChange]);
 
   const handleSeriesColumnsChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>): void => {
-      const raw = e.target.value.trim();
+    (_: unknown, item: SeriesColumnsLabelItem): void => {
       onChange(
         produce(value, (draft: StatChartOptions) => {
-          if (raw === '') {
+          if (item.id === 'auto') {
             delete draft.seriesColumns;
             return;
           }
-          const n = Number(raw);
-          if (!Number.isFinite(n) || n < 1) {
-            delete draft.seriesColumns;
-            return;
-          }
-          draft.seriesColumns = Math.min(12, Math.floor(n));
+          draft.seriesColumns = Number(item.id);
         }),
       );
     },
     [onChange, value],
   );
+
+  const selectSeriesColumns = useMemo(() => {
+    const selectedId = value.seriesColumns === undefined ? 'auto' : String(value.seriesColumns);
+    return (
+      <OptionsEditorControl
+        label="Max series columns"
+        control={
+          <SettingsAutocomplete
+            onChange={handleSeriesColumnsChange}
+            options={SERIES_COLUMNS_LABELS}
+            disableClearable
+            value={SERIES_COLUMNS_LABELS.find((i) => i.id === selectedId)}
+          />
+        }
+      />
+    );
+  }, [value.seriesColumns, handleSeriesColumnsChange]);
 
   const isAutoOrientation = (value.orientation ?? 'auto') === 'auto';
 
@@ -241,21 +258,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
           {selectColorMode}
           {selectOrientation}
-          {isAutoOrientation && (
-            <OptionsEditorControl
-              label="Series columns"
-              control={
-                <TextField
-                  type="number"
-                  size="small"
-                  inputProps={{ min: 1, max: 12, step: 1 }}
-                  placeholder="auto"
-                  value={value.seriesColumns ?? ''}
-                  onChange={handleSeriesColumnsChange}
-                />
-              }
-            />
-          )}
+          {isAutoOrientation && selectSeriesColumns}
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

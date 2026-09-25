@@ -13,39 +13,37 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { idealSeriesColumns, resolveAutoColumns } from './stat-chart-model';
+import { computeIdealSeriesColumns, MAX_SERIES_COLUMNS, resolveAutoOrientationColumnsCount } from './stat-chart-model';
 
-describe('idealSeriesColumns', () => {
+describe('computeIdealSeriesColumns', () => {
   it('matches ceil(sqrt(n))', () => {
-    expect(idealSeriesColumns(1)).toBe(1);
-    expect(idealSeriesColumns(2)).toBe(2);
-    expect(idealSeriesColumns(4)).toBe(2);
-    expect(idealSeriesColumns(6)).toBe(3);
-    expect(idealSeriesColumns(9)).toBe(3);
-    expect(idealSeriesColumns(10)).toBe(4);
+    expect(computeIdealSeriesColumns(1)).toBe(1);
+    expect(computeIdealSeriesColumns(2)).toBe(2);
+    expect(computeIdealSeriesColumns(4)).toBe(2);
+    expect(computeIdealSeriesColumns(6)).toBe(3);
+    expect(computeIdealSeriesColumns(9)).toBe(3);
+    expect(computeIdealSeriesColumns(10)).toBe(4);
   });
 });
 
-describe('resolveAutoColumns', () => {
-  it('honors fixed seriesColumns', () => {
-    expect(resolveAutoColumns(6, 8, 2)).toBe(2);
-    expect(resolveAutoColumns(6, 8, 3)).toBe(3);
-    expect(resolveAutoColumns(4, 10, 2)).toBe(2);
+describe('resolveAutoOrientationColumnsCount', () => {
+  it('honors max seriesColumns', () => {
+    expect(resolveAutoOrientationColumnsCount(6, 8, 2)).toBe(2);
+    expect(resolveAutoOrientationColumnsCount(6, 8, 3)).toBe(3);
+    expect(resolveAutoOrientationColumnsCount(4, 10, 2)).toBe(2);
   });
 
-  it('caps fixed columns at 12 and series count', () => {
-    expect(resolveAutoColumns(5, 10, 20)).toBe(5);
-    expect(resolveAutoColumns(20, 20, 20)).toBe(12);
+  it('caps fixed columns at MAX_SERIES_COLUMNS and series count', () => {
+    expect(resolveAutoOrientationColumnsCount(5, 10, 20)).toBe(5);
+    expect(resolveAutoOrientationColumnsCount(20, 20, 20)).toBe(MAX_SERIES_COLUMNS);
   });
 
   it('prefers square matrix over wide single row', () => {
-    // 4 series on a wide panel: width allows 8 cols, ideal is 2 → 2×2
-    expect(resolveAutoColumns(4, 8)).toBe(2);
-    // 6 series: ideal 3
-    expect(resolveAutoColumns(6, 8)).toBe(3);
+    expect(resolveAutoOrientationColumnsCount(4, 8)).toBe(2);
+    expect(resolveAutoOrientationColumnsCount(6, 8)).toBe(3);
   });
 
   it('respects narrow panel width', () => {
-    expect(resolveAutoColumns(10, 2)).toBe(2);
+    expect(resolveAutoOrientationColumnsCount(10, 2)).toBe(2);
   });
 });

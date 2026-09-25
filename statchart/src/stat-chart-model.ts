@@ -69,24 +69,37 @@ export interface StatChartOptions {
   colorMode?: ColorMode;
   legendMode?: legendMode;
   orientation?: StatChartOrientation;
-  /** Fixed column count when orientation is auto (1–12). */
   seriesColumns?: number;
 }
 
-/** Ideal columns for a series-count matrix (4→2, 6→3, 9→3, …). */
-export function idealSeriesColumns(seriesCount: number): number {
+export const MAX_SERIES_COLUMNS = 12;
+
+export type SeriesColumnsLabelItem = { id: string; label: string };
+
+export const SERIES_COLUMNS_LABELS: SeriesColumnsLabelItem[] = [
+  { id: 'auto', label: 'Auto' },
+  ...Array.from({ length: MAX_SERIES_COLUMNS }, (_, i) => {
+    const n = String(i + 1);
+    return { id: n, label: n };
+  }),
+];
+
+export function computeIdealSeriesColumns(seriesCount: number): number {
   if (seriesCount <= 1) return 1;
   return Math.ceil(Math.sqrt(seriesCount));
 }
 
-/** Resolve auto grid columns: optional fixed seriesColumns, else min(width, ideal). */
-export function resolveAutoColumns(seriesCount: number, widthBasedColumns: number, seriesColumns?: number): number {
+export function resolveAutoOrientationColumnsCount(
+  seriesCount: number,
+  widthBasedColumnCount: number,
+  seriesColumns?: number,
+): number {
   if (seriesCount <= 1) return 1;
   if (seriesColumns !== undefined && seriesColumns !== null && seriesColumns >= 1) {
-    return Math.min(12, Math.floor(seriesColumns), seriesCount);
+    return Math.min(MAX_SERIES_COLUMNS, Math.floor(seriesColumns), seriesCount);
   }
-  const ideal = idealSeriesColumns(seriesCount);
-  const width = Math.max(1, widthBasedColumns);
+  const ideal = computeIdealSeriesColumns(seriesCount);
+  const width = Math.max(1, widthBasedColumnCount);
   return Math.max(1, Math.min(seriesCount, width, ideal));
 }
 
