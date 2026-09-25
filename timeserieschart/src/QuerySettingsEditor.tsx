@@ -64,7 +64,7 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     if (!recentlyAddedInputRef.current || !focusRef.current) return;
     recentlyAddedInputRef.current?.focus();
     focusRef.current = false;
-  }, [querySettingsList?.length]);
+  });
 
   const handleQueryIndexChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {

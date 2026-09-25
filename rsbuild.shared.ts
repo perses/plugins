@@ -14,8 +14,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { ModuleFederationOptions, pluginModuleFederation } from '@module-federation/rsbuild-plugin';
-import { mergeRsbuildConfig, RsbuildConfig } from '@rsbuild/core';
+import type { ModuleFederationOptions } from '@module-federation/rsbuild-plugin';
+import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
+import type { RsbuildConfig } from '@rsbuild/core';
+import { mergeRsbuildConfig } from '@rsbuild/core';
 
 /** The base path for all plugin assets. This should match the path where plugins are stored on the Perses server.
  * @see {@link https://github.com/perses/perses}

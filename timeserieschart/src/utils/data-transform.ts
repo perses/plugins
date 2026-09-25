@@ -250,7 +250,6 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
   if (data.length && data[0] !== undefined && (data as TimeSeries[])[0]?.values) {
     (data as TimeSeries[]).forEach((series) => {
       series.values.forEach((valueTuple: TimeSeriesValueTuple) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, value] = valueTuple;
         // Use the absolute value so percent thresholds compute correctly against
         // negated series (e.g. when `querySettings[].negativeY` is enabled).

@@ -24,7 +24,7 @@ import {
   useMousePosition,
 } from '@perses-dev/components';
 import { DEFAULT_ANNOTATION_COLOR } from '@perses-dev/plugin-system';
-import type { LineSeriesOption } from 'echarts';
+import type { LineSeriesOption, MarkPointComponentOption } from 'echarts';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import useResizeObserver from 'use-resize-observer';
@@ -171,8 +171,14 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
     label?: { show: boolean };
     annotationIndex?: number;
   }> = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markPointData: any[] = [];
+  const markPointData: Array<
+    NonNullable<MarkPointComponentOption['data']>[number] & {
+      annotationIndex: number;
+      isStart?: boolean;
+      isEnd?: boolean;
+      isPoint?: boolean;
+    }
+  > = [];
 
   annotations.forEach((annotation, index) => {
     const color = annotation.color ?? DEFAULT_ANNOTATION_COLOR;
@@ -205,6 +211,7 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
       // Add start and end markers
       for (const isStart of [true, false]) {
         markPointData.push({
+          name: '',
           coord: [isStart ? annotation.start : annotation.end, 0],
           symbol: 'triangle',
           symbolSize: [12, 12],
@@ -230,6 +237,7 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
 
       // Add point marker
       markPointData.push({
+        name: '',
         coord: [annotation.start, 0],
         symbol: 'triangle',
         symbolSize: [12, 10],

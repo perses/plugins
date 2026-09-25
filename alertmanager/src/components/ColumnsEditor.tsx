@@ -32,7 +32,7 @@ import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { ReactElement } from 'react';
-import { useCallback, useRef } from 'react';
+import { useCallback, useState } from 'react';
 
 export interface BaseColumnDefinition {
   name: string;
@@ -202,22 +202,27 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
     renderNameField,
   } = props;
 
-  const idCounterRef = useRef(0);
-  const idsRef = useRef<number[]>([]);
-
-  while (idsRef.current.length < columns.length) {
-    idsRef.current.push(idCounterRef.current++);
+  const [columnIds, setColumnIds] = useState(() => ({
+    ids: columns.map((_, index) => index),
+    nextId: columns.length,
+  }));
+  if (columnIds.ids.length !== columns.length) {
+    const ids = columnIds.ids.slice(0, columns.length);
+    let nextId = columnIds.nextId;
+    while (ids.length < columns.length) {
+      ids.push(nextId++);
+    }
+    setColumnIds({ ids, nextId });
   }
-  idsRef.current.length = columns.length;
 
   const handleAdd = useCallback((): void => {
-    idsRef.current.push(idCounterRef.current++);
+    setColumnIds(({ ids, nextId }) => ({ ids: [...ids, nextId], nextId: nextId + 1 }));
     onAdd();
   }, [onAdd]);
 
   const handleRemove = useCallback(
     (index: number): void => {
-      idsRef.current.splice(index, 1);
+      setColumnIds((previous) => ({ ...previous, ids: previous.ids.filter((_, i) => i !== index) }));
       onRemove(index);
     },
     [onRemove],
@@ -226,9 +231,12 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
   const handleMoveUp = useCallback(
     (index: number): void => {
       if (index <= 0) return;
-      const ids = idsRef.current;
-      const id = ids.splice(index, 1)[0]!;
-      ids.splice(index - 1, 0, id);
+      setColumnIds((previous) => {
+        const ids = [...previous.ids];
+        const id = ids.splice(index, 1)[0]!;
+        ids.splice(index - 1, 0, id);
+        return { ...previous, ids };
+      });
       onMoveUp(index);
     },
     [onMoveUp],
@@ -236,13 +244,16 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
 
   const handleMoveDown = useCallback(
     (index: number): void => {
-      const ids = idsRef.current;
-      if (index >= ids.length - 1) return;
-      const id = ids.splice(index, 1)[0]!;
-      ids.splice(index + 1, 0, id);
+      if (index >= columns.length - 1) return;
+      setColumnIds((previous) => {
+        const ids = [...previous.ids];
+        const id = ids.splice(index, 1)[0]!;
+        ids.splice(index + 1, 0, id);
+        return { ...previous, ids };
+      });
       onMoveDown(index);
     },
-    [onMoveDown],
+    [onMoveDown, columns.length],
   );
 
   return (
@@ -252,7 +263,7 @@ export function ColumnsEditor<C extends BaseColumnDefinition>(props: ColumnsEdit
           {description}
         </Typography>
         {columns.map((column, index) => (
-          <Box key={idsRef.current[index]}>
+          <Box key={columnIds.ids[index]}>
             {index > 0 && <Divider sx={{ mb: 2 }} />}
             <ColumnEntry
               column={column}

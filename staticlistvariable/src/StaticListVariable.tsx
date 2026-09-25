@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Autocomplete, Chip, IconButton, TextField, Typography } from '@mui/material';
-/* eslint-disable jsx-a11y/no-autofocus */
 import type { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
 import PlusCircleIcon from 'mdi-material-ui/PlusCircle';
 import type { ReactElement } from 'react';
@@ -186,6 +185,7 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
                       }
                     }}
                     size="small"
+                    // oxlint-disable-next-line jsx-a11y/no-autofocus -- inline edit field opened by an explicit user action
                     autoFocus
                     sx={{
                       width: '100%',

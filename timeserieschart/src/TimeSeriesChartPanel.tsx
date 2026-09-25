@@ -27,7 +27,6 @@ import {
   YAxisLabel,
   useChartsTheme,
   ContentWithLegend,
-  useId,
   DEFAULT_TOOLTIP_CONFIG,
   getFormattedMultipleYAxes,
   DEFAULT_LEGEND,
@@ -47,7 +46,7 @@ import type { Labels, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import type { ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 
 import type { TimeSeriesChartOptions, QuerySettingsOptions } from './time-series-chart-model';
 import { DEFAULT_FORMAT, DEFAULT_VISUAL, THRESHOLD_PLOT_INTERVAL } from './time-series-chart-model';
@@ -95,7 +94,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const chartId = useId('time-series-panel');
+  const chartId = useId();
 
   const chartRef = useRef<ChartInstance>(null);
 
@@ -353,7 +352,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           }
 
           // Used for repeating colors in Categorical palette
-          seriesIndex++;
+          seriesIndex += 1;
         }
       }
 
@@ -402,7 +401,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
           values: thresholdTimeValueTuple,
         });
         timeSeriesMapping.push(getThresholdSeries(thresholdName, stepOption, seriesIndex));
-        seriesIndex++;
+        seriesIndex += 1;
       });
     }
 

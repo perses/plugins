@@ -69,7 +69,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import isEqual from 'lodash/isEqual';
 import merge from 'lodash/merge';
 import type { MouseEvent } from 'react';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
 import type { TimeSeriesAnnotation } from './utils/annotation';
@@ -214,7 +214,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     };
   }, []);
 
-  const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
+  const handleEvents = useMemo<OnEventsType<unknown>>(() => {
     return {
       datazoom: (params): void => {
         if (onDataZoom === undefined) {
@@ -239,19 +239,21 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           enableDataZoom(chartRef.current);
         }
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mouseover: (params: any): void => {
+      mouseover: (params): void => {
         if (
           params.componentType === 'series' &&
           params.seriesType === 'scatter' &&
+          'seriesId' in params &&
           typeof params.seriesId === 'string' &&
           params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)
         ) {
-          if (params.data?.exemplar) {
+          // This series ID identifies the metadata embedded by getExemplarSeries.
+          const point = params.data as { exemplar?: Exemplar; seriesLabels?: Labels; value?: number[] };
+          if (point?.exemplar) {
             setHoveredExemplar({
-              exemplar: params.data.exemplar,
-              seriesLabels: params.data.seriesLabels,
-              plottedValue: params.data?.value?.[1] ?? params.data.exemplar.value,
+              exemplar: point.exemplar,
+              seriesLabels: point.seriesLabels,
+              plottedValue: point.value?.[1] ?? point.exemplar.value,
             });
             return;
           }
@@ -260,7 +262,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         // Only markPoint (triangles under the X-axis) opens the annotation tooltip.
         // Hovering markLine or anything else keeps the regular TimeSeries tooltip visible
         // and clears any stale hovered annotation (mouseout is sometimes missed by ECharts).
-        if (annotations && params.componentType === 'markPoint' && params.data?.annotationIndex !== undefined) {
+        if (annotations && params.componentType === 'markPoint' && typeof params.data?.annotationIndex === 'number') {
           const matchedAnnotation = annotations[params.data.annotationIndex] || null;
           if (matchedAnnotation) {
             setHoveredAnnotation(matchedAnnotation);
@@ -269,11 +271,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
         setHoveredAnnotation(null);
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mouseout: (params: any): void => {
+      mouseout: (params): void => {
         if (
           params.componentType === 'series' &&
           params.seriesType === 'scatter' &&
+          'seriesId' in params &&
           typeof params.seriesId === 'string' &&
           params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)
         ) {
@@ -283,7 +285,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         if (
           annotations &&
           params.componentType === 'markPoint' &&
-          params.data?.annotationIndex !== undefined &&
+          typeof params.data?.annotationIndex === 'number' &&
           annotations
         ) {
           // Only clear if the mouseout corresponds to the currently hovered annotation, so that
@@ -398,18 +400,21 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     getTimezoneAwareAxisFormatter,
   ]);
 
-  // Update adjacent charts so tooltip is unpinned when current chart is clicked.
-  useEffect(() => {
-    // Only allow pinning one tooltip at a time, subsequent tooltip click unpins previous.
-    // Multiple tooltips can only be pinned if Ctrl or Cmd key is pressed while clicking.
-    const multipleTooltipsPinned = tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null;
-    if (multipleTooltipsPinned) {
-      if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
-        setTooltipPinnedCoords(null);
-        if (tooltipPinnedCoords !== null && pinnedCrosshair !== null) {
-          setPinnedCrosshair(null);
-        }
-      }
+  // Only changes from another chart (or new series) can clear the local pin.
+  // A local click may update its coordinates without updating the shared pin.
+  const [previousPinState, setPreviousPinState] = useState({ lastTooltipPinnedCoords, seriesMapping });
+  if (
+    previousPinState.lastTooltipPinnedCoords !== lastTooltipPinnedCoords ||
+    previousPinState.seriesMapping !== seriesMapping
+  ) {
+    setPreviousPinState({ lastTooltipPinnedCoords, seriesMapping });
+    if (
+      tooltipPinnedCoords !== null &&
+      lastTooltipPinnedCoords !== null &&
+      !isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)
+    ) {
+      setTooltipPinnedCoords(null);
+      setPinnedCrosshair(null);
     }
     // A pinned exemplar tooltip is also unpinned when a tooltip is pinned in another chart,
     // unless it is the one just pinned by this chart at these exact coordinates.
@@ -421,9 +426,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       setPinnedExemplar(null);
       setPinnedExemplarPos(null);
     }
-    // tooltipPinnedCoords CANNOT be in dep array or tooltip pinning breaks in the current chart's onClick
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastTooltipPinnedCoords, seriesMapping]);
+  }
 
   return (
     <Box
