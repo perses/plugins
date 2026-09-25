@@ -432,13 +432,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     seriesFormatMap,
   ]);
 
-  // Create multiple Y axes if there are additional formats
-  // Uses max values from data to compute dynamic offsets that adapt to label widths
   const multipleYAxes = useMemo(() => {
     if (additionalFormats.length === 0) {
-      return undefined; // Use single Y axis (default behavior)
+      return undefined;
     }
-    // Build array of max values for each additional format (in order)
     const maxValues = additionalFormats.map((fmt) => {
       const unitKey = fmt.unit;
       return unitKey ? (maxValuesByFormat?.get(unitKey) ?? 1000) : 1000;
@@ -484,22 +481,21 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   }, [legend?.values, format]);
 
   const gridOverrides: GridComponentOption = useMemo(() => {
-    // When Y axes are hidden, disable containLabel to prevent auto-spacing, but add bottom padding for X axis
-    return echartsYAxis.show === false
-      ? {
-          left: 0,
-          right: 0,
-          bottom: 30,
-          containLabel: false,
-        }
-      : {
-          left: yAxis && yAxis.label ? 30 : 20,
-          // With containLabel: true in theme, ECharts auto-reserves space for axis labels.
-          // For multiple right axes, add extra padding for the last axis labels that extend beyond the grid.
-          right: additionalFormats.length > 0 ? 10 : 20,
-          bottom: 0,
-          containLabel: true,
-        };
+    if (echartsYAxis.show === false) {
+      return {
+        left: 0,
+        right: 0,
+        bottom: 30,
+        containLabel: false,
+      };
+    }
+    const rightPad = additionalFormats.length > 0 ? additionalFormats.length * 52 + 12 : 20;
+    return {
+      left: yAxis && yAxis.label ? 30 : 20,
+      right: rightPad,
+      bottom: 0,
+      containLabel: true,
+    };
   }, [echartsYAxis.show, yAxis, additionalFormats.length]);
 
   if (adjustedContentDimensions === undefined) {
