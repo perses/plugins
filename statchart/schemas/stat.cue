@@ -32,5 +32,6 @@ spec: close({
 	colorMode?:      *"value" | "background_solid" | "none"
 	legendMode?:     *"auto" | "on" | "off"
 	orientation?:    *"auto" | "horizontal" | "vertical"
+	seriesColumns?:  >=1 & <=12
 	mappings?: [...common.#mappings]
 })
