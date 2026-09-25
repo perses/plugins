@@ -47,7 +47,7 @@ import type { Labels, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 
 import type { TimeSeriesChartOptions } from './time-series-chart-model';
 import { DEFAULT_FORMAT, DEFAULT_VISUAL, THRESHOLD_PLOT_INTERVAL } from './time-series-chart-model';
@@ -87,7 +87,7 @@ function labelsKey(labels: Labels): string {
 // TODO: simplify this if we switch the list-based legend UI to use checkboxes,
 // where we *would* want to visually select all items in this case.
 
-export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement | null {
+function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElement | null {
   const {
     spec: { thresholds, yAxis, tooltip, querySettings: querySettingsList },
     contentDimensions,
@@ -199,7 +199,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
                 maxValue = Math.max(maxValue, Math.abs(value ?? 0));
               }
             }
-            const seriesId = chartId + timeSeries.name + seriesIndex;
+            const seriesId = `${chartId}${timeSeries.name}${seriesIndex}`;
             seriesIndex += 1;
             return { timeSeries, seriesId, values, calculations, maxValue };
           });
@@ -591,3 +591,20 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     </Box>
   );
 }
+
+// PanelContent recreates the queryResults array and its wrappers on dashboard
+// hover/focus updates. Compare the underlying references in query order so those
+// updates do not invalidate data preparation or scan the samples and exemplars.
+export const TimeSeriesChartPanel = memo(
+  TimeSeriesChartPanelComponent,
+  (previous, next): boolean =>
+    previous.spec === next.spec &&
+    previous.definition === next.definition &&
+    previous.contentDimensions?.width === next.contentDimensions?.width &&
+    previous.contentDimensions?.height === next.contentDimensions?.height &&
+    previous.queryResults.length === next.queryResults.length &&
+    previous.queryResults.every(
+      (query, index) =>
+        query.data === next.queryResults[index]?.data && query.definition === next.queryResults[index]?.definition,
+    ),
+);

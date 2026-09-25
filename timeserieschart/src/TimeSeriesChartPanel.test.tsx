@@ -19,10 +19,11 @@ import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import { TimeRangeContext, getCalculations } from '@perses-dev/plugin-system';
 import type { TimeSeriesData, TimeRangeValue } from '@perses-dev/spec';
 import { toAbsoluteTimeRange } from '@perses-dev/spec';
-import { screen, render, waitFor } from '@testing-library/react';
+import { screen, render, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EChartsCoreOption, ScatterSeriesOption } from 'echarts';
 import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
 import { MOCK_TIME_SERIES_DATA_MULTIVALUE, MOCK_TIME_SERIES_EXEMPLARS } from './test/mock-query-results';
@@ -100,13 +101,34 @@ function getLegendByName(name?: string): HTMLElement {
   });
 }
 
+// PanelContent recreates these wrappers when dashboard hover/focus state changes.
+function HoveringPanelHost(props: TimeSeriesChartProps): ReactElement {
+  const [hovered, setHovered] = useState(false);
+  const onMouseEnter = useCallback(() => setHovered(true), []);
+  const onMouseLeave = useCallback(() => setHovered(false), []);
+  const queryResults = props.queryResults.map(({ data, definition }) => ({ data, definition }));
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={hovered ? 'Hovered panel' : 'Panel'}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        Panel header
+      </button>
+      <TimeSeriesChartPanel {...props} queryResults={queryResults} />
+    </>
+  );
+}
+
 describe('TimeSeriesChartPanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (
     data = MOCK_TIME_SERIES_DATA_MULTIVALUE,
     spec: TimeSeriesChartProps['spec'] = TEST_TIME_SERIES_PANEL.spec,
     additionalData: TimeSeriesData[] = [],
-  ): void => {
+  ): { rerenderPanel: (overrides: Partial<TimeSeriesChartProps>) => void } => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
       setRefreshInterval: (): Record<string, unknown> => ({}),
@@ -116,23 +138,147 @@ describe('TimeSeriesChartPanel', () => {
       refresh: vi.fn(),
     };
 
-    render(
+    const panelProps: TimeSeriesChartProps = {
+      ...TEST_TIME_SERIES_PANEL,
+      spec,
+      queryResults: [data, ...additionalData].map((queryData) => ({
+        definition: TEST_QUERY_DEFINITION,
+        data: queryData,
+      })),
+    };
+    const wrapPanel = (nextProps: TimeSeriesChartProps): ReactElement => (
       <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
         <ChartsProvider chartsTheme={testChartsTheme}>
           <TimeRangeContext.Provider value={mockTimeRangeContext}>
-            <TimeSeriesChartPanel
-              {...TEST_TIME_SERIES_PANEL}
-              spec={spec}
-              queryResults={[data, ...additionalData].map((queryData) => ({
-                definition: TEST_QUERY_DEFINITION,
-                data: queryData,
-              }))}
-            />
+            <HoveringPanelHost {...nextProps} />
           </TimeRangeContext.Provider>
         </ChartsProvider>
-      </VirtuosoMockContext.Provider>,
+      </VirtuosoMockContext.Provider>
     );
+    const view = render(wrapPanel(panelProps));
+    return {
+      rerenderPanel: (overrides: Partial<TimeSeriesChartProps>): void => {
+        view.rerender(wrapPanel({ ...panelProps, ...overrides }));
+      },
+    };
   };
+
+  it('reuses prepared data when dashboard hover recreates query wrappers', () => {
+    vi.mocked(getTimeSeriesValues).mockClear();
+    vi.mocked(getCalculations).mockClear();
+    renderPanel(
+      { ...MOCK_TIME_SERIES_DATA_MULTIVALUE, exemplars: MOCK_TIME_SERIES_EXEMPLARS },
+      {
+        ...TEST_TIME_SERIES_PANEL.spec,
+        legend: { position: 'right', mode: 'list', values: ['mean'] },
+      },
+    );
+    const samplePasses = vi.mocked(getTimeSeriesValues).mock.calls.length;
+    const calculationPasses = vi.mocked(getCalculations).mock.calls.length;
+    const initialOption = lastChartOption.current;
+    expect(samplePasses).toBe(MOCK_TIME_SERIES_DATA_MULTIVALUE.series.length);
+    expect(calculationPasses).toBe(samplePasses);
+    fireEvent.mouseEnter(screen.getByRole('button', { name: 'Panel' }));
+    fireEvent.mouseLeave(screen.getByRole('button', { name: 'Hovered panel' }));
+    expect(getTimeSeriesValues).toHaveBeenCalledTimes(samplePasses);
+    expect(getCalculations).toHaveBeenCalledTimes(calculationPasses);
+    expect(lastChartOption.current).toBe(initialOption);
+  });
+
+  it('renders refreshed samples and exemplars after skipping unchanged query wrappers', () => {
+    const data: TimeSeriesData = {
+      timeRange: { start: new Date(0), end: new Date(1000) },
+      stepMs: 1000,
+      series: [
+        {
+          name: 'requests',
+          labels: { job: 'api' },
+          values: [
+            [0, 1],
+            [1000, 2],
+          ],
+        },
+      ],
+      exemplars: [
+        { seriesLabels: { job: 'api' }, exemplars: [{ timestamp: 1000, value: 2, labels: { trace_id: 'old' } }] },
+      ],
+    };
+    const { rerenderPanel } = renderPanel(data);
+    fireEvent.mouseEnter(screen.getByRole('button', { name: 'Panel' }));
+    const updatedData: TimeSeriesData = {
+      ...data,
+      timeRange: { start: new Date(0), end: new Date(2000) },
+      series: [
+        {
+          name: 'requests',
+          labels: { job: 'api' },
+          values: [
+            [0, 1],
+            [1000, 2],
+            [2000, 3],
+          ],
+        },
+      ],
+      exemplars: [
+        { seriesLabels: { job: 'api' }, exemplars: [{ timestamp: 2000, value: 3, labels: { trace_id: 'new' } }] },
+      ],
+    };
+    rerenderPanel({ queryResults: [{ definition: TEST_QUERY_DEFINITION, data: updatedData }] });
+    expect(lastChartOption.current).toMatchObject({
+      xAxis: { max: 2000 },
+      dataset: [
+        {
+          source: [
+            [0, 1],
+            [1000, 2],
+            [2000, 3],
+          ],
+        },
+      ],
+      series: [
+        { type: 'line' },
+        { type: 'scatter', data: [{ value: [2000, 3], exemplar: { labels: { trace_id: 'new' } } }] },
+      ],
+    });
+  });
+
+  it('updates when queries are reordered, removed, or their definitions change', () => {
+    const first: TimeSeriesData = {
+      ...MOCK_TIME_SERIES_DATA_MULTIVALUE,
+      series: [{ name: 'first', values: [[0, 1]] }],
+    };
+    const second: TimeSeriesData = { ...first, series: [{ name: 'second', values: [[0, 2]] }] };
+    const { rerenderPanel } = renderPanel(first, TEST_TIME_SERIES_PANEL.spec, [second]);
+    rerenderPanel({ queryResults: [second, first].map((data) => ({ data, definition: TEST_QUERY_DEFINITION })) });
+    expect(lastChartOption.current).toMatchObject({ series: [{ name: 'second' }, { name: 'first' }] });
+    rerenderPanel({ queryResults: [{ data: second, definition: TEST_QUERY_DEFINITION }] });
+    expect(lastChartOption.current?.series).toHaveLength(1);
+    expect(screen.queryByText('first')).not.toBeInTheDocument();
+    vi.mocked(getTimeSeriesValues).mockClear();
+    rerenderPanel({ queryResults: [{ data: second, definition: { ...TEST_QUERY_DEFINITION } }] });
+    expect(getTimeSeriesValues).toHaveBeenCalledTimes(1);
+    rerenderPanel({ queryResults: [] });
+    expect(screen.queryByText('second')).not.toBeInTheDocument();
+  });
+
+  it('applies spec changes and resizes with unchanged query data', () => {
+    const { rerenderPanel } = renderPanel();
+    const spec: TimeSeriesChartProps['spec'] = {
+      ...TEST_TIME_SERIES_PANEL.spec,
+      visual: { lineWidth: 5 },
+      querySettings: [{ queryIndex: 0, negativeY: true }],
+    };
+    rerenderPanel({ spec });
+    expect(lastChartOption.current).toMatchObject({
+      series: [{ lineStyle: { width: 5 } }, { lineStyle: { width: 5 } }],
+    });
+    const chartContainer = screen.getByTestId('echart-mock').parentElement;
+    const previousHeight = chartContainer?.style.height;
+    rerenderPanel({ spec, contentDimensions: { width: 700, height: 700 } });
+    expect(chartContainer?.style.height).not.toBe(previousHeight);
+    rerenderPanel({ contentDimensions: undefined });
+    expect(screen.queryByTestId('echart-mock')).not.toBeInTheDocument();
+  });
 
   describe('exemplars', () => {
     const getExemplarSeries = (): ScatterSeriesOption[] => {
