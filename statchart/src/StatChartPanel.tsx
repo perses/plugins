@@ -22,6 +22,7 @@ import type { FC } from 'react';
 import { useMemo } from 'react';
 
 import type { StatChartOptions } from './stat-chart-model';
+import { resolveAutoOrientationColumnsCount } from './stat-chart-model';
 import type { StatChartData } from './StatChartBase';
 import { StatChartBase } from './StatChartBase';
 import { measureTextWidth } from './utils/calculate-font-size';
@@ -102,8 +103,9 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
 
   const autoColumnCount = useMemo(() => {
     if (!isAutoWrapped) return 1;
-    return Math.max(1, Math.min(statChartData.length, Math.floor((panelWidth + SPACING) / (MIN_WIDTH + SPACING))));
-  }, [panelWidth, isAutoWrapped, statChartData.length]);
+    const widthBasedColumnCount = Math.floor((panelWidth + SPACING) / (MIN_WIDTH + SPACING));
+    return resolveAutoOrientationColumnsCount(statChartData.length, widthBasedColumnCount, spec.seriesColumns);
+  }, [panelWidth, isAutoWrapped, statChartData.length, spec.seriesColumns]);
 
   const autoGridWidth = useMemo(() => {
     if (!isAutoWrapped) return chartWidth;
