@@ -26,7 +26,7 @@ import { createPortal } from 'react-dom';
 
 import type { CellSettings, ColumnSettings, TableOptions } from '../models';
 import { evaluateConditionalFormatting } from '../models';
-import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
+import { buildRawTableData, getTablePanelQueryMode, needsTimeSeriesExpansion } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
 
 type FilterValuesType<T> = Array<{ original: T; formatted: T }>;
@@ -429,8 +429,10 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
   // TODO: handle other query types
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
-    // Transform query results to a tabular format using shared utility
-    return buildRawTableData(queryResults, spec);
+    return buildRawTableData(queryResults, spec, {
+      expandTimeSeries: needsTimeSeriesExpansion(spec),
+      queryMode: getTablePanelQueryMode(spec),
+    });
   }, [queryResults, spec]);
 
   // Transform will be applied by their orders on the original data
