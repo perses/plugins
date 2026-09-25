@@ -59,8 +59,20 @@ const (
 	CategoricalMode PaletteMode = "categorical"
 )
 
+type CategoricalPaletteName string
+
+const (
+	Category10Palette CategoricalPaletteName = "category10"
+	Tableau10Palette  CategoricalPaletteName = "tableau10"
+	Set1Palette       CategoricalPaletteName = "set1"
+	Set2Palette       CategoricalPaletteName = "set2"
+	Set3Palette       CategoricalPaletteName = "set3"
+	Dark2Palette      CategoricalPaletteName = "dark2"
+)
+
 type Palette struct {
-	Mode PaletteMode `json:"mode" yaml:"mode"`
+	Mode                   PaletteMode            `json:"mode" yaml:"mode"`
+	Name                   CategoricalPaletteName `json:"categoricalPaletteName,omitempty" yaml:"categoricalPaletteName,omitempty"`
 }
 
 type VisualDisplay string

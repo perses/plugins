@@ -25,7 +25,11 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "color-hash": "^2.0.2"
+    "color-hash": "^2.0.2",
+    "d3-scale-chromatic": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/d3-scale-chromatic": "^3.1.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",

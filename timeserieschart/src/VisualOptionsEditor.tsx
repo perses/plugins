@@ -16,19 +16,20 @@ import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
 
+import { PaletteSelector } from './components/PaletteSelector';
 import type { StackOptions, TimeSeriesChartVisualOptions } from './time-series-chart-model';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
-  DEFAULT_LINE_WIDTH,
+  DEFAULT_DISPLAY,
   DEFAULT_LINE_STYLE,
+  DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
+  LINE_STYLE_CONFIG,
   POINT_SIZE_OFFSET,
   STACK_CONFIG,
   STACK_OPTIONS,
-  LINE_STYLE_CONFIG,
   VISUAL_CONFIG,
-  DEFAULT_DISPLAY,
 } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
@@ -66,17 +67,13 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         label={VISUAL_CONFIG.stack.label}
         control={
           <SettingsAutocomplete
-            value={{
-              ...stackConfig,
-              id: currentStack,
-            }}
+            value={{ ...stackConfig, id: currentStack }}
             options={STACK_OPTIONS}
             onChange={(__, newValue) => {
               const updatedValue: TimeSeriesChartVisualOptions = {
                 ...value,
                 stack: newValue.id === 'none' ? undefined : newValue.id,
               };
-              // stacked area chart preset to automatically set area under a curve shading
               if (newValue.id === 'all' && !value.areaOpacity) {
                 updatedValue.areaOpacity = 0.3;
               }
@@ -84,9 +81,10 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             }}
             disabled={value === undefined}
             disableClearable
-          ></SettingsAutocomplete>
+          />
         }
       />
+      <PaletteSelector value={value.palette} onChange={(palette) => onChange({ ...value, palette })} />
       <OptionsEditorControl
         label="Display"
         control={
@@ -95,10 +93,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             exclusive
             value={value.display ?? DEFAULT_DISPLAY}
             onChange={(__, newValue) => {
-              onChange({
-                ...value,
-                display: newValue,
-              });
+              onChange({ ...value, display: newValue });
             }}
           >
             <ToggleButton
@@ -139,10 +134,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
                 exclusive
                 value={value.lineStyle ?? DEFAULT_LINE_STYLE}
                 onChange={(__, newValue) => {
-                  onChange({
-                    ...value,
-                    lineStyle: newValue,
-                  });
+                  onChange({ ...value, lineStyle: newValue });
                 }}
               >
                 {Object.entries(LINE_STYLE_CONFIG).map(([styleValue, config]) => (
@@ -174,10 +166,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
               <Switch
                 checked={value.connectNulls ?? DEFAULT_CONNECT_NULLS}
                 onChange={(e) => {
-                  onChange({
-                    ...value,
-                    connectNulls: e.target.checked,
-                  });
+                  onChange({ ...value, connectNulls: e.target.checked });
                 }}
               />
             }
