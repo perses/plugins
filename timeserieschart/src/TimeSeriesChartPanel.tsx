@@ -47,9 +47,9 @@ import type { Labels, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import type { ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 
-import type { TimeSeriesChartOptions, QuerySettingsOptions } from './time-series-chart-model';
+import type { TimeSeriesChartOptions } from './time-series-chart-model';
 import { DEFAULT_FORMAT, DEFAULT_VISUAL, THRESHOLD_PLOT_INTERVAL } from './time-series-chart-model';
 import { TimeSeriesChartBase } from './TimeSeriesChartBase';
 import type { TimeSeriesAnnotation } from './utils/annotation';
@@ -87,7 +87,7 @@ function labelsKey(labels: Labels): string {
 // TODO: simplify this if we switch the list-based legend UI to use checkboxes,
 // where we *would* want to visually select all items in this case.
 
-export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement | null {
+function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElement | null {
   const {
     spec: { thresholds, yAxis, tooltip, querySettings: querySettingsList },
     contentDimensions,
@@ -139,11 +139,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   // Collect unique formats from query settings that differ from the base format
   // These will create additional Y axes on the right side
-  const { additionalFormats, formatToYAxisIndex, seriesFormatMap } = useMemo(() => {
+  const { additionalFormats, formatToYAxisIndex } = useMemo(() => {
     const baseUnit = format?.unit ?? 'decimal';
     const additionalFormats: Array<typeof format> = [];
     const formatToYAxisIndex = new Map<string, number>();
-    const seriesFormatMap = new Map<string, typeof format>();
 
     // Index 0 is reserved for the base Y axis
     formatToYAxisIndex.set(baseUnit, 0);
@@ -160,7 +159,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       }
     }
 
-    return { additionalFormats, formatToYAxisIndex, seriesFormatMap };
+    return { additionalFormats, formatToYAxisIndex };
   }, [format, querySettingsList]);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
@@ -175,22 +174,93 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     [annotationsWithData],
   );
 
+  const calculationTypes = legend?.values;
+
+  // Point processing and legend statistics depend on query data, not legend selection.
+  // Reuse these arrays when toggling series instead of rescanning every sample.
+  const { timeScale, preparedQueries } = useMemo(() => {
+    const commonScale = getCommonTimeScaleForQueries(queryResults);
+    const settingsByQuery = new Map(querySettingsList?.map((settings) => [settings.queryIndex, settings]));
+    let seriesIndex = 0;
+    const queries = commonScale
+      ? queryResults.map((result, queryIndex) => {
+          const querySettings = settingsByQuery.get(queryIndex);
+          const series = result.data.series.map((timeSeries) => {
+            const baseValues = getTimeSeriesValues(timeSeries, commonScale);
+            const values = querySettings?.negativeY
+              ? baseValues.map(([t, v]): TimeSeriesValueTuple => [t, v === null ? null : -v])
+              : baseValues;
+            const calculations = calculationTypes
+              ? getCalculations(timeSeries.values, calculationTypes as CalculationType[])
+              : undefined;
+            let maxValue = 0;
+            if (querySettings?.format?.unit) {
+              for (const [, value] of timeSeries.values) {
+                maxValue = Math.max(maxValue, Math.abs(value ?? 0));
+              }
+            }
+            const seriesId = `${chartId}${timeSeries.name}${seriesIndex}`;
+            seriesIndex += 1;
+            return { timeSeries, seriesId, values, calculations, maxValue };
+          });
+          return { querySettings, series, exemplars: result.data.exemplars };
+        })
+      : [];
+    return { timeScale: commonScale, preparedQueries: queries };
+  }, [queryResults, querySettingsList, calculationTypes, chartId]);
+
+  // Prepare all exemplar groups independently of legend selection. The base chart
+  // filters their scatter series without rebuilding marker data for visible groups.
+  const chartExemplars = useMemo(() => {
+    const groups: ExemplarChartData[] = [];
+    let seriesIndex = 0;
+    for (const { querySettings, series, exemplars } of preparedQueries) {
+      // Labels identify a series within a query, not across different queries.
+      const seriesByLabels = new Map<string, ExemplarChartData>();
+      for (const { timeSeries, seriesId } of series) {
+        const seriesName = timeSeries.formattedName ?? timeSeries.name;
+        if (exemplars?.length && timeSeries.labels) {
+          seriesByLabels.set(labelsKey(timeSeries.labels), {
+            seriesId,
+            seriesName,
+            color: getSeriesColor({
+              categoricalPalette: categoricalPalette as string[],
+              visual,
+              muiPrimaryColor: muiTheme.palette.primary.main,
+              seriesName,
+              seriesIndex,
+              querySettings,
+              queryHasMultipleResults: series.length > 1,
+            }),
+            seriesLabels: timeSeries.labels,
+            yAxisIndex: formatToYAxisIndex.get(querySettings?.format?.unit ?? '') ?? 0,
+            negativeY: querySettings?.negativeY,
+            exemplars: [],
+          });
+        }
+        seriesIndex++;
+      }
+      for (const group of exemplars ?? []) {
+        if (group.exemplars.length === 0) continue;
+        const matched = seriesByLabels.get(labelsKey(group.seriesLabels));
+        if (matched) groups.push({ ...matched, exemplars: group.exemplars });
+      }
+    }
+    return groups;
+  }, [preparedQueries, categoricalPalette, visual, muiTheme.palette.primary.main, formatToYAxisIndex]);
+
   // Populate series data based on query results
   const {
-    timeScale,
     timeChartData,
     timeSeriesMapping,
     legendItems,
-    chartExemplars,
     seriesFormatMap: computedSeriesFormatMap,
     maxValuesByFormat,
   } = useMemo(() => {
-    const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
       return {
         timeChartData: [] as TimeSeries[],
         timeSeriesMapping: [] as TimeChartSeriesMapping,
-        chartExemplars: [] as ExemplarChartData[],
         legendItems: [] as LegendItem[],
         seriesFormatMap: new Map(),
         maxValuesByFormat: new Map<string, number>(),
@@ -206,165 +276,98 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
     // Track max values for each format unit (used for dynamic Y axis offset calculation)
     const maxValuesByFormat = new Map<string, number>();
+    const seriesFormatMap = new Map<string, typeof format>();
+
+    let visibleSeriesCount = 0;
+    for (const { series } of preparedQueries) {
+      for (const { seriesId } of series) {
+        if (selectedLegendItems === 'ALL' || selectedLegendItems[seriesId]) visibleSeriesCount++;
+      }
+    }
 
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
 
-    const seriesByLabels = new Map<string, ExemplarChartData>();
+    for (const { querySettings, series } of preparedQueries) {
+      for (const { timeSeries, seriesId, values, calculations, maxValue } of series) {
+        // Format is determined by seriesNameFormat in query spec
+        const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-    const chartExemplars: ExemplarChartData[] = [];
+        // Color is used for line, tooltip, and legend
+        const seriesColor = getSeriesColor({
+          // ECharts type for color is not always an array but it is always an array in ChartsProvider
+          categoricalPalette: categoricalPalette as string[],
+          visual,
+          muiPrimaryColor: muiTheme.palette.primary.main,
+          seriesName: formattedSeriesName,
+          seriesIndex,
+          querySettings: querySettings,
+          queryHasMultipleResults: series.length > 1,
+        });
 
-    // Mapping of each set of query results to be ECharts option compatible
-    // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
-    for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
-      const result = queryResults[queryIndex];
+        // When we initially load the chart, we want to show all series, but
+        // DO NOT want to visualy highlight all the items in the legend.
+        const isSelectAll = selectedLegendItems === 'ALL';
+        const isSelected = !isSelectAll && !!selectedLegendItems[seriesId];
+        const showTimeSeries = isSelected || isSelectAll;
 
-      // Retrieve querySettings for this query, if exists.
-      // queries & querySettings indices do not necessarily match, so we have to check the tail value of the $ref attribute
-      let querySettings: QuerySettingsOptions | undefined;
-      for (const item of querySettingsList ?? []) {
-        if (item.queryIndex === queryIndex) {
-          querySettings = item;
-          // We don't break the loop here just in case there are multiple querySettings defined for the
-          // same queryIndex, because in that case we want the last one to take precedence.
-        }
-      }
+        if (showTimeSeries) {
+          // Use timeChartData.length to ensure the data that is passed into the tooltip accounts for
+          // which legend items are selected. This must happen before timeChartData.push to avoid an
+          // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
+          const datasetIndex = timeChartData.length;
 
-      if (result) {
-        for (let i = 0; i < result.data.series.length; i++) {
-          const timeSeries: TimeSeries | undefined = result.data.series[i];
-          if (timeSeries === undefined) {
-            return {
-              timeChartData: [] as TimeSeries[],
-              timeSeriesMapping: [] as TimeChartSeriesMapping,
-              chartExemplars: [] as ExemplarChartData[],
-              legendItems: [] as LegendItem[],
-            };
-          }
+          // Determine yAxisIndex based on the query's format setting
+          const queryFormat = querySettings?.format;
+          const yAxisIndex = queryFormat?.unit ? (formatToYAxisIndex.get(queryFormat.unit) ?? 0) : 0;
 
-          // Format is determined by seriesNameFormat in query spec
-          const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
+          // Each series is stored as a separate dataset source.
+          // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
+          timeSeriesMapping.push(
+            getTimeSeries(
+              seriesId,
+              datasetIndex,
+              formattedSeriesName,
+              visual,
+              timeScale,
+              seriesColor,
+              querySettings,
+              yAxisIndex,
+              visibleSeriesCount,
+            ),
+          );
 
-          // Color is used for line, tooltip, and legend
-          const seriesColor = getSeriesColor({
-            // ECharts type for color is not always an array but it is always an array in ChartsProvider
-            categoricalPalette: categoricalPalette as string[],
-            visual,
-            muiPrimaryColor: muiTheme.palette.primary.main,
-            seriesName: formattedSeriesName,
-            seriesIndex,
-            querySettings: querySettings,
-            queryHasMultipleResults: (queryResults[queryIndex]?.data?.series?.length ?? 0) > 1,
-          });
+          // Store the format for this series for tooltip formatting
+          if (queryFormat) {
+            seriesFormatMap.set(seriesId, queryFormat);
 
-          // We add a unique id for the chart to disambiguate items across charts
-          // when there are multiple on the page.
-          const seriesId = chartId + timeSeries.name + seriesIndex;
-
-          const legendCalculations = legend?.values
-            ? getCalculations(timeSeries.values, legend.values as CalculationType[])
-            : undefined;
-
-          // When we initially load the chart, we want to show all series, but
-          // DO NOT want to visualy highlight all the items in the legend.
-          const isSelectAll = selectedLegendItems === 'ALL';
-          const isSelected = !isSelectAll && !!selectedLegendItems[seriesId];
-          const showTimeSeries = isSelected || isSelectAll;
-
-          if (showTimeSeries) {
-            // Use timeChartData.length to ensure the data that is passed into the tooltip accounts for
-            // which legend items are selected. This must happen before timeChartData.push to avoid an
-            // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
-            const datasetIndex = timeChartData.length;
-
-            // Determine yAxisIndex based on the query's format setting
-            const queryFormat = querySettings?.format;
-            const yAxisIndex = queryFormat?.unit ? (formatToYAxisIndex.get(queryFormat.unit) ?? 0) : 0;
-
-            // Each series is stored as a separate dataset source.
-            // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
-            timeSeriesMapping.push(
-              getTimeSeries(
-                seriesId,
-                datasetIndex,
-                formattedSeriesName,
-                visual,
-                timeScale,
-                seriesColor,
-                querySettings,
-                yAxisIndex,
-              ),
-            );
-
-            // Store the format for this series for tooltip formatting
-            if (queryFormat) {
-              seriesFormatMap.set(seriesId, queryFormat);
-
-              // Track max value for this format unit (used for dynamic Y axis offset calculation)
-              const unitKey = queryFormat.unit;
-              if (unitKey) {
-                const seriesMax = Math.max(...timeSeries.values.map((v) => Math.abs(v[1] ?? 0)));
-                const currentMax = maxValuesByFormat.get(unitKey) ?? 0;
-                if (seriesMax > currentMax) {
-                  maxValuesByFormat.set(unitKey, seriesMax);
-                }
+            // Track max value for this format unit (used for dynamic Y axis offset calculation)
+            const unitKey = queryFormat.unit;
+            if (unitKey) {
+              const currentMax = maxValuesByFormat.get(unitKey) ?? 0;
+              if (maxValue > currentMax) {
+                maxValuesByFormat.set(unitKey, maxValue);
               }
             }
-
-            // When negativeY is set on this query, negate the rendered values so the
-            // series renders below the X axis. The original (positive) values are
-            // preserved in `timeSeries.values` (used for legend calculations) and in
-            // `queryResults` (used for CSV export).
-            const baseValues: TimeSeriesValueTuple[] = getTimeSeriesValues(timeSeries, timeScale);
-            const renderedValues: TimeSeriesValueTuple[] = querySettings?.negativeY
-              ? baseValues.map((tuple: TimeSeriesValueTuple): TimeSeriesValueTuple => {
-                  const [t, v] = tuple;
-                  return [t, v === null ? null : -v];
-                })
-              : baseValues;
-
-            timeChartData.push({
-              name: formattedSeriesName,
-              values: renderedValues,
-            });
-
-            if (timeSeries.labels) {
-              seriesByLabels.set(labelsKey(timeSeries.labels), {
-                seriesId,
-                seriesName: formattedSeriesName,
-                color: seriesColor,
-                seriesLabels: timeSeries.labels,
-                yAxisIndex,
-                // Exemplar markers must render on the same side of the X axis as their
-                // series, so they inherit the negativeY visual transform of the query.
-                negativeY: querySettings?.negativeY,
-                exemplars: [],
-              });
-            }
           }
 
-          if (legend && legendItems) {
-            legendItems.push({
-              id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
-              label: formattedSeriesName,
-              color: seriesColor,
-              data: legendCalculations,
-            });
-          }
-
-          // Used for repeating colors in Categorical palette
-          seriesIndex++;
+          timeChartData.push({
+            name: formattedSeriesName,
+            values,
+          });
         }
-      }
 
-      const queryExemplars = result?.data.exemplars;
-      if (queryExemplars) {
-        for (const seriesExemplars of queryExemplars) {
-          if (seriesExemplars.exemplars.length === 0) continue;
-          const matched = seriesByLabels.get(labelsKey(seriesExemplars.seriesLabels));
-          if (matched === undefined) continue;
-          chartExemplars.push({ ...matched, exemplars: seriesExemplars.exemplars });
+        if (legend && legendItems) {
+          legendItems.push({
+            id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
+            label: formattedSeriesName,
+            color: seriesColor,
+            data: calculations,
+          });
         }
+
+        // Used for repeating colors in Categorical palette
+        seriesIndex += 1;
       }
     }
 
@@ -411,25 +414,22 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
       timeChartData,
       timeSeriesMapping,
       legendItems,
-      chartExemplars,
       seriesFormatMap,
       maxValuesByFormat,
     };
   }, [
-    queryResults,
+    preparedQueries,
+    timeScale,
     thresholds,
     selectedLegendItems,
     legend,
     visual,
-    querySettingsList,
     yAxis?.max,
     yAxis?.min,
     categoricalPalette,
-    chartId,
     chartsTheme.thresholds,
     muiTheme.palette.primary.main,
     formatToYAxisIndex,
-    seriesFormatMap,
   ]);
 
   // Create multiple Y axes if there are additional formats
@@ -502,14 +502,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
         };
   }, [echartsYAxis.show, yAxis, additionalFormats.length]);
 
+  const handleDataZoom = useCallback(
+    (event: ZoomEventData): void => {
+      setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
+    },
+    [setTimeRange],
+  );
+
   if (adjustedContentDimensions === undefined) {
     return null;
   }
-
-  const handleDataZoom = (event: ZoomEventData): void => {
-    // TODO: add ECharts transition animation on zoom
-    setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
-  };
 
   // Used to opt in to ECharts trigger item which show subgroup data accurately.
   // Derived from the actual series mapping rather than `visual.stack` alone so that
@@ -589,3 +591,20 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     </Box>
   );
 }
+
+// PanelContent recreates the queryResults array and its wrappers on dashboard
+// hover/focus updates. Compare the underlying references in query order so those
+// updates do not invalidate data preparation or scan the samples and exemplars.
+export const TimeSeriesChartPanel = memo(
+  TimeSeriesChartPanelComponent,
+  (previous, next): boolean =>
+    previous.spec === next.spec &&
+    previous.definition === next.definition &&
+    previous.contentDimensions?.width === next.contentDimensions?.width &&
+    previous.contentDimensions?.height === next.contentDimensions?.height &&
+    previous.queryResults.length === next.queryResults.length &&
+    previous.queryResults.every(
+      (query, index) =>
+        query.data === next.queryResults[index]?.data && query.definition === next.queryResults[index]?.definition,
+    ),
+);

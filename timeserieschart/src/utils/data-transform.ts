@@ -97,14 +97,17 @@ export function getTimeSeries(
   paletteColor: string,
   querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number; stack?: boolean },
   yAxisIndex?: number,
+  visibleSeriesCount = 1,
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
   const shouldStack = querySettings?.stack !== undefined ? querySettings.stack : visual.stack === 'all';
+  const areaOpacity = querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY;
 
-  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  // Show automatic point markers only on short, sparse charts. Dense charts
+  // otherwise create a symbol for every sample across every visible series.
   const minuteMs = 60000;
-  let showPoints = timeScale.rangeMs <= minuteMs * 15;
+  let showPoints = timeScale.rangeMs <= minuteMs * 15 && visibleSeriesCount <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.showPoints === 'always') {
     showPoints = true;
@@ -144,13 +147,12 @@ export function getTimeSeries(
       width: lineWidth,
       type: (querySettings?.lineStyle ?? visual.lineStyle) as LineStyleType,
     },
-    areaStyle: {
-      opacity: querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
-    },
+    // ECharts builds an area polygon whenever areaStyle is set, including at opacity 0.
+    ...(areaOpacity > 0 ? { areaStyle: { opacity: areaOpacity } } : {}),
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      disabled: visual.areaOpacity !== undefined && visual.areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
+      disabled: areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1,
         opacity: 1,
