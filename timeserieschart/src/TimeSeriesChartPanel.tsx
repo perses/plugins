@@ -489,7 +489,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
         containLabel: false,
       };
     }
-    // Right axes with offset>0 sit outside containLabel; ~52px per extra format (unit ticks).
     const rightPad = additionalFormats.length > 0 ? additionalFormats.length * 52 + 12 : 20;
     return {
       left: yAxis && yAxis.label ? 30 : 20,
