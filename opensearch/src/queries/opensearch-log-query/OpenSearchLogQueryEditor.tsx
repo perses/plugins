@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Checkbox, FormControlLabel, InputLabel, Link, Stack, TextField, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, InputLabel, Link, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import { createModEnterHandler } from '@perses-dev/dashboards';
 import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
@@ -20,11 +20,31 @@ import type { ReactElement } from 'react';
 
 import type { OpenSearchDatasourceSelector } from '../../model';
 import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND } from '../../model';
-import { DATASOURCE_KIND, DEFAULT_DATASOURCE, PPL_DOCS_URL, PPL_QUERY_EXAMPLES } from '../constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE, QUERY_LANGUAGES } from '../constants';
 import { useQueryState } from '../query-editor-model';
-import type { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
+import type { OpenSearchLogQuerySpec, OpenSearchQueryLanguage } from './opensearch-log-query-types';
+import { OPENSEARCH_QUERY_LANGUAGES, requiresIndex, resolveQueryLanguage } from './opensearch-log-query-types';
 
 type OpenSearchQueryEditorProps = OptionsEditorProps<OpenSearchLogQuerySpec>;
+
+// Constant across renders — derived once from the language registry so a fifth
+// `_search`-based language only needs a `QUERY_LANGUAGES` entry, not an editor edit.
+const REQUIRED_INDEX_MESSAGE = `Required for ${OPENSEARCH_QUERY_LANGUAGES.filter(requiresIndex)
+  .map((l) => QUERY_LANGUAGES[l].label)
+  .join(' and ')}`;
+
+/**
+ * Parses the Limit field's raw text into a spec-safe value: `undefined` for anything empty,
+ * non-numeric, or not a positive integer, since the CUE schema constrains `limit` to `int & >0`.
+ * Exported (rather than inlined in the change handler) so it can be unit tested directly —
+ * a native `<input type="number">` sanitizes invalid strings like `"abc"` or `" 5"` to `""`
+ * before a change event ever reaches React, so those inputs can't be exercised through the
+ * rendered field itself.
+ */
+export function parseLimitInput(raw: string): number | undefined {
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
 
 const examplesSx = {
   fontSize: '11px',
@@ -47,6 +67,30 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
   ) as OpenSearchDatasourceSelector;
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+
+  const language = resolveQueryLanguage(value);
+  const meta = QUERY_LANGUAGES[language];
+  const indexMissing = requiresIndex(language) && !value.index;
+
+  const handleLanguageChange = (next: OpenSearchQueryLanguage): void => {
+    onChange(
+      produce(value, (draft) => {
+        // Carry the live local query text (useQueryState commits on blur) so a switch can never
+        // discard an uncommitted edit, regardless of event ordering or when the parent applies
+        // onChange. On the normal path this is a no-op: blur has already committed the same value.
+        draft.query = query;
+        draft.queryLanguage = next;
+      })
+    );
+  };
+
+  const handleLimitChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.limit = parseLimitInput(e.target.value);
+      })
+    );
+  };
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
     if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
@@ -101,6 +145,29 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
   return (
     <Stack spacing={1.5} paddingBottom={1}>
       <div>
+        <InputLabel
+          id="opensearch-query-language-label"
+          sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}
+        >
+          Query language
+        </InputLabel>
+        <Select
+          fullWidth
+          size="small"
+          labelId="opensearch-query-language-label"
+          inputProps={{ 'aria-label': 'Query language' }}
+          value={language}
+          onChange={(e) => handleLanguageChange(e.target.value as OpenSearchQueryLanguage)}
+        >
+          {OPENSEARCH_QUERY_LANGUAGES.map((key) => (
+            <MenuItem key={key} value={key}>
+              {QUERY_LANGUAGES[key].label}
+            </MenuItem>
+          ))}
+        </Select>
+      </div>
+
+      <div>
         <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind={DATASOURCE_KIND}
@@ -119,7 +186,8 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
           value={value.index ?? ''}
           onChange={handleIndexChange}
           placeholder="e.g. logs-*"
-          helperText="Ignored when the PPL query starts with source=."
+          error={indexMissing}
+          helperText={indexMissing ? REQUIRED_INDEX_MESSAGE : meta.indexHelperText}
         />
       </div>
 
@@ -156,8 +224,26 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
         label="Disable automatic time filtering"
       />
 
+      {/* `requiresIndex` is true for exactly the `_search`-based languages (lucene/dsl), which
+          is also where a result-count limit applies, so it doubles as the gate for this field. */}
+      {requiresIndex(language) && (
+        <div>
+          <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Limit (optional)</InputLabel>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            inputProps={{ min: 1, 'aria-label': 'Limit (optional)' }}
+            value={value.limit ?? ''}
+            onChange={handleLimitChange}
+            placeholder="500"
+            helperText="Maximum number of log documents to fetch."
+          />
+        </div>
+      )}
+
       <div>
-        <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>PPL Query</InputLabel>
+        <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>{`${meta.label} Query`}</InputLabel>
         <TextField
           fullWidth
           multiline
@@ -167,15 +253,15 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
           onChange={(e) => handleQueryChange(e.target.value)}
           onBlur={handleQueryBlur}
           onKeyDown={createModEnterHandler(handleQueryExecute)}
-          placeholder='e.g. source=logs-* | where level="error"'
+          placeholder={meta.placeholder}
           inputProps={{ style: { fontFamily: 'monospace' } }}
         />
         <Typography variant="caption" sx={{ display: 'block', marginTop: '4px', color: 'text.secondary' }}>
           Uses OpenSearch{' '}
-          <Link href={PPL_DOCS_URL} target="_blank" rel="noopener noreferrer">
-            PPL
+          <Link href={meta.docsUrl} target="_blank" rel="noopener noreferrer">
+            {meta.docsLabel}
           </Link>
-          . Requires the PPL plugin enabled on the OpenSearch cluster.
+          . {meta.usageNote}
         </Typography>
       </div>
 
@@ -186,7 +272,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
         >
           Query Examples
         </Box>
-        <Box sx={examplesSx}>{PPL_QUERY_EXAMPLES}</Box>
+        <Box sx={examplesSx}>{meta.examples}</Box>
       </details>
     </Stack>
   );

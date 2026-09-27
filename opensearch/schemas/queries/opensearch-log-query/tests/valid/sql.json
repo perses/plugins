@@ -1,0 +1,4 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": { "queryLanguage": "sql", "query": "SELECT @timestamp, message FROM `logs-2025`" }
+}

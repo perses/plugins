@@ -14,6 +14,8 @@
 package log
 
 import (
+	"fmt"
+
 	opensearchDatasource "github.com/perses/plugins/opensearch/sdk/go/datasource"
 )
 
@@ -55,6 +57,29 @@ func MessageField(field string) Option {
 func DisableTimeFilter(disable bool) Option {
 	return func(builder *Builder) error {
 		builder.DisableTimeFilter = disable
+		return nil
+	}
+}
+
+// QueryLanguage sets the language the query is written in: "ppl" (the default when
+// unset), "sql", "lucene", or "dsl". "lucene" and "dsl" also require Index.
+func QueryLanguage(lang string) Option {
+	return func(builder *Builder) error {
+		builder.QueryLanguage = lang
+		return nil
+	}
+}
+
+// Limit caps the number of log documents fetched. Applies to the "lucene" and "dsl"
+// languages, which map it to the _search request's `size`. Must be greater than zero:
+// the CUE schema constrains `limit` to `int & >0`, and because the field is a bare int
+// with omitempty, a zero would be indistinguishable from an omitted value.
+func Limit(n int) Option {
+	return func(builder *Builder) error {
+		if n <= 0 {
+			return fmt.Errorf("limit must be greater than 0, got %d", n)
+		}
+		builder.Limit = n
 		return nil
 	}
 }

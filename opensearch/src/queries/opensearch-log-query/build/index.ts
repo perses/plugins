@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './get-opensearch-log-data';
-export * from './OpenSearchLogQuery';
-export * from './OpenSearchLogQueryEditor';
-export * from './opensearch-log-query-types';
-export * from './build';
-export * from './convert';
+export * from './ppl';
+export * from './sql';
+export * from './search';
+export * from './lucene';
+export * from './dsl';

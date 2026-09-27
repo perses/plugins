@@ -21,7 +21,7 @@ import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 export const OpenSearchLogQuery: LogQueryPlugin<OpenSearchLogQuerySpec> = {
   getLogData: getOpenSearchLogData,
   OptionsEditorComponent: OpenSearchLogQueryEditor,
-  createInitialOptions: () => ({ query: '' }),
+  createInitialOptions: () => ({ query: '', queryLanguage: 'ppl' }),
   dependsOn: (spec) => {
     const queryVariables = parseVariables(spec.query);
     const indexVariables = spec.index ? parseVariables(spec.index) : [];
