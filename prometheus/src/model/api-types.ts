@@ -101,6 +101,27 @@ export interface RangeQueryRequestParameters {
 
 export type RangeQueryResponse = ApiResponse<MatrixData>;
 
+/** One query inside a range batch (shared start/end/step). */
+export interface RangeQueryBatchItem {
+  id: string;
+  query: string;
+}
+
+export interface RangeQueryBatchRequestParameters {
+  start: UnixTimestampSeconds;
+  end: UnixTimestampSeconds;
+  step: DurationSeconds;
+  timeout?: DurationString;
+  queries: RangeQueryBatchItem[];
+}
+
+/** Per-id results; failed queries use ErrorResponse shape without aborting the batch. */
+export interface RangeQueryBatchData {
+  results: Record<string, RangeQueryResponse>;
+}
+
+export type RangeQueryBatchResponse = ApiResponse<RangeQueryBatchData>;
+
 // Ref https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars
 export interface QueryExemplarsRequestParameters {
   query: string;

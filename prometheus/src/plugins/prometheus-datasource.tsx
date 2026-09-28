@@ -27,6 +27,7 @@ import {
   parseQuery,
   queryExemplars,
   rangeQuery,
+  rangeQueryBatch,
   series,
 } from '../model';
 import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
@@ -70,6 +71,7 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     healthCheck: healthCheck({ datasourceUrl, headers: specHeaders, queryParams }),
     instantQuery: wrapClientMethod(instantQuery, datasourceUrl, specHeaders, queryParams),
     rangeQuery: wrapClientMethod(rangeQuery, datasourceUrl, specHeaders, queryParams),
+    rangeQueryBatch: wrapClientMethod(rangeQueryBatch, datasourceUrl, specHeaders, queryParams),
     queryExemplars: wrapClientMethod(queryExemplars, datasourceUrl, specHeaders, queryParams),
     labelNames: wrapClientMethod(labelNames, datasourceUrl, specHeaders, queryParams),
     labelValues: wrapClientMethod(labelValues, datasourceUrl, specHeaders, queryParams),

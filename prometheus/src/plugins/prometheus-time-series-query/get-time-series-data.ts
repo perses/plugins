@@ -54,7 +54,6 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   abortSignal,
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
-    // Do not make a request to the backend, instead return an empty TimeSeriesData
     return { series: [] };
   }
 
@@ -188,6 +187,114 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   };
 
   return chartData;
+};
+
+type TSQContext = Parameters<TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData']>[1];
+
+export const getTimeSeriesDataBatch = async (
+  specs: PrometheusTimeSeriesQuerySpec[],
+  context: TSQContext,
+  abortSignal?: AbortSignal,
+): Promise<TimeSeriesData[]> => {
+  if (specs.length === 0) {
+    return [];
+  }
+  if (specs.length === 1) {
+    return [await getTimeSeriesData(specs[0]!, context, abortSignal)];
+  }
+
+  // Mixed instant/range or empty queries → safe fan-out.
+  const modes = specs.map((s) => s.instant ?? context.mode === 'instant');
+  if (modes.some((m) => m) || modes.some((m, i) => m !== modes[0])) {
+    return Promise.all(specs.map((spec) => getTimeSeriesData(spec, context, abortSignal)));
+  }
+  if (specs.some((s) => !s.query)) {
+    return Promise.all(specs.map((spec) => getTimeSeriesData(spec, context, abortSignal)));
+  }
+
+  // Shared datasource + aligned window for the whole panel batch.
+  const listDatasourceSelectItems = await context.datasourceStore.listDatasourceSelectItems(PROM_DATASOURCE_KIND);
+  const selectedDatasource =
+    datasourceSelectValueToSelector(
+      specs[0]!.datasource ?? DEFAULT_PROM,
+      context.variableState,
+      listDatasourceSelectItems,
+    ) ?? DEFAULT_PROM;
+
+  const datasource = (await context.datasourceStore.getDatasource(
+    selectedDatasource,
+  )) as DatasourceSpec<PrometheusDatasourceSpec>;
+  const interpolatedOptions = interpolateDatasourceProxyParams(datasource, context.variableState);
+  const datasourceScrapeInterval = Math.trunc(
+    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000,
+  );
+
+  const minSteps = specs.map(
+    (s) =>
+      getDurationStringSeconds(replaceVariables((s.minStep as string) ?? '', context.variableState) as DurationString) ??
+      datasourceScrapeInterval,
+  );
+  const minStep = Math.max(...minSteps, datasourceScrapeInterval);
+  const timeRange = getPrometheusTimeRange(context.timeRange);
+  let step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs);
+  let { start, end } = timeRange;
+  const utcOffsetSec = new Date().getTimezoneOffset() * 60;
+  const alignedEnd = Math.floor((end + utcOffsetSec) / step) * step - utcOffsetSec;
+  const alignedStart = Math.floor((start + utcOffsetSec) / step) * step - utcOffsetSec;
+  start = alignedStart;
+  end = alignedEnd === alignedStart ? alignedStart + step : alignedEnd;
+
+  const intervalMs = step * 1000;
+  const minStepMs = minStep * 1000;
+  const prepared = specs.map((spec, i) => {
+    let query = replacePromBuiltinVariables(spec.query, minStepMs, intervalMs);
+    query = replaceVariables(query, context.variableState);
+    let seriesNameFormat = spec.seriesNameFormat;
+    if (seriesNameFormat) {
+      seriesNameFormat = replaceVariables(seriesNameFormat, context.variableState);
+    }
+    return { id: String(i), query, seriesNameFormat };
+  });
+
+  const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(selectedDatasource);
+  const batch = await client.rangeQueryBatch(
+    {
+      start,
+      end,
+      step,
+      queries: prepared.map((p) => ({ id: p.id, query: p.query })),
+    },
+    { ...interpolatedOptions, signal: abortSignal },
+  );
+
+  return prepared.map((p) => {
+    const response = batch.data?.results?.[p.id];
+    const notices: Notice[] = [];
+    if (!response || response.status === 'error') {
+      notices.push({
+        type: 'error',
+        message: (response && 'error' in response && response.error) || 'batch query failed',
+      });
+      return {
+        timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
+        stepMs: step * 1000,
+        series: [],
+        metadata: { notices, executedQueryString: p.query },
+      };
+    }
+    if (response.status === 'success') {
+      const warnings = response.warnings ?? [];
+      if (warnings[0]) {
+        notices.push({ type: 'warning', message: warnings[0] });
+      }
+    }
+    return {
+      timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
+      stepMs: step * 1000,
+      series: buildTimeSeries(p.query, response.data, p.seriesNameFormat),
+      metadata: { notices, executedQueryString: p.query },
+    };
+  });
 };
 
 /**

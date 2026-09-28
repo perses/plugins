@@ -29,6 +29,8 @@ import type {
   ParseQueryResponse,
   QueryExemplarsRequestParameters,
   QueryExemplarsResponse,
+  RangeQueryBatchRequestParameters,
+  RangeQueryBatchResponse,
   RangeQueryRequestParameters,
   RangeQueryResponse,
   SeriesRequestParameters,
@@ -51,6 +53,10 @@ export interface PrometheusClient extends DatasourceClient {
   options: PrometheusClientOptions;
   instantQuery(params: InstantQueryRequestParameters, options?: ClientRequestOptions): Promise<InstantQueryResponse>;
   rangeQuery(params: RangeQueryRequestParameters, options?: ClientRequestOptions): Promise<RangeQueryResponse>;
+  rangeQueryBatch(
+    params: RangeQueryBatchRequestParameters,
+    options?: ClientRequestOptions,
+  ): Promise<RangeQueryBatchResponse>;
   queryExemplars(
     params: QueryExemplarsRequestParameters,
     options?: ClientRequestOptions,
@@ -138,6 +144,59 @@ export function rangeQuery(
   queryOptions: QueryOptions,
 ): Promise<RangeQueryResponse> {
   return fetchWithPost<RangeQueryRequestParameters, RangeQueryResponse>('/api/v1/query_range', params, queryOptions);
+}
+
+/**
+ * Batch range queries. Prefer a single HTTP call when the proxy exposes
+ * `/api/v1/query_range_batch`; otherwise fall back to parallel `rangeQuery`.
+ */
+export async function rangeQueryBatch(
+  params: RangeQueryBatchRequestParameters,
+  queryOptions: QueryOptions,
+): Promise<RangeQueryBatchResponse> {
+  const { queries, start, end, step, timeout } = params;
+  if (queries.length === 0) {
+    return { status: 'success', data: { results: {} } };
+  }
+  if (queries.length === 1 && queries[0]) {
+    const single = await rangeQuery(
+      { query: queries[0].query, start, end, step, timeout },
+      queryOptions,
+    );
+    return { status: 'success', data: { results: { [queries[0].id]: single } } };
+  }
+
+  try {
+    const batched = await fetchWithPostJson<RangeQueryBatchRequestParameters, RangeQueryBatchResponse>(
+      '/api/v1/query_range_batch',
+      params,
+      queryOptions,
+    );
+    if (batched && (batched.status === 'success' || batched.status === 'error')) {
+      return batched;
+    }
+  } catch {
+    // Endpoint missing or proxy error — fall through to fan-out.
+  }
+
+  const results: Record<string, RangeQueryResponse> = {};
+  await Promise.all(
+    queries.map(async (item) => {
+      try {
+        results[item.id] = await rangeQuery(
+          { query: item.query, start, end, step, timeout },
+          queryOptions,
+        );
+      } catch (err) {
+        results[item.id] = {
+          status: 'error',
+          errorType: 'batch_fanout',
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    }),
+  );
+  return { status: 'success', data: { results } };
 }
 
 /**
@@ -243,6 +302,20 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
     body: createSearchParams(params),
   };
   return fetchJson<TResponse>(url, init);
+}
+
+function fetchWithPostJson<T, TResponse>(apiURI: string, body: T, queryOptions: QueryOptions): Promise<TResponse> {
+  const { datasourceUrl, headers, signal, queryParams } = queryOptions;
+  const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams)}`;
+  return fetchJson<TResponse>(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+    signal,
+    body: JSON.stringify(body),
+  });
 }
 
 // Request parameter values we know how to serialize

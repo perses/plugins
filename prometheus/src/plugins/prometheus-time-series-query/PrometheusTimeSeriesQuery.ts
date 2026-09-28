@@ -14,7 +14,7 @@
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { isVariableDatasource, parseVariables } from '@perses-dev/plugin-system';
 
-import { getTimeSeriesData } from './get-time-series-data';
+import { getTimeSeriesData, getTimeSeriesDataBatch } from './get-time-series-data';
 import { PrometheusTimeSeriesQueryEditor } from './PrometheusTimeSeriesQueryEditor';
 import type { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
@@ -23,6 +23,8 @@ import type { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
  */
 export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec> = {
   getTimeSeriesData,
+  // Optional batch API (plugin-system ≥ batch branch); cast until shared is released.
+  ...({ getTimeSeriesDataBatch } as object),
   OptionsEditorComponent: PrometheusTimeSeriesQueryEditor,
   createInitialOptions: () => ({
     query: '',
