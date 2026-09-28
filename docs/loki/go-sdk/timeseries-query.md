@@ -3,10 +3,10 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/loki/sdk/go/query/time-series"
 
-var options []query.Option
-query.TimeSeriesQuery(`rate({job="nginx"}[5m])`, options...)
+var options []timeseries.Option
+timeseries.LokiTimeSeriesQuery(`rate({job="nginx"}[5m])`, options...)
 ```
 
 Need to provide the LogQL expression and a list of options.
@@ -20,9 +20,9 @@ Need to provide the LogQL expression and a list of options.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/loki/sdk/go/query/time-series"
 
-query.Query(`sum(rate({job="nginx"}[5m])) by (instance)`)
+timeseries.Query(`sum(rate({job="nginx"}[5m])) by (instance)`)
 ```
 
 Define the LogQL query expression for time series data.
@@ -30,22 +30,12 @@ Define the LogQL query expression for time series data.
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/loki/sdk/go/query/time-series"
 
-query.Datasource("MyLokiDatasource")
+timeseries.Datasource("MyLokiDatasource")
 ```
 
 Define the datasource the query will use.
-
-#### Format
-
-```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
-
-query.Format("time_series")
-```
-
-Define the output format for the query results.
 
 ## Example
 
@@ -56,8 +46,8 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses-plugins/loki/sdk/go/v1/query"
-	timeseries "github.com/perses/perses-plugins/timeserieschart/sdk/go"
+	lokiquery "github.com/perses/plugins/loki/sdk/go/query/time-series"
+	timeseries "github.com/perses/plugins/timeserieschart/sdk/go"
 )
 
 func main() {
@@ -66,7 +56,7 @@ func main() {
 			panelgroup.AddPanel("Request Rate",
 				timeseries.Chart(),
 				panel.AddQuery(
-					query.TimeSeriesQuery(`rate({job="nginx"}[5m])`),
+					lokiquery.LokiTimeSeriesQuery(`rate({job="nginx"}[5m])`),
 				),
 			),
 		),

@@ -1,0 +1,9 @@
+{
+  "kind": "PieChart",
+  "spec": {
+    "calculation": "last-number",
+    "radius": 50,
+    "showLabels": true,
+    "colorPalette": ["#3366cc", "#dc3912"]
+  }
+}

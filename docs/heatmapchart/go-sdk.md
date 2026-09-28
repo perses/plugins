@@ -63,6 +63,42 @@ heatmap.ShowVisualMap(false)
 
 Control whether to show the visual map (color legend) for the heatmap.
 
+### Min
+
+```golang
+package main
+
+import heatmap "github.com/perses/plugins/heatmapchart/sdk/go"
+
+heatmap.Min(0.0)
+```
+
+Set the minimum value for the heatmap range.
+
+### Max
+
+```golang
+package main
+
+import heatmap "github.com/perses/plugins/heatmapchart/sdk/go"
+
+heatmap.Max(100.0)
+```
+
+Set the maximum value for the heatmap range.
+
+### WithLogBase
+
+```golang
+package main
+
+import heatmap "github.com/perses/plugins/heatmapchart/sdk/go"
+
+heatmap.WithLogBase(2)
+```
+
+Set the logarithmic base used by the heatmap.
+
 ## Example
 
 ```golang

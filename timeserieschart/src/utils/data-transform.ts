@@ -20,9 +20,9 @@ import type {
 } from '@perses-dev/components';
 import { OPTIMIZED_MODE_SERIES_LIMIT, getCommonTimeScale } from '@perses-dev/components';
 import type { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
-import type { TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+import type { Exemplar, Labels, TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
 import type { YAXisComponentOption } from 'echarts';
-import type { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
+import type { LineSeriesOption, BarSeriesOption, ScatterSeriesOption } from 'echarts/charts';
 
 import type {
   TimeSeriesChartVisualOptions,
@@ -51,6 +51,30 @@ export const HIDE_DATAPOINTS_LIMIT = 70;
 
 export const BLUR_FADEOUT_OPACITY = 0.5;
 
+export const EXEMPLAR_SERIES_ID_PREFIX = 'exemplar-';
+
+export const EXEMPLAR_SYMBOL_SIZE = 14;
+
+/**
+ * The exemplars of one series, converted to a chart-friendly shape with the
+ * rendering attributes (color, y axis) of the matching time series.
+ */
+export interface ExemplarChartData {
+  seriesId: string;
+  seriesName: string;
+  color: string;
+  seriesLabels?: Labels;
+  yAxisIndex?: number;
+  /**
+   * When the matching series is rendered with `querySettings.negativeY`, its values are
+   * visually negated so it renders below the X axis. The same transform is applied to
+   * the exemplar markers' plotted Y values so they stay next to their series. The
+   * original (positive) values remain on each `exemplar` for metadata display.
+   */
+  negativeY?: boolean;
+  exemplars: Exemplar[];
+}
+
 /**
  * Given a list of running queries, calculates a common time scale for use on
  * the x axis (i.e. start/end dates and a step that is divisible into all of
@@ -73,14 +97,17 @@ export function getTimeSeries(
   paletteColor: string,
   querySettings?: { lineStyle?: LineStyleType; areaOpacity?: number; stack?: boolean },
   yAxisIndex?: number,
+  visibleSeriesCount = 1,
 ): TimeSeriesOption {
   const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
   const shouldStack = querySettings?.stack !== undefined ? querySettings.stack : visual.stack === 'all';
+  const areaOpacity = querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY;
 
-  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  // Show automatic point markers only on short, sparse charts. Dense charts
+  // otherwise create a symbol for every sample across every visible series.
   const minuteMs = 60000;
-  let showPoints = timeScale.rangeMs <= minuteMs * 15;
+  let showPoints = timeScale.rangeMs <= minuteMs * 15 && visibleSeriesCount <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.showPoints === 'always') {
     showPoints = true;
@@ -120,13 +147,12 @@ export function getTimeSeries(
       width: lineWidth,
       type: (querySettings?.lineStyle ?? visual.lineStyle) as LineStyleType,
     },
-    areaStyle: {
-      opacity: querySettings?.areaOpacity ?? visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
-    },
+    // ECharts builds an area polygon whenever areaStyle is set, including at opacity 0.
+    ...(areaOpacity > 0 ? { areaStyle: { opacity: areaOpacity } } : {}),
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      disabled: visual.areaOpacity !== undefined && visual.areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
+      disabled: areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1,
         opacity: 1,
@@ -142,6 +168,32 @@ export function getTimeSeries(
     },
   };
   return series;
+}
+
+/**
+ * Gets an ECharts scatter series rendering exemplar markers for a single series.
+ * Each data item embeds its exemplar (and series labels) so the metadata dialog
+ * can be populated when a marker is clicked.
+ */
+export function getExemplarSeries(data: ExemplarChartData): ScatterSeriesOption {
+  return {
+    type: 'scatter',
+    id: `${EXEMPLAR_SERIES_ID_PREFIX}${data.seriesId}`,
+    name: data.seriesName,
+    color: data.color,
+    yAxisIndex: data.yAxisIndex,
+    symbol: 'diamond',
+    symbolSize: EXEMPLAR_SYMBOL_SIZE,
+    z: 10,
+    cursor: 'pointer',
+    data: data.exemplars.map((exemplar) => ({
+      // The plotted Y value is negated when negativeY is enabled for the matching series,
+      // while `exemplar.value` keeps the original value for the metadata tooltip.
+      value: [exemplar.timestamp, data.negativeY ? -exemplar.value : exemplar.value],
+      exemplar,
+      seriesLabels: data.seriesLabels,
+    })),
+  };
 }
 
 /**

@@ -3,26 +3,26 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+import fieldvalues "github.com/perses/plugins/victorialogs/sdk/go/variable/field-values"
 
-var options []variable.Option
-variable.FieldValues("job", options...)
+var options []fieldvalues.Option
+fieldvalues.VictoriaLogsFieldValues("job", options...)
 ```
 
 Need to provide the field name and a list of options.
 
 ## Default options
 
-- [FieldName()](#fieldname): with the field name provided in the constructor.
+- [Field()](#field): with the field name provided in the constructor.
 
 ## Available options
 
-#### FieldName
+#### Field
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+import fieldvalues "github.com/perses/plugins/victorialogs/sdk/go/variable/field-values"
 
-variable.FieldName("service")
+fieldvalues.Field("service")
 ```
 
 Define the field name to extract values from.
@@ -30,9 +30,9 @@ Define the field name to extract values from.
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+import fieldvalues "github.com/perses/plugins/victorialogs/sdk/go/variable/field-values"
 
-variable.Datasource("MyVictoriaLogsDatasource")
+fieldvalues.Datasource("MyVictoriaLogsDatasource")
 ```
 
 Define the datasource the variable will use.
@@ -40,9 +40,9 @@ Define the datasource the variable will use.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+import fieldvalues "github.com/perses/plugins/victorialogs/sdk/go/variable/field-values"
 
-variable.Query(`_stream:{environment="production"}`)
+fieldvalues.Query(`_stream:{environment="production"}`)
 ```
 
 Define an optional LogsQL query to filter the results.
@@ -54,12 +54,12 @@ package main
 
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
-	"github.com/perses/perses-plugins/victorialogs/sdk/go/v1/variable"
+	fieldvalues "github.com/perses/plugins/victorialogs/sdk/go/variable/field-values"
 )
 
 func main() {
 	dashboard.New("VictoriaLogs Dashboard",
-		dashboard.AddVariable("job", variable.FieldValues("job")),
+		dashboard.AddVariable("job", fieldvalues.VictoriaLogsFieldValues("job")),
 	)
 }
 ```

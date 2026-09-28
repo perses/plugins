@@ -3,10 +3,10 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
+import log "github.com/perses/plugins/loki/sdk/go/query/log"
 
-var options []query.Option
-query.LogQuery(`{job="nginx"} |= "error"`, options...)
+var options []log.Option
+log.LokiLogQuery(`{job="nginx"} |= "error"`, options...)
 ```
 
 Need to provide the LogQL expression and a list of options.
@@ -20,9 +20,9 @@ Need to provide the LogQL expression and a list of options.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
+import log "github.com/perses/plugins/loki/sdk/go/query/log"
 
-query.Query(`{job="nginx", level="error"} |~ "database|connection"`)
+log.Query(`{job="nginx", level="error"} |~ "database|connection"`)
 ```
 
 Define the LogQL query expression for log data.
@@ -30,22 +30,24 @@ Define the LogQL query expression for log data.
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
+import log "github.com/perses/plugins/loki/sdk/go/query/log"
 
-query.Datasource("MyLokiDatasource")
+log.Datasource("MyLokiDatasource")
 ```
 
 Define the datasource the query will use.
 
-#### Format
+#### Direction
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/query"
+import log "github.com/perses/plugins/loki/sdk/go/query/log"
 
-query.Format("logs")
+log.SetDirection(log.ForwardDirection)
+log.Forward()
+log.Backward()
 ```
 
-Define the output format for the query results.
+Set the log direction. Use `SetDirection` with `ForwardDirection` or `BackwardDirection`, or use the `Forward` and `Backward` helpers.
 
 ## Example
 
@@ -56,17 +58,17 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses-plugins/loki/sdk/go/v1/query"
-	logstable "github.com/perses/perses-plugins/logstable/sdk/go"
+	log "github.com/perses/plugins/loki/sdk/go/query/log"
+	logstable "github.com/perses/plugins/logstable/sdk/go"
 )
 
 func main() {
 	dashboard.New("Loki Logs Dashboard",
 		dashboard.AddPanelGroup("Application Logs",
 			panelgroup.AddPanel("Error Logs",
-				logstable.Panel(),
+				logstable.LogsTable(),
 				panel.AddQuery(
-					query.LogQuery(`{job="nginx"} |= "error"`),
+					log.LokiLogQuery(`{job="nginx"} |= "error"`),
 				),
 			),
 		),

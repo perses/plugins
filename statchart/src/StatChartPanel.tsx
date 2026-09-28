@@ -22,6 +22,7 @@ import type { FC } from 'react';
 import { useMemo } from 'react';
 
 import type { StatChartOptions } from './stat-chart-model';
+import { resolveAutoOrientationColumnsCount } from './stat-chart-model';
 import type { StatChartData } from './StatChartBase';
 import { StatChartBase } from './StatChartBase';
 import { measureTextWidth } from './utils/calculate-font-size';
@@ -31,18 +32,26 @@ import { formatStatChartValue } from './utils/format-stat-chart-value';
 import { getStatChartColor } from './utils/get-color';
 
 const MIN_WIDTH = 100;
+const MIN_TILE_HEIGHT = 60;
 const SPACING = 2;
+const AUTO_TILE_HEIGHT = 72;
+const MAX_VALUE_FONT_SIZE = 96;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 
 export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions, queryResults } = props;
+  const panelWidth = contentDimensions?.width ?? 0;
+  const panelHeight = contentDimensions?.height ?? 0;
 
   const { format, sparkline, valueFontSize, legendFontSize, colorMode } = spec;
   const chartsTheme = useChartsTheme();
   const statChartData = useStatChartData(queryResults, spec, chartsTheme);
 
+  const orientation = spec.orientation ?? 'auto';
   const isMultiSeries = statChartData.length > 1;
+  const isAutoWrapped = orientation === 'auto' && isMultiSeries;
+  const isVerticalLayout = orientation === 'vertical';
 
   // Find the widest value text (by pixel width) to use as alignment reference
   const alignmentText = useMemo(() => {
@@ -88,42 +97,66 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
     shouldShowLegend = false;
   }
 
+  // Keep horizontal tiles equal-sized so long metric names do not create large gaps between values.
+  const spacing = SPACING * (statChartData.length - 1);
+  const chartWidth = Math.max(MIN_WIDTH, (panelWidth - spacing) / Math.max(1, statChartData.length));
+
+  const autoColumnCount = useMemo(() => {
+    if (!isAutoWrapped) return 1;
+    const widthBasedColumnCount = Math.floor((panelWidth + SPACING) / (MIN_WIDTH + SPACING));
+    return resolveAutoOrientationColumnsCount(statChartData.length, widthBasedColumnCount, spec.seriesColumns);
+  }, [panelWidth, isAutoWrapped, statChartData.length, spec.seriesColumns]);
+
+  const autoGridWidth = useMemo(() => {
+    if (!isAutoWrapped) return chartWidth;
+    return Math.max(MIN_WIDTH, Math.floor((panelWidth - (autoColumnCount - 1) * SPACING) / autoColumnCount));
+  }, [autoColumnCount, chartWidth, panelWidth, isAutoWrapped]);
+
+  const autoRowCount = useMemo(() => {
+    if (!isAutoWrapped) return 1;
+    return Math.max(1, Math.ceil(statChartData.length / autoColumnCount));
+  }, [autoColumnCount, isAutoWrapped, statChartData.length]);
+
+  const statTileHeight = useMemo(() => {
+    if (isVerticalLayout) {
+      return Math.max(MIN_TILE_HEIGHT, Math.floor(panelHeight / Math.max(1, statChartData.length)));
+    }
+    if (isAutoWrapped) {
+      return Math.min(AUTO_TILE_HEIGHT, Math.max(MIN_TILE_HEIGHT, Math.floor(panelHeight / autoRowCount)));
+    }
+    return panelHeight;
+  }, [autoRowCount, panelHeight, isAutoWrapped, isVerticalLayout, statChartData.length]);
+
   if (!contentDimensions) return null;
 
-  // Calculates chart width — ensure cells are wide enough to show full series names
-  const spacing = SPACING * (statChartData.length - 1);
-  let chartWidth = (contentDimensions.width - spacing) / statChartData.length;
-  if (isMultiSeries) {
-    const fontFamily = chartsTheme.echartsTheme.textStyle?.fontFamily ?? 'Lato';
-    const seriesNameFontSize = legendFontSize ?? Math.max(14, Math.min((contentDimensions.height * 0.15) / 1.2, 30));
-    const padding = chartsTheme.container.padding.default;
-    let maxTextWidth = MIN_WIDTH;
-    for (const series of statChartData) {
-      const nameWidth = measureTextWidth(series.seriesData?.name ?? '', 400, seriesNameFontSize, fontFamily);
-      const valWidth = measureTextWidth(
-        formatStatChartValue(series.calculatedValue, format),
-        700,
-        seriesNameFontSize * 1.5,
-        fontFamily,
-      );
-      const needed = Math.max(nameWidth, valWidth) + padding * 2;
-      if (needed > maxTextWidth) maxTextWidth = needed;
-    }
-    chartWidth = Math.max(chartWidth, maxTextWidth);
-  }
-
   const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
+  let justifyContent = 'center';
+  if (isAutoWrapped) {
+    justifyContent = 'flex-start';
+  } else if (isMultiSeries) {
+    justifyContent = 'left';
+  }
+  const overflowX = !isVerticalLayout && !isAutoWrapped && isMultiSeries ? 'auto' : 'hidden';
 
   return (
     <Stack
-      height={contentDimensions.height}
-      width={contentDimensions.width}
+      height={panelHeight}
+      width={panelWidth}
       spacing={`${SPACING}px`}
-      direction="row"
-      justifyContent={isMultiSeries ? 'left' : 'center'}
-      alignItems="center"
+      direction={isVerticalLayout ? 'column' : 'row'}
+      flexWrap={isAutoWrapped ? 'wrap' : 'nowrap'}
+      justifyContent={justifyContent}
+      alignItems={isAutoWrapped ? 'flex-start' : 'center'}
+      alignContent={isAutoWrapped ? 'flex-start' : 'center'}
       sx={{
-        overflowX: isMultiSeries ? 'auto' : 'hidden',
+        ...(isAutoWrapped && {
+          display: 'grid',
+          gridTemplateColumns: `repeat(${autoColumnCount}, minmax(0, 1fr))`,
+          gridAutoRows: `${statTileHeight}px`,
+          gap: `${SPACING}px`,
+        }),
+        overflowX,
+        overflowY: isVerticalLayout || isAutoWrapped ? 'auto' : 'hidden',
         '&::-webkit-scrollbar': {
           height: '4px',
         },
@@ -147,12 +180,18 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
       {statChartData.length ? (
         statChartData.map((series, index) => {
           const sparklineConfig = convertSparkline(chartsTheme, series.color, sparkline);
+          let tileWidth = chartWidth;
+          if (isAutoWrapped) {
+            tileWidth = autoGridWidth;
+          } else if (isVerticalLayout) {
+            tileWidth = panelWidth;
+          }
 
           return (
             <StatChartBase
               key={index}
-              width={chartWidth}
-              height={contentDimensions.height}
+              width={tileWidth}
+              height={statTileHeight}
               data={series}
               format={format}
               sparkline={sparklineConfig}
@@ -160,8 +199,9 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               valueFontSize={valueFontSize}
               colorMode={colorMode}
               legendFontSize={legendFontSize}
-              alignmentText={alignmentText}
+              alignmentText={isAutoWrapped || !isVerticalLayout ? undefined : alignmentText}
               alignmentSeriesName={alignmentSeriesName}
+              maxValueFontSize={!isAutoWrapped && !isVerticalLayout ? MAX_VALUE_FONT_SIZE : undefined}
             />
           );
         })

@@ -30,7 +30,15 @@ spec: close({
 	format?:     common.#format
 	sort?:       "asc" | "desc"
 	mode?:       "value" | "percentage"
+
 	showLabels?: bool
-	radius:      number
+
+	// Deprecated: radius and colorPalette moved to visual options, but remain accepted at the top level for persisted dashboards.
+	radius?: number
 	colorPalette?: [...string]
+	visual?: close({
+		innerRadius?: int & >=0 & <=100
+		outerRadius:  int & >=0 & <=100
+		colorPalette?: [...string]
+	})
 })
