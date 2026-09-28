@@ -261,3 +261,40 @@ describe('getTimeSeries stack behavior', () => {
     });
   });
 });
+
+describe('area style', () => {
+  const scale: TimeScale = { startMs: 0, endMs: 60_000, stepMs: 1000, rangeMs: 60_000 };
+
+  it('omits areaStyle when the resolved opacity is 0', () => {
+    const series = getTimeSeries('id', 0, 'name', { areaOpacity: 0 }, scale, '#000000');
+    expect(series).not.toHaveProperty('areaStyle');
+    expect(series).toHaveProperty('emphasis.disabled', false);
+  });
+
+  it('keeps areaStyle when the visual or query opacity is positive', () => {
+    const fromVisual = getTimeSeries('id', 0, 'name', { areaOpacity: 0.3 }, scale, '#000000');
+    const fromQuery = getTimeSeries('id', 0, 'name', { areaOpacity: 0 }, scale, '#000000', { areaOpacity: 0.5 });
+
+    expect(fromVisual).toHaveProperty('areaStyle.opacity', 0.3);
+    expect(fromVisual).toHaveProperty('emphasis.disabled', true);
+    expect(fromQuery).toHaveProperty('areaStyle.opacity', 0.5);
+  });
+
+  it('lets a query opacity of 0 override a positive visual opacity', () => {
+    const series = getTimeSeries('id', 0, 'name', { areaOpacity: 0.3 }, scale, '#000000', { areaOpacity: 0 });
+    expect(series).not.toHaveProperty('areaStyle');
+  });
+});
+
+describe('automatic point markers', () => {
+  const scale: TimeScale = { startMs: 0, endMs: 60_000, stepMs: 1000, rangeMs: 60_000 };
+
+  it.each([
+    [70, 'auto', true],
+    [71, 'auto', false],
+    [1000, 'always', true],
+  ] as const)('renders markers for %i visible series with showPoints=%s: %s', (count, showPoints, expected) => {
+    const series = getTimeSeries('id', 0, 'name', { showPoints }, scale, '#000000', undefined, undefined, count);
+    expect(series).toHaveProperty('showSymbol', expected);
+  });
+});
