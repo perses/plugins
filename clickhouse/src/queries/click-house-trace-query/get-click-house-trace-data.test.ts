@@ -240,6 +240,41 @@ describe('getClickHouseTraceData', () => {
       });
     });
 
+    it('should group spans whose resource attributes differ only in order into one resource', async () => {
+      const { context } = createStubContext([
+        traceSpanRow({
+          SpanId: 'eee19b7ec3c1b174',
+          ResourceAttributes: { 'service.name': 'frontend', 'host.name': 'web-1' },
+        }),
+        traceSpanRow({
+          SpanId: 'b7ad6b7169203331',
+          ResourceAttributes: { 'host.name': 'web-1', 'service.name': 'frontend' },
+        }),
+      ]);
+
+      const result = await getClickHouseTraceData({ query: TRACE_ID }, context);
+
+      expect(result.trace?.resourceSpans).toHaveLength(1);
+      expect(result.trace?.resourceSpans[0]?.scopeSpans[0]?.spans.map((span) => span.spanId)).toEqual([
+        'eee19b7ec3c1b174',
+        'b7ad6b7169203331',
+      ]);
+    });
+
+    it('should convert the timestamps of any date-time type to nanoseconds', async () => {
+      const { context, query } = createStubContext([traceSpanRow({})]);
+
+      await getClickHouseTraceData({ query: TRACE_ID }, context);
+
+      // toUnixTimestamp64Nano only accepts DateTime64, a custom table may store a DateTime
+      expect(executedQuery(query)).toContain(
+        'toString(toUnixTimestamp64Nano(toDateTime64(Timestamp, 9))) AS StartTimeUnixNano',
+      );
+      expect(executedQuery(query)).toContain(
+        'arrayMap(t -> toString(toUnixTimestamp64Nano(toDateTime64(t, 9))), Events.Timestamp) AS EventTimesUnixNano',
+      );
+    });
+
     it('should request the JSON output format explicitly', async () => {
       const { context, query } = createStubContext([traceSpanRow({})]);
 

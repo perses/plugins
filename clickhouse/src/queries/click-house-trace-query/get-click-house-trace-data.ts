@@ -168,7 +168,8 @@ FORMAT JSON`;
 /**
  * Builds the query returning every span of a trace, for a table with the OpenTelemetry Collector ClickHouse exporter
  * schema. Timestamps are converted to nanosecond strings in SQL: DateTime64 values are rendered in the server's
- * timezone, and JSON numbers cannot hold nanoseconds since the epoch.
+ * timezone, and JSON numbers cannot hold nanoseconds since the epoch. They go through toDateTime64(..., 9) first, as
+ * toUnixTimestamp64Nano only accepts DateTime64, and a custom table may store a DateTime.
  *
  * The lookup is deliberately not bounded by time, so that a trace opens from a link whatever the dashboard time
  * range. It relies on the bloom filter index the exporter creates on TraceId. The exporter's `<table>_trace_id_ts`
@@ -187,11 +188,11 @@ function buildTraceByIdQuery(traceId: string, table: string): string {
   ScopeName,
   ScopeVersion,
   SpanAttributes,
-  toString(toUnixTimestamp64Nano(Timestamp)) AS StartTimeUnixNano,
+  toString(toUnixTimestamp64Nano(toDateTime64(Timestamp, 9))) AS StartTimeUnixNano,
   toString(Duration) AS DurationNano,
   StatusCode,
   StatusMessage,
-  arrayMap(t -> toString(toUnixTimestamp64Nano(t)), Events.Timestamp) AS EventTimesUnixNano,
+  arrayMap(t -> toString(toUnixTimestamp64Nano(toDateTime64(t, 9))), Events.Timestamp) AS EventTimesUnixNano,
   Events.Name AS EventNames,
   Events.Attributes AS EventAttributes,
   Links.TraceId AS LinkTraceIds,
@@ -216,10 +217,13 @@ function clickHouseTraceToOTLP(rows: ClickHouseTraceSpanRow[]): otlptracev1.Trac
   const scopeSpans = new Map<string, otlptracev1.ScopeSpan>();
 
   for (const row of rows) {
-    const resourceKey = JSON.stringify([row.ServiceName, row.ResourceAttributes]);
+    const attributes = toResourceAttributes(row);
+    // ClickHouse returns the attributes in the order they were written, which can differ between spans of the same
+    // resource, so the key is built from the attributes sorted by name
+    const resourceKey = JSON.stringify([row.ServiceName, attributes.toSorted((a, b) => a.key.localeCompare(b.key))]);
     let resourceSpan = resourceSpans.get(resourceKey);
     if (resourceSpan === undefined) {
-      resourceSpan = { resource: { attributes: toResourceAttributes(row) }, scopeSpans: [] };
+      resourceSpan = { resource: { attributes }, scopeSpans: [] };
       resourceSpans.set(resourceKey, resourceSpan);
     }
 
