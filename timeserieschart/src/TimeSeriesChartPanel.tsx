@@ -489,7 +489,16 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
         containLabel: false,
       };
     }
-    const rightPad = additionalFormats.length > 0 ? additionalFormats.length * 52 + 12 : 20;
+    // Heuristic until @perses-dev/components exposes rightGridPadding from
+    // getFormattedMultipleYAxesLayout (shared#321): ~52px per right axis
+    // (typical formatted tick + unit) plus 12px chart margin; 20px when single axis.
+    const RIGHT_AXIS_WIDTH_PX = 52;
+    const MULTI_Y_RIGHT_MARGIN_PX = 12;
+    const SINGLE_Y_RIGHT_PADDING_PX = 20;
+    const rightPad =
+      additionalFormats.length > 0
+        ? additionalFormats.length * RIGHT_AXIS_WIDTH_PX + MULTI_Y_RIGHT_MARGIN_PX
+        : SINGLE_Y_RIGHT_PADDING_PX;
     return {
       left: yAxis && yAxis.label ? 30 : 20,
       right: rightPad,
