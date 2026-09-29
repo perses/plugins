@@ -102,7 +102,7 @@ func create(query string, options ...Option) (Builder, error) {
 		}
 	}
 
-	if err := builder.PluginSpec.validate(); err != nil {
+	if err := builder.validate(); err != nil {
 		return *builder, err
 	}
 
