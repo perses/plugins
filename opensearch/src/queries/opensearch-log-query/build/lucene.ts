@@ -24,7 +24,7 @@ export function buildLuceneSearchBody(
   userQuery: string,
   start: Date,
   end: Date,
-  { timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false, limit }: SearchBodyOptions = {}
+  { timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false, limit }: SearchBodyOptions = {},
 ): OpenSearchSearchRequestBody {
   const trimmed = userQuery.trim();
 

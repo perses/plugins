@@ -131,6 +131,24 @@ describe('opensearch-client', () => {
       expect(err.message).toBe('OpenSearch API request failed (400): Invalid Query');
     });
 
+    it('explains a Perses proxy 403 for an endpoint missing from allowedEndpoints', () => {
+      const err = new OpenSearchApiError(
+        403,
+        '{"message":"you are not allowed to use this endpoint \\"/_plugins/_sql\\" with the HTTP method POST"}',
+      );
+      expect(err.message).toBe(
+        'OpenSearch API request was blocked by the Perses datasource proxy (403): ' +
+          'you are not allowed to use this endpoint "/_plugins/_sql" with the HTTP method POST. ' +
+          "Add the endpoint to the datasource's proxy allowedEndpoints (POST /_plugins/_ppl, " +
+          '/_plugins/_sql and /.*/_search).',
+      );
+    });
+
+    it('keeps the OpenSearch reason for a 403 that did not come from the proxy', () => {
+      const err = new OpenSearchApiError(403, '{"error":{"reason":"no permissions for [indices:data/read/search]"}}');
+      expect(err.message).toBe('OpenSearch API request failed (403): no permissions for [indices:data/read/search]');
+    });
+
     it('falls through to details when reason is an empty string', () => {
       const err = new OpenSearchApiError(
         400,
@@ -162,7 +180,7 @@ describe('opensearch-client', () => {
     it('labels the error message SQL', async () => {
       mockFetch({ ok: false, status: 400, body: '{"error":{"reason":"bad SQL"}}' });
       await expect(sql({ query: 'x' }, { datasourceUrl: 'http://localhost:9200' })).rejects.toThrow(
-        'OpenSearch SQL request failed (400): bad SQL'
+        'OpenSearch SQL request failed (400): bad SQL',
       );
     });
   });
@@ -210,7 +228,7 @@ describe('opensearch-client', () => {
     ])('rejects unsafe index %p without issuing a request', async (index) => {
       const mock = mockFetch({ ok: true, status: 200, body: { hits: { hits: [] } } });
       await expect(search({ index, body: {} }, { datasourceUrl: 'http://localhost:9200' })).rejects.toThrow(
-        /invalid OpenSearch index/i
+        /invalid OpenSearch index/i,
       );
       expect(mock).not.toHaveBeenCalled();
     });
@@ -222,7 +240,7 @@ describe('opensearch-client', () => {
         body: '{"error":{"type":"search_phase_execution_exception","root_cause":[{"reason":"failed to parse date field"}]},"status":400}',
       });
       await expect(search({ index: 'logs-*', body: {} }, { datasourceUrl: 'http://localhost:9200' })).rejects.toThrow(
-        'OpenSearch Search request failed (400): failed to parse date field'
+        'OpenSearch Search request failed (400): failed to parse date field',
       );
     });
   });

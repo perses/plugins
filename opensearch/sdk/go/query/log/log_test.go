@@ -79,6 +79,22 @@ func TestPluginSpecRejectsEmptyQueryOnUnmarshal(t *testing.T) {
 	}
 }
 
+func TestPluginSpecAcceptsEmptyLuceneQueryOnUnmarshal(t *testing.T) {
+	raw := []byte(`{"query":"","queryLanguage":"lucene","index":"logs-*"}`)
+	var spec PluginSpec
+	if err := json.Unmarshal(raw, &spec); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestPluginSpecRejectsEmptySQLQueryOnUnmarshal(t *testing.T) {
+	raw := []byte(`{"query":"","queryLanguage":"sql"}`)
+	var spec PluginSpec
+	if err := json.Unmarshal(raw, &spec); err == nil {
+		t.Fatalf("expected error unmarshalling sql spec with empty query, got nil")
+	}
+}
+
 func TestPluginSpecAcceptsNonEmptyQueryOnUnmarshal(t *testing.T) {
 	raw := []byte(`{"query":"source=logs-*"}`)
 	var spec PluginSpec

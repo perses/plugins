@@ -140,7 +140,7 @@ describe('OpenSearchLogQueryEditor language selector', () => {
     // Cast through `as` since 'kql' is not a valid OpenSearchQueryLanguage — this simulates a
     // hand-edited or hand-crafted spec reaching the editor at runtime, bypassing the type system.
     expect(() =>
-      setup({ query: 'source=logs-*', queryLanguage: 'kql' as OpenSearchLogQuerySpec['queryLanguage'] })
+      setup({ query: 'source=logs-*', queryLanguage: 'kql' as OpenSearchLogQuerySpec['queryLanguage'] }),
     ).not.toThrow();
     expect(screen.getByLabelText('Query language')).toHaveTextContent('PPL');
   });
@@ -158,7 +158,7 @@ describe('OpenSearchLogQueryEditor language selector', () => {
     fireEvent.click(screen.getByRole('option', { name: 'Lucene' }));
 
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ queryLanguage: 'lucene', query: 'source=logs-* | where level="warn"' })
+      expect.objectContaining({ queryLanguage: 'lucene', query: 'source=logs-* | where level="warn"' }),
     );
   });
 });

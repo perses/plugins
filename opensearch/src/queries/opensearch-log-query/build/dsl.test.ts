@@ -47,9 +47,9 @@ describe('buildDslSearchBody', () => {
     const body = buildDslSearchBody(
       '{"_source":["message"],"aggs":{"by_level":{"terms":{"field":"level"}}}}',
       start,
-      end
+      end,
     );
-    expect(body._source).toEqual(['message']);
+    expect(body['_source']).toEqual(['message']);
     expect(body.aggs).toEqual({ by_level: { terms: { field: 'level' } } });
   });
 
@@ -86,6 +86,6 @@ describe('buildDslSearchBody', () => {
     'throws a shape error for valid JSON that is not an object: %p',
     (input) => {
       expect(() => buildDslSearchBody(input, start, end)).toThrow(/Query DSL must be a JSON object/i);
-    }
+    },
   );
 });

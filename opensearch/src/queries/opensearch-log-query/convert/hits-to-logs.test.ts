@@ -81,6 +81,21 @@ describe('convertHitsToLogs', () => {
     expect(result.hasMore).toBe(true);
   });
 
+  it('sets hasMore when an exact total exceeds the hits returned', () => {
+    const result = convertHitsToLogs({
+      hits: { total: { value: 5000, relation: 'eq' }, hits: [{ _source: { message: 'a' } }] },
+    });
+    expect(result.totalCount).toBe(5000);
+    expect(result.hasMore).toBe(true);
+  });
+
+  it('parses a fractional epoch-seconds timestamp', () => {
+    const { entries } = convertHitsToLogs({
+      hits: { hits: [{ _source: { '@timestamp': 1735689600.5, message: 'a' } }] },
+    });
+    expect(entries[0]?.timestamp).toBe(1735689600.5);
+  });
+
   it('falls back to the entry count when hits.total is absent', () => {
     const result = convertHitsToLogs({ hits: { hits: [{ _source: { message: 'a' } }] } });
     expect(result.totalCount).toBe(1);
@@ -89,7 +104,7 @@ describe('convertHitsToLogs', () => {
   it('honours explicit timestampField and messageField overrides', () => {
     const { entries } = convertHitsToLogs(
       { hits: { hits: [{ _source: { ts: 1735689600000, body: 'hello', other: 'x' } }] } },
-      { timestampField: 'ts', messageField: 'body' }
+      { timestampField: 'ts', messageField: 'body' },
     );
     expect(entries[0]?.timestamp).toBe(1735689600);
     expect(entries[0]?.line).toBe('hello');

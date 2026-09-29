@@ -17,9 +17,9 @@ import type { Mock } from 'vitest';
 import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
 import type { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
 import type { OpenSearchDatarowsResponse } from '../../model/opensearch-client-types';
-import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 import { buildBoundedPPL } from './build/ppl';
 import { convertDatarowsToLogs, parseTimestamp } from './convert';
+import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 
 const datasource: OpenSearchDatasourceSpec = {
   directUrl: '/test',
@@ -483,7 +483,7 @@ describe('getLogData language dispatch', () => {
   it('routes queryLanguage: lucene to client.search with the resolved index', async () => {
     const result = await OpenSearchLogQuery.getLogData(
       { query: 'level:error', queryLanguage: 'lucene', index: 'logs-*' },
-      context
+      context,
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
     expect(params.index).toBe('logs-*');
@@ -495,7 +495,7 @@ describe('getLogData language dispatch', () => {
   it('routes queryLanguage: dsl to client.search', async () => {
     await OpenSearchLogQuery.getLogData(
       { query: '{"query":{"match":{"level":"error"}}}', queryLanguage: 'dsl', index: 'logs-*' },
-      context
+      context,
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
     expect(params.body.query.bool.filter[1]).toEqual({ match: { level: 'error' } });
@@ -504,7 +504,7 @@ describe('getLogData language dispatch', () => {
   it('passes limit through as the search size', async () => {
     await OpenSearchLogQuery.getLogData(
       { query: 'level:error', queryLanguage: 'lucene', index: 'logs-*', limit: 42 },
-      context
+      context,
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
     expect(params.body.size).toBe(42);
@@ -518,7 +518,7 @@ describe('getLogData language dispatch', () => {
         variableState: {
           traceId: { value: 'abc123', loading: false },
         } as unknown as LogQueryContext['variableState'],
-      }
+      },
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
     expect(params.body.query.bool.filter[1]).toEqual({ term: { traceId: 'abc123' } });
@@ -526,7 +526,7 @@ describe('getLogData language dispatch', () => {
 
   it.each(['lucene', 'dsl'] as const)('rejects %s without an index', async (queryLanguage) => {
     await expect(OpenSearchLogQuery.getLogData({ query: 'level:error', queryLanguage }, context)).rejects.toThrow(
-      /index is required/i
+      /index is required/i,
     );
     expect(stubClient.search).not.toHaveBeenCalled();
   });

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { LogData, LogEntry } from '@perses-dev/spec';
+
 import type { OpenSearchSearchResponse } from '../../../model/opensearch-client-types';
 import { DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../../constants';
 import type { ConvertOptions } from './datarows-to-logs';
@@ -67,8 +68,9 @@ export function convertHitsToLogs(response: OpenSearchSearchResponse, options: C
     ? [options.messageField, ...DEFAULT_MESSAGE_FIELDS]
     : DEFAULT_MESSAGE_FIELDS;
 
-  const entries: LogEntry[] = hits.map((hit) => {
-    const source = hit._source ?? {};
+  // OpenSearch's metadata fields are underscore-prefixed, so rename them on the way in.
+  const entries: LogEntry[] = hits.map(({ _id: id, _index: index, _source: rawSource }) => {
+    const source = rawSource ?? {};
     const flat = flattenSource(source);
 
     const tsKey = pickKey(flat, tsCandidates);
@@ -84,8 +86,8 @@ export function convertHitsToLogs(response: OpenSearchSearchResponse, options: C
     }
     // Document identity is genuinely useful: _index disambiguates a wildcard pattern and
     // _id lets a user correlate a line back to the source document.
-    if (hit._id !== undefined) labels._id = hit._id;
-    if (hit._index !== undefined) labels._index = hit._index;
+    if (id !== undefined) labels['_id'] = id;
+    if (index !== undefined) labels['_index'] = index;
 
     return { timestamp, line, labels };
   });
@@ -96,8 +98,9 @@ export function convertHitsToLogs(response: OpenSearchSearchResponse, options: C
     totalCount: total?.value ?? entries.length,
   };
   // `relation: 'gte'` means OpenSearch stopped counting (default cap 10,000), so the true
-  // total is at least this — surface that rather than paying for track_total_hits.
-  if (total?.relation === 'gte') {
+  // total is at least this — surface that rather than paying for track_total_hits. An exact
+  // total larger than the page means `size` truncated the result.
+  if (total?.relation === 'gte' || (total?.value ?? 0) > entries.length) {
     result.hasMore = true;
   }
 

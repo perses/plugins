@@ -11,7 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Checkbox, FormControlLabel, InputLabel, Link, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  InputLabel,
+  Link,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { createModEnterHandler } from '@perses-dev/dashboards';
 import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
@@ -45,6 +56,10 @@ export function parseLimitInput(raw: string): number | undefined {
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
+
+const labelSx = { display: 'block', marginBottom: '4px', fontWeight: 500 } as const;
+const languageInputProps = { 'aria-label': 'Query language' } as const;
+const limitInputProps = { min: 1, 'aria-label': 'Limit (optional)' } as const;
 
 const examplesSx = {
   fontSize: '11px',
@@ -80,7 +95,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
         // onChange. On the normal path this is a no-op: blur has already committed the same value.
         draft.query = query;
         draft.queryLanguage = next;
-      })
+      }),
     );
   };
 
@@ -88,7 +103,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
     onChange(
       produce(value, (draft) => {
         draft.limit = parseLimitInput(e.target.value);
-      })
+      }),
     );
   };
 
@@ -145,17 +160,14 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
   return (
     <Stack spacing={1.5} paddingBottom={1}>
       <div>
-        <InputLabel
-          id="opensearch-query-language-label"
-          sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}
-        >
+        <InputLabel id="opensearch-query-language-label" sx={labelSx}>
           Query language
         </InputLabel>
         <Select
           fullWidth
           size="small"
           labelId="opensearch-query-language-label"
-          inputProps={{ 'aria-label': 'Query language' }}
+          inputProps={languageInputProps}
           value={language}
           onChange={(e) => handleLanguageChange(e.target.value as OpenSearchQueryLanguage)}
         >
@@ -168,7 +180,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       </div>
 
       <div>
-        <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Datasource</InputLabel>
+        <InputLabel sx={labelSx}>Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind={DATASOURCE_KIND}
           value={selectedDatasource}
@@ -179,7 +191,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       </div>
 
       <div>
-        <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Index pattern</InputLabel>
+        <InputLabel sx={labelSx}>Index pattern</InputLabel>
         <TextField
           fullWidth
           size="small"
@@ -192,9 +204,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       </div>
 
       <div>
-        <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
-          Timestamp field (optional)
-        </InputLabel>
+        <InputLabel sx={labelSx}>Timestamp field (optional)</InputLabel>
         <TextField
           fullWidth
           size="small"
@@ -205,9 +215,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       </div>
 
       <div>
-        <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
-          Message field (optional)
-        </InputLabel>
+        <InputLabel sx={labelSx}>Message field (optional)</InputLabel>
         <TextField
           fullWidth
           size="small"
@@ -228,12 +236,12 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
           is also where a result-count limit applies, so it doubles as the gate for this field. */}
       {requiresIndex(language) && (
         <div>
-          <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Limit (optional)</InputLabel>
+          <InputLabel sx={labelSx}>Limit (optional)</InputLabel>
           <TextField
             fullWidth
             size="small"
             type="number"
-            inputProps={{ min: 1, 'aria-label': 'Limit (optional)' }}
+            inputProps={limitInputProps}
             value={value.limit ?? ''}
             onChange={handleLimitChange}
             placeholder="500"
@@ -243,7 +251,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       )}
 
       <div>
-        <InputLabel sx={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>{`${meta.label} Query`}</InputLabel>
+        <InputLabel sx={labelSx}>{`${meta.label} Query`}</InputLabel>
         <TextField
           fullWidth
           multiline

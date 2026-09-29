@@ -22,7 +22,8 @@ kind: "OpenSearchLogQuery"
 
 // `index` is required only for the languages that put it in the request URL
 // (`lucene`, `dsl`, which hit `_search`); it's optional for `ppl`/`sql`, where
-// the index lives in the query text itself.
+// the index lives in the query text itself. `query` may be empty only for
+// `lucene`, where a blank query string means "everything in the time range".
 //
 // A disjunction of two closed structs (one branch requiring `index` for
 // lucene/dsl, one leaving it optional for ppl/sql) does NOT work: a missing
@@ -49,12 +50,17 @@ kind: "OpenSearchLogQuery"
 // without re-testing the comprehension against it.
 spec: close({
 	ds.#selector
-	query:              strings.MinRunes(1)
 	timestampField?:    strings.MinRunes(1)
 	messageField?:      strings.MinRunes(1)
 	disableTimeFilter?: bool
 	limit?:             int & >0
 	queryLanguage:      *"ppl" | "sql" | "lucene" | "dsl"
+	if queryLanguage == "lucene" {
+		query: string
+	}
+	if queryLanguage != "lucene" {
+		query: strings.MinRunes(1)
+	}
 	if queryLanguage == "lucene" || queryLanguage == "dsl" {
 		index: strings.MinRunes(1)
 	}

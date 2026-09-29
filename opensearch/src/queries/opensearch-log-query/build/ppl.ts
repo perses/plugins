@@ -58,7 +58,7 @@ export function buildBoundedPPL(
   userQuery: string,
   start: Date,
   end: Date,
-  { index, timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false }: BoundedPPLOptions = {}
+  { index, timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false }: BoundedPPLOptions = {},
 ): string {
   let trimmed = userQuery.trim();
 

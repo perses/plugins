@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { LogEntry, LogData } from '@perses-dev/spec';
+
 import type { OpenSearchDatarowsResponse } from '../../../model/opensearch-client-types';
 import { DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../../constants';
 import { parseTimestamp } from './parse-timestamp';
@@ -67,7 +68,7 @@ export function convertDatarowsToLogs(response: OpenSearchDatarowsResponse, opti
 
 function rowToObject(
   schema: OpenSearchDatarowsResponse['schema'],
-  row: Array<string | number | boolean | null>
+  row: Array<string | number | boolean | null>,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   schema.forEach((col, i) => {

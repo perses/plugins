@@ -29,7 +29,7 @@ export function buildSqlRequest(
   userQuery: string,
   start: Date,
   end: Date,
-  { timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false }: SqlRequestOptions = {}
+  { timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false }: SqlRequestOptions = {},
 ): OpenSearchSQLParams {
   const query = userQuery.trim();
 

@@ -17,14 +17,16 @@ export function parseTimestamp(v: unknown): number {
   // Numeric epochs arrive in seconds, milliseconds, microseconds, or nanoseconds
   // (logs frequently carry ns precision). They come as a JS number, or — when the
   // value exceeds Number.MAX_SAFE_INTEGER (a ns epoch is ~1e18, well past 2^53) — as
-  // a numeric string so it survives JSON parsing without silent overflow.
+  // a numeric string so it survives JSON parsing without silent overflow. `_search`
+  // hits are flattened to strings, so a fractional epoch (`1700000000.5`) also arrives
+  // as a numeric string and must not fall through to Date.parse.
   // We emit seconds (LogEntry is second-resolution), so we only need the correct
   // magnitude, not sub-second precision: a float's rounding at the ns scale is far
   // below one second and is discarded anyway, so BigInt isn't required here.
   let numeric = NaN;
   if (typeof v === 'number') {
     numeric = v;
-  } else if (/^\d+$/.test(String(v))) {
+  } else if (/^\d+(\.\d+)?$/.test(String(v))) {
     numeric = Number(v);
   }
   if (!Number.isNaN(numeric)) {

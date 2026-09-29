@@ -82,7 +82,18 @@ function buildShortMessage(label: ApiLabel, status: number, body: string): strin
   try {
     const parsed = JSON.parse(body) as {
       error?: { reason?: string; details?: string; root_cause?: Array<{ reason?: string }> };
+      message?: string;
     };
+    // The Perses datasource proxy rejects endpoints missing from `allowedEndpoints` with a
+    // 403 and a top-level `message`. Datasources created before SQL/Lucene/DSL support only
+    // allow `/_plugins/_ppl`, so say how to fix it rather than surfacing a bare 403.
+    if (status === 403 && parsed?.message?.includes('not allowed to use this endpoint')) {
+      return (
+        `OpenSearch ${label} request was blocked by the Perses datasource proxy (403): ${parsed.message}. ` +
+        "Add the endpoint to the datasource's proxy allowedEndpoints (POST /_plugins/_ppl, " +
+        '/_plugins/_sql and /.*/_search).'
+      );
+    }
     const reason = parsed?.error?.reason;
     const details = parsed?.error?.details;
     // OpenSearch often puts a generic phrase in `reason` ("Invalid Query") and the
@@ -163,7 +174,7 @@ export function assertSafeIndexPath(index: string): void {
       `invalid OpenSearch index for a _search request: ${JSON.stringify(index)}. ` +
         'An index (or comma-separated list of indices) must be non-empty and may only contain ' +
         'letters, digits, "_", ".", "+", "-", and "*" as path segments, with no empty or ' +
-        'dots-only segment.'
+        'dots-only segment.',
     );
   };
 
@@ -185,7 +196,7 @@ export function assertSafeIndexPath(index: string): void {
 export async function ppl(
   params: OpenSearchPPLParams,
   options: OpenSearchApiOptions,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<OpenSearchDatarowsResponse> {
   return postJson('PPL', '/_plugins/_ppl', { query: params.query }, options, signal);
 }
@@ -193,7 +204,7 @@ export async function ppl(
 export async function sql(
   params: OpenSearchSQLParams,
   options: OpenSearchApiOptions,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<OpenSearchDatarowsResponse> {
   const body: Record<string, unknown> = { query: params.query };
   if (params.filter !== undefined) {
@@ -205,7 +216,7 @@ export async function sql(
 export async function search(
   params: OpenSearchSearchParams,
   options: OpenSearchApiOptions,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<OpenSearchSearchResponse> {
   assertSafeIndexPath(params.index);
   return postJson('Search', `/${params.index}/_search`, params.body, options, signal);

@@ -21,7 +21,7 @@ function parseBody(userJson: string): Record<string, unknown> {
     parsed = JSON.parse(userJson);
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
-    throw new Error(`Query DSL is not valid JSON: ${detail}`);
+    throw new Error(`Query DSL is not valid JSON: ${detail}`, { cause: e });
   }
 
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
@@ -45,7 +45,7 @@ export function buildDslSearchBody(
   userJson: string,
   start: Date,
   end: Date,
-  { timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false, limit }: SearchBodyOptions = {}
+  { timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false, limit }: SearchBodyOptions = {},
 ): OpenSearchSearchRequestBody {
   const parsed = parseBody(userJson);
   const userQuery = parsed.query as Record<string, unknown> | undefined;

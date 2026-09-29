@@ -65,11 +65,12 @@ func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 var validLanguages = map[string]bool{"": true, "ppl": true, "sql": true, "lucene": true, "dsl": true}
 
 func (s *PluginSpec) validate() error {
-	if len(s.Query) == 0 {
-		return fmt.Errorf("query cannot be empty")
-	}
 	if !validLanguages[s.QueryLanguage] {
 		return fmt.Errorf("unknown query language %q: want one of ppl, sql, lucene, dsl", s.QueryLanguage)
+	}
+	// A blank Lucene query string means "everything in the time range".
+	if len(s.Query) == 0 && s.QueryLanguage != "lucene" {
+		return fmt.Errorf("query cannot be empty")
 	}
 	if (s.QueryLanguage == "lucene" || s.QueryLanguage == "dsl") && len(s.Index) == 0 {
 		return fmt.Errorf("index is required when queryLanguage is %q", s.QueryLanguage)
