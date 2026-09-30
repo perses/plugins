@@ -200,7 +200,11 @@ function buildExemplars(data?: ExemplarSeries[]): TimeSeriesExemplars[] | undefi
   if (!data) return undefined;
 
   return data.map((res) => ({
-    seriesLabels: res.seriesLabels,
+    // Prometheus includes __name__ in exemplar series labels but omits it from range-query labels for expressions.
+    // We thus have to remove the __name__ label from the exemplar series labels, otherwise time series & exemplar won't match correctly.
+    seriesLabels: Object.fromEntries(
+      Object.entries(res.seriesLabels).filter(([labelName]) => labelName !== '__name__'),
+    ),
     exemplars: res.exemplars.map((exemplar) => ({
       labels: exemplar.labels,
       value: parseSampleValue(exemplar.value),

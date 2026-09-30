@@ -37,6 +37,8 @@ export const COLOR_MODE_LABELS: ColorModeLabelItem[] = [
 
 export type legendMode = 'auto' | 'on' | 'off';
 
+export type StatChartOrientation = 'auto' | 'horizontal' | 'vertical';
+
 export type ShowLegendLabelItem = {
   id: legendMode;
   label: string;
@@ -47,6 +49,12 @@ export const SHOW_LEGEND_LABELS: ShowLegendLabelItem[] = [
   { id: 'auto', label: 'Auto', description: 'Show legend for multi-series, hide legend for single series' },
   { id: 'on', label: 'On', description: 'Always show legend' },
   { id: 'off', label: 'Off', description: 'Always hide legend' },
+];
+
+export const STAT_CHART_ORIENTATION_LABELS: Array<{ id: StatChartOrientation; label: string }> = [
+  { id: 'auto', label: 'Auto' },
+  { id: 'horizontal', label: 'Horizontal' },
+  { id: 'vertical', label: 'Vertical' },
 ];
 
 export interface StatChartOptions {
@@ -60,6 +68,39 @@ export interface StatChartOptions {
   mappings?: ValueMapping[];
   colorMode?: ColorMode;
   legendMode?: legendMode;
+  orientation?: StatChartOrientation;
+  seriesColumns?: number;
+}
+
+export const MAX_SERIES_COLUMNS = 12;
+
+export type SeriesColumnsLabelItem = { id: string; label: string };
+
+export const SERIES_COLUMNS_LABELS: SeriesColumnsLabelItem[] = [
+  { id: 'auto', label: 'Auto' },
+  ...Array.from({ length: MAX_SERIES_COLUMNS }, (_, i) => {
+    const n = String(i + 1);
+    return { id: n, label: n };
+  }),
+];
+
+export function computeIdealSeriesColumns(seriesCount: number): number {
+  if (seriesCount <= 1) return 1;
+  return Math.ceil(Math.sqrt(seriesCount));
+}
+
+export function resolveAutoOrientationColumnsCount(
+  seriesCount: number,
+  widthBasedColumnCount: number,
+  seriesColumns?: number,
+): number {
+  if (seriesCount <= 1) return 1;
+  if (seriesColumns !== undefined && seriesColumns !== null && seriesColumns >= 1) {
+    return Math.min(MAX_SERIES_COLUMNS, Math.floor(seriesColumns), seriesCount);
+  }
+  const ideal = computeIdealSeriesColumns(seriesCount);
+  const width = Math.max(1, widthBasedColumnCount);
+  return Math.max(1, Math.min(seriesCount, width, ideal));
 }
 
 export interface StatChartSparklineOptions {
@@ -75,7 +116,7 @@ export function createInitialStatChartOptions(): StatChartOptions {
     format: {
       unit: 'decimal',
     },
-    sparkline: {},
-    legendMode: 'auto',
+    legendMode: 'off',
+    orientation: 'auto',
   };
 }

@@ -3,10 +3,10 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/victorialogs/sdk/go/query/time-series"
 
-var options []query.Option
-query.TimeSeriesQuery(`_stream:{job="nginx"} | stats count() by (_time:1m)`, options...)
+var options []timeseries.Option
+timeseries.VictoriaLogsTimeSeriesQuery(`_stream:{job="nginx"} | stats count() by (_time:1m)`, options...)
 ```
 
 Need to provide the LogsQL expression and a list of options.
@@ -20,9 +20,9 @@ Need to provide the LogsQL expression and a list of options.
 #### Query
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/victorialogs/sdk/go/query/time-series"
 
-query.Query(`_stream:{service="api"} | stats sum(response_time) by (_time:5m)`)
+timeseries.Query(`_stream:{service="api"} | stats sum(response_time) by (_time:5m)`)
 ```
 
 Define the LogsQL query expression for time series data.
@@ -30,9 +30,9 @@ Define the LogsQL query expression for time series data.
 #### Datasource
 
 ```golang
-import "github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
+import timeseries "github.com/perses/plugins/victorialogs/sdk/go/query/time-series"
 
-query.Datasource("MyVictoriaLogsDatasource")
+timeseries.Datasource("MyVictoriaLogsDatasource")
 ```
 
 Define the datasource the query will use.
@@ -46,8 +46,8 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses-plugins/victorialogs/sdk/go/v1/query"
-	timeseries "github.com/perses/perses-plugins/timeserieschart/sdk/go"
+	timeseriesquery "github.com/perses/plugins/victorialogs/sdk/go/query/time-series"
+	timeseries "github.com/perses/plugins/timeserieschart/sdk/go"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 			panelgroup.AddPanel("Request Rate",
 				timeseries.Chart(),
 				panel.AddQuery(
-					query.TimeSeriesQuery(`_stream:{job="nginx"} | stats count() by (_time:1m)`),
+					timeseriesquery.VictoriaLogsTimeSeriesQuery(`_stream:{job="nginx"} | stats count() by (_time:1m)`),
 				),
 			),
 		),

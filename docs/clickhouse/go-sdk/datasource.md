@@ -3,7 +3,7 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/datasource"
+import "github.com/perses/plugins/clickhouse/sdk/go/datasource"
 
 var options []datasource.Option
 datasource.ClickHouse(options...)
@@ -20,7 +20,7 @@ Need a list of options. At least direct URL or proxy URL, in order to work.
 #### Direct URL
 
 ```golang
-import "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/datasource"
+import "github.com/perses/plugins/clickhouse/sdk/go/datasource"
 
 datasource.DirectURL("http://clickhouse.example.com:8123")
 ```
@@ -30,7 +30,7 @@ Configure the access to the ClickHouse datasource with a direct URL.
 #### Proxy
 
 ```golang
-import "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/datasource"
+import "github.com/perses/plugins/clickhouse/sdk/go/datasource"
 
 datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 ```
@@ -45,7 +45,7 @@ package main
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	
-	chDs "github.com/perses/perses-plugins/clickhouse/sdk/go/v1/datasource"
+	chDs "github.com/perses/plugins/clickhouse/sdk/go/datasource"
 )
 
 func main() {

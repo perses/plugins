@@ -3,7 +3,7 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/datasource"
+import "github.com/perses/plugins/pyroscope/sdk/go/datasource"
 
 var options []datasource.Option
 datasource.Pyroscope(options...)
@@ -20,7 +20,7 @@ Need a list of options. At least direct URL or proxy URL, in order to work.
 #### Direct URL
 
 ```golang
-import "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/datasource"
+import "github.com/perses/plugins/pyroscope/sdk/go/datasource"
 
 datasource.DirectURL("http://pyroscope.example.com:4040")
 ```
@@ -30,7 +30,7 @@ Configure the access to the Pyroscope datasource with a direct URL.
 #### Proxy
 
 ```golang
-import "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/datasource"
+import "github.com/perses/plugins/pyroscope/sdk/go/datasource"
 
 datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 ```
@@ -43,7 +43,7 @@ Configure the access to the Pyroscope datasource with a proxy URL. More info at 
 import (
 	"time"
 
-	"github.com/perses/perses-plugins/pyroscope/sdk/go/v1/datasource"
+	"github.com/perses/plugins/pyroscope/sdk/go/datasource"
 )
 
 datasource.MinStep(30 * time.Second)
@@ -62,7 +62,7 @@ package main
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	
-	pyroDs "github.com/perses/perses-plugins/pyroscope/sdk/go/v1/datasource"
+	pyroDs "github.com/perses/plugins/pyroscope/sdk/go/datasource"
 )
 
 func main() {

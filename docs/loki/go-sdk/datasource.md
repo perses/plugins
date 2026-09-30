@@ -3,7 +3,7 @@
 ## Constructor
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
+import "github.com/perses/plugins/loki/sdk/go/datasource"
 
 var options []datasource.Option
 datasource.Loki(options...)
@@ -20,7 +20,7 @@ Need a list of options. At least direct URL or proxy URL, in order to work.
 #### Direct URL
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
+import "github.com/perses/plugins/loki/sdk/go/datasource"
 
 datasource.DirectURL("http://loki.example.com:3100")
 ```
@@ -30,7 +30,7 @@ Configure the access to the Loki datasource with a direct URL.
 #### Proxy
 
 ```golang
-import "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
+import "github.com/perses/plugins/loki/sdk/go/datasource"
 
 datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 ```
@@ -45,7 +45,7 @@ package main
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	
-	lokiDs "github.com/perses/perses-plugins/loki/sdk/go/v1/datasource"
+	lokiDs "github.com/perses/plugins/loki/sdk/go/datasource"
 )
 
 func main() {

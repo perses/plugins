@@ -16,10 +16,13 @@ import type { FormatOptions, ModeOption } from '@perses-dev/components';
 import { EChart, useChartsTheme } from '@perses-dev/components';
 import { PieChart as EChartsPieChart } from 'echarts/charts';
 import { DatasetComponent, GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+import type { ECharts } from 'echarts/core';
 import { use as registerECharts } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ReactElement } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 
+import { DEFAULT_OUTER_RADIUS } from './pie-chart-model';
 import { getLabelFormatter, getTooltipFormatter } from './utils';
 
 registerECharts([
@@ -31,6 +34,11 @@ registerECharts([
   LegendComponent,
   CanvasRenderer,
 ]);
+
+const CHART_SX = { width: '100%', height: '100%' };
+const EMPHASIS_SHADOW_BLUR = 10;
+const EMPHASIS_SCALE_SIZE = 5;
+const PIE_INSET = EMPHASIS_SHADOW_BLUR + EMPHASIS_SCALE_SIZE;
 export interface PieChartData {
   id?: string;
   name: string;
@@ -47,49 +55,74 @@ export interface PieChartBaseProps {
   mode?: ModeOption;
   showLabels?: boolean;
   formatOptions?: FormatOptions;
+  innerRadius?: number;
+  outerRadius?: number;
 }
 
 export function PieChartBase(props: PieChartBaseProps): ReactElement {
-  const { width, height, data, mode, formatOptions, showLabels } = props;
+  const {
+    width,
+    height,
+    data,
+    mode,
+    formatOptions,
+    showLabels,
+    innerRadius,
+    outerRadius = DEFAULT_OUTER_RADIUS,
+  } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
+  const chartRef = useRef<ECharts>();
 
-  const option = {
-    tooltip: {
-      trigger: 'item',
-      formatter: getTooltipFormatter(formatOptions),
-      appendTo: document.body,
-      confine: false,
-    },
-    series: [
-      {
-        type: 'pie',
-        radius: '90%',
-        label: {
-          show: Boolean(showLabels),
-          position: 'inner',
-          fontSize: 14,
-          formatter: getLabelFormatter(mode, formatOptions),
-          overflow: 'truncate',
-          fontWeight: 'bold',
-        },
-        center: ['50%', '50%'],
-        data: data,
-        emphasis: {
+  useLayoutEffect(() => {
+    chartRef.current?.resize();
+  }, [height, width]);
+
+  const option = useMemo(() => {
+    // ECharts treats numeric radii as pixels, so convert persisted percentages at the rendering boundary.
+    const radius = innerRadius === undefined ? `${outerRadius}%` : [`${innerRadius}%`, `${outerRadius}%`];
+    return {
+      tooltip: {
+        trigger: 'item',
+        formatter: getTooltipFormatter(formatOptions),
+        appendTo: document.body,
+        confine: false,
+      },
+      series: [
+        {
+          type: 'pie',
+          radius,
+          left: PIE_INSET,
+          right: PIE_INSET,
+          top: PIE_INSET,
+          bottom: PIE_INSET,
+          label: {
+            show: Boolean(showLabels),
+            position: 'inner',
+            fontSize: 14,
+            formatter: getLabelFormatter(mode, formatOptions),
+            overflow: 'truncate',
+            fontWeight: 'bold',
+          },
+          center: ['50%', '50%'],
+          data: data,
+          emphasis: {
+            scaleSize: EMPHASIS_SCALE_SIZE,
+            itemStyle: {
+              shadowBlur: EMPHASIS_SHADOW_BLUR,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
           itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
+            borderRadius: 5,
+            borderColor: muiTheme.palette.background.default,
+            borderWidth: 2,
           },
         },
-        itemStyle: {
-          borderRadius: 5,
-          borderColor: muiTheme.palette.background.default,
-          borderWidth: 2,
-        },
-      },
-    ],
-  };
+      ],
+    };
+  }, [data, formatOptions, innerRadius, mode, muiTheme.palette.background.default, outerRadius, showLabels]);
 
   return (
     <Box
@@ -99,14 +132,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
       }}
       sx={{ overflow: 'auto' }}
     >
-      <EChart
-        sx={{
-          width: '100%',
-          height: '100%',
-        }}
-        option={option}
-        theme={chartsTheme.echartsTheme}
-      />
+      <EChart _instance={chartRef} sx={CHART_SX} option={option} theme={chartsTheme.echartsTheme} />
     </Box>
   );
 }

@@ -22,6 +22,7 @@ import type { ReactElement } from 'react';
 import { useMemo, useRef, useState } from 'react';
 
 import { getSeriesColor } from './colors';
+import { resolvePieChartVisualOptions } from './pie-chart-model';
 import type { PieChartOptions } from './pie-chart-model';
 import type { PieChartData } from './PieChartBase';
 import { PieChartBase } from './PieChartBase';
@@ -32,10 +33,11 @@ export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
-    spec: { calculation, sort, mode, format: formatOptions, legend: pieChartLegend, colorPalette },
+    spec: { calculation, sort, mode, format: formatOptions, legend: pieChartLegend, showLabels },
     contentDimensions,
     queryResults,
   } = props;
+  const { colorPalette, innerRadius, outerRadius } = resolvePieChartVisualOptions(props.spec);
   const chartsTheme = useChartsTheme();
   const chartId = useId('time-series-panel');
   const seriesNames = queryResults.flatMap((result) => result?.data.series?.map((series) => series.name) || []);
@@ -146,7 +148,9 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
                 height={height}
                 mode={mode}
                 formatOptions={formatOptions}
-                showLabels={Boolean(props.spec.showLabels)}
+                showLabels={Boolean(showLabels)}
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
               />
             </Box>
           );

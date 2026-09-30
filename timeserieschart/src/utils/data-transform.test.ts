@@ -15,7 +15,16 @@ import type { LegacyTimeSeries } from '@perses-dev/components';
 import type { TimeScale } from '@perses-dev/spec';
 
 import type { TimeSeriesChartVisualOptions, TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
-import { convertPercentThreshold, convertPanelYAxis, getTimeSeries, roundDown } from './data-transform';
+import type { ExemplarChartData } from './data-transform';
+import {
+  EXEMPLAR_SERIES_ID_PREFIX,
+  EXEMPLAR_SYMBOL_SIZE,
+  convertPercentThreshold,
+  convertPanelYAxis,
+  getExemplarSeries,
+  getTimeSeries,
+  roundDown,
+} from './data-transform';
 
 const MAX_VALUE = 120;
 const MOCK_ECHART_TIME_SERIES_DATA: LegacyTimeSeries[] = [
@@ -26,6 +35,48 @@ const MOCK_ECHART_TIME_SERIES_DATA: LegacyTimeSeries[] = [
     data: [20, MAX_VALUE, 17, 30],
   },
 ];
+
+describe('getExemplarSeries', () => {
+  const exemplarData: ExemplarChartData = {
+    seriesId: 'chart1http_requests_total0',
+    seriesName: 'http_requests_total',
+    color: '#5f6caf',
+    seriesLabels: { __name__: 'http_requests_total', job: 'demo' },
+    yAxisIndex: 0,
+    exemplars: [
+      { labels: { trace_id: 'abc-123' }, value: 42, timestamp: 1700000000000 },
+      { labels: { trace_id: 'def-456' }, value: 7, timestamp: 1700000150000 },
+    ],
+  };
+
+  it('should render a diamond scatter series prefixed with the exemplar series id', () => {
+    const series = getExemplarSeries(exemplarData);
+    expect(series.type).toEqual('scatter');
+    expect(series.id).toEqual(`${EXEMPLAR_SERIES_ID_PREFIX}${exemplarData.seriesId}`);
+    expect(series.symbol).toEqual('diamond');
+    expect(series.symbolSize).toEqual(EXEMPLAR_SYMBOL_SIZE);
+    expect(series.color).toEqual('#5f6caf');
+  });
+
+  it('should embed exemplar metadata in each data item so the dialog can be populated on click', () => {
+    const series = getExemplarSeries(exemplarData);
+    const data = series.data as Array<{ value: [number, number]; exemplar: unknown; seriesLabels: unknown }>;
+    expect(data).toHaveLength(2);
+    expect(data[0]?.value).toEqual([1700000000000, 42]);
+    expect(data[0]?.exemplar).toEqual(exemplarData.exemplars[0]);
+    expect(data[0]?.seriesLabels).toEqual(exemplarData.seriesLabels);
+  });
+
+  it('should negate plotted Y values while keeping original exemplar values when negativeY is enabled', () => {
+    const series = getExemplarSeries({ ...exemplarData, negativeY: true });
+    const data = series.data as Array<{ value: [number, number]; exemplar: unknown }>;
+    expect(data[0]?.value).toEqual([1700000000000, -42]);
+    expect(data[1]?.value).toEqual([1700000150000, -7]);
+    // The embedded exemplar keeps the original (positive) value for the metadata tooltip.
+    expect(data[0]?.exemplar).toEqual(exemplarData.exemplars[0]);
+    expect(data[1]?.exemplar).toEqual(exemplarData.exemplars[1]);
+  });
+});
 
 describe('convertPercentThreshold', () => {
   it('should return 25 if percent threshold is 25 and max is 100', () => {
@@ -208,5 +259,42 @@ describe('getTimeSeries stack behavior', () => {
       expect(series.type).toEqual(display);
       expect(series.stack).toEqual(expectStacked ? 'all' : undefined);
     });
+  });
+});
+
+describe('area style', () => {
+  const scale: TimeScale = { startMs: 0, endMs: 60_000, stepMs: 1000, rangeMs: 60_000 };
+
+  it('omits areaStyle when the resolved opacity is 0', () => {
+    const series = getTimeSeries('id', 0, 'name', { areaOpacity: 0 }, scale, '#000000');
+    expect(series).not.toHaveProperty('areaStyle');
+    expect(series).toHaveProperty('emphasis.disabled', false);
+  });
+
+  it('keeps areaStyle when the visual or query opacity is positive', () => {
+    const fromVisual = getTimeSeries('id', 0, 'name', { areaOpacity: 0.3 }, scale, '#000000');
+    const fromQuery = getTimeSeries('id', 0, 'name', { areaOpacity: 0 }, scale, '#000000', { areaOpacity: 0.5 });
+
+    expect(fromVisual).toHaveProperty('areaStyle.opacity', 0.3);
+    expect(fromVisual).toHaveProperty('emphasis.disabled', true);
+    expect(fromQuery).toHaveProperty('areaStyle.opacity', 0.5);
+  });
+
+  it('lets a query opacity of 0 override a positive visual opacity', () => {
+    const series = getTimeSeries('id', 0, 'name', { areaOpacity: 0.3 }, scale, '#000000', { areaOpacity: 0 });
+    expect(series).not.toHaveProperty('areaStyle');
+  });
+});
+
+describe('automatic point markers', () => {
+  const scale: TimeScale = { startMs: 0, endMs: 60_000, stepMs: 1000, rangeMs: 60_000 };
+
+  it.each([
+    [70, 'auto', true],
+    [71, 'auto', false],
+    [1000, 'always', true],
+  ] as const)('renders markers for %i visible series with showPoints=%s: %s', (count, showPoints, expected) => {
+    const series = getTimeSeries('id', 0, 'name', { showPoints }, scale, '#000000', undefined, undefined, count);
+    expect(series).toHaveProperty('showSymbol', expected);
   });
 });

@@ -30,7 +30,7 @@ import (
 	"github.com/perses/plugins/barchart/sdk/go"
 )
 
-bar.Calculation(common.Last)
+bar.Calculation(common.LastCalculation)
 
 ```
 

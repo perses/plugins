@@ -78,6 +78,18 @@ histogram.Thresholds(common.Thresholds{
 
 Define threshold values and colors for the histogram.
 
+### WithLogBase
+
+```golang
+package main
+
+import histogram "github.com/perses/plugins/histogramchart/sdk/go"
+
+histogram.WithLogBase(2)
+```
+
+Set the logarithmic base used by the histogram.
+
 ## Example
 
 ```golang
