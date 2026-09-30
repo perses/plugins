@@ -1,5 +1,5 @@
 {
-  "name": "@perses-dev/json",
+  "name": "@perses-dev/json-plugin",
   "version": "0.1.0-beta.2",
   "scripts": {
     "dev": "rsbuild dev",
