@@ -1,7 +1,7 @@
 github.com/perses/common v0.31.2 h1:klsl0KfWn6wVVG4rDJvsTvFO8Owf5ed4nj2VjbQST60=
 github.com/perses/common v0.31.2/go.mod h1:KgLB0ojBFzg93UwTNK8uAE1yuGexBiwqHiAvTFcHRDI=
-github.com/perses/perses v0.55.0-beta.2 h1:Fk/JY7w7nFEthvx59OXJgYS+vGGsX12xiH5ZgyROuKQ=
-github.com/perses/perses v0.55.0-beta.2/go.mod h1:zshmpMe5BnONXaGxDKtn7HzRGgDkeF3FHb4ga4QfXOc=
+github.com/perses/perses v0.55.0-beta.3 h1:LMTE3/SnPGDpKMc58MVUufxTH9tehvCFJtx3E5d9F74=
+github.com/perses/perses v0.55.0-beta.3/go.mod h1:0UJkSSi6uH2DssOjY8BHnn3kjvnbj3ukAblF1R8K0Lw=
 github.com/sirupsen/logrus v1.10.2 h1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=
 github.com/sirupsen/logrus v1.10.2/go.mod h1:SLEg8TqYulVKKfIGHldVp2K2aYz2DKSVBq4g/H5bR7Q=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
