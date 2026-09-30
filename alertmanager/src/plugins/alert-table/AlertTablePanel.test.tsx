@@ -59,16 +59,20 @@ const renderPanel = (runbookUrl: string): void => {
 };
 
 describe('AlertTablePanel runbook link', () => {
-  it.each(['https://runbooks.example.com/alert', 'http://runbooks.example.com/alert'])('links to %s', (url) => {
+  it.each([
+    'https://runbooks.example.com/alert',
+    'http://runbooks.example.com/alert',
+    '/runbooks/alert',
+    'runbooks/alert',
+    '//runbooks.example.com/alert',
+  ])('links to %s', (url) => {
     renderPanel(url);
     expect(screen.getByRole('link', { name: 'View runbook' })).toHaveAttribute('href', url);
   });
 
   it.each([
-    '//evil.example.com/malicious',
     'file:///etc/passwd',
     '  javascript:alert(1)',
-    '/runbooks/alert',
     'mailto:security@example.com',
     'vbscript:msgbox(1)',
     "data:text/html,<script>alert('XSS')</script>",

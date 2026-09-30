@@ -122,11 +122,12 @@ export function deduplicateAlerts(alerts: Alert[], config: AlertDeduplicationCon
 }
 
 /**
- * Whether a runbook annotation is an absolute http(s) URL, the only kind the panel links to.
+ * Whether a runbook annotation resolves to an http(s) URL, the only kind the panel links to.
+ * Relative URLs resolve against the current page, so they keep working in embedded mode.
  */
 export function isSafeRunbookUrl(value: string): boolean {
   try {
-    const { protocol } = new URL(value);
+    const { protocol } = new URL(value, window.location.href);
     return protocol === 'http:' || protocol === 'https:';
   } catch {
     return false;
