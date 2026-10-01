@@ -22,7 +22,7 @@ const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasou
   options,
 ) => {
   const { directUrl, headers, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -45,6 +45,7 @@ const createClient: DatasourcePlugin<GreptimeDBDatasourceSpec, GreptimeDBDatasou
       greptimedbQuery(params, {
         datasourceUrl,
         headers: headers ?? specHeaders,
+        fetch: customFetch,
       }),
   };
 };

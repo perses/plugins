@@ -20,6 +20,7 @@ export interface OpenSearchPPLParams {
 export interface OpenSearchApiOptions {
   datasourceUrl: string;
   headers?: OpenSearchRequestHeaders;
+  fetch?: typeof globalThis.fetch;
 }
 
 export interface OpenSearchClient {
@@ -86,7 +87,8 @@ export async function ppl(
 ): Promise<OpenSearchPPLResponse> {
   const url = buildUrl('/_plugins/_ppl', options.datasourceUrl);
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

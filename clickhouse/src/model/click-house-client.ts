@@ -23,6 +23,7 @@ export interface ClickHouseQueryParams {
 export interface ClickHouseQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetch?: typeof globalThis.fetch;
 }
 
 export interface ClickHouseQueryResponse {
@@ -49,7 +50,7 @@ export async function query(
   params: ClickHouseQueryParams,
   queryOptions: ClickHouseQueryOptions,
 ): Promise<ClickHouseQueryResponse> {
-  const { datasourceUrl, headers } = queryOptions;
+  const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
 
   const url = urlBuilder(datasourceUrl);
   if (!params.query) {
@@ -72,7 +73,8 @@ export async function query(
   };
 
   try {
-    const response = await fetch(url.toString(), init);
+    const doFetch = customFetch ?? fetch;
+    const response = await doFetch(url.toString(), init);
 
     if (!response.ok) {
       const errorText = await response.text();

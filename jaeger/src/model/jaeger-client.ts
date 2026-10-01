@@ -35,10 +35,15 @@ export interface JaegerClient extends DatasourceClient {
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetch?: typeof globalThis.fetch;
 }
 
-export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>): Promise<T> => {
-  const response = await fetch(...args);
+export const executeRequest = async <T>(
+  customFetch: typeof globalThis.fetch | undefined,
+  ...args: Parameters<typeof global.fetch>
+): Promise<T> => {
+  const doFetch = customFetch ?? fetch;
+  const response = await doFetch(...args);
   try {
     return await response.json();
   } catch (e) {
@@ -67,7 +72,7 @@ function fetchWithGet<TResponse>(
   params: JaegerSearchRequestParameters,
   queryOptions: QueryOptions,
 ): Promise<TResponse> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetch: customFetch } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
   const urlParams = buildSearchParams(params).toString();
@@ -75,7 +80,7 @@ function fetchWithGet<TResponse>(
     url += `?${urlParams}`;
   }
 
-  return executeRequest<TResponse>(url, {
+  return executeRequest<TResponse>(customFetch, url, {
     method: 'GET',
     headers,
   });

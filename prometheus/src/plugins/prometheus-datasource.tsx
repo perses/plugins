@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { RequestHeaders } from '@perses-dev/client';
+import type { fetchJson, RequestHeaders } from '@perses-dev/client';
 import type { QueryParamValues } from '@perses-dev/components';
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 import type { BuiltinVariableDefinition } from '@perses-dev/spec';
@@ -37,6 +37,8 @@ function wrapClientMethod<P, R>(
   datasourceUrl: string,
   specHeaders?: RequestHeaders,
   specQueryParams?: QueryParamValues,
+  customFetch?: typeof fetch,
+  customFetchJson?: typeof fetchJson,
 ): (params: P, options?: ClientRequestOptions) => Promise<R> {
   return (params: P, options?: ClientRequestOptions) =>
     fn(params, {
@@ -44,6 +46,8 @@ function wrapClientMethod<P, R>(
       headers: options?.headers ?? specHeaders,
       signal: options?.signal,
       queryParams: mergeQueryParams(specQueryParams, options?.queryParams),
+      fetch: customFetch,
+      fetchJson: customFetchJson,
     });
 }
 
@@ -52,7 +56,7 @@ function wrapClientMethod<P, R>(
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy, queryParams } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch, fetchJson } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -67,15 +71,15 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     options: {
       datasourceUrl,
     },
-    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders, queryParams }),
-    instantQuery: wrapClientMethod(instantQuery, datasourceUrl, specHeaders, queryParams),
-    rangeQuery: wrapClientMethod(rangeQuery, datasourceUrl, specHeaders, queryParams),
-    queryExemplars: wrapClientMethod(queryExemplars, datasourceUrl, specHeaders, queryParams),
-    labelNames: wrapClientMethod(labelNames, datasourceUrl, specHeaders, queryParams),
-    labelValues: wrapClientMethod(labelValues, datasourceUrl, specHeaders, queryParams),
-    metricMetadata: wrapClientMethod(metricMetadata, datasourceUrl, specHeaders, queryParams),
-    series: wrapClientMethod(series, datasourceUrl, specHeaders, queryParams),
-    parseQuery: wrapClientMethod(parseQuery, datasourceUrl, specHeaders, queryParams),
+    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders, queryParams, fetch }),
+    instantQuery: wrapClientMethod(instantQuery, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
+    rangeQuery: wrapClientMethod(rangeQuery, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
+    queryExemplars: wrapClientMethod(queryExemplars, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
+    labelNames: wrapClientMethod(labelNames, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
+    labelValues: wrapClientMethod(labelValues, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
+    metricMetadata: wrapClientMethod(metricMetadata, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
+    series: wrapClientMethod(series, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
+    parseQuery: wrapClientMethod(parseQuery, datasourceUrl, specHeaders, queryParams, fetch, fetchJson),
   };
 };
 
