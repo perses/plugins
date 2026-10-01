@@ -16,8 +16,8 @@ import type { ReactElement } from 'react';
 
 export function ColorSwatches({ colors }: { colors: readonly string[] }): ReactElement {
   return (
-    <Box sx={{ display: 'flex', gap: '3px', flexWrap: 'nowrap', p: '4px 2px' }}>
-      {colors.slice(0, 12).map((color, i) => (
+    <Box sx={{ display: 'flex', gap: '3px', flexWrap: 'wrap', p: '4px 2px' }}>
+      {colors.map((color, i) => (
         <Box
           key={i}
           sx={{

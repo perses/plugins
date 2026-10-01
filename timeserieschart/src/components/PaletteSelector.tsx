@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Tooltip } from '@mui/material';
 import { OptionsEditorControl, SettingsAutocomplete, useChartsTheme } from '@perses-dev/components';
-import type { HTMLAttributes, Key, ReactElement, ReactNode, SyntheticEvent } from 'react';
+import type { SettingsAutocompleteOption } from '@perses-dev/components';
+import type { ReactElement, SyntheticEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 
 import type { CategoricalPaletteName, TimeSeriesChartPaletteOptions } from '../time-series-chart-model';
@@ -26,42 +26,9 @@ import {
 } from '../time-series-chart-model';
 import { ColorSwatches } from './ColorSwatches';
 
-interface PaletteOption {
-  id: string;
-  label: string;
-  swatches: ReactNode;
+interface PaletteOption extends SettingsAutocompleteOption {
   paletteMode: 'auto' | 'categorical';
   paletteName?: CategoricalPaletteName;
-}
-
-const SWATCH_TOOLTIP_SLOT_PROPS = {
-  tooltip: {
-    sx: { bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: 2 },
-  },
-} as const;
-
-function renderPaletteOption(
-  { key, ...props }: HTMLAttributes<HTMLLIElement> & { key: Key },
-  option: PaletteOption,
-): ReactElement {
-  if (option.swatches) {
-    return (
-      <Tooltip
-        key={key}
-        title={option.swatches}
-        placement="right"
-        enterDelay={100}
-        slotProps={SWATCH_TOOLTIP_SLOT_PROPS}
-      >
-        <li {...props}>{option.label}</li>
-      </Tooltip>
-    );
-  }
-  return (
-    <li key={key} {...props}>
-      {option.label}
-    </li>
-  );
 }
 
 export interface PaletteSelectorProps {
@@ -79,13 +46,12 @@ export function PaletteSelector({ value, onChange }: PaletteSelectorProps): Reac
       {
         id: 'auto',
         label: 'Auto',
-        swatches: null,
         paletteMode: 'auto',
       },
       {
         id: 'theme-colors',
         label: 'Theme colors',
-        swatches: themeColors.length > 0 ? <ColorSwatches colors={themeColors} /> : null,
+        description: themeColors.length > 0 ? <ColorSwatches colors={themeColors} /> : undefined,
         paletteMode: 'categorical',
       },
       ...CATEGORICAL_PALETTE_NAMES.map((name): PaletteOption => {
@@ -94,7 +60,7 @@ export function PaletteSelector({ value, onChange }: PaletteSelectorProps): Reac
         return {
           id: `categorical-${name}`,
           label: meta.label,
-          swatches: <ColorSwatches colors={colors} />,
+          description: <ColorSwatches colors={colors} />,
           paletteMode: 'categorical',
           paletteName: name,
         };
@@ -135,8 +101,6 @@ export function PaletteSelector({ value, onChange }: PaletteSelectorProps): Reac
         <SettingsAutocomplete
           value={currentPaletteOption}
           options={paletteOptions}
-          getOptionLabel={(o) => o.label}
-          renderOption={renderPaletteOption}
           onChange={handleChange}
           disableClearable
         />
