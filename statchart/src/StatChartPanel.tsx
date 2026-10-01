@@ -22,7 +22,7 @@ import type { FC } from 'react';
 import { useMemo } from 'react';
 
 import type { StatChartOptions } from './stat-chart-model';
-import { resolveAutoOrientationColumnsCount } from './stat-chart-model';
+import { resolveAutoOrientationColumnsCount, resolveAutoOrientationTileHeight } from './stat-chart-model';
 import type { StatChartData } from './StatChartBase';
 import { StatChartBase } from './StatChartBase';
 import { measureTextWidth } from './utils/calculate-font-size';
@@ -34,7 +34,6 @@ import { getStatChartColor } from './utils/get-color';
 const MIN_WIDTH = 100;
 const MIN_TILE_HEIGHT = 60;
 const SPACING = 2;
-const AUTO_TILE_HEIGHT = 72;
 const MAX_VALUE_FONT_SIZE = 96;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
@@ -122,7 +121,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
       return Math.max(MIN_TILE_HEIGHT, Math.floor(panelHeight / Math.max(1, statChartData.length)));
     }
     if (isAutoWrapped) {
-      return Math.min(AUTO_TILE_HEIGHT, Math.max(MIN_TILE_HEIGHT, Math.floor(panelHeight / autoRowCount)));
+      return resolveAutoOrientationTileHeight(panelHeight, autoRowCount, SPACING, MIN_TILE_HEIGHT);
     }
     return panelHeight;
   }, [autoRowCount, panelHeight, isAutoWrapped, isVerticalLayout, statChartData.length]);
@@ -142,7 +141,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
     <Stack
       height={panelHeight}
       width={panelWidth}
-      spacing={`${SPACING}px`}
+      spacing={isAutoWrapped ? 0 : `${SPACING}px`}
       direction={isVerticalLayout ? 'column' : 'row'}
       flexWrap={isAutoWrapped ? 'wrap' : 'nowrap'}
       justifyContent={justifyContent}

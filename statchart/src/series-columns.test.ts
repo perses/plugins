@@ -13,7 +13,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { computeIdealSeriesColumns, MAX_SERIES_COLUMNS, resolveAutoOrientationColumnsCount } from './stat-chart-model';
+import {
+  computeIdealSeriesColumns,
+  MAX_SERIES_COLUMNS,
+  resolveAutoOrientationColumnsCount,
+  resolveAutoOrientationTileHeight,
+} from './stat-chart-model';
 
 describe('computeIdealSeriesColumns', () => {
   it('matches ceil(sqrt(n))', () => {
@@ -45,5 +50,17 @@ describe('resolveAutoOrientationColumnsCount', () => {
 
   it('respects narrow panel width', () => {
     expect(resolveAutoOrientationColumnsCount(10, 2)).toBe(2);
+  });
+});
+
+describe('resolveAutoOrientationTileHeight', () => {
+  it('shares the panel height so a sparkline fits under the value', () => {
+    // 2 rows, 2px gap: a 72px cap would hide the sparkline in a tall panel.
+    expect(resolveAutoOrientationTileHeight(240, 2, 2, 60)).toBe(119);
+    expect(resolveAutoOrientationTileHeight(300, 3, 2, 60)).toBe(98);
+  });
+
+  it('keeps a minimum tile height when the panel is shorter than the rows', () => {
+    expect(resolveAutoOrientationTileHeight(80, 2, 2, 60)).toBe(60);
   });
 });

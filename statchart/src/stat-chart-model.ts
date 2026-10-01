@@ -103,6 +103,19 @@ export function resolveAutoOrientationColumnsCount(
   return Math.max(1, Math.min(seriesCount, width, ideal));
 }
 
+// Share the panel height across auto-orientation rows
+export function resolveAutoOrientationTileHeight(
+  panelHeight: number,
+  rowCount: number,
+  spacing: number,
+  minTileHeight: number,
+): number {
+  const rows = Math.max(1, Math.floor(rowCount));
+  const gaps = Math.max(0, spacing) * Math.max(0, rows - 1);
+  const available = Math.max(0, panelHeight - gaps);
+  return Math.max(minTileHeight, Math.floor(available / rows));
+}
+
 export interface StatChartSparklineOptions {
   color?: string;
   width?: number;
