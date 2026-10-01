@@ -70,13 +70,13 @@ export function PaletteSelector({ value, onChange }: PaletteSelectorProps): Reac
 
   const currentPaletteOption = useMemo((): PaletteOption => {
     if (value?.mode !== 'categorical') {
-      return paletteOptions[0]!;
+      return paletteOptions.find((o) => o.id === 'auto')!;
     }
     const name = value.name;
     if (!name) {
-      return paletteOptions[1]!;
+      return paletteOptions.find((o) => o.id === 'theme-colors')!;
     }
-    return paletteOptions.find((o) => o.paletteName === name) ?? paletteOptions[1]!;
+    return paletteOptions.find((o) => o.paletteName === name) ?? paletteOptions.find((o) => o.id === 'theme-colors')!;
   }, [value, paletteOptions]);
 
   const handleChange = useCallback(
