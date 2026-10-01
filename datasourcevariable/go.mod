@@ -2,7 +2,7 @@ module github.com/perses/plugins/datasourcevariable
 
 go 1.27.1
 
-require github.com/perses/perses v0.55.0-beta.3
+require github.com/perses/perses v0.55.0-beta.4
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

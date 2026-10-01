@@ -2,7 +2,7 @@ module github.com/perses/plugins/histogramchart
 
 go 1.27.1
 
-require github.com/perses/perses v0.55.0-beta.3
+require github.com/perses/perses v0.55.0-beta.4
 
 require (
 	github.com/kr/pretty v0.3.1 // indirect
