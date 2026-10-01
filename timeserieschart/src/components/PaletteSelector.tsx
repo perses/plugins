@@ -106,7 +106,7 @@ export function PaletteSelector({ value, onChange }: PaletteSelectorProps): Reac
     if (value?.mode !== 'categorical') {
       return paletteOptions[0]!;
     }
-    const name = value.categoricalPaletteName;
+    const name = value.name;
     if (!name) {
       return paletteOptions[1]!;
     }
@@ -120,7 +120,7 @@ export function PaletteSelector({ value, onChange }: PaletteSelectorProps): Reac
       } else {
         onChange({
           mode: 'categorical',
-          categoricalPaletteName: selected.paletteName,
+          name: selected.paletteName,
         });
       }
     },

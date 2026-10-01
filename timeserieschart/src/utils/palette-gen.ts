@@ -56,7 +56,7 @@ export function getSeriesColor(props: SeriesColorProps): string {
 
   // Explicit way to always cycle through classical palette instead of changing when based on number of series.
   if (visual.palette?.mode === 'categorical') {
-    const schemeName = visual.palette.categoricalPaletteName;
+    const schemeName = visual.palette.name;
     const scheme = schemeName ? CATEGORICAL_PALETTE_SCHEMES[schemeName] : null;
     const palette = scheme && scheme.length > 0 ? scheme : defaultCategoricalPalette;
     if (palette && palette.length > 0) {

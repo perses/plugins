@@ -92,10 +92,10 @@ describe('getSeriesColor', () => {
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
   });
 
-  it('should return a color from a named categorical scheme when categoricalPaletteName is set', () => {
+  it('should return a color from a named categorical scheme when name is set', () => {
     const props: SeriesColorProps = {
       defaultCategoricalPalette: testCategoricalPalette,
-      visual: { palette: { mode: 'categorical', categoricalPaletteName: 'category10' } },
+      visual: { palette: { mode: 'categorical', name: 'category10' } },
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,

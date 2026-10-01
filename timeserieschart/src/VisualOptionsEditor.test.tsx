@@ -80,8 +80,8 @@ describe('VisualOptionsEditor', () => {
       expect(screen.getByText(VISUAL_CONFIG.colorPalette.label)).toBeInTheDocument();
     });
 
-    it('shows the named palette label when categoricalPaletteName is set', () => {
-      renderVisualOptionsEditor({ palette: { mode: 'categorical', categoricalPaletteName: 'tableau10' } });
+    it('shows the named palette label when name is set', () => {
+      renderVisualOptionsEditor({ palette: { mode: 'categorical', name: 'tableau10' } });
       expect(screen.getByRole('combobox', { name: VISUAL_CONFIG.colorPalette.label })).toHaveValue(
         CATEGORICAL_SCHEME_METADATA.tableau10.label,
       );
@@ -105,7 +105,7 @@ describe('VisualOptionsEditor', () => {
       await userEvent.click(screen.getByRole('option', { name: 'Theme colors' }));
 
       expect(onChange).toHaveBeenCalledWith(
-        expect.objectContaining({ palette: { mode: 'categorical', categoricalPaletteName: undefined } }),
+        expect.objectContaining({ palette: { mode: 'categorical', name: undefined } }),
       );
     });
 
@@ -117,7 +117,7 @@ describe('VisualOptionsEditor', () => {
       await userEvent.click(screen.getByRole('option', { name: CATEGORICAL_SCHEME_METADATA.dark2.label }));
 
       expect(onChange).toHaveBeenCalledWith(
-        expect.objectContaining({ palette: { mode: 'categorical', categoricalPaletteName: 'dark2' } }),
+        expect.objectContaining({ palette: { mode: 'categorical', name: 'dark2' } }),
       );
     });
   });

@@ -72,7 +72,7 @@ const (
 
 type Palette struct {
 	Mode                   PaletteMode            `json:"mode" yaml:"mode"`
-	Name                   CategoricalPaletteName `json:"categoricalPaletteName,omitempty" yaml:"categoricalPaletteName,omitempty"`
+	Name                   CategoricalPaletteName `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 type VisualDisplay string

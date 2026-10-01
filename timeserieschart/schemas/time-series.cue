@@ -34,7 +34,7 @@ spec: close({
 #palette: {
 	mode: "auto" | "categorical"
 	if mode == "categorical" {
-		categoricalPaletteName?: "category10" | "tableau10" | "set1" | "set2" | "set3" | "dark2"
+		name?: "category10" | "tableau10" | "set1" | "set2" | "set3" | "dark2"
 	}
 }
 

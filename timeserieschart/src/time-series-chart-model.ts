@@ -102,7 +102,7 @@ export const CATEGORICAL_SCHEME_METADATA: Record<CategoricalPaletteName, Categor
 export interface TimeSeriesChartPaletteOptions {
   mode: TimeSeriesChartPaletteMode;
   // Only applies when mode is 'categorical'. Omitting falls back to the ECharts theme palette.
-  categoricalPaletteName?: CategoricalPaletteName;
+  name?: CategoricalPaletteName;
 }
 
 export const PALETTE_DROPDOWN_TOOLTIP =
