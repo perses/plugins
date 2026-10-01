@@ -15,6 +15,7 @@ package log
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -78,6 +79,22 @@ func TestPluginSpecRejectsEmptyQueryOnUnmarshal(t *testing.T) {
 	}
 }
 
+func TestPluginSpecAcceptsEmptyLuceneQueryOnUnmarshal(t *testing.T) {
+	raw := []byte(`{"query":"","queryLanguage":"lucene","index":"logs-*"}`)
+	var spec PluginSpec
+	if err := json.Unmarshal(raw, &spec); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestPluginSpecRejectsEmptySQLQueryOnUnmarshal(t *testing.T) {
+	raw := []byte(`{"query":"","queryLanguage":"sql"}`)
+	var spec PluginSpec
+	if err := json.Unmarshal(raw, &spec); err == nil {
+		t.Fatalf("expected error unmarshalling sql spec with empty query, got nil")
+	}
+}
+
 func TestPluginSpecAcceptsNonEmptyQueryOnUnmarshal(t *testing.T) {
 	raw := []byte(`{"query":"source=logs-*"}`)
 	var spec PluginSpec
@@ -101,5 +118,98 @@ func TestOpenSearchLogQueryDisableTimeFilter(t *testing.T) {
 	}
 	if out["disableTimeFilter"] != true {
 		t.Errorf("disableTimeFilter mismatch: %v", out["disableTimeFilter"])
+	}
+}
+
+func TestQueryLanguageAndLimit(t *testing.T) {
+	q := OpenSearchLogQuery("level:error",
+		QueryLanguage("lucene"),
+		Index("logs-*"),
+		Limit(250),
+	)
+	if q.Error != nil {
+		t.Fatalf("unexpected error: %v", q.Error)
+	}
+
+	raw, err := json.Marshal(q.Plugin.Spec)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	if out["queryLanguage"] != "lucene" {
+		t.Errorf("queryLanguage mismatch: %v", out["queryLanguage"])
+	}
+	// JSON numbers decode as float64 into map[string]any.
+	if out["limit"] != float64(250) {
+		t.Errorf("limit mismatch: %v", out["limit"])
+	}
+}
+
+func TestDefaultLanguageIsOmitted(t *testing.T) {
+	q := OpenSearchLogQuery("source=logs-*")
+	if q.Error != nil {
+		t.Fatalf("unexpected error: %v", q.Error)
+	}
+
+	raw, err := json.Marshal(q.Plugin.Spec)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	// No queryLanguage or limit key at all: the plugin treats absence as PPL.
+	if _, ok := out["queryLanguage"]; ok {
+		t.Errorf("queryLanguage should be omitted, got %v", out["queryLanguage"])
+	}
+	if _, ok := out["limit"]; ok {
+		t.Errorf("limit should be omitted, got %v", out["limit"])
+	}
+}
+
+func TestRejectsUnknownLanguage(t *testing.T) {
+	q := OpenSearchLogQuery("level:error", QueryLanguage("kql"), Index("logs-*"))
+	if q.Error == nil {
+		t.Fatal("expected an error for an unknown query language")
+	}
+	if !strings.Contains(q.Error.Error(), "unknown query language") {
+		t.Errorf("unexpected error text: %v", q.Error)
+	}
+}
+
+func TestRequiresIndexForLucene(t *testing.T) {
+	var spec PluginSpec
+	err := json.Unmarshal([]byte(`{"query":"level:error","queryLanguage":"lucene"}`), &spec)
+	if err == nil {
+		t.Fatal("expected an error when index is missing for lucene")
+	}
+	if !strings.Contains(err.Error(), "index is required") {
+		t.Errorf("unexpected error text: %v", err)
+	}
+}
+
+func TestLimitRejectsZero(t *testing.T) {
+	q := OpenSearchLogQuery("level:error", QueryLanguage("lucene"), Index("logs-*"), Limit(0))
+	if q.Error == nil {
+		t.Fatal("expected an error for Limit(0)")
+	}
+	if !strings.Contains(q.Error.Error(), "limit must be greater than 0") {
+		t.Errorf("unexpected error text: %v", q.Error)
+	}
+}
+
+func TestLimitRejectsNegative(t *testing.T) {
+	q := OpenSearchLogQuery("level:error", QueryLanguage("lucene"), Index("logs-*"), Limit(-3))
+	if q.Error == nil {
+		t.Fatal("expected an error for Limit(-3)")
+	}
+	if !strings.Contains(q.Error.Error(), "limit must be greater than 0") {
+		t.Errorf("unexpected error text: %v", q.Error)
 	}
 }

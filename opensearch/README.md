@@ -1,7 +1,12 @@
 # Plugin Module: opensearch
 
-Datasource plugin for [OpenSearch](https://opensearch.org/) in Perses. Supports log queries using
-[PPL (Piped Processing Language)](https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/).
+Datasource plugin for [OpenSearch](https://opensearch.org/) in Perses. Log queries can
+be written in [PPL](https://docs.opensearch.org/latest/sql-and-ppl/ppl/index/),
+[SQL](https://docs.opensearch.org/latest/sql-and-ppl/sql/index/),
+[Lucene / query string](https://docs.opensearch.org/latest/query-dsl/full-text/query-string/),
+or raw [Query DSL](https://docs.opensearch.org/latest/query-dsl/), selected per query.
+PPL and SQL need the SQL/PPL plugin enabled on the cluster; Lucene and Query DSL use
+the core `_search` API.
 
 This plugin is intended to display logs alongside the traces surfaced by the Tempo plugin, so a user can
 pivot from a trace to the related logs in OpenSearch.

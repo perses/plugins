@@ -27,6 +27,8 @@ const PluginKind = "OpenSearchLogQuery"
 type PluginSpec struct {
 	Datasource        *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	Query             string               `json:"query" yaml:"query"`
+	QueryLanguage     string               `json:"queryLanguage,omitempty" yaml:"queryLanguage,omitempty"`
+	Limit             int                  `json:"limit,omitempty" yaml:"limit,omitempty"`
 	Index             string               `json:"index,omitempty" yaml:"index,omitempty"`
 	TimestampField    string               `json:"timestampField,omitempty" yaml:"timestampField,omitempty"`
 	MessageField      string               `json:"messageField,omitempty" yaml:"messageField,omitempty"`
@@ -59,9 +61,26 @@ func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+// validLanguages mirrors the CUE schema. An empty value means PPL.
+var validLanguages = map[string]bool{"": true, "ppl": true, "sql": true, "lucene": true, "dsl": true}
+
 func (s *PluginSpec) validate() error {
-	if len(s.Query) == 0 {
+	if !validLanguages[s.QueryLanguage] {
+		return fmt.Errorf("unknown query language %q: want one of ppl, sql, lucene, dsl", s.QueryLanguage)
+	}
+	// A blank Lucene query string means "everything in the time range".
+	if len(s.Query) == 0 && s.QueryLanguage != "lucene" {
 		return fmt.Errorf("query cannot be empty")
+	}
+	if (s.QueryLanguage == "lucene" || s.QueryLanguage == "dsl") && len(s.Index) == 0 {
+		return fmt.Errorf("index is required when queryLanguage is %q", s.QueryLanguage)
+	}
+	// Only negative values are rejected here: with a bare int + omitempty, an omitted
+	// `limit` also unmarshals to 0, so rejecting 0 would reject every spec that simply
+	// omits the field. An explicit `"limit": 0` in hand-written YAML/JSON therefore
+	// passes here and is caught by the CUE schema instead.
+	if s.Limit < 0 {
+		return fmt.Errorf("limit cannot be negative")
 	}
 	return nil
 }
@@ -81,6 +100,10 @@ func create(query string, options ...Option) (Builder, error) {
 		if err := opt(builder); err != nil {
 			return *builder, err
 		}
+	}
+
+	if err := builder.validate(); err != nil {
+		return *builder, err
 	}
 
 	return *builder, nil

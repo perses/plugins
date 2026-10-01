@@ -1,0 +1,12 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": {
+    "datasource": { "kind": "OpenSearchDatasource", "name": "opensearch-demo" },
+    "queryLanguage": "ppl",
+    "query": "source=logs-* | where level='error'",
+    "index": "logs-*",
+    "timestampField": "@timestamp",
+    "messageField": "message",
+    "disableTimeFilter": false
+  }
+}
