@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { fetchJson, RequestHeaders } from '@perses-dev/client';
+import type { FetchFn, fetchJson, RequestHeaders } from '@perses-dev/client';
 import type { QueryParamValues } from '@perses-dev/components';
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 import type { BuiltinVariableDefinition } from '@perses-dev/spec';
@@ -37,7 +37,7 @@ function wrapClientMethod<P, R>(
   datasourceUrl: string,
   specHeaders?: RequestHeaders,
   specQueryParams?: QueryParamValues,
-  customFetch?: typeof fetch,
+  customFetch?: FetchFn,
   customFetchJson?: typeof fetchJson,
 ): (params: P, options?: ClientRequestOptions) => Promise<R> {
   return (params: P, options?: ClientRequestOptions) =>

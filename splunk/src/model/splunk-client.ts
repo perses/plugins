@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/client';
+import type { FetchFn } from '@perses-dev/client';
 
 import type {
   SplunkJobCreateResponse,
@@ -45,7 +46,7 @@ export interface SplunkExportSearchParams {
 export interface SplunkApiOptions {
   datasourceUrl: string;
   headers?: SplunkRequestHeaders;
-  fetch?: typeof globalThis.fetch;
+  fetch?: FetchFn;
   fetchJson?: typeof fetchJson;
 }
 

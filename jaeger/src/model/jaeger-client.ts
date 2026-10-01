@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { RequestHeaders } from '@perses-dev/client';
+import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 import type { DatasourceClient } from '@perses-dev/plugin-system';
 
 import type { JaegerApiResponse, JaegerOperation, JaegerSearchRequestParameters, JaegerTrace } from './api-types';
@@ -35,11 +35,11 @@ export interface JaegerClient extends DatasourceClient {
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
-  fetch?: typeof globalThis.fetch;
+  fetch?: FetchFn;
 }
 
 export const executeRequest = async <T>(
-  customFetch: typeof globalThis.fetch | undefined,
+  customFetch: FetchFn | undefined,
   ...args: Parameters<typeof global.fetch>
 ): Promise<T> => {
   const doFetch = customFetch ?? fetch;

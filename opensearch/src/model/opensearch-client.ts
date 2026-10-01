@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { FetchFn } from '@perses-dev/client';
+
 import type { OpenSearchPPLResponse, OpenSearchRequestHeaders } from './opensearch-client-types';
 
 export interface OpenSearchPPLParams {
@@ -20,7 +22,7 @@ export interface OpenSearchPPLParams {
 export interface OpenSearchApiOptions {
   datasourceUrl: string;
   headers?: OpenSearchRequestHeaders;
-  fetch?: typeof globalThis.fetch;
+  fetch?: FetchFn;
 }
 
 export interface OpenSearchClient {

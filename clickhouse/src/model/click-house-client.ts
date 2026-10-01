@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { RequestHeaders } from '@perses-dev/client';
+import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 
 export interface ClickHouseQueryParams {
   query: string;
@@ -23,7 +23,7 @@ export interface ClickHouseQueryParams {
 export interface ClickHouseQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
-  fetch?: typeof globalThis.fetch;
+  fetch?: FetchFn;
 }
 
 export interface ClickHouseQueryResponse {

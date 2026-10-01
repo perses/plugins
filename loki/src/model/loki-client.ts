@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { FetchFn } from '@perses-dev/client';
 import type { AbsoluteTimeRange } from '@perses-dev/spec';
 
 import type {
@@ -65,7 +66,7 @@ export interface LokiVolumeParams {
 export interface LokiApiOptions {
   datasourceUrl: string;
   headers?: LokiRequestHeaders;
-  fetch?: typeof globalThis.fetch;
+  fetch?: FetchFn;
 }
 
 export interface LokiClient {

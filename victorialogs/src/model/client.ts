@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { FetchFn } from '@perses-dev/client';
+
 import type {
   VictoriaLogsStreamQueryRangeResponse,
   VictoriaLogsStatsQueryRangeResponse,
@@ -47,7 +49,7 @@ export interface VictoriaLogsFieldValuesParams extends VictoriaLogsBaseParams {
 export interface VictoriaLogsApiOptions {
   datasourceUrl: string;
   headers?: VictoriaLogsRequestHeaders;
-  fetch?: typeof globalThis.fetch;
+  fetch?: FetchFn;
 }
 
 export interface VictoriaLogsClient {
