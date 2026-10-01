@@ -22,7 +22,7 @@ jobs:
           enable_npm: true
           enable_go: true
           enable_cue: true
-          cue_version: 'v0.16.1'
+          cue_version: 'v0.17.1'
       - name: install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.1
         with:
@@ -105,7 +105,7 @@ jobs:
           enable_npm: true
           enable_go: true
           enable_cue: true
-          cue_version: 'v0.16.1'
+          cue_version: 'v0.17.1'
           nvmrc_path: './.nvmrc'
       - name: Download archive
         uses: actions/download-artifact@v8

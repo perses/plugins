@@ -18,7 +18,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: 'v0.16.1'
+          cue_version: 'v0.17.1'
       - run: make checkformat-cue
   validate-schemas:
     name: 'Validate plugin schemas'
@@ -31,7 +31,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: 'v0.16.1'
+          cue_version: 'v0.17.1'
       - name: Install percli
         uses: perses/cli-actions/actions/install_percli@v0.2.1
         with:
@@ -57,7 +57,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: 'v0.16.1'
+          cue_version: 'v0.17.1'
       - uses: actions/cache@v6
         id: cache
         with:
