@@ -7,7 +7,7 @@ source: {
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.55.0-beta.2"
+		v:       "v0.55.0-beta.3"
 		default: true
 	}
 	"github.com/perses/plugins/jaeger@v0": {
@@ -39,7 +39,7 @@ deps: {
 		default: true
 	}
 	"github.com/perses/spec/cue@v0": {
-		v:       "v0.3.0-beta.9"
+		v:       "v0.3.0-beta.10"
 		default: true
 	}
 }
