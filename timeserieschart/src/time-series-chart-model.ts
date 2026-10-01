@@ -99,11 +99,13 @@ export const CATEGORICAL_SCHEME_METADATA: Record<CategoricalPaletteName, Categor
   dark2: { label: 'ColorBrewer Dark 2' },
 };
 
-export interface TimeSeriesChartPaletteOptions {
-  mode: TimeSeriesChartPaletteMode;
-  // Only applies when mode is 'categorical'. Omitting falls back to the ECharts theme palette.
-  name?: CategoricalPaletteName;
-}
+export type TimeSeriesChartPaletteOptions =
+  | { mode: 'auto' }
+  | {
+      mode: 'categorical';
+      // Omitting falls back to the ECharts theme palette.
+      name?: CategoricalPaletteName;
+    };
 
 export const PALETTE_DROPDOWN_TOOLTIP =
   'Auto derives a unique color from the series name — same name always maps to the same color across panels. ' +
