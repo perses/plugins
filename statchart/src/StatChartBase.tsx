@@ -26,6 +26,7 @@ import type { FC, ReactNode } from 'react';
 import { useMemo } from 'react';
 
 import type { ColorMode } from './stat-chart-model';
+import { resolveSparklineBandHeight } from './stat-chart-model';
 import { useOptimalFontSize } from './utils/calculate-font-size';
 import { formatStatChartValue } from './utils/format-stat-chart-value';
 
@@ -101,24 +102,27 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   if (legendFontSize !== undefined) {
     seriesNameFontSize = legendFontSize;
   } else if (alignmentSeriesName !== undefined) {
-    // multi-series: use 15% of cell height for legend, clamped between 14px and 30px
-    seriesNameFontSize = Math.max(14, Math.min((height * 0.15) / LINE_HEIGHT, SERIES_NAME_MAX_FONT_SIZE));
+    // Multi-series names track the tile. Dividing by line-height pinned them at 14px
+    // until the tile was taller than ~110px.
+    seriesNameFontSize = Math.max(14, Math.min(height * 0.18, SERIES_NAME_MAX_FONT_SIZE));
   }
 
   const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
 
   const availableHeight = height - seriesNameHeight;
+  // A sparkline used to claim everything under a value sized to 25% of the tile,
+  // so the number stayed tiny while the chart grew into empty space.
+  const sparklineBand = sparkline ? resolveSparklineBandHeight(availableHeight) : 0;
+  const valueAreaHeight = sparkline ? Math.max(0, availableHeight - sparklineBand) : availableHeight * 0.9;
   const optimalValueFontSize = useOptimalFontSize({
     text: alignmentText || formattedValue,
     fontSizeOverride: valueFontSize,
     fontWeight: VALUE_FONT_WEIGHT,
     width: sparkline ? availableWidth : availableWidth * 0.5,
-    height: sparkline ? availableHeight * 0.25 : availableHeight * 0.9,
+    height: valueAreaHeight,
     lineHeight: LINE_HEIGHT,
     maxSize: maxValueFontSize,
   });
-  const valueFontHeight = optimalValueFontSize * LINE_HEIGHT;
-
   // single-series: keep legend smaller than value (unless explicitly set)
   if (alignmentSeriesName === undefined && legendFontSize === undefined) {
     seriesNameFontSize = Math.min(optimalValueFontSize * 0.7, seriesNameFontSize);
@@ -157,7 +161,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
       },
       grid: {
         show: false,
-        top: '35%', // adds space above sparkline
+        top: 0,
         right: 0,
         bottom: 0,
         left: 0,
@@ -267,7 +271,7 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
           style={{
             // ECharts rounds the height to the nearest integer by default.
             // This can cause unneccessary scrollbars when the total height of this chart exceeds the 'height' prop.
-            height: Math.floor(height - seriesNameHeight - valueFontHeight),
+            height: Math.floor(sparklineBand),
           }}
           option={option}
           theme={chartsTheme.echartsTheme}

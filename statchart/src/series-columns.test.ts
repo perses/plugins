@@ -18,6 +18,7 @@ import {
   MAX_SERIES_COLUMNS,
   resolveAutoOrientationColumnsCount,
   resolveAutoOrientationTileHeight,
+  resolveSparklineBandHeight,
 } from './stat-chart-model';
 
 describe('computeIdealSeriesColumns', () => {
@@ -62,5 +63,17 @@ describe('resolveAutoOrientationTileHeight', () => {
 
   it('keeps a minimum tile height when the panel is shorter than the rows', () => {
     expect(resolveAutoOrientationTileHeight(80, 2, 2, 60)).toBe(60);
+  });
+});
+
+describe('resolveSparklineBandHeight', () => {
+  it('leaves most of the tile to the value', () => {
+    expect(resolveSparklineBandHeight(47)).toBeCloseTo(18.8);
+    expect(resolveSparklineBandHeight(100)).toBe(30);
+    expect(resolveSparklineBandHeight(200)).toBe(60);
+  });
+
+  it('returns 0 when there is no room under the series name', () => {
+    expect(resolveSparklineBandHeight(0)).toBe(0);
   });
 });

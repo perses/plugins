@@ -200,7 +200,7 @@ export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
               legendFontSize={legendFontSize}
               alignmentText={isAutoWrapped || !isVerticalLayout ? undefined : alignmentText}
               alignmentSeriesName={alignmentSeriesName}
-              maxValueFontSize={!isAutoWrapped && !isVerticalLayout ? MAX_VALUE_FONT_SIZE : undefined}
+              maxValueFontSize={MAX_VALUE_FONT_SIZE}
             />
           );
         })

@@ -116,6 +116,18 @@ export function resolveAutoOrientationTileHeight(
   return Math.max(minTileHeight, Math.floor(available / rows));
 }
 
+const SPARKLINE_BAND_MIN_HEIGHT = 24;
+const SPARKLINE_BAND_MAX_HEIGHT = 72;
+// The sparkline keeps at most this share of the space under the series name.
+// The value uses the rest, so the number stays readable when the panel grows.
+const SPARKLINE_BAND_MAX_RATIO = 0.4;
+
+export function resolveSparklineBandHeight(availableHeight: number): number {
+  if (availableHeight <= 0) return 0;
+  const preferred = Math.min(SPARKLINE_BAND_MAX_HEIGHT, Math.max(SPARKLINE_BAND_MIN_HEIGHT, availableHeight * 0.3));
+  return Math.min(availableHeight * SPARKLINE_BAND_MAX_RATIO, preferred);
+}
+
 export interface StatChartSparklineOptions {
   color?: string;
   width?: number;
