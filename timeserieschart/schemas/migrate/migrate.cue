@@ -231,7 +231,8 @@ spec: {
 	]
 
 	// don't keep elements that just define the queryIndex
-	#querySettingsFiltered: [for qs in #querySettings if len(qs) > 1 {qs}]
+	// NB: count the fields via a comprehension, as len() on the struct directly triggers a cyclic reference error since CUE v0.17
+	#querySettingsFiltered: [for qs in #querySettings if len([for k, _ in qs {k}]) > 1 {qs}]
 	if len(#querySettingsFiltered) != 0 {
 		querySettings: #querySettingsFiltered
 	}
