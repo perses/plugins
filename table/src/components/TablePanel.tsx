@@ -779,11 +779,6 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       return;
     }
 
-    const headerRow = scrollContainer.querySelector('thead tr');
-    if (!headerRow) {
-      return;
-    }
-
     const syncColumnWidths = (): void => {
       const headerCells = scrollContainer.querySelectorAll<HTMLElement>('thead tr th');
 
@@ -801,15 +796,32 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       });
     };
 
-    syncColumnWidths();
-
-    // Re-sync whenever the header row's size changes
+    // Re-sync whenever the header row's size changes.
     const resizeObserver = new ResizeObserver(syncColumnWidths);
-    if (headerRow) {
-      resizeObserver.observe(headerRow);
-    }
+    // The virtualized table remounts its header row when its width, rows, or columns change,
+    // so follow the current header row instead of observing a detached one.
+    let headerRow: Element | null = null;
+    const observeHeaderRow = (): void => {
+      const currentHeaderRow = scrollContainer.querySelector('thead tr');
+      if (currentHeaderRow === headerRow) {
+        return;
+      }
+      if (headerRow) {
+        resizeObserver.unobserve(headerRow);
+      }
+      headerRow = currentHeaderRow;
+      if (headerRow) {
+        resizeObserver.observe(headerRow);
+      }
+      syncColumnWidths();
+    };
+
+    observeHeaderRow();
+    const mutationObserver = new MutationObserver(observeHeaderRow);
+    mutationObserver.observe(scrollContainer, { childList: true, subtree: true });
 
     return (): void => {
+      mutationObserver.disconnect();
       resizeObserver.disconnect();
     };
   }, [panelContainer, spec.enableFiltering, columns]);
