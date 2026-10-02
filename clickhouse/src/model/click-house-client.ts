@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { RequestHeaders } from '@perses-dev/client';
+import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 
 export interface ClickHouseQueryParams {
   query: string;
@@ -23,6 +23,7 @@ export interface ClickHouseQueryParams {
 export interface ClickHouseQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetch?: FetchFn;
 }
 
 export interface ClickHouseQueryResponse {
@@ -49,7 +50,7 @@ export async function query(
   params: ClickHouseQueryParams,
   queryOptions: ClickHouseQueryOptions,
 ): Promise<ClickHouseQueryResponse> {
-  const { datasourceUrl, headers } = queryOptions;
+  const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
 
   const url = urlBuilder(datasourceUrl);
   if (!params.query) {
@@ -72,7 +73,8 @@ export async function query(
   };
 
   try {
-    const response = await fetch(url.toString(), init);
+    const doFetch = customFetch ?? fetch;
+    const response = await doFetch(url.toString(), init);
 
     if (!response.ok) {
       const errorText = await response.text();

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { FetchFn } from '@perses-dev/client';
 import type { AbsoluteTimeRange } from '@perses-dev/spec';
 
 import type {
@@ -65,6 +66,7 @@ export interface LokiVolumeParams {
 export interface LokiApiOptions {
   datasourceUrl: string;
   headers?: LokiRequestHeaders;
+  fetch?: FetchFn;
 }
 
 export interface LokiClient {
@@ -103,7 +105,8 @@ export async function query(params: LokiQueryParams, options: LokiApiOptions): P
   if (params.direction) url.searchParams.append('direction', params.direction);
   if (params.limit) url.searchParams.append('limit', params.limit.toString());
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -163,7 +166,8 @@ export async function queryRange(
   if (params.direction) url.searchParams.append('direction', params.direction);
   if (params.limit) url.searchParams.append('limit', params.limit.toString());
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -184,7 +188,8 @@ export async function labels(params: LokiLabelsParams, options: LokiApiOptions):
   if (params.end) url.searchParams.append('end', params.end);
   if (params.query) url.searchParams.append('query', params.query);
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -208,7 +213,8 @@ export async function labelValues(
   if (params.end) url.searchParams.append('end', params.end);
   if (params.query) url.searchParams.append('query', params.query);
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -234,7 +240,8 @@ export async function series(
   if (start) url.searchParams.append('start', start);
   if (end) url.searchParams.append('end', end);
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -257,7 +264,8 @@ export async function volume(params: LokiVolumeParams, options: LokiApiOptions):
   if (params.step) url.searchParams.append('step', params.step);
   if (params.limit) url.searchParams.append('limit', params.limit.toString());
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -280,7 +288,8 @@ export async function volumeRange(params: LokiVolumeParams, options: LokiApiOpti
   if (params.step) url.searchParams.append('step', params.step);
   if (params.limit) url.searchParams.append('limit', params.limit.toString());
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -306,7 +315,8 @@ export async function indexStats(
   if (start) url.searchParams.append('start', start);
   if (end) url.searchParams.append('end', end);
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

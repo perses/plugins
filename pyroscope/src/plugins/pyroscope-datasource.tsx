@@ -33,7 +33,7 @@ import { PyroscopeDatasourceEditor } from './PyroscopeDatasourceEditor';
  */
 const createClient: DatasourcePlugin<PyroscopeDatasourceSpec, PyroscopeClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy, minStep } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -51,16 +51,17 @@ const createClient: DatasourcePlugin<PyroscopeDatasourceSpec, PyroscopeClient>['
       minStepSeconds,
     },
     selectMergeStacktraces: (body, headers) =>
-      selectMergeStacktraces(body, { datasourceUrl, headers: headers ?? specHeaders }),
-    selectSeries: (body, headers) => selectSeries(body, { datasourceUrl, headers: headers ?? specHeaders }),
+      selectMergeStacktraces(body, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    selectSeries: (body, headers) =>
+      selectSeries(body, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
     searchProfileTypes: (params, headers, body) =>
-      searchProfileTypes(params, { datasourceUrl, headers: headers ?? specHeaders }, body),
+      searchProfileTypes(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, body),
     searchLabelNames: (params, headers, body) =>
-      searchLabelNames(params, { datasourceUrl, headers: headers ?? specHeaders }, body),
+      searchLabelNames(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, body),
     searchLabelValues: (params, headers, body) =>
-      searchLabelValues(params, { datasourceUrl, headers: headers ?? specHeaders }, body),
+      searchLabelValues(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, body),
     searchServices: (params, headers, body) =>
-      searchServices(params, { datasourceUrl, headers: headers ?? specHeaders }, body),
+      searchServices(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, body),
   };
 };
 
