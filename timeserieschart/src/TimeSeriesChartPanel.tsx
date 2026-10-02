@@ -29,7 +29,7 @@ import {
   ContentWithLegend,
   useId,
   DEFAULT_TOOLTIP_CONFIG,
-  getFormattedMultipleYAxes,
+  getFormattedMultipleYAxesLayout,
   DEFAULT_LEGEND,
   formatValue,
   getTimeSeriesValues,
@@ -432,7 +432,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
     formatToYAxisIndex,
   ]);
 
-  const multipleYAxes = useMemo(() => {
+  const multipleYLayout = useMemo(() => {
     if (additionalFormats.length === 0) {
       return undefined;
     }
@@ -440,8 +440,9 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
       const unitKey = fmt.unit;
       return unitKey ? (maxValuesByFormat?.get(unitKey) ?? 1000) : 1000;
     });
-    return getFormattedMultipleYAxes(echartsYAxis, format, additionalFormats, maxValues);
+    return getFormattedMultipleYAxesLayout(echartsYAxis, format, additionalFormats, maxValues);
   }, [echartsYAxis, format, additionalFormats, maxValuesByFormat]);
+  const multipleYAxes = multipleYLayout?.axes;
 
   // Translate the legend values into columns for the table legend.
   const legendColumns = useMemo(() => {
@@ -489,23 +490,15 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
         containLabel: false,
       };
     }
-    // Heuristic until @perses-dev/components exposes rightGridPadding from
-    // getFormattedMultipleYAxesLayout (shared#321): ~52px per right axis
-    // (typical formatted tick + unit) plus 12px chart margin; 20px when single axis.
-    const RIGHT_AXIS_WIDTH_PX = 52;
-    const MULTI_Y_RIGHT_MARGIN_PX = 12;
-    const SINGLE_Y_RIGHT_PADDING_PX = 20;
-    const rightPad =
-      additionalFormats.length > 0
-        ? additionalFormats.length * RIGHT_AXIS_WIDTH_PX + MULTI_Y_RIGHT_MARGIN_PX
-        : SINGLE_Y_RIGHT_PADDING_PX;
+    // rightGridPadding is the cumulative width of the right axes (shared#321).
+    const rightPad = multipleYLayout?.rightGridPadding ?? 20;
     return {
       left: yAxis && yAxis.label ? 30 : 20,
       right: rightPad,
       bottom: 0,
       containLabel: true,
     };
-  }, [echartsYAxis.show, yAxis, additionalFormats.length]);
+  }, [echartsYAxis.show, yAxis, multipleYLayout]);
 
   const handleDataZoom = useCallback(
     (event: ZoomEventData): void => {
