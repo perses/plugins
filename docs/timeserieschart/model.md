@@ -64,6 +64,8 @@ connectNulls: <boolean | default = false> # Optional
 
 ```yaml
 mode: <enum = "auto" | "categorical">
+# Only allowed when mode is "categorical". If omitted, the theme's default palette is used.
+name: <enum = "category10" | "tableau10" | "set1" | "set2" | "set3" | "dark2"> # Optional
 ```
 
 ## Query Settings specification
