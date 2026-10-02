@@ -11,15 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { TimeSeriesChartVisualOptions } from './time-series-chart-model';
-import { VISUAL_CONFIG } from './time-series-chart-model';
+import { CATEGORICAL_SCHEME_METADATA, VISUAL_CONFIG } from './time-series-chart-model';
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
   const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = vi.fn()): void => {
-    render(<VisualOptionsEditor value={value} onChange={onChange} />);
+    render(
+      <ChartsProvider chartsTheme={testChartsTheme}>
+        <VisualOptionsEditor value={value} onChange={onChange} />
+      </ChartsProvider>,
+    );
   };
 
   const getLineWidthSlider = (): HTMLElement => {
@@ -66,5 +72,53 @@ describe('VisualOptionsEditor', () => {
 
     // Connect nulls control should not be present
     expect(screen.queryByText(VISUAL_CONFIG.connectNulls.label)).not.toBeInTheDocument();
+  });
+
+  describe('Color Palette', () => {
+    it('renders the color palette label', () => {
+      renderVisualOptionsEditor({});
+      expect(screen.getByText(VISUAL_CONFIG.colorPalette.label)).toBeInTheDocument();
+    });
+
+    it('shows the named palette label when name is set', () => {
+      renderVisualOptionsEditor({ palette: { mode: 'categorical', name: 'tableau10' } });
+      expect(screen.getByRole('combobox', { name: VISUAL_CONFIG.colorPalette.label })).toHaveValue(
+        CATEGORICAL_SCHEME_METADATA.tableau10.label,
+      );
+    });
+
+    it('calls onChange with auto mode when Auto is selected', async () => {
+      const onChange = vi.fn();
+      renderVisualOptionsEditor({ palette: { mode: 'categorical' } }, onChange);
+
+      await userEvent.click(screen.getByRole('combobox', { name: VISUAL_CONFIG.colorPalette.label }));
+      await userEvent.click(screen.getByRole('option', { name: 'Auto' }));
+
+      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ palette: { mode: 'auto' } }));
+    });
+
+    it('calls onChange with categorical mode and no name when Theme colors is selected', async () => {
+      const onChange = vi.fn();
+      renderVisualOptionsEditor({ palette: { mode: 'auto' } }, onChange);
+
+      await userEvent.click(screen.getByRole('combobox', { name: VISUAL_CONFIG.colorPalette.label }));
+      await userEvent.click(screen.getByRole('option', { name: 'Theme colors' }));
+
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ palette: { mode: 'categorical', name: undefined } }),
+      );
+    });
+
+    it('calls onChange with the selected named palette', async () => {
+      const onChange = vi.fn();
+      renderVisualOptionsEditor({ palette: { mode: 'auto' } }, onChange);
+
+      await userEvent.click(screen.getByRole('combobox', { name: VISUAL_CONFIG.colorPalette.label }));
+      await userEvent.click(screen.getByRole('option', { name: CATEGORICAL_SCHEME_METADATA.dark2.label }));
+
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ palette: { mode: 'categorical', name: 'dark2' } }),
+      );
+    });
   });
 });

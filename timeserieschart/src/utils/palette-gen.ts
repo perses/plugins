@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import type { QuerySettingsOptions, TimeSeriesChartVisualOptions } from '../time-series-chart-model';
+import { CATEGORICAL_PALETTE_SCHEMES } from '../time-series-chart-model';
 import { getConsistentColor } from './palette';
 
 export interface SeriesColorProps {
-  categoricalPalette: string[];
+  defaultCategoricalPalette: string[];
   visual: TimeSeriesChartVisualOptions;
   muiPrimaryColor: string;
   seriesName: string;
@@ -29,7 +30,7 @@ export interface SeriesColorProps {
  */
 export function getSeriesColor(props: SeriesColorProps): string {
   const {
-    categoricalPalette,
+    defaultCategoricalPalette,
     visual,
     muiPrimaryColor,
     seriesName,
@@ -49,13 +50,18 @@ export function getSeriesColor(props: SeriesColorProps): string {
 
   // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
   const fallbackColor =
-    Array.isArray(categoricalPalette) && categoricalPalette[0]
-      ? (categoricalPalette[0] as string) // Needed since echarts color property isn't always an array.
+    Array.isArray(defaultCategoricalPalette) && defaultCategoricalPalette[0]
+      ? (defaultCategoricalPalette[0] as string) // Needed since echarts color property isn't always an array.
       : muiPrimaryColor;
 
   // Explicit way to always cycle through classical palette instead of changing when based on number of series.
   if (visual.palette?.mode === 'categorical') {
-    return getCategoricalPaletteColor(categoricalPalette, seriesIndex, fallbackColor);
+    const schemeName = visual.palette.name;
+    const scheme = schemeName ? CATEGORICAL_PALETTE_SCHEMES[schemeName] : null;
+    const palette = scheme && scheme.length > 0 ? scheme : defaultCategoricalPalette;
+    if (palette && palette.length > 0) {
+      return getCategoricalPaletteColor(palette, seriesIndex, fallbackColor);
+    }
   }
 
   return getAutoPaletteColor(seriesName, fallbackColor);
@@ -74,16 +80,18 @@ export function getAutoPaletteColor(name: string, fallbackColor: string): string
 /**
  * Default classical qualitative palette that cycles through the colors array by index.
  */
-export function getCategoricalPaletteColor(palette: string[], seriesIndex: number, fallbackColor: string): string {
-  if (palette === undefined) {
+export function getCategoricalPaletteColor(
+  palette: readonly string[],
+  seriesIndex: number,
+  fallbackColor: string,
+): string {
+  if (!palette || palette.length === 0) {
     return fallbackColor;
   }
   // Loop through predefined static color palette
-  const paletteTotalColors = palette.length ?? 1;
-  const paletteIndex = seriesIndex % paletteTotalColors;
+  const paletteIndex = seriesIndex % palette.length;
   // fallback color comes from echarts theme
-  const seriesColor = palette[paletteIndex] ?? fallbackColor;
-  return seriesColor;
+  return palette[paletteIndex] ?? fallbackColor;
 }
 
 /*
