@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { FetchFn } from '@perses-dev/client';
+
 import type {
   VictoriaLogsStreamQueryRangeResponse,
   VictoriaLogsStatsQueryRangeResponse,
@@ -47,6 +49,7 @@ export interface VictoriaLogsFieldValuesParams extends VictoriaLogsBaseParams {
 export interface VictoriaLogsApiOptions {
   datasourceUrl: string;
   headers?: VictoriaLogsRequestHeaders;
+  fetch?: FetchFn;
 }
 
 export interface VictoriaLogsClient {
@@ -103,7 +106,8 @@ export async function streamQueryRange(
   if (params?.offset) postData['offset'] = params.offset.toString();
 
   const data = new URLSearchParams(postData).toString();
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -153,7 +157,8 @@ export async function statsQueryRange(
   if (params?.step) postData['step'] = params.step.toString();
 
   const data = new URLSearchParams(postData).toString();
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -177,7 +182,8 @@ export async function fieldNames(
   if (params.end) postData['end'] = params.end;
 
   const data = new URLSearchParams(postData).toString();
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -202,7 +208,8 @@ export async function fieldValues(
   if (params.end) postData['end'] = params.end;
 
   const data = new URLSearchParams(postData).toString();
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

@@ -23,7 +23,7 @@ const createClient: DatasourcePlugin<VictoriaLogsDatasourceSpec, VictoriaLogsCli
   options,
 ) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -36,10 +36,14 @@ const createClient: DatasourcePlugin<VictoriaLogsDatasourceSpec, VictoriaLogsCli
     options: {
       datasourceUrl,
     },
-    streamQueryRange: (params, headers) => streamQueryRange(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    statsQueryRange: (params, headers) => statsQueryRange(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    fieldNames: (params, headers) => fieldNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    fieldValues: (params, headers) => fieldValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    streamQueryRange: (params, headers) =>
+      streamQueryRange(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    statsQueryRange: (params, headers) =>
+      statsQueryRange(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    fieldNames: (params, headers) =>
+      fieldNames(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    fieldValues: (params, headers) =>
+      fieldValues(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
   };
 };
 

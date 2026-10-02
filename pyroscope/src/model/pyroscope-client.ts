@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { RequestHeaders } from '@perses-dev/client';
+import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 import type { DatasourceClient } from '@perses-dev/plugin-system';
 
 import type {
@@ -65,10 +65,15 @@ export interface PyroscopeClient extends DatasourceClient {
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetch?: FetchFn;
 }
 
-export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>): Promise<T> => {
-  const response = await fetch(...args);
+export const executeRequest = async <T>(
+  customFetch: FetchFn | undefined,
+  ...args: Parameters<typeof global.fetch>
+): Promise<T> => {
+  const doFetch = customFetch ?? fetch;
+  const response = await doFetch(...args);
   try {
     return await response.json();
   } catch (e) {
@@ -83,7 +88,7 @@ function fetchWithPost<T, TResponse>(
   queryOptions: QueryOptions,
   body: Record<string, unknown>,
 ): Promise<TResponse> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetch: customFetch } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
   if (params) {
@@ -95,7 +100,7 @@ function fetchWithPost<T, TResponse>(
     body: JSON.stringify(body),
   };
 
-  return executeRequest<TResponse>(url, init);
+  return executeRequest<TResponse>(customFetch, url, init);
 }
 
 /**
@@ -105,9 +110,10 @@ export function selectMergeStacktraces(
   body: SelectMergeStacktracesRequest,
   queryOptions: QueryOptions,
 ): Promise<SelectMergeStacktracesResponse> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetch: customFetch } = queryOptions;
 
   return executeRequest<SelectMergeStacktracesResponse>(
+    customFetch,
     `${datasourceUrl}/querier.v1.QuerierService/SelectMergeStacktraces`,
     {
       method: 'POST',
@@ -121,9 +127,9 @@ export function selectMergeStacktraces(
  * Returns the time series (timeline) for the matching profiles.
  */
 export function selectSeries(body: SelectSeriesRequest, queryOptions: QueryOptions): Promise<SelectSeriesResponse> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetch: customFetch } = queryOptions;
 
-  return executeRequest<SelectSeriesResponse>(`${datasourceUrl}/querier.v1.QuerierService/SelectSeries`, {
+  return executeRequest<SelectSeriesResponse>(customFetch, `${datasourceUrl}/querier.v1.QuerierService/SelectSeries`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...headers },
     body: JSON.stringify(body),

@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { fetchJson } from '@perses-dev/client';
+
 import { SplunkDatasource } from './index';
 
 describe('SplunkDatasource', () => {
@@ -30,5 +32,58 @@ describe('SplunkDatasource', () => {
 
   it('should throw when neither directUrl nor proxyUrl is provided', () => {
     expect(() => SplunkDatasource.createClient({}, {})).toThrow(/No URL specified for Splunk client/);
+  });
+
+  describe('custom fetch/fetchJson injection', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('uses the injected fetchJson for JSON API methods and not the default/global fetch', async () => {
+      const mockFetchJson = vi.fn().mockResolvedValue({ entry: [] });
+      const mockFetch = vi.fn();
+      const globalFetchSpy = vi.spyOn(globalThis, 'fetch');
+
+      const client = SplunkDatasource.createClient(
+        {},
+        {
+          proxyUrl: 'http://proxy:8080',
+          fetch: mockFetch as unknown as typeof globalThis.fetch,
+          fetchJson: mockFetchJson as unknown as typeof fetchJson,
+        },
+      );
+
+      await client.getIndexes();
+
+      expect(mockFetchJson).toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(globalFetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('uses the injected fetch for the exportSearch path and not the default/global fetch', async () => {
+      const mockFetchJson = vi.fn();
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: () => Promise.resolve(''),
+      });
+      const globalFetchSpy = vi.spyOn(globalThis, 'fetch');
+
+      const client = SplunkDatasource.createClient(
+        {},
+        {
+          proxyUrl: 'http://proxy:8080',
+          fetch: mockFetch as unknown as typeof globalThis.fetch,
+          fetchJson: mockFetchJson as unknown as typeof fetchJson,
+        },
+      );
+
+      await client.exportSearch({ search: 'index=main' });
+
+      expect(mockFetch).toHaveBeenCalled();
+      expect(mockFetchJson).not.toHaveBeenCalled();
+      expect(globalFetchSpy).not.toHaveBeenCalled();
+    });
   });
 });

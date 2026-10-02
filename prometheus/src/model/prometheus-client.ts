@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { fetch, fetchJson } from '@perses-dev/client';
 import type { RequestHeaders } from '@perses-dev/client';
-import { fetchJson } from '@perses-dev/client';
 import type { QueryParamValues } from '@perses-dev/components';
 import type { DatasourceClient } from '@perses-dev/plugin-system';
 
@@ -45,6 +45,8 @@ export interface ClientRequestOptions {
   headers?: RequestHeaders;
   signal?: AbortSignal;
   queryParams?: QueryParamValues;
+  fetch?: typeof fetch;
+  fetchJson?: typeof fetchJson;
 }
 
 export interface PrometheusClient extends DatasourceClient {
@@ -70,6 +72,8 @@ export interface QueryOptions {
   headers?: RequestHeaders;
   signal?: AbortSignal;
   queryParams?: QueryParamValues;
+  fetch?: typeof fetch;
+  fetchJson?: typeof fetchJson;
 }
 
 /**
@@ -112,7 +116,8 @@ export function healthCheck(queryOptions: QueryOptions) {
     const url = `${queryOptions.datasourceUrl}/-/healthy${buildQueryString(queryOptions.queryParams)}`;
 
     try {
-      const resp = await fetch(url, { headers: queryOptions.headers, signal: queryOptions.signal });
+      const doFetch = queryOptions.fetch ?? fetch;
+      const resp = await doFetch(url, { headers: queryOptions.headers, signal: queryOptions.signal });
       return resp.status === 200;
     } catch {
       return false;
@@ -220,9 +225,11 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions,
 ): Promise<TResponse> {
-  const { datasourceUrl, headers, queryParams, signal } = queryOptions;
+  const { datasourceUrl, headers, queryParams, signal, fetchJson: customFetchJson } = queryOptions;
   const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams, createSearchParams(params))}`;
-  return fetchJson<TResponse>(url, { method: 'GET', headers, signal });
+
+  const doFetchJson = customFetchJson ?? fetchJson;
+  return doFetchJson<TResponse>(url, { method: 'GET', headers, signal });
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(
@@ -230,7 +237,7 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
   params: T,
   queryOptions: QueryOptions,
 ): Promise<TResponse> {
-  const { datasourceUrl, headers, signal, queryParams } = queryOptions;
+  const { datasourceUrl, headers, signal, queryParams, fetchJson: customFetchJson } = queryOptions;
   const url = `${datasourceUrl}${apiURI}${buildQueryString(queryParams)}`;
 
   const init = {
@@ -242,7 +249,9 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(
     signal,
     body: createSearchParams(params),
   };
-  return fetchJson<TResponse>(url, init);
+
+  const doFetchJson = customFetchJson ?? fetchJson;
+  return doFetchJson<TResponse>(url, init);
 }
 
 // Request parameter values we know how to serialize
