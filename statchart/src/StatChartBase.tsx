@@ -102,16 +102,12 @@ export const StatChartBase: FC<StatChartProps> = (props) => {
   if (legendFontSize !== undefined) {
     seriesNameFontSize = legendFontSize;
   } else if (alignmentSeriesName !== undefined) {
-    // Multi-series names track the tile. Dividing by line-height pinned them at 14px
-    // until the tile was taller than ~110px.
     seriesNameFontSize = Math.max(14, Math.min(height * 0.18, SERIES_NAME_MAX_FONT_SIZE));
   }
 
   const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
 
   const availableHeight = height - seriesNameHeight;
-  // A sparkline used to claim everything under a value sized to 25% of the tile,
-  // so the number stayed tiny while the chart grew into empty space.
   const sparklineBand = sparkline ? resolveSparklineBandHeight(availableHeight) : 0;
   const valueAreaHeight = sparkline ? Math.max(0, availableHeight - sparklineBand) : availableHeight * 0.9;
   const optimalValueFontSize = useOptimalFontSize({
