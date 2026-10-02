@@ -11,7 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { JsonDatasourceSpec } from './json-datasource-types';
 import { buildUrl } from './json-datasource-utils';
+import { JsonDatasource } from './JsonDatasource';
+
+describe('JsonDatasource createClient', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('uses the custom fetch passed via options and not the global fetch', async () => {
+    const spec: JsonDatasourceSpec = {};
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ result: 'ok' }),
+    });
+    const globalFetchSpy = vi.spyOn(globalThis, 'fetch');
+
+    const client = JsonDatasource.createClient(spec, {
+      proxyUrl: 'http://proxy:8080',
+      fetch: mockFetch,
+    });
+
+    await client.query({ endpointUrl: '/data', method: 'GET' });
+
+    expect(mockFetch).toHaveBeenCalled();
+    expect(globalFetchSpy).not.toHaveBeenCalled();
+  });
+});
 
 describe('buildUrl', () => {
   it('joins base and path, stripping trailing slash from base', () => {

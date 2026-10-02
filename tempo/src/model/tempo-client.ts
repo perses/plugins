@@ -43,6 +43,7 @@ export interface TempoClient extends DatasourceClient {
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetchJson?: typeof fetchJson;
 }
 
 async function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>(
@@ -50,7 +51,7 @@ async function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>
   params: TRequest,
   queryOptions: QueryOptions,
 ): Promise<TResponse> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetchJson: customFetchJson } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
   const urlParams = buildSearchParams(params).toString();
@@ -66,7 +67,8 @@ async function fetchWithGet<TRequest extends RequestParams<TRequest>, TResponse>
   };
 
   try {
-    return await fetchJson<TResponse>(url, init);
+    const doFetchJson = customFetchJson ?? fetchJson;
+    return await doFetchJson<TResponse>(url, init);
   } catch (e) {
     // fetchJson() puts the entire response body in the error message,
     // which can be a full HTML page. Replace with a short status message.
