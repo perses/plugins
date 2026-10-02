@@ -85,7 +85,7 @@ export const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTML
         ref={(reference) => {
           if (reference) {
             const measuredMaxHeight = getComputedStyle(reference).maxHeight;
-            if (measuredMaxHeight) setMaxHeight(measuredMaxHeight);
+            if (measuredMaxHeight && measuredMaxHeight !== maxHeight) setMaxHeight(measuredMaxHeight);
           }
 
           if (typeof ref === 'function') {
