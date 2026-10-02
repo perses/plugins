@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'LogExplorer',
   rsbuildConfig: {
-    server: { port: 3009 },
+    server: { port: 3023 },
     plugins: [pluginReact()],
   },
   moduleFederation: {

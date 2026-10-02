@@ -188,8 +188,10 @@ function generateCellContentConfig(
 
   return {
     cell: (ctx): ReactElement | string => {
-      const cellValue = ctx.getValue();
-      return typeof cellValue === 'number' && column.format ? formatValue(cellValue, column.format) : cellValue;
+      const cellValue = ctx.getValue<ReactElement | string | number>();
+      return typeof cellValue === 'number' && column.format
+        ? formatValue(cellValue, column.format)
+        : (cellValue as ReactElement | string);
     },
     cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
   };

@@ -20,7 +20,7 @@ import { JaegerDatasourceEditor } from './JaegerDatasourceEditor';
 
 const createClient: DatasourcePlugin<JaegerDatasourceSpec, JaegerClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -33,11 +33,13 @@ const createClient: DatasourcePlugin<JaegerDatasourceSpec, JaegerClient>['create
     options: {
       datasourceUrl,
     },
-    getTrace: (traceId, headers) => getTrace(traceId, { datasourceUrl, headers: headers ?? specHeaders }),
-    searchTraces: (params, headers) => searchTraces(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    searchServices: (headers) => searchServices({ datasourceUrl, headers: headers ?? specHeaders }),
+    getTrace: (traceId, headers) =>
+      getTrace(traceId, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    searchTraces: (params, headers) =>
+      searchTraces(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    searchServices: (headers) => searchServices({ datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
     searchOperations: (service, headers) =>
-      searchOperations(service, { datasourceUrl, headers: headers ?? specHeaders }),
+      searchOperations(service, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
   };
 };
 

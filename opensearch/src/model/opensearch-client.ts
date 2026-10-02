@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { FetchFn } from '@perses-dev/client';
+
 import type { OpenSearchPPLResponse, OpenSearchRequestHeaders } from './opensearch-client-types';
 
 export interface OpenSearchPPLParams {
@@ -20,6 +22,7 @@ export interface OpenSearchPPLParams {
 export interface OpenSearchApiOptions {
   datasourceUrl: string;
   headers?: OpenSearchRequestHeaders;
+  fetch?: FetchFn;
 }
 
 export interface OpenSearchClient {
@@ -86,7 +89,8 @@ export async function ppl(
 ): Promise<OpenSearchPPLResponse> {
   const url = buildUrl('/_plugins/_ppl', options.datasourceUrl);
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

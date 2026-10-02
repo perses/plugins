@@ -27,6 +27,7 @@ import type {
 export interface AlertManagerQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetch?: typeof fetch;
 }
 
 export interface AlertManagerClient extends DatasourceClient {
@@ -52,8 +53,12 @@ async function throwOnError(response: Response): Promise<void> {
   }
 }
 
-const executeRequest = async <T>(...args: Parameters<typeof fetch>): Promise<T> => {
-  const response = await fetch(...args);
+const executeRequest = async <T>(
+  customFetch: typeof fetch | undefined,
+  ...args: Parameters<typeof fetch>
+): Promise<T> => {
+  const doFetch = customFetch ?? fetch;
+  const response = await doFetch(...args);
   await throwOnError(response);
   try {
     return await response.json();
@@ -83,7 +88,7 @@ function fetchWithGet<TResponse>(
   params: Record<string, unknown> | object,
   queryOptions: AlertManagerQueryOptions,
 ): Promise<TResponse> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetch: customFetch } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
   const urlParams = buildSearchParams(params).toString();
@@ -91,7 +96,7 @@ function fetchWithGet<TResponse>(
     url += `?${urlParams}`;
   }
 
-  return executeRequest<TResponse>(url, {
+  return executeRequest<TResponse>(customFetch, url, {
     method: 'GET',
     headers,
   });
@@ -121,9 +126,9 @@ export function createSilence(
   silence: PostableSilence,
   queryOptions: AlertManagerQueryOptions,
 ): Promise<{ silenceID: string }> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetch: customFetch } = queryOptions;
 
-  return executeRequest<{ silenceID: string }>(`${datasourceUrl}/api/v2/silences`, {
+  return executeRequest<{ silenceID: string }>(customFetch, `${datasourceUrl}/api/v2/silences`, {
     method: 'POST',
     headers: { ...headers, 'Content-Type': 'application/json' },
     body: JSON.stringify(silence),
@@ -131,9 +136,10 @@ export function createSilence(
 }
 
 export async function deleteSilence(id: string, queryOptions: AlertManagerQueryOptions): Promise<void> {
-  const { datasourceUrl, headers = {} } = queryOptions;
+  const { datasourceUrl, headers = {}, fetch: customFetch } = queryOptions;
 
-  const response = await fetch(`${datasourceUrl}/api/v2/silence/${encodeURIComponent(id)}`, {
+  const doFetch = customFetch ?? fetch;
+  const response = await doFetch(`${datasourceUrl}/api/v2/silence/${encodeURIComponent(id)}`, {
     method: 'DELETE',
     headers,
   });

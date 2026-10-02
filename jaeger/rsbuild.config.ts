@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'Jaeger',
   rsbuildConfig: {
-    server: { port: 3021 },
+    server: { port: 3027 },
     plugins: [pluginReact()],
   },
   moduleFederation: {

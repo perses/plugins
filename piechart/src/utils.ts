@@ -134,10 +134,10 @@ export class PieChartTableLegendMapper implements PieChartLegendMapper {
           cellDescription: true,
           enableSorting: true,
           cell: ({ getValue }): string => {
-            const cellValue = getValue();
+            const cellValue = getValue<string | number>();
             return typeof cellValue === 'number' && formatOptions
               ? formatValue(cellValue, v === 'relative' ? relativeFormatOptions : formatOptions)
-              : cellValue;
+              : (cellValue as string);
           },
         };
       }) ?? []

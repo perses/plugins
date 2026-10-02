@@ -70,6 +70,7 @@ import isEqual from 'lodash/isEqual';
 import merge from 'lodash/merge';
 import type { MouseEvent } from 'react';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import useResizeObserver from 'use-resize-observer';
 
 import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
 import type { TimeSeriesAnnotation } from './utils/annotation';
@@ -109,10 +110,13 @@ interface HoveredExemplar {
  */
 const EXEMPLAR_HOVER_RADIUS = (Math.SQRT2 * EXEMPLAR_SYMBOL_SIZE) / 2;
 
+const CHART_SX = { width: '100%', height: '100%' };
+
 export interface TimeChartProps {
   height: number;
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
+  /** All exemplar groups; only groups matching a visible series are rendered. */
   exemplars?: ExemplarChartData[];
   annotations?: TimeSeriesAnnotation[];
   timeScale?: TimeScale;
@@ -176,23 +180,28 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     [timeZone],
   );
 
-  let timeScale: TimeScale;
-  if (timeScaleProp === undefined) {
+  const timeScale = useMemo((): TimeScale => {
+    if (timeScaleProp) return timeScaleProp;
     const commonTimeScale = getCommonTimeScale(data);
-    if (commonTimeScale === undefined) {
-      // set default to past 5 years
-      const today = new Date();
-      const pastDate = new Date(today);
-      pastDate.setFullYear(today.getFullYear() - 5);
-      const todayMs = today.getTime();
-      const pastDateMs = pastDate.getTime();
-      timeScale = { startMs: pastDateMs, endMs: todayMs, stepMs: 1, rangeMs: todayMs - pastDateMs };
-    } else {
-      timeScale = commonTimeScale;
+    if (commonTimeScale) return commonTimeScale;
+    // Set the empty chart's default range to the past five years.
+    const today = new Date();
+    const pastDate = new Date(today);
+    pastDate.setFullYear(today.getFullYear() - 5);
+    const startMs = pastDate.getTime();
+    const endMs = today.getTime();
+    return { startMs, endMs, stepMs: 1, rangeMs: endMs - startMs };
+  }, [data, timeScaleProp]);
+
+  // EChart resizes whenever its sx identity changes. Keep sx stable and observe
+  // actual container dimensions so hover/pinning never relayouts every series.
+  const handleResize = useCallback(({ width, height: containerHeight }: { width?: number; height?: number }): void => {
+    const chart = chartRef.current;
+    if (width && containerHeight && chart && (chart.getWidth() !== width || chart.getHeight() !== containerHeight)) {
+      chart.resize({ width, height: containerHeight });
     }
-  } else {
-    timeScale = timeScaleProp;
-  }
+  }, []);
+  const { ref: containerRef } = useResizeObserver<HTMLDivElement>({ onResize: handleResize });
 
   useImperativeHandle(ref, () => {
     return {
@@ -305,25 +314,30 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   // Generate annotation series for ECharts markArea (range), markLine (point), and markPoint (markers under X-axis)
   const annotationSeries = useMemo(() => buildAnnotationSeries(annotations), [annotations]);
 
-  const exemplarSeries = useMemo(() => exemplars?.map(getExemplarSeries) ?? [], [exemplars]);
+  const preparedExemplarSeries = useMemo(() => exemplars?.map(getExemplarSeries) ?? [], [exemplars]);
+  const exemplarSeries = useMemo(() => {
+    const visibleIds = new Set(seriesMapping.map((series) => `${EXEMPLAR_SERIES_ID_PREFIX}${series.id}`));
+    return preparedExemplarSeries.filter((series) => visibleIds.has(String(series.id)));
+  }, [preparedExemplarSeries, seriesMapping]);
 
   const { noDataOption } = chartsTheme;
+
+  // Reuse the dataset when pinning a crosshair or updating annotations/axes.
+  const dataset = useMemo<DatasetOption[]>(
+    () =>
+      data?.map((series, index) => ({
+        id: index,
+        dimensions: ['time', 'value'],
+        // ECharts treats null as missing data; no per-point conversion/copy is needed.
+        source: series.values,
+      })) ?? [],
+    [data],
+  );
 
   const option: EChartsCoreOption = useMemo(() => {
     // The "chart" `noDataVariant` is only used when the `timeSeries` is an
     // empty array because a `null` value will throw an error.
     if (data === null || (data.length === 0 && noDataVariant === 'message')) return noDataOption;
-
-    // Utilizes ECharts dataset so raw data is separate from series option style properties
-    // https://apache.github.io/echarts-handbook/en/concepts/dataset/
-    const dataset: DatasetOption[] = [];
-    data.map((d, index) => {
-      const values = d.values.map(([timestamp, value]) => {
-        const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
-        return [timestamp, val];
-      });
-      dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
-    });
 
     const updatedSeriesMapping =
       enablePinning && pinnedCrosshair !== null
@@ -382,6 +396,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     return option;
   }, [
     data,
+    dataset,
     seriesMapping,
     annotationSeries,
     exemplarSeries,
@@ -427,6 +442,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
 
   return (
     <Box
+      ref={containerRef}
       style={{ height }}
       // onContextMenu={(e) => {
       //   // TODO: confirm tooltip pinning works correctly on Windows, should e.preventDefault() be added here
@@ -686,10 +702,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         />
       )}
       <EChart
-        sx={{
-          width: '100%',
-          height: '100%',
-        }}
+        sx={CHART_SX}
         option={option}
         theme={chartsTheme.echartsTheme}
         onEvents={handleEvents}
