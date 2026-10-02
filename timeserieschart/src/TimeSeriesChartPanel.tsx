@@ -224,7 +224,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
             seriesId,
             seriesName,
             color: getSeriesColor({
-              categoricalPalette: categoricalPalette as string[],
+              defaultCategoricalPalette: categoricalPalette as string[],
               visual,
               muiPrimaryColor: muiTheme.palette.primary.main,
               seriesName,
@@ -296,7 +296,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
         // Color is used for line, tooltip, and legend
         const seriesColor = getSeriesColor({
           // ECharts type for color is not always an array but it is always an array in ChartsProvider
-          categoricalPalette: categoricalPalette as string[],
+          defaultCategoricalPalette: categoricalPalette as string[],
           visual,
           muiPrimaryColor: muiTheme.palette.primary.main,
           seriesName: formattedSeriesName,
