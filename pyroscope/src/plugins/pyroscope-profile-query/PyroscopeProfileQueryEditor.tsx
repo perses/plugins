@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { FormControl, InputLabel, Stack, TextField, useTheme } from '@mui/material';
-import { useId } from '@perses-dev/components';
 import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
+import { useId } from 'react';
 
 import { ProfileTypeSelector, Service, Filters } from '../../components';
 import type { PyroscopeDatasourceSelector } from '../../model';
@@ -37,7 +37,7 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
     datasourceSelectValue,
     PYROSCOPE_DATASOURCE_KIND,
   ) as PyroscopeDatasourceSelector;
-  const datasourceSelectLabelID = useId('pyroscope-datasource-label');
+  const datasourceSelectLabelID = useId();
 
   const { maxNodes, handleMaxNodesChange, maxNodesHasError } = useMaxNodesState(props);
   const { profileType, handleProfileTypeChange } = useProfileTypeState(props);
