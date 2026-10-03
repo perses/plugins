@@ -18,6 +18,6 @@ export interface ClickHouseTimeSeriesData extends TimeSeriesData {
 }
 
 export interface TimeSeriesEntry {
-  time: string;
+  time?: string;
   [key: string]: number | string | null | undefined;
 }

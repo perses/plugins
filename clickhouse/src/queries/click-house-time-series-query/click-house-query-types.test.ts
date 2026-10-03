@@ -110,14 +110,16 @@ describe('ClickHouseTimeSeriesQuery', () => {
     });
     expect(response.series).toEqual([
       {
-        name: 'avg_cpu',
+        name: 'service=api avg_cpu',
+        labels: { service: 'api', metric: 'avg_cpu' },
         values: [
           [new Date('2025-09-09 05:18:00').getTime(), 2.5],
           [new Date('2025-09-09 05:19:00').getTime(), 3.5],
         ],
       },
       {
-        name: 'max_memory',
+        name: 'service=api max_memory',
+        labels: { service: 'api', metric: 'max_memory' },
         values: [
           [new Date('2025-09-09 05:18:00').getTime(), 277],
           [new Date('2025-09-09 05:19:00').getTime(), 156102],
