@@ -21,7 +21,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import type { TableProps } from './components';
 import type { TableOptions } from './models';
-import { buildRawTableData } from './table-data-utils';
+import { buildRawTableData, getTablePanelQueryMode, needsTimeSeriesExpansion } from './table-data-utils';
 
 export interface ExportColumn {
   key: string;
@@ -37,8 +37,11 @@ export function buildTableData(
   queryResults: Array<PanelData<QueryDataType>>,
   spec: TableOptions,
 ): { data: Array<Record<string, unknown>>; columns: ExportColumn[] } {
-  // Use shared utility with forExport=true to get raw scalar values
-  const rawData = buildRawTableData(queryResults, spec, { forExport: true });
+  const rawData = buildRawTableData(queryResults, spec, {
+    forExport: true,
+    expandTimeSeries: needsTimeSeriesExpansion(spec),
+    queryMode: getTablePanelQueryMode(spec),
+  });
 
   const transformed = transformData(rawData, spec.transforms ?? []);
 

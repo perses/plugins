@@ -15,7 +15,12 @@ import type { PanelData } from '@perses-dev/plugin-system';
 import type { JsonData, TimeSeriesData } from '@perses-dev/spec';
 
 import type { TableOptions } from './models';
-import { buildJsonTableData, buildRawTableData, getTablePanelQueryMode } from './table-data-utils';
+import {
+  buildJsonTableData,
+  buildRawTableData,
+  getTablePanelQueryMode,
+  needsTimeSeriesExpansion,
+} from './table-data-utils';
 
 function makeTsPanelData(series: TimeSeriesData['series']): PanelData<TimeSeriesData> {
   return {
@@ -41,6 +46,49 @@ function makeJsonPanelData(payload: unknown): PanelData<JsonData> {
   };
 }
 
+describe('needsTimeSeriesExpansion', () => {
+  it('is false when there are no transforms', () => {
+    expect(needsTimeSeriesExpansion({})).toBe(false);
+  });
+
+  it('is true when the last enabled transform is PivotByLabel', () => {
+    const spec: TableOptions = {
+      transforms: [
+        { kind: 'MergeSeries', spec: {} },
+        { kind: 'PivotByLabel', spec: { columnLabel: 'farm' } },
+      ],
+    };
+    expect(needsTimeSeriesExpansion(spec)).toBe(true);
+  });
+
+  it('is false when PivotByLabel is not last among enabled transforms', () => {
+    const spec: TableOptions = {
+      transforms: [
+        { kind: 'PivotByLabel', spec: { columnLabel: 'farm' } },
+        { kind: 'MergeSeries', spec: {} },
+      ],
+    };
+    expect(needsTimeSeriesExpansion(spec)).toBe(false);
+  });
+
+  it('skips disabled trailing transforms', () => {
+    const spec: TableOptions = {
+      transforms: [
+        { kind: 'PivotByLabel', spec: { columnLabel: 'farm' } },
+        { kind: 'MergeSeries', spec: { disabled: true } },
+      ],
+    };
+    expect(needsTimeSeriesExpansion(spec)).toBe(true);
+  });
+
+  it('is false when PivotByLabel is disabled', () => {
+    const spec: TableOptions = {
+      transforms: [{ kind: 'PivotByLabel', spec: { columnLabel: 'farm', disabled: true } }],
+    };
+    expect(needsTimeSeriesExpansion(spec)).toBe(false);
+  });
+});
+
 describe('getTablePanelQueryMode', () => {
   it('returns instant when there are no column settings', () => {
     expect(getTablePanelQueryMode({})).toBe('instant');
@@ -63,6 +111,23 @@ describe('getTablePanelQueryMode', () => {
       columnSettings: [{ name: 'host' }, { name: 'value', plugin: { kind: 'StatChart', spec: {} } }, { name: 'env' }],
     };
     expect(getTablePanelQueryMode(spec)).toBe('range');
+  });
+
+  it('returns range when last enabled transform is PivotByLabel', () => {
+    const spec: TableOptions = {
+      transforms: [{ kind: 'PivotByLabel', spec: { columnLabel: 'farm' } }],
+    };
+    expect(getTablePanelQueryMode(spec)).toBe('range');
+  });
+
+  it('returns instant when PivotByLabel is not last enabled', () => {
+    const spec: TableOptions = {
+      transforms: [
+        { kind: 'PivotByLabel', spec: { columnLabel: 'farm' } },
+        { kind: 'MergeSeries', spec: {} },
+      ],
+    };
+    expect(getTablePanelQueryMode(spec)).toBe('instant');
   });
 });
 
@@ -220,5 +285,52 @@ describe('buildRawTableData', () => {
       definition: { kind: 'TimeSeriesQuery', spec: { plugin: { kind: 'P', spec: {} } } },
     } as PanelData<TimeSeriesData>;
     expect(buildRawTableData([pending], {})).toEqual([]);
+  });
+
+  it('expands one row per timestamp when expandTimeSeries is true', () => {
+    const result = buildRawTableData(
+      [
+        makeTsPanelData([
+          {
+            name: 's',
+            values: [
+              [1000, 1],
+              [2000, 2],
+            ],
+            labels: { farm: 'a' },
+          },
+        ]),
+      ],
+      {},
+      { expandTimeSeries: true, queryMode: 'range' },
+    );
+    expect(result).toEqual([
+      { timestamp: 1000, value: 1, farm: 'a' },
+      { timestamp: 2000, value: 2, farm: 'a' },
+    ]);
+  });
+
+  it('keeps last sample when expandTimeSeries is false even if PivotByLabel is last', () => {
+    const spec: TableOptions = {
+      transforms: [{ kind: 'PivotByLabel', spec: { columnLabel: 'farm' } }],
+    };
+    const result = buildRawTableData(
+      [
+        makeTsPanelData([
+          {
+            name: 's',
+            values: [
+              [1000, 1],
+              [2000, 2],
+            ],
+            labels: { farm: 'a' },
+          },
+        ]),
+      ],
+      spec,
+      { expandTimeSeries: false, queryMode: 'instant' },
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ timestamp: 2000, value: 2, farm: 'a' });
   });
 });

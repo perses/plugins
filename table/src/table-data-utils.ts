@@ -16,37 +16,34 @@ import type { JsonData, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 
 import type { TableOptions } from './models';
 
-/**
- * Options for building raw table data.
- */
 export interface BuildRawTableDataOptions {
-  /**
-   * When true, always use raw scalar values for cell data (for export).
-   * When false, plugin columns will contain embedded PanelData objects (for rendering).
-   */
   forExport?: boolean;
+  expandTimeSeries?: boolean;
+  queryMode?: 'instant' | 'range';
 }
 
-/**
- * Determines the query mode based on table options.
- * If any column has a plugin (embedded panel), use range mode; otherwise instant.
- */
+export function needsTimeSeriesExpansion(spec: TableOptions): boolean {
+  const transforms = spec.transforms ?? [];
+  for (let i = transforms.length - 1; i >= 0; i--) {
+    const t = transforms[i];
+    if (!t || t.spec?.disabled === true) {
+      continue;
+    }
+    return t.kind === 'PivotByLabel';
+  }
+  return false;
+}
+
 export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' {
-  return (spec.columnSettings ?? []).some((c) => c.plugin) ? 'range' : 'instant';
+  if ((spec.columnSettings ?? []).some((c) => c.plugin)) {
+    return 'range';
+  }
+  if (needsTimeSeriesExpansion(spec)) {
+    return 'range';
+  }
+  return 'instant';
 }
 
-/**
- * Converts raw query results into a tabular format.
- *
- * This is the shared data-building logic used by both TablePanel (for rendering)
- * and TableExportAction (for CSV export). Extracting this ensures both use the
- * same transformation logic, reducing drift.
- *
- * @param queryResults - The panel query results containing data to be transformed into a table
- * @param spec - The table options specification
- * @param options - Build options (e.g., forExport mode)
- * @returns Array of row objects with column keys and values
- */
 export function buildRawTableData(
   queryResults: PanelData[],
   spec: TableOptions,
@@ -67,21 +64,11 @@ function buildTimeSeriesTableData(
   options: BuildRawTableDataOptions = {},
 ): Array<Record<string, unknown>> {
   const { forExport = false } = options;
-  const queryMode = getTablePanelQueryMode(spec);
+  const queryMode = options.queryMode ?? getTablePanelQueryMode(spec);
+  const expandTime = options.expandTimeSeries ?? needsTimeSeriesExpansion(spec);
 
-  return queryResults
-    .flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
-      (data.data?.series ?? []).map((ts: TimeSeries) => ({ data, ts, queryIndex })),
-    )
-    .map(({ data, ts, queryIndex }: { data: PanelData<TimeSeriesData>; ts: TimeSeries; queryIndex: number }) => {
-      // Pick the last (most recent) data point. For range responses the last
-      // value covers the window ending at the selected time range's end.
-      const lastPoint = ts.values[ts.values.length - 1];
-      if (lastPoint === undefined) {
-        return { ...ts.labels };
-      }
-
-      // If there are multiple queries, add query index to value key and label keys to avoid conflicts
+  return queryResults.flatMap((data: PanelData<TimeSeriesData>, queryIndex: number) =>
+    (data.data?.series ?? []).flatMap((ts: TimeSeries) => {
       const valueColumnName = queryResults.length === 1 ? 'value' : `value #${queryIndex + 1}`;
       const labels =
         queryResults.length === 1
@@ -91,8 +78,24 @@ function buildTimeSeriesTableData(
               return acc;
             }, {} as Labels);
 
-      // For export: always use raw scalar values
-      // For rendering: plugin columns get embedded PanelData objects
+      const points = ts.values ?? [];
+      if (points.length === 0) {
+        return [{ ...labels }];
+      }
+
+      if (expandTime) {
+        return points.map(([tsMs, value]) => ({
+          timestamp: tsMs,
+          [valueColumnName]: value,
+          ...labels,
+        }));
+      }
+
+      const lastPoint = points[points.length - 1];
+      if (lastPoint === undefined) {
+        return [{ ...labels }];
+      }
+
       let columnValue: unknown;
       if (forExport) {
         columnValue = lastPoint[1];
@@ -104,11 +107,11 @@ function buildTimeSeriesTableData(
       }
 
       if (queryMode === 'instant') {
-        return { timestamp: lastPoint[0], [valueColumnName]: columnValue, ...labels };
-      } else {
-        return { [valueColumnName]: columnValue, ...labels };
+        return [{ timestamp: lastPoint[0], [valueColumnName]: columnValue, ...labels }];
       }
-    });
+      return [{ [valueColumnName]: columnValue, ...labels }];
+    }),
+  );
 }
 
 function safeStringify(v: object): string {
