@@ -24,12 +24,21 @@ import {
   useMousePosition,
 } from '@perses-dev/components';
 import { DEFAULT_ANNOTATION_COLOR } from '@perses-dev/plugin-system';
-import type { LineSeriesOption } from 'echarts';
+import type { LineSeriesOption, YAXisComponentOption } from 'echarts';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import useResizeObserver from 'use-resize-observer';
 
 import type { TimeSeriesAnnotation } from '../utils/annotation';
+
+// Hidden Y axis to guarantee annotations being shown
+export const ANNOTATION_Y_AXIS: YAXisComponentOption = {
+  type: 'value',
+  show: false,
+  min: 0,
+  max: 1,
+  axisLabel: { show: false },
+};
 
 export interface AnnotationTooltipProps {
   annotation: TimeSeriesAnnotation;
@@ -160,7 +169,10 @@ export function AnnotationTooltip({
  * Build ECharts series options for rendering annotations as markArea (range),
  * markLine (vertical dashed lines) and markPoint (triangle markers under the X-axis).
  */
-export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | undefined): LineSeriesOption[] {
+export function buildAnnotationSeries(
+  annotations: TimeSeriesAnnotation[] | undefined,
+  annotationYAxisIndex: number,
+): LineSeriesOption[] {
   if (!annotations?.length) return [];
 
   const markAreaData: Array<[{ xAxis: number; itemStyle?: { color: string; opacity: number } }, { xAxis: number }]> =
@@ -245,6 +257,7 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
   const series: LineSeriesOption = {
     type: 'line',
     data: [],
+    yAxisIndex: annotationYAxisIndex,
     silent: false,
     markArea:
       markAreaData.length > 0

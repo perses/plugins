@@ -72,7 +72,7 @@ import type { MouseEvent } from 'react';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
-import { AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
+import { ANNOTATION_Y_AXIS, AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
 import type { TimeSeriesAnnotation } from './utils/annotation';
 import type { ExemplarChartData } from './utils/data-transform';
 import { EXEMPLAR_SERIES_ID_PREFIX, EXEMPLAR_SYMBOL_SIZE, getExemplarSeries } from './utils/data-transform';
@@ -312,7 +312,11 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   }, [annotations, onDataZoom]);
 
   // Generate annotation series for ECharts markArea (range), markLine (point), and markPoint (markers under X-axis)
-  const annotationSeries = useMemo(() => buildAnnotationSeries(annotations), [annotations]);
+  const annotationYAxisIndex = Array.isArray(yAxis) ? yAxis.length : 1;
+  const annotationSeries = useMemo(
+    () => buildAnnotationSeries(annotations, annotationYAxisIndex),
+    [annotations, annotationYAxisIndex],
+  );
 
   const preparedExemplarSeries = useMemo(() => exemplars?.map(getExemplarSeries) ?? [], [exemplars]);
   const exemplarSeries = useMemo(() => {
@@ -360,7 +364,10 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         },
       },
       // If yAxis is already an array (multiple Y axes), use it directly; otherwise use getFormattedAxis
-      yAxis: Array.isArray(yAxis) ? yAxis : getFormattedAxis(yAxis, format),
+      yAxis: [
+        ...(Array.isArray(yAxis) ? yAxis : getFormattedAxis(yAxis, format)),
+        ...(annotationSeries.length > 0 ? [ANNOTATION_Y_AXIS] : []),
+      ],
       animation: false,
       tooltip: {
         show: true,
