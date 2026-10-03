@@ -339,10 +339,16 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     // empty array because a `null` value will throw an error.
     if (data === null || (data.length === 0 && noDataVariant === 'message')) return noDataOption;
 
+    // If yAxis is already an array (multiple Y axes), use it directly; otherwise use getFormattedAxis
+    const visibleYAxes = Array.isArray(yAxis) ? yAxis : getFormattedAxis(yAxis, format);
+    const anchoredAnnotationSeries = annotationSeries.map((series) => ({
+      ...series,
+      yAxisIndex: visibleYAxes.length,
+    }));
     const updatedSeriesMapping =
       enablePinning && pinnedCrosshair !== null
-        ? [...seriesMapping, pinnedCrosshair, ...annotationSeries, ...exemplarSeries]
-        : [...seriesMapping, ...annotationSeries, ...exemplarSeries];
+        ? [...seriesMapping, pinnedCrosshair, ...anchoredAnnotationSeries, ...exemplarSeries]
+        : [...seriesMapping, ...anchoredAnnotationSeries, ...exemplarSeries];
 
     const option: EChartsCoreOption = {
       dataset: dataset,
@@ -359,8 +365,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           snap: false, // important so shared crosshair does not lag
         },
       },
-      // If yAxis is already an array (multiple Y axes), use it directly; otherwise use getFormattedAxis
-      yAxis: Array.isArray(yAxis) ? yAxis : getFormattedAxis(yAxis, format),
+      yAxis: annotationSeries.length ? [...visibleYAxes, { type: 'value', show: false, min: 0, max: 1 }] : visibleYAxes,
       animation: false,
       tooltip: {
         show: true,
