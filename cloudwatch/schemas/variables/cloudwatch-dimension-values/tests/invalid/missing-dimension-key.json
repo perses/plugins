@@ -1,0 +1,6 @@
+{
+  "kind": "CloudWatchDimensionValuesVariable",
+  "spec": {
+    "namespace": "AWS/EC2"
+  }
+}
