@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useChartsTheme } from '@perses-dev/components';
+import { Box } from '@mui/material';
 import type { ThresholdOptions } from '@perses-dev/components';
+import { useChartsTheme } from '@perses-dev/components';
 import type { TimeSeries } from '@perses-dev/spec';
 import type { MouseEvent, ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
@@ -23,13 +24,21 @@ import type { CanvasProps, CanvasSpec, Point } from '../../model';
 import { buildGraphFromQueries } from '../../utils/graphGeneration';
 import { layoutGraph } from '../../utils/graphLayout';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
+import { resolveMouseShortcut } from '../../utils/shortcuts';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
+import { CanvasShortcutsTooltip } from '../shared/CanvasShortcutsTooltip';
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
 import { ThresholdLegend } from './ThresholdLegend';
 
 const SVG_STYLE_BASE = { display: 'block' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
+const PANEL_WRAPPER_SX = { position: 'relative' as const };
+
+const LEGEND_WIDTH = 110;
+const LEGEND_MARGIN = 8;
+const BTN_MARGIN = 4;
+const BTN_HEIGHT = 32;
 
 interface PanelSvgProps {
   svgRef: (node: SVGSVGElement | null) => void;
@@ -60,13 +69,15 @@ function PanelSvg({
 
   const handleDoubleClick = useCallback(
     (event: MouseEvent<SVGSVGElement>): void => {
-      if (event.ctrlKey || event.metaKey) {
-        const boundingBox = nodeBoundingBox(nodes);
-        if (boundingBox) {
-          fitView(boundingBox, width, height);
+      switch (resolveMouseShortcut(event)?.id) {
+        case 'fitView': {
+          const boundingBox = nodeBoundingBox(nodes);
+          if (boundingBox) fitView(boundingBox, width, height);
+          return;
         }
-      } else {
-        resetPan();
+        case 'resetView':
+          resetPan();
+          return;
       }
     },
     [fitView, resetPan, nodes, width, height],
@@ -75,44 +86,55 @@ function PanelSvg({
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;
   const thresholds = spec.thresholds ?? EMPTY_THRESHOLDS;
   const legendPosition = spec.legend?.position ?? 'bottom';
-  const LEGEND_MARGIN = 8;
-  const legendX = legendPosition === 'right' ? width - 118 - LEGEND_MARGIN : LEGEND_MARGIN;
+  const legendX = legendPosition === 'right' ? width - LEGEND_WIDTH - LEGEND_MARGIN : LEGEND_MARGIN;
   const legendY =
-    legendPosition === 'right' ? LEGEND_MARGIN : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
+    legendPosition === 'right'
+      ? BTN_MARGIN + BTN_HEIGHT + BTN_MARGIN
+      : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
+
+  const shortcutsBtnSx = useMemo(
+    () => ({ position: 'absolute' as const, top: BTN_MARGIN, right: BTN_MARGIN, zIndex: 1 }),
+    [],
+  );
 
   const svgStyle = useMemo(() => ({ ...SVG_STYLE_BASE, cursor: isPanning ? 'grabbing' : 'grab' }), [isPanning]);
 
   return (
-    <svg ref={svgRef} width={width} height={height} style={svgStyle} onDoubleClick={handleDoubleClick}>
-      <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
-      <g transform={transform.toString()}>
-        <BackgroundLayer backgrounds={backgrounds} />
-        <PanelNodeLayer
-          spec={spec}
-          seriesByQueryIndex={seriesByQueryIndex}
-          k={transform.k}
-          paletteColors={paletteColors}
-          seriesByItemId={seriesByItemId}
-        />
-        <PanelEdgeLayer
-          spec={spec}
-          seriesByQueryIndex={seriesByQueryIndex}
-          k={transform.k}
-          paletteColors={paletteColors}
-          seriesByItemId={seriesByItemId}
-          reverseSeriesByItemId={reverseSeriesByItemId}
-        />
-      </g>
+    <Box sx={PANEL_WRAPPER_SX}>
+      <svg ref={svgRef} width={width} height={height} style={svgStyle} onDoubleClick={handleDoubleClick}>
+        <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
+        <g transform={transform.toString()}>
+          <BackgroundLayer backgrounds={backgrounds} />
+          <PanelNodeLayer
+            spec={spec}
+            seriesByQueryIndex={seriesByQueryIndex}
+            k={transform.k}
+            paletteColors={paletteColors}
+            seriesByItemId={seriesByItemId}
+          />
+          <PanelEdgeLayer
+            spec={spec}
+            seriesByQueryIndex={seriesByQueryIndex}
+            k={transform.k}
+            paletteColors={paletteColors}
+            seriesByItemId={seriesByItemId}
+            reverseSeriesByItemId={reverseSeriesByItemId}
+          />
+        </g>
 
-      {showLegend ? (
-        <ThresholdLegend
-          thresholds={thresholds}
-          format={spec.format}
-          paletteColors={paletteColors}
-          position={{ x: legendX, y: legendY }}
-        />
-      ) : null}
-    </svg>
+        {showLegend ? (
+          <ThresholdLegend
+            thresholds={thresholds}
+            format={spec.format}
+            paletteColors={paletteColors}
+            position={{ x: legendX, y: legendY }}
+          />
+        ) : null}
+      </svg>
+      <Box sx={shortcutsBtnSx}>
+        <CanvasShortcutsTooltip />
+      </Box>
+    </Box>
   );
 }
 
