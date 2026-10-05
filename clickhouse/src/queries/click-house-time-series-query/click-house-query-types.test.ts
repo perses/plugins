@@ -16,7 +16,7 @@
 vi.mock('echarts/core');
 
 import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import type { DatasourceSpec } from '@perses-dev/spec';
+import type { DatasourceSpec, TimeSeriesData } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
 import type { ClickHouseDatasourceSpec } from '../../datasources';
@@ -35,8 +35,8 @@ clickhouseStubClient.query = vi.fn(async () => {
   const stubResponse: ClickHouseQueryResponse = {
     status: 'success',
     data: [
-      { time: '2025-09-09 05:18:00', avg_cpu: '2.5', max_memory: 277, service: 'api' },
-      { time: '2025-09-09 05:19:00', avg_cpu: '3.5', max_memory: 156102, service: 'api' },
+      { time: '2025-09-09 05:18:00', avg_cpu: '2.5', max_memory: 277 },
+      { time: '2025-09-09 05:19:00', avg_cpu: '3.5', max_memory: 156102 },
     ],
   };
   return stubResponse as ClickHouseQueryResponse;
@@ -180,5 +180,113 @@ describe('ClickHouseTimeSeriesQuery', () => {
     );
 
     expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
+  });
+
+  describe('label columns', () => {
+    const run = async (
+      data: Array<Record<string, string | number | null>>,
+      query = 'SELECT 1',
+    ): Promise<TimeSeriesData> => {
+      (clickhouseStubClient.query as Mock).mockResolvedValueOnce({
+        status: 'success',
+        data,
+      });
+      return ClickHouseTimeSeriesQuery.getTimeSeriesData({ query }, createStubContext());
+    };
+    const t1 = new Date('2026-01-01 00:00:00').getTime();
+    const t2 = new Date('2026-01-01 00:01:00').getTime();
+
+    it('should keep one series per value column, without labels, when no column is a label', async () => {
+      const response = await run([
+        { time: '2026-01-01 00:00:00', a: 1, b: '2' },
+        { time: '2026-01-01 00:01:00', a: 3, b: null },
+      ]);
+      expect(response.series).toStrictEqual([
+        {
+          name: 'a',
+          values: [
+            [t1, 1],
+            [t2, 3],
+          ],
+        },
+        {
+          name: 'b',
+          values: [
+            [t1, 2],
+            [t2, null],
+          ],
+        },
+      ]);
+    });
+
+    it('should split value columns into one series per label tuple', async () => {
+      const response = await run([
+        { time: '2026-01-01 00:00:00', repository: 'network-api', jobs: 4 },
+        { time: '2026-01-01 00:00:00', repository: 'billing', jobs: 7 },
+        { time: '2026-01-01 00:01:00', repository: 'network-api', jobs: 5 },
+        { time: '2026-01-01 00:01:00', repository: 'billing', jobs: 9 },
+      ]);
+      expect(response.series).toStrictEqual([
+        {
+          name: 'jobs{repository="network-api"}',
+          labels: { repository: 'network-api' },
+          values: [
+            [t1, 4],
+            [t2, 5],
+          ],
+        },
+        {
+          name: 'jobs{repository="billing"}',
+          labels: { repository: 'billing' },
+          values: [
+            [t1, 7],
+            [t2, 9],
+          ],
+        },
+      ]);
+    });
+
+    it('should combine several label columns and several value columns', async () => {
+      const response = await run([
+        {
+          time: '2026-01-01 00:00:00',
+          repository: 'api',
+          branch: 'main',
+          jobs: 1,
+          failures: 0,
+        },
+      ]);
+      expect(response.series?.map((s) => [s.name, s.labels])).toStrictEqual([
+        ['jobs{branch="main",repository="api"}', { repository: 'api', branch: 'main' }],
+        ['failures{branch="main",repository="api"}', { repository: 'api', branch: 'main' }],
+      ]);
+    });
+
+    it('should treat a column mixing numbers and text as a value column', async () => {
+      const response = await run([
+        { time: '2026-01-01 00:00:00', repository: 'api', jobs: 1 },
+        { time: '2026-01-01 00:01:00', repository: '5', jobs: 2 },
+      ]);
+      expect(response.series?.map((s) => s.name)).toStrictEqual(['repository', 'jobs']);
+    });
+
+    it('should keep labels on rows without a time column so tables can show them', async () => {
+      const response = await run([
+        { repository: 'network-api', coverage: 81.5 },
+        { repository: 'billing', coverage: 64 },
+      ]);
+      expect(response.series).toStrictEqual([
+        {
+          name: 'coverage{repository="network-api"}',
+          labels: { repository: 'network-api' },
+          values: [[NaN, 81.5]],
+        },
+        {
+          name: 'coverage{repository="billing"}',
+          labels: { repository: 'billing' },
+          values: [[NaN, 64]],
+        },
+      ]);
+    });
   });
 });

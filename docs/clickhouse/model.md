@@ -96,6 +96,22 @@ spec:
       query: "SELECT toStartOfMinute(timestamp) as time, count() as requests FROM http_logs WHERE timestamp >= now() - INTERVAL 1 HOUR GROUP BY time ORDER BY time"
 ```
 
+### Label columns
+
+Columns (other than `time`) whose values are all non-numeric text are used as series labels; every other column is a
+value column. One series is produced per label combination and value column, named like
+`requests{service="api"}` (Prometheus notation). Without label columns, one series per value column is produced, named
+after the column.
+
+```yaml
+kind: "TimeSeriesQuery"
+spec:
+  plugin:
+    kind: "ClickHouseTimeSeriesQuery"
+    spec:
+      query: "SELECT toStartOfMinute(timestamp) as time, service, count() as requests FROM http_logs GROUP BY time, service ORDER BY time"
+```
+
 ## ClickHouseLogQuery
 
 Perses supports log queries for ClickHouse: `ClickHouseLogQuery`.

@@ -13,7 +13,7 @@
 
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
-import type { TimeSeries } from '@perses-dev/spec';
+import type { Labels, TimeSeries } from '@perses-dev/spec';
 
 import type { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
 import { formatClickHouseDateTime, replaceTimeRangePlaceholders } from '../../model/click-house-client';
@@ -23,27 +23,69 @@ import type { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './c
 
 const DEFAULT_STEP_MS = 30 * 1000;
 
+function isLabelColumn(data: TimeSeriesEntry[], column: string): boolean {
+  let hasText = false;
+  for (const row of data) {
+    const value = row[column];
+    if (value === null || value === undefined || value === '') {
+      continue;
+    }
+    if (toTimeSeriesValue(value) !== null) {
+      return false;
+    }
+    hasText = true;
+  }
+  return hasText;
+}
+
+// Same notation as a Prometheus series: metric{label="value",...} with sorted label names.
+function formatSeriesName(metricName: string, labels: Labels): string {
+  const labelNames = Object.keys(labels);
+  if (labelNames.length === 0) {
+    return metricName;
+  }
+  const pairs = labelNames.toSorted().map((labelName) => `${labelName}="${labels[labelName]}"`);
+  return `${metricName}{${pairs.join(',')}}`;
+}
+
+// Columns holding only non-numeric text are labels; the remaining columns (except `time`) are values.
 function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
   const data = response?.data as TimeSeriesEntry[];
   if (!response || !data || data.length === 0) {
     return [];
   }
 
-  const metricNames = Object.keys(data[0] ?? {}).filter((key) => key !== 'time');
+  const columns = Object.keys(data[0] ?? {}).filter((key) => key !== 'time');
+  const labelNames = columns.filter((column) => isLabelColumn(data, column));
+  const metricNames = columns.filter((column) => !labelNames.includes(column));
 
-  return metricNames
-    .map((metricName) => {
-      const values: Array<[number, number | null]> = data.map((row: TimeSeriesEntry) => {
-        const timestamp = new Date(row.time).getTime();
-        const value = toTimeSeriesValue(row[metricName]);
-        return [timestamp, value];
-      });
+  const groups = new Map<string, { labels: Labels; rows: TimeSeriesEntry[] }>();
+  for (const row of data) {
+    const labels: Labels = {};
+    for (const labelName of labelNames) {
+      labels[labelName] = String(row[labelName] ?? '');
+    }
+    const key = JSON.stringify(labelNames.map((labelName) => labels[labelName]));
+    const group = groups.get(key) ?? { labels, rows: [] };
+    group.rows.push(row);
+    groups.set(key, group);
+  }
 
-      return {
-        name: metricName,
-        values,
-      };
-    })
+  const hasLabels = labelNames.length > 0;
+  return Array.from(groups.values())
+    .flatMap(({ labels, rows }) =>
+      metricNames.map((metricName): TimeSeries => {
+        const values: Array<[number, number | null]> = rows.map((row: TimeSeriesEntry) => {
+          const timestamp = new Date(row.time).getTime();
+          const value = toTimeSeriesValue(row[metricName]);
+          return [timestamp, value];
+        });
+
+        return hasLabels
+          ? { name: formatSeriesName(metricName, labels), labels, values }
+          : { name: metricName, values };
+      }),
+    )
     .filter((series) => series.values.some(([, value]) => value !== null));
 }
 
