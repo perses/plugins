@@ -22,9 +22,9 @@ import {
   ThresholdsEditor,
 } from '@perses-dev/components';
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
-import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
