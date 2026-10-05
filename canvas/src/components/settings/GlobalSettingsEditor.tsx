@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import {
   FormatControls,
+  InfoTooltip,
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
@@ -23,6 +24,7 @@ import {
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
@@ -64,7 +66,28 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
         </OptionsEditorColumn>
         <OptionsEditorColumn>
           <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
-          <OptionsEditorGroup title="Edge thickness">
+          <OptionsEditorGroup
+            title="Edge thickness"
+            icon={
+              <InfoTooltip
+                title="Edge thickness"
+                description="Defines stroke widths used when edges have thickness mode set to threshold. The default width applies when no threshold step matches the query value."
+                enterDelay={100}
+              >
+                <IconButton
+                  size="small"
+                  sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px', margin: '0 2px' })}
+                >
+                  <InformationOutlineIcon
+                    aria-describedby="info-tooltip"
+                    aria-hidden={false}
+                    fontSize="inherit"
+                    sx={{ color: (theme) => theme.palette.grey[700] }}
+                  />
+                </IconButton>
+              </InfoTooltip>
+            }
+          >
             <EdgeThicknessSettings value={value} onChange={onChange} />
           </OptionsEditorGroup>
         </OptionsEditorColumn>
