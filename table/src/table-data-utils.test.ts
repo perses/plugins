@@ -51,7 +51,7 @@ describe('needsTimeSeriesExpansion', () => {
     expect(needsTimeSeriesExpansion({})).toBe(false);
   });
 
-  it('is true when the last enabled transform is PivotByLabel', () => {
+  it('is true when MergeSeries runs before PivotByLabel', () => {
     const spec: TableOptions = {
       transforms: [
         { kind: 'MergeSeries', spec: {} },
@@ -61,14 +61,14 @@ describe('needsTimeSeriesExpansion', () => {
     expect(needsTimeSeriesExpansion(spec)).toBe(true);
   });
 
-  it('is false when PivotByLabel is not last among enabled transforms', () => {
+  it('is true when a transform follows PivotByLabel', () => {
     const spec: TableOptions = {
       transforms: [
         { kind: 'PivotByLabel', spec: { columnLabel: 'farm' } },
         { kind: 'MergeSeries', spec: {} },
       ],
     };
-    expect(needsTimeSeriesExpansion(spec)).toBe(false);
+    expect(needsTimeSeriesExpansion(spec)).toBe(true);
   });
 
   it('skips disabled trailing transforms', () => {
@@ -120,14 +120,14 @@ describe('getTablePanelQueryMode', () => {
     expect(getTablePanelQueryMode(spec)).toBe('range');
   });
 
-  it('returns instant when PivotByLabel is not last enabled', () => {
+  it('returns range when a transform follows PivotByLabel', () => {
     const spec: TableOptions = {
       transforms: [
         { kind: 'PivotByLabel', spec: { columnLabel: 'farm' } },
         { kind: 'MergeSeries', spec: {} },
       ],
     };
-    expect(getTablePanelQueryMode(spec)).toBe('instant');
+    expect(getTablePanelQueryMode(spec)).toBe('range');
   });
 });
 

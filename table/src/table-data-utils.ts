@@ -15,6 +15,7 @@ import type { Labels, PanelData } from '@perses-dev/plugin-system';
 import type { JsonData, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 
 import type { TableOptions } from './models';
+import { transformRequiresEachSample } from './transform-requirements';
 
 export interface BuildRawTableDataOptions {
   forExport?: boolean;
@@ -23,15 +24,9 @@ export interface BuildRawTableDataOptions {
 }
 
 export function needsTimeSeriesExpansion(spec: TableOptions): boolean {
-  const transforms = spec.transforms ?? [];
-  for (let i = transforms.length - 1; i >= 0; i--) {
-    const t = transforms[i];
-    if (!t || t.spec?.disabled === true) {
-      continue;
-    }
-    return t.kind === 'PivotByLabel';
-  }
-  return false;
+  return (spec.transforms ?? []).some(
+    (transform) => transform.spec?.disabled !== true && transformRequiresEachSample(transform.kind),
+  );
 }
 
 export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' {
