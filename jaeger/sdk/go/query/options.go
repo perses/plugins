@@ -13,11 +13,17 @@
 
 package query
 
-import "github.com/perses/plugins/jaeger/sdk/go/datasource"
+import (
+	"github.com/perses/plugins/jaeger/sdk/go/datasource"
+)
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = datasource.Selector(datasourceName)
+		sel, err := datasource.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
 		return nil
 	}
 }
