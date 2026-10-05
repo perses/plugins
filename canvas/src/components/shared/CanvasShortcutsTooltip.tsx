@@ -11,13 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Typography } from '@mui/material';
-import { StyledTooltip as Tooltip } from '@perses-dev/components';
+import { Box, Tooltip as MuiTooltip, tooltipClasses, Typography } from '@mui/material';
+import type { TooltipProps as MuiTooltipProps } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import type { ReactElement } from 'react';
 
 import type { MouseShortcutTooltip } from '../../utils/shortcuts';
 import { SHORTCUTS } from '../../utils/shortcuts';
+
+const Tooltip = styled(({ className, ...props }: MuiTooltipProps) => (
+  <MuiTooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.background.tooltip,
+    color: theme.palette.text.primary,
+    maxWidth: '300px',
+    padding: theme.spacing(1),
+    boxShadow: theme.shadows[1],
+  },
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.background.tooltip,
+  },
+}));
 
 const styles = {
   key: {
