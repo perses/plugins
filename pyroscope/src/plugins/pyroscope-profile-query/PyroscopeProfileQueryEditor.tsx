@@ -104,7 +104,13 @@ export function PyroscopeProfileQueryEditor(props: ProfileQueryEditorProps): Rea
           slotProps={{ htmlInput: { step: 1 } }}
         />
       </Stack>
-      <Filters datasource={selectedDatasource} value={filters} onChange={handleFiltersChange} />
+      <Filters
+        datasource={selectedDatasource}
+        value={filters}
+        service={service}
+        profileType={profileType}
+        onChange={handleFiltersChange}
+      />
     </Stack>
   );
 }
