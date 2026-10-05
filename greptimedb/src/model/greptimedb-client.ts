@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { RequestHeaders } from '@perses-dev/client';
+import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 
 import type {
   GreptimeDBDatasourceResponse,
@@ -22,6 +22,7 @@ import type { GreptimeDBResponseData } from './greptimedb-data-types';
 export interface GreptimeDBQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetch?: FetchFn;
 }
 
 export interface GreptimeDBQueryResponse {
@@ -48,7 +49,7 @@ export async function greptimedbQuery(
   params: GreptimeDBQueryRequestParameters,
   queryOptions: GreptimeDBQueryOptions,
 ): Promise<GreptimeDBDatasourceResponse> {
-  const { datasourceUrl, headers } = queryOptions;
+  const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
   const url = buildSqlUrl(datasourceUrl);
 
   if (!params.query) {
@@ -67,7 +68,8 @@ export async function greptimedbQuery(
   };
 
   try {
-    const response = await fetch(url.toString(), init);
+    const doFetch = customFetch ?? fetch;
+    const response = await doFetch(url.toString(), init);
     if (!response.ok) {
       const errorMessage = await readErrorResponse(response);
       console.error('GreptimeDB error response:', errorMessage);

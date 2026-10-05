@@ -1,13 +1,13 @@
 module: "github.com/perses/plugins/datasourcevariable@v0"
 language: {
-	version: "v0.16.1"
+	version: "v0.17.1"
 }
 source: {
 	kind: "git"
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.55.0-beta.2"
+		v:       "v0.55.0-beta.4"
 		default: true
 	}
 	"github.com/perses/plugins/jaeger@v0": {
@@ -39,7 +39,7 @@ deps: {
 		default: true
 	}
 	"github.com/perses/spec/cue@v0": {
-		v:       "v0.3.0-beta.9"
+		v:       "v0.3.0-beta.10"
 		default: true
 	}
 }

@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'HeatMapChart',
   rsbuildConfig: {
-    server: { port: 3021 },
+    server: { port: 3028 },
     plugins: [pluginReact()],
   },
   moduleFederation: {

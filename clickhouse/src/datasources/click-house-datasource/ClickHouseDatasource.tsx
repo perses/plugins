@@ -22,7 +22,7 @@ const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasou
   options,
 ) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -37,7 +37,7 @@ const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasou
     options: {
       datasourceUrl,
     },
-    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
   };
 };
 
