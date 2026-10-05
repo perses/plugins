@@ -27,13 +27,12 @@ import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLaye
 import { CanvasShortcutsTooltip } from '../shared/CanvasShortcutsTooltip';
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
-import { ThresholdLegend } from './ThresholdLegend';
+import { LEGEND_WIDTH, ThresholdLegend } from './ThresholdLegend';
 
 const SVG_STYLE_BASE = { display: 'block' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
 const PANEL_WRAPPER_SX = { position: 'relative' as const };
 
-const LEGEND_WIDTH = 110;
 const LEGEND_MARGIN = 8;
 const BTN_MARGIN = 4;
 const BTN_HEIGHT = 32;
