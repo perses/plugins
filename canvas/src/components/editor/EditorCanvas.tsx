@@ -26,6 +26,7 @@ import type { CanvasSpec, FloatingEdge } from '../../model';
 import { isFloatingEdge } from '../../model';
 import type { ResizeHandleId } from '../../utils/resizeUtils';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
+import { resolveMouseShortcut } from '../../utils/shortcuts';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { DragEdgeLine } from './DragEdgeLine';
 import { EditorEdgeItem } from './EditorEdgeItem';
@@ -167,13 +168,17 @@ export function EditorCanvas({
 
   const onSvgDoubleClick = useCallback(
     (event: MouseEvent<SVGSVGElement>): void => {
-      if (event.ctrlKey || event.metaKey) {
-        const boundingBox = nodeBoundingBox(displayNodes);
-        if (boundingBox) {
-          fitView(boundingBox, width, height);
+      switch (resolveMouseShortcut(event)?.id) {
+        case 'fitView': {
+          const boundingBox = nodeBoundingBox(displayNodes);
+          if (boundingBox) {
+            fitView(boundingBox, width, height);
+          }
+          return;
         }
-      } else {
-        resetPan();
+        case 'resetView':
+          resetPan();
+          return;
       }
     },
     [displayNodes, fitView, resetPan, width, height],
