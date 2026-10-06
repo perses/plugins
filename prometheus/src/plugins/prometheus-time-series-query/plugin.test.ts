@@ -16,7 +16,7 @@
 vi.mock('echarts/core');
 
 import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import type { DatasourceSpec } from '@perses-dev/spec';
+import type { DatasourceSpec, DurationString } from '@perses-dev/spec';
 import type { Mock } from 'vitest';
 
 import type { RangeQueryResponse, InstantQueryResponse, QueryExemplarsResponse } from '../../model';
@@ -317,5 +317,72 @@ describe('PrometheusTimeSeriesQuery', () => {
 
     expect(promStubClient.instantQuery).toHaveBeenCalledTimes(1);
     expect(promStubClient.rangeQuery).not.toHaveBeenCalled();
+  });
+
+  it('should explain that $__rate_interval cannot be used as Min Step, for range and instant queries', async () => {
+    const ctx = createStubContext();
+    // In a dashboard, the built-in variables of the Prometheus datasource resolve to themselves:
+    // they are only replaced in the PromQL query, with values computed from the step.
+    ctx.variableState = { __rate_interval: { value: '$__rate_interval', loading: false } };
+    (promStubClient.rangeQuery as Mock).mockClear();
+    (promStubClient.instantQuery as Mock).mockClear();
+    const minStep = '$__rate_interval' as DurationString;
+
+    await expect(PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', minStep }, ctx)).rejects.toThrow(
+      "'$__rate_interval' cannot be used as Min Step",
+    );
+    await expect(
+      PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', minStep, instant: true }, ctx),
+    ).rejects.toThrow("'$__rate_interval' cannot be used as Min Step");
+    expect(promStubClient.rangeQuery).not.toHaveBeenCalled();
+    expect(promStubClient.instantQuery).not.toHaveBeenCalled();
+  });
+
+  it('should resolve the variables used in the Min Step', async () => {
+    const ctx = createStubContext();
+    // On a 6h range, the step is the Min Step: it is above the safe step (3s), and no step is suggested
+    ctx.timeRange = { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-01T06:00:00Z') };
+    ctx.variableState = { resolution: { value: '5m', loading: false } };
+    (promStubClient.rangeQuery as Mock).mockClear();
+
+    await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', minStep: '$resolution' as DurationString }, ctx);
+
+    expect(promStubClient.rangeQuery).toHaveBeenCalledTimes(1);
+    const [params] = (promStubClient.rangeQuery as Mock).mock.calls[0] as [{ step: number }];
+    expect(params.step).toBe(300);
+  });
+
+  it('should use the scrape interval of the datasource when a variable used as Min Step has an empty value', async () => {
+    const ctx = createStubContext();
+    ctx.timeRange = { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-01T06:00:00Z') };
+    ctx.variableState = { resolution: { value: '', loading: false } };
+    // A scrape interval that differs from the default (1m), so that the test fails if the default is used instead
+    getDatasource.mockImplementationOnce((): DatasourceSpec<PrometheusDatasourceSpec> => {
+      return {
+        default: false,
+        plugin: { kind: 'PrometheusDatasource', spec: { ...datasource, scrapeInterval: '2m' } },
+      };
+    });
+    (promStubClient.rangeQuery as Mock).mockClear();
+
+    await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', minStep: '$resolution' as DurationString }, ctx);
+
+    expect(promStubClient.rangeQuery).toHaveBeenCalledTimes(1);
+    const [params] = (promStubClient.rangeQuery as Mock).mock.calls[0] as [{ step: number }];
+    expect(params.step).toBe(120);
+  });
+
+  it('should not use the scrape interval of the datasource when the Min Step is 0s', async () => {
+    const ctx = createStubContext();
+    ctx.timeRange = { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-01T06:00:00Z') };
+    // Below the scrape interval of the datasource (1m): a Min Step of 0s sets no lower bound
+    ctx.suggestedStepMs = 15 * 1000;
+    (promStubClient.rangeQuery as Mock).mockClear();
+
+    await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', minStep: '0s' }, ctx);
+
+    expect(promStubClient.rangeQuery).toHaveBeenCalledTimes(1);
+    const [params] = (promStubClient.rangeQuery as Mock).mock.calls[0] as [{ step: number }];
+    expect(params.step).toBe(15);
   });
 });
