@@ -70,17 +70,19 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
             title="Edge thickness"
             icon={
               <InfoTooltip
+                id="edge-thickness-info-tooltip"
                 title="Edge thickness"
                 description="Defines stroke widths used when edges have thickness mode set to threshold. The default width applies when no threshold step matches the query value."
                 enterDelay={100}
               >
                 <IconButton
+                  aria-label="Edge thickness information"
+                  aria-describedby="edge-thickness-info-tooltip"
                   size="small"
                   sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px', margin: '0 2px' })}
                 >
                   <InformationOutlineIcon
-                    aria-describedby="info-tooltip"
-                    aria-hidden={false}
+                    aria-hidden
                     fontSize="inherit"
                     sx={{ color: (theme) => theme.palette.grey[700] }}
                   />
