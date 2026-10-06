@@ -13,14 +13,7 @@
 
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
-import type {
-  DatasourceSpec,
-  DurationString,
-  Notice,
-  TimeSeries,
-  TimeSeriesData,
-  TimeSeriesExemplars,
-} from '@perses-dev/spec';
+import type { DatasourceSpec, Notice, TimeSeries, TimeSeriesData, TimeSeriesExemplars } from '@perses-dev/spec';
 import { parseDurationString } from '@perses-dev/spec';
 import { fromUnixTime, milliseconds } from 'date-fns';
 
@@ -35,7 +28,6 @@ import type {
 import {
   parseValueTuple,
   parseSampleValue,
-  getDurationStringSeconds,
   getPrometheusTimeRange,
   getRangeStep,
   DEFAULT_PROM,
@@ -45,6 +37,7 @@ import { getFormattedPrometheusSeriesName } from '../../utils';
 import { interpolateDatasourceProxyParams } from '../interpolation';
 import type { PrometheusDatasourceSpec } from '../types';
 import { DEFAULT_SCRAPE_INTERVAL } from '../types';
+import { getMinStepSeconds } from './min-step';
 import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
 import type { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
@@ -78,12 +71,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
 
   // Min step is the lower bound of the interval between data points
   // If no value is provided for it, it should default to the scrape interval of the datasource
-  const minStep =
-    getDurationStringSeconds(
-      // resolve any variable that may have been provided
-      // TODO add a validation check to make sure the variable is a DurationString, to avoid the back & forth cast here
-      replaceVariables(spec.minStep as string, context.variableState) as DurationString,
-    ) ?? datasourceScrapeInterval;
+  const minStep = getMinStepSeconds(spec.minStep, context.variableState) ?? datasourceScrapeInterval;
 
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
