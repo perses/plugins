@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Tooltip as MuiTooltip, tooltipClasses, Typography } from '@mui/material';
+import { Box, IconButton, Tooltip as MuiTooltip, tooltipClasses, Typography } from '@mui/material';
 import type { TooltipProps as MuiTooltipProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
@@ -50,7 +50,7 @@ const styles = {
   row: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, py: 0.25 },
   keys: { display: 'flex', gap: 0.5 },
   title: { fontWeight: 'medium', mb: 0.5 },
-  icon: { cursor: 'default', opacity: 0.7 },
+  iconButton: { opacity: 0.7, padding: '2px' },
 } as const;
 
 const SHORTCUT_ROWS: MouseShortcutTooltip[] = SHORTCUTS.map((s) => s.tooltip);
@@ -84,7 +84,9 @@ const TOOLTIP_TITLE = (
 export function CanvasShortcutsTooltip(): ReactElement {
   return (
     <Tooltip arrow placement="left" enterDelay={200} enterNextDelay={200} title={TOOLTIP_TITLE}>
-      <InformationOutlineIcon fontSize="small" sx={styles.icon} />
+      <IconButton size="small" aria-label="Canvas keyboard shortcuts" sx={styles.iconButton}>
+        <InformationOutlineIcon fontSize="small" />
+      </IconButton>
     </Tooltip>
   );
 }
