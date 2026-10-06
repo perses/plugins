@@ -88,8 +88,8 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
               fill={muiTheme.palette.text.primary}
               style={NO_SELECT_STYLE}
             >
-<title>{row.label}</title>
-{truncateLabel(row.label)}
+              <title>{row.label}</title>
+              {truncateLabel(row.label)}
             </text>
           </g>
         );
