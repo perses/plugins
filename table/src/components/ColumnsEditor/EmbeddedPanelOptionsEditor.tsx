@@ -13,11 +13,11 @@
 
 import { CircularProgress, Stack, Typography } from '@mui/material';
 import type { PanelPlugin } from '@perses-dev/plugin-system';
-import { OptionsEditorTabs, usePlugin } from '@perses-dev/plugin-system';
+import { OptionsEditorTabs, useEvent, usePlugin } from '@perses-dev/plugin-system';
 import type { UnknownSpec } from '@perses-dev/spec';
 import merge from 'lodash/merge';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export interface EmbeddedPanelOptionsEditorProps {
   kind: string;
@@ -52,16 +52,15 @@ export function EmbeddedPanelOptionsEditor({ kind, spec, onChange }: EmbeddedPan
     return mergeWithPluginDefaults(panelPlugin, spec);
   }, [panelPlugin, spec]);
 
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  const handleChange = useEvent(onChange);
 
   // Persist plugin defaults when the column still has an empty spec (e.g. after switching panel kind).
   useEffect(() => {
     if (!panelPlugin || !isSpecEmpty(spec)) {
       return;
     }
-    onChangeRef.current(mergeWithPluginDefaults(panelPlugin, spec));
-  }, [panelPlugin, kind, spec]);
+    handleChange(mergeWithPluginDefaults(panelPlugin, spec));
+  }, [panelPlugin, spec, handleChange]);
 
   if (isLoading) {
     return (

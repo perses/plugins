@@ -51,8 +51,10 @@ describe('useStatusHistoryDataModel', () => {
             },
           ],
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        definition: { query: 'some-query' } as any,
+        definition: {
+          kind: 'TimeSeriesQuery',
+          spec: { plugin: { kind: 'PrometheusTimeSeriesQuery', spec: { query: 'some-query' } } },
+        },
       },
     ];
     const colors = ['#ff0000', '#00ff00'];

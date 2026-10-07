@@ -18,18 +18,20 @@ import { useEffect, useState } from 'react';
 
 interface ResizableDividerProps {
   parentRef: React.RefObject<Element>;
-  spacing?: number;
   onMove: (left: number) => void;
 }
 
 export function ResizableDivider(props: ResizableDividerProps): ReactElement {
-  const { parentRef, spacing = 0, onMove } = props;
+  const { parentRef, onMove } = props;
   const [isResizing, setResizing] = useState(false);
+  const [spacing, setSpacing] = useState(0);
 
   const handleMouseDown = (e: ReactMouseEvent): void => {
     // disable any default actions (text selection, etc.)
     e.preventDefault();
 
+    // read the flex gap once per drag instead of on every mousemove
+    setSpacing(parentRef.current ? parseFloat(getComputedStyle(parentRef.current).columnGap) || 0 : 0);
     setResizing(true);
   };
 

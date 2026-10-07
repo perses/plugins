@@ -34,7 +34,7 @@ import CloseIcon from 'mdi-material-ui/Close';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddIcon from 'mdi-material-ui/Plus';
 import type { ReactElement } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import type {
   QuerySettingsOptions,
@@ -58,13 +58,12 @@ export function QuerySettingsEditor(props: TimeSeriesChartOptionsEditorProps): R
     );
   };
   // Every time a new query settings input is added, we want to focus the recently added input
-  const recentlyAddedInputRef = useRef<HTMLInputElement | null>(null);
   const focusRef = useRef(false);
-  useEffect(() => {
-    if (!recentlyAddedInputRef.current || !focusRef.current) return;
-    recentlyAddedInputRef.current?.focus();
+  const recentlyAddedInputRef = useCallback((input: HTMLInputElement | null): void => {
+    if (!input || !focusRef.current) return;
+    input.focus();
     focusRef.current = false;
-  }, [querySettingsList?.length]);
+  }, []);
 
   const handleQueryIndexChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {
@@ -348,7 +347,7 @@ interface QuerySettingsInputProps {
   onLineStyleChange: (lineStyle: string) => void;
   onAreaOpacityChange: (event: Event, value: number | number[]) => void;
   onDelete: () => void;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
+  inputRef?: React.Ref<HTMLInputElement>;
   // Optional control handlers
   onAddColor: () => void;
   onRemoveColor: () => void;

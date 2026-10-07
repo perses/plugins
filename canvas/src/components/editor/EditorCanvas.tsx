@@ -202,11 +202,11 @@ export function EditorCanvas({
 
   return (
     <>
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <svg
         ref={svgRef}
         role="application"
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={0}
         width={width}
         height={height}
