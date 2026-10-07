@@ -521,7 +521,7 @@ export function AlertTablePanel({ spec, queryResults, contentDimensions }: Alert
     return result;
   }, [alerts, groupBy, allTrackedKeys, sortState]);
 
-  const currentKeys = groups.map((g) => g.key).join('\0');
+  const currentKeys = useMemo(() => groups.map((g) => g.key).join('\0'), [groups]);
   const [previousGroupKeys, setPreviousGroupKeys] = useState('');
   if (currentKeys !== previousGroupKeys) {
     setPreviousGroupKeys(currentKeys);

@@ -18,7 +18,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import type { CompletionConfig } from './logql-extension';
-import { LogQLExtension as createLogQLExtension } from './logql-extension';
+import { createLogQLExtension } from './logql-extension';
 
 export type LogQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> & {
   completionConfig?: CompletionConfig;

@@ -41,16 +41,17 @@ export const DatasourceVariableOptionEditor = (props: OptionsEditorProps<StaticL
   const selectedKind = options.find((option) => option.label === datasourcePluginKind) ?? EMPTY_SELECTED_KIND;
 
   // If there is no selected kind and there are available options, select the first one
+  const selectedKindValue = selectedKind.value;
   useEffect(() => {
     const datasourcePluginKindArray = Array.from(datasourcePluginKindSet);
     if (
-      selectedKind.value === EMPTY_SELECTED_KIND.value &&
+      selectedKindValue === EMPTY_SELECTED_KIND.value &&
       datasourcePluginKindArray.length > 0 &&
       datasourcePluginKindArray[0]
     ) {
       onChange({ datasourcePluginKind: datasourcePluginKindArray[0] });
     }
-  }, [selectedKind, onChange, datasourcePluginKindSet]);
+  }, [selectedKindValue, onChange, datasourcePluginKindSet]);
 
   return (
     <Autocomplete

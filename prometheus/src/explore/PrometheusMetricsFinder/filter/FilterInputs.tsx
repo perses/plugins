@@ -25,7 +25,7 @@ import {
 import type { DatasourceSelector } from '@perses-dev/spec';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import type { HTMLAttributes, ReactElement, SyntheticEvent } from 'react';
-import { cloneElement, forwardRef, useMemo, useState } from 'react';
+import { cloneElement, forwardRef, useCallback, useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 
 import type { LabelFilter, Operator } from '../types';
@@ -79,21 +79,26 @@ export const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTML
 
     const [height, setHeight] = useState(0);
 
+    const listRef = useCallback(
+      (reference: HTMLUListElement | null) => {
+        if (reference) {
+          const measuredMaxHeight = getComputedStyle(reference).maxHeight;
+          setMaxHeight((prev) => (measuredMaxHeight && measuredMaxHeight !== prev ? measuredMaxHeight : prev));
+        }
+
+        if (typeof ref === 'function') {
+          ref(reference);
+        } else if (ref) {
+          ref.current = reference;
+        }
+      },
+      [ref],
+    );
+
     return (
       <ul
         style={{ overflow: 'hidden', padding: '0', height: height ? `min(40vh, ${height}px)` : '40vh' }}
-        ref={(reference) => {
-          if (reference) {
-            const measuredMaxHeight = getComputedStyle(reference).maxHeight;
-            if (measuredMaxHeight && measuredMaxHeight !== maxHeight) setMaxHeight(measuredMaxHeight);
-          }
-
-          if (typeof ref === 'function') {
-            ref(reference);
-          } else if (ref) {
-            ref.current = reference;
-          }
-        }}
+        ref={listRef}
         {...rest}
       >
         <Virtuoso

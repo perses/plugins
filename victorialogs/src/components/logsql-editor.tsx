@@ -17,7 +17,7 @@ import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
-import { LogsQLExtension as createLogsQLExtension } from './logsql-extension';
+import { createLogsQLExtension } from './logsql-extension';
 
 export type LogsQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
 
