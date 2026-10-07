@@ -19,7 +19,11 @@ import (
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = ds.Selector(datasourceName)
+		sel, err := ds.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
 		return nil
 	}
 }

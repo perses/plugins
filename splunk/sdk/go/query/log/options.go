@@ -26,7 +26,11 @@ func Query(spl string) Option {
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = splunkDatasource.Selector(datasourceName)
+		sel, err := splunkDatasource.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
 		return nil
 	}
 }

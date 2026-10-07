@@ -13,7 +13,9 @@
 
 package query
 
-import "github.com/perses/plugins/tempo/sdk/go/datasource"
+import (
+	"github.com/perses/plugins/tempo/sdk/go/datasource"
+)
 
 func Expr(expr string) Option {
 	return func(builder *Builder) error {
@@ -24,7 +26,11 @@ func Expr(expr string) Option {
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = datasource.Selector(datasourceName)
+		sel, err := datasource.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
 		return nil
 	}
 }

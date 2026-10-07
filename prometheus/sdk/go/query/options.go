@@ -29,7 +29,11 @@ func Expr(expr string) Option {
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = promDatasource.Selector(datasourceName)
+		sel, err := promDatasource.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
 		return nil
 	}
 }

@@ -26,7 +26,11 @@ func Query(expr string) Option {
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = clickhouseDatasource.Selector(datasourceName)
+		sel, err := clickhouseDatasource.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
 		return nil
 	}
 }
