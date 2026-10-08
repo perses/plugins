@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Single source of truth for all canvas interaction triggers.
-// keys/action fields drive the shortcuts dialog. Adding or changing a shortcut means
-// editing only this file.
-
 function detectMac(): boolean {
   if (typeof navigator === 'undefined') return false;
   const p = (navigator.platform ?? navigator.userAgent).toLowerCase();
