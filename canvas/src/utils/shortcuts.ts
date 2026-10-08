@@ -13,7 +13,8 @@
 
 function detectMac(): boolean {
   if (typeof navigator === 'undefined') return false;
-  const p = (navigator.platform ?? navigator.userAgent).toLowerCase();
+  const p = ( navigator.platform || navigator.userAgent
+  ).toLowerCase();
   return p.includes('mac');
 }
 
@@ -25,7 +26,7 @@ export interface MouseShortcutTooltip {
 }
 
 export interface MouseShortcutDefinition {
-  mouseEvent: string;
+  mouseEvent: 'wheel' | 'mousedown' | 'dblclick';
   modifierKey?: boolean;
   mouseButton?: number;
 }
@@ -38,7 +39,7 @@ export interface MouseShortcut {
   definition: MouseShortcutDefinition;
 }
 
-export const SHORTCUTS: MouseShortcut[] = [
+export const SHORTCUTS: readonly MouseShortcut[] = [
   {
     id: 'zoom',
     tooltip: { keys: [MOD_KEY, 'Scroll'], action: 'Zoom in / out' },

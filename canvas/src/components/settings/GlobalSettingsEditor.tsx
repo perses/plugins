@@ -35,6 +35,23 @@ import { LegendSettings } from './LegendSettings';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 const EDITOR_COLUMN_SX = { display: 'flex', flexDirection: 'column' as const, gap: 3 };
+const EDGE_THICKNESS_INFO_ICON = (
+  <InfoTooltip
+    id="edge-thickness-info-tooltip"
+    title="Edge thickness"
+    description="When an edge has a query and its thickness mode is set to Threshold, its width follows the latest value of that query: the width of the highest matching threshold step is used. The default width applies otherwise (fixed mode without a custom width, no data, or no matching step)."
+    enterDelay={100}
+  >
+    <IconButton
+      aria-label="Edge thickness information"
+      aria-describedby="edge-thickness-info-tooltip"
+      size="small"
+      sx={{ borderRadius: 1, padding: '4px', margin: '0 2px' }}
+    >
+      <InformationOutlineIcon aria-hidden fontSize="inherit" sx={{ color: 'text.secondary' }} />
+    </IconButton>
+  </InfoTooltip>
+);
 
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
 
@@ -68,27 +85,7 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
           <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
           <OptionsEditorGroup
             title="Edge thickness"
-            icon={
-              <InfoTooltip
-                id="edge-thickness-info-tooltip"
-                title="Edge thickness"
-                description="Defines stroke widths used when edges have thickness mode set to threshold. The default width applies when no threshold step matches the query value."
-                enterDelay={100}
-              >
-                <IconButton
-                  aria-label="Edge thickness information"
-                  aria-describedby="edge-thickness-info-tooltip"
-                  size="small"
-                  sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px', margin: '0 2px' })}
-                >
-                  <InformationOutlineIcon
-                    aria-hidden
-                    fontSize="inherit"
-                    sx={{ color: (theme) => theme.palette.grey[700] }}
-                  />
-                </IconButton>
-              </InfoTooltip>
-            }
+            icon={EDGE_THICKNESS_INFO_ICON}
           >
             <EdgeThicknessSettings value={value} onChange={onChange} />
           </OptionsEditorGroup>

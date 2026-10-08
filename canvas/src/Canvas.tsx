@@ -15,11 +15,13 @@ import type { PanelPlugin } from '@perses-dev/plugin-system';
 
 import { CanvasPanel } from './components/panel/CanvasPanel';
 import { GlobalSettingsEditor } from './components/settings/GlobalSettingsEditor';
-import type { CanvasSpec, CanvasProps } from './model';
+import { CanvasShortcutsTooltip } from './components/shared/CanvasShortcutsTooltip';
+import type { CanvasProps, CanvasSpec } from './model';
 
 export const Canvas: PanelPlugin<CanvasSpec, CanvasProps> = {
   PanelComponent: CanvasPanel,
   panelOptionsEditorComponents: [{ label: 'Settings', content: GlobalSettingsEditor }],
   supportedQueryTypes: ['TimeSeriesQuery'],
   createInitialOptions: () => ({}),
+  actions: [{ component: CanvasShortcutsTooltip, location: 'header' }],
 };
