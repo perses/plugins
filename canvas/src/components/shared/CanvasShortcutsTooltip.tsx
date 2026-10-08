@@ -84,7 +84,7 @@ const TOOLTIP_TITLE = (
 export function CanvasShortcutsTooltip(): ReactElement {
   return (
     <Tooltip arrow placement="left" enterDelay={200} enterNextDelay={200} title={TOOLTIP_TITLE}>
-      <IconButton size="small" aria-label="Canvas keyboard shortcuts" sx={styles.iconButton}>
+      <IconButton size="small" aria-label="Canvas interaction shortcuts" sx={styles.iconButton}>
         <InformationOutlineIcon fontSize="small" />
       </IconButton>
     </Tooltip>
