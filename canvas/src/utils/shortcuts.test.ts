@@ -16,11 +16,11 @@ import { describe, expect, it } from 'vitest';
 import { resolveMouseShortcut } from './shortcuts';
 
 describe('resolveMouseShortcut', () => {
-  it('returns zoom on wheel + ctrlKey', () => {
+  it('returns zoom on wheel + ctrlKey (trackpad pinch-to-zoom)', () => {
     expect(resolveMouseShortcut({ type: 'wheel', ctrlKey: true, metaKey: false })?.id).toBe('zoom');
   });
 
-  it('returns zoom on wheel + metaKey (pinch-to-zoom)', () => {
+  it('returns zoom on wheel + metaKey (Cmd+scroll on Mac)', () => {
     expect(resolveMouseShortcut({ type: 'wheel', ctrlKey: false, metaKey: true })?.id).toBe('zoom');
   });
 
