@@ -36,6 +36,7 @@ const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 const EDITOR_COLUMN_SX = { display: 'flex', flexDirection: 'column' as const, gap: 3 };
 const DEFAULT_GENERATION: GraphGenerationSpec = { enabled: true, nodeQueryIndex: 0, nodeIdLabel: '' };
 
+
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
 
 interface StylingSettingsProps {

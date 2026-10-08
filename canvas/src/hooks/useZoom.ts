@@ -57,7 +57,7 @@ export function useZoom(): UseZoomResult {
           return false;
         }
       });
-      zoomBehavior.on('start', ({ sourceEvent }: { sourceEvent: Event }) => {
+      zoomBehavior.on('start', ({ sourceEvent }: { sourceEvent: Event | null }) => {
         setIsPanning(sourceEvent instanceof MouseEvent && resolveMouseShortcut(sourceEvent)?.id === 'pan');
       });
       zoomBehavior.on('zoom', ({ transform: t }: { transform: ZoomTransform }) => {
