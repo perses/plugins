@@ -84,12 +84,12 @@ export const EDITOR_SHORTCUTS: ReadonlyArray<MouseShortcut | KeyboardShortcut> =
   },
 ];
 
-const MOUSE_SHORTCUTS: readonly MouseShortcut[] = VIEW_SHORTCUTS.filter(
-  (s): s is MouseShortcut => MOUSE_SHORTCUT_IDS.includes(s.id as MouseShortcutId),
+const MOUSE_SHORTCUTS: readonly MouseShortcut[] = VIEW_SHORTCUTS.filter((s): s is MouseShortcut =>
+  MOUSE_SHORTCUT_IDS.includes(s.id as MouseShortcutId),
 );
 
-const KEYBOARD_SHORTCUTS: readonly KeyboardShortcut[] = EDITOR_SHORTCUTS.filter(
-  (s): s is KeyboardShortcut => KEYBOARD_SHORTCUT_IDS.includes(s.id as KeyboardShortcutId),
+const KEYBOARD_SHORTCUTS: readonly KeyboardShortcut[] = EDITOR_SHORTCUTS.filter((s): s is KeyboardShortcut =>
+  KEYBOARD_SHORTCUT_IDS.includes(s.id as KeyboardShortcutId),
 );
 
 type ResolveEvent = {

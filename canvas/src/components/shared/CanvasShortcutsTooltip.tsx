@@ -90,7 +90,7 @@ const EDITOR_TOOLTIP_TITLE = <TooltipTitle rows={EDITOR_ROWS} />;
 
 const ShortcutsButton = forwardRef<HTMLButtonElement>(function ShortcutsButton(props, ref) {
   return (
-    <IconButton ref={ref} size="small" aria-label="Canvas interaction shortcuts" {...props}>
+    <IconButton ref={ref} size="small" {...props} aria-label="Canvas interaction shortcuts">
       <InformationOutlineIcon fontSize="small" />
     </IconButton>
   );
