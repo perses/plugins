@@ -18,6 +18,7 @@ import type { PointerEvent } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { Point } from '../model';
+import { resolveMouseShortcut } from '../utils/shortcuts';
 
 const FIT_PADDING = 40;
 
@@ -44,19 +45,21 @@ export function useZoom(): UseZoomResult {
   const svgRef = useCallback(
     (node: SVGSVGElement | null): void => {
       if (!node) {
+        nodeRef.current = null;
         return;
       }
       nodeRef.current = node;
       zoomBehavior.filter((event: Event) => {
-        if (event.type === 'dblclick') {
+        if (event instanceof MouseEvent) {
+          const shortcut = resolveMouseShortcut(event);
+          return shortcut?.id === 'zoom' || shortcut?.id === 'pan';
+        } else {
           return false;
         }
-        if (event instanceof WheelEvent) {
-          return event.ctrlKey || event.metaKey;
-        }
-        return event instanceof MouseEvent && event.button === 1;
       });
-      zoomBehavior.on('start', () => setIsPanning(true));
+      zoomBehavior.on('start', ({ sourceEvent }: { sourceEvent: Event | null }) => {
+        setIsPanning(sourceEvent instanceof MouseEvent && resolveMouseShortcut(sourceEvent)?.id === 'pan');
+      });
       zoomBehavior.on('zoom', ({ transform: t }: { transform: ZoomTransform }) => {
         setTransform(t);
       });

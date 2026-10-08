@@ -20,6 +20,7 @@ import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
 import { ZoomProvider } from '../../contexts/ZoomContext';
 import { useZoom } from '../../hooks/useZoom';
+import { EditorCanvasShortcutsTooltip } from '../shared/CanvasShortcutsTooltip';
 import { BackgroundPropertiesPanel } from './BackgroundPropertiesPanel';
 import { EdgePropertiesPanel } from './EdgePropertiesPanel';
 import { EditorCanvas } from './EditorCanvas';
@@ -171,6 +172,7 @@ export function EditorItemsPanel(): ReactElement {
         >
           Delete
         </Button>
+        <EditorCanvasShortcutsTooltip />
       </Box>
 
       <Box sx={PROPERTIES_BOX_SX}>
