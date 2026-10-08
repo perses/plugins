@@ -18,6 +18,6 @@ go 1.27.1
 require github.com/perses/perses v0.55.0-beta.4
 
 require (
-	github.com/perses/spec v0.3.0-beta.10 // indirect
+	github.com/perses/spec v0.3.0-rc.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
