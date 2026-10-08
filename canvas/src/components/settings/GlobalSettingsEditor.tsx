@@ -83,10 +83,7 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
         </OptionsEditorColumn>
         <OptionsEditorColumn>
           <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
-          <OptionsEditorGroup
-            title="Edge thickness"
-            icon={EDGE_THICKNESS_INFO_ICON}
-          >
+          <OptionsEditorGroup title="Edge thickness" icon={EDGE_THICKNESS_INFO_ICON}>
             <EdgeThicknessSettings value={value} onChange={onChange} />
           </OptionsEditorGroup>
         </OptionsEditorColumn>

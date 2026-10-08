@@ -13,14 +13,13 @@
 
 function detectMac(): boolean {
   if (typeof navigator === 'undefined') return false;
-  const p = ( navigator.platform || navigator.userAgent
-  ).toLowerCase();
+  const p = (navigator.platform || navigator.userAgent).toLowerCase();
   return p.includes('mac');
 }
 
 export const MOD_KEY = detectMac() ? '⌘' : 'Ctrl';
 
-export interface MouseShortcutTooltip {
+export interface ShortcutTooltip {
   keys: readonly string[];
   action: string;
 }
@@ -31,15 +30,29 @@ export interface MouseShortcutDefinition {
   mouseButton?: number;
 }
 
-export type MouseShortcutId = 'zoom' | 'pan' | 'resetView' | 'fitView';
+const MOUSE_SHORTCUT_IDS = ['zoom', 'pan', 'resetView', 'fitView'] as const;
+const KEYBOARD_SHORTCUT_IDS = ['deleteSelected'] as const;
+
+export type MouseShortcutId = (typeof MOUSE_SHORTCUT_IDS)[number];
+export type KeyboardShortcutId = (typeof KEYBOARD_SHORTCUT_IDS)[number];
 
 export interface MouseShortcut {
   id: MouseShortcutId;
-  tooltip: MouseShortcutTooltip;
+  tooltip: ShortcutTooltip;
   definition: MouseShortcutDefinition;
 }
 
-export const SHORTCUTS: readonly MouseShortcut[] = [
+export interface KeyboardShortcutDefinition {
+  keys: readonly string[];
+}
+
+export interface KeyboardShortcut {
+  id: KeyboardShortcutId;
+  tooltip: ShortcutTooltip;
+  definition: KeyboardShortcutDefinition;
+}
+
+export const VIEW_SHORTCUTS: ReadonlyArray<MouseShortcut | KeyboardShortcut> = [
   {
     id: 'zoom',
     tooltip: { keys: [MOD_KEY, 'Scroll'], action: 'Zoom in / out' },
@@ -62,6 +75,23 @@ export const SHORTCUTS: readonly MouseShortcut[] = [
   },
 ];
 
+export const EDITOR_SHORTCUTS: ReadonlyArray<MouseShortcut | KeyboardShortcut> = [
+  ...VIEW_SHORTCUTS,
+  {
+    id: 'deleteSelected',
+    tooltip: { keys: ['Delete', 'Backspace'], action: 'Delete selected' },
+    definition: { keys: ['Delete', 'Backspace'] },
+  },
+];
+
+const MOUSE_SHORTCUTS: readonly MouseShortcut[] = VIEW_SHORTCUTS.filter(
+  (s): s is MouseShortcut => MOUSE_SHORTCUT_IDS.includes(s.id as MouseShortcutId),
+);
+
+const KEYBOARD_SHORTCUTS: readonly KeyboardShortcut[] = EDITOR_SHORTCUTS.filter(
+  (s): s is KeyboardShortcut => KEYBOARD_SHORTCUT_IDS.includes(s.id as KeyboardShortcutId),
+);
+
 type ResolveEvent = {
   type: string;
   ctrlKey: boolean;
@@ -72,7 +102,7 @@ type ResolveEvent = {
 export function resolveMouseShortcut(event: ResolveEvent): MouseShortcut | null {
   const modifierKey = event.ctrlKey || event.metaKey;
   return (
-    SHORTCUTS.find((s) => {
+    MOUSE_SHORTCUTS.find((s) => {
       const definition = s.definition;
       return (
         definition.mouseEvent === event.type &&
@@ -81,4 +111,8 @@ export function resolveMouseShortcut(event: ResolveEvent): MouseShortcut | null 
       );
     }) ?? null
   );
+}
+
+export function resolveKeyboardShortcut(key: string): KeyboardShortcut | null {
+  return KEYBOARD_SHORTCUTS.find((s) => s.definition.keys.includes(key)) ?? null;
 }
