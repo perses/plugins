@@ -1,0 +1,29 @@
+{
+  "kind": "CloudWatchTimeSeriesQuery",
+  "spec": {
+    "datasource": {
+      "kind": "CloudWatchDatasource",
+      "name": "cloudwatch"
+    },
+    "queries": [
+      {
+        "id": "m1",
+        "returnData": false,
+        "metric": {
+          "namespace": "AWS/EC2",
+          "name": "CPUUtilization",
+          "dimensions": {
+            "InstanceId": "$instance"
+          },
+          "statistic": "p99.5",
+          "period": 300
+        }
+      },
+      {
+        "id": "e1",
+        "label": "CPU x2",
+        "expression": "m1 * 2"
+      }
+    ]
+  }
+}
