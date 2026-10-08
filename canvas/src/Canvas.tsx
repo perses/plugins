@@ -15,7 +15,7 @@ import type { PanelPlugin } from '@perses-dev/plugin-system';
 
 import { CanvasPanel } from './components/panel/CanvasPanel';
 import { GlobalSettingsEditor } from './components/settings/GlobalSettingsEditor';
-import { CanvasShortcutsTooltip } from './components/shared/CanvasShortcutsTooltip';
+import { ViewCanvasShortcutsTooltip } from './components/shared/CanvasShortcutsTooltip';
 import type { CanvasProps, CanvasSpec } from './model';
 
 export const Canvas: PanelPlugin<CanvasSpec, CanvasProps> = {
@@ -23,5 +23,5 @@ export const Canvas: PanelPlugin<CanvasSpec, CanvasProps> = {
   panelOptionsEditorComponents: [{ label: 'Settings', content: GlobalSettingsEditor }],
   supportedQueryTypes: ['TimeSeriesQuery'],
   createInitialOptions: () => ({}),
-  actions: [{ component: CanvasShortcutsTooltip, location: 'header' }],
+  actions: [{ component: ViewCanvasShortcutsTooltip, location: 'header' }],
 };

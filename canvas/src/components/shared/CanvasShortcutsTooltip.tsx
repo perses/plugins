@@ -16,10 +16,10 @@ import { Box, IconButton, Tooltip as MuiTooltip, tooltipClasses, Typography } fr
 import { styled } from '@mui/material/styles';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import type { ReactElement } from 'react';
-import { useMemo } from 'react';
+import { forwardRef, useMemo } from 'react';
 
-import type { MouseShortcutTooltip } from '../../utils/shortcuts';
-import { SHORTCUTS } from '../../utils/shortcuts';
+import type { ShortcutTooltip } from '../../utils/shortcuts';
+import { EDITOR_SHORTCUTS, VIEW_SHORTCUTS } from '../../utils/shortcuts';
 
 const Tooltip = styled(({ className, ...props }: MuiTooltipProps) => {
   const classes = useMemo(() => ({ popper: className }), [className]);
@@ -54,9 +54,7 @@ const styles = {
   title: { fontWeight: 'medium', mb: 0.5 },
 } as const;
 
-const SHORTCUT_ROWS: MouseShortcutTooltip[] = SHORTCUTS.map((s) => s.tooltip);
-
-function ShortcutList({ rows }: { rows: MouseShortcutTooltip[] }): ReactElement {
+function ShortcutList({ rows }: { rows: readonly ShortcutTooltip[] }): ReactElement {
   return (
     <>
       {rows.map(({ keys, action }) => (
@@ -75,19 +73,41 @@ function ShortcutList({ rows }: { rows: MouseShortcutTooltip[] }): ReactElement 
   );
 }
 
-const TOOLTIP_TITLE = (
-  <Box sx={{ p: 0.5 }}>
-    <Typography sx={styles.title}>Canvas shortcuts</Typography>
-    <ShortcutList rows={SHORTCUT_ROWS} />
-  </Box>
-);
+const VIEW_ROWS: ShortcutTooltip[] = VIEW_SHORTCUTS.map((s) => s.tooltip);
+const EDITOR_ROWS: ShortcutTooltip[] = EDITOR_SHORTCUTS.map((s) => s.tooltip);
 
-export function CanvasShortcutsTooltip(): ReactElement {
+function TooltipTitle({ rows }: { rows: readonly ShortcutTooltip[] }): ReactElement {
   return (
-    <Tooltip arrow placement="left" enterDelay={200} enterNextDelay={200} title={TOOLTIP_TITLE}>
-      <IconButton size="small" aria-label="Canvas interaction shortcuts">
-        <InformationOutlineIcon fontSize="small" />
-      </IconButton>
+    <Box>
+      <Typography sx={styles.title}>Canvas shortcuts</Typography>
+      <ShortcutList rows={rows} />
+    </Box>
+  );
+}
+
+const VIEW_TOOLTIP_TITLE = <TooltipTitle rows={VIEW_ROWS} />;
+const EDITOR_TOOLTIP_TITLE = <TooltipTitle rows={EDITOR_ROWS} />;
+
+const ShortcutsButton = forwardRef<HTMLButtonElement>(function ShortcutsButton(props, ref) {
+  return (
+    <IconButton ref={ref} size="small" aria-label="Canvas interaction shortcuts" {...props}>
+      <InformationOutlineIcon fontSize="small" />
+    </IconButton>
+  );
+});
+
+function ShortcutsTooltip({ title }: { title: ReactElement }): ReactElement {
+  return (
+    <Tooltip arrow placement="left" enterDelay={200} enterNextDelay={200} title={title}>
+      <ShortcutsButton />
     </Tooltip>
   );
+}
+
+export function ViewCanvasShortcutsTooltip(): ReactElement {
+  return <ShortcutsTooltip title={VIEW_TOOLTIP_TITLE} />;
+}
+
+export function EditorCanvasShortcutsTooltip(): ReactElement {
+  return <ShortcutsTooltip title={EDITOR_TOOLTIP_TITLE} />;
 }
