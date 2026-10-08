@@ -28,7 +28,7 @@ import {
   useChartsTheme,
   ContentWithLegend,
   DEFAULT_TOOLTIP_CONFIG,
-  getFormattedMultipleYAxes,
+  getFormattedMultipleYAxesLayout,
   DEFAULT_LEGEND,
   formatValue,
   getTimeSeriesValues,
@@ -431,19 +431,17 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
     formatToYAxisIndex,
   ]);
 
-  // Create multiple Y axes if there are additional formats
-  // Uses max values from data to compute dynamic offsets that adapt to label widths
-  const multipleYAxes = useMemo(() => {
+  const multipleYLayout = useMemo(() => {
     if (additionalFormats.length === 0) {
-      return undefined; // Use single Y axis (default behavior)
+      return undefined;
     }
-    // Build array of max values for each additional format (in order)
     const maxValues = additionalFormats.map((fmt) => {
       const unitKey = fmt.unit;
       return unitKey ? (maxValuesByFormat?.get(unitKey) ?? 1000) : 1000;
     });
-    return getFormattedMultipleYAxes(echartsYAxis, format, additionalFormats, maxValues);
+    return getFormattedMultipleYAxesLayout(echartsYAxis, format, additionalFormats, maxValues);
   }, [echartsYAxis, format, additionalFormats, maxValuesByFormat]);
+  const multipleYAxes = multipleYLayout?.axes;
 
   // Translate the legend values into columns for the table legend.
   const legendColumns = useMemo(() => {
@@ -483,23 +481,23 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
   }, [legend?.values, format]);
 
   const gridOverrides: GridComponentOption = useMemo(() => {
-    // When Y axes are hidden, disable containLabel to prevent auto-spacing, but add bottom padding for X axis
-    return echartsYAxis.show === false
-      ? {
-          left: 0,
-          right: 0,
-          bottom: 30,
-          containLabel: false,
-        }
-      : {
-          left: yAxis && yAxis.label ? 30 : 20,
-          // With containLabel: true in theme, ECharts auto-reserves space for axis labels.
-          // For multiple right axes, add extra padding for the last axis labels that extend beyond the grid.
-          right: additionalFormats.length > 0 ? 10 : 20,
-          bottom: 0,
-          containLabel: true,
-        };
-  }, [echartsYAxis.show, yAxis, additionalFormats.length]);
+    if (echartsYAxis.show === false) {
+      return {
+        left: 0,
+        right: 0,
+        bottom: 30,
+        containLabel: false,
+      };
+    }
+    // rightGridPadding is the cumulative width of the right axes (shared#321).
+    const rightPad = multipleYLayout?.rightGridPadding ?? 20;
+    return {
+      left: yAxis && yAxis.label ? 30 : 20,
+      right: rightPad,
+      bottom: 0,
+      containLabel: true,
+    };
+  }, [echartsYAxis.show, yAxis, multipleYLayout]);
 
   const handleDataZoom = useCallback(
     (event: ZoomEventData): void => {
