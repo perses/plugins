@@ -23,17 +23,17 @@ const MOD = 'Ctrl';
 describe('ViewCanvasShortcutsTooltip', () => {
   it('renders a button with the accessible label', () => {
     render(<ViewCanvasShortcutsTooltip />);
-    expect(screen.getByRole('button', { name: 'Canvas interaction shortcuts' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Canvas interaction shortcuts' })).toBeDefined();
   });
 
   it('shows view shortcut rows on hover', async () => {
     render(<ViewCanvasShortcutsTooltip />);
     await userEvent.hover(screen.getByRole('button', { name: 'Canvas interaction shortcuts' }));
     await waitFor(() => {
-      expect(screen.getByText('Zoom in / out')).toBeInTheDocument();
-      expect(screen.getByText('Pan')).toBeInTheDocument();
-      expect(screen.getByText('Reset pan & zoom')).toBeInTheDocument();
-      expect(screen.getByText('Fit all nodes in view')).toBeInTheDocument();
+      expect(screen.getByText('Zoom in / out')).toBeDefined();
+      expect(screen.getByText('Pan')).toBeDefined();
+      expect(screen.getByText('Reset pan & zoom')).toBeDefined();
+      expect(screen.getByText('Fit all nodes in view')).toBeDefined();
     });
   });
 
@@ -41,7 +41,7 @@ describe('ViewCanvasShortcutsTooltip', () => {
     render(<ViewCanvasShortcutsTooltip />);
     await userEvent.hover(screen.getByRole('button', { name: 'Canvas interaction shortcuts' }));
     await waitFor(() => screen.getByText('Zoom in / out'));
-    expect(screen.queryByText('Delete selected')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete selected')).toBeNull();
   });
 
   it('shows Ctrl as modifier key in jsdom (no navigator.platform)', async () => {
@@ -55,15 +55,15 @@ describe('ViewCanvasShortcutsTooltip', () => {
 describe('EditorCanvasShortcutsTooltip', () => {
   it('renders a button with the accessible label', () => {
     render(<EditorCanvasShortcutsTooltip />);
-    expect(screen.getByRole('button', { name: 'Canvas interaction shortcuts' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Canvas interaction shortcuts' })).toBeDefined();
   });
 
   it('shows all view rows plus Delete selected on hover', async () => {
     render(<EditorCanvasShortcutsTooltip />);
     await userEvent.hover(screen.getByRole('button', { name: 'Canvas interaction shortcuts' }));
     await waitFor(() => {
-      expect(screen.getByText('Zoom in / out')).toBeInTheDocument();
-      expect(screen.getByText('Delete selected')).toBeInTheDocument();
+      expect(screen.getByText('Zoom in / out')).toBeDefined();
+      expect(screen.getByText('Delete selected')).toBeDefined();
     });
   });
 
@@ -71,7 +71,7 @@ describe('EditorCanvasShortcutsTooltip', () => {
     render(<EditorCanvasShortcutsTooltip />);
     await userEvent.hover(screen.getByRole('button', { name: 'Canvas interaction shortcuts' }));
     await waitFor(() => screen.getByText('Delete selected'));
-    expect(screen.getByText('Delete')).toBeInTheDocument();
-    expect(screen.getByText('Backspace')).toBeInTheDocument();
+    expect(screen.getByText('Delete')).toBeDefined();
+    expect(screen.getByText('Backspace')).toBeDefined();
   });
 });
