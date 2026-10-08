@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, IconButton, Tooltip as MuiTooltip, tooltipClasses, Typography } from '@mui/material';
 import type { TooltipProps as MuiTooltipProps } from '@mui/material';
+import { Box, IconButton, Tooltip as MuiTooltip, tooltipClasses, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
 import type { MouseShortcutTooltip } from '../../utils/shortcuts';
 import { SHORTCUTS } from '../../utils/shortcuts';
 
-const Tooltip = styled(({ className, ...props }: MuiTooltipProps) => (
-  <MuiTooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
+const Tooltip = styled(({ className, ...props }: MuiTooltipProps) => {
+  const classes = useMemo(() => ({ popper: className }), [className]);
+  return <MuiTooltip {...props} classes={classes} />;
+})(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
     backgroundColor: theme.palette.background.tooltip,
     color: theme.palette.text.primary,
@@ -50,7 +52,6 @@ const styles = {
   row: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, py: 0.25 },
   keys: { display: 'flex', gap: 0.5 },
   title: { fontWeight: 'medium', mb: 0.5 },
-  iconButton: { opacity: 0.7, padding: '2px' },
 } as const;
 
 const SHORTCUT_ROWS: MouseShortcutTooltip[] = SHORTCUTS.map((s) => s.tooltip);
@@ -63,7 +64,7 @@ function ShortcutList({ rows }: { rows: MouseShortcutTooltip[] }): ReactElement 
           <Typography variant="caption">{action}</Typography>
           <Box sx={styles.keys}>
             {keys.map((key) => (
-              <Typography key={key} sx={styles.key}>
+              <Typography key={key} component="kbd" sx={styles.key}>
                 {key}
               </Typography>
             ))}
@@ -84,7 +85,7 @@ const TOOLTIP_TITLE = (
 export function CanvasShortcutsTooltip(): ReactElement {
   return (
     <Tooltip arrow placement="left" enterDelay={200} enterNextDelay={200} title={TOOLTIP_TITLE}>
-      <IconButton size="small" aria-label="Canvas interaction shortcuts" sx={styles.iconButton}>
+      <IconButton size="small" aria-label="Canvas interaction shortcuts">
         <InformationOutlineIcon fontSize="small" />
       </IconButton>
     </Tooltip>
