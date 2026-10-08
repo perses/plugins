@@ -13,7 +13,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { resolveMouseShortcut } from './shortcuts';
+import { resolveKeyboardShortcut, resolveMouseShortcut } from './shortcuts';
 
 describe('resolveMouseShortcut', () => {
   it('returns zoom on wheel + ctrlKey (trackpad pinch-to-zoom)', () => {
@@ -55,5 +55,19 @@ describe('resolveMouseShortcut', () => {
 
   it('returns null for unrecognized event type', () => {
     expect(resolveMouseShortcut({ type: 'mousemove', ctrlKey: false, metaKey: false })).toBeNull();
+  });
+});
+
+describe('resolveKeyboardShortcut', () => {
+  it('returns deleteSelected on Delete', () => {
+    expect(resolveKeyboardShortcut('Delete')?.id).toBe('deleteSelected');
+  });
+
+  it('returns deleteSelected on Backspace', () => {
+    expect(resolveKeyboardShortcut('Backspace')?.id).toBe('deleteSelected');
+  });
+
+  it('returns null for unrecognized key', () => {
+    expect(resolveKeyboardShortcut('Escape')).toBeNull();
   });
 });

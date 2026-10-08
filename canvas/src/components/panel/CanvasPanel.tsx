@@ -69,9 +69,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
   const legendPosition = spec.legend?.position ?? 'bottom';
   const legendX = legendPosition === 'right' ? width - LEGEND_WIDTH - LEGEND_MARGIN : LEGEND_MARGIN;
   const legendY =
-    legendPosition === 'right'
-      ? LEGEND_MARGIN
-      : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
+    legendPosition === 'right' ? LEGEND_MARGIN : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
 
   const svgStyle = useMemo(() => ({ ...SVG_STYLE_BASE, cursor: isPanning ? 'grabbing' : 'grab' }), [isPanning]);
 

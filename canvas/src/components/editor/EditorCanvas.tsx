@@ -26,7 +26,7 @@ import type { CanvasSpec, FloatingEdge } from '../../model';
 import { isFloatingEdge } from '../../model';
 import type { ResizeHandleId } from '../../utils/resizeUtils';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
-import { resolveMouseShortcut } from '../../utils/shortcuts';
+import { resolveMouseShortcut, resolveKeyboardShortcut } from '../../utils/shortcuts';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { DragEdgeLine } from './DragEdgeLine';
 import { EditorEdgeItem } from './EditorEdgeItem';
@@ -186,10 +186,7 @@ export function EditorCanvas({
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<SVGSVGElement>): void => {
-      if (event.key !== 'Delete' && event.key !== 'Backspace') {
-        return;
-      }
-      if (selectedIds.size > 0) {
+      if (resolveKeyboardShortcut(event.key)?.id === 'deleteSelected' && selectedIds.size > 0) {
         deleteSelected();
       }
     },
