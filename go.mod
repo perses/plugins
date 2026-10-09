@@ -1,6 +1,6 @@
 module github.com/perses/plugins
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/perses/common v0.31.2
