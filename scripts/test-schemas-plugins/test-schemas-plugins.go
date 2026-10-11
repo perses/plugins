@@ -16,6 +16,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/perses/common/async"
@@ -24,6 +26,36 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// dashboardTestDir contains an optional CUE package defining a "#Dashboard" that embeds the plugin schema the way
+// Perses does when merging all plugin schemas, along with JSON dashboards that must validate against it.
+const dashboardTestDir = "schemas/tests/dashboard"
+
+func testSchemas(workspace string) error {
+	if err := command.Run("percli", "plugin", "test-schemas", fmt.Sprintf("--plugin.path=%s", workspace)); err != nil {
+		return err
+	}
+	if _, err := os.Stat(filepath.Join(workspace, dashboardTestDir)); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	dashboards, err := filepath.Glob(filepath.Join(workspace, dashboardTestDir, "*.json"))
+	if err != nil {
+		return err
+	}
+	for _, dashboard := range dashboards {
+		relPath, relErr := filepath.Rel(workspace, dashboard)
+		if relErr != nil {
+			return relErr
+		}
+		if vetErr := command.RunInDirectory(workspace, "cue", "vet", "-d", "#Dashboard", "./"+dashboardTestDir, relPath); vetErr != nil {
+			return fmt.Errorf("dashboard schema test %s failed: %w", relPath, vetErr)
+		}
+	}
+	return nil
+}
+
 func main() {
 	workspaces := npm.MustGetWorkspaces(".")
 	plugins := make([]async.Future[string], 0, len(workspaces))
@@ -31,7 +63,7 @@ func main() {
 	for _, workspace := range workspaces {
 		logrus.Infof("Testing schemas of plugin %s", workspace)
 		plugins = append(plugins, async.Async(func() (string, error) {
-			return workspace, command.Run("percli", "plugin", "test-schemas", fmt.Sprintf("--plugin.path=%s", workspace))
+			return workspace, testSchemas(workspace)
 		}))
 	}
 	isErr := false
