@@ -26,6 +26,12 @@ export interface OpenSearchDatarowsResponse {
   size?: number;
 }
 
+/** @deprecated Use `OpenSearchDatarowsColumn`. */
+export type OpenSearchPPLColumn = OpenSearchDatarowsColumn;
+
+/** @deprecated Use `OpenSearchDatarowsResponse`. */
+export type OpenSearchPPLResponse = OpenSearchDatarowsResponse;
+
 export interface OpenSearchErrorResponse {
   error?: {
     type?: string;

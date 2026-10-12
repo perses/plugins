@@ -76,3 +76,6 @@ function rowToObject(
   });
   return out;
 }
+
+/** @deprecated Use `convertDatarowsToLogs`. */
+export const convertPPLToLogs = convertDatarowsToLogs;

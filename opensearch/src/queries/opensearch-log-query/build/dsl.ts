@@ -31,12 +31,21 @@ function parseBody(userJson: string): Record<string, unknown> {
   return parsed as Record<string, unknown>;
 }
 
+function resolveDslSize(userSize: unknown, limit?: number): unknown {
+  if (userSize === undefined) return resolveSize(limit);
+  if (limit === undefined) return userSize;
+  // A non-numeric size (e.g. a string) can't be compared, so the limit applies to keep the cap.
+  return typeof userSize === 'number' ? Math.min(userSize, limit) : limit;
+}
+
 /**
  * Build a `_search` body from a raw Query DSL document. The user's JSON is treated as a
  * complete `_search` request body — the thing you would paste out of Dev Tools — so any
  * key we do not manage (`_source`, `aggs`, `highlight`, …) passes straight through.
  *
- * The user wins on `size` and `sort`; we only supply defaults. Their `query`, if present,
+ * `limit` caps `size`: with both set the smaller wins, so the body can ask for fewer documents
+ * but never more than the configured limit. With only one set, that one applies. The user wins
+ * on `sort`; we only supply a default. Their `query`, if present,
  * is nested inside our `bool.filter` next to the time range, which is valid DSL and means
  * exactly "AND" — we deliberately do not try to merge into their bool clause, because
  * rewriting a user's query semantics is far worse than one extra level of nesting.
@@ -51,7 +60,7 @@ export function buildDslSearchBody(
   const userQuery = parsed.query as Record<string, unknown> | undefined;
 
   const body: OpenSearchSearchRequestBody = { ...parsed };
-  body.size = parsed.size ?? resolveSize(limit);
+  body.size = resolveDslSize(parsed.size, limit);
   body.sort = parsed.sort ?? buildDefaultSort(timestampField);
 
   if (disableTimeFilter) {

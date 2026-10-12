@@ -77,7 +77,7 @@ func QueryLanguage(lang string) Option {
 // Limit caps the number of log documents fetched. Applies to the "lucene" and "dsl"
 // languages, which map it to the _search request's `size`. Must be greater than zero:
 // the CUE schema constrains `limit` to `int & >0`, and because the field is a bare int
-// with omitempty, a zero would be indistinguishable from an omitted value.
+// with omitempty, a zero would be serialized as an omitted value.
 func Limit(n int) Option {
 	return func(builder *Builder) error {
 		if n <= 0 {

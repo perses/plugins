@@ -24,7 +24,7 @@ describe('buildLuceneSearchBody', () => {
   it('wraps the user query in a query_string clause beside the time range', () => {
     expect(buildLuceneSearchBody('level:error AND service:api', start, end)).toEqual({
       size: 500,
-      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'boolean' } }],
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       query: {
         bool: {
           filter: [timeFilter, { query_string: { query: 'level:error AND service:api', analyze_wildcard: true } }],
@@ -51,7 +51,7 @@ describe('buildLuceneSearchBody', () => {
 
   it('sorts and filters on the configured timestamp field', () => {
     const body = buildLuceneSearchBody('*', start, end, { timestampField: 'event.time' });
-    expect(body.sort).toEqual([{ 'event.time': { order: 'desc', unmapped_type: 'boolean' } }]);
+    expect(body.sort).toEqual([{ 'event.time': { order: 'desc', unmapped_type: 'date' } }]);
     expect(body.query).toEqual({
       bool: {
         filter: [

@@ -35,10 +35,30 @@ type PluginSpec struct {
 	DisableTimeFilter bool                 `json:"disableTimeFilter,omitempty" yaml:"disableTimeFilter,omitempty"`
 }
 
+// limitPresence is decoded alongside PluginSpec to tell an explicit `limit: 0` apart from an
+// omitted limit, which both leave the bare-int PluginSpec.Limit at 0.
+type limitPresence struct {
+	Limit *int `json:"limit" yaml:"limit"`
+}
+
+func (l limitPresence) validate() error {
+	if l.Limit != nil && *l.Limit <= 0 {
+		return fmt.Errorf("limit must be greater than 0, got %d", *l.Limit)
+	}
+	return nil
+}
+
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {
 	type plain PluginSpec
 	var tmp PluginSpec
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	var limit limitPresence
+	if err := json.Unmarshal(data, &limit); err != nil {
+		return err
+	}
+	if err := limit.validate(); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {
@@ -52,6 +72,13 @@ func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var tmp PluginSpec
 	type plain PluginSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	var limit limitPresence
+	if err := unmarshal(&limit); err != nil {
+		return err
+	}
+	if err := limit.validate(); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {
@@ -76,9 +103,8 @@ func (s *PluginSpec) validate() error {
 		return fmt.Errorf("index is required when queryLanguage is %q", s.QueryLanguage)
 	}
 	// Only negative values are rejected here: with a bare int + omitempty, an omitted
-	// `limit` also unmarshals to 0, so rejecting 0 would reject every spec that simply
-	// omits the field. An explicit `"limit": 0` in hand-written YAML/JSON therefore
-	// passes here and is caught by the CUE schema instead.
+	// `limit` is also 0, so rejecting 0 would reject every spec that simply omits the
+	// field. An explicit zero is caught while unmarshalling, via limitPresence.
 	if s.Limit < 0 {
 		return fmt.Errorf("limit cannot be negative")
 	}

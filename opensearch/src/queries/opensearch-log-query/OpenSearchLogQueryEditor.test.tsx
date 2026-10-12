@@ -173,7 +173,7 @@ describe('OpenSearchLogQueryEditor limit field', () => {
     ['', undefined],
     ['0', undefined],
     ['-5', undefined],
-    ['3.7', 3],
+    ['3.7', undefined],
   ])('sets limit to %p -> %p via the rendered field', (input, expected) => {
     // Start from a non-empty value so every target value below is a genuine DOM change —
     // starting from "" would make the "" case a same-value no-op that never fires onChange.
@@ -189,7 +189,8 @@ describe('OpenSearchLogQueryEditor limit field', () => {
     ['0', undefined],
     ['-5', undefined],
     ['abc', undefined],
-    ['3.7', 3],
+    ['1.0', 1],
+    ['3.7', undefined],
     [' 5', 5],
   ])('parseLimitInput(%p) -> %p', (input, expected) => {
     expect(parseLimitInput(input)).toBe(expected);

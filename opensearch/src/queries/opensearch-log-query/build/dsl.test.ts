@@ -25,7 +25,7 @@ describe('buildDslSearchBody', () => {
     const body = buildDslSearchBody('{"query":{"match":{"level":"error"}}}', start, end);
     expect(body).toEqual({
       size: 500,
-      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'boolean' } }],
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       query: { bool: { filter: [timeFilter, { match: { level: 'error' } }] } },
     });
   });
@@ -35,12 +35,19 @@ describe('buildDslSearchBody', () => {
     expect(body.query).toEqual({ bool: { filter: [timeFilter] } });
   });
 
-  it("lets the user's own size and sort win", () => {
-    const body = buildDslSearchBody('{"size":7,"sort":[{"seq":"asc"}],"query":{"match_all":{}}}', start, end, {
-      limit: 500,
-    });
-    expect(body.size).toBe(7);
+  it("lets the user's own sort win", () => {
+    const body = buildDslSearchBody('{"sort":[{"seq":"asc"}],"query":{"match_all":{}}}', start, end);
     expect(body.sort).toEqual([{ seq: 'asc' }]);
+  });
+
+  it.each([
+    ['a smaller body size under the limit', '{"size":7}', 500, 7],
+    ['the limit over a larger body size', '{"size":1000}', 10, 10],
+    ['the body size when no limit is set', '{"size":1000}', undefined, 1000],
+    ['the limit when the body has no size', '{}', 10, 10],
+    ['the limit over a non-numeric body size', '{"size":"1000"}', 10, 10],
+  ])('caps size: keeps %s', (_, json, limit, expected) => {
+    expect(buildDslSearchBody(json, start, end, { limit }).size).toBe(expected);
   });
 
   it('passes unrelated top-level keys through untouched', () => {

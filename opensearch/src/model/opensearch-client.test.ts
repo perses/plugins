@@ -13,7 +13,7 @@
 
 import type { Mock } from 'vitest';
 
-import { ppl, sql, search, OpenSearchApiError } from './opensearch-client';
+import { ppl, sql, search, OpenSearchApiError, OpenSearchPPLError } from './opensearch-client';
 
 describe('opensearch-client', () => {
   const originalFetch = global.fetch;
@@ -62,16 +62,22 @@ describe('opensearch-client', () => {
     expect((init.headers as Record<string, string>).Authorization).toBe('Basic xyz');
   });
 
-  it('throws OpenSearchApiError carrying status and body on non-200', async () => {
+  it('throws the deprecated OpenSearchPPLError, also an OpenSearchApiError, carrying status and body on non-200', async () => {
     mockFetch({ ok: false, status: 400, body: '{"error":{"reason":"bad PPL"}}' });
-    await expect(ppl({ query: 'broken' }, { datasourceUrl: 'http://localhost:9200' })).rejects.toMatchObject({
-      name: 'OpenSearchApiError',
+    const err = await ppl({ query: 'broken' }, { datasourceUrl: 'http://localhost:9200' }).catch((e: unknown) => e);
+    expect(err).toMatchObject({
+      name: 'OpenSearchPPLError',
       status: 400,
       body: '{"error":{"reason":"bad PPL"}}',
     });
-    await expect(ppl({ query: 'broken' }, { datasourceUrl: 'http://localhost:9200' })).rejects.toBeInstanceOf(
-      OpenSearchApiError,
-    );
+    expect(err).toBeInstanceOf(OpenSearchPPLError);
+    expect(err).toBeInstanceOf(OpenSearchApiError);
+  });
+
+  it('keeps the deprecated OpenSearchPPLError (status, body) constructor working', () => {
+    const err = new OpenSearchPPLError(400, '{"error":{"reason":"bad PPL"}}');
+    expect(err.name).toBe('OpenSearchPPLError');
+    expect(err.message).toBe('OpenSearch PPL request failed (400): bad PPL');
   });
 
   it('labels the error message PPL', async () => {
@@ -175,6 +181,14 @@ describe('opensearch-client', () => {
       await sql({ query: 'SELECT 1' }, { datasourceUrl: 'http://localhost:9200' });
       const [, init] = mock.mock.calls[0] as [string, RequestInit];
       expect(JSON.parse(init.body as string)).toEqual({ query: 'SELECT 1' });
+    });
+
+    it('throws a plain OpenSearchApiError, not the PPL subclass', async () => {
+      mockFetch({ ok: false, status: 400, body: '{"error":{"reason":"bad SQL"}}' });
+      const err = await sql({ query: 'x' }, { datasourceUrl: 'http://localhost:9200' }).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(OpenSearchApiError);
+      expect(err).not.toBeInstanceOf(OpenSearchPPLError);
+      expect(err).toMatchObject({ name: 'OpenSearchApiError' });
     });
 
     it('labels the error message SQL', async () => {

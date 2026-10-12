@@ -44,7 +44,7 @@ export function buildTimeRangeFilter(timestampField: string, start: Date, end: D
  * matched indices has no such field, which would otherwise fail the shard.
  */
 export function buildDefaultSort(timestampField: string): Array<Record<string, unknown>> {
-  return [{ [timestampField]: { order: 'desc', unmapped_type: 'boolean' } }];
+  return [{ [timestampField]: { order: 'desc', unmapped_type: 'date' } }];
 }
 
 export function resolveSize(limit?: number): number {

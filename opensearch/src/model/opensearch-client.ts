@@ -73,6 +73,18 @@ export class OpenSearchApiError extends Error {
 }
 
 /**
+ * @deprecated Use `OpenSearchApiError`. Kept so existing `instanceof OpenSearchPPLError`
+ * checks and `err.name === 'OpenSearchPPLError'` comparisons keep working: `ppl` still
+ * throws this subclass, so a PPL failure is an instance of both classes.
+ */
+export class OpenSearchPPLError extends OpenSearchApiError {
+  constructor(status: number, body: string, message?: string) {
+    super(status, body, message ?? buildShortMessage('PPL', status, body));
+    this.name = 'OpenSearchPPLError';
+  }
+}
+
+/**
  * Label used in error messages so the user knows which API rejected the request.
  * `'API'` is a neutral fallback for a caller that constructs `OpenSearchApiError`
  * without an explicit message — unreachable today since all three transports pass
@@ -150,7 +162,10 @@ async function postJson<T>(
 
   if (!response.ok) {
     const text = await response.text();
-    throw new OpenSearchApiError(response.status, text, buildShortMessage(label, response.status, text));
+    const message = buildShortMessage(label, response.status, text);
+    throw label === 'PPL'
+      ? new OpenSearchPPLError(response.status, text, message)
+      : new OpenSearchApiError(response.status, text, message);
   }
 
   return response.json();

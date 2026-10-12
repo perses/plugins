@@ -53,8 +53,10 @@ const REQUIRED_INDEX_MESSAGE = `Required for ${OPENSEARCH_QUERY_LANGUAGES.filter
  * rendered field itself.
  */
 export function parseLimitInput(raw: string): number | undefined {
-  const parsed = Number.parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  // `Number` rather than `parseInt`: parseInt would silently truncate "3.7" to 3, whereas
+  // a decimal should be rejected like any other non-integer. `Number("")` is 0, so empty is rejected too.
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 const labelSx = { display: 'block', marginBottom: '4px', fontWeight: 500 } as const;

@@ -213,3 +213,47 @@ func TestLimitRejectsNegative(t *testing.T) {
 		t.Errorf("unexpected error text: %v", q.Error)
 	}
 }
+
+func TestPluginSpecLimitOnUnmarshal(t *testing.T) {
+	tests := []struct {
+		name    string
+		raw     string
+		wantErr bool
+		want    int
+	}{
+		{name: "explicit zero", raw: `{"query":"q","limit":0}`, wantErr: true},
+		{name: "negative", raw: `{"query":"q","limit":-1}`, wantErr: true},
+		{name: "omitted", raw: `{"query":"q"}`, want: 0},
+		{name: "positive", raw: `{"query":"q","limit":25}`, want: 25},
+	}
+	for _, tt := range tests {
+		t.Run("json/"+tt.name, func(t *testing.T) {
+			var spec PluginSpec
+			err := json.Unmarshal([]byte(tt.raw), &spec)
+			checkLimitResult(t, spec, err, tt.wantErr, tt.want)
+		})
+		// UnmarshalYAML receives a decoder callback; drive it with a JSON-backed one so the
+		// YAML code path is exercised without adding a YAML library dependency.
+		t.Run("yaml/"+tt.name, func(t *testing.T) {
+			var spec PluginSpec
+			err := spec.UnmarshalYAML(func(v interface{}) error { return json.Unmarshal([]byte(tt.raw), v) })
+			checkLimitResult(t, spec, err, tt.wantErr, tt.want)
+		})
+	}
+}
+
+func checkLimitResult(t *testing.T, spec PluginSpec, err error, wantErr bool, want int) {
+	t.Helper()
+	if wantErr {
+		if err == nil {
+			t.Fatal("expected an error, got nil")
+		}
+		return
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if spec.Limit != want {
+		t.Errorf("limit = %d, want %d", spec.Limit, want)
+	}
+}
