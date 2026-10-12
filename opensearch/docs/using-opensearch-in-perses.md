@@ -27,11 +27,11 @@ or "show me every log line that belongs to this one trace."
 To *use* the plugin you only need:
 
 - A **current Perses release** — the OpenSearch plugin ships bundled, so there's
-  nothing to install (you'll confirm this in [Step 2](#step-2-run-perses)).
+  nothing to install (you'll confirm this in [Step 2](#step-2--run-perses)).
 - An **OpenSearch** cluster with the SQL/PPL plugin — bundled by default.
 
 **If you already have Perses and OpenSearch running,** jump straight to
-[Step 3](#step-3-add-the-opensearch-datasource) and add the datasource — you can
+[Step 3](#step-3--add-the-opensearch-datasource) and add the datasource — you can
 ignore everything before it.
 
 The rest of the tutorial stands up OpenSearch and Perses locally, which also needs:
@@ -39,7 +39,7 @@ The rest of the tutorial stands up OpenSearch and Perses locally, which also nee
 - **Docker** (with Compose).
 
 > **Running an older Perses that predates the plugin?** See the note at the end of
-> [Step 2](#step-2-run-perses) for loading it as a released archive — though the
+> [Step 2](#step-2--run-perses) for loading it as a released archive — though the
 > simplest path is to upgrade Perses.
 
 ## Step 1 — Get OpenSearch running (with some data)
