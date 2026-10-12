@@ -49,4 +49,34 @@ describe('PyroscopeDatasource createClient', () => {
     expect(minStepSecondsFor('1500ms')).toBe(2);
     expect(minStepSecondsFor('1s500ms')).toBe(2);
   });
+
+  describe('custom fetch', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('uses the custom fetch from options and never touches the global fetch', async () => {
+      const globalFetchSpy = vi.spyOn(globalThis, 'fetch');
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ flamegraph: {} }),
+      });
+
+      const client = PyroscopeDatasource.createClient(
+        { directUrl: 'http://pyroscope.example.com:4040' },
+        { proxyUrl: 'http://proxy:8080', fetch: mockFetch as unknown as typeof globalThis.fetch },
+      );
+
+      await client.selectMergeStacktraces({
+        profileTypeID: 'process_cpu:cpu:nanoseconds:cpu:nanoseconds',
+        labelSelector: '{service_name="my_service"}',
+        start: 0,
+        end: 1,
+      });
+
+      expect(mockFetch).toHaveBeenCalled();
+      expect(globalFetchSpy).not.toHaveBeenCalled();
+    });
+  });
 });

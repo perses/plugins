@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
-import type { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
+import type { LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
 import type { Definition } from '@perses-dev/spec';
+import { schemeCategory10, schemeDark2, schemeSet1, schemeSet2, schemeSet3, schemeTableau10 } from 'd3-scale-chromatic';
 
 /**
  * Line style options for time series charts.
@@ -70,9 +71,45 @@ export interface TooltipSpecOptions {
   enablePinning: boolean;
 }
 
-export interface TimeSeriesChartPaletteOptions {
-  mode: 'auto' | 'categorical';
+export type TimeSeriesChartPaletteMode = 'auto' | 'categorical';
+
+export const CATEGORICAL_PALETTE_SCHEMES = {
+  category10: schemeCategory10,
+  tableau10: schemeTableau10,
+  set1: schemeSet1,
+  set2: schemeSet2,
+  set3: schemeSet3,
+  dark2: schemeDark2,
+} as const;
+
+export type CategoricalPaletteName = keyof typeof CATEGORICAL_PALETTE_SCHEMES;
+
+export const CATEGORICAL_PALETTE_NAMES = Object.keys(CATEGORICAL_PALETTE_SCHEMES) as CategoricalPaletteName[];
+
+export interface CategoricalSchemeMetadata {
+  label: string;
 }
+
+export const CATEGORICAL_SCHEME_METADATA: Record<CategoricalPaletteName, CategoricalSchemeMetadata> = {
+  category10: { label: 'D3 Category 10' },
+  tableau10: { label: 'Tableau 10' },
+  set1: { label: 'ColorBrewer Set 1' },
+  set2: { label: 'ColorBrewer Set 2' },
+  set3: { label: 'ColorBrewer Set 3' },
+  dark2: { label: 'ColorBrewer Dark 2' },
+};
+
+export type TimeSeriesChartPaletteOptions =
+  | { mode: 'auto' }
+  | {
+      mode: 'categorical';
+      // Omitting falls back to the ECharts theme palette.
+      name?: CategoricalPaletteName;
+    };
+
+export const PALETTE_DROPDOWN_TOOLTIP =
+  'Auto derives a unique color from the series name — same name always maps to the same color across panels. ' +
+  'Categorical palettes assign colors from a fixed set by series order.';
 
 export type TimeSeriesChartVisualOptions = {
   display?: 'line' | 'bar';
@@ -158,6 +195,9 @@ export const VISUAL_CONFIG = {
   },
   stack: {
     label: 'Stack Series',
+  },
+  colorPalette: {
+    label: 'Color Palette',
   },
   connectNulls: {
     label: 'Connect Nulls',

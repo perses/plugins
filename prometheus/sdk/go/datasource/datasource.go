@@ -111,9 +111,6 @@ func Prometheus(options ...Option) datasource.Option {
 	}
 }
 
-func Selector(datasourceName string) *datasource.Selector {
-	return &datasource.Selector{
-		Kind: PluginKind,
-		Name: datasourceName,
-	}
+func Selector(name string) (*datasource.Selector, error) {
+	return datasource.NewSelector(PluginKind, name)
 }

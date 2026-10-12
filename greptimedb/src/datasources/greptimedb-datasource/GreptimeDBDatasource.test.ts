@@ -87,3 +87,35 @@ describe('GreptimeDBDatasource.createClient', () => {
     );
   });
 });
+
+describe('GreptimeDBDatasource.createClient custom fetch', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  it('uses the custom fetch from options and not the global fetch', async () => {
+    // Use the real greptimedb-client (not the module mock above) so the request
+    // reaches the actual fetch call site.
+    vi.resetModules();
+    vi.doUnmock('../../model/greptimedb-client');
+    const { GreptimeDBDatasource: RealGreptimeDBDatasource } = await import('./GreptimeDBDatasource');
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ status: 'success', output: [] }),
+    });
+    const globalFetchSpy = vi.spyOn(globalThis, 'fetch');
+
+    const client = RealGreptimeDBDatasource.createClient(
+      { directUrl: 'http://localhost:4000' },
+      { proxyUrl: 'http://proxy:8080', fetch: mockFetch as unknown as typeof fetch },
+    );
+
+    await client.query({ query: 'select 1' });
+
+    expect(mockFetch).toHaveBeenCalled();
+    expect(globalFetchSpy).not.toHaveBeenCalled();
+  });
+});

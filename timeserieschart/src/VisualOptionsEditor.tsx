@@ -16,6 +16,7 @@ import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
 
+import { PaletteSelector } from './components/PaletteSelector';
 import type { StackOptions, TimeSeriesChartVisualOptions } from './time-series-chart-model';
 import {
   DEFAULT_AREA_OPACITY,
@@ -87,6 +88,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
           ></SettingsAutocomplete>
         }
       />
+      <PaletteSelector value={value.palette} onChange={(palette) => onChange({ ...value, palette })} />
       <OptionsEditorControl
         label="Display"
         control={

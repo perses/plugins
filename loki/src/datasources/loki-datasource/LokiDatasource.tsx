@@ -29,7 +29,7 @@ import { LokiDatasourceEditor } from './LokiDatasourceEditor';
 
 const createClient: DatasourcePlugin<LokiDatasourceSpec, LokiClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -42,16 +42,19 @@ const createClient: DatasourcePlugin<LokiDatasourceSpec, LokiClient>['createClie
     options: {
       datasourceUrl,
     },
-    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    queryRange: (params, headers) => queryRange(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labels: (params, headers) => labels(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    queryRange: (params, headers) =>
+      queryRange(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    labels: (params, headers) => labels(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    labelValues: (params, headers) =>
+      labelValues(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
     series: (match, start, end, headers) =>
-      series(match, start, end, { datasourceUrl, headers: headers ?? specHeaders }),
-    volume: (params, headers) => volume(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    volumeRange: (params, headers) => volumeRange(params, { datasourceUrl, headers: headers ?? specHeaders }),
+      series(match, start, end, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    volume: (params, headers) => volume(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    volumeRange: (params, headers) =>
+      volumeRange(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
     indexStats: (query, start, end, headers) =>
-      indexStats(query, start, end, { datasourceUrl, headers: headers ?? specHeaders }),
+      indexStats(query, start, end, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
   };
 };
 

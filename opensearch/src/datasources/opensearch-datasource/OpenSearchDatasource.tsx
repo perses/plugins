@@ -20,7 +20,7 @@ import { OpenSearchDatasourceEditor } from './OpenSearchDatasourceEditor';
 
 const createClient: DatasourcePlugin<OpenSearchDatasourceSpec, OpenSearchClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -33,9 +33,12 @@ const createClient: DatasourcePlugin<OpenSearchDatasourceSpec, OpenSearchClient>
     options: {
       datasourceUrl,
     },
-    ppl: (params, headers, signal) => ppl(params, { datasourceUrl, headers: headers ?? specHeaders }, signal),
-    sql: (params, headers, signal) => sql(params, { datasourceUrl, headers: headers ?? specHeaders }, signal),
-    search: (params, headers, signal) => search(params, { datasourceUrl, headers: headers ?? specHeaders }, signal),
+    ppl: (params, headers, signal) =>
+      ppl(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, signal),
+    sql: (params, headers, signal) =>
+      sql(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, signal),
+    search: (params, headers, signal) =>
+      search(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, signal),
   };
 };
 

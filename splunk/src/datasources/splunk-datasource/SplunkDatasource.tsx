@@ -27,7 +27,7 @@ import { SplunkDatasourceEditor } from './SplunkDatasourceEditor';
 
 const createClient: DatasourcePlugin<SplunkDatasourceSpec, SplunkClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch, fetchJson: customFetchJson } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -40,14 +40,17 @@ const createClient: DatasourcePlugin<SplunkDatasourceSpec, SplunkClient>['create
     options: {
       datasourceUrl,
     },
-    createJob: (params, headers) => createJob(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    getJobStatus: (jobId, headers) => getJobStatus(jobId, { datasourceUrl, headers: headers ?? specHeaders }),
+    createJob: (params, headers) =>
+      createJob(params, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
+    getJobStatus: (jobId, headers) =>
+      getJobStatus(jobId, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
     getJobResults: (jobId, params, headers) =>
-      getJobResults(jobId, params, { datasourceUrl, headers: headers ?? specHeaders }),
+      getJobResults(jobId, params, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
     getJobEvents: (jobId, params, headers) =>
-      getJobEvents(jobId, params, { datasourceUrl, headers: headers ?? specHeaders }),
-    exportSearch: (params, headers) => exportSearch(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    getIndexes: (headers) => getIndexes({ datasourceUrl, headers: headers ?? specHeaders }),
+      getJobEvents(jobId, params, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
+    exportSearch: (params, headers) =>
+      exportSearch(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    getIndexes: (headers) => getIndexes({ datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
   };
 };
 

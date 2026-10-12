@@ -16,18 +16,22 @@ import type { ReactElement } from 'react';
 
 import type { PyroscopeDatasourceSelector } from '../model';
 import type { LabelFilter } from '../utils/types';
+import { computeLabelScopeSelector } from '../utils/types';
 import { AddFilterItem } from './AddFilterItem';
 import { FilterItem } from './FilterItem';
 
 export interface FiltersProps {
   datasource: PyroscopeDatasourceSelector;
   value: LabelFilter[];
+  service?: string;
+  profileType?: string;
   onChange?: (value: LabelFilter[]) => void;
 }
 
 export function Filters(props: FiltersProps): ReactElement {
   const theme = useTheme();
-  const { datasource, value, onChange } = props;
+  const { datasource, value, service, profileType, onChange } = props;
+  const labelSelector = computeLabelScopeSelector(service, profileType);
 
   const addFilterItem = (): void => {
     const newItem: LabelFilter = { labelName: '', labelValue: '', operator: '=' };
@@ -86,6 +90,7 @@ export function Filters(props: FiltersProps): ReactElement {
         <FilterItem
           key={`${filter.labelName}:${filter.operator}:${filter.labelValue}`}
           datasource={datasource}
+          labelSelector={labelSelector}
           value={filter}
           onChange={(newValue) => updateFilter(index, newValue)}
           deleteItem={() => deleteFilter(index)}

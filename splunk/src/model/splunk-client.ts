@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/client';
+import type { FetchFn } from '@perses-dev/client';
 
 import type {
   SplunkJobCreateResponse,
@@ -45,6 +46,8 @@ export interface SplunkExportSearchParams {
 export interface SplunkApiOptions {
   datasourceUrl: string;
   headers?: SplunkRequestHeaders;
+  fetch?: FetchFn;
+  fetchJson?: typeof fetchJson;
 }
 
 export interface SplunkClient {
@@ -95,7 +98,8 @@ export async function createJob(
   if (params.earliest_time) formData.append('earliest_time', params.earliest_time);
   if (params.latest_time) formData.append('latest_time', params.latest_time);
   formData.append('output_mode', params.output_mode || 'json');
-  return await fetchJson<SplunkJobCreateResponse>(url.toString(), {
+  const doFetchJson = options.fetchJson ?? fetchJson;
+  return await doFetchJson<SplunkJobCreateResponse>(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -108,7 +112,8 @@ export async function createJob(
 export async function getJobStatus(jobId: string, options: SplunkApiOptions): Promise<SplunkJobStatusResponse> {
   const url = buildUrl(`/services/search/v2/jobs/${jobId}`, options.datasourceUrl);
   url.searchParams.append('output_mode', 'json');
-  return await fetchJson<SplunkJobStatusResponse>(url.toString(), {
+  const doFetchJson = options.fetchJson ?? fetchJson;
+  return await doFetchJson<SplunkJobStatusResponse>(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -128,7 +133,8 @@ export async function getJobResults(
   if (params.count) url.searchParams.append('count', params.count.toString());
   if (params.offset) url.searchParams.append('offset', params.offset.toString());
 
-  return await fetchJson<SplunkResultsResponse>(url.toString(), {
+  const doFetchJson = options.fetchJson ?? fetchJson;
+  return await doFetchJson<SplunkResultsResponse>(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -146,7 +152,8 @@ export async function getJobEvents(
   url.searchParams.append('output_mode', params.output_mode || 'json');
   if (params.count) url.searchParams.append('count', params.count.toString());
   if (params.offset) url.searchParams.append('offset', params.offset.toString());
-  return await fetchJson<SplunkEventsResponse>(url.toString(), {
+  const doFetchJson = options.fetchJson ?? fetchJson;
+  return await doFetchJson<SplunkEventsResponse>(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -171,7 +178,8 @@ export async function exportSearch(
   if (params.latest_time) formData.append('latest_time', params.latest_time);
   formData.append('output_mode', params.output_mode || 'json');
 
-  const response = await fetch(url.toString(), {
+  const doFetch = options.fetch ?? fetch;
+  const response = await doFetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -200,7 +208,8 @@ export async function getIndexes(options: SplunkApiOptions): Promise<SplunkIndex
   const url = buildUrl('/services/data/indexes', options.datasourceUrl);
   url.searchParams.append('output_mode', 'json');
   url.searchParams.append('count', '0');
-  return await fetchJson<SplunkIndexResponse>(url.toString(), {
+  const doFetchJson = options.fetchJson ?? fetchJson;
+  return await doFetchJson<SplunkIndexResponse>(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

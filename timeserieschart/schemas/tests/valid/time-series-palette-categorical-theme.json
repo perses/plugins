@@ -1,0 +1,10 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "visual": {
+      "palette": {
+        "mode": "categorical"
+      }
+    }
+  }
+}

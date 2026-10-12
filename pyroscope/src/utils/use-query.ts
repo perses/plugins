@@ -28,19 +28,23 @@ import { getUnixTimeRange } from '../plugins';
 // Pyroscope need timestamp in milliseconds, but the time range from Perses is in seconds.
 const MILLISECONDS = 1_000;
 
-export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<SearchLabelNamesResponse, StatusError> {
+// labelSelector comes from computeLabelScopeSelector; an empty selector disables the lookup.
+export function useLabelNames(
+  datasource: DatasourceSelector,
+  labelSelector: string,
+): UseQueryResult<SearchLabelNamesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
   const { absoluteTimeRange } = useTimeRange();
   const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelNamesResponse, StatusError>({
-    enabled: !!client,
-    queryKey: ['searchLabelNames', client],
+    enabled: !!client && labelSelector !== '',
+    queryKey: ['searchLabelNames', labelSelector, start, end, client],
     queryFn: async () => {
       return await client!.searchLabelNames(
         {},
         { 'content-type': 'application/json' },
-        { start: start * MILLISECONDS, end: end * MILLISECONDS },
+        { matchers: [labelSelector], start: start * MILLISECONDS, end: end * MILLISECONDS },
       );
     },
   });
@@ -49,19 +53,20 @@ export function useLabelNames(datasource: DatasourceSelector): UseQueryResult<Se
 export function useLabelValues(
   datasource: DatasourceSelector,
   labelName: string,
+  labelSelector: string,
 ): UseQueryResult<SearchLabelValuesResponse, StatusError> {
   const { data: client } = useDatasourceClient<PyroscopeClient>(datasource);
   const { absoluteTimeRange } = useTimeRange();
   const { start, end } = getUnixTimeRange(absoluteTimeRange);
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
-    enabled: !!client && labelName !== '', // do not trigger query if no labelName is set
-    queryKey: ['searchLabelValues', labelName, client],
+    enabled: !!client && labelName !== '' && labelSelector !== '', // do not trigger query if no labelName or service is set
+    queryKey: ['searchLabelValues', labelName, labelSelector, start, end, client],
     queryFn: async () => {
       return await client!.searchLabelValues(
         {},
         { 'content-type': 'application/json' },
-        { name: labelName, start: start * MILLISECONDS, end: end * MILLISECONDS },
+        { name: labelName, matchers: [labelSelector], start: start * MILLISECONDS, end: end * MILLISECONDS },
       );
     },
   });
@@ -77,7 +82,7 @@ export function useProfileTypes(
 
   return useQuery<SearchProfileTypesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchProfileTypes', service, client],
+    queryKey: ['searchProfileTypes', service, start, end, client],
     queryFn: async () => {
       const profileTypesResponse = await client!.searchProfileTypes(
         {},
@@ -117,7 +122,7 @@ export function useServices(datasource: DatasourceSelector): UseQueryResult<Sear
 
   return useQuery<SearchLabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['searchServices', client],
+    queryKey: ['searchServices', start, end, client],
     queryFn: async () => {
       return await client!.searchServices(
         {},

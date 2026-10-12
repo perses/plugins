@@ -23,7 +23,7 @@ import { TempoDatasourceEditor } from './TempoDatasourceEditor';
  */
 const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetchJson: customFetchJson } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -37,10 +37,14 @@ const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createCl
     options: {
       datasourceUrl,
     },
-    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    search: (params, headers) => search(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    searchTags: (params, headers) => searchTags(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    searchTagValues: (params, headers) => searchTagValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    query: (params, headers) =>
+      query(params, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
+    search: (params, headers) =>
+      search(params, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
+    searchTags: (params, headers) =>
+      searchTags(params, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
+    searchTagValues: (params, headers) =>
+      searchTagValues(params, { datasourceUrl, headers: headers ?? specHeaders, fetchJson: customFetchJson }),
   };
 };
 

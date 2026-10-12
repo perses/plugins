@@ -23,7 +23,7 @@ const createClient: DatasourcePlugin<AlertManagerDatasourceSpec, AlertManagerCli
   options,
 ) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -36,12 +36,16 @@ const createClient: DatasourcePlugin<AlertManagerDatasourceSpec, AlertManagerCli
     options: {
       datasourceUrl,
     },
-    getAlerts: (params, headers) => getAlerts(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    getSilences: (params, headers) => getSilences(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    getSilence: (id, headers) => getSilence(id, { datasourceUrl, headers: headers ?? specHeaders }),
-    createSilence: (silence, headers) => createSilence(silence, { datasourceUrl, headers: headers ?? specHeaders }),
-    deleteSilence: (id, headers) => deleteSilence(id, { datasourceUrl, headers: headers ?? specHeaders }),
-    getStatus: (headers) => getStatus({ datasourceUrl, headers: headers ?? specHeaders }),
+    getAlerts: (params, headers) =>
+      getAlerts(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    getSilences: (params, headers) =>
+      getSilences(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    getSilence: (id, headers) => getSilence(id, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    createSilence: (silence, headers) =>
+      createSilence(silence, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    deleteSilence: (id, headers) =>
+      deleteSilence(id, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    getStatus: (headers) => getStatus({ datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
   };
 };
 

@@ -18,7 +18,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'AlertManager',
   rsbuildConfig: {
-    server: { port: 3015 },
+    server: { port: 3024 },
     plugins: [pluginReact()],
   },
   moduleFederation: {

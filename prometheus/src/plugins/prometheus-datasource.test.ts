@@ -101,3 +101,49 @@ describe('PrometheusDatasource query parameters', () => {
     );
   });
 });
+
+describe('PrometheusDatasource custom fetch injection', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('uses the fetch provided through createClient options for healthCheck', async () => {
+    const spec: PrometheusDatasourceSpec = { directUrl: 'http://localhost:9090' };
+    // Previous tests in this file reassign global.fetch without restoring it; clear any inherited call history.
+    const globalFetchSpy = vi.spyOn(globalThis, 'fetch').mockClear();
+    const customFetch = vi.fn().mockResolvedValue({ status: 200 });
+
+    const client = PrometheusDatasource.createClient(spec, {
+      proxyUrl: 'http://proxy:8080',
+      fetch: customFetch,
+    });
+
+    expect(client.healthCheck).toBeDefined();
+    const healthy = await client.healthCheck!();
+
+    expect(healthy).toBe(true);
+    expect(customFetch).toHaveBeenCalledTimes(1);
+    expect(globalFetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('uses the fetchJson provided through createClient options for queries', async () => {
+    const spec: PrometheusDatasourceSpec = { directUrl: 'http://localhost:9090' };
+    // Previous tests in this file reassign global.fetch without restoring it; clear any inherited call history.
+    const globalFetchSpy = vi.spyOn(globalThis, 'fetch').mockClear();
+    const customFetchJson = vi.fn().mockResolvedValue({
+      status: 'success',
+      data: { resultType: 'vector', result: [] },
+    });
+
+    const client = PrometheusDatasource.createClient(spec, {
+      proxyUrl: 'http://proxy:8080',
+      fetchJson: customFetchJson,
+    });
+
+    const response = await client.instantQuery({ query: 'up' });
+
+    expect(response.data).toEqual({ resultType: 'vector', result: [] });
+    expect(customFetchJson).toHaveBeenCalledTimes(1);
+    expect(globalFetchSpy).not.toHaveBeenCalled();
+  });
+});

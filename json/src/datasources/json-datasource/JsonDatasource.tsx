@@ -20,7 +20,7 @@ import { JsonDatasourceEditor } from './JsonDatasourceEditor';
 
 const createClient: DatasourcePlugin<JsonDatasourceSpec, JsonDatasourceClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
@@ -41,7 +41,8 @@ const createClient: DatasourcePlugin<JsonDatasourceSpec, JsonDatasourceClient>['
       const requestHeaders =
         method === 'POST' && body ? { 'Content-Type': 'application/json', ...resolvedHeaders } : resolvedHeaders;
 
-      const response = await fetch(url, {
+      const doFetch = customFetch ?? fetch;
+      const response = await doFetch(url, {
         method,
         headers: requestHeaders,
         body,
