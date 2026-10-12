@@ -186,4 +186,108 @@ describe('jaeger-client', () => {
     await expect(searchServices({ datasourceUrl: '' })).resolves.toEqual({ data: [] });
     await expect(searchOperations('frontend', { datasourceUrl: '' })).resolves.toEqual({ data: [] });
   });
+
+  describe('datasources saved with the former allowed endpoints', () => {
+    const forbidden = (): Pick<Response, 'ok' | 'status' | 'text'> =>
+      errorResponse(403, JSON.stringify({ message: 'you are not allowed to use this endpoint' }));
+    const searchWindow = {
+      startTime: new Date('2024-06-11T10:00:00.000Z'),
+      endTime: new Date('2024-06-11T11:00:00.000Z'),
+    };
+    const legacyTrace = {
+      traceID: 'abc',
+      processes: { p1: { serviceName: 'frontend', tags: [] } },
+      spans: [
+        {
+          traceID: 'abc',
+          spanID: '1',
+          operationName: 'GET /cart',
+          startTime: 1000,
+          duration: 500,
+          processID: 'p1',
+          tags: [{ key: 'span.kind', type: 'string', value: 'server' }],
+        },
+      ],
+    };
+    const pathOf = (call: unknown[]): string => new URL(call[0] as string).pathname;
+
+    it('falls back to the API v1 when the proxy rejects the API v3, and remembers it', async () => {
+      const options = { datasourceUrl: 'http://legacy-services.example' };
+      fetchMock.mockResolvedValueOnce(forbidden());
+      fetchMock.mockResolvedValueOnce(jsonResponse({ data: ['frontend'] }));
+
+      await expect(searchServices(options)).resolves.toEqual({ data: ['frontend'] });
+      expect(fetchMock.mock.calls.map(pathOf)).toEqual(['/api/v3/services', '/api/services']);
+
+      fetchMock.mockResolvedValueOnce(jsonResponse({ data: [{ name: 'GET /cart', spanKind: 'server' }] }));
+      await expect(searchOperations('frontend', options)).resolves.toEqual({
+        data: [{ name: 'GET /cart', spanKind: 'server' }],
+      });
+      // The second call goes straight to the API v1.
+      expect(fetchMock.mock.calls.map(pathOf)).toEqual(['/api/v3/services', '/api/services', '/api/operations']);
+    });
+
+    it('searches traces with the API v1 parameters and returns OTLP data', async () => {
+      fetchMock.mockResolvedValueOnce(forbidden());
+      fetchMock.mockResolvedValueOnce(jsonResponse({ data: [legacyTrace] }));
+
+      const result = await searchTraces(
+        { service: 'frontend', limit: 5, ...searchWindow },
+        { datasourceUrl: 'http://legacy-search.example' },
+      );
+
+      const url = new URL(fetchMock.mock.calls[1]![0] as string);
+      expect(url.pathname).toBe('/api/traces');
+      expect(Object.fromEntries(url.searchParams.entries())).toEqual({
+        service: 'frontend',
+        limit: '5',
+        start: `${searchWindow.startTime.getTime() * 1000}`,
+        end: `${searchWindow.endTime.getTime() * 1000}`,
+      });
+      const span = result.resourceSpans?.[0]?.scopeSpans?.[0]?.spans?.[0];
+      expect(span).toMatchObject({
+        traceId: 'abc'.padStart(32, '0'),
+        spanId: '1'.padStart(16, '0'),
+        name: 'GET /cart',
+        kind: 'SPAN_KIND_SERVER',
+        startTimeUnixNano: '1000000',
+        endTimeUnixNano: '1500000',
+      });
+      expect(result.resourceSpans?.[0]?.resource?.attributes).toEqual([
+        { key: 'service.name', value: { stringValue: 'frontend' } },
+      ]);
+    });
+
+    it('gets a single trace with the API v1', async () => {
+      fetchMock.mockResolvedValueOnce(forbidden());
+      fetchMock.mockResolvedValueOnce(jsonResponse({ data: [legacyTrace] }));
+
+      const result = await getTrace('abc', { datasourceUrl: 'http://legacy-trace.example' });
+
+      expect(fetchMock.mock.calls.map(pathOf)).toEqual(['/api/v3/traces/abc', '/api/traces/abc']);
+      expect(result.resourceSpans).toHaveLength(1);
+    });
+
+    it('explains how to update the allowed endpoints when Jaeger no longer serves the API v1', async () => {
+      fetchMock.mockResolvedValueOnce(forbidden());
+      fetchMock.mockResolvedValueOnce(errorResponse(404, '404 page not found'));
+
+      const error: unknown = await searchServices({ datasourceUrl: 'http://legacy-removed.example' }).catch(
+        (e: unknown) => e,
+      );
+
+      expect(error).toBeInstanceOf(JaegerRequestError);
+      expect((error as JaegerRequestError).message).toContain('/api/v3/traces');
+      expect((error as JaegerRequestError).message).toContain('allowed endpoints');
+    });
+
+    it('does not fall back for other errors', async () => {
+      fetchMock.mockResolvedValueOnce(errorResponse(500, ''));
+
+      await expect(searchServices({ datasourceUrl: 'http://legacy-other.example' })).rejects.toMatchObject({
+        status: 500,
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -24,6 +24,16 @@ import type {
   JaegerTracesData,
   JaegerTracesResponse,
 } from './api-types';
+import {
+  LEGACY_OPERATIONS_PATH,
+  LEGACY_SERVICES_PATH,
+  LEGACY_TRACES_PATH,
+  buildLegacySearchParams,
+  legacyErrorMessage,
+  legacyOperations,
+  legacyServices,
+  legacyTracesToOTLP,
+} from './legacy-api';
 
 interface JaegerClientOptions {
   datasourceUrl: string;
@@ -144,48 +154,133 @@ function buildSearchParams(params: JaegerSearchRequestParameters): URLSearchPara
   return urlSearchParams;
 }
 
+// Datasources saved before the move to the API v3 only allow the former paths in their Perses proxy, which then answers
+// the API v3 requests with a 403. For those, the client falls back to the API v1 (served by Jaeger up to 2.20) and
+// remembers it, so existing datasources keep working until their allowed endpoints are updated.
+const legacyDatasources = new Set<string>();
+
+const ALLOWED_ENDPOINTS_HINT =
+  'The Perses proxy of this datasource does not allow the Jaeger API v3, and this Jaeger does not serve the former ' +
+  'API (removed in Jaeger 2.21). Add GET /api/v3/traces, GET /api/v3/services and GET /api/v3/operations to the ' +
+  'allowed endpoints of the datasource.';
+
+async function withLegacyFallback<T>(
+  queryOptions: QueryOptions,
+  current: () => Promise<T>,
+  legacy: () => Promise<T>,
+  legacyMissingStatuses: number[],
+): Promise<T> {
+  const { datasourceUrl } = queryOptions;
+  if (!legacyDatasources.has(datasourceUrl)) {
+    try {
+      return await current();
+    } catch (e) {
+      if (!(e instanceof JaegerRequestError && e.status === 403)) {
+        throw e;
+      }
+    }
+  }
+
+  try {
+    const result = await legacy();
+    legacyDatasources.add(datasourceUrl);
+    return result;
+  } catch (e) {
+    if (e instanceof JaegerRequestError && (e.status === 403 || legacyMissingStatuses.includes(e.status))) {
+      throw new JaegerRequestError(ALLOWED_ENDPOINTS_HINT, e.status);
+    }
+    throw e;
+  }
+}
+
+async function legacyGet<T>(path: string, params: URLSearchParams, queryOptions: QueryOptions): Promise<T> {
+  const response = await fetchWithGet<T & { errors?: Array<{ msg: string }> | null }>(path, params, queryOptions);
+  const error = legacyErrorMessage(response);
+  if (error !== undefined) {
+    throw new Error(error);
+  }
+  return response;
+}
+
 export async function getTrace(traceId: string, queryOptions: QueryOptions): Promise<JaegerTracesData> {
-  const response = await fetchWithGet<JaegerTracesResponse>(
-    `/api/v3/traces/${encodeURIComponent(traceId)}`,
-    new URLSearchParams(),
+  return withLegacyFallback(
     queryOptions,
+    async () => {
+      const response = await fetchWithGet<JaegerTracesResponse>(
+        `/api/v3/traces/${encodeURIComponent(traceId)}`,
+        new URLSearchParams(),
+        queryOptions,
+      );
+      return response.result ?? {};
+    },
+    async () =>
+      legacyTracesToOTLP(
+        await legacyGet(`${LEGACY_TRACES_PATH}/${encodeURIComponent(traceId)}`, new URLSearchParams(), queryOptions),
+      ),
+    // A missing trace is a legitimate 404 of the former API.
+    [],
   );
-  return response.result ?? {};
 }
 
 export async function searchTraces(
   params: JaegerSearchRequestParameters,
   queryOptions: QueryOptions,
 ): Promise<JaegerTracesData> {
-  try {
-    const response = await fetchWithGet<JaegerTracesResponse>(
-      '/api/v3/traces',
-      buildSearchParams(params),
-      queryOptions,
-    );
-    return response.result ?? {};
-  } catch (e) {
-    // Jaeger answers a search without any match with a 404, which is not an error for the caller.
-    if (e instanceof JaegerRequestError && e.status === 404 && /no traces found/i.test(e.message)) {
-      return {};
-    }
-    throw e;
-  }
+  return withLegacyFallback(
+    queryOptions,
+    async () => {
+      try {
+        const response = await fetchWithGet<JaegerTracesResponse>(
+          '/api/v3/traces',
+          buildSearchParams(params),
+          queryOptions,
+        );
+        return response.result ?? {};
+      } catch (e) {
+        // Jaeger answers a search without any match with a 404, which is not an error for the caller.
+        if (e instanceof JaegerRequestError && e.status === 404 && /no traces found/i.test(e.message)) {
+          return {};
+        }
+        throw e;
+      }
+    },
+    async () => legacyTracesToOTLP(await legacyGet(LEGACY_TRACES_PATH, buildLegacySearchParams(params), queryOptions)),
+    [404],
+  );
 }
 
 export async function searchServices(queryOptions: QueryOptions): Promise<JaegerApiResponse<string[]>> {
-  const response = await fetchWithGet<JaegerServicesResponse>('/api/v3/services', new URLSearchParams(), queryOptions);
-  return { data: response.services ?? [] };
+  return withLegacyFallback(
+    queryOptions,
+    async () => {
+      const response = await fetchWithGet<JaegerServicesResponse>(
+        '/api/v3/services',
+        new URLSearchParams(),
+        queryOptions,
+      );
+      return { data: response.services ?? [] };
+    },
+    async () => legacyServices(await legacyGet(LEGACY_SERVICES_PATH, new URLSearchParams(), queryOptions)),
+    [404],
+  );
 }
 
 export async function searchOperations(
   service: string,
   queryOptions: QueryOptions,
 ): Promise<JaegerApiResponse<JaegerOperation[]>> {
-  const response = await fetchWithGet<JaegerOperationsResponse>(
-    '/api/v3/operations',
-    new URLSearchParams({ service }),
+  return withLegacyFallback(
     queryOptions,
+    async () => {
+      const response = await fetchWithGet<JaegerOperationsResponse>(
+        '/api/v3/operations',
+        new URLSearchParams({ service }),
+        queryOptions,
+      );
+      return { data: response.operations ?? [] };
+    },
+    async () =>
+      legacyOperations(await legacyGet(LEGACY_OPERATIONS_PATH, new URLSearchParams({ service }), queryOptions)),
+    [404],
   );
-  return { data: response.operations ?? [] };
 }
