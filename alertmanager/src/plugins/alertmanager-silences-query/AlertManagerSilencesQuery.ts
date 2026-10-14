@@ -23,7 +23,7 @@ export const AlertManagerSilencesQuery: SilencesQueryPlugin<AlertManagerSilences
   OptionsEditorComponent: AlertManagerSilencesQueryEditor,
   createInitialOptions: (): AlertManagerSilencesQuerySpec => ({
     datasource: undefined,
-    filters: [],
+    filters: undefined,
   }),
   dependsOn: (spec: AlertManagerSilencesQuerySpec) => {
     const datasourceVariables = isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource ?? '') : [];
