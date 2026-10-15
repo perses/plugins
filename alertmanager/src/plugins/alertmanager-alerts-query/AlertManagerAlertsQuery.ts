@@ -24,7 +24,7 @@ export const AlertManagerAlertsQuery: AlertsQueryPlugin<AlertManagerAlertsQueryS
   createInitialOptions: (): AlertManagerAlertsQuerySpec => ({
     datasource: undefined,
     filters: [],
-    active: true,
+    active: false,
     silenced: false,
     inhibited: false,
     receiver: undefined,

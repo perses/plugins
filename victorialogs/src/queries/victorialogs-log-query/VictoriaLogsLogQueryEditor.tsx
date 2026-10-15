@@ -16,7 +16,7 @@ import { createModEnterHandler } from '@perses-dev/dashboards';
 import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 
 import { LogsQLEditor } from '../../components/logsql-editor';
 import type { VictoriaLogsDatasourceSelector } from '../../model';
@@ -41,10 +41,11 @@ export function VictoriaLogsLogQueryEditor(props: VictoriaLogsQueryEditorProps):
   // Local state for editor value to prevent query_range calls on every keystroke
   const [localQuery, setLocalQuery] = useState(value.query);
 
-  // Update local state when prop changes
-  useEffect(() => {
+  const [previousQuery, setPreviousQuery] = useState(value.query);
+  if (value.query !== previousQuery) {
+    setPreviousQuery(value.query);
     setLocalQuery(value.query);
-  }, [value.query]);
+  }
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
     if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {

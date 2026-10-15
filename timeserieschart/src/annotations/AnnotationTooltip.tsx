@@ -24,12 +24,21 @@ import {
   useMousePosition,
 } from '@perses-dev/components';
 import { DEFAULT_ANNOTATION_COLOR } from '@perses-dev/plugin-system';
-import type { LineSeriesOption } from 'echarts';
+import type { LineSeriesOption, MarkPointComponentOption, YAXisComponentOption } from 'echarts';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import useResizeObserver from 'use-resize-observer';
 
 import type { TimeSeriesAnnotation } from '../utils/annotation';
+
+// Hidden Y axis to guarantee annotations being shown
+export const ANNOTATION_Y_AXIS: YAXisComponentOption = {
+  type: 'value',
+  show: false,
+  min: 0,
+  max: 1,
+  axisLabel: { show: false },
+};
 
 export interface AnnotationTooltipProps {
   annotation: TimeSeriesAnnotation;
@@ -160,7 +169,10 @@ export function AnnotationTooltip({
  * Build ECharts series options for rendering annotations as markArea (range),
  * markLine (vertical dashed lines) and markPoint (triangle markers under the X-axis).
  */
-export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | undefined): LineSeriesOption[] {
+export function buildAnnotationSeries(
+  annotations: TimeSeriesAnnotation[] | undefined,
+  annotationYAxisIndex: number,
+): LineSeriesOption[] {
   if (!annotations?.length) return [];
 
   const markAreaData: Array<[{ xAxis: number; itemStyle?: { color: string; opacity: number } }, { xAxis: number }]> =
@@ -171,8 +183,14 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
     label?: { show: boolean };
     annotationIndex?: number;
   }> = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markPointData: any[] = [];
+  const markPointData: Array<
+    NonNullable<MarkPointComponentOption['data']>[number] & {
+      annotationIndex: number;
+      isStart?: boolean;
+      isEnd?: boolean;
+      isPoint?: boolean;
+    }
+  > = [];
 
   annotations.forEach((annotation, index) => {
     const color = annotation.color ?? DEFAULT_ANNOTATION_COLOR;
@@ -205,6 +223,7 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
       // Add start and end markers
       for (const isStart of [true, false]) {
         markPointData.push({
+          name: '',
           coord: [isStart ? annotation.start : annotation.end, 0],
           symbol: 'triangle',
           symbolSize: [12, 12],
@@ -230,6 +249,7 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
 
       // Add point marker
       markPointData.push({
+        name: '',
         coord: [annotation.start, 0],
         symbol: 'triangle',
         symbolSize: [12, 10],
@@ -245,6 +265,7 @@ export function buildAnnotationSeries(annotations: TimeSeriesAnnotation[] | unde
   const series: LineSeriesOption = {
     type: 'line',
     data: [],
+    yAxisIndex: annotationYAxisIndex,
     silent: false,
     markArea:
       markAreaData.length > 0

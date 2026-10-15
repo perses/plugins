@@ -17,7 +17,7 @@ import { useTimeRange } from '@perses-dev/plugin-system';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement, SyntheticEvent } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { TempoClient } from '../model';
 import { getUnixTimeRange } from '../plugins';
@@ -220,9 +220,11 @@ function LazyTextInput(props: LazyTextInputProps): ReactElement {
   const [draftValue, setDraftValue] = useState(value);
   const isValidInput = draftValue === '' || validationRegex === undefined || validationRegex.test(draftValue);
 
-  useEffect(() => {
+  const [previousValue, setPreviousValue] = useState(value);
+  if (value !== previousValue) {
+    setPreviousValue(value);
     setDraftValue(value);
-  }, [value, setDraftValue]);
+  }
 
   const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setDraftValue(event.target.value);

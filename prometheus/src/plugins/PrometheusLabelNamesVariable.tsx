@@ -12,15 +12,10 @@
 // limitations under the License.
 
 import type { VariablePlugin, GetVariableOptionsContext } from '@perses-dev/plugin-system';
-import {
-  replaceVariables,
-  parseVariables,
-  datasourceSelectValueToSelector,
-  isVariableDatasource,
-} from '@perses-dev/plugin-system';
+import { parseVariables, datasourceSelectValueToSelector, isVariableDatasource } from '@perses-dev/plugin-system';
 
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
-import { resolvePrometheusDatasource } from './interpolation';
+import { interpolateMatchers, resolvePrometheusDatasource } from './interpolation';
 import { stringArrayToVariableOptions, PrometheusLabelNamesVariableEditor } from './prometheus-variables';
 import type { PrometheusLabelNamesVariableOptions } from './types';
 
@@ -37,7 +32,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
       datasourceSelector,
       ctx.variables,
     );
-    const match = spec.matchers ? spec.matchers.map((m) => replaceVariables(m, ctx.variables)) : undefined;
+    const match = interpolateMatchers(spec.matchers, ctx.variables);
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
 
     const { data: options } = await client.labelNames({ 'match[]': match, ...timeRange }, requestOptions);

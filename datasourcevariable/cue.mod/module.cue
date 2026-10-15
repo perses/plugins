@@ -11,35 +11,35 @@ deps: {
 		default: true
 	}
 	"github.com/perses/plugins/jaeger@v0": {
-		v:       "v0.2.0-beta.4"
+		v:       "v0.2.0-beta.7"
 		default: true
 	}
 	"github.com/perses/plugins/loki@v0": {
-		v:       "v0.7.0-beta.4"
+		v:       "v0.7.0-beta.7"
 		default: true
 	}
 	"github.com/perses/plugins/opensearch@v0": {
-		v:       "v0.2.0-beta.4"
+		v:       "v0.2.0-beta.7"
 		default: true
 	}
 	"github.com/perses/plugins/prometheus@v0": {
-		v:       "v0.59.0-beta.4"
+		v:       "v0.59.0-beta.7"
 		default: true
 	}
 	"github.com/perses/plugins/pyroscope@v0": {
-		v:       "v0.7.0-beta.4"
+		v:       "v0.7.0-beta.7"
 		default: true
 	}
 	"github.com/perses/plugins/tempo@v0": {
-		v:       "v0.60.0-beta.4"
+		v:       "v0.60.0-beta.7"
 		default: true
 	}
 	"github.com/perses/shared/cue@v0": {
-		v:       "v0.55.0-beta.13"
+		v:       "v0.55.0-rc.0"
 		default: true
 	}
 	"github.com/perses/spec/cue@v0": {
-		v:       "v0.3.0-beta.10"
+		v:       "v0.3.0-rc.0"
 		default: true
 	}
 }

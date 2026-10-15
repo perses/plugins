@@ -26,7 +26,7 @@ import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import type { ReactElement, MouseEvent } from 'react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 
 import type { FlameChartSample as Sample } from '../utils/data-model';
 import { buildSamples, findTotalSampleByName } from '../utils/data-transform';
@@ -39,6 +39,53 @@ const Y_MIN_LARGE = 20; // min value of y axis for large containers
 const LARGE_CONTAINER_THRESHOLD = 600;
 const CONTAINER_PADDING = 10;
 const BREADCRUMB_SPACE = 50;
+
+const renderItem: CustomSeriesRenderItem = (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) => {
+  const level = api.value(0);
+  const start = api.coord([api.value(1), level]);
+  const end = api.coord([api.value(2), level]);
+  const height = (((api.size && api.size([0, 1])) || [0, 20]) as number[])[1];
+  const width = (end?.[0] ?? 0) - (start?.[0] ?? 0);
+
+  return {
+    type: 'rect',
+    transition: ['shape'],
+    shape: {
+      x: start?.[0],
+      y: (start?.[1] ?? 0) - (height ?? 0) / 2,
+      width,
+      height: (height ?? ITEM_GAP) - ITEM_GAP,
+      r: 0,
+    },
+    style: {
+      fill: api.visual('color'),
+    },
+    emphasis: {
+      style: {
+        stroke: '#000',
+      },
+    },
+    textConfig: {
+      position: 'insideLeft',
+    },
+    textContent: {
+      style: {
+        text: api.value(3),
+        fill: '#000',
+        width: width - 4,
+        overflow: 'truncate',
+        ellipsis: '..',
+        truncateMinChar: 1,
+      },
+      emphasis: {
+        style: {
+          stroke: '#000',
+          lineWidth: 0.5,
+        },
+      },
+    },
+  } as CustomSeriesRenderItemReturn;
+};
 
 export interface FlameChartProps {
   width: number;
@@ -63,7 +110,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     [palette, data.metadata, data.profile.stackTrace, selectedId, searchValue],
   );
 
-  const handleItemClick = (params: MouseEventsParameters<Sample>): void => {
+  const handleItemClick = useCallback((params: MouseEventsParameters<Sample>): void => {
     const data: Sample = params.data;
     const functionName = data.value[6];
     const functionId = data.name;
@@ -78,7 +125,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         mouseY: mouseEvent.event.clientY - 4,
       });
     }
-  };
+  }, []);
 
   const handleFocusBlock = (): void => {
     onSelectedIdChange(selectedItem.id);
@@ -102,53 +149,6 @@ export function FlameChart(props: FlameChartProps): ReactElement {
   const handleClose = (): void => {
     setMenuPosition(null);
     if (isCopied) setIsCopied(false);
-  };
-
-  const renderItem: CustomSeriesRenderItem = (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) => {
-    const level = api.value(0);
-    const start = api.coord([api.value(1), level]);
-    const end = api.coord([api.value(2), level]);
-    const height = (((api.size && api.size([0, 1])) || [0, 20]) as number[])[1];
-    const width = (end?.[0] ?? 0) - (start?.[0] ?? 0);
-
-    return {
-      type: 'rect',
-      transition: ['shape'],
-      shape: {
-        x: start?.[0],
-        y: (start?.[1] ?? 0) - (height ?? 0) / 2,
-        width,
-        height: (height ?? ITEM_GAP) - ITEM_GAP,
-        r: 0,
-      },
-      style: {
-        fill: api.visual('color'),
-      },
-      emphasis: {
-        style: {
-          stroke: '#000',
-        },
-      },
-      textConfig: {
-        position: 'insideLeft',
-      },
-      textContent: {
-        style: {
-          text: api.value(3),
-          fill: '#000',
-          width: width - 4,
-          overflow: 'truncate',
-          ellipsis: '..',
-          truncateMinChar: 1,
-        },
-        emphasis: {
-          style: {
-            stroke: '#000',
-            lineWidth: 0.5,
-          },
-        },
-      },
-    } as CustomSeriesRenderItemReturn;
   };
 
   const option: EChartsCoreOption = useMemo(() => {
@@ -234,7 +234,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
         }}
       />
     ),
-    [chartsTheme.echartsTheme, height, option, width],
+    [chartsTheme.echartsTheme, height, option, width, handleItemClick],
   );
 
   return (

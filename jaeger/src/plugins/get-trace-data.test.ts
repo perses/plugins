@@ -90,15 +90,13 @@ const makeClient = (): JaegerClient => {
   return client;
 };
 
-const getDatasource: Mock = vi.fn(
-  (): DatasourceSpec<typeof datasource> => ({
-    default: false,
-    plugin: {
-      kind: 'JaegerDatasource',
-      spec: datasource,
-    },
-  }),
-);
+const getDatasource: Mock = vi.fn((): DatasourceSpec<typeof datasource> => ({
+  default: false,
+  plugin: {
+    kind: 'JaegerDatasource',
+    spec: datasource,
+  },
+}));
 
 function createContext(client: JaegerClient): TraceQueryContext {
   return {

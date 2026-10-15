@@ -19,6 +19,7 @@ import type { TimeSeriesData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
 import type { TableOptions, TimeSeriesTableProps } from '../models';
@@ -34,12 +35,10 @@ import {
 import { TablePanel } from './TablePanel';
 
 /* mock all variables */
-const MOCK_VARIABLE_STATE_MAP = vi.hoisted(
-  (): VariableStateMap => ({
-    myproject: { loading: false, value: 'my_project' },
-    __range: { loading: false, value: '1h' },
-  }),
-);
+const MOCK_VARIABLE_STATE_MAP = vi.hoisted((): VariableStateMap => ({
+  myproject: { loading: false, value: 'my_project' },
+  __range: { loading: false, value: '1h' },
+}));
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
   ...(await importOriginal<typeof PluginSystemModule>()),
   // Return a stable reference (like the real hook, which memoizes) so consumers
@@ -55,6 +54,36 @@ const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> =
   },
   spec: {},
 };
+
+const VIRTUOSO_MOCK_CONTEXT = { viewportHeight: 600, itemHeight: 100 };
+const FILTERING_SPEC: TableOptions = { enableFiltering: true };
+const FILTERING_QUERY_RESULTS = [
+  { definition: MOCK_TIME_SERIES_QUERY_DEFINITION, data: MOCK_TIME_SERIES_DATA_SINGLEVALUE },
+];
+const NARROW_DIMENSIONS = { width: 500, height: 500 };
+const WIDE_DIMENSIONS = { width: 600, height: 500 };
+
+function renderFilteringTable(contentDimensions: TimeSeriesTableProps['contentDimensions']): ReactElement {
+  return (
+    <SelectionProvider>
+      <ItemActionsProvider>
+        <VirtuosoMockContext.Provider value={VIRTUOSO_MOCK_CONTEXT}>
+          <ChartsProvider chartsTheme={testChartsTheme}>
+            <TablePanel
+              contentDimensions={contentDimensions}
+              spec={FILTERING_SPEC}
+              queryResults={FILTERING_QUERY_RESULTS}
+            />
+          </ChartsProvider>
+        </VirtuosoMockContext.Provider>
+      </ItemActionsProvider>
+    </SelectionProvider>
+  );
+}
+
+function getFirstFilterCell(): HTMLElement {
+  return screen.getAllByRole('button', { name: '▼' })[0]!.parentElement!;
+}
 
 describe('TablePanel', () => {
   // Helper to render the panel with some context set
@@ -520,6 +549,59 @@ describe('TablePanel', () => {
         const naCells = await screen.findAllByRole('cell', { name: 'N/A' });
         // At minimum: ns-b missing value #2 (1) + both rows missing value #3 (2) = 3 N/A cells
         expect(naCells.length).toBeGreaterThanOrEqual(3);
+      },
+      TEST_TIMEOUT,
+    );
+  });
+
+  describe('filter row alignment', () => {
+    let headerCellWidth = 0;
+    const observedElements = new Set<Element>();
+
+    beforeEach(() => {
+      headerCellWidth = 120;
+      observedElements.clear();
+      vi.spyOn(HTMLTableCellElement.prototype, 'getBoundingClientRect').mockImplementation(
+        () => ({ width: headerCellWidth }) as DOMRect,
+      );
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          observe(element: Element): void {
+            observedElements.add(element);
+          }
+          unobserve(element: Element): void {
+            observedElements.delete(element);
+          }
+          disconnect(): void {
+            observedElements.clear();
+          }
+        },
+      );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+
+    it(
+      'should re-sync filter cell widths when the table replaces its header row',
+      async () => {
+        const { container, rerender } = render(renderFilteringTable(NARROW_DIMENSIONS));
+
+        await waitFor(() => expect(getFirstFilterCell().style.width).toBe('120px'));
+        const initialHeaderRow = container.querySelector('thead tr');
+        expect(observedElements.has(initialHeaderRow!)).toBe(true);
+
+        headerCellWidth = 150;
+        rerender(renderFilteringTable(WIDE_DIMENSIONS));
+
+        await waitFor(() => expect(getFirstFilterCell().style.width).toBe('150px'));
+        const currentHeaderRow = container.querySelector('thead tr');
+        expect(currentHeaderRow).not.toBe(initialHeaderRow);
+        expect(observedElements.has(currentHeaderRow!)).toBe(true);
+        expect(observedElements.has(initialHeaderRow!)).toBe(false);
       },
       TEST_TIMEOUT,
     );
