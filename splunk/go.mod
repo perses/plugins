@@ -3,7 +3,7 @@ module github.com/perses/plugins/splunk
 go 1.27.1
 
 require (
-	github.com/perses/perses v0.55.0-beta.3.0.20261007092956-ddff411f6a10
+	github.com/perses/perses v0.55.0-rc.0
 	github.com/perses/spec v0.3.0-rc.0
 )
 

@@ -3,7 +3,7 @@ module github.com/perses/plugins/piechart
 go 1.27.1
 
 require (
-	github.com/perses/perses v0.55.0-beta.4
+	github.com/perses/perses v0.55.0-rc.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
