@@ -261,6 +261,48 @@ describe('PrometheusTimeSeriesQuery', () => {
     ]);
   });
 
+  it('should not query exemplars when spec.enableExemplars is false, even if the datasource enables them', async () => {
+    const ctx = createStubContext();
+    getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {
+      return {
+        default: false,
+        plugin: {
+          kind: 'PrometheusDatasource',
+          spec: {
+            ...datasource,
+            exemplars: { enable: true },
+          },
+        },
+      };
+    });
+    (promStubClient.queryExemplars as Mock).mockClear();
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', enableExemplars: false }, ctx);
+
+    expect(promStubClient.queryExemplars).not.toHaveBeenCalled();
+    expect(results.exemplars).toBeUndefined();
+  });
+
+  it('should not query exemplars when spec.enableExemplars is true but the datasource does not enable them', async () => {
+    const ctx = createStubContext();
+    getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {
+      return {
+        default: false,
+        plugin: {
+          kind: 'PrometheusDatasource',
+          // exemplars NOT enabled on the datasource: a per-query `true` must not override it
+          spec: datasource,
+        },
+      };
+    });
+    (promStubClient.queryExemplars as Mock).mockClear();
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', enableExemplars: true }, ctx);
+
+    expect(promStubClient.queryExemplars).not.toHaveBeenCalled();
+    expect(results.exemplars).toBeUndefined();
+  });
+
   it('should keep the query working when the exemplar query fails', async () => {
     const ctx = createStubContext();
     getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {
