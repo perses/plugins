@@ -16,7 +16,7 @@ import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
-import { useId, useCallback } from 'react';
+import { useId, useCallback, useEffect } from 'react';
 
 import { LazyTextField } from '../../components/LazyTextField';
 import {
@@ -63,6 +63,14 @@ export function AlertManagerSilencesQueryEditor(props: AlertManagerSilencesQuery
     },
     [onChange, value],
   );
+
+  useEffect(() => {
+    // If filters are not defined, initialize it with an empty value
+    // This initializes the default query in the spec
+    if (!value.filters) {
+      handleFiltersChange('');
+    }
+  }, [value, handleFiltersChange]);
 
   return (
     <Stack spacing={2}>
