@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, FormControl, Stack, TextField } from '@mui/material';
+import { Button, ButtonGroup, FormControl, Stack, TextField, Typography } from '@mui/material';
 import { PanelEditorContext } from '@perses-dev/dashboards';
 import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import {
@@ -42,7 +42,13 @@ import {
 import type { PrometheusDatasourceSpec } from '../types';
 import { DEFAULT_SCRAPE_INTERVAL } from '../types';
 import type { PrometheusTimeSeriesQueryEditorProps } from './query-editor-model';
-import { useQueryState, useFormatState, useMinStepState, useInstantState } from './query-editor-model';
+import {
+  useQueryState,
+  useFormatState,
+  useMinStepState,
+  useInstantState,
+  useEnableExemplarsState,
+} from './query-editor-model';
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
  */
@@ -71,6 +77,12 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const { instant, handleInstantChange } = useInstantState(props);
+  const { enableExemplars, handleEnableExemplarsChange } = useEnableExemplarsState(props);
+  const datasourceSpec = datasourceResource?.plugin.spec as PrometheusDatasourceSpec | undefined;
+  // Undefined while the datasource resource is still loading: the control is disabled
+  // but no "disabled on the datasource" message is shown yet.
+  const exemplarsEnabledOnDatasource =
+    datasourceSpec === undefined ? undefined : datasourceSpec.exemplars?.enable === true;
   const minStepPlaceholder =
     minStep ??
     (datasourceResource && (datasourceResource.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
@@ -190,6 +202,36 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
             Auto
           </Button>
         </ButtonGroup>
+      </Stack>
+      <Stack direction="row" spacing={2} alignItems="center">
+        <ButtonGroup
+          disabled={isReadonly || exemplarsEnabledOnDatasource !== true || instant === true}
+          sx={{ '& .MuiButton-root': { px: 2, py: 2 } }}
+        >
+          <Button
+            variant={enableExemplars === true ? 'contained' : 'outlined'}
+            onClick={() => handleEnableExemplarsChange(true)}
+          >
+            On
+          </Button>
+          <Button
+            variant={enableExemplars === false ? 'contained' : 'outlined'}
+            onClick={() => handleEnableExemplarsChange(false)}
+          >
+            Off
+          </Button>
+          <Button
+            variant={enableExemplars === undefined ? 'contained' : 'outlined'}
+            onClick={() => handleEnableExemplarsChange(undefined)}
+          >
+            Auto
+          </Button>
+        </ButtonGroup>
+        <Typography variant="body2" color={exemplarsEnabledOnDatasource === false ? 'error' : 'textSecondary'}>
+          Exemplars
+          {exemplarsEnabledOnDatasource === false && ' (disabled on the datasource)'}
+          {exemplarsEnabledOnDatasource === true && instant === true && ' (not available for instant queries)'}
+        </Typography>
       </Stack>
     </Stack>
   );

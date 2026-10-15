@@ -65,3 +65,13 @@ func Instant(instant bool) Option {
 		return nil
 	}
 }
+
+// EnableExemplars enables or disables exemplars for this query, overriding the
+// `exemplars.enable` setting of the Prometheus datasource. Exemplars are only
+// fetched for range queries.
+func EnableExemplars(enableExemplars bool) Option {
+	return func(builder *Builder) error {
+		builder.EnableExemplars = &enableExemplars
+		return nil
+	}
+}
