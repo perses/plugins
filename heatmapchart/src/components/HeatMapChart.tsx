@@ -11,22 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTheme } from '@mui/material';
-import type { FormatOptions } from '@perses-dev/components';
-import { EChart, formatValue, useChartsTheme, useTimeZone } from '@perses-dev/components';
-import type { TimeScale } from '@perses-dev/spec';
+import { Box, useTheme } from '@mui/material';
+import type { CursorCoordinates, FormatOptions, OnEventsType } from '@perses-dev/components';
+import {
+  EChart,
+  ExemplarMetadataTooltip,
+  formatValue,
+  useChartsContext,
+  useChartsTheme,
+  useTimeZone,
+} from '@perses-dev/components';
+import type { Exemplar, Labels, TimeScale } from '@perses-dev/spec';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams, CustomSeriesRenderItemReturn } from 'echarts';
-import { CustomChart } from 'echarts/charts';
+import { CustomChart, ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import type { EChartsCoreOption } from 'echarts/core';
+import type { ECharts as EChartsInstance } from 'echarts/core';
 import { use as registerECharts } from 'echarts/core';
 import type { ReactElement } from 'react';
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import type { LOG_BASE } from '../heat-map-chart-model';
 import { getFormattedHeatmapAxisLabel } from '../utils';
+import type { HeatMapExemplarDataItem } from '../utils/data-transform';
+import { EXEMPLAR_SERIES_ID_PREFIX, EXEMPLAR_SYMBOL_SIZE, getExemplarScatterSeries } from '../utils/data-transform';
 import { generateTooltipHTML } from './HeatMapTooltip';
 
-registerECharts([CustomChart]);
+registerECharts([CustomChart, EChartsScatterChart]);
 
 // The default coloring is a blue->yellow->red gradient
 const DEFAULT_VISUAL_MAP_COLORS = [
@@ -43,6 +53,12 @@ const DEFAULT_VISUAL_MAP_COLORS = [
   '#a50026',
 ];
 
+/**
+ * Maximum pixel distance from an exemplar marker center for the cursor to count as still
+ * hovering it (covers the full diamond bounding box, corners included).
+ */
+const EXEMPLAR_HOVER_RADIUS = (Math.SQRT2 * EXEMPLAR_SYMBOL_SIZE) / 2;
+
 export type HeatMapData = [number, number, number, number | undefined]; // [xIndex, yLower, yUpper, count]
 
 export interface HeatMapDataItem {
@@ -55,11 +71,20 @@ export interface HeatMapDataItem {
   };
 }
 
+interface HoveredExemplar {
+  exemplar: Exemplar;
+  seriesLabels?: Labels;
+  /** The point actually plotted: [xIndex, exemplar value]. */
+  plotted: [number, number];
+}
+
 export interface HeatMapChartProps {
   width: number;
   height: number;
   data: HeatMapDataItem[];
   xAxisCategories: number[];
+  /** Exemplar markers to render on top of the heatmap, if any. */
+  exemplars?: HeatMapExemplarDataItem[];
   yAxisFormat?: FormatOptions;
   countFormat?: FormatOptions;
   countMin?: number;
@@ -76,6 +101,7 @@ export function HeatMapChart({
   height,
   data,
   xAxisCategories,
+  exemplars,
   yAxisFormat,
   countFormat,
   countMin,
@@ -86,18 +112,78 @@ export function HeatMapChart({
   max,
   logBase,
 }: HeatMapChartProps): ReactElement | null {
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme, enablePinning } = useChartsContext();
   const theme = useTheme();
   const { timeZone } = useTimeZone();
+
+  const chartRef = useRef<EChartsInstance>();
+  const [hoveredExemplar, setHoveredExemplar] = useState<HoveredExemplar | null>(null);
+  const [pinnedExemplar, setPinnedExemplar] = useState<HoveredExemplar | null>(null);
+  const [pinnedExemplarPos, setPinnedExemplarPos] = useState<CursorCoordinates | null>(null);
+
+  const exemplarSeries = useMemo(
+    () => (exemplars !== undefined && exemplars.length > 0 ? getExemplarScatterSeries(exemplars) : undefined),
+    [exemplars],
+  );
+
+  const handleEvents = useMemo<OnEventsType<unknown>>(() => {
+    return {
+      mouseover: (params): void => {
+        if (
+          params.componentType === 'series' &&
+          params.seriesType === 'scatter' &&
+          'seriesId' in params &&
+          typeof params.seriesId === 'string' &&
+          params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)
+        ) {
+          // This series ID identifies the metadata embedded by getExemplarScatterSeries.
+          const point = params.data as { exemplar?: Exemplar; seriesLabels?: Labels; value?: [number, number] };
+          if (point?.exemplar && point.value) {
+            setHoveredExemplar({
+              exemplar: point.exemplar,
+              seriesLabels: point.seriesLabels,
+              plotted: point.value,
+            });
+          }
+          return;
+        }
+      },
+      mouseout: (params): void => {
+        if (
+          params.componentType === 'series' &&
+          params.seriesType === 'scatter' &&
+          'seriesId' in params &&
+          typeof params.seriesId === 'string' &&
+          params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)
+        ) {
+          setHoveredExemplar(null);
+        }
+      },
+      globalout: (): void => {
+        // Cursor left the chart canvas — guarantee the exemplar tooltip is dismissed.
+        setHoveredExemplar(null);
+      },
+    };
+  }, []);
 
   const option: EChartsCoreOption = useMemo(() => {
     return {
       tooltip: {
         appendToBody: true,
-        formatter: (params: { data: HeatMapDataItem; marker: string }): string => {
+        formatter: (params: {
+          data: HeatMapDataItem | HeatMapExemplarDataItem;
+          marker: string;
+          seriesId?: unknown;
+        }): string => {
+          // Exemplar markers are covered by their own ExemplarMetadataTooltip: hide the
+          // regular heatmap tooltip for them (an empty string renders no tooltip).
+          if (typeof params.seriesId === 'string' && params.seriesId.startsWith(EXEMPLAR_SERIES_ID_PREFIX)) {
+            return '';
+          }
+          const item = params.data as HeatMapDataItem;
           return generateTooltipHTML({
-            data: params.data.value,
-            label: params.data.label,
+            data: item.value,
+            label: item.label,
             marker: params.marker,
             xAxisCategories,
             theme,
@@ -151,7 +237,9 @@ export function HeatMapChart({
           textBorderColor: theme.palette.background.default,
           textBorderWidth: 5,
         },
-        // Color by the count dimension (index 3)
+        // Color by the count dimension (index 3), and only the heatmap series: the
+        // exemplar scatter series keeps its own white/diamond marker style.
+        seriesIndex: 0,
         dimension: 3,
       },
       series: [
@@ -200,6 +288,7 @@ export function HeatMapChart({
           progressive: 1000,
           animation: false,
         },
+        ...(exemplarSeries !== undefined ? [exemplarSeries] : []),
       ],
     };
   }, [
@@ -217,6 +306,7 @@ export function HeatMapChart({
     min,
     max,
     logBase,
+    exemplarSeries,
   ]);
 
   const chart = useMemo(
@@ -231,10 +321,81 @@ export function HeatMapChart({
         }}
         option={option}
         theme={chartsTheme.echartsTheme}
+        onEvents={handleEvents}
+        _instance={chartRef}
       />
     ),
-    [chartsTheme.container.padding.default, chartsTheme.echartsTheme, height, option, width],
+    [chartsTheme.container.padding.default, chartsTheme.echartsTheme, height, option, width, handleEvents],
   );
 
-  return <>{chart}</>;
+  return (
+    <Box
+      onClick={(e) => {
+        if (hoveredExemplar !== null && e.target instanceof HTMLCanvasElement) {
+          // Clicking while hovering an exemplar marker pins/unpins the exemplar tooltip.
+          const pinnedPos: CursorCoordinates = {
+            page: { x: e.pageX, y: e.pageY },
+            client: { x: e.clientX, y: e.clientY },
+            plotCanvas: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY },
+            target: e.target,
+          };
+          const isUnpinClick = pinnedExemplar !== null && pinnedExemplar.exemplar === hoveredExemplar.exemplar;
+          // Compute the next state first and call the setters separately: updater functions
+          // may run more than once (e.g. StrictMode), so they must stay side-effect free.
+          setPinnedExemplar(isUnpinClick ? null : hoveredExemplar);
+          setPinnedExemplarPos(isUnpinClick ? null : pinnedPos);
+          return;
+        }
+
+        // Clicking elsewhere on the canvas unpins a pinned exemplar tooltip.
+        if (pinnedExemplar !== null && e.target instanceof HTMLCanvasElement) {
+          setPinnedExemplar(null);
+          setPinnedExemplarPos(null);
+        }
+      }}
+      onMouseMove={(e) => {
+        if (!(e.target instanceof HTMLCanvasElement)) {
+          return;
+        }
+        // ECharts does not reliably emit mouseout when the cursor moves off an exemplar
+        // marker onto the plot area, which would keep the exemplar tooltip stuck on screen.
+        // Clear the hovered exemplar as soon as the cursor is no longer within its marker.
+        setHoveredExemplar((current) => {
+          if (current === null || chartRef.current === undefined) return current;
+          let markerPixel: number[] | undefined;
+          try {
+            markerPixel = chartRef.current.convertToPixel('grid', current.plotted);
+          } catch {
+            // Coordinates cannot be resolved (e.g. grid not ready yet), keep the current hover.
+            return current;
+          }
+          const [markerPixelX, markerPixelY] = markerPixel ?? [];
+          if (markerPixelX === undefined || markerPixelY === undefined) return current;
+          const distance = Math.hypot(e.nativeEvent.offsetX - markerPixelX, e.nativeEvent.offsetY - markerPixelY);
+          return distance <= EXEMPLAR_HOVER_RADIUS ? current : null;
+        });
+      }}
+      onMouseLeave={() => {
+        // Defensive: clear the hovered exemplar in case ECharts missed a mouseout event.
+        setHoveredExemplar(null);
+      }}
+    >
+      {/* Pinned exemplar takes priority over hovered. */}
+      {(pinnedExemplar !== null || hoveredExemplar !== null) && (
+        <ExemplarMetadataTooltip
+          exemplar={(pinnedExemplar ?? hoveredExemplar)!.exemplar}
+          seriesLabels={(pinnedExemplar ?? hoveredExemplar)!.seriesLabels}
+          containerId={chartsTheme.tooltipPortalContainerId}
+          format={yAxisFormat}
+          pinnedPos={pinnedExemplar !== null ? pinnedExemplarPos : null}
+          enablePinning={enablePinning}
+          onUnpinClick={() => {
+            setPinnedExemplar(null);
+            setPinnedExemplarPos(null);
+          }}
+        />
+      )}
+      {chart}
+    </Box>
+  );
 }
