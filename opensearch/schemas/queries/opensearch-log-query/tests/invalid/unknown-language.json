@@ -1,0 +1,4 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": { "queryLanguage": "kql", "query": "level:error", "index": "logs-*" }
+}

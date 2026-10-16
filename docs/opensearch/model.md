@@ -25,7 +25,7 @@ spec:
 
 See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#http-proxy-specification).
 
-The plugin sends every query to `POST /_plugins/_ppl`, so that single endpoint is all you need to allow.
+Allow the endpoints for the query languages you use: `POST /_plugins/_ppl` for PPL, `POST /_plugins/_sql` for SQL, and `POST /{index}/_search` (pattern `/.*/_search`) for Lucene and Query DSL.
 
 ### Example
 
@@ -63,6 +63,10 @@ spec:
           allowedEndpoints:
             - endpointPattern: "/_plugins/_ppl"
               method: "POST"
+            - endpointPattern: "/_plugins/_sql"
+              method: "POST"
+            - endpointPattern: "/.*/_search"
+              method: "POST"
           secret: "opensearch_secret_config"
 ```
 
@@ -73,17 +77,28 @@ Perses supports log queries for OpenSearch: `OpenSearchLogQuery`.
 ```yaml
 kind: "OpenSearchLogQuery"
 spec:
-  # `query` is the PPL expression for log data. It cannot be empty.
+  # `query` is the log query, written in `queryLanguage`.
+  # It cannot be empty, except for `lucene`, where a blank query matches every document.
+  # For `dsl` it is a JSON `_search` request body.
   query: <string>
+
+  # `queryLanguage` is one of `ppl`, `sql`, `lucene` or `dsl`. Defaults to `ppl` when omitted.
+  queryLanguage: <string> # Optional
 
   # `datasource` is a datasource selector. If not provided, the default OpenSearchDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   datasource: <OpenSearch Datasource selector> # Optional
 
   # `index` is the index or index pattern to read from, e.g. `logs-*`.
-  # It is prepended to the query as a `source=<index>` clause, and ignored when the
-  # query already starts with `source=`.
+  # Required for `lucene` and `dsl`, where it is the index in `POST /{index}/_search`.
+  # For `ppl` it is prepended to the query as a `source=<index>` clause, and ignored when
+  # the query already starts with `source=`. Ignored for `sql`, which uses its FROM clause.
   index: <string> # Optional
+
+  # `limit` is the maximum number of log documents fetched by a `lucene` or `dsl` query.
+  # It must be greater than 0 and defaults to 500. A `size` in a `dsl` body is capped at `limit`.
+  # Ignored for `ppl` and `sql`.
+  limit: <int> # Optional
 
   # `timestampField` overrides which column carries the log timestamp.
   # It is also the column used by the automatic time filter.
@@ -94,8 +109,8 @@ spec:
   # Defaults to `message`, then `log`, then `body`.
   messageField: <string> # Optional
 
-  # When `disableTimeFilter` is true, the panel time range is NOT injected as a
-  # `where` clause on the timestamp field.
+  # When `disableTimeFilter` is true, the panel time range is NOT added as a filter on
+  # the timestamp field.
   disableTimeFilter: <boolean> # Optional
 ```
 
@@ -130,6 +145,33 @@ spec:
       timestampField: "time"
       messageField: "msg"
       disableTimeFilter: true
+```
+
+A Lucene query, fetching at most 200 documents:
+
+```yaml
+kind: "LogQuery"
+spec:
+  plugin:
+    kind: "OpenSearchLogQuery"
+    spec:
+      queryLanguage: "lucene"
+      index: "otel-logs-*"
+      query: "severityText:ERROR AND service.name:payment-svc"
+      limit: 200
+```
+
+A Query DSL query:
+
+```yaml
+kind: "LogQuery"
+spec:
+  plugin:
+    kind: "OpenSearchLogQuery"
+    spec:
+      queryLanguage: "dsl"
+      index: "otel-logs-*"
+      query: '{"query": {"term": {"traceId": "$traceId"}}}'
 ```
 
 ## Shared definitions

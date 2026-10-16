@@ -27,16 +27,38 @@ const PluginKind = "OpenSearchLogQuery"
 type PluginSpec struct {
 	Datasource        *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	Query             string               `json:"query" yaml:"query"`
+	QueryLanguage     string               `json:"queryLanguage,omitempty" yaml:"queryLanguage,omitempty"`
+	Limit             int                  `json:"limit,omitempty" yaml:"limit,omitempty"`
 	Index             string               `json:"index,omitempty" yaml:"index,omitempty"`
 	TimestampField    string               `json:"timestampField,omitempty" yaml:"timestampField,omitempty"`
 	MessageField      string               `json:"messageField,omitempty" yaml:"messageField,omitempty"`
 	DisableTimeFilter bool                 `json:"disableTimeFilter,omitempty" yaml:"disableTimeFilter,omitempty"`
 }
 
+// limitPresence is decoded alongside PluginSpec to tell an explicit `limit: 0` apart from an
+// omitted limit, which both leave the bare-int PluginSpec.Limit at 0.
+type limitPresence struct {
+	Limit *int `json:"limit" yaml:"limit"`
+}
+
+func (l limitPresence) validate() error {
+	if l.Limit != nil && *l.Limit <= 0 {
+		return fmt.Errorf("limit must be greater than 0, got %d", *l.Limit)
+	}
+	return nil
+}
+
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {
 	type plain PluginSpec
 	var tmp PluginSpec
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	var limit limitPresence
+	if err := json.Unmarshal(data, &limit); err != nil {
+		return err
+	}
+	if err := limit.validate(); err != nil {
 		return err
 	}
 	if err := (&tmp).validate(); err != nil {
@@ -52,6 +74,13 @@ func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
+	var limit limitPresence
+	if err := unmarshal(&limit); err != nil {
+		return err
+	}
+	if err := limit.validate(); err != nil {
+		return err
+	}
 	if err := (&tmp).validate(); err != nil {
 		return err
 	}
@@ -59,9 +88,25 @@ func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+// validLanguages mirrors the CUE schema. An empty value means PPL.
+var validLanguages = map[string]bool{"": true, "ppl": true, "sql": true, "lucene": true, "dsl": true}
+
 func (s *PluginSpec) validate() error {
-	if len(s.Query) == 0 {
+	if !validLanguages[s.QueryLanguage] {
+		return fmt.Errorf("unknown query language %q: want one of ppl, sql, lucene, dsl", s.QueryLanguage)
+	}
+	// A blank Lucene query string means "everything in the time range".
+	if len(s.Query) == 0 && s.QueryLanguage != "lucene" {
 		return fmt.Errorf("query cannot be empty")
+	}
+	if (s.QueryLanguage == "lucene" || s.QueryLanguage == "dsl") && len(s.Index) == 0 {
+		return fmt.Errorf("index is required when queryLanguage is %q", s.QueryLanguage)
+	}
+	// Only negative values are rejected here: with a bare int + omitempty, an omitted
+	// `limit` is also 0, so rejecting 0 would reject every spec that simply omits the
+	// field. An explicit zero is caught while unmarshalling, via limitPresence.
+	if s.Limit < 0 {
+		return fmt.Errorf("limit cannot be negative")
 	}
 	return nil
 }
@@ -81,6 +126,10 @@ func create(query string, options ...Option) (Builder, error) {
 		if err := opt(builder); err != nil {
 			return *builder, err
 		}
+	}
+
+	if err := builder.validate(); err != nil {
+		return *builder, err
 	}
 
 	return *builder, nil
