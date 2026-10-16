@@ -17,8 +17,9 @@ import { replaceVariables } from '@perses-dev/plugin-system';
 import type { DatasourceSpec } from '@perses-dev/spec';
 import type { Mock, MockedFunction } from 'vitest';
 
-import type { JaegerClient } from '../model';
-import { getTraceData, jaegerTraceToOTLP } from './get-trace-data';
+import type { JaegerClient, JaegerTracesData } from '../model';
+import { JaegerRequestError } from '../model';
+import { getTraceData, normalizeTracesData } from './get-trace-data';
 import { JaegerDatasource } from './jaeger-datasource';
 
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => {
@@ -35,48 +36,45 @@ const datasource = {
   directUrl: 'http://jaeger.example',
 };
 
-const exampleTrace = {
-  traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
-  processes: {
-    p1: {
-      serviceName: 'frontend',
-      tags: [{ key: 'telemetry.sdk.language', type: 'string' as const, value: 'nodejs' }],
-    },
-  },
-  spans: [
+const TRACE_ID = '7d73f3ae841bf59a74cf5b52a328cfca';
+
+// A trace as returned by Jaeger API v3: OTLP JSON with numeric enums.
+const exampleTrace: JaegerTracesData = {
+  resourceSpans: [
     {
-      traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
-      spanID: 'aaaaaaaaaaaaaaaa',
-      operationName: 'GET /api/cart',
-      startTime: 1718122135000000,
-      duration: 2000,
-      processID: 'p1',
-      tags: [{ key: 'span.kind', type: 'string' as const, value: 'server' }],
-      logs: [],
-      references: [],
-    },
-    {
-      traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
-      spanID: 'bbbbbbbbbbbbbbbb',
-      operationName: 'SELECT cart',
-      startTime: 1718122135000500,
-      duration: 500,
-      processID: 'p1',
-      tags: [
-        { key: 'span.kind', type: 'string' as const, value: 'client' },
-        { key: 'otel.status_code', type: 'string' as const, value: 'ERROR' },
-      ],
-      logs: [
+      resource: {
+        attributes: [
+          { key: 'service.name', value: { stringValue: 'frontend' } },
+          { key: 'telemetry.sdk.language', value: { stringValue: 'nodejs' } },
+        ],
+      },
+      scopeSpans: [
         {
-          timestamp: 1718122135000700,
-          fields: [{ key: 'event', type: 'string' as const, value: 'db timeout' }],
-        },
-      ],
-      references: [
-        {
-          refType: 'CHILD_OF' as const,
-          traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
-          spanID: 'aaaaaaaaaaaaaaaa',
+          scope: { name: 'http' },
+          spans: [
+            {
+              traceId: TRACE_ID,
+              spanId: 'aaaaaaaaaaaaaaaa',
+              name: 'GET /api/cart',
+              kind: 2,
+              startTimeUnixNano: '1718122135000000000',
+              endTimeUnixNano: '1718122135002000000',
+              attributes: [{ key: 'http.method', value: { stringValue: 'GET' } }],
+              status: { code: 1 },
+            },
+            {
+              traceId: TRACE_ID,
+              spanId: 'bbbbbbbbbbbbbbbb',
+              parentSpanId: 'aaaaaaaaaaaaaaaa',
+              name: 'SELECT cart',
+              kind: 3,
+              startTimeUnixNano: '1718122135000500000',
+              endTimeUnixNano: '1718122135001000000',
+              events: [{ timeUnixNano: '1718122135000700000', name: 'db timeout' }],
+              links: [{ traceId: TRACE_ID.toUpperCase(), spanId: 'CCCCCCCCCCCCCCCC' }],
+              status: { code: 2, message: 'timeout' },
+            },
+          ],
         },
       ],
     },
@@ -85,8 +83,8 @@ const exampleTrace = {
 
 const makeClient = (): JaegerClient => {
   const client = JaegerDatasource.createClient(datasource, {});
-  client.getTrace = vi.fn(async () => ({ data: [exampleTrace] }));
-  client.searchTraces = vi.fn(async () => ({ data: [exampleTrace] }));
+  client.getTrace = vi.fn(async () => exampleTrace);
+  client.searchTraces = vi.fn(async () => exampleTrace);
   return client;
 };
 
@@ -117,20 +115,69 @@ function createContext(client: JaegerClient): TraceQueryContext {
   } as TraceQueryContext;
 }
 
-describe('jaegerTraceToOTLP', () => {
-  it('converts parent relationships, events, ids, and status', () => {
-    const trace = jaegerTraceToOTLP(exampleTrace);
+describe('normalizeTracesData', () => {
+  it('converts the numeric OTLP enums, ids and keeps the rest of the span', () => {
+    const trace = normalizeTracesData(exampleTrace);
     const spans = trace.resourceSpans[0]?.scopeSpans[0]?.spans ?? [];
 
     expect(spans).toHaveLength(2);
-    expect(spans[0]?.traceId).toBe('7d73f3ae841bf59a74cf5b52a328cfca');
-    expect(spans[1]?.parentSpanId).toBe('aaaaaaaaaaaaaaaa');
-    expect(spans[1]?.events?.[0]?.name).toBe('db timeout');
-    expect(spans[1]?.status?.code).toBe('STATUS_CODE_ERROR');
+    expect(spans[0]).toMatchObject({
+      traceId: TRACE_ID,
+      spanId: 'aaaaaaaaaaaaaaaa',
+      name: 'GET /api/cart',
+      kind: 'SPAN_KIND_SERVER',
+      startTimeUnixNano: '1718122135000000000',
+      attributes: [{ key: 'http.method', value: { stringValue: 'GET' } }],
+      status: { code: 'STATUS_CODE_OK' },
+    });
+    expect(spans[0]?.parentSpanId).toBeUndefined();
+    expect(spans[1]).toMatchObject({
+      parentSpanId: 'aaaaaaaaaaaaaaaa',
+      kind: 'SPAN_KIND_CLIENT',
+      events: [{ timeUnixNano: '1718122135000700000', name: 'db timeout' }],
+      status: { code: 'STATUS_CODE_ERROR', message: 'timeout' },
+    });
+    expect(spans[1]?.links).toEqual([{ traceId: TRACE_ID, spanId: 'cccccccccccccccc' }]);
     expect(trace.resourceSpans[0]?.resource?.attributes?.[0]).toEqual({
       key: 'service.name',
       value: { stringValue: 'frontend' },
     });
+    expect(trace.resourceSpans[0]?.scopeSpans[0]?.scope).toEqual({ name: 'http' });
+  });
+
+  it('keeps enum names and pads short ids', () => {
+    const trace = normalizeTracesData({
+      resourceSpans: [
+        {
+          scopeSpans: [
+            {
+              spans: [
+                {
+                  traceId: 'ABC',
+                  spanId: 'D',
+                  name: 'op',
+                  kind: 'SPAN_KIND_PRODUCER',
+                  startTimeUnixNano: '1',
+                  endTimeUnixNano: '2',
+                  status: { code: 'STATUS_CODE_ERROR' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    const span = trace.resourceSpans[0]?.scopeSpans[0]?.spans[0];
+
+    expect(span?.traceId).toBe('00000000000000000000000000000abc');
+    expect(span?.spanId).toBe('000000000000000d');
+    expect(span?.kind).toBe('SPAN_KIND_PRODUCER');
+    expect(span?.status?.code).toBe('STATUS_CODE_ERROR');
+  });
+
+  it('handles a response without spans', () => {
+    expect(normalizeTracesData({})).toEqual({ resourceSpans: [] });
+    expect(normalizeTracesData({ resourceSpans: [{}] })).toEqual({ resourceSpans: [{ scopeSpans: [] }] });
   });
 });
 
@@ -140,13 +187,45 @@ describe('getTraceData', () => {
     mockedReplaceVariables.mockImplementation((query: string) => query);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('fetches a single trace by trace id', async () => {
     const client = makeClient();
-    const result = await getTraceData({ traceId: '7d73f3ae841bf59a74cf5b52a328cfca' }, createContext(client));
+    const result = await getTraceData({ traceId: TRACE_ID }, createContext(client));
 
-    expect(client.getTrace).toHaveBeenCalledWith('7d73f3ae841bf59a74cf5b52a328cfca');
+    expect(client.getTrace).toHaveBeenCalledWith(TRACE_ID);
     expect(result.trace?.resourceSpans[0]?.scopeSpans[0]?.spans).toHaveLength(2);
-    expect(result.metadata?.executedQueryString).toBe('7d73f3ae841bf59a74cf5b52a328cfca');
+    expect(result.trace?.resourceSpans[0]?.scopeSpans[0]?.spans[0]?.kind).toBe('SPAN_KIND_SERVER');
+    expect(result.metadata?.executedQueryString).toBe(TRACE_ID);
+  });
+
+  it('reports a trace that does not exist', async () => {
+    const notFound = new JaegerRequestError('No traces found', 404);
+    const client = makeClient();
+    client.getTrace = vi.fn(async () => {
+      throw notFound;
+    });
+    await expect(getTraceData({ traceId: TRACE_ID }, createContext(client))).rejects.toThrow(
+      `Trace ${TRACE_ID} was not found.`,
+    );
+
+    client.getTrace = vi.fn(async () => ({}));
+    await expect(getTraceData({ traceId: TRACE_ID }, createContext(client))).rejects.toThrow(
+      `Trace ${TRACE_ID} was not found.`,
+    );
+  });
+
+  it('does not hide other failures of a trace lookup', async () => {
+    const client = makeClient();
+    client.getTrace = vi.fn(async () => {
+      throw new JaegerRequestError('Jaeger request failed with status 500', 500);
+    });
+
+    await expect(getTraceData({ traceId: TRACE_ID }, createContext(client))).rejects.toThrow(
+      'Jaeger request failed with status 500',
+    );
   });
 
   it('builds a jaeger search request and summarizes traces', async () => {
@@ -178,12 +257,12 @@ describe('getTraceData', () => {
       minDuration: '20ms',
       maxDuration: undefined,
       limit: 26,
-      start: 1718100000000000,
-      end: 1718103600000000,
+      startTime: new Date('2024-06-11T10:00:00.000Z'),
+      endTime: new Date('2024-06-11T11:00:00.000Z'),
     });
     expect(result.searchResult).toEqual([
       {
-        traceId: '7d73f3ae841bf59a74cf5b52a328cfca',
+        traceId: TRACE_ID,
         startTimeUnixMs: 1718122135000,
         durationMs: 2,
         rootServiceName: 'frontend',
@@ -197,6 +276,93 @@ describe('getTraceData', () => {
       },
     ]);
     expect(result.metadata?.hasMoreResults).toBe(false);
+  });
+
+  it('groups the spans of several traces and services, most recent trace first', async () => {
+    const olderTraceId = '11111111111111111111111111111111';
+    const client = makeClient();
+    client.searchTraces = vi.fn(async () => ({
+      resourceSpans: [
+        // The older trace comes first, and one of its spans belongs to another service.
+        {
+          resource: { attributes: [{ key: 'service.name', value: { stringValue: 'cart' } }] },
+          scopeSpans: [
+            {
+              spans: [
+                {
+                  traceId: olderTraceId,
+                  spanId: '2222222222222222',
+                  parentSpanId: '1111111111111111',
+                  name: 'lookup',
+                  startTimeUnixNano: '1718000000100000000',
+                  endTimeUnixNano: '1718000000200000000',
+                  attributes: [{ key: 'error', value: { boolValue: true } }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          resource: { attributes: [{ key: 'service.name', value: { stringValue: 'frontend' } }] },
+          scopeSpans: [
+            {
+              spans: [
+                {
+                  traceId: olderTraceId,
+                  spanId: '1111111111111111',
+                  name: 'GET /old',
+                  startTimeUnixNano: '1718000000000000000',
+                  endTimeUnixNano: '1718000000300000000',
+                },
+              ],
+            },
+          ],
+        },
+        ...(exampleTrace.resourceSpans ?? []),
+      ],
+    }));
+
+    const result = await getTraceData({ service: 'frontend' }, createContext(client));
+
+    expect(result.searchResult?.map((trace) => trace.traceId)).toEqual([TRACE_ID, olderTraceId]);
+    expect(result.searchResult?.[1]).toEqual({
+      traceId: olderTraceId,
+      startTimeUnixMs: 1718000000000,
+      durationMs: 300,
+      rootServiceName: 'frontend',
+      rootTraceName: 'GET /old',
+      serviceStats: {
+        frontend: { spanCount: 1 },
+        cart: { spanCount: 1, errorCount: 1 },
+      },
+    });
+  });
+
+  it('returns no results when Jaeger finds no traces', async () => {
+    const client = makeClient();
+    client.searchTraces = vi.fn(async () => ({}));
+
+    const result = await getTraceData({ service: 'frontend' }, createContext(client));
+
+    expect(result.searchResult).toEqual([]);
+    expect(result.metadata?.hasMoreResults).toBe(false);
+  });
+
+  it('searches the last hour when the query has no time range', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-06-11T12:00:00.000Z'));
+    const client = makeClient();
+    const context = createContext(client);
+    context.absoluteTimeRange = undefined;
+
+    await getTraceData({ service: 'frontend' }, context);
+
+    expect(client.searchTraces).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startTime: new Date('2024-06-11T11:00:00.000Z'),
+        endTime: new Date('2024-06-11T12:00:00.000Z'),
+      }),
+    );
   });
 
   it('rejects invalid tags and missing search service', async () => {
@@ -213,9 +379,21 @@ describe('getTraceData', () => {
   it('keeps one extra search result only to detect additional matches', async () => {
     const client = makeClient();
     client.searchTraces = vi.fn(async () => ({
-      data: Array.from({ length: 3 }, (_, index) => ({
-        ...exampleTrace,
-        traceID: `7d73f3ae841bf59a74cf5b52a328cfc${index}`,
+      resourceSpans: [0, 1, 2].map((index) => ({
+        resource: { attributes: [{ key: 'service.name', value: { stringValue: 'frontend' } }] },
+        scopeSpans: [
+          {
+            spans: [
+              {
+                traceId: `7d73f3ae841bf59a74cf5b52a328cfc${index}`,
+                spanId: 'aaaaaaaaaaaaaaaa',
+                name: 'GET /api/cart',
+                startTimeUnixNano: `${1718122135000000000 + index * 1000000000}`,
+                endTimeUnixNano: `${1718122135002000000 + index * 1000000000}`,
+              },
+            ],
+          },
+        ],
       })),
     }));
 
@@ -229,8 +407,8 @@ describe('getTraceData', () => {
       minDuration: undefined,
       maxDuration: undefined,
       limit: 3,
-      start: 1718100000000000,
-      end: 1718103600000000,
+      startTime: new Date('2024-06-11T10:00:00.000Z'),
+      endTime: new Date('2024-06-11T11:00:00.000Z'),
     });
     expect(result.searchResult).toHaveLength(2);
     expect(result.metadata?.hasMoreResults).toBe(true);

@@ -14,45 +14,45 @@
 import type { TraceQueryPlugin, VariableStateMap } from '@perses-dev/plugin-system';
 import { datasourceSelectValueToSelector, replaceVariables } from '@perses-dev/plugin-system';
 import type { AbsoluteTimeRange, Notice, TraceSearchResult } from '@perses-dev/spec';
-import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 
 import type {
-  JaegerApiResponse,
   JaegerClient,
-  JaegerLog,
-  JaegerProcess,
-  JaegerReference,
+  JaegerOtlpSpan,
   JaegerSearchRequestParameters,
-  JaegerSpan,
-  JaegerTag,
-  JaegerTrace,
   JaegerTraceQuerySpec,
+  JaegerTracesData,
 } from '../model';
-import { DEFAULT_JAEGER, DEFAULT_SEARCH_LIMIT, JAEGER_DATASOURCE_KIND } from '../model';
+import { DEFAULT_JAEGER, DEFAULT_SEARCH_LIMIT, JAEGER_DATASOURCE_KIND, JaegerRequestError } from '../model';
 
 const TRACE_ID_PATTERN = /^[a-fA-F0-9]{16}(?:[a-fA-F0-9]{16})?$/;
 
-const SPAN_KIND_MAP: Record<string, otlptracev1.Span['kind']> = {
-  unspecified: 'SPAN_KIND_UNSPECIFIED',
-  internal: 'SPAN_KIND_INTERNAL',
-  server: 'SPAN_KIND_SERVER',
-  client: 'SPAN_KIND_CLIENT',
-  producer: 'SPAN_KIND_PRODUCER',
-  consumer: 'SPAN_KIND_CONSUMER',
+// Jaeger API v3 requires a start time range. It is used when the query has no time range.
+const DEFAULT_SEARCH_WINDOW_MS = 60 * 60 * 1000;
+
+// Jaeger serializes OTLP enums as numbers, whereas Perses uses the names.
+const SPAN_KIND_NAMES: Record<number, otlptracev1.Span['kind']> = {
+  0: 'SPAN_KIND_UNSPECIFIED',
+  1: 'SPAN_KIND_INTERNAL',
+  2: 'SPAN_KIND_SERVER',
+  3: 'SPAN_KIND_CLIENT',
+  4: 'SPAN_KIND_PRODUCER',
+  5: 'SPAN_KIND_CONSUMER',
 };
 
-const STATUS_CODE_MAP: Record<string, otlptracev1.Status['code']> = {
-  unset: 'STATUS_CODE_UNSET',
-  ok: 'STATUS_CODE_OK',
-  error: 'STATUS_CODE_ERROR',
+const STATUS_CODE_NAMES: Record<number, otlptracev1.Status['code']> = {
+  0: 'STATUS_CODE_UNSET',
+  1: 'STATUS_CODE_OK',
+  2: 'STATUS_CODE_ERROR',
 };
 
-export function getTraceDataTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
-  return {
-    start: timeRange.start.getTime() * 1000,
-    end: timeRange.end.getTime() * 1000,
-  };
+export function getTraceDataTimeRange(timeRange?: AbsoluteTimeRange): { startTime: Date; endTime: Date } {
+  if (timeRange) {
+    return { startTime: timeRange.start, endTime: timeRange.end };
+  }
+
+  const endTime = new Date();
+  return { startTime: new Date(endTime.getTime() - DEFAULT_SEARCH_WINDOW_MS), endTime };
 }
 
 export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'] = async (spec, context) => {
@@ -65,10 +65,9 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
   const client = await context.datasourceStore.getDatasourceClient<JaegerClient>(datasourceSelector);
 
   if (resolvedSpec.traceId !== undefined) {
-    const response = await client.getTrace(resolvedSpec.traceId);
-    const trace = pickSingleTrace(response, resolvedSpec.traceId);
+    const tracesData = await getSingleTrace(client, resolvedSpec.traceId);
     return {
-      trace: jaegerTraceToOTLP(trace),
+      trace: normalizeTracesData(tracesData),
       metadata: {
         executedQueryString: resolvedSpec.traceId,
       },
@@ -79,6 +78,7 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
     throw new Error('Jaeger trace searches require a service when Trace ID is not provided.');
   }
 
+  const limit = resolvedSpec.limit ?? DEFAULT_SEARCH_LIMIT;
   const searchParams: JaegerSearchRequestParameters = {
     service: resolvedSpec.service,
     operation: resolvedSpec.operation,
@@ -86,26 +86,15 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
     tags: resolvedSpec.tags,
     minDuration: resolvedSpec.minDuration,
     maxDuration: resolvedSpec.maxDuration,
-    limit: (resolvedSpec.limit ?? DEFAULT_SEARCH_LIMIT) + 1,
+    // Ask for one more trace than needed to know whether there are more results.
+    limit: limit + 1,
+    ...getTraceDataTimeRange(context.absoluteTimeRange),
   };
 
-  if (context.absoluteTimeRange) {
-    const { start, end } = getTraceDataTimeRange(context.absoluteTimeRange);
-    searchParams.start = start;
-    searchParams.end = end;
-  }
-
-  const response = await client.searchTraces(searchParams);
-  const limit = resolvedSpec.limit ?? DEFAULT_SEARCH_LIMIT;
-  const searchResult = (response.data ?? []).map(summarizeTrace);
+  const tracesData = await client.searchTraces(searchParams);
+  const searchResult = summarizeTraces(tracesData);
   const hasMoreResults = searchResult.length > limit;
   const notices: Notice[] = [];
-  if (response.errors && response.errors.length > 0) {
-    notices.push({
-      type: 'warning',
-      message: response.errors.map((error) => error.msg).join('; '),
-    });
-  }
   if (hasMoreResults) {
     notices.push({
       type: 'info',
@@ -123,6 +112,21 @@ export const getTraceData: TraceQueryPlugin<JaegerTraceQuerySpec>['getTraceData'
     },
   };
 };
+
+async function getSingleTrace(client: JaegerClient, traceId: string): Promise<JaegerTracesData> {
+  const notFound = new Error(`Trace ${traceId} was not found.`);
+  let tracesData: JaegerTracesData;
+  try {
+    tracesData = await client.getTrace(traceId);
+  } catch (e) {
+    throw e instanceof JaegerRequestError && e.status === 404 ? notFound : e;
+  }
+
+  if (tracesData.resourceSpans === undefined || tracesData.resourceSpans.length === 0) {
+    throw notFound;
+  }
+  return tracesData;
+}
 
 function resolveSpec(
   spec: JaegerTraceQuerySpec,
@@ -186,56 +190,52 @@ function buildExecutedQueryString(spec: JaegerTraceQuerySpec): string {
   );
 }
 
-function pickSingleTrace(response: JaegerApiResponse<JaegerTrace[]>, traceId: string): JaegerTrace {
-  const trace = response.data?.[0];
-  if (trace) {
-    return trace;
-  }
-
-  const errorMessage = response.errors?.map((error) => error.msg).join('; ') ?? `Trace ${traceId} was not found.`;
-  throw new Error(errorMessage);
-}
-
 function trimToUndefined(value: string): string | undefined {
   const trimmed = value.trim();
   return trimmed === '' ? undefined : trimmed;
 }
 
-function summarizeTrace(trace: JaegerTrace): TraceSearchResult {
-  const spans = trace.spans ?? [];
-  const rootSpan = findRootSpan(spans);
-  const { startTimeUnixMs, endTimeUnixMs } = getTraceBounds(spans);
-  const process = rootSpan ? resolveProcess(trace, rootSpan) : undefined;
-
-  return {
-    traceId: trace.traceID,
-    startTimeUnixMs,
-    durationMs: endTimeUnixMs - startTimeUnixMs,
-    rootServiceName: process?.serviceName ?? 'unknown',
-    rootTraceName: rootSpan?.operationName ?? trace.traceID,
-    serviceStats: buildServiceStats(trace),
-  };
+interface SpanWithService {
+  span: otlptracev1.Span;
+  serviceName: string;
 }
 
-function getTraceBounds(spans: JaegerSpan[]): { startTimeUnixMs: number; endTimeUnixMs: number } {
-  if (spans.length === 0) {
-    return { startTimeUnixMs: 0, endTimeUnixMs: 0 };
+// Jaeger returns the spans of all matching traces together, so they have to be grouped by trace.
+function summarizeTraces(tracesData: JaegerTracesData): TraceSearchResult[] {
+  const spansByTraceId = new Map<string, SpanWithService[]>();
+  for (const resourceSpan of normalizeTracesData(tracesData).resourceSpans) {
+    const serviceName = getServiceName(resourceSpan);
+    for (const scopeSpan of resourceSpan.scopeSpans) {
+      for (const span of scopeSpan.spans) {
+        const spans = spansByTraceId.get(span.traceId) ?? [];
+        spans.push({ span, serviceName });
+        spansByTraceId.set(span.traceId, spans);
+      }
+    }
   }
 
-  const [startTime, endTime] = spans.reduce<[number, number]>(
-    (acc, span) => [Math.min(acc[0], span.startTime), Math.max(acc[1], span.startTime + span.duration)],
-    [spans[0]!.startTime, spans[0]!.startTime + spans[0]!.duration],
+  return Array.from(spansByTraceId, ([traceId, spans]) => summarizeTrace(traceId, spans)).toSorted(
+    (a, b) => b.startTimeUnixMs - a.startTimeUnixMs,
   );
+}
+
+function summarizeTrace(traceId: string, spans: SpanWithService[]): TraceSearchResult {
+  const rootSpan = findRootSpan(spans);
+  const startTimeUnixMs = Math.min(...spans.map(({ span }) => nanoToMs(span.startTimeUnixNano)));
+  const endTimeUnixMs = Math.max(...spans.map(({ span }) => nanoToMs(span.endTimeUnixNano)));
 
   return {
-    startTimeUnixMs: startTime / 1000,
-    endTimeUnixMs: endTime / 1000,
+    traceId,
+    startTimeUnixMs,
+    durationMs: endTimeUnixMs - startTimeUnixMs,
+    rootServiceName: rootSpan.serviceName,
+    rootTraceName: rootSpan.span.name,
+    serviceStats: buildServiceStats(spans),
   };
 }
 
-function buildServiceStats(trace: JaegerTrace): TraceSearchResult['serviceStats'] {
-  return trace.spans.reduce<Record<string, { spanCount: number; errorCount?: number }>>((acc, span) => {
-    const serviceName = resolveProcess(trace, span)?.serviceName ?? 'unknown';
+function buildServiceStats(spans: SpanWithService[]): TraceSearchResult['serviceStats'] {
+  return spans.reduce<Record<string, { spanCount: number; errorCount?: number }>>((acc, { span, serviceName }) => {
     const stats = acc[serviceName] ?? { spanCount: 0 };
     stats.spanCount += 1;
     if (isErrorSpan(span)) {
@@ -246,134 +246,79 @@ function buildServiceStats(trace: JaegerTrace): TraceSearchResult['serviceStats'
   }, {});
 }
 
-export function jaegerTraceToOTLP(trace: JaegerTrace): otlptracev1.TracesData {
-  const resourceSpanByProcessID = new Map<string, otlptracev1.ResourceSpan>();
-
-  for (const span of trace.spans ?? []) {
-    const processID = span.processID ?? `process-${resolveProcess(trace, span)?.serviceName ?? 'unknown'}`;
-    const process = resolveProcess(trace, span);
-    const resourceSpan = getOrCreateResourceSpan(resourceSpanByProcessID, processID, process);
-    const scopeSpan = resourceSpan.scopeSpans[0]!;
-    scopeSpan.spans.push(convertSpan(span));
-  }
-
-  return {
-    resourceSpans: Array.from(resourceSpanByProcessID.values()),
-  };
+// The root span is the earliest span without a parent in the trace.
+function findRootSpan(spans: SpanWithService[]): SpanWithService {
+  const spanIds = new Set(spans.map(({ span }) => span.spanId));
+  const roots = spans.filter(({ span }) => span.parentSpanId === undefined || !spanIds.has(span.parentSpanId));
+  const candidates = roots.length > 0 ? roots : spans;
+  return candidates.reduce((earliest, current) =>
+    nanoToMs(current.span.startTimeUnixNano) < nanoToMs(earliest.span.startTimeUnixNano) ? current : earliest,
+  );
 }
 
-function getOrCreateResourceSpan(
-  resourceSpanByProcessID: Map<string, otlptracev1.ResourceSpan>,
-  processID: string,
-  process?: JaegerProcess,
-): otlptracev1.ResourceSpan {
-  const existing = resourceSpanByProcessID.get(processID);
-  if (existing) {
-    return existing;
-  }
-
-  const next: otlptracev1.ResourceSpan = {
-    resource: {
-      attributes: buildResourceAttributes(process),
-    },
-    scopeSpans: [
-      {
-        scope: {},
-        spans: [],
-      },
-    ],
-  };
-  resourceSpanByProcessID.set(processID, next);
-  return next;
+function getServiceName(resourceSpan: otlptracev1.ResourceSpan): string {
+  const serviceName = resourceSpan.resource?.attributes?.find((attribute) => attribute.key === 'service.name');
+  return serviceName && 'stringValue' in serviceName.value ? serviceName.value.stringValue : 'unknown';
 }
 
-function buildResourceAttributes(process?: JaegerProcess): otlpcommonv1.KeyValue[] {
-  const serviceName = process?.serviceName ?? 'unknown';
-  const processTags = (process?.tags ?? []).filter((tag) => tag.key !== 'service.name').map(convertTag);
-  return [{ key: 'service.name', value: { stringValue: serviceName } }, ...processTags];
+function isErrorSpan(span: otlptracev1.Span): boolean {
+  return (
+    span.status?.code === 'STATUS_CODE_ERROR' ||
+    (span.attributes ?? []).some(
+      (attribute) => attribute.key === 'error' && 'boolValue' in attribute.value && attribute.value.boolValue,
+    )
+  );
 }
 
-function convertSpan(span: JaegerSpan): otlptracev1.Span {
-  const childOfReference = span.references?.find((reference) => reference.refType === 'CHILD_OF');
-  const spanKindTag = getTagValue(span.tags, 'span.kind');
-  const statusCodeTag = getTagValue(span.tags, 'otel.status_code');
-  const statusDescriptionTag = getTagValue(span.tags, 'otel.status_description');
-  let statusCode: otlptracev1.Status['code'] | undefined = isErrorSpan(span) ? 'STATUS_CODE_ERROR' : undefined;
-  if (statusCodeTag && typeof statusCodeTag === 'string') {
-    statusCode = STATUS_CODE_MAP[statusCodeTag.toLowerCase()];
-  }
-
-  return {
-    traceId: normalizeTraceId(span.traceID),
-    spanId: normalizeSpanId(span.spanID),
-    parentSpanId: childOfReference ? normalizeSpanId(childOfReference.spanID) : undefined,
-    name: span.operationName,
-    kind: spanKindTag && typeof spanKindTag === 'string' ? SPAN_KIND_MAP[spanKindTag.toLowerCase()] : undefined,
-    startTimeUnixNano: `${span.startTime * 1000}`,
-    endTimeUnixNano: `${(span.startTime + span.duration) * 1000}`,
-    attributes: (span.tags ?? []).map(convertTag),
-    events: (span.logs ?? []).map(convertLog),
-    links: buildLinks(span.references),
-    status: {
-      code: statusCode,
-      message: typeof statusDescriptionTag === 'string' ? statusDescriptionTag : undefined,
-    },
-  };
-}
-
-function buildLinks(references?: JaegerReference[]): otlptracev1.Link[] {
-  return (references ?? [])
-    .filter((reference) => reference.refType !== 'CHILD_OF')
-    .map((reference) => ({
-      traceId: normalizeTraceId(reference.traceID),
-      spanId: normalizeSpanId(reference.spanID),
-      attributes: [],
-    }));
-}
-
-function convertLog(log: JaegerLog): otlptracev1.Event {
-  return {
-    timeUnixNano: `${log.timestamp * 1000}`,
-    name: getEventName(log),
-    attributes: (log.fields ?? []).map(convertTag),
-  };
-}
-
-function getEventName(log: JaegerLog): string {
-  const eventField = log.fields?.find((field) => field.key === 'event' && field.type === 'string');
-  return typeof eventField?.value === 'string' ? eventField.value : 'event';
-}
-
-function convertTag(tag: JaegerTag): otlpcommonv1.KeyValue {
-  return {
-    key: tag.key,
-    value: convertAnyValue(tag),
-  };
-}
-
-function convertAnyValue(tag: JaegerTag): otlpcommonv1.AnyValue {
-  switch (tag.type) {
-    case 'string':
-      return { stringValue: tag.value };
-    case 'bool':
-      return { boolValue: tag.value };
-    case 'int64':
-      return { intValue: `${tag.value}` };
-    case 'float64':
-      return { doubleValue: tag.value };
-    case 'binary':
-      return { bytesValue: tag.value };
-    default:
-      throw new Error(`Unsupported Jaeger tag type: ${(tag as JaegerTag).type}`);
+// Nanosecond timestamps do not fit in a number without losing precision, hence the BigInt.
+function nanoToMs(nanos: string): number {
+  try {
+    return Number(BigInt(nanos) / 1000n) / 1000;
+  } catch {
+    return 0;
   }
 }
 
-function resolveProcess(trace: JaegerTrace, span: JaegerSpan): JaegerProcess | undefined {
-  return span.process ?? (span.processID ? trace.processes?.[span.processID] : undefined);
+export function normalizeTracesData(tracesData: JaegerTracesData): otlptracev1.TracesData {
+  return {
+    resourceSpans: (tracesData.resourceSpans ?? []).map((resourceSpan) => ({
+      resource: resourceSpan.resource,
+      scopeSpans: (resourceSpan.scopeSpans ?? []).map((scopeSpan) => ({
+        scope: scopeSpan.scope,
+        spans: (scopeSpan.spans ?? []).map(normalizeSpan),
+      })),
+    })),
+  };
 }
 
-function findRootSpan(spans: JaegerSpan[]): JaegerSpan | undefined {
-  return spans.find((span) => !span.references?.some((reference) => reference.refType === 'CHILD_OF')) ?? spans[0];
+function normalizeSpan(span: JaegerOtlpSpan): otlptracev1.Span {
+  return {
+    traceId: normalizeTraceId(span.traceId),
+    spanId: normalizeSpanId(span.spanId),
+    parentSpanId: span.parentSpanId ? normalizeSpanId(span.parentSpanId) : undefined,
+    name: span.name,
+    kind: normalizeEnum(span.kind, SPAN_KIND_NAMES),
+    startTimeUnixNano: `${span.startTimeUnixNano}`,
+    endTimeUnixNano: `${span.endTimeUnixNano}`,
+    attributes: span.attributes,
+    events: span.events,
+    links: span.links?.map((link) => ({
+      traceId: normalizeTraceId(link.traceId),
+      spanId: normalizeSpanId(link.spanId),
+      attributes: link.attributes,
+    })),
+    status: span.status
+      ? { code: normalizeEnum(span.status.code, STATUS_CODE_NAMES), message: span.status.message }
+      : undefined,
+  };
+}
+
+function normalizeEnum<T extends string | undefined>(value: number | string | undefined, names: Record<number, T>): T {
+  // Already a name, or unset.
+  if (typeof value !== 'number') {
+    return value as T;
+  }
+  return names[value] as T;
 }
 
 function normalizeTraceId(traceId: string): string {
@@ -382,18 +327,4 @@ function normalizeTraceId(traceId: string): string {
 
 function normalizeSpanId(spanId: string): string {
   return spanId.toLowerCase().padStart(16, '0');
-}
-
-function isErrorSpan(span: JaegerSpan): boolean {
-  const errorTag = getTagValue(span.tags, 'error');
-  if (errorTag === true) {
-    return true;
-  }
-
-  const statusCodeTag = getTagValue(span.tags, 'otel.status_code');
-  return typeof statusCodeTag === 'string' && statusCodeTag.toLowerCase() === 'error';
-}
-
-function getTagValue(tags: JaegerTag[] | undefined, key: string): JaegerTag['value'] | undefined {
-  return tags?.find((tag) => tag.key === key)?.value;
 }
