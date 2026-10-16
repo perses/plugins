@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseTraceQuery",
+  "spec": {
+    "query": "SELECT TraceId, Timestamp FROM otel_traces",
+    "limit": 0
+  }
+}
