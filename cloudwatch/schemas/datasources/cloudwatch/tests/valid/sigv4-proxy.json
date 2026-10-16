@@ -1,0 +1,18 @@
+{
+  "kind": "CloudWatchDatasource",
+  "spec": {
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "https://monitoring.eu-west-3.amazonaws.com",
+        "allowedEndpoints": [
+          {
+            "endpointPattern": "^/$",
+            "method": "POST"
+          }
+        ],
+        "secret": "cloudwatch-sigv4"
+      }
+    }
+  }
+}

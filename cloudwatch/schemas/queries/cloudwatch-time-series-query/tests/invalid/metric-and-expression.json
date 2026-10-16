@@ -1,0 +1,17 @@
+{
+  "kind": "CloudWatchTimeSeriesQuery",
+  "spec": {
+    "queries": [
+      {
+        "id": "m1",
+        "expression": "m2 * 2",
+        "metric": {
+          "namespace": "AWS/EC2",
+          "name": "CPUUtilization",
+          "statistic": "Average",
+          "period": 60
+        }
+      }
+    ]
+  }
+}

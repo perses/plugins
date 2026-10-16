@@ -33,6 +33,7 @@
     "barchart",
     "canvas",
     "clickhouse",
+    "cloudwatch",
     "datasourcevariable",
     "flamechart",
     "gaugechart",
