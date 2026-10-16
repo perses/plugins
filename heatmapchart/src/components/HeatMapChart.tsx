@@ -170,6 +170,10 @@ export function HeatMapChart({
     return {
       tooltip: {
         appendToBody: true,
+        // Keep the tooltip inside the chart container: without confine, ECharts flips it over
+        // the cursor when hovering near the edges, which covers the hovered tile and looks
+        // like the tooltip jumps around (most visible on small windows).
+        confine: true,
         formatter: (params: {
           data: HeatMapDataItem | HeatMapExemplarDataItem;
           marker: string;
