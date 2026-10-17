@@ -25,7 +25,8 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@mui/x-data-grid": "^7.20.0"
+    "@mui/x-data-grid": "^7.20.0",
+    "react-compiler-runtime": "^1.0.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
