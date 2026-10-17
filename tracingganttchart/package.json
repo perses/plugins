@@ -26,6 +26,7 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "color-hash": "^2.0.2",
+    "react-compiler-runtime": "^1.0.0",
     "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {

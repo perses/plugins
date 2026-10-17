@@ -25,6 +25,7 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
+    "react-compiler-runtime": "^1.0.0",
     "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {

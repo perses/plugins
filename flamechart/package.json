@@ -24,6 +24,9 @@
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
+  "dependencies": {
+    "react-compiler-runtime": "^1.0.0"
+  },
   "devDependencies": {
     "@types/color-hash": "^2.0.0"
   },

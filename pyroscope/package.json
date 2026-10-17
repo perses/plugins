@@ -26,7 +26,8 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.4",
-    "@lezer/highlight": "^1.2.3"
+    "@lezer/highlight": "^1.2.3",
+    "react-compiler-runtime": "^1.0.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",

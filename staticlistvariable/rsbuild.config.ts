@@ -13,13 +13,13 @@
 
 import { pluginReact } from '@rsbuild/plugin-react';
 
-import { createConfigForPlugin } from '../rsbuild.shared';
+import { createConfigForPlugin, reactCompilerOptions } from '../rsbuild.shared';
 
 export default createConfigForPlugin({
   name: 'StaticListVariable',
   rsbuildConfig: {
     server: { port: 3012 },
-    plugins: [pluginReact()],
+    plugins: [pluginReact({ reactCompiler: reactCompilerOptions })],
   },
   moduleFederation: {
     exposes: {
