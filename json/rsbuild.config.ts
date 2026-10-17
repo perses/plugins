@@ -13,12 +13,12 @@
 
 import { pluginReact } from '@rsbuild/plugin-react';
 
-import { createConfigForPlugin } from '../rsbuild.shared';
+import { createConfigForPlugin, reactCompilerOptions } from '../rsbuild.shared';
 
 export default createConfigForPlugin({
   name: 'Json',
   rsbuildConfig: {
-    plugins: [pluginReact()],
+    plugins: [pluginReact({ reactCompiler: reactCompilerOptions })],
   },
   moduleFederation: {
     exposes: {

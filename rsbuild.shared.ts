@@ -18,11 +18,22 @@ import type { ModuleFederationOptions } from '@module-federation/rsbuild-plugin'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import type { RsbuildConfig } from '@rsbuild/core';
 import { mergeRsbuildConfig } from '@rsbuild/core';
+import type { PluginReactOptions } from '@rsbuild/plugin-react';
 
 /** The base path for all plugin assets. This should match the path where plugins are stored on the Perses server.
  * @see {@link https://github.com/perses/perses}
  */
 const PLUGINS_PATH = '/plugins';
+
+/**
+ * React Compiler options shared by every plugin, passed to `pluginReact({ reactCompiler })`.
+ * Perses runs on React 18, so the compiled output relies on the `react-compiler-runtime` package. Switch the target to
+ * '19' (and drop `react-compiler-runtime`) when upgrading React.
+ * @see {@link https://rsbuild.rs/plugins/list/plugin-react#reactcompiler}
+ */
+export const reactCompilerOptions: PluginReactOptions['reactCompiler'] = {
+  target: '18',
+};
 
 /**
  * Configuration options for building a Perses plugin with rsbuild.
@@ -140,6 +151,8 @@ function getRsbuildConfig(name: string): RsbuildConfig {
     source: { entry: { main: './src/index-federation.ts' } },
     output: {
       assetPrefix,
+      // Rsbuild 2 raised its default browserslist; keep the targets supported by the Perses app.
+      overrideBrowserslist: ['chrome >= 87', 'edge >= 88', 'firefox >= 78', 'safari >= 14'],
       copy: [{ from: 'package.json' }, { from: 'README.md' }, { from: '../LICENSE', to: './LICENSE', toType: 'file' }],
       distPath: {
         root: 'dist',

@@ -13,14 +13,14 @@
 
 import { pluginReact } from '@rsbuild/plugin-react';
 
-import { createConfigForPlugin } from '../rsbuild.shared';
+import { createConfigForPlugin, reactCompilerOptions } from '../rsbuild.shared';
 
 export default createConfigForPlugin({
   name: 'OpenSearch',
   rsbuildConfig: {
     server: { port: 3135 },
     dev: { hmr: false, liveReload: false },
-    plugins: [pluginReact()],
+    plugins: [pluginReact({ reactCompiler: reactCompilerOptions })],
   },
   moduleFederation: {
     exposes: {
