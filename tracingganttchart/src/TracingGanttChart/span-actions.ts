@@ -13,7 +13,7 @@
 
 import { useSelection } from '@perses-dev/components';
 import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
-import { startTransition, useCallback, useEffect, useRef } from 'react';
+import { startTransition, useCallback, useEffect } from 'react';
 
 import type { Span, Trace } from './trace';
 
@@ -90,25 +90,17 @@ export interface SpanSelection {
 
 /**
  * useSpanSelection exposes the checked spans as panel selection, e.g. for the item actions displayed in the panel header.
- * The selection is cleared when the trace changes, the selection is disabled or the gantt chart is unmounted.
+ * The selection is cleared when the selection is disabled or the gantt chart is unmounted,
+ * e.g. when another trace is loaded (the gantt chart is keyed by trace ID).
  */
 export function useSpanSelection(trace: Trace, enabled: boolean): SpanSelection {
   const { selectionMap, setSelection, toggleSelection, clearSelection } = useSelection<SpanActionData, string>();
 
+  // the selection is stored in the panel's SelectionProvider, which outlives the gantt chart
   useEffect(() => {
     if (!enabled) return;
     return clearSelection;
   }, [enabled, clearSelection]);
-
-  // The gantt chart is not remounted when a new trace is loaded, so the selection of the previous trace is cleared here.
-  // The selection is stored in the panel's SelectionProvider (not in local state), therefore it cannot be reset during render:
-  // the first render with a new trace can still see the previous selection, until this effect has cleared it.
-  const traceRef = useRef(trace);
-  useEffect(() => {
-    if (traceRef.current === trace) return;
-    traceRef.current = trace;
-    clearSelection();
-  }, [trace, clearSelection]);
 
   const isSelected = useCallback((spanId: string) => enabled && selectionMap.has(spanId), [enabled, selectionMap]);
 

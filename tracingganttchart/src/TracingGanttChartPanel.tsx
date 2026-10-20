@@ -18,6 +18,7 @@ import type { TraceData } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 
 import type { CustomLinks, TracingGanttChartOptions } from './gantt-chart-model';
+import { getTraceId } from './TracingGanttChart/trace';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 
 export type TracingGanttChartPanelProps = PanelProps<TracingGanttChartOptions, TraceData>;
@@ -55,7 +56,7 @@ export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): Reac
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <TracingGanttChart options={spec} customLinks={customLinks} trace={trace} />
+      <TracingGanttChart key={getTraceId(trace)} options={spec} customLinks={customLinks} trace={trace} />
     </Box>
   );
 }

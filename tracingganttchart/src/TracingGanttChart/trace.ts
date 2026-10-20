@@ -68,6 +68,19 @@ export interface Link {
 }
 
 /**
+ * getTraceId returns the ID of an OTLP trace, i.e. the trace ID of its first span (all spans of a trace share the same trace ID).
+ */
+export function getTraceId(trace: otlptracev1.TracesData): string | undefined {
+  for (const resourceSpan of trace.resourceSpans) {
+    for (const scopeSpan of resourceSpan.scopeSpans) {
+      const span = scopeSpan.spans[0];
+      if (span) return span.traceId;
+    }
+  }
+  return undefined;
+}
+
+/**
  * getTraceModel builds a tree of spans from an OTLP trace,
  * and precomputes common fields, for example the start and end time of a trace.
  * Time complexity: O(2n)

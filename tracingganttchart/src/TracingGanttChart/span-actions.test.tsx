@@ -14,13 +14,39 @@
 import { SelectionProvider, useSelection } from '@perses-dev/components';
 import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import type { RenderHookResult } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import * as exampleTrace from '../test/traces/example_otlp.json';
 import { getSpanActionData, useSpanSelection } from './span-actions';
 import type { SpanActionData } from './span-actions';
-import type { Trace } from './trace';
+import type { Span, Trace } from './trace';
 import { getTraceModel } from './trace';
+
+interface SpanToggleProps {
+  trace: Trace;
+  span: Span;
+}
+
+function SpanToggle(props: SpanToggleProps): ReactElement {
+  const { trace, span } = props;
+  const { toggleSpan } = useSpanSelection(trace, true);
+  const handleClick = useCallback(() => toggleSpan(span), [toggleSpan, span]);
+  return <button onClick={handleClick}>toggle</button>;
+}
+
+/** renders a SpanToggle keyed by trace ID, like the gantt chart in the panel */
+function KeyedSpanToggle(props: SpanToggleProps & { traceId: string }): ReactElement {
+  const { trace, span, traceId } = props;
+  const { selectionMap } = useSelection<SpanActionData, string>();
+  return (
+    <>
+      <SpanToggle key={traceId} trace={trace} span={span} />
+      <output>{selectionMap.size}</output>
+    </>
+  );
+}
 
 describe('getSpanActionData', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
@@ -131,12 +157,19 @@ describe('useSpanSelection', () => {
     expect(result.current.selection.allSelected).toBe(false);
   });
 
-  it('clears the selection when the trace changes', () => {
-    const { result, rerender } = renderTestHook();
+  it('clears the selection when remounted for another trace', () => {
+    const { rerender } = render(<KeyedSpanToggle trace={trace} span={span1} traceId="trace1" />, {
+      wrapper: SelectionProvider,
+    });
 
-    act(() => result.current.selection.toggleSpan(span1));
-    rerender({ trace: getTraceModel(exampleTrace as otlptracev1.TracesData), enabled: true });
-    expect(result.current.selectionMap.size).toBe(0);
+    fireEvent.click(screen.getByRole('button', { name: 'toggle' }));
+    expect(screen.getByRole('status')).toHaveTextContent('1');
+
+    rerender(<KeyedSpanToggle trace={trace} span={span1} traceId="trace1" />);
+    expect(screen.getByRole('status')).toHaveTextContent('1');
+
+    rerender(<KeyedSpanToggle trace={trace} span={span1} traceId="trace2" />);
+    expect(screen.getByRole('status')).toHaveTextContent('0');
   });
 
   it('clears the selection when disabled', () => {
