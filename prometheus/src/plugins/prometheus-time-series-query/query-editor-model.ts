@@ -157,3 +157,25 @@ export function useInstantState(props: PrometheusTimeSeriesQueryEditorProps): {
 
   return { instant, handleInstantChange };
 }
+
+/**
+ * Hook to manage `enableExemplars` state. The toggle commits immediately, like `instant`.
+ */
+export function useEnableExemplarsState(props: PrometheusTimeSeriesQueryEditorProps): {
+  enableExemplars: boolean | undefined;
+  handleEnableExemplarsChange: (enableExemplars: boolean | undefined) => void;
+} {
+  const { onChange, value } = props;
+
+  const enableExemplars = value.enableExemplars;
+
+  const handleEnableExemplarsChange = (next: boolean | undefined): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.enableExemplars = next;
+      }),
+    );
+  };
+
+  return { enableExemplars, handleEnableExemplarsChange };
+}
