@@ -65,7 +65,7 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
         {span.name}
       </Typography>
       {actions?.length && actionItem ? (
-        <Stack direction="row" flexWrap="wrap" gap={0.5}>
+        <Stack direction="row" flexWrap="wrap" gap={1} marginY={1}>
           <SpanActionButtons actions={actions} item={actionItem} />
         </Stack>
       ) : null}

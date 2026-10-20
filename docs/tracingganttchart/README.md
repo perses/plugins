@@ -14,10 +14,14 @@ See also technical docs related to this plugin:
 Item actions let you trigger events or webhooks with the details of a span, for example to open the logs of a span in another plugin or application.
 Actions are configured in the **Item Actions** tab of the panel editor:
 
-- **Display Actions with Each Item**: shows the action buttons in the span detail pane, next to the close button.
-- **Display Actions in Panel Header**: shows the action buttons in the panel header. Requires **Enable Item Selection**, which exposes the selected span as the panel selection.
+- **Enable Item Selection**: adds a checkbox to each span row, and a checkbox in the table header to select all spans of the trace.
+  The checked spans are exposed as the panel selection. The selection is cleared when another trace is loaded.
+- **Display Actions with Each Item**: shows the actions as buttons in the span detail pane, below the span name.
+  These actions are executed with the span opened in the detail pane only.
+- **Display Actions in Panel Header**: shows the actions in the panel header. Requires **Enable Item Selection**:
+  these actions are executed with the checked spans, either once per span (`individual` batch mode) or once for all spans (`batch` batch mode).
 
-Each action receives the following fields of the selected span, which can be referenced in URL and body templates with `${__data.fields["<field>"]}`:
+Each action receives the following fields of a span, which can be referenced in URL and body templates with `${__data.fields["<field>"]}`:
 
 | Field                                        | Description                                            |
 |----------------------------------------------|--------------------------------------------------------|

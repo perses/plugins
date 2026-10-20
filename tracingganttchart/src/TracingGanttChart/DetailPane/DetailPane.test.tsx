@@ -64,6 +64,18 @@ describe('DetailPane', () => {
     expect(screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual(['close']);
   });
 
+  it('renders the enabled actions as buttons with label and icon', () => {
+    renderComponent([
+      { ...showLogsAction, icon: 'troubleshoot' },
+      { ...showLogsAction, name: 'Disabled action', enabled: false },
+    ]);
+
+    const button = screen.getByRole('button', { name: 'Show logs' });
+    expect(button).toHaveClass('MuiButton-outlined');
+    expect(button.querySelector('.MuiButton-startIcon svg')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Disabled action' })).not.toBeInTheDocument();
+  });
+
   it('dispatches an event with the span data', () => {
     const listener = vi.fn();
     window.addEventListener('test:show-logs', listener);
@@ -112,5 +124,17 @@ describe('DetailPane', () => {
 
     window.removeEventListener('test:show-logs', listener);
     expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels the confirmation', () => {
+    const listener = vi.fn();
+    window.addEventListener('test:show-logs', listener);
+
+    renderComponent([{ ...showLogsAction, confirmMessage: 'Are you sure?' }]);
+    fireEvent.click(screen.getByRole('button', { name: 'Show logs' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    window.removeEventListener('test:show-logs', listener);
+    expect(listener).not.toHaveBeenCalled();
   });
 });

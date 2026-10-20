@@ -32,6 +32,7 @@ export default createConfigForPlugin({
       'date-fns': { singleton: true },
       'date-fns-tz': { singleton: true },
       lodash: { singleton: true },
+      '@perses-dev/client': { singleton: true },
       '@perses-dev/components': { singleton: true },
       '@perses-dev/plugin-system': { singleton: true },
       '@perses-dev/dashboards': { singleton: true },

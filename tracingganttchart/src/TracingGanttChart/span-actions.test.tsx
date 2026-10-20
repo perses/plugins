@@ -13,33 +13,14 @@
 
 import { SelectionProvider, useSelection } from '@perses-dev/components';
 import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
-import { screen } from '@testing-library/dom';
-import { render } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import type { RenderHookResult } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 import * as exampleTrace from '../test/traces/example_otlp.json';
-import type { SpanActionData, SpanActionItem } from './span-actions';
-import { getSpanActionData, getSpanActionItem, SpanSelectionSync } from './span-actions';
+import { getSpanActionData, useSpanSelection } from './span-actions';
+import type { SpanActionData } from './span-actions';
+import type { Trace } from './trace';
 import { getTraceModel } from './trace';
-
-function SelectionContent(): ReactElement {
-  const { selectionMap } = useSelection<SpanActionData, string>();
-  return <output>{JSON.stringify(Object.fromEntries(selectionMap))}</output>;
-}
-
-function Selection(props: { item?: SpanActionItem; mounted?: boolean }): ReactElement {
-  const { item, mounted = true } = props;
-  return (
-    <SelectionProvider>
-      {mounted ? <SpanSelectionSync item={item} /> : null}
-      <SelectionContent />
-    </SelectionProvider>
-  );
-}
-
-function getSelection(): Record<string, SpanActionData> {
-  return JSON.parse(screen.getByRole('status').textContent!);
-}
 
 describe('getSpanActionData', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
@@ -93,40 +74,77 @@ describe('getSpanActionData', () => {
   });
 });
 
-describe('SpanSelectionSync', () => {
+describe('useSpanSelection', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
-  const item1 = getSpanActionItem(trace, trace.spanById.get('sid1')!);
-  const item2 = getSpanActionItem(trace, trace.spanById.get('sid2')!);
+  const span1 = trace.spanById.get('sid1')!;
+  const span2 = trace.spanById.get('sid2')!;
 
-  it('exposes the selected span as selection', () => {
-    render(<Selection item={item2} />);
+  interface HookProps {
+    trace: Trace;
+    enabled: boolean;
+  }
 
-    const selection = getSelection();
-    expect(Object.keys(selection)).toEqual(['sid2']);
-    expect(selection['sid2']).toMatchObject({
+  function useTestHook(props: HookProps): {
+    selection: ReturnType<typeof useSpanSelection>;
+    selectionMap: Map<string, SpanActionData>;
+  } {
+    const selection = useSpanSelection(props.trace, props.enabled);
+    const { selectionMap } = useSelection<SpanActionData, string>();
+    return { selection, selectionMap };
+  }
+
+  function renderTestHook(
+    initialProps: HookProps = { trace, enabled: true },
+  ): RenderHookResult<ReturnType<typeof useTestHook>, HookProps> {
+    return renderHook(useTestHook, { initialProps, wrapper: SelectionProvider });
+  }
+
+  it('toggles spans in the panel selection', () => {
+    const { result } = renderTestHook();
+
+    act(() => result.current.selection.toggleSpan(span1));
+    act(() => result.current.selection.toggleSpan(span2));
+    expect([...result.current.selectionMap.keys()]).toEqual(['sid1', 'sid2']);
+    expect(result.current.selectionMap.get('sid2')).toMatchObject({
       spanId: 'sid2',
       'attributes.http.method': 'DELETE',
     });
+    expect(result.current.selection.isSelected('sid1')).toBe(true);
+    expect(result.current.selection.someSelected).toBe(true);
+    expect(result.current.selection.allSelected).toBe(false);
+
+    act(() => result.current.selection.toggleSpan(span1));
+    expect([...result.current.selectionMap.keys()]).toEqual(['sid2']);
+    expect(result.current.selection.isSelected('sid1')).toBe(false);
   });
 
-  it('replaces the selection when another span is selected', () => {
-    const { rerender } = render(<Selection item={item1} />);
-    rerender(<Selection item={item2} />);
+  it('selects and deselects all spans', () => {
+    const { result } = renderTestHook();
 
-    expect(Object.keys(getSelection())).toEqual(['sid2']);
+    act(() => result.current.selection.toggleAll());
+    expect(result.current.selectionMap.size).toBe(trace.spanById.size);
+    expect(result.current.selection.allSelected).toBe(true);
+    expect(result.current.selection.someSelected).toBe(false);
+
+    act(() => result.current.selection.toggleAll());
+    expect(result.current.selectionMap.size).toBe(0);
+    expect(result.current.selection.allSelected).toBe(false);
   });
 
-  it('clears the selection when the span is deselected', () => {
-    const { rerender } = render(<Selection item={item2} />);
-    rerender(<Selection item={undefined} />);
+  it('clears the selection when the trace changes', () => {
+    const { result, rerender } = renderTestHook();
 
-    expect(getSelection()).toEqual({});
+    act(() => result.current.selection.toggleSpan(span1));
+    rerender({ trace: getTraceModel(exampleTrace as otlptracev1.TracesData), enabled: true });
+    expect(result.current.selectionMap.size).toBe(0);
   });
 
-  it('clears the selection when unmounted', () => {
-    const { rerender } = render(<Selection item={item2} />);
-    rerender(<Selection item={item2} mounted={false} />);
+  it('clears the selection when disabled', () => {
+    const { result, rerender } = renderTestHook();
 
-    expect(getSelection()).toEqual({});
+    act(() => result.current.selection.toggleSpan(span1));
+    rerender({ trace, enabled: false });
+    expect(result.current.selectionMap.size).toBe(0);
+    expect(result.current.selection.isSelected('sid1')).toBe(false);
   });
 });

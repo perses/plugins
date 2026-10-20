@@ -13,7 +13,7 @@
 
 import { useSelection } from '@perses-dev/components';
 import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import type { Span, Trace } from './trace';
 
@@ -77,23 +77,59 @@ export function getSpanActionItem(trace: Trace, span: Span): SpanActionItem {
   return { id: span.spanId, data: getSpanActionData(trace, span) };
 }
 
-export interface SpanSelectionSyncProps {
-  item?: SpanActionItem;
+export interface SpanSelection {
+  enabled: boolean;
+  isSelected: (spanId: string) => boolean;
+  /** all spans of the trace are selected */
+  allSelected: boolean;
+  /** some, but not all spans of the trace are selected */
+  someSelected: boolean;
+  toggleSpan: (span: Span) => void;
+  toggleAll: () => void;
 }
 
 /**
- * SpanSelectionSync exposes the selected span as panel selection, e.g. for the item actions displayed in the panel header.
- * It is a separate component, so that only this leaf subscribes to the selection context, and not the whole gantt chart.
- * The selection is cleared when the span is deselected or this component is unmounted.
+ * useSpanSelection exposes the checked spans as panel selection, e.g. for the item actions displayed in the panel header.
+ * The selection is cleared when the trace changes, the selection is disabled or the gantt chart is unmounted.
  */
-export function SpanSelectionSync({ item }: SpanSelectionSyncProps): null {
-  const { setSelection, clearSelection } = useSelection<SpanActionData, string>();
+export function useSpanSelection(trace: Trace, enabled: boolean): SpanSelection {
+  const { selectionMap, setSelection, toggleSelection, clearSelection } = useSelection<SpanActionData, string>();
 
   useEffect(() => {
-    if (!item) return;
-    setSelection([{ id: item.id, item: item.data }]);
+    if (!enabled) return;
     return clearSelection;
-  }, [item, setSelection, clearSelection]);
+  }, [enabled, clearSelection]);
 
-  return null;
+  // the gantt chart is not remounted when a new trace is loaded, so the selection of the previous trace is cleared here
+  const traceRef = useRef(trace);
+  useEffect(() => {
+    if (traceRef.current === trace) return;
+    traceRef.current = trace;
+    clearSelection();
+  }, [trace, clearSelection]);
+
+  const isSelected = useCallback((spanId: string) => enabled && selectionMap.has(spanId), [enabled, selectionMap]);
+
+  const toggleSpan = useCallback(
+    (span: Span) => toggleSelection(getSpanActionData(trace, span), span.spanId),
+    [trace, toggleSelection],
+  );
+
+  const selectedCount = enabled ? selectionMap.size : 0;
+  const allSelected = selectedCount > 0 && selectedCount === trace.spanById.size;
+  const someSelected = selectedCount > 0 && !allSelected;
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      clearSelection();
+      return;
+    }
+    const items = Array.from(trace.spanById.values(), (span) => ({
+      id: span.spanId,
+      item: getSpanActionData(trace, span),
+    }));
+    setSelection(items);
+  }, [allSelected, trace, setSelection, clearSelection]);
+
+  return { enabled, isSelected, allSelected, someSelected, toggleSpan, toggleAll };
 }

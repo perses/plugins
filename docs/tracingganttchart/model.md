@@ -22,7 +22,7 @@ mode: <enum = "auto" | "categorical">
 
 ## Selection specification
 
-When enabled, the selected span is exposed as the panel selection, which is used by the actions displayed in the panel header.
+When enabled, spans can be selected with checkboxes. The checked spans are exposed as the panel selection, which is used by the actions displayed in the panel header.
 
 ```yaml
 enabled: <boolean> # Optional

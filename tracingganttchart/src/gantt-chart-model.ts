@@ -20,9 +20,9 @@ import type { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perse
 export interface TracingGanttChartOptions {
   visual?: TracingGanttChartVisualOptions;
   links?: TracingGanttChartCustomLinks;
-  /** When enabled, the selected span is exposed as the panel selection, e.g. for item actions displayed in the panel header. */
+  /** When enabled, spans can be selected with checkboxes, and are exposed as the panel selection, e.g. for item actions displayed in the panel header. */
   selection?: SelectionOptions;
-  /** Actions (events or webhooks) executed with the data of the selected span. */
+  /** Actions (events or webhooks) executed with the data of the selected spans, or of the span opened in the detail pane. */
   actions?: ActionOptions;
   /**
    * Span ID of the initially selected span.
