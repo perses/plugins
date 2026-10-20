@@ -99,7 +99,8 @@ export function useSpanSelection(trace: Trace, enabled: boolean): SpanSelection 
   useEffect(() => {
     if (!enabled) return;
     return clearSelection;
-  }, [enabled, clearSelection]);
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- checked spans are saved as snapshots, and those snapshots don't update when the same trace is reloaded with new content.
+  }, [enabled, trace, clearSelection]);
 
   const isSelected = useCallback((spanId: string) => enabled && selectionMap.has(spanId), [enabled, selectionMap]);
 
