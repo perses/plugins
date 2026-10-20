@@ -14,7 +14,7 @@
 import { Box, Stack } from '@mui/material';
 import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import type { ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
 import { DetailPane } from './DetailPane/DetailPane';
@@ -55,9 +55,10 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
     startTimeUnixMs: trace.startTimeUnixMs,
     endTimeUnixMs: trace.endTimeUnixMs,
   });
-  const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(() =>
-    options.selectedSpanId ? trace.spanById.get(options.selectedSpanId) : undefined,
-  );
+  // the span ID is stored instead of the span, as a refreshed trace model contains new span objects
+  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>(options.selectedSpanId);
+  const selectedSpan = selectedSpanId ? trace.spanById.get(selectedSpanId) : undefined;
+  const handleSpanClick = useCallback((span: Span) => setSelectedSpanId(span.spanId), []);
   const search = useSpanSearch(trace);
 
   const itemActions =
@@ -86,7 +87,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
             trace={trace}
             viewport={viewport}
             selectedSpan={selectedSpan}
-            onSpanClick={setSelectedSpan}
+            onSpanClick={handleSpanClick}
             matchingSpanIds={search.matchingSpanIds}
             focusedSpanId={search.matchingSpanIds[search.focusedMatchIndex]}
           />
@@ -108,7 +109,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
               span={selectedSpan}
               actions={itemActions}
               actionItem={selectedSpanActionItem}
-              onCloseBtnClick={() => setSelectedSpan(undefined)}
+              onCloseBtnClick={() => setSelectedSpanId(undefined)}
             />
           </Box>
         </>

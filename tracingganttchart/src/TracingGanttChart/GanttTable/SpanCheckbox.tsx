@@ -13,7 +13,7 @@
 
 import { Checkbox } from '@mui/material';
 import type { MouseEvent, ReactElement } from 'react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 export interface SpanCheckboxProps {
   checked: boolean;
@@ -28,6 +28,13 @@ export interface SpanCheckboxProps {
 export function SpanCheckbox(props: SpanCheckboxProps): ReactElement {
   const { checked, indeterminate, onChange, 'aria-label': ariaLabel } = props;
   const inputProps = useMemo(() => ({ 'aria-label': ariaLabel }), [ariaLabel]);
+  // MUI only renders the indeterminate icon: the native property exposes the mixed state to assistive technology
+  const inputRef = useCallback(
+    (input: HTMLInputElement | null) => {
+      if (input) input.indeterminate = indeterminate ?? false;
+    },
+    [indeterminate],
+  );
 
   return (
     <Checkbox
@@ -37,6 +44,7 @@ export function SpanCheckbox(props: SpanCheckboxProps): ReactElement {
       onChange={onChange}
       onClick={stopPropagation}
       inputProps={inputProps}
+      inputRef={inputRef}
       sx={checkboxSx}
     />
   );

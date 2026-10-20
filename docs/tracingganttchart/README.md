@@ -40,13 +40,28 @@ Fields can be referenced in URL and body templates with `${__data.fields["<path>
 Object fields are interpolated as JSON, e.g. `${__data.fields["span.attributes"]}`.
 Attributes are lists of OTLP key-value pairs (e.g. `[{ "key": "http.method", "value": { "stringValue": "GET" } }]`),
 so they cannot be referenced individually with a field path: use the whole list, or the full data with `${__data:json}`.
+In `batch` mode, `${__data.fields["<path>"]}` joins the values of all spans (CSV by default), and `${__data[<index>].fields["<path>"]}` references the span at this index.
 
 An event action dispatches a [`CustomEvent`](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent) on `window`, allowing any plugin or application to handle it.
-Without body template, the event detail is the JSON of `{ "id": <spanId>, "data": { "span": ..., "trace": ... } }`:
+Without body template, the event detail is a JSON string, which depends on the batch mode of the action:
+
+- `individual`: one event per span, with `{ "id": <spanId>, "data": { "span": ..., "trace": ... } }`
+- `batch`: one event for all spans, with `{ "items": [{ "span": ..., "trace": ... }, ...] }`
+
+For example, a listener of an `individual` event action:
 
 ```ts
 window.addEventListener('span-logs', (event) => {
   const { data } = JSON.parse((event as CustomEvent<string>).detail);
   openLogs({ traceId: data.span.traceId, spanId: data.span.spanId, service: data.span.resource.serviceName });
+});
+```
+
+And a listener of a `batch` event action:
+
+```ts
+window.addEventListener('spans-logs', (event) => {
+  const { items } = JSON.parse((event as CustomEvent<string>).detail);
+  openLogs(items.map((item) => ({ traceId: item.span.traceId, spanId: item.span.spanId })));
 });
 ```

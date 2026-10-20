@@ -115,7 +115,7 @@ describe('GanttTable', () => {
 
       expect(screen.getByRole('status')).toHaveTextContent('sid1,sid2');
       expect(screen.getByRole('checkbox', { name: 'select span shop-backend: testRootSpan' })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: 'select all spans' })).toHaveAttribute('data-indeterminate', 'true');
+      expect(screen.getByRole('checkbox', { name: 'select all spans' })).toBePartiallyChecked();
       expect(onSpanClick).not.toHaveBeenCalled();
     });
 
@@ -126,6 +126,7 @@ describe('GanttTable', () => {
       expect(screen.getByRole('status').textContent!.split(',')).toHaveLength(selectionTrace.spanById.size);
       for (const checkbox of screen.getAllByRole('checkbox')) {
         expect(checkbox).toBeChecked();
+        expect(checkbox).not.toBePartiallyChecked();
       }
 
       fireEvent.click(screen.getByRole('checkbox', { name: 'select all spans' }));
