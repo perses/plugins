@@ -17,7 +17,7 @@ import { Dialog, useItemActions } from '@perses-dev/components';
 import type { ItemAction } from '@perses-dev/plugin-system';
 import { ACTION_ICONS, executeAction, useAllVariableValues } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 
 import type { SpanActionItem } from '../span-actions';
 
@@ -105,7 +105,8 @@ interface SpanActionButtonProps {
   onClick: (action: ItemAction) => void;
 }
 
-function SpanActionButton(props: SpanActionButtonProps): ReactElement {
+/** memoized, so a button is only re-rendered when its action or loading status changes */
+const SpanActionButton = memo(function SpanActionButton(props: SpanActionButtonProps): ReactElement {
   const { action, loading, onClick } = props;
   const handleClick = useCallback(() => onClick(action), [onClick, action]);
   const icon = loading ? loadingIcon : ACTION_ICONS.find((i) => i.value === action.icon)?.icon;
@@ -115,4 +116,4 @@ function SpanActionButton(props: SpanActionButtonProps): ReactElement {
       {action.name}
     </Button>
   );
-}
+});

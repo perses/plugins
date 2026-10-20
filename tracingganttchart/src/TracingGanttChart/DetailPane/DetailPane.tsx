@@ -25,6 +25,8 @@ import { SpanActionButtons } from './SpanActionButtons';
 import { SpanEventList } from './SpanEvents';
 import { SpanLinkList } from './SpanLinks';
 
+const closeButtonSx = { float: 'right' } as const;
+
 export interface DetailPaneProps {
   customLinks?: CustomLinks;
   trace: Trace;
@@ -55,11 +57,9 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
 
   return (
     <Box>
-      <Stack direction="row" alignItems="center" sx={{ float: 'right' }}>
-        <IconButton onClick={onCloseBtnClick} aria-label="close">
-          <CloseIcon />
-        </IconButton>
-      </Stack>
+      <IconButton sx={closeButtonSx} onClick={onCloseBtnClick} aria-label="close">
+        <CloseIcon />
+      </IconButton>
       <Typography sx={{ wordBreak: 'break-word' }}>{span.resource.serviceName}</Typography>
       <Typography variant="h2" sx={{ wordBreak: 'break-word' }}>
         {span.name}

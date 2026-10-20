@@ -26,7 +26,7 @@ interface GanttTableHeaderProps {
   viewport: Viewport;
   nameColumnWidth: number;
   divider: React.ReactNode;
-  selection?: SpanSelection;
+  selection: SpanSelection;
 }
 
 export function GanttTableHeader(props: GanttTableHeaderProps): ReactElement {
@@ -44,7 +44,7 @@ export function GanttTableHeader(props: GanttTableHeaderProps): ReactElement {
       }}
     >
       <Stack direction="row" alignItems="center" style={{ width: `${nameColumnWidth * 100}%` }}>
-        {selection?.enabled && (
+        {selection.enabled && (
           <SpanCheckbox
             checked={selection.allSelected}
             indeterminate={selection.someSelected}

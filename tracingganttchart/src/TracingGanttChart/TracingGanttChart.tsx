@@ -23,7 +23,7 @@ import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { useSpanSearch } from './Search';
-import { getSpanActionItem, useSpanSelection } from './span-actions';
+import { getSpanActionItem } from './span-actions';
 import type { Span } from './trace';
 import { getTraceModel } from './trace';
 import { TraceHeaderBar } from './TraceHeaderBar';
@@ -60,7 +60,6 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   );
   const search = useSpanSearch(trace);
 
-  const selection = useSpanSelection(trace, options.selection?.enabled ?? false);
   const itemActions =
     options.actions?.enabled && options.actions.displayWithItem ? options.actions.actionsList : undefined;
   const hasItemActions = (itemActions?.length ?? 0) > 0;
@@ -90,7 +89,6 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
             onSpanClick={setSelectedSpan}
             matchingSpanIds={search.matchingSpanIds}
             focusedSpanId={search.matchingSpanIds[search.focusedMatchIndex]}
-            selection={selection}
           />
         </GanttTableProvider>
       </Stack>

@@ -19,8 +19,8 @@ import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
+import type { TracingGanttChartOptions } from '../../gantt-chart-model';
 import * as exampleTrace from '../../test/traces/example_otlp.json';
-import { useSpanSelection } from '../span-actions';
 import { getTraceModel } from '../trace';
 import type { GanttTableProps } from './GanttTable';
 import { GanttTable } from './GanttTable';
@@ -31,11 +31,10 @@ const selectionViewport = {
   startTimeUnixMs: selectionTrace.startTimeUnixMs,
   endTimeUnixMs: selectionTrace.endTimeUnixMs,
 };
-const selectionOptions = {};
+const selectionOptions: TracingGanttChartOptions = { selection: { enabled: true } };
 const virtuosoMock = { viewportHeight: 300, itemHeight: 20 };
 
 function SelectableGanttTable(props: { onSpanClick: () => void }): ReactElement {
-  const selection = useSpanSelection(selectionTrace, true);
   const { selectionMap } = useSelection<unknown, string>();
   return (
     <>
@@ -44,7 +43,6 @@ function SelectableGanttTable(props: { onSpanClick: () => void }): ReactElement 
         trace={selectionTrace}
         viewport={selectionViewport}
         onSpanClick={props.onSpanClick}
-        selection={selection}
       />
       <output>{[...selectionMap.keys()].join(',')}</output>
     </>

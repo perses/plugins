@@ -13,7 +13,7 @@
 
 import { useSelection } from '@perses-dev/components';
 import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
-import { useCallback, useEffect, useRef } from 'react';
+import { startTransition, useCallback, useEffect, useRef } from 'react';
 
 import type { Span, Trace } from './trace';
 
@@ -100,7 +100,9 @@ export function useSpanSelection(trace: Trace, enabled: boolean): SpanSelection 
     return clearSelection;
   }, [enabled, clearSelection]);
 
-  // the gantt chart is not remounted when a new trace is loaded, so the selection of the previous trace is cleared here
+  // The gantt chart is not remounted when a new trace is loaded, so the selection of the previous trace is cleared here.
+  // The selection is stored in the panel's SelectionProvider (not in local state), therefore it cannot be reset during render:
+  // the first render with a new trace can still see the previous selection, until this effect has cleared it.
   const traceRef = useRef(trace);
   useEffect(() => {
     if (traceRef.current === trace) return;
@@ -128,7 +130,8 @@ export function useSpanSelection(trace: Trace, enabled: boolean): SpanSelection 
       id: span.spanId,
       item: getSpanActionData(trace, span),
     }));
-    setSelection(items);
+    // selecting all spans of a large trace re-renders many rows, keep the UI responsive meanwhile
+    startTransition(() => setSelection(items));
   }, [allSelected, trace, setSelection, clearSelection]);
 
   return { enabled, isSelected, allSelected, someSelected, toggleSpan, toggleAll };
