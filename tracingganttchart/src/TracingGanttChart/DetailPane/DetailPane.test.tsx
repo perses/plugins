@@ -89,9 +89,12 @@ describe('DetailPane', () => {
     expect(detail).toMatchObject({
       id: 'sid2',
       data: {
-        traceId: '5B8EFFF798038103D269B633813FC60C',
-        spanId: 'sid2',
-        'attributes.http.method': 'DELETE',
+        span: {
+          traceId: '5B8EFFF798038103D269B633813FC60C',
+          spanId: 'sid2',
+          attributes: [{ key: 'http.method', value: { stringValue: 'DELETE' } }],
+        },
+        trace: { traceId: '5B8EFFF798038103D269B633813FC60C' },
       },
     });
   });
@@ -103,13 +106,13 @@ describe('DetailPane', () => {
     renderComponent([
       {
         ...showLogsAction,
-        bodyTemplate: '${__data.fields.serviceName}/${__data.fields["attributes.http.method"]}',
+        bodyTemplate: '${__data.fields["span.resource.serviceName"]}/${__data.fields["span.status.code"]}',
       },
     ]);
     fireEvent.click(screen.getByRole('button', { name: 'Show logs' }));
 
     window.removeEventListener('test:show-logs', listener);
-    expect((listener.mock.calls[0]![0] as CustomEvent<string>).detail).toBe('shop-backend/DELETE');
+    expect((listener.mock.calls[0]![0] as CustomEvent<string>).detail).toBe('shop-backend/STATUS_CODE_ERROR');
   });
 
   it('asks for confirmation', () => {

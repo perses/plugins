@@ -51,52 +51,43 @@ function KeyedSpanToggle(props: SpanToggleProps & { traceId: string }): ReactEle
 describe('getSpanActionData', () => {
   const trace = getTraceModel(exampleTrace as otlptracev1.TracesData);
 
-  it('returns span, trace and flattened attribute data', () => {
+  it('returns a serializable span and its trace', () => {
     const span = trace.spanById.get('sid2')!;
+    const data = getSpanActionData(trace, span);
 
-    expect(getSpanActionData(trace, span)).toEqual({
-      traceId: '5B8EFFF798038103D269B633813FC60C',
-      spanId: 'sid2',
-      parentSpanId: 'sid1',
-      name: 'testChildSpan2',
-      kind: 'SPAN_KIND_CLIENT',
-      serviceName: 'shop-backend',
-      startTimeUnixMs: expect.closeTo(1100),
-      endTimeUnixMs: expect.closeTo(1200),
-      durationMs: expect.closeTo(100),
-      statusCode: 'STATUS_CODE_ERROR',
-      statusMessage: 'Forbidden',
-      scopeName: 'k6',
-      scopeVersion: undefined,
-      traceStartTimeUnixMs: expect.closeTo(1000),
-      traceEndTimeUnixMs: expect.closeTo(2000),
-      'resource.service.name': 'shop-backend',
-      'attributes.http.method': 'DELETE',
-    });
-  });
-
-  it('converts attribute values', () => {
-    const span = {
-      ...trace.spanById.get('sid1')!,
-      attributes: [
-        { key: 'int', value: { intValue: '42' } },
-        { key: 'double', value: { doubleValue: 4.2 } },
-        { key: 'bool', value: { boolValue: true } },
-        {
-          key: 'array',
-          value: {
-            arrayValue: { values: [{ stringValue: 'a' }, { intValue: '1' }] },
-          },
+    expect(data).toEqual({
+      span: {
+        traceId: '5B8EFFF798038103D269B633813FC60C',
+        spanId: 'sid2',
+        parentSpanId: 'sid1',
+        name: 'testChildSpan2',
+        kind: 'SPAN_KIND_CLIENT',
+        startTimeUnixMs: expect.closeTo(1100),
+        endTimeUnixMs: expect.closeTo(1200),
+        status: { code: 'STATUS_CODE_ERROR', message: 'Forbidden' },
+        scope: { name: 'k6' },
+        resource: {
+          serviceName: 'shop-backend',
+          attributes: [{ key: 'service.name', value: { stringValue: 'shop-backend' } }],
         },
-      ],
-    };
-
-    expect(getSpanActionData(trace, span)).toMatchObject({
-      'attributes.int': '42',
-      'attributes.double': 4.2,
-      'attributes.bool': true,
-      'attributes.array': ['a', '1'],
+        attributes: [{ key: 'http.method', value: { stringValue: 'DELETE' } }],
+        events: [
+          {
+            timeUnixMs: expect.closeTo(1150),
+            name: 'event1_name',
+            attributes: [{ key: 'event1_key', value: { stringValue: 'event1_value' } }],
+          },
+        ],
+        links: [],
+      },
+      trace: {
+        traceId: '5B8EFFF798038103D269B633813FC60C',
+        startTimeUnixMs: expect.closeTo(1000),
+        endTimeUnixMs: expect.closeTo(2000),
+        spanCount: 3,
+      },
     });
+    expect(() => JSON.stringify(data)).not.toThrow();
   });
 });
 
@@ -132,8 +123,8 @@ describe('useSpanSelection', () => {
     act(() => result.current.selection.toggleSpan(span2));
     expect([...result.current.selectionMap.keys()]).toEqual(['sid1', 'sid2']);
     expect(result.current.selectionMap.get('sid2')).toMatchObject({
-      spanId: 'sid2',
-      'attributes.http.method': 'DELETE',
+      span: { spanId: 'sid2', attributes: [{ key: 'http.method', value: { stringValue: 'DELETE' } }] },
+      trace: { spanCount: 3 },
     });
     expect(result.current.selection.isSelected('sid1')).toBe(true);
     expect(result.current.selection.someSelected).toBe(true);
@@ -151,6 +142,10 @@ describe('useSpanSelection', () => {
     expect(result.current.selectionMap.size).toBe(trace.spanById.size);
     expect(result.current.selection.allSelected).toBe(true);
     expect(result.current.selection.someSelected).toBe(false);
+    const [first, ...others] = [...result.current.selectionMap.values()];
+    for (const item of others) {
+      expect(item.trace).toBe(first!.trace);
+    }
 
     act(() => result.current.selection.toggleAll());
     expect(result.current.selectionMap.size).toBe(0);

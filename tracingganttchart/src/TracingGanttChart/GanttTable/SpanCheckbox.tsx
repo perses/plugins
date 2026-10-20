@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { SxProps, Theme } from '@mui/material';
 import { Checkbox } from '@mui/material';
 import type { MouseEvent, ReactElement } from 'react';
 import { useMemo } from 'react';
@@ -48,4 +47,5 @@ function stopPropagation(e: MouseEvent): void {
   e.stopPropagation();
 }
 
-const checkboxSx: SxProps<Theme> = { padding: 0.25, marginX: 0.25, '& .MuiSvgIcon-root': { fontSize: 18 } };
+/** the default padding of a small checkbox exceeds the height of a gantt table row */
+const checkboxSx = { padding: 0.5 } as const;

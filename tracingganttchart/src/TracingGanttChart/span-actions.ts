@@ -12,57 +12,56 @@
 // limitations under the License.
 
 import { useSelection } from '@perses-dev/components';
-import type * as otlpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import { startTransition, useCallback, useEffect } from 'react';
 
 import type { Span, Trace } from './trace';
 
 /**
- * Data of a span passed to item actions.
- * Attributes are flattened with a prefix, so they can be referenced in templates,
- * e.g. ${__data.fields["attributes.http.method"]} or ${__data.fields["resource.service.name"]}.
+ * A span passed to item actions, based on the OTLP types of the Span model (e.g. attributes are OTLP KeyValue lists).
+ * Unlike the Span model, it does not reference its parent and child spans, so it can be serialized.
  */
-export type SpanActionData = Record<string, unknown>;
+export type SpanActionSpan = Omit<Span, 'parentSpan' | 'childSpans'>;
 
-function getAttributeValue(value: otlpcommonv1.AnyValue): unknown {
-  if ('stringValue' in value) return value.stringValue;
-  if ('intValue' in value) return value.intValue;
-  if ('doubleValue' in value) return value.doubleValue;
-  if ('boolValue' in value) return value.boolValue;
-  if ('arrayValue' in value) return (value.arrayValue.values ?? []).map(getAttributeValue);
-  return undefined;
+/**
+ * The trace of a span passed to item actions.
+ * It summarizes the trace, to keep the payload small when all spans of a trace are selected.
+ */
+export interface SpanActionTrace {
+  traceId: string;
+  startTimeUnixMs: number;
+  endTimeUnixMs: number;
+  spanCount: number;
 }
 
-function addAttributes(data: SpanActionData, prefix: string, attributes: otlpcommonv1.KeyValue[]): void {
-  for (const attribute of attributes) {
-    data[`${prefix}.${attribute.key}`] = getAttributeValue(attribute.value);
-  }
+/**
+ * Data of a span passed to item actions, which can be referenced in templates,
+ * e.g. ${__data.fields["span.name"]} or ${__data.fields["trace.startTimeUnixMs"]}.
+ * Declared as a type (not an interface), so it is assignable to the DataItem of the item actions.
+ */
+export type SpanActionData = {
+  span: SpanActionSpan;
+  trace: SpanActionTrace;
+};
+
+export function getSpanActionSpan(span: Span): SpanActionSpan {
+  const { parentSpan: _parentSpan, childSpans: _childSpans, ...serializableSpan } = span;
+  return serializableSpan;
+}
+
+export function getSpanActionTrace(trace: Trace, traceId: string): SpanActionTrace {
+  return {
+    traceId,
+    startTimeUnixMs: trace.startTimeUnixMs,
+    endTimeUnixMs: trace.endTimeUnixMs,
+    spanCount: trace.spanById.size,
+  };
 }
 
 /**
  * getSpanActionData returns the data of a span and its trace, used as item data by the item actions.
  */
 export function getSpanActionData(trace: Trace, span: Span): SpanActionData {
-  const data: SpanActionData = {
-    traceId: span.traceId,
-    spanId: span.spanId,
-    parentSpanId: span.parentSpanId,
-    name: span.name,
-    kind: span.kind,
-    serviceName: span.resource.serviceName,
-    startTimeUnixMs: span.startTimeUnixMs,
-    endTimeUnixMs: span.endTimeUnixMs,
-    durationMs: span.endTimeUnixMs - span.startTimeUnixMs,
-    statusCode: span.status.code,
-    statusMessage: span.status.message,
-    scopeName: span.scope.name,
-    scopeVersion: span.scope.version,
-    traceStartTimeUnixMs: trace.startTimeUnixMs,
-    traceEndTimeUnixMs: trace.endTimeUnixMs,
-  };
-  addAttributes(data, 'resource', span.resource.attributes);
-  addAttributes(data, 'attributes', span.attributes);
-  return data;
+  return { span: getSpanActionSpan(span), trace: getSpanActionTrace(trace, span.traceId) };
 }
 
 /**
@@ -118,9 +117,14 @@ export function useSpanSelection(trace: Trace, enabled: boolean): SpanSelection 
       clearSelection();
       return;
     }
-    const items = Array.from(trace.spanById.values(), (span) => ({
+    const spans = Array.from(trace.spanById.values());
+    const firstSpan = spans[0];
+    if (!firstSpan) return;
+    // all spans share the same trace object, instead of a copy per span
+    const actionTrace = getSpanActionTrace(trace, firstSpan.traceId);
+    const items = spans.map((span) => ({
       id: span.spanId,
-      item: getSpanActionData(trace, span),
+      item: { span: getSpanActionSpan(span), trace: actionTrace },
     }));
     // selecting all spans of a large trace re-renders many rows, keep the UI responsive meanwhile
     startTransition(() => setSelection(items));

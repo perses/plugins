@@ -21,26 +21,32 @@ Actions are configured in the **Item Actions** tab of the panel editor:
 - **Display Actions in Panel Header**: shows the actions in the panel header. Requires **Enable Item Selection**:
   these actions are executed with the checked spans, either once per span (`individual` batch mode) or once for all spans (`batch` batch mode).
 
-Each action receives the following fields of a span, which can be referenced in URL and body templates with `${__data.fields["<field>"]}`:
+Each action receives the data of a span and its trace, as `{ "span": { ... }, "trace": { ... } }`.
+Fields can be referenced in URL and body templates with `${__data.fields["<path>"]}`, e.g. `${__data.fields["span.name"]}`:
 
-| Field                                        | Description                                            |
-|----------------------------------------------|--------------------------------------------------------|
-| `traceId`, `spanId`, `parentSpanId`          | Identifiers of the trace, span and parent span         |
-| `name`, `kind`, `serviceName`                | Span name, span kind and service name                  |
-| `startTimeUnixMs`, `endTimeUnixMs`           | Start and end time of the span, in milliseconds        |
-| `durationMs`                                 | Duration of the span, in milliseconds                  |
-| `statusCode`, `statusMessage`                | Span status                                            |
-| `scopeName`, `scopeVersion`                  | Instrumentation scope                                  |
-| `traceStartTimeUnixMs`, `traceEndTimeUnixMs` | Start and end time of the whole trace, in milliseconds |
-| `attributes.<key>`                           | Span attributes, e.g. `attributes.http.method`         |
-| `resource.<key>`                             | Resource attributes, e.g. `resource.service.name`      |
+| Field                                              | Description                                            |
+|----------------------------------------------------|--------------------------------------------------------|
+| `span.traceId`, `span.spanId`, `span.parentSpanId` | Identifiers of the trace, span and parent span         |
+| `span.name`, `span.kind`                           | Span name and span kind                                |
+| `span.startTimeUnixMs`, `span.endTimeUnixMs`       | Start and end time of the span, in milliseconds        |
+| `span.status.code`, `span.status.message`          | Span status                                            |
+| `span.scope.name`, `span.scope.version`            | Instrumentation scope                                  |
+| `span.resource.serviceName`                        | Service name                                           |
+| `span.resource.attributes`, `span.attributes`      | Resource and span attributes, as OTLP key-value lists  |
+| `span.events`, `span.links`                        | Span events and links, with their attributes           |
+| `trace.traceId`, `trace.spanCount`                 | Identifier of the trace and its number of spans        |
+| `trace.startTimeUnixMs`, `trace.endTimeUnixMs`     | Start and end time of the whole trace, in milliseconds |
+
+Object fields are interpolated as JSON, e.g. `${__data.fields["span.attributes"]}`.
+Attributes are lists of OTLP key-value pairs (e.g. `[{ "key": "http.method", "value": { "stringValue": "GET" } }]`),
+so they cannot be referenced individually with a field path: use the whole list, or the full data with `${__data:json}`.
 
 An event action dispatches a [`CustomEvent`](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent) on `window`, allowing any plugin or application to handle it.
-Without body template, the event detail is the JSON of `{ "id": <spanId>, "data": <span fields> }`:
+Without body template, the event detail is the JSON of `{ "id": <spanId>, "data": { "span": ..., "trace": ... } }`:
 
 ```ts
 window.addEventListener('span-logs', (event) => {
   const { data } = JSON.parse((event as CustomEvent<string>).detail);
-  openLogs({ traceId: data.traceId, spanId: data.spanId, service: data['resource.service.name'] });
+  openLogs({ traceId: data.span.traceId, spanId: data.span.spanId, service: data.span.resource.serviceName });
 });
 ```

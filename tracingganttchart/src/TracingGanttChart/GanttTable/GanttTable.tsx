@@ -41,7 +41,6 @@ export interface GanttTableProps {
 export function GanttTable(props: GanttTableProps): ReactElement {
   const { options, customLinks, trace, viewport, selectedSpan, onSpanClick, matchingSpanIds, focusedSpanId } = props;
   const { collapsedSpans, setCollapsedSpans, setVisibleSpans } = useGanttTableContext();
-  // the selection is consumed here, so checking a span only re-renders the table, not the entire gantt chart
   const selection = useSpanSelection(trace, options.selection?.enabled ?? false);
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
