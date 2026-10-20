@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { FetchProvider } from '@perses-dev/client';
+import { ItemActionsProvider } from '@perses-dev/components';
 import { VariableProvider } from '@perses-dev/dashboards';
 import type { ItemAction } from '@perses-dev/plugin-system';
 import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
@@ -18,7 +20,7 @@ import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/ot
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, screen } from '@testing-library/dom';
 import type { RenderResult } from '@testing-library/react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import * as exampleTrace from '../../test/traces/example_otlp.json';
@@ -33,14 +35,25 @@ const initialTimeRange = { pastDuration: '1m' } as const;
 
 function noop(): void {}
 
-function renderComponent(actions?: ItemAction[]): RenderResult {
+function renderComponent(actions?: ItemAction[], fetchFn: typeof fetch = fetch): RenderResult {
   return render(
     <QueryClientProvider client={new QueryClient()}>
       <MemoryRouter>
         <ReactRouterProvider>
           <TimeRangeProviderBasic initialTimeRange={initialTimeRange}>
             <VariableProvider>
-              <DetailPane trace={trace} span={span} actions={actions} actionItem={actionItem} onCloseBtnClick={noop} />
+              <FetchProvider fetchFn={fetchFn}>
+                {/* provided by the panel in dashboards */}
+                <ItemActionsProvider>
+                  <DetailPane
+                    trace={trace}
+                    span={span}
+                    actions={actions}
+                    actionItem={actionItem}
+                    onCloseBtnClick={noop}
+                  />
+                </ItemActionsProvider>
+              </FetchProvider>
             </VariableProvider>
           </TimeRangeProviderBasic>
         </ReactRouterProvider>
@@ -113,6 +126,38 @@ describe('DetailPane', () => {
 
     window.removeEventListener('test:show-logs', listener);
     expect((listener.mock.calls[0]![0] as CustomEvent<string>).detail).toBe('shop-backend/STATUS_CODE_ERROR');
+  });
+
+  it('disables a batch webhook action while it is running', async () => {
+    let resolveFetch: (response: Response) => void = noop;
+    const fetchFn = vi.fn(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+    renderComponent(
+      [
+        {
+          type: 'webhook',
+          name: 'Report span',
+          url: 'https://example.com/spans',
+          method: 'POST',
+          contentType: 'none',
+          batchMode: 'batch',
+          enabled: true,
+        },
+      ],
+      fetchFn,
+    );
+
+    const button = screen.getByRole('button', { name: 'Report span' });
+    fireEvent.click(button);
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+    expect(button).toBeDisabled();
+
+    await act(async () => resolveFetch({ ok: true, status: 200, statusText: 'OK' } as Response));
+    expect(button).toBeEnabled();
   });
 
   it('asks for confirmation', () => {

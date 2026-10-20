@@ -81,7 +81,7 @@ export function SpanActionButtons(props: SpanActionButtonsProps): ReactElement {
           <SpanActionButton
             key={action.name}
             action={action}
-            loading={actionStatuses.get(action.name)?.itemStatuses?.get(item.id)?.loading ?? false}
+            loading={actionStatuses.get(action.name)?.loading ?? false}
             onClick={handleClick}
           />
         ))}
