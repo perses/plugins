@@ -11,14 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Chip, IconButton, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Chip, IconButton, Stack, Tab, Tabs, Typography } from '@mui/material';
+import type { ItemAction } from '@perses-dev/plugin-system';
 import CloseIcon from 'mdi-material-ui/Close';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 
 import type { CustomLinks } from '../../gantt-chart-model';
+import type { SpanActionItem } from '../span-actions';
 import type { Span, Trace } from '../trace';
 import { TraceAttributes } from './Attributes';
+import { SpanActionButtons } from './SpanActionButtons';
 import { SpanEventList } from './SpanEvents';
 import { SpanLinkList } from './SpanLinks';
 
@@ -26,6 +29,10 @@ export interface DetailPaneProps {
   customLinks?: CustomLinks;
   trace: Trace;
   span: Span;
+  /** item actions executed with the data of the span */
+  actions?: ItemAction[];
+  /** data of the span passed to the item actions, required to display the actions */
+  actionItem?: SpanActionItem;
   onCloseBtnClick: () => void;
 }
 
@@ -33,7 +40,7 @@ export interface DetailPaneProps {
  * DetailPane renders a sidebar showing the span attributes etc.
  */
 export function DetailPane(props: DetailPaneProps): ReactElement {
-  const { customLinks, trace, span, onCloseBtnClick } = props;
+  const { customLinks, trace, span, actions, actionItem, onCloseBtnClick } = props;
   const [tab, setTab] = useState<'attributes' | 'events' | 'links'>('attributes');
 
   // if the events tab is selected, and then a span without events is clicked,
@@ -48,13 +55,20 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
 
   return (
     <Box>
-      <IconButton sx={{ float: 'right' }} onClick={onCloseBtnClick}>
-        <CloseIcon />
-      </IconButton>
+      <Stack direction="row" alignItems="center" sx={{ float: 'right' }}>
+        <IconButton onClick={onCloseBtnClick} aria-label="close">
+          <CloseIcon />
+        </IconButton>
+      </Stack>
       <Typography sx={{ wordBreak: 'break-word' }}>{span.resource.serviceName}</Typography>
       <Typography variant="h2" sx={{ wordBreak: 'break-word' }}>
         {span.name}
       </Typography>
+      {actions?.length && actionItem ? (
+        <Stack direction="row" flexWrap="wrap" gap={0.5}>
+          <SpanActionButtons actions={actions} item={actionItem} />
+        </Stack>
+      ) : null}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tab} onChange={(_, tab) => setTab(tab)} variant="scrollable">
           <Tab sx={{ p: 0 }} value="attributes" label="Attributes" />

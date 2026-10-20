@@ -23,6 +23,7 @@ import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { useSpanSearch } from './Search';
+import { getSpanActionItem, SpanSelectionSync } from './span-actions';
 import type { Span } from './trace';
 import { getTraceModel } from './trace';
 import { TraceHeaderBar } from './TraceHeaderBar';
@@ -59,6 +60,16 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   );
   const search = useSpanSearch(trace);
 
+  const selectionEnabled = options.selection?.enabled ?? false;
+  const itemActions =
+    options.actions?.enabled && options.actions.displayWithItem ? options.actions.actionsList : undefined;
+  const hasItemActions = (itemActions?.length ?? 0) > 0;
+  // computed once for both the panel selection and the item actions of the detail pane
+  const selectedSpanActionItem = useMemo(
+    () => (selectedSpan && (selectionEnabled || hasItemActions) ? getSpanActionItem(trace, selectedSpan) : undefined),
+    [trace, selectedSpan, selectionEnabled, hasItemActions],
+  );
+
   const ganttChart = useRef<HTMLDivElement>(null);
   // tableWidth only comes to effect if the detail pane is visible.
   // setTableWidth() is only called by <ResizableDivider />
@@ -67,6 +78,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
 
   return (
     <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
+      {selectionEnabled ? <SpanSelectionSync item={selectedSpanActionItem} /> : null}
       <Stack sx={{ flexGrow: 1, gap }}>
         <TraceHeaderBar trace={trace} search={search} />
         <MiniGanttChart options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
@@ -97,6 +109,8 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
               customLinks={customLinks}
               trace={trace}
               span={selectedSpan}
+              actions={itemActions}
+              actionItem={selectedSpanActionItem}
               onCloseBtnClick={() => setSelectedSpan(undefined)}
             />
           </Box>

@@ -5,3 +5,9 @@ language: {
 source: {
 	kind: "git"
 }
+deps: {
+	"github.com/perses/shared/cue@v0": {
+		v:       "v0.55.0-beta.13"
+		default: true
+	}
+}

@@ -1,0 +1,32 @@
+{
+  "kind": "TracingGanttChart",
+  "spec": {
+    "selection": {
+      "enabled": true
+    },
+    "actions": {
+      "enabled": true,
+      "displayInHeader": true,
+      "displayWithItem": true,
+      "actionsList": [
+        {
+          "type": "event",
+          "name": "Show logs",
+          "icon": "link",
+          "eventName": "perses:span-logs",
+          "batchMode": "individual",
+          "bodyTemplate": "{\"traceId\": \"${__data.fields.traceId}\", \"spanId\": \"${__data.fields.spanId}\"}"
+        },
+        {
+          "type": "webhook",
+          "name": "Report span",
+          "url": "https://example.com/spans/${__data.fields.spanId}",
+          "method": "POST",
+          "contentType": "json",
+          "batchMode": "individual",
+          "bodyTemplate": "{\"service\": \"${__data.fields[\"resource.service.name\"]}\"}"
+        }
+      ]
+    }
+  }
+}

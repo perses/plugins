@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
+
 /**
  * The Options object type supported by the TracingGanttChart panel plugin.
  */
@@ -18,6 +20,10 @@
 export interface TracingGanttChartOptions {
   visual?: TracingGanttChartVisualOptions;
   links?: TracingGanttChartCustomLinks;
+  /** When enabled, the selected span is exposed as the panel selection, e.g. for item actions displayed in the panel header. */
+  selection?: SelectionOptions;
+  /** Actions (events or webhooks) executed with the data of the selected span. */
+  actions?: ActionOptions;
   /**
    * Span ID of the initially selected span.
    * This property is used in the explore view when clicking on span links, and is intentionally not exposed in the Cue schema.
@@ -61,6 +67,8 @@ export interface CustomLinks {
   variables: Record<string, string>;
   links: TracingGanttChartCustomLinks;
 }
+
+export type TracingGanttChartOptionsEditorProps = OptionsEditorProps<TracingGanttChartOptions>;
 
 /**
  * Creates the initial/empty options for a TracingGanttChart panel.
