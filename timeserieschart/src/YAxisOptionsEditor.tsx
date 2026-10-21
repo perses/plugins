@@ -48,6 +48,17 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
           />
         }
       />
+      <OptionsEditorControl
+        label="Axis centered"
+        control={
+          <Switch
+            checked={value.axisCentered ?? DEFAULT_Y_AXIS.axisCentered}
+            onChange={(e): void => {
+              onChange({ ...value, axisCentered: e.target.checked });
+            }}
+          />
+        }
+      />
       <FormatControls
         value={value.format ?? DEFAULT_FORMAT}
         onChange={(newFormat): void =>
