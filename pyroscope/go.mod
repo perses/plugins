@@ -3,8 +3,8 @@ module github.com/perses/plugins/pyroscope
 go 1.27.2
 
 require (
-	github.com/perses/perses v0.55.0-rc.0
-	github.com/perses/spec v0.3.0-rc.1
+	github.com/perses/perses v0.55.0-rc.1
+	github.com/perses/spec v0.3.0
 )
 
 require (
