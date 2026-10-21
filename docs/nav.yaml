@@ -1,0 +1,160 @@
+# Navigation of the documentation published on https://perses.dev.
+#
+# The website (https://github.com/perses/website) reads this file for each published version of the documentation,
+# so the navigation evolves with the documentation. When you add, move or remove a page, update this file.
+# A page missing from this file is still published, but it can only be reached through links and the search.
+#
+# Syntax:
+#   - overview.md                          # page, the title is the first h1 of the page
+#   - Getting started: getting-started.md  # page with an explicit title
+#   - Concepts:                            # section
+#       - Dashboard: concepts/dashboard.md
+#   - Helm: helm-charts:installation.md    # page of another documentation of the website
+#                                          # (perses, operator, helm-charts or plugins), in its latest version
+#   - Plugins: /docs/plugins/              # link to another page of the website
+#   - Demo: https://demo.perses.dev        # external link
+
+- Datasources:
+    - ClickHouse:
+        - Overview: clickhouse/README.md
+        - Model: clickhouse/model.md
+        - Go SDK:
+            - Datasource: clickhouse/go-sdk/datasource.md
+            - Log Query: clickhouse/go-sdk/log-query.md
+            - Time Series Query: clickhouse/go-sdk/timeseries-query.md
+    - GreptimeDB:
+        - Overview: greptimedb/README.md
+        - Model: greptimedb/model.md
+        - Go SDK:
+            - Datasource: greptimedb/go-sdk/datasource.md
+            - Log Query: greptimedb/go-sdk/log-query.md
+            - Time Series Query: greptimedb/go-sdk/timeseries-query.md
+            - Trace Query: greptimedb/go-sdk/trace-query.md
+    - Loki:
+        - Overview: loki/README.md
+        - Model: loki/model.md
+        - Go SDK:
+            - Datasource: loki/go-sdk/datasource.md
+            - Log Query: loki/go-sdk/log-query.md
+            - Time Series Query: loki/go-sdk/timeseries-query.md
+    - OpenSearch:
+        - Overview: opensearch/README.md
+        - Model: opensearch/model.md
+        - Go SDK:
+            - Datasource: opensearch/go-sdk/datasource.md
+            - Log Query: opensearch/go-sdk/log-query.md
+    - Prometheus:
+        - Overview: prometheus/README.md
+        - Model: prometheus/model.md
+        - CUE SDK:
+            - Filter: prometheus/cue-sdk/filter.md
+            - Panel: prometheus/cue-sdk/panel.md
+            - Variables:
+                - Label Names Variable: prometheus/cue-sdk/variable/label-names.md
+                - Label Values Variable: prometheus/cue-sdk/variable/label-values.md
+                - PromQL Variable: prometheus/cue-sdk/variable/promql.md
+        - Go SDK:
+            - Datasource: prometheus/go-sdk/datasource.md
+            - Query: prometheus/go-sdk/query.md
+            - Variables:
+                - Label Names Variable: prometheus/go-sdk/variable/label-names.md
+                - Label Values Variable: prometheus/go-sdk/variable/label-values.md
+                - PromQL Variable: prometheus/go-sdk/variable/promql.md
+    - Pyroscope:
+        - Overview: pyroscope/README.md
+        - Model: pyroscope/model.md
+        - Go SDK:
+            - Datasource: pyroscope/go-sdk/datasource.md
+            - Query: pyroscope/go-sdk/query.md
+    - Tempo:
+        - Overview: tempo/README.md
+        - Model: tempo/model.md
+        - Go SDK:
+            - Datasource: tempo/go-sdk/datasource.md
+            - Query: tempo/go-sdk/query.md
+    - VictoriaLogs:
+        - Overview: victorialogs/README.md
+        - Model: victorialogs/model.md
+        - Go SDK:
+            - Datasource: victorialogs/go-sdk/datasource.md
+            - Log Query: victorialogs/go-sdk/log-query.md
+            - Time Series Query: victorialogs/go-sdk/timeseries-query.md
+            - Variables:
+                - Field Names Variable: victorialogs/go-sdk/variable/field-names.md
+                - Field Values Variable: victorialogs/go-sdk/variable/field-values.md
+- Panels:
+    - Bar Chart:
+        - Overview: barchart/README.md
+        - Model: barchart/model.md
+        - Go SDK: barchart/go-sdk.md
+    - Flame Chart:
+        - Overview: flamechart/README.md
+        - Model: flamechart/model.md
+        - Go SDK: flamechart/go-sdk.md
+    - Gauge Chart:
+        - Overview: gaugechart/README.md
+        - Model: gaugechart/model.md
+        - Go SDK: gaugechart/go-sdk.md
+    - HeatMap Chart:
+        - Overview: heatmapchart/README.md
+        - Model: heatmapchart/model.md
+        - Go SDK: heatmapchart/go-sdk.md
+    - Histogram Chart:
+        - Overview: histogramchart/README.md
+        - Model: histogramchart/model.md
+        - Go SDK: histogramchart/go-sdk.md
+    - Logs Table:
+        - Overview: logstable/README.md
+        - Model: logstable/model.md
+        - Go SDK: logstable/go-sdk.md
+    - Markdown:
+        - Overview: markdown/README.md
+        - Model: markdown/model.md
+        - Go SDK: markdown/go-sdk.md
+    - Pie Chart:
+        - Overview: piechart/README.md
+        - Model: piechart/model.md
+        - Go SDK: piechart/go-sdk.md
+    - Scatter Chart:
+        - Overview: scatterchart/README.md
+        - Model: scatterchart/model.md
+        - Go SDK: scatterchart/go-sdk.md
+    - Stat Chart:
+        - Overview: statchart/README.md
+        - Model: statchart/model.md
+        - Go SDK: statchart/go-sdk.md
+    - Status History Chart:
+        - Overview: statushistorychart/README.md
+        - Model: statushistorychart/model.md
+        - Go SDK: statushistorychart/go-sdk.md
+    - Table:
+        - Overview: table/README.md
+        - Model: table/model.md
+        - Go SDK: table/go-sdk.md
+    - Time Series Chart:
+        - Overview: timeserieschart/README.md
+        - Model: timeserieschart/model.md
+        - Go SDK: timeserieschart/go-sdk.md
+    - Time Series Table:
+        - Overview: timeseriestable/README.md
+        - Model: timeseriestable/model.md
+        - Go SDK: timeseriestable/go-sdk.md
+    - Trace Table:
+        - Overview: tracetable/README.md
+        - Model: tracetable/model.md
+        - Go SDK: tracetable/go-sdk.md
+    - Tracing Gantt Chart:
+        - Overview: tracingganttchart/README.md
+        - Model: tracingganttchart/model.md
+        - Go SDK: tracingganttchart/go-sdk.md
+- Variables:
+    - Datasource Variable:
+        - Overview: datasourcevariable/README.md
+        - Model: datasourcevariable/model.md
+        - CUE SDK: datasourcevariable/cue-sdk.md
+        - Go SDK: datasourcevariable/go-sdk.md
+    - Static List Variable:
+        - Overview: staticlistvariable/README.md
+        - Model: staticlistvariable/model.md
+        - CUE SDK: staticlistvariable/cue-sdk.md
+        - Go SDK: staticlistvariable/go-sdk.md
