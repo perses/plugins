@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Skeleton, Stack } from '@mui/material';
+import { Box, Skeleton, Stack, Typography } from '@mui/material';
 import type { FormatOptions } from '@perses-dev/components';
-import { formatValue, useChartsTheme } from '@perses-dev/components';
+import { ErrorAlert, formatValue, useChartsTheme } from '@perses-dev/components';
 import type { PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
 import type { TimeSeriesData } from '@perses-dev/spec';
@@ -31,6 +31,7 @@ import { convertThresholds, defaultThresholdInput } from './thresholds';
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };
 const GAUGE_MIN_WIDTH = 90;
 const PANEL_PADDING_OFFSET = 20;
+const INVALID_VALUE_SX = { overflowWrap: 'anywhere' } as const;
 
 /**
  * Calculate responsive progress width based on panel dimensions
@@ -189,21 +190,41 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
       }}
     >
       {gaugeData.map((series, seriesIndex) => {
-        const fontSize = getResponsiveValueFontSize(series.value ?? null, format, chartWidth, contentDimensions.height);
-
         return (
           <Box key={`gauge-series-${seriesIndex}`}>
-            <GaugeChartBase
-              width={chartWidth}
-              height={contentDimensions.height}
-              data={series}
-              format={format}
-              axisLine={axisLine}
-              max={thresholdMax}
-              valueFontSize={fontSize}
-              progressWidth={progressWidth}
-              titleFontSize={titleFontSize}
-            />
+            {Number.isNaN(series.value) ? (
+              <Stack
+                width={chartWidth}
+                height={contentDimensions.height}
+                justifyContent="center"
+                spacing={1}
+                sx={INVALID_VALUE_SX}
+              >
+                <ErrorAlert error={new Error('Invalid numeric value')} />
+                {series.label && (
+                  <Typography align="center" variant="body2">
+                    {series.label}
+                  </Typography>
+                )}
+              </Stack>
+            ) : (
+              <GaugeChartBase
+                width={chartWidth}
+                height={contentDimensions.height}
+                data={series}
+                format={format}
+                axisLine={axisLine}
+                max={thresholdMax}
+                valueFontSize={getResponsiveValueFontSize(
+                  series.value ?? null,
+                  format,
+                  chartWidth,
+                  contentDimensions.height,
+                )}
+                progressWidth={progressWidth}
+                titleFontSize={titleFontSize}
+              />
+            )}
           </Box>
         );
       })}
