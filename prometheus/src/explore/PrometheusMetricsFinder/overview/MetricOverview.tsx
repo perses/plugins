@@ -19,7 +19,7 @@ import type { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
 import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
 import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import type { LabelFilter } from '../types';
 import { computeFilterExpr } from '../types';

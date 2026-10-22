@@ -28,8 +28,8 @@ const PLUGINS_PATH = '/plugins';
 
 /**
  * React Compiler options shared by every plugin, passed to `pluginReact({ reactCompiler })`.
- * Perses runs on React 18, so the compiled output relies on the `react-compiler-runtime` package. Switch the target to
- * '19' (and drop `react-compiler-runtime`) when upgrading React.
+ * Plugins support React 18 and 19, so the compiler targets the minimum supported version (18). The compiled output then
+ * imports the `react-compiler-runtime` package, which delegates to React's built-in compiler runtime on React 19+.
  * @see {@link https://rsbuild.rs/plugins/list/plugin-react#reactcompiler}
  */
 const reactCompilerOptions: ReactCompilerOptions = {

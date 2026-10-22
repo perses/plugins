@@ -26,8 +26,8 @@ export default createConfigForPlugin({
       './GreptimeDBTraceQuery': './src/queries/greptimedb-trace-query',
     },
     shared: {
-      react: { requiredVersion: '18.2.0', singleton: true },
-      'react-dom': { requiredVersion: '18.2.0', singleton: true },
+      react: { requiredVersion: '^18.2.0 || ^19.0.0', singleton: true },
+      'react-dom': { requiredVersion: '^18.2.0 || ^19.0.0', singleton: true },
       echarts: { singleton: true },
       'date-fns': { singleton: true },
       'date-fns-tz': { singleton: true },
