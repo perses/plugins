@@ -23,6 +23,17 @@ function errorResponse(status: number, body: string): Pick<Response, 'ok' | 'sta
   return { ok: false, status, text: (): Promise<string> => Promise.resolve(body) };
 }
 
+function forbidden(): Pick<Response, 'ok' | 'status' | 'text'> {
+  return errorResponse(
+    403,
+    JSON.stringify({ message: 'you are not allowed to use this endpoint GET /api/v3/services' }),
+  );
+}
+
+function pathOf(call: unknown[]): string {
+  return new URL(call[0] as string).pathname;
+}
+
 describe('jaeger-client', () => {
   beforeEach(() => {
     fetchMock.mockReset();
@@ -188,8 +199,6 @@ describe('jaeger-client', () => {
   });
 
   describe('datasources saved with the former allowed endpoints', () => {
-    const forbidden = (): Pick<Response, 'ok' | 'status' | 'text'> =>
-      errorResponse(403, JSON.stringify({ message: 'you are not allowed to use this endpoint GET /api/v3/services' }));
     const searchWindow = {
       startTime: new Date('2024-06-11T10:00:00.000Z'),
       endTime: new Date('2024-06-11T11:00:00.000Z'),
@@ -209,7 +218,6 @@ describe('jaeger-client', () => {
         },
       ],
     };
-    const pathOf = (call: unknown[]): string => new URL(call[0] as string).pathname;
 
     it('falls back to the API v1 when the proxy rejects the API v3, and remembers it', async () => {
       const options = { datasourceUrl: 'http://legacy-services.example' };
@@ -256,6 +264,19 @@ describe('jaeger-client', () => {
       expect(result.resourceSpans?.[0]?.resource?.attributes).toEqual([
         { key: 'service.name', value: { stringValue: 'frontend' } },
       ]);
+    });
+
+    it('sends numeric and boolean tags to the API v1 as strings', async () => {
+      fetchMock.mockResolvedValueOnce(forbidden());
+      fetchMock.mockResolvedValueOnce(jsonResponse({ data: [] }));
+
+      await searchTraces(
+        { service: 'frontend', tags: '{"http.status_code":500,"error":true,"env":"prod"}', ...searchWindow },
+        { datasourceUrl: 'http://legacy-tags.example' },
+      );
+
+      const url = new URL(fetchMock.mock.calls[1]![0] as string);
+      expect(url.searchParams.get('tags')).toBe('{"http.status_code":"500","error":"true","env":"prod"}');
     });
 
     it('gets a single trace with the API v1', async () => {

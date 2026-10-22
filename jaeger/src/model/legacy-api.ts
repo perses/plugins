@@ -68,13 +68,19 @@ export const LEGACY_TRACES_PATH = '/api/traces';
 export const LEGACY_SERVICES_PATH = '/api/services';
 export const LEGACY_OPERATIONS_PATH = '/api/operations';
 
+// The API v1 parses the tags as a map of strings, so numbers and booleans are converted like the API v3 attributes.
+function stringifyTags(tags: string): string {
+  const parsed = JSON.parse(tags) as Record<string, string | number | boolean>;
+  return JSON.stringify(Object.fromEntries(Object.entries(parsed).map(([key, value]) => [key, String(value)])));
+}
+
 export function buildLegacySearchParams(params: JaegerSearchRequestParameters): URLSearchParams {
   const urlSearchParams = new URLSearchParams();
   const entries: Record<string, string | undefined> = {
     service: params.service,
     operation: params.operation,
     spanKind: params.spanKind,
-    tags: params.tags,
+    tags: params.tags === undefined ? undefined : stringifyTags(params.tags),
     minDuration: params.minDuration,
     maxDuration: params.maxDuration,
     limit: params.limit?.toString(),
