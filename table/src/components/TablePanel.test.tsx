@@ -592,6 +592,44 @@ describe('TablePanel', () => {
       },
       TEST_TIMEOUT,
     );
+
+    it(
+      'should keep a separate column filter value for each raw value mapped to the same text',
+      async () => {
+        const options: TableOptions = {
+          columnSettings: [
+            { name: 'timestamp', hide: true },
+            { name: 'namespace', header: 'Namespace' },
+            { name: 'value', header: 'Value' },
+          ],
+          cellSettings: [
+            { condition: { kind: 'Value', spec: { value: '50' } }, text: 'same' },
+            { condition: { kind: 'Value', spec: { value: '0' } }, text: 'same' },
+          ],
+          enableFiltering: true,
+        };
+        renderMultiQueryPanel([MOCK_MULTI_QUERY_DATA_WITH_ZERO], options);
+
+        await screen.findByRole('cell', { name: 'ns-b' });
+        const filterButtons = screen.getAllByRole('button', { name: '▼' });
+        await userEvent.click(filterButtons[1]!);
+
+        const dropdown = document.querySelector<HTMLElement>('[data-filter-dropdown]')!;
+        const sameOptions = within(dropdown).getAllByRole('checkbox', { name: 'same' });
+        expect(sameOptions).toHaveLength(2);
+        const [first, second] = sameOptions;
+
+        await userEvent.click(first!);
+        await waitFor(() => expect(screen.queryByRole('cell', { name: 'ns-b' })).not.toBeInTheDocument());
+        expect(screen.getByRole('cell', { name: 'ns-a' })).toBeInTheDocument();
+
+        await userEvent.click(first!);
+        await userEvent.click(second!);
+        await waitFor(() => expect(screen.queryByRole('cell', { name: 'ns-a' })).not.toBeInTheDocument());
+        expect(screen.getByRole('cell', { name: 'ns-b' })).toBeInTheDocument();
+      },
+      TEST_TIMEOUT,
+    );
   });
 
   describe('filter row alignment', () => {
