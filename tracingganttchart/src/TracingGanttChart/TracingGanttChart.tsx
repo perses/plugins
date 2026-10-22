@@ -64,7 +64,6 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   // setTableWidth() is only called by <ResizableDivider />
   const [tableWidth, setTableWidth] = useState<number>(0.82);
   const gap = 2;
-  const spacing = ganttChart.current ? parseFloat(getComputedStyle(ganttChart.current).columnGap) || 0 : 0;
 
   return (
     <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
@@ -86,7 +85,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
       </Stack>
       {selectedSpan && (
         <>
-          <ResizableDivider parentRef={ganttChart} spacing={spacing} onMove={setTableWidth} />
+          <ResizableDivider parentRef={ganttChart} onMove={setTableWidth} />
           <Box
             style={{
               width: `${(1 - tableWidth) * 100}%`,

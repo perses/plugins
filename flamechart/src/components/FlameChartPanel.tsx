@@ -18,7 +18,7 @@ import type { PanelProps } from '@perses-dev/plugin-system';
 import type { ProfileData, StackTrace } from '@perses-dev/spec';
 import type { TitleComponentOption } from 'echarts';
 import type { FC } from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 import type { FlameChartOptions } from '../flame-chart-model';
 import { filterStackTraceById, getMaxDepth } from '../utils/data-transform';
@@ -45,12 +45,13 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
   // This spec is used to manage settings temporarily
   const [liveSpec, setLiveSpec] = useState<FlameChartOptions>(spec);
 
-  // keep liveSpec up to date
-  useEffect(() => {
+  const [previousSpec, setPreviousSpec] = useState(spec);
+  if (spec !== previousSpec) {
+    setPreviousSpec(spec);
     setLiveSpec(spec);
     setSelectedId(0);
     setSearchValue('');
-  }, [spec]);
+  }
 
   const chartsTheme = useChartsTheme();
   const flameChartData = useMemo(() => {

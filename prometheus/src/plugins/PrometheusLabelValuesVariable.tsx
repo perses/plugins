@@ -21,7 +21,7 @@ import {
 import type { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 
 import { DEFAULT_PROM, getPrometheusTimeRange, PROM_DATASOURCE_KIND } from '../model';
-import { resolvePrometheusDatasource } from './interpolation';
+import { interpolateMatchers, resolvePrometheusDatasource } from './interpolation';
 import { stringArrayToVariableOptions, PrometheusLabelValuesVariableEditor } from './prometheus-variables';
 import type { PrometheusLabelValuesVariableOptions, PrometheusDatasourceSpec } from './types';
 
@@ -109,7 +109,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
       datasourceSelector,
       ctx.variables,
     );
-    const match = pluginDef.matchers ? pluginDef.matchers.map((m) => replaceVariables(m, ctx.variables)) : undefined;
+    const match = interpolateMatchers(pluginDef.matchers, ctx.variables);
 
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
 

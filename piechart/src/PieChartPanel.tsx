@@ -13,13 +13,13 @@
 
 import { Box } from '@mui/material';
 import type { ChartInstance, LegendProps, SelectedLegendItemState } from '@perses-dev/components';
-import { ContentWithLegend, DEFAULT_LEGEND, useChartsTheme, useId } from '@perses-dev/components';
+import { ContentWithLegend, DEFAULT_LEGEND, useChartsTheme } from '@perses-dev/components';
 import type { CalculationType, PanelProps } from '@perses-dev/plugin-system';
 import { CalculationsMap, validateLegendSpec } from '@perses-dev/plugin-system';
 import type { TimeSeriesData } from '@perses-dev/spec';
 import merge from 'lodash/merge';
 import type { ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 
 import { getSeriesColor } from './colors';
 import { resolvePieChartVisualOptions } from './pie-chart-model';
@@ -39,7 +39,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   } = props;
   const { colorPalette, innerRadius, outerRadius } = resolvePieChartVisualOptions(props.spec);
   const chartsTheme = useChartsTheme();
-  const chartId = useId('time-series-panel');
+  const chartId = useId();
   const seriesNames = queryResults.flatMap((result) => result?.data.series?.map((series) => series.name) || []);
 
   // Memoize the color list so it only regenerates when color/palette/series count changes

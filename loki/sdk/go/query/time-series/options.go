@@ -26,7 +26,11 @@ func Query(expr string) Option {
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = lokiDatasource.Selector(datasourceName)
+		sel, err := lokiDatasource.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
 		return nil
 	}
 }

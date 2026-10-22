@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/loki-plugin",
-  "version": "0.7.0-beta.7",
+  "version": "0.7.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
@@ -25,17 +25,18 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@grafana/lezer-logql": "^0.2.8"
+    "@grafana/lezer-logql": "^0.2.8",
+    "react-compiler-runtime": "^1.0.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^5.9.1",
-    "@perses-dev/components": "^0.55.0-beta.15",
-    "@perses-dev/dashboards": "^0.55.0-beta.15",
-    "@perses-dev/explore": "^0.55.0-beta.15",
-    "@perses-dev/plugin-system": "^0.55.0-beta.15",
-    "@perses-dev/spec": "^0.3.0-beta.10",
+    "@perses-dev/components": "^0.55.0",
+    "@perses-dev/dashboards": "^0.55.0",
+    "@perses-dev/explore": "^0.55.0",
+    "@perses-dev/plugin-system": "^0.55.0",
+    "@perses-dev/spec": "^0.3.0",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

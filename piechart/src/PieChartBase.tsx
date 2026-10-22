@@ -36,6 +36,7 @@ registerECharts([
 ]);
 
 const CHART_SX = { width: '100%', height: '100%' };
+const CONTAINER_SX = { overflow: 'auto' };
 const EMPHASIS_SHADOW_BLUR = 10;
 const EMPHASIS_SCALE_SIZE = 5;
 const PIE_INSET = EMPHASIS_SHADOW_BLUR + EMPHASIS_SCALE_SIZE;
@@ -75,8 +76,10 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
   const chartRef = useRef<ECharts>();
 
   useLayoutEffect(() => {
-    chartRef.current?.resize();
+    chartRef.current?.resize({ width, height });
   }, [height, width]);
+
+  const containerStyle = useMemo(() => ({ width, height }), [width, height]);
 
   const option = useMemo(() => {
     // ECharts treats numeric radii as pixels, so convert persisted percentages at the rendering boundary.
@@ -125,13 +128,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
   }, [data, formatOptions, innerRadius, mode, muiTheme.palette.background.default, outerRadius, showLabels]);
 
   return (
-    <Box
-      style={{
-        width: width,
-        height: height,
-      }}
-      sx={{ overflow: 'auto' }}
-    >
+    <Box style={containerStyle} sx={CONTAINER_SX}>
       <EChart _instance={chartRef} sx={CHART_SX} option={option} theme={chartsTheme.echartsTheme} />
     </Box>
   );

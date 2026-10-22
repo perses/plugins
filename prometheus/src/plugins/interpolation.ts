@@ -14,6 +14,7 @@
 import type { VariableStateMap } from '@perses-dev/components';
 import { interpolateHeaders, interpolateQueryParams } from '@perses-dev/components';
 import type { DatasourceStore } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
 import type { DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 
 import type { ClientRequestOptions, PrometheusClient } from '../model';
@@ -49,6 +50,21 @@ export function interpolateDatasourceProxyParams(
     headers: rawHeaders ? interpolateHeaders(rawHeaders, variableState) : undefined,
     queryParams: rawQueryParams ? interpolateQueryParams(rawQueryParams, variableState) : undefined,
   };
+}
+
+/**
+ * Interpolates the series selectors of a label names or label values variable into `match[]` values. Selectors that
+ * are empty or only whitespace after interpolation, like the one added by "Add Series Selector" before it is filled,
+ * are left out: Prometheus rejects an empty `match[]` ("parse error: unexpected end of input"), and sending no
+ * `match[]` at all means no filter.
+ */
+export function interpolateMatchers(
+  matchers: string[] | undefined,
+  variableState: VariableStateMap,
+): string[] | undefined {
+  return matchers
+    ?.map((matcher) => replaceVariables(matcher, variableState))
+    .filter((matcher) => matcher.trim() !== '');
 }
 
 export async function getInterpolatedRequestOptions(

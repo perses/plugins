@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/tracing-gantt-chart-plugin",
-  "version": "0.14.0-beta.7",
+  "version": "0.14.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
@@ -26,15 +26,16 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "color-hash": "^2.0.2",
+    "react-compiler-runtime": "^1.0.0",
     "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^5.9.1",
-    "@perses-dev/components": "^0.55.0-beta.15",
-    "@perses-dev/spec": "^0.3.0-beta.10",
-    "@perses-dev/plugin-system": "^0.55.0-beta.15",
+    "@perses-dev/components": "^0.55.0",
+    "@perses-dev/spec": "^0.3.0",
+    "@perses-dev/plugin-system": "^0.55.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",

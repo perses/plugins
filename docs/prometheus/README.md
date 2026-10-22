@@ -57,6 +57,52 @@ See also technical docs related to this plugin:
 - [Dashboard-as-Code Go lib](./go-sdk/variable/promql.md)
 - [Dashboard-as-Code CUE lib](./cue-sdk/variable/promql.md)
 
+### Migrating variables from Grafana
+
+The [migration from Grafana](https://perses.dev/perses/docs/migration/#variables-with-a-regex) doesn't keep the regex of a Grafana variable. This section explains how it migrates the Prometheus query variables, and how to get the same values as in Grafana.
+
+In Grafana, a Prometheus query variable hides the Prometheus API. For example, `query_result(<expr>)` returns each series as a line of text, such as `up{instance="demo:9100",job="node"} 1 1700000000000`, and the regex often extracts a label value from these lines. The Prometheus variables of Perses don't hide the Prometheus API: they list label names, or the values of the label set in their `Label Name` field, which is mandatory.
+
+#### How Prometheus query variables are migrated
+
+The migration converts the Grafana query as follows:
+
+- `label_names()` becomes a `PrometheusLabelNamesVariable`.
+- `label_values(<label>)` and `label_values(<series selector>, <label>)` become a `PrometheusLabelValuesVariable`, with `<label>` as `Label Name` and `<series selector>`, if any, as `Series Selector`.
+- `query_result(<expr>)` becomes a `PrometheusPromQLVariable` that runs `<expr>`, with a label of a `by (...)` clause of `<expr>` as `Label Name`: check it, especially when `<expr>` groups by several labels or has several `by (...)` clauses. If no label is found this way, for example when there is no `by (...)` clause, the query keeps the `query_result(...)` wrapper and the `Label Name` is `migration_from_grafana_not_supported`: remove the wrapper and set the `Label Name` yourself.
+- Any other query, such as `metrics(<regex>)`, `label_names(<regex>)` or a series selector, becomes the static variable shown in [Using the CLI](https://perses.dev/perses/docs/migration/#using-the-cli). To replace it when the query was a series selector, such as `up{job="node"}`, use a `PrometheusLabelValuesVariable` with this selector as `Series Selector` and, as `Label Name`, the label whose value the regex extracted, such as `instance` for `/instance="([^"]+)"/`. When the query was `metrics(<regex>)`, use a `PrometheusLabelValuesVariable` with `__name__` as `Label Name`, and filter the metric names as explained below.
+
+The queries are matched as written, so extra spaces, `BY` in capitals or a label name with a dot can lead to `migration_from_grafana_not_supported` or to the static variable: check each migrated variable.
+
+#### How to get the same values as in Grafana
+
+- If the regex only extracted the value of a label from the lines of `query_result(<expr>)`, such as `/instance="([^"]+)"/`, set the `Label Name` to this label: you don't need a regex anymore. The metric name, at the start of a line, is the value of the label `__name__`.
+- If the regex extracted the sample value, the first number after the labels, as `/.* ([^\ ]*) .*/` does, no label holds it: use `count_values("value", <expr>)` as the query, and `value` as the `Label Name`. `count_values` returns one series for each distinct value of `<expr>`, with this value in its label `value`. If `<expr>` returns a scalar, which Grafana lists as a single value, use `count_values("value", vector(<expr>))`.
+- To keep only some values of the `Label Name`, add a matcher on this label to the query or to the `Series Selector`, such as `kube_pod_info{namespace=~"prod-.*"}` instead of `kube_pod_info` when the `Label Name` is `namespace`. Prometheus then keeps only the series whose label matches the [regular expression](https://prometheus.io/docs/prometheus/latest/querying/basics/#regular-expressions) of the matcher.
+    - The regular expression uses the RE2 syntax, must match the whole label value, and can start with `(?i)` to ignore the case.
+    - RE2 doesn't support lookarounds such as `(?!...)`: to exclude values, use a negative matcher instead, such as `kube_pod_info{namespace!~"kube-.*"}`. Without a metric name, a selector needs a matcher that doesn't match an empty value, so Prometheus rejects `{namespace!~"kube-.*"}`: write `{namespace=~".+",namespace!~"kube-.*"}` instead.
+    - Put the matcher in the existing `Series Selector`, if there is one: a second `Series Selector` can only add values, because Prometheus lists the values of each one and merges them.
+    - A matcher selects series: on a `PrometheusLabelNamesVariable`, it keeps the names of the selected series, but it can't keep only the names that match a regex.
+- Otherwise, or to filter label names, set the [Capturing Regexp Filter](https://perses.dev/perses/docs/migration/#using-the-capturing-regexp-filter) of the variable. Unlike a matcher, it doesn't replace variables such as `$env`.
+
+#### Example
+
+A Grafana variable with the query `query_result(group by (ifAlias) (ifHCInOctets))` and the regex `.*ifAlias="Prov: ([^,]+),.*` gets `ACME` from the line `{ifAlias="Prov: ACME, 10G"} 1 1700000000000`. The migrated variable lists the values of the `ifAlias` label instead, such as `Prov: ACME, 10G`. To use `ACME` in the queries again, keep only the part of the regex that matches the start of the label value, `Prov: ([^,]+),`, and anchor it with `^`:
+
+```yaml
+kind: ListVariable
+spec:
+  name: provider
+  capturingRegexp: "^Prov: ([^,]+),"
+  plugin:
+    kind: PrometheusPromQLVariable
+    spec:
+      expr: group by (ifAlias) (ifHCInOctets)
+      labelName: ifAlias
+```
+
+With this filter, the dropdown still shows `Prov: ACME, 10G`, while the value of the variable, used in the queries, is `ACME`.
+
 ### Built-in Variables
 
 The Prometheus package provide several built-in variables that can be used within your PromQL queries:
@@ -64,6 +110,8 @@ The Prometheus package provide several built-in variables that can be used withi
 - **`$__interval`**: Current dashboard interval. For dynamic queries that adapt across different time ranges, use `$__interval` instead of hardcoded intervals. It represents the actual spacing between data points: it’s calculated based on the current time range and the panel pixel width (taking the "Min step" as a lower bound).
 - **`__interval_ms`**: Same as `$__interval` but in milliseconds.
 - **`$__rate_interval`**: Use this one rather than `$__interval` as the range parameter of promQL functions like `rate()`, `increase()`, etc. With such function it is advised to choose a range that is at least 4x the scrape interval (this is to allow for various races, and to be resilient to a failed scrape). `$__rate_interval` provides that, as it is defined as `max($__interval + Min Step, 4 * Min Step)`, where the Min Step value should represent the scrape interval of the metrics.
+
+These variables are computed from the step of the query, whose lower bound is the Min Step, so they cannot be used to set the Min Step itself.
 
 ### Variable Syntax
 

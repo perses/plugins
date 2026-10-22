@@ -12,12 +12,11 @@
 // limitations under the License.
 
 import { Checkbox, FormControl, FormControlLabel, Stack } from '@mui/material';
-import { useId } from '@perses-dev/components';
 import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
-import { useCallback } from 'react';
+import { useId, useCallback, useEffect } from 'react';
 
 import { LazyTextField } from '../../components/LazyTextField';
 import {
@@ -36,7 +35,7 @@ interface AlertManagerAlertsQueryEditorProps {
 export function AlertManagerAlertsQueryEditor(props: AlertManagerAlertsQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const datasourceSelectValue = value.datasource ?? DEFAULT_ALERTMANAGER;
-  const datasourceSelectLabelID = useId('alertmanager-datasource-label');
+  const datasourceSelectLabelID = useId();
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isAlertManagerDatasourceSelector(next)) {
@@ -75,6 +74,14 @@ export function AlertManagerAlertsQueryEditor(props: AlertManagerAlertsQueryEdit
     },
     [onChange, value],
   );
+
+  useEffect(() => {
+    // select active alerts by default if no other options are selected.
+    // This initializes the default query in the spec
+    if (!value.active && !value.silenced && !value.inhibited && !value.unprocessed) {
+      handleBooleanChange('active', true);
+    }
+  }, [value, handleBooleanChange]);
 
   const handleReceiverChange = useCallback(
     (receiver: string): void => {

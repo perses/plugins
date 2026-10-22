@@ -20,8 +20,10 @@ import { init } from 'echarts/core';
 import type { ReactElement } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
+import { ANNOTATION_Y_AXIS } from './annotations/AnnotationTooltip';
 import type { TimeChartProps } from './TimeSeriesChartBase';
 import { TimeSeriesChartBase } from './TimeSeriesChartBase';
+import type { TimeSeriesAnnotation } from './utils/annotation';
 import type { ExemplarChartData } from './utils/data-transform';
 
 vi.mock('@perses-dev/components', async (importOriginal) => ({
@@ -55,6 +57,8 @@ const EXEMPLARS: ExemplarChartData[] = [
     exemplars: [{ timestamp: 1000, value: 2, labels: { trace_id: 'trace-1' } }],
   },
 ];
+
+const ANNOTATIONS: TimeSeriesAnnotation[] = [{ name: 'deploy', start: 500 }];
 
 function chartElement(props: Partial<TimeChartProps> = {}): ReactElement {
   return (
@@ -181,5 +185,25 @@ describe('TimeSeriesChartBase performance', () => {
       value: [1000, 3],
       exemplar: { labels: { trace_id: 'trace-2' } },
     });
+  });
+});
+
+describe('TimeSeriesChartBase annotations', () => {
+  it('does not add the annotation y-axis without annotations', () => {
+    const chart = mockChart();
+    render(chartElement());
+    expect(chart.setOption.mock.calls.at(-1)?.[0].yAxis).not.toContain(ANNOTATION_Y_AXIS);
+  });
+
+  it('adds the annotation y-axis after one visible y-axis', () => {
+    const chart = mockChart();
+    render(chartElement({ annotations: ANNOTATIONS, yAxis: { min: 100 } }));
+    expect(chart.setOption.mock.calls.at(-1)?.[0].yAxis[1]).toBe(ANNOTATION_Y_AXIS);
+  });
+
+  it('adds the annotation y-axis after two visible y-axes', () => {
+    const chart = mockChart();
+    render(chartElement({ annotations: ANNOTATIONS, yAxis: [{ min: 100 }, { min: 100 }] }));
+    expect(chart.setOption.mock.calls.at(-1)?.[0].yAxis[2]).toBe(ANNOTATION_Y_AXIS);
   });
 });

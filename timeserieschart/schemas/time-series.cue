@@ -31,11 +31,13 @@ spec: close({
 	enablePinning?: bool
 }
 
+// Disjunction of closed structs rather than a comprehension (`if mode == "categorical"`): the comprehension
+// cannot be resolved when the plugin schema is merged into the dashboard schema and validated with `cue vet`.
 #palette: {
-	mode: "auto" | "categorical"
-	if mode == "categorical" {
-		name?: "category10" | "tableau10" | "set1" | "set2" | "set3" | "dark2"
-	}
+	mode: "auto"
+} | {
+	mode:  "categorical"
+	name?: "category10" | "tableau10" | "set1" | "set2" | "set3" | "dark2"
 }
 
 #visual: {

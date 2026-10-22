@@ -121,6 +121,8 @@ spec:
   # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   datasource: <Prometheus Datasource selector> # Optional
+  # `matchers` are series selectors that filter the label names (Prometheus `match[]` parameter).
+  # Entries that are empty, contain only whitespace, or become empty after variable interpolation are ignored.
   matchers:
     - <string> # Optional
 ```
@@ -174,6 +176,8 @@ spec:
   # See the documentation about the datasources to understand how it is selected.
   datasource: <Prometheus Datasource selector> # Optional
   labelName: <string>
+  # `matchers` are series selectors that filter the label values (Prometheus `match[]` parameter).
+  # Entries that are empty, contain only whitespace, or become empty after variable interpolation are ignored.
   matchers:
     - <string> # Optional
 ```
