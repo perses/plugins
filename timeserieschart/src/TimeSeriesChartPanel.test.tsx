@@ -38,6 +38,17 @@ vi.mock('@perses-dev/components', async (importOriginal) => {
   return {
     ...actual,
     getTimeSeriesValues: vi.fn(actual.getTimeSeriesValues),
+    // Published @perses-dev/components does not export this yet (shared#321).
+    getFormattedMultipleYAxesLayout: (
+      ...args: Parameters<typeof actual.getFormattedMultipleYAxes>
+    ): { axes: ReturnType<typeof actual.getFormattedMultipleYAxes>; rightGridPadding: number } => {
+      const additionalFormats = args[2];
+      return {
+        axes: actual.getFormattedMultipleYAxes(...args),
+        // First right axis is covered by containLabel, same contract as shared#321.
+        rightGridPadding: additionalFormats.length > 1 ? (additionalFormats.length - 1) * 52 : 20,
+      };
+    },
     EChart: (props: { option: EChartsCoreOption }): ReactElement => {
       lastChartOption.current = props.option;
       return <div data-testid="echart-mock" />;
