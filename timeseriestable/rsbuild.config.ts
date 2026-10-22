@@ -36,6 +36,7 @@ export default createConfigForPlugin({
       '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
       '@emotion/styled': { singleton: true },
       '@hookform/resolvers': { singleton: true },
+      'use-resize-observer': { requiredVersion: '^10.0.0', singleton: true },
     },
   },
 });
