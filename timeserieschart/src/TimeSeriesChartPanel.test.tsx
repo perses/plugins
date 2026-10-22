@@ -45,7 +45,8 @@ vi.mock('@perses-dev/components', async (importOriginal) => {
       const additionalFormats = args[2];
       return {
         axes: actual.getFormattedMultipleYAxes(...args),
-        rightGridPadding: additionalFormats.length > 0 ? additionalFormats.length * 52 + 12 : 20,
+        // First right axis is covered by containLabel, same contract as shared#321.
+        rightGridPadding: additionalFormats.length > 1 ? (additionalFormats.length - 1) * 52 : 20,
       };
     },
     EChart: (props: { option: EChartsCoreOption }): ReactElement => {
