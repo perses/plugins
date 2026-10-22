@@ -24,7 +24,9 @@
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "react-compiler-runtime": "^1.0.0"
+  },
   "peerDependencies": {
     "@perses-dev/components": "^0.55.0",
     "@perses-dev/plugin-system": "^0.55.0",

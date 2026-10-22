@@ -23,6 +23,9 @@
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
+  "dependencies": {
+    "react-compiler-runtime": "^1.0.0"
+  },
   "devDependencies": {
     "@types/qs": "^6.9.18"
   },

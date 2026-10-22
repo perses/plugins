@@ -15,7 +15,8 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "jsonata": "^2.0.5"
+    "jsonata": "^2.0.5",
+    "react-compiler-runtime": "^1.0.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
