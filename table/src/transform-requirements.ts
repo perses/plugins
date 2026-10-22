@@ -11,12 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as Components from '@perses-dev/components';
-
 const TRANSFORMS_REQUIRING_EACH_SAMPLE = new Set(['PivotByLabel']);
 
 export function transformRequiresEachSample(kind: string): boolean {
-  const shared = (Components as { transformRequiresEachSample?: (kind: string) => boolean })
-    .transformRequiresEachSample;
-  return shared ? shared(kind) : TRANSFORMS_REQUIRING_EACH_SAMPLE.has(kind);
+  return TRANSFORMS_REQUIRING_EACH_SAMPLE.has(kind);
 }

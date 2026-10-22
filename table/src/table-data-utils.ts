@@ -17,18 +17,32 @@ import type { JsonData, TimeSeries, TimeSeriesData } from '@perses-dev/spec';
 import type { TableOptions } from './models';
 import { transformRequiresEachSample } from './transform-requirements';
 
+/**
+ * Options for building raw table data.
+ */
 export interface BuildRawTableDataOptions {
+  /**
+   * When true, always use raw scalar values for cell data (for export).
+   * When false, plugin columns will contain embedded PanelData objects (for rendering).
+   */
   forExport?: boolean;
+  /** One row per sample. Defaults to needsTimeSeriesExpansion. */
   expandTimeSeries?: boolean;
+  /** Query mode already resolved for this panel. Defaults to getTablePanelQueryMode. */
   queryMode?: 'instant' | 'range';
 }
 
+/** True when an enabled transform needs one row per timestamp. */
 export function needsTimeSeriesExpansion(spec: TableOptions): boolean {
   return (spec.transforms ?? []).some(
     (transform) => transform.spec?.disabled !== true && transformRequiresEachSample(transform.kind),
   );
 }
 
+/**
+ * Determines the query mode based on table options.
+ * If any column has a plugin (embedded panel), or a transform needs every sample, use range mode; otherwise instant.
+ */
 export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' {
   if ((spec.columnSettings ?? []).some((c) => c.plugin)) {
     return 'range';
@@ -39,6 +53,18 @@ export function getTablePanelQueryMode(spec: TableOptions): 'instant' | 'range' 
   return 'instant';
 }
 
+/**
+ * Converts raw query results into a tabular format.
+ *
+ * This is the shared data-building logic used by both TablePanel (for rendering)
+ * and TableExportAction (for CSV export). Extracting this ensures both use the
+ * same transformation logic, reducing drift.
+ *
+ * @param queryResults - The panel query results containing data to be transformed into a table
+ * @param spec - The table options specification
+ * @param options - Build options (e.g., forExport mode)
+ * @returns Array of row objects with column keys and values
+ */
 export function buildRawTableData(
   queryResults: PanelData[],
   spec: TableOptions,
