@@ -17,9 +17,39 @@ import "github.com/perses/perses/go-sdk/panel"
 
 const PluginKind = "TracingGanttChart"
 
-func Chart() panel.Option {
+type PluginSpec struct {
+	Selection *Selection `json:"selection,omitempty" yaml:"selection,omitempty"`
+	Actions   *Actions   `json:"actions,omitempty" yaml:"actions,omitempty"`
+}
+
+type Option func(plugin *Builder) error
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+}
+
+func create(options ...Option) (Builder, error) {
+	builder := &Builder{
+		PluginSpec: PluginSpec{},
+	}
+
+	for _, opt := range options {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+func Chart(options ...Option) panel.Option {
 	return func(builder *panel.Builder) error {
+		r, err := create(options...)
+		if err != nil {
+			return err
+		}
 		builder.Spec.Plugin.Kind = PluginKind
+		builder.Spec.Plugin.Spec = r.PluginSpec
 		return nil
 	}
 }
