@@ -70,7 +70,7 @@ import isEqual from 'lodash/isEqual';
 import merge from 'lodash/merge';
 import type { MouseEvent } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import { ANNOTATION_Y_AXIS, AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
 import type { TimeSeriesAnnotation } from './utils/annotation';
@@ -161,7 +161,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   const { chartsTheme, enablePinning, enableSyncGrouping, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } =
     useChartsContext();
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
-  const chartRef = useRef<EChartsInstance>();
+  const chartRef = useRef<EChartsInstance | undefined>(undefined);
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);

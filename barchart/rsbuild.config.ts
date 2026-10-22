@@ -23,8 +23,8 @@ export default createConfigForPlugin({
       './BarChart': './src/BarChart.ts',
     },
     shared: {
-      react: { requiredVersion: '^18.2.0', singleton: true },
-      'react-dom': { requiredVersion: '^18.2.0', singleton: true },
+      react: { requiredVersion: '^18.2.0 || ^19.0.0', singleton: true },
+      'react-dom': { requiredVersion: '^18.2.0 || ^19.0.0', singleton: true },
       echarts: { singleton: true },
       'date-fns': { singleton: true },
       'date-fns-tz': { singleton: true },
@@ -34,7 +34,6 @@ export default createConfigForPlugin({
       '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
       '@emotion/styled': { singleton: true },
       '@hookform/resolvers': { singleton: true },
-      'use-resize-observer': { requiredVersion: '^9.1.0', singleton: true },
       'mdi-material-ui': { requiredVersion: '^7.4.0', singleton: true },
       immer: { singleton: true },
     },

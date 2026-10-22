@@ -31,7 +31,6 @@ const sharedConfig = defineConfig({
         find: /^@perses-dev\/(client|components|dashboards|explore|plugin-system|spec)$/,
         replacement: resolve(repoRoot, 'node_modules/@perses-dev/$1/dist/index.js'),
       },
-      { find: 'use-resize-observer', replacement: 'use-resize-observer/polyfilled' },
     ],
   },
   test: {

@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import type { DatasourceSelector } from '@perses-dev/spec';
 import DeleteIcon from 'mdi-material-ui/Delete';
-import type { HTMLAttributes, ReactElement, SyntheticEvent } from 'react';
+import type { HTMLAttributes, ReactElement, ReactNode, SyntheticEvent } from 'react';
 import { cloneElement, forwardRef, useCallback, useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 
@@ -74,7 +74,7 @@ export function LabelFilterInput({
 // https://stackoverflow.com/questions/69060738/material-ui-autocomplete-virtualization-w-react-virtuoso
 export const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTMLUListElement>>(
   ({ children, ...rest }, ref) => {
-    const data = children as ReactElement[];
+    const data = children as Array<ReactElement<{ children?: ReactNode; index?: number; title?: ReactNode }>>;
     const [maxHeight, setMaxHeight] = useState('500px');
 
     const [height, setHeight] = useState(0);

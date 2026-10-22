@@ -32,8 +32,8 @@
     "@perses-dev/plugin-system": "^0.55.0",
     "@perses-dev/spec": "^0.3.0",
     "immer": "^10.1.1",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0"
   },
   "devDependencies": {},
   "files": [
