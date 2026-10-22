@@ -489,7 +489,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
         containLabel: false,
       };
     }
-    // rightGridPadding is the cumulative width of the right axes (shared#321).
+    // Right axes after the first. containLabel already reserves the first (shared#321).
     const rightPad = multipleYLayout?.rightGridPadding ?? 20;
     return {
       left: yAxis && yAxis.label ? 30 : 20,
