@@ -1,5 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Bug Report or Feature Request
-    url: https://github.com/perses/perses/issues
-    about: Please open all issues in the perses/perses repository.

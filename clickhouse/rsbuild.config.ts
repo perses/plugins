@@ -11,15 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { pluginReact } from '@rsbuild/plugin-react';
-
 import { createConfigForPlugin } from '../rsbuild.shared';
 
 export default createConfigForPlugin({
   name: 'ClickHouse',
   rsbuildConfig: {
     server: { port: 3123 },
-    plugins: [pluginReact()],
   },
   moduleFederation: {
     exposes: {

@@ -631,13 +631,14 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
       // Generate cellConfigs for each column (including duplicates with different headers)
       for (const [key, value] of Object.entries(extendRow)) {
+        const columnSetting = spec.columnSettings?.find((col) => col.name === key);
+
         // First, try to get cell config from global cell settings
-        let cellConfig = evaluateConditionalFormatting(value, spec.cellSettings ?? []);
+        let cellConfig = evaluateConditionalFormatting(value, spec.cellSettings ?? [], columnSetting);
 
         // Then, try to get cell config from column-specific cell settings
-        const columnSetting = spec.columnSettings?.find((col) => col.name === key);
         if (columnSetting?.cellSettings?.length) {
-          const columnCellConfig = evaluateConditionalFormatting(value, columnSetting.cellSettings);
+          const columnCellConfig = evaluateConditionalFormatting(value, columnSetting.cellSettings, columnSetting);
           // Column-specific settings take precedence over global settings
           if (columnCellConfig) {
             cellConfig = columnCellConfig;

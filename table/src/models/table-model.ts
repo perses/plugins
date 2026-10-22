@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TextField, Stack, MenuItem, Typography } from '@mui/material';
+import { formatValue } from '@perses-dev/components';
 import type { TableDensity, TableCellConfig, FormatOptions, Transform } from '@perses-dev/components';
 import type { ActionOptions, OptionsEditorProps, SelectionOptions } from '@perses-dev/plugin-system';
 import type { Definition, UnknownSpec } from '@perses-dev/spec';
@@ -178,8 +179,15 @@ function parseRangeBound(rawValue: string): number | undefined {
 /**
  * Formats the display text and colors based on cell settings
  */
-export function formatCellDisplay(value: unknown, setting: CellSettings, defaultText?: string): TableCellConfig {
-  const baseText = setting.text || defaultText || String(value);
+export function formatCellDisplay(
+  value: unknown,
+  setting: CellSettings,
+  defaultText?: string,
+  format?: FormatOptions,
+): TableCellConfig {
+  const formattedValue = typeof value === 'number' && format ? formatValue(value, format) : String(value);
+
+  const baseText = setting.text || defaultText || formattedValue;
   const displayText = `${setting.prefix ?? ''}${baseText}${setting.suffix ?? ''}`;
   return {
     text: displayText,
@@ -251,7 +259,11 @@ export function evaluateCondition(condition: Condition, value: unknown): boolean
 /**
  * Evaluates all conditions and returns the cell config for the first matching condition
  */
-export function evaluateConditionalFormatting(value: unknown, settings: CellSettings[]): TableCellConfig | undefined {
+export function evaluateConditionalFormatting(
+  value: unknown,
+  settings: CellSettings[],
+  columnSetting?: ColumnSettings,
+): TableCellConfig | undefined {
   for (const setting of settings) {
     if (evaluateCondition(setting.condition, value)) {
       // Handle special default text cases
@@ -267,7 +279,7 @@ export function evaluateConditionalFormatting(value: unknown, settings: CellSett
         }
       }
 
-      return formatCellDisplay(value, setting, defaultText);
+      return formatCellDisplay(value, setting, defaultText, columnSetting?.format);
     }
   }
 
@@ -289,7 +301,10 @@ export function renderConditionEditor(
       placeholder: 'Exact value',
       value: condition.spec?.value ?? '',
       onChange: (e: { target: { value: string } }) =>
-        onChange({ ...condition, spec: { value: e.target.value } } as ValueCondition),
+        onChange({
+          ...condition,
+          spec: { value: e.target.value },
+        } as ValueCondition),
       fullWidth: true,
       size: size,
     });
@@ -308,7 +323,10 @@ export function renderConditionEditor(
           value: condition.spec?.min ?? '',
           onChange: (e: { target: { value: string } }) => {
             const nextMin = parseRangeBound(e.target.value);
-            onChange({ ...condition, spec: { ...condition.spec, min: nextMin } } as RangeCondition);
+            onChange({
+              ...condition,
+              spec: { ...condition.spec, min: nextMin },
+            } as RangeCondition);
           },
           type: 'number',
           slotProps: { htmlInput: { step: 'any' } },
@@ -322,7 +340,10 @@ export function renderConditionEditor(
           value: condition.spec?.max ?? '',
           onChange: (e: { target: { value: string } }) => {
             const nextMax = parseRangeBound(e.target.value);
-            onChange({ ...condition, spec: { ...condition.spec, max: nextMax } } as RangeCondition);
+            onChange({
+              ...condition,
+              spec: { ...condition.spec, max: nextMax },
+            } as RangeCondition);
           },
           type: 'number',
           slotProps: { htmlInput: { step: 'any' } },
@@ -337,7 +358,10 @@ export function renderConditionEditor(
       placeholder: 'JavaScript regular expression',
       value: condition.spec?.expr ?? '',
       onChange: (e: { target: { value: string } }) =>
-        onChange({ ...condition, spec: { expr: e.target.value } } as RegexCondition),
+        onChange({
+          ...condition,
+          spec: { expr: e.target.value },
+        } as RegexCondition),
       fullWidth: true,
       size: size,
     });
@@ -357,7 +381,10 @@ export function renderConditionEditor(
         label: 'Value',
         value: condition.spec?.value ?? '',
         onChange: (e: { target: { value: string } }) =>
-          onChange({ ...condition, spec: { value: e.target.value } } as MiscCondition),
+          onChange({
+            ...condition,
+            spec: { value: e.target.value },
+          } as MiscCondition),
         fullWidth: true,
         size: size,
       },
