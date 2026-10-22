@@ -371,6 +371,9 @@ describe('getTraceData', () => {
     await expect(getTraceData({ tags: '[]' }, createContext(client))).rejects.toThrow(
       'Jaeger tags must be a JSON object.',
     );
+    await expect(getTraceData({ service: 'frontend', tags: '{"a":{"b":1}}' }, createContext(client))).rejects.toThrow(
+      'Jaeger tag "a" must be a string, a number or a boolean.',
+    );
     await expect(getTraceData({ operation: 'GET /api/cart' }, createContext(client))).rejects.toThrow(
       'Jaeger trace searches require a service when Trace ID is not provided.',
     );

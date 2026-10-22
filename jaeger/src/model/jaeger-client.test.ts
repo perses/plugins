@@ -189,7 +189,7 @@ describe('jaeger-client', () => {
 
   describe('datasources saved with the former allowed endpoints', () => {
     const forbidden = (): Pick<Response, 'ok' | 'status' | 'text'> =>
-      errorResponse(403, JSON.stringify({ message: 'you are not allowed to use this endpoint' }));
+      errorResponse(403, JSON.stringify({ message: 'you are not allowed to use this endpoint GET /api/v3/services' }));
     const searchWindow = {
       startTime: new Date('2024-06-11T10:00:00.000Z'),
       endTime: new Date('2024-06-11T11:00:00.000Z'),
@@ -279,6 +279,40 @@ describe('jaeger-client', () => {
       expect(error).toBeInstanceOf(JaegerRequestError);
       expect((error as JaegerRequestError).message).toContain('/api/v3/traces');
       expect((error as JaegerRequestError).message).toContain('allowed endpoints');
+    });
+
+    it('explains the allowed endpoints for a trace lookup, but keeps a missing trace a 404', async () => {
+      fetchMock.mockResolvedValueOnce(forbidden());
+      fetchMock.mockResolvedValueOnce(errorResponse(404, '404 page not found'));
+      await expect(getTrace('abc', { datasourceUrl: 'http://legacy-trace-removed.example' })).rejects.toMatchObject({
+        message: expect.stringContaining('allowed endpoints'),
+      });
+
+      fetchMock.mockResolvedValueOnce(forbidden());
+      fetchMock.mockResolvedValueOnce(
+        errorResponse(404, JSON.stringify({ errors: [{ code: 404, msg: 'trace not found' }] })),
+      );
+      await expect(getTrace('abc', { datasourceUrl: 'http://legacy-trace-missing.example' })).rejects.toMatchObject({
+        status: 404,
+      });
+    });
+
+    it('does not fall back on a 403 coming from Jaeger', async () => {
+      fetchMock.mockResolvedValueOnce(errorResponse(403, 'access denied'));
+
+      await expect(searchServices({ datasourceUrl: 'http://jaeger-403.example' })).rejects.toMatchObject({
+        status: 403,
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not fall back when the requests do not go through the proxy', async () => {
+      fetchMock.mockResolvedValueOnce(forbidden());
+
+      await expect(searchServices({ datasourceUrl: 'http://direct.example', viaProxy: false })).rejects.toMatchObject({
+        status: 403,
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     it('does not fall back for other errors', async () => {

@@ -52,6 +52,11 @@ export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
   fetch?: FetchFn;
+  /**
+   * Whether the requests go through the Perses proxy, the only place where the allowed endpoints can reject them.
+   * Defaults to true. The API v1 fallback is disabled otherwise (e.g. with `directUrl`).
+   */
+  viaProxy?: boolean;
 }
 
 /**
@@ -59,11 +64,14 @@ export interface QueryOptions {
  */
 export class JaegerRequestError extends Error {
   readonly status: number;
+  /** Raw body of the response, empty when there is none. */
+  readonly body: string;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, body = '') {
     super(message);
     this.name = 'JaegerRequestError';
     this.status = status;
+    this.body = body;
   }
 }
 
@@ -74,7 +82,8 @@ export const executeRequest = async <T>(
   const doFetch = customFetch ?? fetch;
   const response = await doFetch(...args);
   if (!response.ok) {
-    throw new JaegerRequestError(await readErrorMessage(response), response.status);
+    const body = await readBody(response);
+    throw new JaegerRequestError(errorMessage(response.status, body), response.status, body);
   }
   try {
     return await response.json();
@@ -84,14 +93,43 @@ export const executeRequest = async <T>(
   }
 };
 
-async function readErrorMessage(response: Response): Promise<string> {
-  const fallback = `Jaeger request failed with status ${response.status}`;
+async function readBody(response: Response): Promise<string> {
   try {
-    const body: JaegerErrorResponse = JSON.parse(await response.text());
-    return body.error?.message || fallback;
+    return await response.text();
+  } catch {
+    return '';
+  }
+}
+
+function errorMessage(status: number, body: string): string {
+  const fallback = `Jaeger request failed with status ${status}`;
+  try {
+    const parsed: JaegerErrorResponse = JSON.parse(body);
+    return parsed.error?.message || fallback;
   } catch {
     return fallback;
   }
+}
+
+function isJson(body: string): boolean {
+  try {
+    JSON.parse(body);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// The Perses proxy answers a request outside of the allowed endpoints with "you are not allowed to use this endpoint".
+// Jaeger (or an auth proxy in front of it) can answer 403 as well, and that one must reach the user untouched.
+function isProxyRejection(e: unknown): boolean {
+  return e instanceof JaegerRequestError && e.status === 403 && /not allowed to use this endpoint/i.test(e.body);
+}
+
+// A route unknown to Jaeger answers with a non-JSON `404 page not found`, whereas the API v1 answers a missing trace
+// with a JSON body.
+function isMissingRoute(e: unknown): boolean {
+  return e instanceof JaegerRequestError && e.status === 404 && !isJson(e.body);
 }
 
 function fetchWithGet<TResponse>(
@@ -126,8 +164,8 @@ function appendParam(params: URLSearchParams, names: string[], value: string | u
 function buildAttributes(params: JaegerSearchRequestParameters): string | undefined {
   const attributes: Record<string, string> = {};
   if (params.tags !== undefined) {
-    // Jaeger only accepts string values.
-    Object.entries(JSON.parse(params.tags) as Record<string, unknown>).forEach(([key, value]) => {
+    // Jaeger only accepts string values, and the tags are validated to be scalars when the query is resolved.
+    Object.entries(JSON.parse(params.tags) as Record<string, string | number | boolean>).forEach(([key, value]) => {
       attributes[key] = String(value);
     });
   }
@@ -156,7 +194,8 @@ function buildSearchParams(params: JaegerSearchRequestParameters): URLSearchPara
 
 // Datasources saved before the move to the API v3 only allow the former paths in their Perses proxy, which then answers
 // the API v3 requests with a 403. For those, the client falls back to the API v1 (served by Jaeger up to 2.20) and
-// remembers it, so existing datasources keep working until their allowed endpoints are updated.
+// remembers it, so existing datasources keep working until their allowed endpoints are updated. The memory is never
+// cleared: the datasource stays on the API v1 until the page is reloaded, even once its allowed endpoints are updated.
 const legacyDatasources = new Set<string>();
 
 const ALLOWED_ENDPOINTS_HINT =
@@ -168,14 +207,16 @@ async function withLegacyFallback<T>(
   queryOptions: QueryOptions,
   current: () => Promise<T>,
   legacy: () => Promise<T>,
-  legacyMissingStatuses: number[],
 ): Promise<T> {
-  const { datasourceUrl } = queryOptions;
+  const { datasourceUrl, viaProxy = true } = queryOptions;
+  if (!viaProxy) {
+    return current();
+  }
   if (!legacyDatasources.has(datasourceUrl)) {
     try {
       return await current();
     } catch (e) {
-      if (!(e instanceof JaegerRequestError && e.status === 403)) {
+      if (!isProxyRejection(e)) {
         throw e;
       }
     }
@@ -186,8 +227,9 @@ async function withLegacyFallback<T>(
     legacyDatasources.add(datasourceUrl);
     return result;
   } catch (e) {
-    if (e instanceof JaegerRequestError && (e.status === 403 || legacyMissingStatuses.includes(e.status))) {
-      throw new JaegerRequestError(ALLOWED_ENDPOINTS_HINT, e.status);
+    if (isProxyRejection(e) || isMissingRoute(e)) {
+      // Not a 404, so that a trace lookup does not turn the hint into "trace not found".
+      throw new JaegerRequestError(ALLOWED_ENDPOINTS_HINT, 403);
     }
     throw e;
   }
@@ -217,8 +259,6 @@ export async function getTrace(traceId: string, queryOptions: QueryOptions): Pro
       legacyTracesToOTLP(
         await legacyGet(`${LEGACY_TRACES_PATH}/${encodeURIComponent(traceId)}`, new URLSearchParams(), queryOptions),
       ),
-    // A missing trace is a legitimate 404 of the former API.
-    [],
   );
 }
 
@@ -245,7 +285,6 @@ export async function searchTraces(
       }
     },
     async () => legacyTracesToOTLP(await legacyGet(LEGACY_TRACES_PATH, buildLegacySearchParams(params), queryOptions)),
-    [404],
   );
 }
 
@@ -261,7 +300,6 @@ export async function searchServices(queryOptions: QueryOptions): Promise<Jaeger
       return { data: response.services ?? [] };
     },
     async () => legacyServices(await legacyGet(LEGACY_SERVICES_PATH, new URLSearchParams(), queryOptions)),
-    [404],
   );
 }
 
@@ -281,6 +319,5 @@ export async function searchOperations(
     },
     async () =>
       legacyOperations(await legacyGet(LEGACY_OPERATIONS_PATH, new URLSearchParams({ service }), queryOptions)),
-    [404],
   );
 }

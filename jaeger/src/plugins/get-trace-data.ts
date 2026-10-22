@@ -155,6 +155,10 @@ function resolveSpec(
     if (parsedTags === null || Array.isArray(parsedTags) || typeof parsedTags !== 'object') {
       throw new Error('Jaeger tags must be a JSON object.');
     }
+    const nonScalar = Object.entries(parsedTags).find(([, value]) => value === null || typeof value === 'object');
+    if (nonScalar !== undefined) {
+      throw new Error(`Jaeger tag "${nonScalar[0]}" must be a string, a number or a boolean.`);
+    }
     tags = JSON.stringify(parsedTags);
   }
 
