@@ -1,0 +1,73 @@
+# Demo metrics for the canvas panel's data-driven graph mode.
+#
+# A small microservice topology shaped exactly the way the canvas "From data" mode expects:
+#   - node_load{instance="..."}            one series per node; label `instance` is the node id
+#   - edge_traffic{source=...,target=...}  one series per directed edge
+#
+# The last value of each series (0..1) drives node/edge color via the panel thresholds, and edge
+# thickness via the edge-thickness thresholds. The extra labels (`name`, `role`, `tier`, `region`)
+# carry no behavior on their own — they exist so the demo dashboard can show off rich label
+# templates like `{{name}}` / `{{role}} · {{region}}` and the `{{value}}` placeholder.
+#
+# Topology (an e-commerce-style request path across two regions):
+#
+#            ┌──────────────┐
+#            │ edge  gateway │
+#            └──────┬───────┘
+#         ┌─────────┼──────────┐
+#         ▼         ▼          ▼
+#      web-eu    web-us    auth (shared)
+#         │         │          │
+#         ▼         ▼          ▼
+#      api-eu ◄──► api-us    (both call auth)
+#      │   │       │   │
+#      ▼   ▼       ▼   ▼
+#  orders  cart  orders  search
+#      │     │     │        │
+#      ▼     ▼     ▼        ▼
+#   db-eu  cache  db-us   db-us   (+ cross-region db replication)
+#
+# Served at /metrics by the nginx service in docker-compose.yml. See README.md.
+
+# HELP node_load Synthetic per-service load in [0,1]. `instance` is the node id.
+# TYPE node_load gauge
+node_load{instance="gateway",name="Edge Gateway",role="ingress",tier="edge",region="global"} 0.41
+node_load{instance="auth",name="Auth Service",role="authn",tier="platform",region="global"} 0.62
+node_load{instance="web-eu",name="Web (EU)",role="frontend",tier="web",region="eu-west"} 0.28
+node_load{instance="web-us",name="Web (US)",role="frontend",tier="web",region="us-east"} 0.36
+node_load{instance="api-eu",name="API (EU)",role="backend",tier="app",region="eu-west"} 0.54
+node_load{instance="api-us",name="API (US)",role="backend",tier="app",region="us-east"} 0.73
+node_load{instance="orders-eu",name="Orders (EU)",role="service",tier="app",region="eu-west"} 0.48
+node_load{instance="orders-us",name="Orders (US)",role="service",tier="app",region="us-east"} 0.81
+node_load{instance="cart",name="Cart Service",role="service",tier="app",region="eu-west"} 0.33
+node_load{instance="search",name="Search Service",role="service",tier="app",region="us-east"} 0.67
+node_load{instance="cache",name="Redis Cache",role="cache",tier="data",region="eu-west"} 0.22
+node_load{instance="db-eu",name="Postgres (EU)",role="database",tier="data",region="eu-west"} 0.59
+node_load{instance="db-us",name="Postgres (US)",role="database",tier="data",region="us-east"} 0.92
+
+# HELP edge_traffic Synthetic per-link traffic in [0,1]. `source`/`target` are node ids.
+# TYPE edge_traffic gauge
+# Gateway fans out to the regional frontends and the shared auth service.
+edge_traffic{source="gateway",target="web-eu"} 0.44
+edge_traffic{source="gateway",target="web-us"} 0.52
+edge_traffic{source="gateway",target="auth"} 0.61
+# Frontends call their regional API.
+edge_traffic{source="web-eu",target="api-eu"} 0.47
+edge_traffic{source="web-us",target="api-us"} 0.58
+# Both APIs authenticate against the shared auth service.
+edge_traffic{source="api-eu",target="auth"} 0.39
+edge_traffic{source="api-us",target="auth"} 0.55
+# APIs call their domain services.
+edge_traffic{source="api-eu",target="orders-eu"} 0.63
+edge_traffic{source="api-eu",target="cart"} 0.31
+edge_traffic{source="api-us",target="orders-us"} 0.84
+edge_traffic{source="api-us",target="search"} 0.70
+# Cross-region API chatter (failover / shared traffic).
+edge_traffic{source="api-eu",target="api-us"} 0.26
+# Services reach their data stores.
+edge_traffic{source="orders-eu",target="db-eu"} 0.57
+edge_traffic{source="orders-us",target="db-us"} 0.88
+edge_traffic{source="cart",target="cache"} 0.24
+edge_traffic{source="search",target="db-us"} 0.66
+# Database replication EU -> US.
+edge_traffic{source="db-eu",target="db-us"} 0.49

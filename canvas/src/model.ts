@@ -50,6 +50,8 @@ export interface NodeSpec {
   queryIndex?: number;
   colorMode?: 'threshold' | 'fixed';
   color?: string;
+  /** When `threshold`, the node's base size is scaled by the `nodeThresholdSizes` steps. */
+  sizeMode?: 'fixed' | 'threshold';
 }
 
 export type AnchorPoint = 'n' | 's' | 'e' | 'w' | 'nw' | 'ne' | 'sw' | 'se';
@@ -98,6 +100,12 @@ export interface EdgeThresholdStep {
   strokeWidth: number;
 }
 
+export interface NodeThresholdStep {
+  value: number;
+  /** Multiplier applied to the node's base width/height. */
+  scale: number;
+}
+
 export type FloatingEdge = EdgeSpec & { freeEndpoint: Point };
 
 export function isFloatingEdge(edge: EdgeSpec): edge is FloatingEdge {
@@ -117,16 +125,48 @@ export interface BackgroundSpec {
   global?: boolean;
 }
 
+/**
+ * Configuration for the data-driven graph mode. When `enabled`, the panel derives nodes and edges
+ * live from query results on every render (ignoring the manually authored `nodes`/`edges`) and lays
+ * them out automatically. Graph structure is inferred from series labels.
+ */
+export interface GraphGenerationSpec {
+  enabled?: boolean;
+  /** Index of the query whose series define the nodes. */
+  nodeQueryIndex: number;
+  /** Series label whose value identifies a node (e.g. "instance"). */
+  nodeIdLabel: string;
+  /** Label template for a node's caption. Defaults to the value of `nodeIdLabel`. */
+  nodeLabelTemplate?: string;
+  /** Index of the query whose series define the edges. Omit for a nodes-only graph. */
+  edgeQueryIndex?: number;
+  /** Series label whose value identifies an edge's source node. */
+  edgeSourceLabel?: string;
+  /** Series label whose value identifies an edge's target node. */
+  edgeTargetLabel?: string;
+  /** Label template for an edge's caption (e.g. "{{value}}"). */
+  edgeLabelTemplate?: string;
+  /** Render edges as bidirectional. */
+  bidirectional?: boolean;
+}
+
 export interface CanvasSpec {
   legend?: LegendSpecOptions;
   thresholds?: ThresholdOptions;
+  /** Color scheme applied to edges. Falls back to `thresholds` when unset. */
+  edgeThresholds?: ThresholdOptions;
   format?: FormatOptions;
   edgeThresholdWidths?: EdgeThresholdStep[];
   edgeDefaultStrokeWidth?: number;
+  /** Threshold steps that scale node size by the node's bound value. */
+  nodeThresholdSizes?: NodeThresholdStep[];
+  /** Base width/height (px) for generated nodes, scaled by `nodeThresholdSizes`. */
+  nodeDefaultSize?: number;
   querySettings?: QueryColorSettings[];
   backgrounds?: BackgroundSpec[];
   nodes?: NodeSpec[];
   edges?: EdgeSpec[];
+  graphGeneration?: GraphGenerationSpec;
 }
 
 export type CanvasSpecEditorProps = OptionsEditorProps<CanvasSpec>;

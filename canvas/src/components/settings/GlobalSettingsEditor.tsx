@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import {
   FormatControls,
@@ -21,20 +21,72 @@ import {
   ThresholdsEditor,
 } from '@perses-dev/components';
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
-import type { ReactElement } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
 import { useCallback } from 'react';
 
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
-import type { CanvasSpec } from '../../model';
+import type { CanvasSpec, GraphGenerationSpec } from '../../model';
 import { EditorItemsPanel } from '../editor/EditorItemsPanel';
 import { EdgeThicknessSettings } from './EdgeThicknessSettings';
+import { GraphGenerationSettings } from './GraphGenerationSettings';
 import { LegendSettings } from './LegendSettings';
+import { NodeSizeSettings } from './NodeSizeSettings';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 const EDITOR_COLUMN_SX = { display: 'flex', flexDirection: 'column' as const, gap: 3 };
+const MODE_TOGGLE_SX = { mb: 2 };
+const DEFAULT_GENERATION: GraphGenerationSpec = { enabled: true, nodeQueryIndex: 0, nodeIdLabel: '' };
 
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
+
+interface StylingSettingsProps {
+  value: CanvasSpec;
+  onChange: (value: CanvasSpec) => void;
+  onFormatChange: (format: FormatOptions) => void;
+  onThresholdsChange: (thresholds: ThresholdOptions | undefined) => void;
+  onEdgeThresholdsChange: (thresholds: ThresholdOptions | undefined) => void;
+}
+
+// The appearance controls shared by both the manual and data-driven tabs. Rendering the same block
+// in each tab keeps every adjustment option close together instead of split between a top section
+// and the tab contents.
+function StylingSettings({
+  value,
+  onChange,
+  onFormatChange,
+  onThresholdsChange,
+  onEdgeThresholdsChange,
+}: StylingSettingsProps): ReactElement {
+  return (
+    <OptionsEditorGrid>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Legend">
+          <LegendSettings value={value} onChange={onChange} />
+        </OptionsEditorGroup>
+        <OptionsEditorGroup title="Format">
+          <FormatControls value={value.format ?? DEFAULT_FORMAT} onChange={onFormatChange} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Node color">
+          <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
+        </OptionsEditorGroup>
+        <OptionsEditorGroup title="Node size">
+          <NodeSizeSettings value={value} onChange={onChange} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Edge color">
+          <ThresholdsEditor hideDefault thresholds={value.edgeThresholds} onChange={onEdgeThresholdsChange} />
+        </OptionsEditorGroup>
+        <OptionsEditorGroup title="Edge thickness">
+          <EdgeThicknessSettings value={value} onChange={onChange} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+    </OptionsEditorGrid>
+  );
+}
 
 export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorProps): ReactElement {
   const onFormatChange = useCallback(
@@ -51,31 +103,58 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
     [value, onChange],
   );
 
+  const onEdgeThresholdsChange = useCallback(
+    (edgeThresholds: ThresholdOptions | undefined): void => {
+      onChange({ ...value, edgeThresholds });
+    },
+    [value, onChange],
+  );
+
+  const mode = value.graphGeneration?.enabled ? 'auto' : 'manual';
+
+  const onModeChange = useCallback(
+    (_: MouseEvent<HTMLElement>, next: 'manual' | 'auto' | null): void => {
+      if (next === null) {
+        return;
+      }
+      if (next === 'auto') {
+        onChange({ ...value, graphGeneration: { ...DEFAULT_GENERATION, ...value.graphGeneration, enabled: true } });
+      } else {
+        onChange(
+          value.graphGeneration ? { ...value, graphGeneration: { ...value.graphGeneration, enabled: false } } : value,
+        );
+      }
+    },
+    [value, onChange],
+  );
+
   return (
     <Box sx={EDITOR_COLUMN_SX}>
-      <OptionsEditorGrid>
-        <OptionsEditorColumn>
-          <OptionsEditorGroup title="Legend">
-            <LegendSettings value={value} onChange={onChange} />
-          </OptionsEditorGroup>
-          <OptionsEditorGroup title="Format">
-            <FormatControls value={value.format ?? DEFAULT_FORMAT} onChange={onFormatChange} />
-          </OptionsEditorGroup>
-        </OptionsEditorColumn>
-        <OptionsEditorColumn>
-          <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
-          <OptionsEditorGroup title="Edge thickness">
-            <EdgeThicknessSettings value={value} onChange={onChange} />
-          </OptionsEditorGroup>
-        </OptionsEditorColumn>
-      </OptionsEditorGrid>
+      <ToggleButtonGroup exclusive size="small" value={mode} onChange={onModeChange} sx={MODE_TOGGLE_SX}>
+        <ToggleButton value="manual">Manual</ToggleButton>
+        <ToggleButton value="auto">From data</ToggleButton>
+      </ToggleButtonGroup>
+
+      {/* Each tab is self-contained: the same styling controls plus the tab's own item editor, so
+          every adjustment option stays together within the active mode. */}
+      <StylingSettings
+        value={value}
+        onChange={onChange}
+        onFormatChange={onFormatChange}
+        onThresholdsChange={onThresholdsChange}
+        onEdgeThresholdsChange={onEdgeThresholdsChange}
+      />
 
       <OptionsEditorGroup title="Items">
-        <EditorStateProvider>
-          <SpecProvider spec={value} onChange={onChange}>
-            <EditorItemsPanel />
-          </SpecProvider>
-        </EditorStateProvider>
+        {mode === 'auto' ? (
+          <GraphGenerationSettings value={value} onChange={onChange} />
+        ) : (
+          <EditorStateProvider>
+            <SpecProvider spec={value} onChange={onChange}>
+              <EditorItemsPanel />
+            </SpecProvider>
+          </EditorStateProvider>
+        )}
       </OptionsEditorGroup>
     </Box>
   );

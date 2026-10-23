@@ -21,14 +21,30 @@ kind: "Canvas"
 spec: close({
 	legend?:                 #legend
 	thresholds?:             common.#thresholds
+	edgeThresholds?:         common.#thresholds
 	format?:                 common.#format
 	querySettings?:          #querySettings
 	edgeDefaultStrokeWidth?: number & >0
 	edgeThresholdWidths?: [...#edgeThresholdStep]
+	nodeThresholdSizes?: [...#nodeThresholdStep]
+	nodeDefaultSize?: number & >0
 	backgrounds?: [...#background]
 	nodes?: [...#node]
 	edges?: [...#edge]
+	graphGeneration?: #graphGeneration
 })
+
+#graphGeneration: {
+	enabled?:           bool
+	nodeQueryIndex:     int & >=0
+	nodeIdLabel:        string
+	nodeLabelTemplate?: string
+	edgeQueryIndex?:    int & >=0
+	edgeSourceLabel?:   string
+	edgeTargetLabel?:   string
+	edgeLabelTemplate?: string
+	bidirectional?:     bool
+}
 
 #legend: {
 	position: "bottom" | "right"
@@ -75,6 +91,7 @@ spec: close({
 	queryIndex?:      int & >=0
 	colorMode?:       "threshold" | "fixed"
 	color?:           =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+	sizeMode?:        "fixed" | "threshold"
 }
 
 #edge: {
@@ -100,4 +117,9 @@ spec: close({
 #edgeThresholdStep: {
 	value:       number
 	strokeWidth: number & >0
+}
+
+#nodeThresholdStep: {
+	value: number
+	scale: number & >0
 }
