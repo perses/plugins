@@ -13,7 +13,7 @@
 
 import type { TimeSeries } from '@perses-dev/spec';
 
-import { colorFromThresholds, interpolateLabel, isSafeImageUrl } from './panelUtils';
+import { colorFromThresholds, interpolateLabel, isSafeImageUrl, scaleFromThresholds } from './panelUtils';
 
 function makeSeries(labels: Record<string, string>, values: Array<[number, number | null]>): TimeSeries {
   return { labels, values } as unknown as TimeSeries;
@@ -92,6 +92,38 @@ describe('colorFromThresholds', () => {
   it('returns fallback when palette is empty and step has no color', () => {
     const thresholds = { steps: [{ value: 0 }] };
     expect(colorFromThresholds(5, thresholds, [], fallback)).toBe(fallback);
+  });
+});
+
+describe('scaleFromThresholds', () => {
+  const steps = [
+    { value: 0.5, scale: 1.3 },
+    { value: 0.8, scale: 1.7 },
+  ];
+
+  it('returns 1 when there are no steps', () => {
+    expect(scaleFromThresholds(0.9, undefined)).toBe(1);
+    expect(scaleFromThresholds(0.9, [])).toBe(1);
+  });
+
+  it('returns 1 below the first step', () => {
+    expect(scaleFromThresholds(0.2, steps)).toBe(1);
+  });
+
+  it('returns the matching step scale and prefers the highest reached step', () => {
+    expect(scaleFromThresholds(0.5, steps)).toBe(1.3);
+    expect(scaleFromThresholds(0.79, steps)).toBe(1.3);
+    expect(scaleFromThresholds(0.8, steps)).toBe(1.7);
+    expect(scaleFromThresholds(0.95, steps)).toBe(1.7);
+  });
+
+  it('prefers the highest reached step regardless of array order', () => {
+    const unsorted = [
+      { value: 0.8, scale: 1.7 },
+      { value: 0.5, scale: 1.3 },
+    ];
+    expect(scaleFromThresholds(0.95, unsorted)).toBe(1.7);
+    expect(scaleFromThresholds(0.6, unsorted)).toBe(1.3);
   });
 });
 
