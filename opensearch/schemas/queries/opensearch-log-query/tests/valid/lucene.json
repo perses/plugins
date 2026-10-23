@@ -1,0 +1,4 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": { "queryLanguage": "lucene", "query": "level:error AND service:api", "index": "logs-*", "limit": 250 }
+}
