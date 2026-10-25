@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as echarts from 'echarts';
+import { format } from 'echarts/core';
 
 import type { FlameChartSample } from './data-model';
 import { formatItemValue } from './format';
@@ -29,5 +29,5 @@ export function generateTooltip(params: FlameChartSample, unit: string | undefin
   return `${functionName}<br/><br/>
             Total: ${formatItemValue(unit, total)} (${totalPercentage.toFixed(2)}%)<br/>
             Self: ${formatItemValue(unit, self)} (${selfPercentage.toFixed(2)}%)<br/>
-            Samples: ${echarts.format.addCommas(total)}`;
+            Samples: ${format.addCommas(total)}`;
 }
