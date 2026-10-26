@@ -27,7 +27,7 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@nexucis/fuzzy": "^0.5.1",
-    "@prometheus-io/codemirror-promql": "^0.314.0",
+    "@prometheus-io/codemirror-promql": "^0.315.0",
     "color-hash": "^2.0.2",
     "qs": "^6.13.0",
     "react-compiler-runtime": "^1.0.0",
