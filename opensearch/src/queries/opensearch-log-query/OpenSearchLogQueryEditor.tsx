@@ -32,7 +32,7 @@ import { useState } from 'react';
 
 import type { OpenSearchDatasourceSelector } from '../../model';
 import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND } from '../../model';
-import { DATASOURCE_KIND, DEFAULT_DATASOURCE, QUERY_LANGUAGES } from '../constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE, MAX_SEARCH_SIZE, QUERY_LANGUAGES } from '../constants';
 import { useQueryState } from '../query-editor-model';
 import type { OpenSearchLogQuerySpec, OpenSearchQueryLanguage } from './opensearch-log-query-types';
 import { OPENSEARCH_QUERY_LANGUAGES, requiresIndex, resolveQueryLanguage } from './opensearch-log-query-types';
@@ -48,6 +48,7 @@ const REQUIRED_INDEX_MESSAGE = `Required for ${OPENSEARCH_QUERY_LANGUAGES.filter
 /**
  * Parses the Limit field's raw text into a spec-safe value: `undefined` for anything empty,
  * non-numeric, or not a positive integer, since the CUE schema constrains `limit` to `int & >0`.
+ * Values above MAX_SEARCH_SIZE are clamped to it, because `_search` rejects a larger `size`.
  * Exported (rather than inlined in the change handler) so it can be unit tested directly —
  * a native `<input type="number">` sanitizes invalid strings like `"abc"` or `" 5"` to `""`
  * before a change event ever reaches React, so those inputs can't be exercised through the
@@ -57,12 +58,12 @@ export function parseLimitInput(raw: string): number | undefined {
   // `Number` rather than `parseInt`: parseInt would silently truncate "3.7" to 3, whereas
   // a decimal should be rejected like any other non-integer. `Number("")` is 0, so empty is rejected too.
   const parsed = Number(raw);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+  return Number.isInteger(parsed) && parsed > 0 ? Math.min(parsed, MAX_SEARCH_SIZE) : undefined;
 }
 
 const labelSx = { display: 'block', marginBottom: '4px', fontWeight: 500 } as const;
 const languageInputProps = { 'aria-label': 'Query language' } as const;
-const limitInputProps = { min: 1, 'aria-label': 'Limit (optional)' } as const;
+const limitInputProps = { min: 1, max: MAX_SEARCH_SIZE, 'aria-label': 'Limit (optional)' } as const;
 
 const summarySx = { cursor: 'pointer', fontSize: '12px', color: 'text.secondary', marginBottom: '8px' } as const;
 
@@ -200,11 +201,13 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       </div>
 
       <div>
-        <InputLabel sx={labelSx}>Datasource</InputLabel>
+        {/* DatasourceSelect names its input only through its own `label`, so that is the one
+            label here: a separate heading above it would leave the input unnamed. */}
         <DatasourceSelect
           datasourcePluginKind={DATASOURCE_KIND}
           value={selectedDatasource}
           onChange={handleDatasourceChange}
+          label="Datasource"
         />
       </div>
 
@@ -296,7 +299,7 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
                 value={value.limit ?? ''}
                 onChange={handleLimitChange}
                 placeholder="500"
-                helperText="Maximum number of log documents to fetch."
+                helperText="Maximum number of log documents to fetch, up to 10,000."
               />
             </div>
           )}

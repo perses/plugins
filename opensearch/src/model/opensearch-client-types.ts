@@ -21,7 +21,8 @@ export interface OpenSearchDatarowsColumn {
 /** The schema + datarows shape returned by _ppl and _sql. OpenSearch calls this its `jdbc` response format (?format=jdbc), which is the default. */
 export interface OpenSearchDatarowsResponse {
   schema: OpenSearchDatarowsColumn[];
-  datarows: Array<Array<string | number | boolean | null>>;
+  // Object/struct and array columns (e.g. OTel's `service`) come back as nested JSON values.
+  datarows: Array<Array<string | number | boolean | null | Record<string, unknown> | unknown[]>>;
   total?: number;
   size?: number;
 }

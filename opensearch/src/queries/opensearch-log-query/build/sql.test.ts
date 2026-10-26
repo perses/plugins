@@ -16,7 +16,7 @@ import { buildSqlRequest, UNSUPPORTED_SQL_TIME_FILTER_MESSAGE } from './sql';
 const start = new Date('2025-01-01T00:00:00.000Z');
 const end = new Date('2025-01-01T01:00:00.000Z');
 
-const bound = "(`@timestamp` >= '2025-01-01 00:00:00.000' AND `@timestamp` <= '2025-01-01 01:00:00.000')";
+const bound = "(`@timestamp` >= '2025-01-01T00:00:00.000Z' AND `@timestamp` <= '2025-01-01T01:00:00.000Z')";
 
 const build = (sql: string): string => buildSqlRequest(sql, start, end).query;
 
@@ -83,6 +83,32 @@ describe('buildSqlRequest', () => {
       `SELECT * FROM logs WHERE ${bound} AND (a = 1) -- note\nLIMIT 5`,
     ],
     [
+      'places the WHERE before a trailing # comment',
+      'SELECT * FROM logs # recent errors',
+      `SELECT * FROM logs WHERE ${bound} # recent errors`,
+    ],
+    [
+      'ignores keywords inside a # comment',
+      "SELECT * FROM logs # where x limit 1\nWHERE level = 'ERROR'",
+      `SELECT * FROM logs # where x limit 1\nWHERE ${bound} AND (level = 'ERROR')`,
+    ],
+    [
+      'reads a word after a dot as part of a field name, not a keyword',
+      "SELECT * FROM logs WHERE user.group = 'admin' AND rate.limit > 1",
+      `SELECT * FROM logs WHERE ${bound} AND (user.group = 'admin' AND rate.limit > 1)`,
+    ],
+    [
+      'accepts a dotted field named like FROM in the select list',
+      'SELECT source.from FROM logs',
+      `SELECT source.from FROM logs WHERE ${bound}`,
+    ],
+    [
+      'treats a bare -- as two minus signs, not a comment',
+      'SELECT * FROM logs WHERE x = 5--1 LIMIT 3',
+      `SELECT * FROM logs WHERE ${bound} AND (x = 5--1) LIMIT 3`,
+    ],
+    ['treats -- at the end of the query as a comment', 'SELECT * FROM logs --', `SELECT * FROM logs WHERE ${bound} --`],
+    [
       'ignores keywords inside block comments',
       'SELECT * /* from limit */ FROM logs',
       `SELECT * /* from limit */ FROM logs WHERE ${bound}`,
@@ -94,7 +120,7 @@ describe('buildSqlRequest', () => {
 
   it('uses the configured timestamp field and escapes backticks in it', () => {
     expect(buildSqlRequest('SELECT * FROM logs', start, end, { timestampField: 'event.time' }).query).toContain(
-      "`event.time` >= '2025-01-01 00:00:00.000'",
+      "`event.time` >= '2025-01-01T00:00:00.000Z'",
     );
     expect(buildSqlRequest('SELECT * FROM logs', start, end, { timestampField: 'a`b' }).query).toContain('`a``b` >=');
   });

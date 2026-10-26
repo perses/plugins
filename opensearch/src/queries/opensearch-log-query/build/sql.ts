@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { OpenSearchSQLParams } from '../../../model/opensearch-client';
+import { escapeIdentifier } from './identifier';
 import { DEFAULT_TIMESTAMP_FIELD } from './search';
 
 export interface SqlRequestOptions {
@@ -46,7 +47,9 @@ interface ScannedSql {
 /**
  * Collect the words outside parentheses, quotes and comments, which is enough to find the
  * outer query's clauses. Quoting follows the OpenSearch SQL lexer: '…', "…" and `…` may
- * escape a character with a backslash or by doubling the quote; `--` and `/* *\/` are comments.
+ * escape a character with a backslash or by doubling the quote. `#`, `/* *\/`, and `--` followed
+ * by a space or the end of a line are comments; a bare `--` is two minus signs (`5--1`). A word
+ * right after a `.` is part of a dotted field name (`user.group`), never a keyword.
  */
 function scanTopLevelWords(sql: string): ScannedSql {
   const keywords: SqlKeyword[] = [];
@@ -57,7 +60,12 @@ function scanTopLevelWords(sql: string): ScannedSql {
   while (i < sql.length) {
     const ch = sql[i]!;
 
-    if (ch === '-' && sql[i + 1] === '-') {
+    const afterDashes = sql[i + 2];
+    const isDashComment =
+      ch === '-' &&
+      sql[i + 1] === '-' &&
+      (afterDashes === undefined || afterDashes === ' ' || afterDashes === '\n' || afterDashes === '\r');
+    if (isDashComment || ch === '#') {
       const newline = sql.indexOf('\n', i);
       i = newline === -1 ? sql.length : newline;
       continue;
@@ -93,7 +101,7 @@ function scanTopLevelWords(sql: string): ScannedSql {
     if (/[A-Za-z_]/.test(ch)) {
       const start = i;
       while (i < sql.length && /\w/.test(sql[i]!)) i++;
-      if (depth === 0) {
+      if (depth === 0 && sql[start - 1] !== '.') {
         keywords.push({ word: sql.slice(start, i).toUpperCase(), start, end: i, codeEndBefore: codeEnd });
       }
       codeEnd = i;
@@ -107,16 +115,6 @@ function scanTopLevelWords(sql: string): ScannedSql {
   }
 
   return { keywords, codeEnd };
-}
-
-/** Escape a user-supplied identifier for a backtick-quoted SQL identifier by doubling backticks. */
-function escapeIdentifier(name: string): string {
-  return name.replace(/`/g, '``');
-}
-
-/** UTC `yyyy-MM-dd HH:mm:ss.SSS`, the timestamp literal OpenSearch SQL compares against. */
-function toSqlTimestamp(date: Date): string {
-  return date.toISOString().replace('T', ' ').replace('Z', '');
 }
 
 /**
@@ -167,6 +165,9 @@ export function buildSqlRequest(
   // timestampField is user-editable, so escape it before embedding it in the backtick-quoted
   // identifier (the bounds are machine-generated and safe).
   const tsField = `\`${escapeIdentifier(timestampField)}\``;
-  const bound = `(${tsField} >= '${toSqlTimestamp(start)}' AND ${tsField} <= '${toSqlTimestamp(end)}')`;
+  // ISO 8601 bounds: the new SQL engine compares them as timestamps, and when a query falls
+  // back to the legacy engine they are pushed down to a `range` query, whose default date
+  // format accepts ISO but not `yyyy-MM-dd HH:mm:ss`.
+  const bound = `(${tsField} >= '${start.toISOString()}' AND ${tsField} <= '${end.toISOString()}')`;
   return { query: spliceWhere(query, bound) };
 }

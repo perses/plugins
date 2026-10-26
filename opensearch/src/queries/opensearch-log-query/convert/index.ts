@@ -12,5 +12,6 @@
 // limitations under the License.
 
 export * from './datarows-to-logs';
+export * from './fields';
 export * from './parse-timestamp';
 export * from './hits-to-logs';

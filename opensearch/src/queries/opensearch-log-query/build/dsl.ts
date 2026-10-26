@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { OpenSearchSearchRequestBody } from '../../../model/opensearch-client-types';
+import { MAX_SEARCH_SIZE } from '../../constants';
 import type { SearchBodyOptions } from './search';
 import { buildDefaultSort, buildTimeRangeFilter, DEFAULT_TIMESTAMP_FIELD, resolveSize } from './search';
 
@@ -33,9 +34,11 @@ function parseBody(userJson: string): Record<string, unknown> {
 
 function resolveDslSize(userSize: unknown, limit?: number): unknown {
   if (userSize === undefined) return resolveSize(limit);
-  if (limit === undefined) return userSize;
+  // Without a limit, a numeric body size is still kept within what `_search` accepts.
+  if (limit === undefined) return typeof userSize === 'number' ? Math.min(userSize, MAX_SEARCH_SIZE) : userSize;
   // A non-numeric size (e.g. a string) can't be compared, so the limit applies to keep the cap.
-  return typeof userSize === 'number' ? Math.min(userSize, limit) : limit;
+  const cap = resolveSize(limit);
+  return typeof userSize === 'number' ? Math.min(userSize, cap) : cap;
 }
 
 /**
@@ -44,7 +47,8 @@ function resolveDslSize(userSize: unknown, limit?: number): unknown {
  * key we do not manage (`_source`, `aggs`, `highlight`, …) passes straight through.
  *
  * `limit` caps `size`: with both set the smaller wins, so the body can ask for fewer documents
- * but never more than the configured limit. With only one set, that one applies. The user wins
+ * but never more than the configured limit. With only one set, that one applies. Either way a
+ * numeric size never exceeds MAX_SEARCH_SIZE, the most `_search` accepts by default. The user wins
  * on `sort`; we only supply a default. Their `query`, if present, is nested under our
  * `bool.must` while the time range goes in `bool.filter`. That still means exactly "AND",
  * but keeps the user's query in scoring context so `_score` sorts, `track_scores` and

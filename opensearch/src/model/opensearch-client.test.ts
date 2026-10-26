@@ -165,22 +165,14 @@ describe('opensearch-client', () => {
   });
 
   describe('sql', () => {
-    it('POSTs to /_plugins/_sql with query and filter', async () => {
+    it('POSTs only the query to /_plugins/_sql', async () => {
       const mock = mockFetch({ ok: true, status: 200, body: { schema: [], datarows: [] } });
-      const filter = { range: { '@timestamp': { gte: 1, lte: 2, format: 'epoch_millis' } } };
-      await sql({ query: 'SELECT * FROM logs', filter }, { datasourceUrl: 'http://localhost:9200' });
+      await sql({ query: 'SELECT * FROM logs' }, { datasourceUrl: 'http://localhost:9200' });
 
       const [url, init] = mock.mock.calls[0] as [string, RequestInit];
       expect(url).toBe('http://localhost:9200/_plugins/_sql');
       expect(init.method).toBe('POST');
-      expect(JSON.parse(init.body as string)).toEqual({ query: 'SELECT * FROM logs', filter });
-    });
-
-    it('omits filter from the body when not provided', async () => {
-      const mock = mockFetch({ ok: true, status: 200, body: { schema: [], datarows: [] } });
-      await sql({ query: 'SELECT 1' }, { datasourceUrl: 'http://localhost:9200' });
-      const [, init] = mock.mock.calls[0] as [string, RequestInit];
-      expect(JSON.parse(init.body as string)).toEqual({ query: 'SELECT 1' });
+      expect(JSON.parse(init.body as string)).toEqual({ query: 'SELECT * FROM logs' });
     });
 
     it('throws a plain OpenSearchApiError, not the PPL subclass', async () => {
@@ -215,6 +207,16 @@ describe('opensearch-client', () => {
       await search({ index: 'a-*,b-*', body: {} }, { datasourceUrl: 'http://localhost:9200' });
       const [url] = mock.mock.calls[0] as [string];
       expect(url).toBe('http://localhost:9200/a-*,b-*/_search');
+    });
+
+    it.each([
+      ['a cross-cluster index', 'remote:logs-*', 'remote:logs-*'],
+      ['spaces after the commas of a multi-index list', 'logs-*, app-*', 'logs-*,app-*'],
+    ])('accepts %s', async (_, index, expected) => {
+      const mock = mockFetch({ ok: true, status: 200, body: { hits: { hits: [] } } });
+      await search({ index, body: {} }, { datasourceUrl: 'http://localhost:9200' });
+      const [url] = mock.mock.calls[0] as [string];
+      expect(url).toBe(`http://localhost:9200/${expected}/_search`);
     });
 
     it('allows dots within an index name (date-suffixed indices)', async () => {

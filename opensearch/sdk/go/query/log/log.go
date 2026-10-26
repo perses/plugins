@@ -41,6 +41,10 @@ type limitPresence struct {
 	Limit *int `json:"limit" yaml:"limit"`
 }
 
+// MaxLimit is the largest `limit` accepted: `_search` rejects a `size` above the index's
+// max_result_window, which defaults to 10,000.
+const MaxLimit = 10000
+
 func (l limitPresence) validate() error {
 	if l.Limit != nil && *l.Limit <= 0 {
 		return fmt.Errorf("limit must be greater than 0, got %d", *l.Limit)
@@ -107,6 +111,9 @@ func (s *PluginSpec) validate() error {
 	// field. An explicit zero is caught while unmarshalling, via limitPresence.
 	if s.Limit < 0 {
 		return fmt.Errorf("limit cannot be negative")
+	}
+	if s.Limit > MaxLimit {
+		return fmt.Errorf("limit must be at most %d, got %d", MaxLimit, s.Limit)
 	}
 	return nil
 }

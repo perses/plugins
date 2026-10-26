@@ -47,9 +47,11 @@ See also technical docs related to this plugin:
 
 For Lucene and Query DSL, `index` is required: it is the index or index pattern in the `POST /{index}/_search` request path. For SQL it is ignored. For PPL, the `index` field of the query is prepended to your expression as a `source=<index>` clause. It is ignored when your expression already starts with `source=` (or `search source=`), so you can either set the index once on the query or write the source clause yourself.
 
+List several indices with commas (`logs-*,app-*`; spaces after the commas are ignored), and use `cluster:index` for cross-cluster search. A variable in `index` that has several values selected is joined with commas: `$index` with `logs-a` and `logs-b` becomes `logs-a,logs-b`.
+
 ### Result limit
 
-`limit` sets how many log documents a Lucene or Query DSL query fetches, as the `_search` request's `size`. It defaults to 500 and must be a positive integer. For Query DSL, a `size` in your request body is kept, but capped at `limit` when both are set. `limit` does not apply to PPL or SQL — use `head` or `LIMIT` in the query instead.
+`limit` sets how many log documents a Lucene or Query DSL query fetches, as the `_search` request's `size`. It defaults to 500 and must be an integer from 1 to 10,000, because `_search` rejects a larger `size` under OpenSearch's default `index.max_result_window`. For Query DSL, a `size` in your request body is kept, but capped at `limit` when both are set, and at 10,000 when it is set alone. `limit` does not apply to PPL or SQL — use `head` or `LIMIT` in the query instead.
 
 ### Automatic time filtering
 
@@ -71,6 +73,8 @@ source=otel-logs-demo | where `@timestamp` >= '2026-07-14T03:53:33.000Z' and `@t
 
 Set `disableTimeFilter` to `true` to turn this off, in every language, and manage the time bounds yourself.
 
+Lucene and Query DSL results are sorted newest first on the timestamp field. A Query DSL body that sets its own `sort` keeps it.
+
 ### Time range variables
 
 `$__from` and `$__to` are replaced with the start and end of the panel time range, in epoch milliseconds, in every query language and in `index`. Use them to bound a query yourself when `disableTimeFilter` is set, for example a SQL statement that automatic time filtering rejects:
@@ -83,11 +87,26 @@ Set `disableTimeFilter` to `true` to turn this off, in every language, and manag
 
 In SQL, divide by `1000.0` rather than `1000`: integer division drops the milliseconds. A dashboard variable with the same name takes precedence.
 
-Lucene and Query DSL results are sorted newest first on the timestamp field. A Query DSL body that sets its own `sort` keeps it.
+### Multi-value variables
+
+A variable with several values selected, referenced without a format, is written in the syntax of the query language:
+
+| Language | `$level` with `error` and `warn` | Use it as |
+| --- | --- | --- |
+| SQL | `'error','warn'` | `WHERE level IN ($level)` |
+| Lucene | `("error" OR "warn")` | `level:$level` |
+| PPL | `(error\|warn)` | Perses' default; give a format such as `${level:singlequote}` |
+| `index` | `logs-a,logs-b` | OpenSearch's multi-index syntax |
+
+An explicit format, such as `${level:csv}`, always takes precedence.
+
+### Variables in Query DSL
+
+In a Query DSL body, a variable's value is formatted and then escaped as JSON string content, so a value containing `"` or `\`, or the quotes a format such as `lucene` adds, stays inside the string it is placed in and can't change the structure of the request. Put a variable inside quotes, for example `{"term": {"traceId": "$traceId"}}`. To insert a multi-value variable as a JSON array, use the `json` format, which is not escaped: `{"terms": {"level": ${level:json}}}`.
 
 ### Field mapping
 
-OpenSearch does not enforce a schema, and field names vary by exporter. Each PPL or SQL result row, and each Lucene or Query DSL hit's `_source` (flattened to dot-separated keys), is mapped to a log entry by looking up a timestamp column and a message column, trying these names in order:
+OpenSearch does not enforce a schema, and field names vary by exporter. Each PPL or SQL result row, and each Lucene or Query DSL hit's `_source` (flattened to dot-separated keys), is mapped to a log entry by looking up a timestamp column and a message column, trying these names in order (object columns in PPL and SQL results, such as `service`, are flattened to `service.name`-style labels too):
 
 - **timestamp**: `@timestamp`, `timestamp`, `time`
 - **message**: `message`, `log`, `body`

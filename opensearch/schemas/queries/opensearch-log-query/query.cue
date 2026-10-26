@@ -53,7 +53,7 @@ spec: close({
 	timestampField?:    strings.MinRunes(1)
 	messageField?:      strings.MinRunes(1)
 	disableTimeFilter?: bool
-	limit?:             int & >0
+	limit?:             int & >0 & <=10000
 	queryLanguage:      *"ppl" | "sql" | "lucene" | "dsl"
 	if queryLanguage == "lucene" {
 		query: string

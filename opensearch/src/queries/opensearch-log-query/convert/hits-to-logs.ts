@@ -14,40 +14,9 @@
 import type { LogData, LogEntry } from '@perses-dev/spec';
 
 import type { OpenSearchSearchResponse } from '../../../model/opensearch-client-types';
-import { DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../../constants';
-import type { ConvertOptions } from './datarows-to-logs';
+import type { ConvertOptions } from './fields';
+import { fieldCandidates, flattenSource } from './fields';
 import { parseTimestamp } from './parse-timestamp';
-
-/**
- * Flatten a `_source` document to dot-separated keys, because LogEntry labels are a flat
- * `Record<string, string>`. Arrays are JSON-stringified rather than indexed, since
- * `tags.0`/`tags.1` labels are noise; null/undefined values are dropped so they do not
- * render as the strings "null"/"undefined".
- */
-export function flattenSource(source: Record<string, unknown>): Record<string, string> {
-  const out: Record<string, string> = {};
-
-  const walk = (value: unknown, prefix: string): void => {
-    if (value === null || value === undefined) return;
-    if (Array.isArray(value)) {
-      out[prefix] = JSON.stringify(value);
-      return;
-    }
-    if (typeof value === 'object') {
-      for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-        walk(child, prefix ? `${prefix}.${key}` : key);
-      }
-      return;
-    }
-    out[prefix] = String(value);
-  };
-
-  for (const [key, value] of Object.entries(source)) {
-    walk(value, key);
-  }
-
-  return out;
-}
 
 /** First candidate present in the flattened document, or undefined if none match. */
 function pickKey(flat: Record<string, string>, candidates: string[]): string | undefined {
@@ -61,12 +30,7 @@ function pickKey(flat: Record<string, string>, candidates: string[]): string | u
 export function convertHitsToLogs(response: OpenSearchSearchResponse, options: ConvertOptions = {}): LogData {
   const hits = response?.hits?.hits ?? [];
 
-  const tsCandidates = options.timestampField
-    ? [options.timestampField, ...DEFAULT_TIMESTAMP_FIELDS]
-    : DEFAULT_TIMESTAMP_FIELDS;
-  const msgCandidates = options.messageField
-    ? [options.messageField, ...DEFAULT_MESSAGE_FIELDS]
-    : DEFAULT_MESSAGE_FIELDS;
+  const { timestamp: tsCandidates, message: msgCandidates } = fieldCandidates(options);
 
   // OpenSearch's metadata fields are underscore-prefixed, so rename them on the way in.
   const entries: LogEntry[] = hits.map(({ _id: id, _index: index, _source: rawSource }) => {

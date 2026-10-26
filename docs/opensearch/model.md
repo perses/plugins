@@ -96,7 +96,7 @@ spec:
   index: <string> # Optional
 
   # `limit` is the maximum number of log documents fetched by a `lucene` or `dsl` query.
-  # It must be greater than 0 and defaults to 500. A `size` in a `dsl` body is capped at `limit`.
+  # It must be between 1 and 10000 and defaults to 500. A `size` in a `dsl` body is capped at `limit`.
   # Ignored for `ppl` and `sql`.
   limit: <int> # Optional
 

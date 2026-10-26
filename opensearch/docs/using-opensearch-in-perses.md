@@ -273,7 +273,7 @@ choose the **OpenSearch Log Query** type, and you get an editor with these field
 | **Options** → **Timestamp field** *(optional)* | Overrides the default timestamp field. |
 | **Options** → **Message field** *(optional)* | Overrides which field becomes the log line. |
 | **Options** → **Use dashboard time range** | On by default. Untick it to turn off the automatic time bound (see below). |
-| **Options** → **Limit** *(optional — Lucene and Query DSL only)* | Caps the number of documents fetched (the `_search` request's `size`). Leave it empty and the plugin sends 500. For PPL and SQL, cap results yourself with `head` or `LIMIT` instead. |
+| **Options** → **Limit** *(optional — Lucene and Query DSL only)* | Caps the number of documents fetched (the `_search` request's `size`). Leave it empty and the plugin sends 500; the maximum is 10,000, which is all `_search` accepts by default. For PPL and SQL, cap results yourself with `head` or `LIMIT` instead. |
 
 **Options** is collapsed until you open it, and starts open when the query already
 changes one of its settings.

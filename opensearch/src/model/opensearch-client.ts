@@ -32,7 +32,6 @@ export interface OpenSearchApiOptions {
 
 export interface OpenSearchSQLParams {
   query: string;
-  filter?: unknown;
 }
 
 export interface OpenSearchSearchParams {
@@ -185,19 +184,20 @@ async function postJson<T>(
  * cluster-wide root) and `\` (reparsed as an authority separator, escaping the host
  * entirely). Only an allowlist of characters that OpenSearch itself permits in an
  * index name closes this off in one rule, because it rejects `%` and `\` outright
- * regardless of what they'd decode or reparse to.
+ * regardless of what they'd decode or reparse to. `:` is allowed for cross-cluster
+ * search (`cluster:logs-*`); behind the leading `/` it stays inside the path segment.
  */
 export function assertSafeIndexPath(index: string): void {
   const invalid = (): never => {
     throw new Error(
       `invalid OpenSearch index for a _search request: ${JSON.stringify(index)}. ` +
         'An index (or comma-separated list of indices) must be non-empty and may only contain ' +
-        'letters, digits, "_", ".", "+", "-", and "*" as path segments, with no empty or ' +
-        'dots-only segment.',
+        'letters, digits, "_", ".", "+", "-", "*" and ":" (as in a cross-cluster "cluster:index"), ' +
+        'with no empty or dots-only segment.',
     );
   };
 
-  if (!index || /[^A-Za-z0-9_.+*,-]/.test(index)) {
+  if (!index || /[^A-Za-z0-9_.+*,:-]/.test(index)) {
     invalid();
   }
 
@@ -225,11 +225,7 @@ export async function sql(
   options: OpenSearchApiOptions,
   signal?: AbortSignal,
 ): Promise<OpenSearchDatarowsResponse> {
-  const body: Record<string, unknown> = { query: params.query };
-  if (params.filter !== undefined) {
-    body.filter = params.filter;
-  }
-  return postJson('SQL', '/_plugins/_sql', body, options, signal);
+  return postJson('SQL', '/_plugins/_sql', { query: params.query }, options, signal);
 }
 
 export async function search(
@@ -237,6 +233,11 @@ export async function search(
   options: OpenSearchApiOptions,
   signal?: AbortSignal,
 ): Promise<OpenSearchSearchResponse> {
-  assertSafeIndexPath(params.index);
-  return postJson('Search', `/${params.index}/_search`, params.body, options, signal);
+  // A multi-index list is often written with spaces after the commas (`logs-*, app-*`).
+  const index = params.index
+    .split(',')
+    .map((segment) => segment.trim())
+    .join(',');
+  assertSafeIndexPath(index);
+  return postJson('Search', `/${index}/_search`, params.body, options, signal);
 }

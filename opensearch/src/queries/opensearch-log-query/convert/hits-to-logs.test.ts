@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { convertHitsToLogs, flattenSource } from './hits-to-logs';
+import { flattenSource } from './fields';
+import { convertHitsToLogs } from './hits-to-logs';
 
 describe('flattenSource', () => {
   it('flattens nested objects to dot paths and stringifies scalars', () => {

@@ -42,6 +42,10 @@ describe('buildLuceneSearchBody', () => {
     expect(buildLuceneSearchBody('*', start, end, { limit: 25 }).size).toBe(25);
   });
 
+  it('caps a limit above what _search accepts at 10,000', () => {
+    expect(buildLuceneSearchBody('*', start, end, { limit: 20000 }).size).toBe(10000);
+  });
+
   // The CUE schema constrains `limit` to `int & >0`, so `limit: 0` cannot reach here from a
   // validated dashboard. This test pins the `??` operator choice in resolveSize, not `size: 0`
   // as a supported use case — do not "fix" it by switching resolveSize to `||`.

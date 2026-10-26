@@ -14,7 +14,8 @@
 import type { LogEntry, LogData } from '@perses-dev/spec';
 
 import type { OpenSearchDatarowsResponse } from '../../../model/opensearch-client-types';
-import { DEFAULT_MESSAGE_FIELDS, DEFAULT_TIMESTAMP_FIELDS } from '../../constants';
+import type { ConvertOptions } from './fields';
+import { fieldCandidates, flattenSource } from './fields';
 import { parseTimestamp } from './parse-timestamp';
 
 function pickIndex(cols: Array<{ name: string }>, candidates: string[]): number {
@@ -25,20 +26,10 @@ function pickIndex(cols: Array<{ name: string }>, candidates: string[]): number 
   return -1;
 }
 
-export interface ConvertOptions {
-  timestampField?: string;
-  messageField?: string;
-}
-
 export function convertDatarowsToLogs(response: OpenSearchDatarowsResponse, options: ConvertOptions = {}): LogData {
   const { schema = [], datarows = [] } = response;
 
-  const tsCandidates = options.timestampField
-    ? [options.timestampField, ...DEFAULT_TIMESTAMP_FIELDS]
-    : DEFAULT_TIMESTAMP_FIELDS;
-  const msgCandidates = options.messageField
-    ? [options.messageField, ...DEFAULT_MESSAGE_FIELDS]
-    : DEFAULT_MESSAGE_FIELDS;
+  const { timestamp: tsCandidates, message: msgCandidates } = fieldCandidates(options);
 
   const tsIdx = pickIndex(schema, tsCandidates);
   const msgIdx = pickIndex(schema, msgCandidates);
@@ -48,13 +39,19 @@ export function convertDatarowsToLogs(response: OpenSearchDatarowsResponse, opti
     const rawMsg = msgIdx !== -1 ? row[msgIdx] : null;
 
     const timestamp = parseTimestamp(rawTs);
-    const line = rawMsg !== null && rawMsg !== undefined ? String(rawMsg) : JSON.stringify(rowToObject(schema, row));
+    let line: string;
+    if (rawMsg === null || rawMsg === undefined) {
+      line = JSON.stringify(rowToObject(schema, row));
+    } else {
+      line = typeof rawMsg === 'object' ? JSON.stringify(rawMsg) : String(rawMsg);
+    }
 
+    // Object and struct columns (e.g. OTel's `service`) come back as nested objects, so flatten
+    // them to `service.name`-style labels, as the `_search` converter does for `_source`.
     const labels: Record<string, string> = {};
     schema.forEach((col, i) => {
       if (i === tsIdx || i === msgIdx) return;
-      const v = row[i];
-      if (v !== null && v !== undefined) labels[col.name] = String(v);
+      Object.assign(labels, flattenSource({ [col.name]: row[i] }));
     });
 
     return { timestamp, line, labels };
@@ -68,7 +65,7 @@ export function convertDatarowsToLogs(response: OpenSearchDatarowsResponse, opti
 
 function rowToObject(
   schema: OpenSearchDatarowsResponse['schema'],
-  row: Array<string | number | boolean | null>,
+  row: OpenSearchDatarowsResponse['datarows'][number],
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   schema.forEach((col, i) => {

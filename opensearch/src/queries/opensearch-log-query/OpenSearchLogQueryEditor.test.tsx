@@ -21,7 +21,10 @@ import { OpenSearchLogQueryEditor, parseLimitInput } from './OpenSearchLogQueryE
 
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
   ...(await importOriginal<typeof PluginSystemModule>()),
-  DatasourceSelect: (): JSX.Element => <div data-testid="datasource-select" />,
+  // Like the real component, the mock names its input only through `label`.
+  DatasourceSelect: ({ label }: { label?: string }): JSX.Element => (
+    <select data-testid="datasource-select" aria-label={label} />
+  ),
   useDatasourceSelectValueToSelector: (): undefined => undefined,
   isVariableDatasource: (): boolean => false,
 }));
@@ -55,6 +58,11 @@ describe('OpenSearchLogQueryEditor', () => {
     expect(screen.getByPlaceholderText('@timestamp')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('message')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/source=logs-/)).toBeInTheDocument();
+  });
+
+  it('names the datasource select "Datasource"', () => {
+    setup();
+    expect(screen.getByRole('combobox', { name: 'Datasource' })).toBe(screen.getByTestId('datasource-select'));
   });
 
   it('persists timestampField into spec when typed', () => {
@@ -242,6 +250,7 @@ describe('OpenSearchLogQueryEditor limit field', () => {
     ['0', undefined],
     ['-5', undefined],
     ['3.7', undefined],
+    ['20000', 10000],
   ])('sets limit to %p -> %p via the rendered field', (input, expected) => {
     // Start from a non-empty value so every target value below is a genuine DOM change —
     // starting from "" would make the "" case a same-value no-op that never fires onChange.
@@ -260,6 +269,8 @@ describe('OpenSearchLogQueryEditor limit field', () => {
     ['1.0', 1],
     ['3.7', undefined],
     [' 5', 5],
+    ['10000', 10000],
+    ['10001', 10000],
   ])('parseLimitInput(%p) -> %p', (input, expected) => {
     expect(parseLimitInput(input)).toBe(expected);
   });

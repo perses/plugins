@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { escapeIdentifier } from './identifier';
 import { DEFAULT_TIMESTAMP_FIELD } from './search';
 
 /**
@@ -24,17 +25,6 @@ export interface BoundedPPLOptions {
   index?: string;
   timestampField?: string;
   disableTimeFilter?: boolean;
-}
-
-/**
- * Escape a user-supplied identifier (timestamp field name) for safe interpolation
- * inside a PPL backtick-quoted identifier. A backtick in the value would otherwise
- * close the quoting early and let the rest of the string be parsed as PPL, producing
- * an invalid — or potentially injected — query. PPL escapes a literal backtick by
- * doubling it.
- */
-function escapeIdentifier(name: string): string {
-  return name.replace(/`/g, '``');
 }
 
 /**

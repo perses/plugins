@@ -46,6 +46,8 @@ describe('buildDslSearchBody', () => {
     ['the body size when no limit is set', '{"size":1000}', undefined, 1000],
     ['the limit when the body has no size', '{}', 10, 10],
     ['the limit over a non-numeric body size', '{"size":"1000"}', 10, 10],
+    ['10,000 over a hand-edited limit above it', '{"size":50000}', 20000, 10000],
+    ['10,000 over a body size above it when no limit is set', '{"size":50000}', undefined, 10000],
   ])('caps size: keeps %s', (_, json, limit, expected) => {
     expect(buildDslSearchBody(json, start, end, { limit }).size).toBe(expected);
   });

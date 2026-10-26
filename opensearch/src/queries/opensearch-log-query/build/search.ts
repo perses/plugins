@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DEFAULT_SEARCH_SIZE, DEFAULT_TIMESTAMP_FIELDS } from '../../constants';
+import { DEFAULT_SEARCH_SIZE, DEFAULT_TIMESTAMP_FIELDS, MAX_SEARCH_SIZE } from '../../constants';
 
 export interface SearchBodyOptions {
   timestampField?: string;
@@ -47,6 +47,7 @@ export function buildDefaultSort(timestampField: string): Array<Record<string, u
   return [{ [timestampField]: { order: 'desc', unmapped_type: 'date' } }];
 }
 
+/** The configured limit, or the default, never above what `_search` accepts. */
 export function resolveSize(limit?: number): number {
-  return limit ?? DEFAULT_SEARCH_SIZE;
+  return Math.min(limit ?? DEFAULT_SEARCH_SIZE, MAX_SEARCH_SIZE);
 }

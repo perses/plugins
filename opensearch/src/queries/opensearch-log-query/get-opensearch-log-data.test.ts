@@ -368,6 +368,27 @@ describe('parseTimestamp', () => {
 });
 
 describe('convertDatarowsToLogs', () => {
+  it('flattens object columns into dotted labels instead of "[object Object]"', () => {
+    const logs = convertDatarowsToLogs({
+      schema: [
+        { name: '@timestamp', type: 'timestamp' },
+        { name: 'body', type: 'text' },
+        { name: 'service', type: 'object' },
+        { name: 'tags', type: 'array' },
+      ],
+      datarows: [['2025-01-01T00:00:00.000Z', 'hello', { name: 'api', ns: { env: 'prod' } }, ['a', 'b']]],
+    });
+    expect(logs.entries[0]?.labels).toEqual({ 'service.name': 'api', 'service.ns.env': 'prod', tags: '["a","b"]' });
+  });
+
+  it('serializes an object message column as JSON', () => {
+    const logs = convertDatarowsToLogs({
+      schema: [{ name: 'message', type: 'object' }],
+      datarows: [[{ text: 'hi' }]],
+    });
+    expect(logs.entries[0]?.line).toBe('{"text":"hi"}');
+  });
+
   it('maps @timestamp and message fields and collects remaining fields as labels', () => {
     const logs = convertDatarowsToLogs({
       schema: [
@@ -475,7 +496,7 @@ describe('getLogData language dispatch', () => {
     const [params] = (stubClient.sql as Mock).mock.calls[0]!;
     expect(params).toEqual({
       query:
-        "SELECT * FROM logs WHERE (`@timestamp` >= '2025-01-01 00:00:00.000' AND `@timestamp` <= '2025-01-01 01:00:00.000')",
+        "SELECT * FROM logs WHERE (`@timestamp` >= '2025-01-01T00:00:00.000Z' AND `@timestamp` <= '2025-01-01T01:00:00.000Z')",
     });
     expect(result.logs.entries[0]?.line).toBe('from sql');
   });
@@ -522,6 +543,63 @@ describe('getLogData language dispatch', () => {
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
     expect(params.body.query.bool.must).toEqual([{ term: { traceId: 'abc123' } }]);
+  });
+
+  it('escapes variable values so they stay inside a DSL JSON string', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"term":{"path":"$path"}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      {
+        ...context,
+        variableState: {
+          path: { value: 'C:\\temp\\logs "x"', loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.query.bool.must).toEqual([{ term: { path: 'C:\\temp\\logs "x"' } }]);
+  });
+
+  it('does not let a DSL variable value add keys to the request body', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"term":{"level":"$level"}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      {
+        ...context,
+        variableState: {
+          level: { value: 'x"}},"size":10000,"q":{"a":"y', loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.size).toBe(500);
+    expect(params.body.query.bool.must).toEqual([{ term: { level: 'x"}},"size":10000,"q":{"a":"y' } }]);
+  });
+
+  it('leaves a DSL variable with the json format as the JSON it emits', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"terms":{"level":${levels:json}}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      {
+        ...context,
+        variableState: {
+          levels: { value: ['error', 'warn'], loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.query.bool.must).toEqual([{ terms: { level: ['error', 'warn'] } }]);
+  });
+
+  it('joins a multi-value index variable with commas', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: 'level:error', queryLanguage: 'lucene', index: '$index' },
+      {
+        ...context,
+        variableState: {
+          index: { value: ['logs-a', 'logs-b'], loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.index).toBe('logs-a,logs-b');
   });
 
   it('resolves the builtin $__from / $__to to the time range in epoch milliseconds', async () => {

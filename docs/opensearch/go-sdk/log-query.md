@@ -65,7 +65,7 @@ import "github.com/perses/plugins/opensearch/sdk/go/query/log"
 log.Limit(200)
 ```
 
-Cap the number of log documents fetched by a `lucene` or `dsl` query (the `_search` request's `size`). Must be greater than 0; defaults to 500 when not set. A `size` in a `dsl` body is capped at this value. Ignored for PPL and SQL.
+Cap the number of log documents fetched by a `lucene` or `dsl` query (the `_search` request's `size`). Must be between 1 and `log.MaxLimit` (10,000); defaults to 500 when not set. A `size` in a `dsl` body is capped at this value. Ignored for PPL and SQL.
 
 #### TimestampField
 

@@ -214,6 +214,16 @@ func TestLimitRejectsNegative(t *testing.T) {
 	}
 }
 
+func TestLimitRejectsAboveMax(t *testing.T) {
+	q := OpenSearchLogQuery("level:error", QueryLanguage("lucene"), Index("logs-*"), Limit(MaxLimit+1))
+	if q.Error == nil {
+		t.Fatal("expected an error for a limit above MaxLimit")
+	}
+	if !strings.Contains(q.Error.Error(), "limit must be at most 10000") {
+		t.Errorf("unexpected error text: %v", q.Error)
+	}
+}
+
 func TestPluginSpecLimitOnUnmarshal(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -225,6 +235,8 @@ func TestPluginSpecLimitOnUnmarshal(t *testing.T) {
 		{name: "negative", raw: `{"query":"q","limit":-1}`, wantErr: true},
 		{name: "omitted", raw: `{"query":"q"}`, want: 0},
 		{name: "positive", raw: `{"query":"q","limit":25}`, want: 25},
+		{name: "maximum", raw: `{"query":"q","limit":10000}`, want: 10000},
+		{name: "above maximum", raw: `{"query":"q","limit":10001}`, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run("json/"+tt.name, func(t *testing.T) {

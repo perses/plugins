@@ -89,3 +89,6 @@ NOT level:debug`,
 // `_search` returns only 10 hits by default, which would silently truncate a log panel
 // to ten lines. 500 matches the log default used by Grafana's OpenSearch datasource.
 export const DEFAULT_SEARCH_SIZE = 500;
+
+// `_search` rejects `from + size` above the index's `max_result_window`, 10,000 by default.
+export const MAX_SEARCH_SIZE = 10000;
