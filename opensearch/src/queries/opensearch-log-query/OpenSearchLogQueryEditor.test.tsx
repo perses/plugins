@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type * as PluginSystemModule from '@perses-dev/plugin-system';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { Mock } from 'vitest';
 
 import { QUERY_LANGUAGES } from '../constants';
@@ -31,6 +31,15 @@ vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
 vi.mock('@perses-dev/dashboards', () => ({
   createModEnterHandler: (cb: () => void) => (): void => cb(),
 }));
+
+const PPL_SPEC: OpenSearchLogQuerySpec = { query: 'source=logs-*' };
+
+async function selectLanguage(name: string): Promise<void> {
+  fireEvent.mouseDown(screen.getByLabelText('Query language'));
+  fireEvent.click(screen.getByRole('option', { name }));
+  // Wait for the menu to close so the next lookup of the select isn't ambiguous.
+  await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+}
 
 function setup(initial: OpenSearchLogQuerySpec = { query: '' }): { onChange: Mock } {
   const onChange = vi.fn();
@@ -60,16 +69,44 @@ describe('OpenSearchLogQueryEditor', () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ messageField: undefined }));
   });
 
-  it('toggles disableTimeFilter on when the checkbox is clicked', () => {
+  it('checks "Use dashboard time range" by default', () => {
+    setup();
+    expect(screen.getByLabelText('Use dashboard time range')).toBeChecked();
+  });
+
+  it('sets disableTimeFilter when "Use dashboard time range" is unticked', () => {
     const { onChange } = setup();
-    fireEvent.click(screen.getByLabelText('Disable automatic time filtering'));
+    fireEvent.click(screen.getByLabelText('Use dashboard time range'));
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ disableTimeFilter: true }));
   });
 
-  it('clears disableTimeFilter when unchecked', () => {
+  it('clears disableTimeFilter when "Use dashboard time range" is ticked again', () => {
     const { onChange } = setup({ query: '', disableTimeFilter: true });
-    fireEvent.click(screen.getByLabelText('Disable automatic time filtering'));
+    expect(screen.getByLabelText('Use dashboard time range')).not.toBeChecked();
+    fireEvent.click(screen.getByLabelText('Use dashboard time range'));
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ disableTimeFilter: undefined }));
+  });
+
+  it('places the query field before the optional settings', () => {
+    setup();
+    const queryField = screen.getByPlaceholderText(/source=logs-/);
+    const timestampField = screen.getByPlaceholderText('@timestamp');
+    expect(queryField.compareDocumentPosition(timestampField) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('starts with Options collapsed when every optional setting is at its default', () => {
+    setup({ query: 'source=logs-*' });
+    expect(screen.getByText('Options').closest('details')).not.toHaveAttribute('open');
+  });
+
+  it.each<[string, Partial<OpenSearchLogQuerySpec>]>([
+    ['timestampField', { timestampField: 'time' }],
+    ['messageField', { messageField: 'body' }],
+    ['disableTimeFilter', { disableTimeFilter: true }],
+    ['limit', { queryLanguage: 'lucene', index: 'logs-*', limit: 10 }],
+  ])('starts with Options open when %s is set', (_, spec) => {
+    setup({ query: '', ...spec });
+    expect(screen.getByText('Options').closest('details')).toHaveAttribute('open');
   });
 
   it('notes that source= in the PPL query overrides the Index field', () => {
@@ -101,13 +138,42 @@ describe('OpenSearchLogQueryEditor language selector', () => {
     expect(screen.getByLabelText('Query language')).toHaveTextContent('PPL');
   });
 
-  it('writes queryLanguage to the spec without clearing the query', () => {
+  it('starts a language not used yet with an empty query, so its placeholder shows', async () => {
     const { onChange } = setup({ query: 'source=logs-*' });
 
-    fireEvent.mouseDown(screen.getByLabelText('Query language'));
-    fireEvent.click(screen.getByRole('option', { name: 'Lucene' }));
+    await selectLanguage('Lucene');
 
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ queryLanguage: 'lucene', query: 'source=logs-*' }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ queryLanguage: 'lucene', query: '' }));
+  });
+
+  it('restores the query typed in a language when switching back to it', async () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<OpenSearchLogQueryEditor value={PPL_SPEC} onChange={onChange} />);
+
+    await selectLanguage('Lucene');
+    rerender(<OpenSearchLogQueryEditor value={onChange.mock.lastCall![0]} onChange={onChange} />);
+    fireEvent.change(screen.getByPlaceholderText(/level:error/), { target: { value: 'service:api' } });
+    fireEvent.blur(screen.getByPlaceholderText(/level:error/));
+    rerender(<OpenSearchLogQueryEditor value={onChange.mock.lastCall![0]} onChange={onChange} />);
+
+    await selectLanguage('PPL');
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ queryLanguage: 'ppl', query: 'source=logs-*' }),
+    );
+    rerender(<OpenSearchLogQueryEditor value={onChange.mock.lastCall![0]} onChange={onChange} />);
+
+    await selectLanguage('Lucene');
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ queryLanguage: 'lucene', query: 'service:api' }),
+    );
+  });
+
+  it('does nothing when the current language is picked again', async () => {
+    const { onChange } = setup({ query: 'source=logs-*' });
+
+    await selectLanguage('PPL');
+
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('marks the index field required for Lucene when it is empty', () => {
@@ -145,8 +211,9 @@ describe('OpenSearchLogQueryEditor language selector', () => {
     expect(screen.getByLabelText('Query language')).toHaveTextContent('PPL');
   });
 
-  it('carries forward an uncommitted (unblurred) query edit when the language is switched', () => {
-    const { onChange } = setup({ query: 'source=logs-*' });
+  it('keeps an uncommitted (unblurred) query edit for when the user switches back', async () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<OpenSearchLogQueryEditor value={PPL_SPEC} onChange={onChange} />);
 
     // Edit the query field without blurring it — useQueryState only commits to the spec on blur,
     // so at this point value.query is still the old text and only local state has the new text.
@@ -154,11 +221,12 @@ describe('OpenSearchLogQueryEditor language selector', () => {
       target: { value: 'source=logs-* | where level="warn"' },
     });
 
-    fireEvent.mouseDown(screen.getByLabelText('Query language'));
-    fireEvent.click(screen.getByRole('option', { name: 'Lucene' }));
+    await selectLanguage('Lucene');
+    rerender(<OpenSearchLogQueryEditor value={onChange.mock.lastCall![0]} onChange={onChange} />);
+    await selectLanguage('PPL');
 
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ queryLanguage: 'lucene', query: 'source=logs-* | where level="warn"' }),
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ queryLanguage: 'ppl', query: 'source=logs-* | where level="warn"' }),
     );
   });
 });

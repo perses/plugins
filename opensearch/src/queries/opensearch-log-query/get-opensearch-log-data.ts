@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { LogQueryContext, LogQueryPlugin } from '@perses-dev/plugin-system';
+import type { LogQueryContext, LogQueryPlugin, VariableStateMap } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
 import type { LogData } from '@perses-dev/spec';
 
@@ -21,6 +21,19 @@ import { buildBoundedPPL, buildDslSearchBody, buildLuceneSearchBody, buildSqlReq
 import { convertDatarowsToLogs, convertHitsToLogs } from './convert';
 import type { OpenSearchLogQuerySpec } from './opensearch-log-query-types';
 import { requiresIndex, resolveQueryLanguage } from './opensearch-log-query-types';
+
+/**
+ * Add the Perses builtin `__from` / `__to` (epoch milliseconds) to the variable state. Log
+ * queries receive only user-defined variables, unlike time series queries, so without this
+ * `$__from` would stay literal text. User-defined variables of the same name win.
+ */
+function withTimeRangeVariables(variableState: VariableStateMap, start: Date, end: Date): VariableStateMap {
+  return {
+    __from: { value: start.valueOf().toString(), loading: false },
+    __to: { value: end.valueOf().toString(), loading: false },
+    ...variableState,
+  };
+}
 
 export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLogData'] = async (
   spec: OpenSearchLogQuerySpec,
@@ -37,8 +50,9 @@ export const getOpenSearchLogData: LogQueryPlugin<OpenSearchLogQuerySpec>['getLo
     return { logs: { entries: [], totalCount: 0 }, timeRange: { start, end } };
   }
 
-  const query = replaceVariables(spec.query, context.variableState);
-  const resolvedIndex = spec.index ? replaceVariables(spec.index, context.variableState) : undefined;
+  const variableState = withTimeRangeVariables(context.variableState, start, end);
+  const query = replaceVariables(spec.query, variableState);
+  const resolvedIndex = spec.index ? replaceVariables(spec.index, variableState) : undefined;
 
   if (requiresIndex(language) && !resolvedIndex) {
     throw new Error(`An index is required when the query language is ${language}.`);

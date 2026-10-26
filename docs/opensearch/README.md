@@ -55,7 +55,7 @@ For Lucene and Query DSL, `index` is required: it is the index or index pattern 
 
 The panel time range is added to every query as a filter on the timestamp field:
 
-- **SQL**: sent in the `_sql` request's `filter` field, so your statement is sent unchanged.
+- **SQL**: added to the outer query's `WHERE` clause as a condition on the timestamp field, ANDed in front of your own condition (which is wrapped in parentheses), or inserted as a new `WHERE` before `GROUP BY`, `HAVING`, `ORDER BY` or `LIMIT`. Only a single `SELECT … FROM` query can be filtered this way: a statement with `UNION` or `JOIN`, or one that isn't a `SELECT`, is rejected with an error. Set `disableTimeFilter` and filter on the timestamp yourself in that case. The `_sql` API's `filter` field is not used because OpenSearch only supports it on its legacy SQL engine.
 - **Lucene and Query DSL**: added as a `range` clause in `bool.filter`. Lucene queries sit in the same `bool.filter`; a Query DSL `query` goes under `bool.must`, so `_score` sorting, `track_scores` and `min_score` still work. A Query DSL body without a `query` key is filtered on the time range alone.
 - **PPL**: injected into the query as a `where` clause on the timestamp field, placed immediately after the source clause so it applies before any pipe that drops the timestamp column, such as `stats` or `fields`. A query written as:
 
@@ -70,6 +70,18 @@ source=otel-logs-demo | where `@timestamp` >= '2026-07-14T03:53:33.000Z' and `@t
 ```
 
 Set `disableTimeFilter` to `true` to turn this off, in every language, and manage the time bounds yourself.
+
+### Time range variables
+
+`$__from` and `$__to` are replaced with the start and end of the panel time range, in epoch milliseconds, in every query language and in `index`. Use them to bound a query yourself when `disableTimeFilter` is set, for example a SQL statement that automatic time filtering rejects:
+
+| Language | Example |
+| --- | --- |
+| SQL | ``WHERE `@timestamp` >= FROM_UNIXTIME($__from / 1000.0) AND `@timestamp` <= FROM_UNIXTIME($__to / 1000.0)`` |
+| Lucene | `@timestamp:[$__from TO $__to]` |
+| Query DSL | `{"range": {"@timestamp": {"gte": $__from, "lte": $__to, "format": "epoch_millis"}}}` |
+
+In SQL, divide by `1000.0` rather than `1000`: integer division drops the milliseconds. A dashboard variable with the same name takes precedence.
 
 Lucene and Query DSL results are sorted newest first on the timestamp field. A Query DSL body that sets its own `sort` keeps it.
 

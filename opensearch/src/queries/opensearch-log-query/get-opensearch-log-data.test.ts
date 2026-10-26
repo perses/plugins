@@ -469,13 +469,13 @@ describe('getLogData language dispatch', () => {
     expect(stubClient.search).not.toHaveBeenCalled();
   });
 
-  it('routes queryLanguage: sql to client.sql with a time filter', async () => {
+  it('routes queryLanguage: sql to client.sql with the time range in its WHERE clause', async () => {
     const result = await OpenSearchLogQuery.getLogData({ query: 'SELECT * FROM logs', queryLanguage: 'sql' }, context);
     expect(stubClient.ppl).not.toHaveBeenCalled();
     const [params] = (stubClient.sql as Mock).mock.calls[0]!;
-    expect(params.query).toBe('SELECT * FROM logs');
-    expect(params.filter).toEqual({
-      range: { '@timestamp': { gte: 1735689600000, lte: 1735693200000, format: 'epoch_millis' } },
+    expect(params).toEqual({
+      query:
+        "SELECT * FROM logs WHERE (`@timestamp` >= '2025-01-01 00:00:00.000' AND `@timestamp` <= '2025-01-01 01:00:00.000')",
     });
     expect(result.logs.entries[0]?.line).toBe('from sql');
   });
@@ -522,6 +522,36 @@ describe('getLogData language dispatch', () => {
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
     expect(params.body.query.bool.must).toEqual([{ term: { traceId: 'abc123' } }]);
+  });
+
+  it('resolves the builtin $__from / $__to to the time range in epoch milliseconds', async () => {
+    await OpenSearchLogQuery.getLogData(
+      {
+        query:
+          'SELECT * FROM logs WHERE `@timestamp` >= FROM_UNIXTIME($__from / 1000.0) AND `@timestamp` <= FROM_UNIXTIME(${__to} / 1000.0)',
+        queryLanguage: 'sql',
+        disableTimeFilter: true,
+      },
+      context,
+    );
+    const [params] = (stubClient.sql as Mock).mock.calls[0]!;
+    expect(params.query).toBe(
+      'SELECT * FROM logs WHERE `@timestamp` >= FROM_UNIXTIME(1735689600000 / 1000.0) AND `@timestamp` <= FROM_UNIXTIME(1735693200000 / 1000.0)',
+    );
+  });
+
+  it('lets a user-defined variable named __from win over the builtin', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '@timestamp:[$__from TO *]', queryLanguage: 'lucene', index: 'logs-*', disableTimeFilter: true },
+      {
+        ...context,
+        variableState: {
+          __from: { value: 'now-1d', loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(JSON.stringify(params.body.query)).toContain('@timestamp:[now-1d TO *]');
   });
 
   it.each(['lucene', 'dsl'] as const)('rejects %s without an index', async (queryLanguage) => {

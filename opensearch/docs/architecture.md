@@ -154,7 +154,9 @@ This ties both ends together. When a log panel needs data, Perses calls
 `getLogData(spec, context, abortSignal)`. The shape of the call is the same for
 every language — resolve variables, get a client, build a request, call
 OpenSearch, convert the response — only the build/convert/client step in the
-middle changes. Follow the default (PPL) path end to end:
+middle changes. Log queries receive only user-defined variables, so `getLogData`
+adds the builtin `__from` / `__to` (the time range in epoch milliseconds) before
+resolving them. Follow the default (PPL) path end to end:
 
 ```mermaid
 sequenceDiagram
@@ -169,7 +171,7 @@ sequenceDiagram
     alt query is blank
         Q-->>P: empty LogData (no request)
     else has a query
-        Q->>Q: replaceVariables() — resolve $vars<br/>in query and index
+        Q->>Q: replaceVariables() — resolve $vars and<br/>$__from / $__to in query and index
         Q->>P: datasourceStore.getDatasourceClient()
         P-->>Q: OpenSearchClient
         Q->>Q: buildBoundedPPL() — inject source=<br/>and the panel time window
@@ -195,8 +197,10 @@ into whatever request shape its endpoint expects:
 
 - **`ppl.ts` → `buildBoundedPPL`** — splices a `source=` clause and a
   time-bounded `where` clause into the PPL string.
-- **`sql.ts` → `buildSqlRequest`** — leaves the SQL untouched and bounds time via
-  the `_sql` API's `filter` field instead.
+- **`sql.ts` → `buildSqlRequest`** — adds a time-bounded condition to the outer
+  query's `WHERE` clause (or inserts a `WHERE` before `GROUP BY` / `HAVING` /
+  `ORDER BY` / `LIMIT`). It does not use the `_sql` API's `filter` field, which
+  forces OpenSearch onto its legacy SQL engine.
 - **`lucene.ts` → `buildLuceneSearchBody`** and **`dsl.ts` → `buildDslSearchBody`**
   — wrap the query string (Lucene) or parsed JSON body (Query DSL) in a
   `_search` request, ANDing in a `bool.filter` time-range clause. A Query DSL

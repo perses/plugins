@@ -180,9 +180,9 @@ Each log query picks its own language with the **Query language** dropdown:
 | Query DSL | `POST /{index}/_search` | **Required** | Paste a `_search` request body straight from Dev Tools |
 
 The dashboard time range is applied automatically in every language — as a `where`
-clause for PPL, as the request body's `filter` for SQL, and as a `bool.filter` range
+clause for PPL, as a condition added to the outer `WHERE` for SQL, and as a `bool.filter` range
 clause for Lucene and Query DSL (a Query DSL `query` goes under `bool.must`, so scoring
-still works). Tick **Disable automatic time filtering** to manage
+still works). Untick **Use dashboard time range** (under **Options**) to manage
 the bounds yourself.
 
 **Ordering differs by language.** Lucene and Query DSL sort newest-first — the
@@ -191,12 +191,23 @@ in cluster order unless you sort in the query yourself (`sort - @timestamp` for
 PPL, `ORDER BY` for SQL). Switching a panel's query language can therefore reorder
 its rows even though nothing else about the query changed.
 
+**SQL time filtering rewrites the `WHERE` clause.** The plugin ANDs a condition on
+the timestamp field into your outer `WHERE`, or inserts one before `GROUP BY`,
+`HAVING`, `ORDER BY` or `LIMIT`. It only does this for a single `SELECT … FROM`
+query: a statement with `UNION` or `JOIN`, or one that isn't a `SELECT`, fails with
+an error asking you to untick **Use dashboard time range** and filter on the
+timestamp yourself. `$__from` and `$__to` hold the panel time range in epoch
+milliseconds for that, in every language:
+
+```sql
+SELECT * FROM `logs-*`
+WHERE `@timestamp` >= FROM_UNIXTIME($__from / 1000.0)
+  AND `@timestamp` <= FROM_UNIXTIME($__to / 1000.0)
+```
+
 > Verified against OpenSearch 2.19.6 (`distribution: opensearch`) using a
-> single-node example cluster, and additionally against
-> OpenSearch 3.8.0 with the Calcite SQL engine (`plugins.calcite.enabled: true`)
-> explicitly enabled — the SQL `filter` field bounds results correctly on both,
-> including with Calcite explicitly disabled on the same 3.x cluster for
-> comparison.
+> single-node example cluster, including indices with microsecond `date_nanos`
+> timestamps.
 
 For Lucene and Query DSL the **Limit** field sets the `_search` `size`. If you leave it
 empty the plugin sends 500, because OpenSearch's own default is only 10 documents —
@@ -258,11 +269,14 @@ choose the **OpenSearch Log Query** type, and you get an editor with these field
 | **Query language** | Selects PPL, SQL, Lucene, or Query DSL. It's the first control in the editor, and it changes how the fields below are used and what the query field expects. |
 | **Datasource** | Which OpenSearch datasource to query. |
 | **Index pattern** | e.g. `logs-*`. For PPL, prepended as `source=<index>` — *ignored if your PPL already starts with `source=`.* For SQL it's ignored (the index comes from your `FROM` clause). Required for Lucene and Query DSL, which send it as `POST /{index}/_search`. |
-| **Timestamp field** *(optional)* | Overrides the default timestamp field. |
-| **Message field** *(optional)* | Overrides which field becomes the log line. |
-| **Disable automatic time filtering** | Turn off the auto time-bound (see below). |
-| **Limit** *(optional — Lucene and Query DSL only)* | Caps the number of documents fetched (the `_search` request's `size`). Leave it empty and the plugin sends 500. For PPL and SQL, cap results yourself with `head` or `LIMIT` instead. |
-| **Query** | The query itself, in whichever language you picked above — the field's label changes to match (`PPL Query`, `SQL Query`, `Lucene Query`, or `Query DSL Query`). |
+| **Query** | The query itself, in whichever language you picked above — the field's label changes to match (`PPL Query`, `SQL Query`, `Lucene Query`, or `Query DSL Query`). Each language keeps its own query while you edit, so switching language and back restores what you typed; a language you haven't used yet starts empty with its own placeholder and examples. |
+| **Options** → **Timestamp field** *(optional)* | Overrides the default timestamp field. |
+| **Options** → **Message field** *(optional)* | Overrides which field becomes the log line. |
+| **Options** → **Use dashboard time range** | On by default. Untick it to turn off the automatic time bound (see below). |
+| **Options** → **Limit** *(optional — Lucene and Query DSL only)* | Caps the number of documents fetched (the `_search` request's `size`). Leave it empty and the plugin sends 500. For PPL and SQL, cap results yourself with `head` or `LIMIT` instead. |
+
+**Options** is collapsed until you open it, and starts open when the query already
+changes one of its settings.
 
 A first query — the most recent lines, newest first:
 
@@ -311,7 +325,7 @@ source=otel-logs-demo
 ```
 
 Change the dashboard time picker and the logs follow. If you manage time bounds
-yourself, tick **Disable automatic time filtering**.
+yourself, untick **Use dashboard time range** under **Options**.
 
 ### Field mapping for schema-flexible indices
 

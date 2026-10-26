@@ -28,6 +28,7 @@ import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plug
 import { DatasourceSelect, isVariableDatasource, useDatasourceSelectValueToSelector } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
+import { useState } from 'react';
 
 import type { OpenSearchDatasourceSelector } from '../../model';
 import { isDefaultOpenSearchSelector, OPENSEARCH_DATASOURCE_KIND } from '../../model';
@@ -63,6 +64,8 @@ const labelSx = { display: 'block', marginBottom: '4px', fontWeight: 500 } as co
 const languageInputProps = { 'aria-label': 'Query language' } as const;
 const limitInputProps = { min: 1, 'aria-label': 'Limit (optional)' } as const;
 
+const summarySx = { cursor: 'pointer', fontSize: '12px', color: 'text.secondary', marginBottom: '8px' } as const;
+
 const examplesSx = {
   fontSize: '11px',
   color: 'text.secondary',
@@ -89,13 +92,28 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
   const meta = QUERY_LANGUAGES[language];
   const indexMissing = requiresIndex(language) && !value.index;
 
+  // Queries typed in other languages during this editing session, so switching away and back
+  // restores them. Kept in editor state only: the spec holds a single query.
+  const [queriesByLanguage, setQueriesByLanguage] = useState<Partial<Record<OpenSearchQueryLanguage, string>>>({});
+
+  // Captured once on mount so the Options section starts open when it holds a non-default
+  // setting, and is never collapsed under the user while they edit it.
+  const [optionsInitiallyOpen] = useState(
+    () =>
+      value.timestampField !== undefined ||
+      value.messageField !== undefined ||
+      value.disableTimeFilter === true ||
+      value.limit !== undefined,
+  );
+
   const handleLanguageChange = (next: OpenSearchQueryLanguage): void => {
+    if (next === language) return;
+    // Save the live local text (useQueryState commits on blur), so an uncommitted edit survives
+    // a round trip. A language not used yet starts empty, so its placeholder and examples show.
+    setQueriesByLanguage((saved) => ({ ...saved, [language]: query }));
     onChange(
       produce(value, (draft) => {
-        // Carry the live local query text (useQueryState commits on blur) so a switch can never
-        // discard an uncommitted edit, regardless of event ordering or when the parent applies
-        // onChange. On the normal path this is a no-op: blur has already committed the same value.
-        draft.query = query;
+        draft.query = queriesByLanguage[next] ?? '';
         draft.queryLanguage = next;
       }),
     );
@@ -141,11 +159,11 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       );
     };
 
-  const handleDisableTimeFilterChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleUseTimeRangeChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const checked = e.target.checked;
     onChange(
       produce(value, (draft) => {
-        draft.disableTimeFilter = checked ? true : undefined;
+        draft.disableTimeFilter = checked ? undefined : true;
       }),
     );
   };
@@ -187,8 +205,6 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
           datasourcePluginKind={DATASOURCE_KIND}
           value={selectedDatasource}
           onChange={handleDatasourceChange}
-          label="OpenSearch Datasource"
-          notched
         />
       </div>
 
@@ -204,53 +220,6 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
           helperText={indexMissing ? REQUIRED_INDEX_MESSAGE : meta.indexHelperText}
         />
       </div>
-
-      <div>
-        <InputLabel sx={labelSx}>Timestamp field (optional)</InputLabel>
-        <TextField
-          fullWidth
-          size="small"
-          value={value.timestampField ?? ''}
-          onChange={handleStringFieldChange('timestampField')}
-          placeholder="@timestamp"
-        />
-      </div>
-
-      <div>
-        <InputLabel sx={labelSx}>Message field (optional)</InputLabel>
-        <TextField
-          fullWidth
-          size="small"
-          value={value.messageField ?? ''}
-          onChange={handleStringFieldChange('messageField')}
-          placeholder="message"
-        />
-      </div>
-
-      <FormControlLabel
-        control={
-          <Checkbox size="small" checked={value.disableTimeFilter ?? false} onChange={handleDisableTimeFilterChange} />
-        }
-        label="Disable automatic time filtering"
-      />
-
-      {/* `requiresIndex` is true for exactly the `_search`-based languages (lucene/dsl), which
-          is also where a result-count limit applies, so it doubles as the gate for this field. */}
-      {requiresIndex(language) && (
-        <div>
-          <InputLabel sx={labelSx}>Limit (optional)</InputLabel>
-          <TextField
-            fullWidth
-            size="small"
-            type="number"
-            inputProps={limitInputProps}
-            value={value.limit ?? ''}
-            onChange={handleLimitChange}
-            placeholder="500"
-            helperText="Maximum number of log documents to fetch."
-          />
-        </div>
-      )}
 
       <div>
         <InputLabel sx={labelSx}>{`${meta.label} Query`}</InputLabel>
@@ -276,13 +245,62 @@ export function OpenSearchLogQueryEditor(props: OpenSearchQueryEditorProps): Rea
       </div>
 
       <details>
-        <Box
-          component="summary"
-          sx={{ cursor: 'pointer', fontSize: '12px', color: 'text.secondary', marginBottom: '8px' }}
-        >
+        <Box component="summary" sx={summarySx}>
           Query Examples
         </Box>
         <Box sx={examplesSx}>{meta.examples}</Box>
+      </details>
+
+      <details open={optionsInitiallyOpen}>
+        <Box component="summary" sx={summarySx}>
+          Options
+        </Box>
+        <Stack spacing={1.5}>
+          <div>
+            <InputLabel sx={labelSx}>Timestamp field (optional)</InputLabel>
+            <TextField
+              fullWidth
+              size="small"
+              value={value.timestampField ?? ''}
+              onChange={handleStringFieldChange('timestampField')}
+              placeholder="@timestamp"
+            />
+          </div>
+
+          <div>
+            <InputLabel sx={labelSx}>Message field (optional)</InputLabel>
+            <TextField
+              fullWidth
+              size="small"
+              value={value.messageField ?? ''}
+              onChange={handleStringFieldChange('messageField')}
+              placeholder="message"
+            />
+          </div>
+
+          <FormControlLabel
+            control={<Checkbox size="small" checked={!value.disableTimeFilter} onChange={handleUseTimeRangeChange} />}
+            label="Use dashboard time range"
+          />
+
+          {/* `requiresIndex` is true for exactly the `_search`-based languages (lucene/dsl), which
+              is also where a result-count limit applies, so it doubles as the gate for this field. */}
+          {requiresIndex(language) && (
+            <div>
+              <InputLabel sx={labelSx}>Limit (optional)</InputLabel>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                inputProps={limitInputProps}
+                value={value.limit ?? ''}
+                onChange={handleLimitChange}
+                placeholder="500"
+                helperText="Maximum number of log documents to fetch."
+              />
+            </div>
+          )}
+        </Stack>
       </details>
     </Stack>
   );
