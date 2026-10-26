@@ -18,11 +18,23 @@ import type { ModuleFederationOptions } from '@module-federation/rsbuild-plugin'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import type { RsbuildConfig } from '@rsbuild/core';
 import { mergeRsbuildConfig } from '@rsbuild/core';
+import type { ReactCompilerOptions } from '@rsbuild/plugin-react';
+import { pluginReact } from '@rsbuild/plugin-react';
 
 /** The base path for all plugin assets. This should match the path where plugins are stored on the Perses server.
  * @see {@link https://github.com/perses/perses}
  */
 const PLUGINS_PATH = '/plugins';
+
+/**
+ * React Compiler options shared by every plugin, passed to `pluginReact({ reactCompiler })`.
+ * Perses runs on React 18, so the compiled output relies on the `react-compiler-runtime` package. Switch the target to
+ * '19' (and drop `react-compiler-runtime`) when upgrading React.
+ * @see {@link https://rsbuild.rs/plugins/list/plugin-react#reactcompiler}
+ */
+const reactCompilerOptions: ReactCompilerOptions = {
+  target: '18', // Keep in sync with `.swcrc` React target
+};
 
 /**
  * Configuration options for building a Perses plugin with rsbuild.
@@ -36,7 +48,8 @@ interface PluginConfigOptions {
   /**
    * Any rsbuild configuration options to merge with the base config. Note that
    * the `server.port` and `output.assetPrefix` are automatically set based on
-   * the plugin name but can be overridden here. Additionally, the
+   * the plugin name but can be overridden here. The React plugin (with the
+   * React Compiler enabled) is part of the base config. Additionally, the
    * ModuleFederation plugin is automatically added after any plugins specified
    * here. It's options can be configured via the `moduleFederation` property.
    *
@@ -123,6 +136,7 @@ function getRsbuildConfig(name: string): RsbuildConfig {
   const version = process.env.NODE_ENV === 'development' ? undefined : getPluginVersion();
 
   return {
+    plugins: [pluginReact({ reactCompiler: reactCompilerOptions })],
     server: {
       port: 3000 + Math.floor(Math.random() * 1000),
       strictPort: false,
