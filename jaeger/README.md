@@ -25,6 +25,12 @@ uses them.
 It has been tested with Jaeger 2.10 to 2.22. Filtering the search by span kind needs Jaeger 2.20 or later; older
 releases ignore that filter.
 
+Jaeger 1.x is not supported, and it reached end of life on December 31, 2025. Jaeger 1.52 and older answer the API v3
+with base64-encoded IDs and stream one JSON chunk per trace, which the plugin cannot read, and 1.53 still returns
+base64-encoded IDs. Releases 1.54 to 1.76 return the same response as Jaeger 2.x, so searches can work, but they ignore
+the tag and span kind filters. Datasources that use the Perses proxy and only allow the former endpoints fall back to
+`/api/traces`, but datasources that use a `directUrl` never fall back.
+
 If the datasource uses the Perses proxy, its allowed endpoints should include `GET /api/v3/traces`,
 `GET /api/v3/services` and `GET /api/v3/operations`. Datasources saved with the previous allowed endpoints
 (`/api/traces`, `/api/services`, `/api/operations`) keep working against Jaeger 2.20 and older: when the proxy rejects the
