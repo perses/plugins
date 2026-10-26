@@ -199,7 +199,8 @@ into whatever request shape its endpoint expects:
   the `_sql` API's `filter` field instead.
 - **`lucene.ts` → `buildLuceneSearchBody`** and **`dsl.ts` → `buildDslSearchBody`**
   — wrap the query string (Lucene) or parsed JSON body (Query DSL) in a
-  `_search` request, ANDing in a `bool.filter` time-range clause.
+  `_search` request, ANDing in a `bool.filter` time-range clause. A Query DSL
+  `query` is nested under `bool.must` so it keeps its scoring.
 - **`search.ts`** — shared helpers used by the two `_search` builders above:
   `buildTimeRangeFilter`, `buildDefaultSort`, and `resolveSize` (the `limit` →
   `size` default, 500).

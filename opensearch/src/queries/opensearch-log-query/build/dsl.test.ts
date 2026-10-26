@@ -21,12 +21,12 @@ const timeFilter = {
 };
 
 describe('buildDslSearchBody', () => {
-  it("ANDs the user's query under bool.filter with the time range", () => {
+  it("ANDs the user's query under bool.must with the time range in bool.filter", () => {
     const body = buildDslSearchBody('{"query":{"match":{"level":"error"}}}', start, end);
     expect(body).toEqual({
       size: 500,
       sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-      query: { bool: { filter: [timeFilter, { match: { level: 'error' } }] } },
+      query: { bool: { must: [{ match: { level: 'error' } }], filter: [timeFilter] } },
     });
   });
 
@@ -60,10 +60,10 @@ describe('buildDslSearchBody', () => {
     expect(body.aggs).toEqual({ by_level: { terms: { field: 'level' } } });
   });
 
-  it('nests a user bool query inside our filter rather than merging it', () => {
+  it('nests a user bool query inside our must rather than merging it', () => {
     const body = buildDslSearchBody('{"query":{"bool":{"must_not":[{"term":{"level":"debug"}}]}}}', start, end);
     expect(body.query).toEqual({
-      bool: { filter: [timeFilter, { bool: { must_not: [{ term: { level: 'debug' } }] } }] },
+      bool: { must: [{ bool: { must_not: [{ term: { level: 'debug' } }] } }], filter: [timeFilter] },
     });
   });
 
@@ -95,4 +95,19 @@ describe('buildDslSearchBody', () => {
       expect(() => buildDslSearchBody(input, start, end)).toThrow(/Query DSL must be a JSON object/i);
     },
   );
+
+  it.each([
+    ['false', false],
+    ['null', false],
+    ['""', false],
+    ['0', false],
+    ['[]', false],
+    ['false', true],
+    ['null', true],
+    ['[]', true],
+  ])('rejects a present but non-object query %s (disableTimeFilter=%s)', (query, disableTimeFilter) => {
+    expect(() => buildDslSearchBody(`{"query":${query}}`, start, end, { disableTimeFilter })).toThrow(
+      /Query DSL "query" must be a JSON object/i,
+    );
+  });
 });

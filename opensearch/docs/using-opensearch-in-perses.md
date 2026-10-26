@@ -28,7 +28,8 @@ To *use* the plugin you only need:
 
 - A **current Perses release** — the OpenSearch plugin ships bundled, so there's
   nothing to install (you'll confirm this in [Step 2](#step-2--run-perses)).
-- An **OpenSearch** cluster with the SQL/PPL plugin — bundled by default.
+- An **OpenSearch** cluster. PPL and SQL queries also need the SQL/PPL plugin —
+  bundled by default. Lucene and Query DSL use the core `_search` API.
 
 **If you already have Perses and OpenSearch running,** jump straight to
 [Step 3](#step-3--add-the-opensearch-datasource) and add the datasource — you can
@@ -62,8 +63,8 @@ curl -s http://localhost:9200/_cluster/health | grep -o '"status":"[a-z]*"'
 ```
 
 > **Already have OpenSearch?** Point the datasource at your own cluster in Step 3
-> and skip the seeding below. The plugin needs the **SQL/PPL plugin** enabled,
-> which ships with OpenSearch by default.
+> and skip the seeding below. PPL and SQL queries need the **SQL/PPL plugin**
+> enabled, which ships with OpenSearch by default; Lucene and Query DSL don't.
 
 For the tutorial we'll seed a handful of OTel-style log documents so there's
 something to query. The docs carry a `@timestamp`, a `body` (the log message), a
@@ -180,7 +181,8 @@ Each log query picks its own language with the **Query language** dropdown:
 
 The dashboard time range is applied automatically in every language — as a `where`
 clause for PPL, as the request body's `filter` for SQL, and as a `bool.filter` range
-clause for Lucene and Query DSL. Tick **Disable automatic time filtering** to manage
+clause for Lucene and Query DSL (a Query DSL `query` goes under `bool.must`, so scoring
+still works). Tick **Disable automatic time filtering** to manage
 the bounds yourself.
 
 **Ordering differs by language.** Lucene and Query DSL sort newest-first — the

@@ -257,5 +257,16 @@ describe('opensearch-client', () => {
         'OpenSearch Search request failed (400): failed to parse date field',
       );
     });
+
+    it('surfaces root_cause reason alongside a generic top-level reason', async () => {
+      mockFetch({
+        ok: false,
+        status: 400,
+        body: '{"error":{"root_cause":[{"type":"query_shard_exception","reason":"failed to create query: For input string: \\"abc\\""}],"type":"search_phase_execution_exception","reason":"all shards failed"},"status":400}',
+      });
+      await expect(search({ index: 'logs-*', body: {} }, { datasourceUrl: 'http://localhost:9200' })).rejects.toThrow(
+        'OpenSearch Search request failed (400): all shards failed — failed to create query: For input string: "abc"',
+      );
+    });
   });
 });

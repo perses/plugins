@@ -45,10 +45,12 @@ function resolveDslSize(userSize: unknown, limit?: number): unknown {
  *
  * `limit` caps `size`: with both set the smaller wins, so the body can ask for fewer documents
  * but never more than the configured limit. With only one set, that one applies. The user wins
- * on `sort`; we only supply a default. Their `query`, if present,
- * is nested inside our `bool.filter` next to the time range, which is valid DSL and means
- * exactly "AND" — we deliberately do not try to merge into their bool clause, because
- * rewriting a user's query semantics is far worse than one extra level of nesting.
+ * on `sort`; we only supply a default. Their `query`, if present, is nested under our
+ * `bool.must` while the time range goes in `bool.filter`. That still means exactly "AND",
+ * but keeps the user's query in scoring context so `_score` sorts, `track_scores` and
+ * `min_score` behave as in the raw request. We deliberately do not try to merge into their
+ * bool clause, because rewriting a user's query semantics is far worse than one extra
+ * level of nesting.
  */
 export function buildDslSearchBody(
   userJson: string,
@@ -57,7 +59,12 @@ export function buildDslSearchBody(
   { timestampField = DEFAULT_TIMESTAMP_FIELD, disableTimeFilter = false, limit }: SearchBodyOptions = {},
 ): OpenSearchSearchRequestBody {
   const parsed = parseBody(userJson);
-  const userQuery = parsed.query as Record<string, unknown> | undefined;
+  const userQuery = parsed.query;
+  // A present but falsey or non-object `query` (false, null, "", 0, []) must not be read as
+  // "no query" — that would silently widen the request to every document in the range.
+  if ('query' in parsed && (userQuery === null || typeof userQuery !== 'object' || Array.isArray(userQuery))) {
+    throw new Error('Query DSL "query" must be a JSON object, e.g. {"query": {"match": {...}}}.');
+  }
 
   const body: OpenSearchSearchRequestBody = { ...parsed };
   body.size = resolveDslSize(parsed.size, limit);
@@ -68,11 +75,8 @@ export function buildDslSearchBody(
     return body;
   }
 
-  const filter: Array<Record<string, unknown>> = [buildTimeRangeFilter(timestampField, start, end)];
-  if (userQuery) {
-    filter.push(userQuery);
-  }
-  body.query = { bool: { filter } };
+  const timeFilter = buildTimeRangeFilter(timestampField, start, end);
+  body.query = userQuery ? { bool: { must: [userQuery], filter: [timeFilter] } } : { bool: { filter: [timeFilter] } };
 
   return body;
 }

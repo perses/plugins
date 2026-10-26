@@ -56,7 +56,7 @@ For Lucene and Query DSL, `index` is required: it is the index or index pattern 
 The panel time range is added to every query as a filter on the timestamp field:
 
 - **SQL**: sent in the `_sql` request's `filter` field, so your statement is sent unchanged.
-- **Lucene and Query DSL**: added as a `range` filter next to your query inside a `bool.filter`. A Query DSL body without a `query` key is filtered on the time range alone.
+- **Lucene and Query DSL**: added as a `range` clause in `bool.filter`. Lucene queries sit in the same `bool.filter`; a Query DSL `query` goes under `bool.must`, so `_score` sorting, `track_scores` and `min_score` still work. A Query DSL body without a `query` key is filtered on the time range alone.
 - **PPL**: injected into the query as a `where` clause on the timestamp field, placed immediately after the source clause so it applies before any pipe that drops the timestamp column, such as `stats` or `fields`. A query written as:
 
 ```ppl

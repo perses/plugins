@@ -109,14 +109,14 @@ function buildShortMessage(label: ApiLabel, status: number, body: string): strin
         '/_plugins/_sql and /.*/_search).'
       );
     }
-    const reason = parsed?.error?.reason;
-    const details = parsed?.error?.details;
-    // OpenSearch often puts a generic phrase in `reason` ("Invalid Query") and the
-    // actionable text in `details` ("can't resolve Symbol(name=@timestamp)"). Surface
-    // both so the user can diagnose the failure. `_search` errors carry neither and
-    // put the useful text in root_cause[0].reason instead.
-    const rootCause = parsed?.error?.root_cause?.[0]?.reason;
-    const suffix = reason && details && reason !== details ? `${reason} — ${details}` : reason || details || rootCause;
+    // OpenSearch often puts a generic phrase in `reason` ("Invalid Query", "all shards
+    // failed") and the actionable text in `details` or root_cause[0].reason ("can't resolve
+    // Symbol(name=@timestamp)", "failed to parse date field"). Surface every distinct one
+    // so the user can diagnose the failure.
+    const messages = [parsed?.error?.reason, parsed?.error?.details, parsed?.error?.root_cause?.[0]?.reason].filter(
+      (m): m is string => typeof m === 'string' && m !== '',
+    );
+    const suffix = [...new Set(messages)].join(' — ');
     if (suffix) {
       return `OpenSearch ${label} request failed (${status}): ${suffix}`;
     }

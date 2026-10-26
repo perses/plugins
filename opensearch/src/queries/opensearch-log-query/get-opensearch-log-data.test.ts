@@ -498,7 +498,7 @@ describe('getLogData language dispatch', () => {
       context,
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
-    expect(params.body.query.bool.filter[1]).toEqual({ match: { level: 'error' } });
+    expect(params.body.query.bool.must).toEqual([{ match: { level: 'error' } }]);
   });
 
   it('passes limit through as the search size', async () => {
@@ -521,7 +521,7 @@ describe('getLogData language dispatch', () => {
       },
     );
     const [params] = (stubClient.search as Mock).mock.calls[0]!;
-    expect(params.body.query.bool.filter[1]).toEqual({ term: { traceId: 'abc123' } });
+    expect(params.body.query.bool.must).toEqual([{ term: { traceId: 'abc123' } }]);
   });
 
   it.each(['lucene', 'dsl'] as const)('rejects %s without an index', async (queryLanguage) => {
