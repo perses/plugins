@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type * as ComponentsModule from '@perses-dev/components';
-import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, testChartsTheme, useChartsContext } from '@perses-dev/components';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ECharts } from 'echarts/core';
 import { init } from 'echarts/core';
@@ -52,9 +52,28 @@ const EXEMPLARS: HeatMapExemplarDataItem[] = [
   },
 ];
 
-function chartElement(props: Partial<HeatMapChartProps> = {}): ReactElement {
+function PinElsewhereButton(): ReactElement {
+  const { setLastTooltipPinnedCoords } = useChartsContext();
   return (
-    <ChartsProvider chartsTheme={testChartsTheme}>
+    <button
+      onClick={() =>
+        setLastTooltipPinnedCoords({
+          page: { x: 1, y: 1 },
+          client: { x: 1, y: 1 },
+          plotCanvas: { x: 1, y: 1 },
+          target: null,
+        })
+      }
+    >
+      Pin in another chart
+    </button>
+  );
+}
+
+function chartElement(props: Partial<HeatMapChartProps> = {}, enablePinning = true): ReactElement {
+  return (
+    <ChartsProvider chartsTheme={testChartsTheme} enablePinning={enablePinning}>
+      <PinElsewhereButton />
       <HeatMapChart
         width={500}
         height={300}
@@ -129,7 +148,7 @@ describe('HeatMapChart exemplars', () => {
 
     // Clicking the canvas while hovering the marker pins the tooltip, and it stays
     // visible after the mouse leaves the chart.
-    const wrapper = container.firstElementChild;
+    const wrapper = container.querySelector('button + div');
     if (!(wrapper instanceof HTMLElement)) throw new Error('Chart wrapper is missing');
     const canvas = document.createElement('canvas');
     wrapper.appendChild(canvas);
@@ -156,7 +175,7 @@ describe('HeatMapChart exemplars', () => {
         data: (marker.data as HeatMapExemplarDataItem[])[0],
       }),
     );
-    const wrapper = container.firstElementChild;
+    const wrapper = container.querySelector('button + div');
     if (!(wrapper instanceof HTMLElement)) throw new Error('Chart wrapper is missing');
     const canvas = document.createElement('canvas');
     wrapper.appendChild(canvas);
@@ -167,6 +186,56 @@ describe('HeatMapChart exemplars', () => {
     act(() => mouseout({ componentType: 'series', seriesType: 'scatter', seriesId: marker.id }));
     expect(screen.getByRole('tooltip')).toHaveTextContent('Exemplar tooltip'); // pinned stays
     fireEvent.click(canvas); // click elsewhere with no hover: unpins
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('does not pin the exemplar tooltip when pinning is disabled', () => {
+    const chart = mockChart();
+    const { container } = render(chartElement({}, false));
+
+    const marker = getExemplarScatterSeries(EXEMPLARS);
+    const mouseover = chart.on.mock.calls.find(([event]) => event === 'mouseover')?.[1];
+    act(() =>
+      mouseover({
+        componentType: 'series',
+        seriesType: 'scatter',
+        seriesId: marker.id,
+        data: (marker.data as HeatMapExemplarDataItem[])[0],
+      }),
+    );
+    const wrapper = container.querySelector('button + div');
+    if (!(wrapper instanceof HTMLElement)) throw new Error('Chart wrapper is missing');
+    const canvas = document.createElement('canvas');
+    wrapper.appendChild(canvas);
+    fireEvent.click(canvas);
+    fireEvent.mouseLeave(wrapper);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('unpins the pinned exemplar tooltip when a tooltip is pinned in another chart', () => {
+    const chart = mockChart();
+    const { container } = render(chartElement());
+
+    const marker = getExemplarScatterSeries(EXEMPLARS);
+    const mouseover = chart.on.mock.calls.find(([event]) => event === 'mouseover')?.[1];
+    act(() =>
+      mouseover({
+        componentType: 'series',
+        seriesType: 'scatter',
+        seriesId: marker.id,
+        data: (marker.data as HeatMapExemplarDataItem[])[0],
+      }),
+    );
+    const wrapper = container.querySelector('button + div');
+    if (!(wrapper instanceof HTMLElement)) throw new Error('Chart wrapper is missing');
+    const canvas = document.createElement('canvas');
+    wrapper.appendChild(canvas);
+    fireEvent.click(canvas); // pin
+    fireEvent.mouseLeave(wrapper);
+    // Pinning here shares the coordinates without unpinning this chart's own tooltip.
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Exemplar tooltip');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Pin in another chart' }));
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 });

@@ -13,20 +13,13 @@
 
 import { Box, useTheme } from '@mui/material';
 import type { CursorCoordinates, FormatOptions, OnEventsType } from '@perses-dev/components';
-import {
-  EChart,
-  ExemplarMetadataTooltip,
-  formatValue,
-  useChartsContext,
-  useChartsTheme,
-  useTimeZone,
-} from '@perses-dev/components';
+import { EChart, ExemplarMetadataTooltip, formatValue, useChartsContext, useTimeZone } from '@perses-dev/components';
 import type { Exemplar, Labels, TimeScale } from '@perses-dev/spec';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams, CustomSeriesRenderItemReturn } from 'echarts';
 import { CustomChart, ScatterChart as EChartsScatterChart } from 'echarts/charts';
-import type { EChartsCoreOption } from 'echarts/core';
-import type { ECharts as EChartsInstance } from 'echarts/core';
+import type { ECharts as EChartsInstance, EChartsCoreOption } from 'echarts/core';
 import { use as registerECharts } from 'echarts/core';
+import isEqual from 'lodash/isEqual';
 import type { ReactElement } from 'react';
 import { useMemo, useRef, useState } from 'react';
 
@@ -112,7 +105,7 @@ export function HeatMapChart({
   max,
   logBase,
 }: HeatMapChartProps): ReactElement | null {
-  const { chartsTheme, enablePinning } = useChartsContext();
+  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsContext();
   const theme = useTheme();
   const { timeZone } = useTimeZone();
 
@@ -332,9 +325,34 @@ export function HeatMapChart({
     [chartsTheme.container.padding.default, chartsTheme.echartsTheme, height, option, width, handleEvents],
   );
 
+  // A pinned exemplar tooltip is unpinned when a tooltip is pinned in another chart, unless
+  // it is the one just pinned by this chart at these exact coordinates.
+  const [previousLastTooltipPinnedCoords, setPreviousLastTooltipPinnedCoords] = useState(lastTooltipPinnedCoords);
+  if (previousLastTooltipPinnedCoords !== lastTooltipPinnedCoords) {
+    setPreviousLastTooltipPinnedCoords(lastTooltipPinnedCoords);
+    if (
+      pinnedExemplarPos !== null &&
+      lastTooltipPinnedCoords !== null &&
+      !isEqual(lastTooltipPinnedCoords, pinnedExemplarPos)
+    ) {
+      setPinnedExemplar(null);
+      setPinnedExemplarPos(null);
+    }
+  }
+
+  // Pinning can be turned off while an exemplar tooltip is pinned: only show it while allowed.
+  const activePinnedExemplar = enablePinning ? pinnedExemplar : null;
+
   return (
     <Box
       onClick={(e) => {
+        if (!enablePinning) {
+          return;
+        }
+
+        // Allows the user to keep tooltips pinned in other charts when Ctrl or Cmd is held down.
+        const isControlKeyPressed = e.ctrlKey || e.metaKey;
+
         if (hoveredExemplar !== null && e.target instanceof HTMLCanvasElement) {
           // Clicking while hovering an exemplar marker pins/unpins the exemplar tooltip.
           const pinnedPos: CursorCoordinates = {
@@ -348,6 +366,11 @@ export function HeatMapChart({
           // may run more than once (e.g. StrictMode), so they must stay side-effect free.
           setPinnedExemplar(isUnpinClick ? null : hoveredExemplar);
           setPinnedExemplarPos(isUnpinClick ? null : pinnedPos);
+          if (!isUnpinClick && !isControlKeyPressed) {
+            // Let adjacent charts know a tooltip is pinned at these coordinates, so only one
+            // tooltip is pinned at a time.
+            setLastTooltipPinnedCoords(pinnedPos);
+          }
           return;
         }
 
@@ -385,13 +408,13 @@ export function HeatMapChart({
       }}
     >
       {/* Pinned exemplar takes priority over hovered. */}
-      {(pinnedExemplar !== null || hoveredExemplar !== null) && (
+      {(activePinnedExemplar !== null || hoveredExemplar !== null) && (
         <ExemplarMetadataTooltip
-          exemplar={(pinnedExemplar ?? hoveredExemplar)!.exemplar}
-          seriesLabels={(pinnedExemplar ?? hoveredExemplar)!.seriesLabels}
+          exemplar={(activePinnedExemplar ?? hoveredExemplar)!.exemplar}
+          seriesLabels={(activePinnedExemplar ?? hoveredExemplar)!.seriesLabels}
           containerId={chartsTheme.tooltipPortalContainerId}
           format={yAxisFormat}
-          pinnedPos={pinnedExemplar !== null ? pinnedExemplarPos : null}
+          pinnedPos={activePinnedExemplar !== null ? pinnedExemplarPos : null}
           enablePinning={enablePinning}
           onUnpinClick={() => {
             setPinnedExemplar(null);
