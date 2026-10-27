@@ -14,7 +14,7 @@
 import { Box, Stack } from '@mui/material';
 import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import type { ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
 import { DetailPane } from './DetailPane/DetailPane';
@@ -23,6 +23,7 @@ import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { useSpanSearch } from './Search';
+import { getSpanActionItem } from './span-actions';
 import type { Span } from './trace';
 import { getTraceModel } from './trace';
 import { TraceHeaderBar } from './TraceHeaderBar';
@@ -54,10 +55,19 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
     startTimeUnixMs: trace.startTimeUnixMs,
     endTimeUnixMs: trace.endTimeUnixMs,
   });
-  const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(() =>
-    options.selectedSpanId ? trace.spanById.get(options.selectedSpanId) : undefined,
-  );
+  // the span ID is stored instead of the span, as a refreshed trace model contains new span objects
+  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>(options.selectedSpanId);
+  const selectedSpan = selectedSpanId ? trace.spanById.get(selectedSpanId) : undefined;
+  const handleSpanClick = useCallback((span: Span) => setSelectedSpanId(span.spanId), []);
   const search = useSpanSearch(trace);
+
+  const itemActions =
+    options.actions?.enabled && options.actions.displayWithItem ? options.actions.actionsList : undefined;
+  const hasItemActions = (itemActions?.length ?? 0) > 0;
+  const selectedSpanActionItem = useMemo(
+    () => (selectedSpan && hasItemActions ? getSpanActionItem(trace, selectedSpan) : undefined),
+    [trace, selectedSpan, hasItemActions],
+  );
 
   const ganttChart = useRef<HTMLDivElement>(null);
   // tableWidth only comes to effect if the detail pane is visible.
@@ -77,7 +87,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
             trace={trace}
             viewport={viewport}
             selectedSpan={selectedSpan}
-            onSpanClick={setSelectedSpan}
+            onSpanClick={handleSpanClick}
             matchingSpanIds={search.matchingSpanIds}
             focusedSpanId={search.matchingSpanIds[search.focusedMatchIndex]}
           />
@@ -97,7 +107,9 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
               customLinks={customLinks}
               trace={trace}
               span={selectedSpan}
-              onCloseBtnClick={() => setSelectedSpan(undefined)}
+              actions={itemActions}
+              actionItem={selectedSpanActionItem}
+              onCloseBtnClick={() => setSelectedSpanId(undefined)}
             />
           </Box>
         </>
