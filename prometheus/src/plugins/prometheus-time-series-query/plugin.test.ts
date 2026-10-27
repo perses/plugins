@@ -141,6 +141,15 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(variables).toEqual(['job', 'instance', 'foo']);
   });
 
+  it('should include the variables used in the Min Step in the variable dependencies', () => {
+    if (!PrometheusTimeSeriesQuery.dependsOn) throw new Error('dependsOn is not defined');
+    const { variables } = PrometheusTimeSeriesQuery.dependsOn(
+      { query: 'up{job="$job"}', minStep: '$resolution' as DurationString },
+      createStubContext(),
+    );
+    expect(variables).toEqual(['job', 'resolution']);
+  });
+
   it('should replace variables in seriesNameFormat', async () => {
     const ctx = createStubContext();
     ctx.variableState = {
