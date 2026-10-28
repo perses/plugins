@@ -36,14 +36,14 @@ interface SearchResultsPanelProps {
 
 function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
   const { timeZone } = useTimeZone();
-  const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
+  const { isFetching, isPending, queryResults } = useDataQueries('TraceQuery');
 
   // no query executed, show empty panel
   if (queryResults.length === 0) {
     return <></>;
   }
 
-  if (isLoading || isFetching) {
+  if (isPending || isFetching) {
     return <LoadingOverlay />;
   }
 
