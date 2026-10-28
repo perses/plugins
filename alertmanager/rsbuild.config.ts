@@ -30,6 +30,7 @@ export default createConfigForPlugin({
     },
     shared: {
       react: { requiredVersion: '^18.2.0 || ^19.0.0', singleton: true },
+      'react/jsx-runtime': { requiredVersion: '^18.2.0 || ^19.0.0', singleton: true },
       'react-dom': { requiredVersion: '^18.2.0 || ^19.0.0', singleton: true },
       'date-fns': { singleton: true },
       lodash: { singleton: true },
