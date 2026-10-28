@@ -18,6 +18,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import type { CustomLinks } from '../../gantt-chart-model';
+import { sanitizeUrl } from '../../link-safety';
 import type { Span, Trace } from '../trace';
 import { formatDuration } from '../utils';
 
@@ -147,9 +148,12 @@ export function AttributeItem(props: AttributeItemProps): ReactElement {
   const { name, value, link } = props;
   const { RouterComponent } = useRouterContext();
 
+  // The link is sanitized here, after the variables are interpolated, since variable values can be provided by the user
+  // (e.g. through the URL query parameters). An unsafe link (e.g. javascript:) is rendered as plain text.
+  const href = sanitizeUrl(link);
   const valueComponent =
-    RouterComponent && link ? (
-      <Link component={RouterComponent} to={link}>
+    RouterComponent && href ? (
+      <Link component={RouterComponent} to={href}>
         {value}
       </Link>
     ) : (
