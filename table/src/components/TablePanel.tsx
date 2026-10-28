@@ -160,7 +160,7 @@ function generateCellContentConfig(
   column: ColumnSettings,
   gaugeRange?: GaugeRange,
   globalCellSettings: CellSettings[] = [],
-): Pick<TableColumnConfig<unknown>, 'cellDescription' | 'cell'> {
+): Pick<TableColumnConfig<Record<string, unknown>>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
   if (plugin !== undefined) {
     return {
@@ -336,7 +336,7 @@ function generateColumnConfig(
   gaugeRangeByColumn: Record<string, GaugeRange>,
   globalCellSettings: CellSettings[] = [],
   defaultEnableSorting = false,
-): TableColumnConfig<unknown> | undefined {
+): TableColumnConfig<Record<string, unknown>> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
       if (column.hide) {
@@ -528,8 +528,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [data, keys]);
 
   // Generate columns and map each column accessor to its settings index and data key
-  const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
-    const columns: Array<TableColumnConfig<unknown>> = [];
+  const columns: Array<TableColumnConfig<Record<string, unknown>>> = useMemo(() => {
+    const columns: Array<TableColumnConfig<Record<string, unknown>>> = [];
     const customizedColumns = new Set<string>();
 
     // Process columnSettings if they exist

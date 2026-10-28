@@ -14,18 +14,38 @@
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { GaugeChartOptions } from './gauge-chart-model';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
+// Keeps the options in state, like a real parent of this controlled editor
+function StatefulGaugeChartOptionsEditorSettings({
+  initialValue,
+  onChange,
+}: {
+  initialValue: GaugeChartOptions;
+  onChange: (value: GaugeChartOptions) => void;
+}): ReactElement {
+  const [value, setValue] = useState(initialValue);
+  const handleChange = useCallback(
+    (next: GaugeChartOptions): void => {
+      setValue(next);
+      onChange(next);
+    },
+    [onChange],
+  );
+  return (
+    <ChartsProvider chartsTheme={testChartsTheme}>
+      <GaugeChartOptionsEditorSettings value={value} onChange={handleChange} />
+    </ChartsProvider>
+  );
+}
+
 describe('GaugeChartOptionsEditorSettings', () => {
   const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = vi.fn()): void => {
-    render(
-      <ChartsProvider chartsTheme={testChartsTheme}>
-        <GaugeChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsProvider>,
-    );
+    render(<StatefulGaugeChartOptionsEditorSettings initialValue={value} onChange={onChange} />);
   };
 
   it('can modify unit', () => {

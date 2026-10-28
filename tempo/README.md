@@ -4,12 +4,12 @@ This plugin supports Tempo v2.6.0 and later.
 
 ### How to install
 
-This plugin requires react and react-dom 18
+This plugin requires react and react-dom 18 or 19.
 
 Install peer dependencies:
 
 ```bash
-npm install react@18 react-dom@18
+npm install react@18 react-dom@18 # or react@19 react-dom@19
 ```
 
 Install the plugin:
