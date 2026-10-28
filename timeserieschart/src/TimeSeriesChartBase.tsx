@@ -344,7 +344,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     [data],
   );
 
-  const axisPointerType = axisPointer?.type;
+  const hoveredAxisPointerType = isHovered ? axisPointer?.type : undefined;
 
   const option: EChartsCoreOption = useMemo(() => {
     // The "chart" `noDataVariant` is only used when the `timeSeries` is an
@@ -363,7 +363,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       showContent: isStackedBar,
       trigger: isStackedBar ? 'item' : 'axis',
       appendToBody: isStackedBar,
-      ...(axisPointerType && isHovered ? { axisPointer: { type: axisPointerType, label: { show: false } } } : {}),
+      ...(hoveredAxisPointerType ? { axisPointer: { type: hoveredAxisPointerType, label: { show: false } } } : {}),
     };
 
     const option: EChartsCoreOption = {
@@ -429,8 +429,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     enablePinning,
     pinnedCrosshair,
     getTimezoneAwareAxisFormatter,
-    axisPointerType,
-    isHovered,
+    hoveredAxisPointerType,
   ]);
 
   // Only changes from another chart (or new series) can clear the local pin.

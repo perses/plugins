@@ -32,6 +32,7 @@ axisPointer: <AxisPointer specification> # Optional
 ```yaml
 # "cross" adds a horizontal line at the cursor's y position while hovering the panel.
 # The horizontal line only shows on the hovered panel.
+# Stacked bar charts ignore this option.
 type: <enum = "cross"> # Optional
 ```
 

@@ -188,6 +188,25 @@ describe('TimeSeriesChartBase performance', () => {
   });
 });
 
+describe('TimeSeriesChartBase axis pointer', () => {
+  it('shows the cross axis pointer only while the chart is hovered', () => {
+    const chart = mockChart();
+    const { container } = render(chartElement({ axisPointer: { type: 'cross' } }));
+    const wrapper = container.firstElementChild;
+    if (!(wrapper instanceof HTMLElement)) throw new Error('Chart wrapper is missing');
+    expect(chart.setOption.mock.calls.at(-1)?.[0].tooltip.axisPointer).toBeUndefined();
+
+    fireEvent.mouseEnter(wrapper);
+    expect(chart.setOption.mock.calls.at(-1)?.[0].tooltip.axisPointer).toEqual({
+      type: 'cross',
+      label: { show: false },
+    });
+
+    fireEvent.mouseLeave(wrapper);
+    expect(chart.setOption.mock.calls.at(-1)?.[0].tooltip.axisPointer).toBeUndefined();
+  });
+});
+
 describe('TimeSeriesChartBase annotations', () => {
   it('does not add the annotation y-axis without annotations', () => {
     const chart = mockChart();
