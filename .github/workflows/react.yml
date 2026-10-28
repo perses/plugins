@@ -59,5 +59,7 @@ jobs:
           enable_npm: true
       - run: npm ci
       - run: npm install --no-save react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19
+      # Fail fast if peer resolution silently kept React 18.
+      - run: node -e "const v=require('react/package.json').version; if(!v.startsWith('19.')) { console.error('Expected React 19, got', v); process.exit(1) }"
       - run: npm run type-check
       - run: npm run test

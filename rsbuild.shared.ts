@@ -18,7 +18,7 @@ import type { ModuleFederationOptions } from '@module-federation/rsbuild-plugin'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import type { RsbuildConfig } from '@rsbuild/core';
 import { mergeRsbuildConfig } from '@rsbuild/core';
-import type { ReactCompilerOptions } from '@rsbuild/plugin-react';
+import type { PluginReactOptions, ReactCompilerOptions } from '@rsbuild/plugin-react';
 import { pluginReact } from '@rsbuild/plugin-react';
 
 /** The base path for all plugin assets. This should match the path where plugins are stored on the Perses server.
@@ -34,6 +34,17 @@ const PLUGINS_PATH = '/plugins';
  */
 const reactCompilerOptions: ReactCompilerOptions = {
   target: '18', // Keep in sync with `.swcrc` React target
+};
+
+/**
+ * SWC JSX options shared by every plugin, passed to `pluginReact({ swcReactOptions })`.
+ * Always compile JSX to `react/jsx-runtime`, even in dev mode, so that plugins consume the host's shared JSX runtime.
+ * The default dev transform imports `react/jsx-dev-runtime`, which isn't shared by the host: the plugin would then bundle
+ * its own React 18 dev runtime, which breaks against a React 19 host. Fast Refresh is not affected.
+ * @see {@link https://rsbuild.rs/plugins/list/plugin-react#swcreactoptions}
+ */
+const swcReactOptions: PluginReactOptions['swcReactOptions'] = {
+  development: false,
 };
 
 /**
@@ -136,7 +147,7 @@ function getRsbuildConfig(name: string): RsbuildConfig {
   const version = process.env.NODE_ENV === 'development' ? undefined : getPluginVersion();
 
   return {
-    plugins: [pluginReact({ reactCompiler: reactCompilerOptions })],
+    plugins: [pluginReact({ reactCompiler: reactCompilerOptions, swcReactOptions })],
     server: {
       port: 3000 + Math.floor(Math.random() * 1000),
       strictPort: false,
