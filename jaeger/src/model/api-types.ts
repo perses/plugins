@@ -11,62 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
+
+/**
+ * Envelope used by the client for the list endpoints (services and operations), so callers read `data`.
+ */
 export interface JaegerApiResponse<T> {
   data: T;
-  total?: number;
-  limit?: number;
-  offset?: number;
-  errors?: JaegerApiError[];
 }
 
-export interface JaegerApiError {
-  code?: number;
-  msg: string;
-  traceID?: string;
-}
-
-export interface JaegerTrace {
-  traceID: string;
-  spans: JaegerSpan[];
-  processes?: Record<string, JaegerProcess>;
-  warnings?: string[] | null;
-}
-
-export interface JaegerSpan {
-  traceID: string;
-  spanID: string;
-  operationName: string;
-  references?: JaegerReference[];
-  startTime: number;
-  duration: number;
-  tags?: JaegerTag[];
-  logs?: JaegerLog[];
-  processID?: string;
-  process?: JaegerProcess;
-  warnings?: string[] | null;
-}
-
-export interface JaegerReference {
-  refType: 'CHILD_OF' | 'FOLLOWS_FROM' | string;
-  traceID: string;
-  spanID: string;
-}
-
-export interface JaegerProcess {
-  serviceName: string;
-  tags?: JaegerTag[];
-}
-
-export type JaegerTag =
-  | { key: string; type: 'string'; value: string }
-  | { key: string; type: 'bool'; value: boolean }
-  | { key: string; type: 'int64'; value: number }
-  | { key: string; type: 'float64'; value: number }
-  | { key: string; type: 'binary'; value: string };
-
-export interface JaegerLog {
-  timestamp: number;
-  fields?: JaegerTag[];
+/**
+ * Response of `GET /api/v3/services`.
+ */
+export interface JaegerServicesResponse {
+  services?: string[];
 }
 
 export interface JaegerOperation {
@@ -74,17 +32,63 @@ export interface JaegerOperation {
   spanKind?: string;
 }
 
+/**
+ * Response of `GET /api/v3/operations`.
+ */
+export interface JaegerOperationsResponse {
+  operations?: JaegerOperation[];
+}
+
+/**
+ * Body of a failed Jaeger API v3 request.
+ */
+export interface JaegerErrorResponse {
+  error?: {
+    httpCode?: number;
+    message?: string;
+  };
+}
+
+/**
+ * OTLP JSON as returned by Jaeger. Enums are numbers (e.g. `kind: 2`) instead of the names used by Perses.
+ */
+export interface JaegerOtlpSpan extends Omit<otlptracev1.Span, 'kind' | 'status'> {
+  kind?: number | string;
+  status?: { code?: number | string; message?: string };
+}
+
+export interface JaegerOtlpScopeSpans extends Omit<otlptracev1.ScopeSpan, 'spans'> {
+  spans?: JaegerOtlpSpan[];
+}
+
+export interface JaegerOtlpResourceSpans extends Omit<otlptracev1.ResourceSpan, 'scopeSpans'> {
+  scopeSpans?: JaegerOtlpScopeSpans[];
+}
+
+export interface JaegerTracesData {
+  resourceSpans?: JaegerOtlpResourceSpans[];
+}
+
+/**
+ * Response of `GET /api/v3/traces` and `GET /api/v3/traces/{traceId}`.
+ */
+export interface JaegerTracesResponse {
+  result?: JaegerTracesData;
+}
+
 export interface JaegerSearchRequestParameters {
-  traceID?: string[];
   service?: string;
   operation?: string;
   spanKind?: string;
+  /** JSON object of attribute filters, e.g. `{"http.status_code":"500"}`. */
   tags?: string;
+  /** Go duration, e.g. `100ms` or `1.5s`. */
   minDuration?: string;
   maxDuration?: string;
   limit?: number;
-  start?: number;
-  end?: number;
+  /** Jaeger API v3 requires both bounds of the start time range. */
+  startTime: Date;
+  endTime: Date;
 }
 
 export const DEFAULT_SEARCH_LIMIT = 20;

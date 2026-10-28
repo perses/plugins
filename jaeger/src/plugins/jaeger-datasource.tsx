@@ -27,6 +27,7 @@ const createClient: DatasourcePlugin<JaegerDatasourceSpec, JaegerClient>['create
     throw new Error('No URL specified for Jaeger client. You can use directUrl in the spec to configure it.');
   }
 
+  const viaProxy = directUrl === undefined;
   const specHeaders = proxy?.spec.headers;
 
   return {
@@ -34,12 +35,13 @@ const createClient: DatasourcePlugin<JaegerDatasourceSpec, JaegerClient>['create
       datasourceUrl,
     },
     getTrace: (traceId, headers) =>
-      getTrace(traceId, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+      getTrace(traceId, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch, viaProxy }),
     searchTraces: (params, headers) =>
-      searchTraces(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
-    searchServices: (headers) => searchServices({ datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+      searchTraces(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch, viaProxy }),
+    searchServices: (headers) =>
+      searchServices({ datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch, viaProxy }),
     searchOperations: (service, headers) =>
-      searchOperations(service, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+      searchOperations(service, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch, viaProxy }),
   };
 };
 

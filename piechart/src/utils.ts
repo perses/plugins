@@ -15,7 +15,7 @@ import type { FormatOptions, LegendItem, ModeOption, SortOption, TableColumnConf
 import { formatValue } from '@perses-dev/components';
 import type { ComparisonValues, LegendValue } from '@perses-dev/plugin-system';
 import { comparisonLegends } from '@perses-dev/plugin-system';
-import { format } from 'echarts';
+import { format } from 'echarts/core';
 
 import { DEFAULT_SORT } from './pie-chart-model';
 import type { PieChartData } from './PieChartBase';
