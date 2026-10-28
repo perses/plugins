@@ -63,6 +63,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
+                    "instant": true,
                     "query": "node_load"
                   }
                 }
@@ -74,6 +75,7 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
+                    "instant": true,
                     "query": "edge_traffic"
                   }
                 }
