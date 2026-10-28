@@ -39,6 +39,7 @@
     "greptimedb",
     "heatmapchart",
     "histogramchart",
+    "influxdb",
     "jaeger",
     "json",
     "logexplorer",
