@@ -22,8 +22,6 @@ export interface GeneratedGraph {
   edges: EdgeSpec[];
   /** Series backing each generated node/edge id, used to resolve color/label/thickness at render time. */
   seriesByItemId: Map<string, TimeSeries>;
-  /** Stable key describing the graph topology (node + edge ids), for memoizing layout. */
-  topologyKey: string;
 }
 
 const NODE_ID_PREFIX = 'gen-node:';
@@ -117,7 +115,5 @@ export function buildGraphFromQueries(
     }
   }
 
-  const topologyKey = [nodes.map((n) => n.id).join(','), edges.map((e) => e.id).join(',')].join('|');
-
-  return { nodes, edges, seriesByItemId, topologyKey };
+  return { nodes, edges, seriesByItemId };
 }
