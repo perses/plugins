@@ -146,9 +146,9 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   }
 
   // Non-2xx responses are already turned into an error by fetchJson. Some backends and proxies
-  // answer an invalid query with a 2xx status and an error body, which must not render as an empty chart.
+  // are non compliant with Prometheus spec and answer an invalid query with a 2xx status and an error body, which must not render as an empty chart.
   if (response.status === 'error') {
-    throw new Error(response.errorType ? `${response.errorType}: ${response.error}` : response.error);
+    throw new Error(response.error || `Prometheus query failed (${response.errorType || 'unknown error'})`);
   }
 
   const result = response.data;

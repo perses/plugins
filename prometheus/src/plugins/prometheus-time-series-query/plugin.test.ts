@@ -196,7 +196,18 @@ describe('PrometheusTimeSeriesQuery', () => {
     } satisfies RangeQueryResponse);
 
     await expect(PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'sum(' }, createStubContext())).rejects.toThrow(
-      'bad_data: parse error: unexpected end of input',
+      'parse error: unexpected end of input',
+    );
+  });
+
+  it('should throw a fallback message when an error body has no error text', async () => {
+    (promStubClient.rangeQuery as Mock).mockResolvedValueOnce({
+      status: 'error',
+      errorType: 'bad_data',
+    } as unknown as RangeQueryResponse);
+
+    await expect(PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'sum(' }, createStubContext())).rejects.toThrow(
+      'Prometheus query failed (bad_data)',
     );
   });
 
@@ -209,7 +220,7 @@ describe('PrometheusTimeSeriesQuery', () => {
 
     await expect(
       PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', instant: true }, createStubContext()),
-    ).rejects.toThrow('timeout: query timed out');
+    ).rejects.toThrow('query timed out');
   });
 
   it('should use instantQuery when spec.instant is true', async () => {
