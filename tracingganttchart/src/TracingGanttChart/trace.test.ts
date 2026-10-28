@@ -20,7 +20,17 @@ import * as exampleTrace from '../test/traces/example_otlp.json';
 import * as incompleteTrace from '../test/traces/pushbytes_incomplete_otlp.json';
 import * as missingRootSpanTrace from '../test/traces/pushbytes_no_root_span_otlp.json';
 import type { Span } from './trace';
-import { forEachSpan, getTraceModel } from './trace';
+import { forEachSpan, getTraceId, getTraceModel } from './trace';
+
+describe('getTraceId', () => {
+  it('returns the trace ID of the first span', () => {
+    expect(getTraceId(exampleTrace as otlptracev1.TracesData)).toEqual('5B8EFFF798038103D269B633813FC60C');
+  });
+
+  it('returns undefined for a trace without spans', () => {
+    expect(getTraceId({ resourceSpans: [{ scopeSpans: [{ spans: [] }] }] })).toBeUndefined();
+  });
+});
 
 describe('trace', () => {
   it('computes a GanttTrace model from a trace', (): void => {
