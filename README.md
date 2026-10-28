@@ -49,23 +49,27 @@ This will allow you to use the updates from perses core in your plugin so you ca
 # perses/plugins/timeserieschart/package.json
 
 "dependencies": {
-    "color-hash": "^2.0.2"
+    "color-hash": "^2.0.2",
+    "d3-scale-chromatic": "^3.1.0",
+    "react-compiler-runtime": "^1.0.0",
 +   "@perses-dev/components": "v0.0.0-snapshot-panel-actions-520389b",
 +   "@perses-dev/plugin-system": "v0.0.0-snapshot-panel-actions-520389b"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@hookform/resolvers": "^3.2.0",
--   "@perses-dev/components": "^0.51.0-rc.1",
--   "@perses-dev/plugin-system": "^0.51.0-rc.1",
+    "@hookform/resolvers": "^5.9.1",
+-   "@perses-dev/components": "^0.56.0-beta.0",
+    "@perses-dev/dashboards": "^0.56.0-beta.0",
+-   "@perses-dev/plugin-system": "^0.56.0-beta.0",
+    "@perses-dev/spec": "^0.3.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
     "lodash": "^4.17.21",
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0",
-    "use-resize-observer": "^9.0.0",
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0",
+    "use-resize-observer": "^10.0.0",
     "immer": "^10.1.1"
   }
 ```
