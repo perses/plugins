@@ -13,6 +13,10 @@
 
 package model
 
+import (
+	"github.com/perses/shared/cue/common"
+)
+
 #palette: {
 	mode: "auto" | "categorical"
 }
@@ -33,6 +37,8 @@ package model
 
 kind: "TracingGanttChart"
 spec: close({
-	visual?: #visual
-	links?:  #links
+	visual?:    #visual
+	links?:     #links
+	selection?: common.#selection
+	actions?:   common.#actions
 })
