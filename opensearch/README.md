@@ -8,10 +8,10 @@ pivot from a trace to the related logs in OpenSearch.
 
 ### How to install
 
-This plugin requires react and react-dom 18.
+This plugin requires react and react-dom 18 or 19.
 
 ```bash
-npm install react@18 react-dom@18
+npm install react@18 react-dom@18 # or react@19 react-dom@19
 npm install @perses-dev/opensearch-plugin
 ```
 

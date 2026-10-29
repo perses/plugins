@@ -27,7 +27,8 @@ import { DEFAULT_ANNOTATION_COLOR } from '@perses-dev/plugin-system';
 import type { LineSeriesOption, MarkPointComponentOption, YAXisComponentOption } from 'echarts';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
-import useResizeObserver from 'use-resize-observer';
+import type { ReactElement } from 'react';
+import { useResizeObserver } from 'use-resize-observer';
 
 import type { TimeSeriesAnnotation } from '../utils/annotation';
 
@@ -56,7 +57,7 @@ export function AnnotationTooltip({
   pinnedPos,
   enablePinning = true,
   onUnpinClick,
-}: AnnotationTooltipProps): JSX.Element | null {
+}: AnnotationTooltipProps): ReactElement | null {
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver<HTMLDivElement>();
 

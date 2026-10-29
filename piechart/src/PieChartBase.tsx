@@ -73,7 +73,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const chartRef = useRef<ECharts>();
+  const chartRef = useRef<ECharts | undefined>(undefined);
 
   useLayoutEffect(() => {
     chartRef.current?.resize({ width, height });
