@@ -155,4 +155,21 @@ describe('buildGraphFromQueries', () => {
     expect(key1).toBe(key2); // only values changed
     expect(key1).not.toBe(key3); // topology changed
   });
+
+  it('topology key is independent of series order', () => {
+    const forward = [result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)), result()];
+    const reversed = [result(series({ instance: 'b' }, 2), series({ instance: 'a' }, 1)), result()];
+    expect(buildGraphFromQueries(baseConfig, forward).topologyKey).toBe(
+      buildGraphFromQueries(baseConfig, reversed).topologyKey,
+    );
+  });
+
+  it('topology key does not collide between distinct node sets that share a joined form', () => {
+    // Two nodes `a` and `b` must not key the same as a single node literally named `a,gen-node:b`.
+    const twoNodes = [result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)), result()];
+    const oneNode = [result(series({ instance: 'a,gen-node:b' }, 1)), result()];
+    expect(buildGraphFromQueries(baseConfig, twoNodes).topologyKey).not.toBe(
+      buildGraphFromQueries(baseConfig, oneNode).topologyKey,
+    );
+  });
 });

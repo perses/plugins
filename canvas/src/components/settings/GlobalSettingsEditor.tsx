@@ -109,12 +109,17 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
       // The per-threshold node-size multipliers are keyed by threshold value. When a color threshold
       // is moved or removed, drop any multiplier whose value no longer matches a step so it cannot
       // linger as an active-but-hidden scale in the panel while disappearing from the editor.
-      const stepValues = new Set(thresholds?.steps?.map((step) => step.value));
-      const nodeThresholdSizes = value.nodeThresholdSizes?.filter((size) => stepValues.has(size.value));
+      const nodeStepValues = new Set(thresholds?.steps?.map((step) => step.value));
+      const nodeThresholdSizes = value.nodeThresholdSizes?.filter((size) => nodeStepValues.has(size.value));
+      // Edge widths key off the effective edge thresholds, which fall back to these node thresholds
+      // when no edge thresholds are set — so reconcile them here too.
+      const edgeStepValues = new Set((value.edgeThresholds ?? thresholds)?.steps?.map((step) => step.value));
+      const edgeThresholdWidths = value.edgeThresholdWidths?.filter((width) => edgeStepValues.has(width.value));
       onChange({
         ...value,
         thresholds,
         nodeThresholdSizes: nodeThresholdSizes?.length ? nodeThresholdSizes : undefined,
+        edgeThresholdWidths: edgeThresholdWidths?.length ? edgeThresholdWidths : undefined,
       });
     },
     [value, onChange],
@@ -122,7 +127,16 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
 
   const onEdgeThresholdsChange = useCallback(
     (edgeThresholds: ThresholdOptions | undefined): void => {
-      onChange({ ...value, edgeThresholds });
+      // Edge thickness breakpoints key off the effective edge thresholds (edge thresholds, or the
+      // node thresholds when edge thresholds are cleared). Drop any width whose value no longer
+      // matches a step so it cannot linger as an active-but-hidden width in the panel.
+      const edgeStepValues = new Set((edgeThresholds ?? value.thresholds)?.steps?.map((step) => step.value));
+      const edgeThresholdWidths = value.edgeThresholdWidths?.filter((width) => edgeStepValues.has(width.value));
+      onChange({
+        ...value,
+        edgeThresholds,
+        edgeThresholdWidths: edgeThresholdWidths?.length ? edgeThresholdWidths : undefined,
+      });
     },
     [value, onChange],
   );

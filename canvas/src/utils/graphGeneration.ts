@@ -124,7 +124,13 @@ export function buildGraphFromQueries(
     }
   }
 
-  const topologyKey = [nodes.map((n) => n.id).join(','), edges.map((e) => e.id).join(',')].join('|');
+  // Serialize sorted id arrays via JSON so the key is unambiguous (no separator collision between,
+  // e.g., ids `a`,`b` and a single id `a,gen-node:b`) and independent of series order, so merely
+  // reordering the same series does not change the topology and rerun the layout.
+  const topologyKey = JSON.stringify({
+    nodes: nodes.map((n) => n.id).toSorted(),
+    edges: edges.map((e) => e.id).toSorted(),
+  });
 
   return { nodes, edges, seriesByItemId, topologyKey };
 }
