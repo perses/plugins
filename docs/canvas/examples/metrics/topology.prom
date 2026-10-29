@@ -11,9 +11,9 @@
 #
 # Topology (an e-commerce-style request path across two regions):
 #
-#            ┌──────────────┐
+#            ┌───────────────┐
 #            │ edge  gateway │
-#            └──────┬───────┘
+#            └──────┬────────┘
 #         ┌─────────┼──────────┐
 #         ▼         ▼          ▼
 #      web-eu    web-us    auth (shared)
