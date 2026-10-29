@@ -22,6 +22,16 @@ function edge(id: string, source: string, target: string): EdgeSpec {
   return { id, source, target };
 }
 
+// Deterministic shuffle so order-independence tests are stable.
+function shuffled<T>(xs: T[], seed: number): T[] {
+  const out = [...xs];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = (i * 1103515245 + seed) % (i + 1);
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
 describe('layoutGraph', () => {
   it('returns an empty array for no nodes', () => {
     expect(layoutGraph([], [])).toEqual([]);
@@ -47,6 +57,21 @@ describe('layoutGraph', () => {
     const posB = new Map(b.map((n) => [n.id, n.position]));
     for (const id of ['a', 'b', 'c']) {
       expect(posB.get(id)).toEqual(posA.get(id));
+    }
+  });
+
+  it('is order-independent for a larger connected graph with shuffled nodes and edges', () => {
+    const ids = Array.from({ length: 20 }, (_, i) => `n${i}`);
+    const nodes = ids.map(node);
+    // A connected graph: a ring plus a few chords, so the spring pass is exercised.
+    const edges: EdgeSpec[] = ids.map((id, i) => edge(`e${i}`, id, ids[(i + 1) % ids.length]!));
+    edges.push(edge('c1', 'n0', 'n10'), edge('c2', 'n3', 'n15'), edge('c3', 'n5', 'n12'));
+
+    const base = layoutGraph(nodes, edges);
+    const reordered = layoutGraph(shuffled(nodes, 7), shuffled(edges, 13));
+    const basePos = new Map(base.map((n) => [n.id, n.position]));
+    for (const n of reordered) {
+      expect(n.position).toEqual(basePos.get(n.id));
     }
   });
 

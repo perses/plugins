@@ -27,7 +27,7 @@ other labels such as `{{role}}` or `{{region}}` to see how the label templates w
 ## Steps
 
 1. **Start the demo exporter** (from the plugins repo root). It serves the metrics at
-   <http://localhost:9101/metrics>:
+   `http://localhost:9101/metrics`:
 
    ```bash
    docker compose --file docs/canvas/examples/docker-compose.yml up --detach
@@ -49,7 +49,7 @@ other labels such as `{{role}}` or `{{region}}` to see how the label templates w
    ```
 
    The dev `PrometheusLocal` datasource (`http://localhost:9090`) is the default, so no datasource
-   setup is needed. Confirm `node_load` and `edge_traffic` return data at <http://localhost:9090>.
+   setup is needed. Confirm `node_load` and `edge_traffic` return data at `http://localhost:9090`.
 
 3. **Run the backend and the plugin dev server.** In `perses/perses`, set `plugin.enable_dev: true`
    in `dev/config.yaml`, then:

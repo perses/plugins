@@ -63,6 +63,8 @@ interface PanelEdgeLayerProps {
   paletteColors: string[];
   /** Series backing generated edges (data-driven mode), keyed by edge id. Takes precedence over queryIndex. */
   seriesByItemId?: Map<string, TimeSeries>;
+  /** Series backing the reverse half of a reciprocal generated edge, keyed by edge id. */
+  reverseSeriesByItemId?: Map<string, TimeSeries>;
 }
 
 export function PanelEdgeLayer({
@@ -71,6 +73,7 @@ export function PanelEdgeLayer({
   k,
   paletteColors,
   seriesByItemId,
+  reverseSeriesByItemId,
 }: PanelEdgeLayerProps): ReactElement {
   const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
   const edges = useMemo(() => spec.edges ?? [], [spec.edges]);
@@ -98,8 +101,14 @@ export function PanelEdgeLayer({
         }
 
         const generatedSeries = seriesByItemId?.get(edge.id);
+        const generatedReverseSeries = reverseSeriesByItemId?.get(edge.id);
 
-        function resolveSeries(queryIndex: number | undefined): TimeSeries | undefined {
+        function resolveSeries(queryIndex: number | undefined, reverse = false): TimeSeries | undefined {
+          // For a reciprocal generated edge the reverse half has its own series; fall back to the
+          // forward series otherwise so a plain bidirectional edge still shows a value on both halves.
+          if (reverse && generatedReverseSeries) {
+            return generatedReverseSeries;
+          }
           if (generatedSeries) {
             return generatedSeries;
           }
@@ -114,7 +123,7 @@ export function PanelEdgeLayer({
         }
 
         const fwdSeries = resolveSeries(edge.sourceQueryIndex);
-        const bwdSeries = resolveSeries(edge.targetQueryIndex);
+        const bwdSeries = resolveSeries(edge.targetQueryIndex, true);
 
         const fwdStyle = resolveEdgeStyle(
           fwdSeries,

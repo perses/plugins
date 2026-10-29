@@ -65,23 +65,37 @@ export function layoutGraph(nodes: NodeSpec[], edges: EdgeSpec[], options: Layou
     return [{ ...nodes[0]!, position: { x: 0, y: 0 } }];
   }
 
+  // Run the simulation over a canonical (id-sorted) ordering of the nodes, not the incoming array
+  // order. Floating-point force sums are not associative, so iterating nodes in query order would
+  // let a mere reordering of the same topology settle to slightly different positions and visibly
+  // move nodes. `inputToSim[inputIdx]` maps an input-array index to its simulation slot so the
+  // returned array can preserve the caller's node order.
+  const simOrder = nodes.map((_, i) => i).toSorted((a, b) => (nodes[a]!.id < nodes[b]!.id ? -1 : 1));
+  const inputToSim = Array.from({ length: n }, () => 0);
+  simOrder.forEach((inputIdx, simIdx) => {
+    inputToSim[inputIdx] = simIdx;
+  });
+  const simNodes = simOrder.map((i) => nodes[i]!);
+
   // Deterministic seed: place each node on a circle at an angle derived from its id hash.
-  const pos: Point[] = nodes.map((node) => {
+  const pos: Point[] = simNodes.map((node) => {
     const angle = (hashString(node.id) / 0xffffffff) * Math.PI * 2;
     return { x: Math.cos(angle) * opts.seedRadius, y: Math.sin(angle) * opts.seedRadius };
   });
 
   const indexById = new Map<string, number>();
-  nodes.forEach((node, i) => indexById.set(node.id, i));
+  simNodes.forEach((node, i) => indexById.set(node.id, i));
 
+  // Build the edge list in a canonical order too, so the spring pass is order-independent as well.
   const edgePairs: Array<[number, number]> = [];
   for (const edge of edges) {
     const a = indexById.get(edge.source);
     const b = edge.target !== undefined ? indexById.get(edge.target) : undefined;
     if (a !== undefined && b !== undefined && a !== b) {
-      edgePairs.push([a, b]);
+      edgePairs.push(a < b ? [a, b] : [b, a]);
     }
   }
+  edgePairs.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
 
   const disp: Point[] = pos.map(() => ({ x: 0, y: 0 }));
 
@@ -154,17 +168,21 @@ export function layoutGraph(nodes: NodeSpec[], edges: EdgeSpec[], options: Layou
   // seeded graphs that equilibrium is noticeably off-origin. Shifting by the centroid guarantees the
   // result is centered on (0, 0) regardless of how the simulation settled.
   //
-  // Accumulate in id-sorted order so floating-point rounding of the sum does not depend on the input
-  // array order (layout is otherwise order-independent — positions follow node id, not slot).
-  const order = nodes.map((_, i) => i).toSorted((a, b) => (nodes[a]!.id < nodes[b]!.id ? -1 : 1));
+  // `pos` is already in the canonical (id-sorted) simulation order, so the sum is independent of the
+  // caller's input order.
   let cx = 0;
   let cy = 0;
-  for (const i of order) {
+  for (let i = 0; i < n; i++) {
     cx += pos[i]!.x;
     cy += pos[i]!.y;
   }
   cx /= n;
   cy /= n;
 
-  return nodes.map((node, i) => ({ ...node, position: { x: pos[i]!.x - cx, y: pos[i]!.y - cy } }));
+  // Map each input node to its simulation slot so the returned array preserves the caller's order
+  // while carrying the canonically computed positions.
+  return nodes.map((node, inputIdx) => {
+    const p = pos[inputToSim[inputIdx]!]!;
+    return { ...node, position: { x: p.x - cx, y: p.y - cy } };
+  });
 }

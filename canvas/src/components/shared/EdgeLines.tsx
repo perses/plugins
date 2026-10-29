@@ -20,6 +20,9 @@ import { midpoint } from '../../utils/edgeUtils';
 interface EdgeGeometry {
   fwd: Line;
   bwd: Line | null;
+  /** Arrowhead length scale in [0, 1] per direction, shrunk so a short segment's marker still fits. */
+  fwdArrowScale: number;
+  bwdArrowScale: number;
 }
 
 function shortenEnd(line: Line, amount: number): Line {
@@ -29,6 +32,24 @@ function shortenEnd(line: Line, amount: number): Line {
   if (len <= amount) return line;
   const t = (len - amount) / len;
   return { start: line.start, end: { x: line.start.x + dx * t, y: line.start.y + dy * t } };
+}
+
+function lineLength(line: Line): number {
+  return Math.hypot(line.end.x - line.start.x, line.end.y - line.start.y);
+}
+
+/**
+ * The arrowhead renders `ARROW_SW_W * strokeWidth` user-units long (markerUnits="strokeWidth").
+ * When the (already node-clipped) directional segment is shorter than that, the full-size marker
+ * would overshoot past the segment into the node. Return a scale in (0, 1] that shrinks the marker
+ * to fit the available length so its tip still lands on the node boundary.
+ */
+export function arrowScaleForSegment(segmentLength: number, strokeWidth: number): number {
+  const arrowLength = ARROW_SW_W * strokeWidth;
+  if (arrowLength <= 0 || segmentLength >= arrowLength) {
+    return 1;
+  }
+  return Math.max(0, segmentLength / arrowLength);
 }
 
 function computeEdgeGeometry(
@@ -41,12 +62,17 @@ function computeEdgeGeometry(
   const bwdShorten = ARROW_SW_W * bwdStrokeWidth;
 
   if (!bidirectional) {
-    return { fwd: shortenEnd(pts, fwdShorten), bwd: null };
+    const fwd = shortenEnd(pts, fwdShorten);
+    return { fwd, bwd: null, fwdArrowScale: arrowScaleForSegment(lineLength(pts), fwdStrokeWidth), bwdArrowScale: 1 };
   }
   const mid = midpoint(pts);
+  const fwdFull = { start: pts.start, end: mid };
+  const bwdFull = { start: pts.end, end: mid };
   return {
-    fwd: shortenEnd({ start: pts.start, end: mid }, fwdShorten),
-    bwd: shortenEnd({ start: pts.end, end: mid }, bwdShorten),
+    fwd: shortenEnd(fwdFull, fwdShorten),
+    bwd: shortenEnd(bwdFull, bwdShorten),
+    fwdArrowScale: arrowScaleForSegment(lineLength(fwdFull), fwdStrokeWidth),
+    bwdArrowScale: arrowScaleForSegment(lineLength(bwdFull), bwdStrokeWidth),
   };
 }
 
@@ -67,19 +93,23 @@ interface EdgeArrowMarkerProps {
   nsPrefix: string;
   direction: 'fwd' | 'bwd';
   fill: string;
+  /** Shrinks the marker so a short, node-clipped segment's arrowhead does not overshoot the node. */
+  scale?: number;
 }
 
-function EdgeArrowMarker({ nsPrefix, direction, fill }: EdgeArrowMarkerProps): ReactElement {
+function EdgeArrowMarker({ nsPrefix, direction, fill, scale = 1 }: EdgeArrowMarkerProps): ReactElement {
+  const w = ARROW_SW_W * scale;
+  const h = ARROW_SW_H * scale;
   return (
     <marker
       id={markerId(nsPrefix, direction)}
-      markerWidth={ARROW_SW_W}
-      markerHeight={ARROW_SW_H}
-      refY={ARROW_SW_H / 2}
+      markerWidth={w}
+      markerHeight={h}
+      refY={h / 2}
       orient="auto"
       markerUnits="strokeWidth"
     >
-      <path d={`M0,0 L0,${ARROW_SW_H} L${ARROW_SW_W},${ARROW_SW_H / 2} z`} fill={fill} />
+      <path d={`M0,0 L0,${h} L${w},${h / 2} z`} fill={fill} />
     </marker>
   );
 }
@@ -102,13 +132,20 @@ export function EdgeLines({
   lineProps,
 }: EdgeLinesProps): ReactElement {
   const resolvedBwdStyle = bwdStyle ?? fwdStyle;
-  const { fwd, bwd } = computeEdgeGeometry(pts, bidirectional, fwdStyle.strokeWidth, resolvedBwdStyle.strokeWidth);
+  const { fwd, bwd, fwdArrowScale, bwdArrowScale } = computeEdgeGeometry(
+    pts,
+    bidirectional,
+    fwdStyle.strokeWidth,
+    resolvedBwdStyle.strokeWidth,
+  );
 
   return (
     <>
       <defs>
-        <EdgeArrowMarker nsPrefix={nsPrefix} direction="fwd" fill={fwdStyle.stroke} />
-        {bwd ? <EdgeArrowMarker nsPrefix={nsPrefix} direction="bwd" fill={resolvedBwdStyle.stroke} /> : null}
+        <EdgeArrowMarker nsPrefix={nsPrefix} direction="fwd" fill={fwdStyle.stroke} scale={fwdArrowScale} />
+        {bwd ? (
+          <EdgeArrowMarker nsPrefix={nsPrefix} direction="bwd" fill={resolvedBwdStyle.stroke} scale={bwdArrowScale} />
+        ) : null}
       </defs>
       <line
         x1={fwd.start.x}

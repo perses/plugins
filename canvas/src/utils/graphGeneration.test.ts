@@ -107,6 +107,45 @@ describe('buildGraphFromQueries', () => {
     expect(new Set(graph.edges.map((e) => e.id)).size).toBe(2);
   });
 
+  it('merges reciprocal A→B and B→A rows into one bidirectional edge with per-direction series', () => {
+    const results = [
+      result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)),
+      result(series({ source: 'a', target: 'b' }, 5), series({ source: 'b', target: 'a' }, 9)),
+    ];
+    const graph = buildGraphFromQueries(baseConfig, results);
+    expect(graph.edges).toHaveLength(1);
+    const edge = graph.edges[0]!;
+    expect(edge).toMatchObject({ source: 'gen-node:a', target: 'gen-node:b', bidirectional: true });
+    // Forward half keeps the A→B series; the reverse half gets the B→A series.
+    expect(graph.seriesByItemId.get(edge.id)?.values[0]?.[1]).toBe(5);
+    expect(graph.reverseSeriesByItemId.get(edge.id)?.values[0]?.[1]).toBe(9);
+  });
+
+  it('keeps a single-direction edge non-bidirectional by default and leaves no reverse series', () => {
+    const results = [
+      result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)),
+      result(series({ source: 'a', target: 'b' }, 5)),
+    ];
+    const graph = buildGraphFromQueries(baseConfig, results);
+    expect(graph.edges).toHaveLength(1);
+    expect(graph.edges[0]?.bidirectional).toBe(false);
+    expect(graph.reverseSeriesByItemId.get(graph.edges[0]!.id)).toBeUndefined();
+  });
+
+  it('merges reciprocal rows regardless of which direction appears first', () => {
+    const results = [
+      result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)),
+      result(series({ source: 'b', target: 'a' }, 9), series({ source: 'a', target: 'b' }, 5)),
+    ];
+    const graph = buildGraphFromQueries(baseConfig, results);
+    expect(graph.edges).toHaveLength(1);
+    const edge = graph.edges[0]!;
+    // Orientation follows the first-seen row (B→A here).
+    expect(edge).toMatchObject({ source: 'gen-node:b', target: 'gen-node:a', bidirectional: true });
+    expect(graph.seriesByItemId.get(edge.id)?.values[0]?.[1]).toBe(9);
+    expect(graph.reverseSeriesByItemId.get(edge.id)?.values[0]?.[1]).toBe(5);
+  });
+
   it('drives generated edge thickness from the edge-thickness thresholds', () => {
     const results = [
       result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)),

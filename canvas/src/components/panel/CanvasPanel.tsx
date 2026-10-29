@@ -39,6 +39,7 @@ interface PanelSvgProps {
   seriesByQueryIndex: Map<number, TimeSeries>;
   paletteColors: string[];
   seriesByItemId?: Map<string, TimeSeries>;
+  reverseSeriesByItemId?: Map<string, TimeSeries>;
 }
 
 function PanelSvg({
@@ -48,6 +49,7 @@ function PanelSvg({
   seriesByQueryIndex,
   paletteColors,
   seriesByItemId,
+  reverseSeriesByItemId,
 }: PanelSvgProps): ReactElement {
   const { transform, isPanning, fitView, resetPan } = useZoomContext();
 
@@ -128,6 +130,7 @@ function PanelSvg({
           k={transform.k}
           paletteColors={paletteColors}
           seriesByItemId={seriesByItemId}
+          reverseSeriesByItemId={reverseSeriesByItemId}
         />
       </g>
 
@@ -218,6 +221,7 @@ export function CanvasPanel(props: CanvasProps): ReactElement | null {
         seriesByQueryIndex={seriesByQueryIndex}
         paletteColors={paletteColors}
         seriesByItemId={generated?.seriesByItemId}
+        reverseSeriesByItemId={generated?.reverseSeriesByItemId}
       />
     </ZoomProvider>
   );

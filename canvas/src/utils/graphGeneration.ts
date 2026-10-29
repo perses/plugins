@@ -22,6 +22,11 @@ export interface GeneratedGraph {
   edges: EdgeSpec[];
   /** Series backing each generated node/edge id, used to resolve color/label/thickness at render time. */
   seriesByItemId: Map<string, TimeSeries>;
+  /**
+   * Series backing the reverse half of a reciprocal generated edge, keyed by edge id. Present only
+   * for edges where the query returned both A→B and B→A; the forward half uses `seriesByItemId`.
+   */
+  reverseSeriesByItemId: Map<string, TimeSeries>;
   /** Stable key describing the graph topology (node + edge ids), for memoizing layout. */
   topologyKey: string;
 }
@@ -45,6 +50,7 @@ export function buildGraphFromQueries(
   nodeDefaultSize?: number,
 ): GeneratedGraph {
   const seriesByItemId = new Map<string, TimeSeries>();
+  const reverseSeriesByItemId = new Map<string, TimeSeries>();
   const nodes: NodeSpec[] = [];
   const nodeIds = new Set<string>();
   const nodeSize = nodeDefaultSize && nodeDefaultSize > 0 ? nodeDefaultSize : DEFAULT_NODE_WIDTH;
@@ -79,13 +85,28 @@ export function buildGraphFromQueries(
   }
 
   const edges: EdgeSpec[] = [];
-  const edgeIds = new Set<string>();
   const canBuildEdges =
     config.edgeQueryIndex !== undefined && config.edgeSourceLabel !== undefined && config.edgeTargetLabel !== undefined;
 
   if (canBuildEdges) {
     const edgeResult = queryResults[config.edgeQueryIndex!];
     const edgeSeries = edgeResult?.data.series ?? [];
+
+    // Group directed series by their unordered node pair so reciprocal rows (A→B and B→A) become a
+    // single bidirectional edge. Each entry keeps the orientation of the first-seen series (its
+    // `source`/`target`) plus the series for each observed direction. Building edges once per pair
+    // avoids two generated edges overpainting the same path and overlapping their labels.
+    interface PairEntry {
+      source: string;
+      target: string;
+      sourceValue: string;
+      targetValue: string;
+      forward?: TimeSeries;
+      reverse?: TimeSeries;
+    }
+    const pairs = new Map<string, PairEntry>();
+    const pairOrder: string[] = [];
+
     for (const series of edgeSeries) {
       const sourceValue = series.labels?.[config.edgeSourceLabel!];
       const targetValue = series.labels?.[config.edgeTargetLabel!];
@@ -98,20 +119,43 @@ export function buildGraphFromQueries(
         // Drop edges whose endpoints were not produced by the node query.
         continue;
       }
-      // Encode the endpoint pair unambiguously: a plain `source->target` join collides across
-      // different pairs whose values contain the separator (e.g. (`a->b`, `c`) vs (`a`, `b->c`)).
-      // JSON.stringify of the tuple escapes the values so each distinct pair maps to a distinct id.
-      const id = `${EDGE_ID_PREFIX}${JSON.stringify([sourceValue, targetValue])}`;
-      if (edgeIds.has(id)) {
-        continue;
+      // Unordered pair key so A→B and B→A map to the same entry. JSON.stringify of the sorted tuple
+      // escapes the values so distinct pairs never collide (e.g. (`a->b`, `c`) vs (`a`, `b->c`)).
+      const pairKey = JSON.stringify([sourceValue, targetValue].toSorted());
+      let entry = pairs.get(pairKey);
+      if (!entry) {
+        entry = { source, target, sourceValue, targetValue };
+        pairs.set(pairKey, entry);
+        pairOrder.push(pairKey);
       }
-      edgeIds.add(id);
-      seriesByItemId.set(id, series);
+      // Record the series for this direction relative to the entry's orientation. A repeated series
+      // in the same direction keeps the first one for determinism.
+      if (source === entry.source && target === entry.target) {
+        entry.forward ??= series;
+      } else {
+        entry.reverse ??= series;
+      }
+    }
+
+    for (const pairKey of pairOrder) {
+      const entry = pairs.get(pairKey)!;
+      const isReciprocal = entry.forward !== undefined && entry.reverse !== undefined;
+      // Stable id from the entry's (first-seen) orientation.
+      const id = `${EDGE_ID_PREFIX}${JSON.stringify([entry.sourceValue, entry.targetValue])}`;
+      const forwardSeries = entry.forward ?? entry.reverse;
+      if (forwardSeries) {
+        seriesByItemId.set(id, forwardSeries);
+      }
+      if (isReciprocal) {
+        reverseSeriesByItemId.set(id, entry.reverse!);
+      }
       edges.push({
         id,
-        source,
-        target,
-        bidirectional: config.bidirectional ?? false,
+        source: entry.source,
+        target: entry.target,
+        // A reciprocal pair is always rendered bidirectionally so each direction shows on its own
+        // half; a single-direction edge honors the configured flag.
+        bidirectional: isReciprocal || (config.bidirectional ?? false),
         sourceLabelTemplate: config.edgeLabelTemplate,
         // Apply the single generation label template to both directions so a bidirectional edge
         // shows the same caption on its forward and reverse halves instead of the reverse half
@@ -132,5 +176,5 @@ export function buildGraphFromQueries(
     edges: edges.map((e) => e.id).toSorted(),
   });
 
-  return { nodes, edges, seriesByItemId, topologyKey };
+  return { nodes, edges, seriesByItemId, reverseSeriesByItemId, topologyKey };
 }
