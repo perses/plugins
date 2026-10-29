@@ -84,7 +84,27 @@ describe('buildGraphFromQueries', () => {
     ];
     const graph = buildGraphFromQueries(config, results);
     expect(graph.edges[0]?.sourceLabelTemplate).toBe('{{value}}');
+    // Both directional templates come from the single generation setting so a bidirectional edge
+    // shows the same caption on each half instead of the reverse defaulting to `{{value}}`.
+    expect(graph.edges[0]?.targetLabelTemplate).toBe('{{value}}');
     expect(graph.edges[0]?.bidirectional).toBe(true);
+  });
+
+  it('gives distinct ids to endpoint pairs that share a separator-joined form', () => {
+    // (`a->b`, `c`) and (`a`, `b->c`) both flatten to `a->b->c` under a naive join; distinct ids
+    // keep the second edge from being deduplicated away.
+    const results = [
+      result(
+        series({ instance: 'a->b' }, 1),
+        series({ instance: 'c' }, 2),
+        series({ instance: 'a' }, 3),
+        series({ instance: 'b->c' }, 4),
+      ),
+      result(series({ source: 'a->b', target: 'c' }, 5), series({ source: 'a', target: 'b->c' }, 6)),
+    ];
+    const graph = buildGraphFromQueries(baseConfig, results);
+    expect(graph.edges).toHaveLength(2);
+    expect(new Set(graph.edges.map((e) => e.id)).size).toBe(2);
   });
 
   it('drives generated edge thickness from the edge-thickness thresholds', () => {
@@ -117,5 +137,22 @@ describe('buildGraphFromQueries', () => {
     const graph = buildGraphFromQueries(config, results);
     expect(graph.nodes).toHaveLength(2);
     expect(graph.edges).toHaveLength(0);
+  });
+
+  it('builds a topology key that changes with topology but not with values', () => {
+    const r1 = [
+      result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)),
+      result(series({ source: 'a', target: 'b' }, 5)),
+    ];
+    const r2 = [
+      result(series({ instance: 'a' }, 100), series({ instance: 'b' }, 200)),
+      result(series({ source: 'a', target: 'b' }, 500)),
+    ];
+    const r3 = [result(series({ instance: 'a' }, 1)), result()];
+    const key1 = buildGraphFromQueries(baseConfig, r1).topologyKey;
+    const key2 = buildGraphFromQueries(baseConfig, r2).topologyKey;
+    const key3 = buildGraphFromQueries(baseConfig, r3).topologyKey;
+    expect(key1).toBe(key2); // only values changed
+    expect(key1).not.toBe(key3); // topology changed
   });
 });

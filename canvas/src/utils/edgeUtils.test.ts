@@ -159,6 +159,18 @@ describe('clipLineToNodes', () => {
     const line = { start: { x: 5, y: 5 }, end: { x: 5, y: 5 } };
     expect(clipLineToNodes(line, a, a)).toEqual(line);
   });
+
+  it('collapses to a point instead of reversing when nodes overlap', () => {
+    // Two 48px circular nodes 40px apart overlap: each radius (24) exceeds the remaining gap, so a
+    // naive clip would produce start.x=24, end.x=16 and point the edge backwards.
+    const a: NodeSpec = { id: 'a', position: { x: 0, y: 0 }, width: 48, height: 48, kind: 'icon' };
+    const b: NodeSpec = { id: 'b', position: { x: 40, y: 0 }, width: 48, height: 48, kind: 'icon' };
+    const clipped = clipLineToNodes({ start: { x: 0, y: 0 }, end: { x: 40, y: 0 } }, a, b);
+    expect(clipped.start).toEqual(clipped.end);
+    // The collapsed point sits forward of the source, never past the target center.
+    expect(clipped.start.x).toBeGreaterThanOrEqual(0);
+    expect(clipped.start.x).toBeLessThanOrEqual(40);
+  });
 });
 
 describe('strokeWidthFromThresholds', () => {

@@ -46,6 +46,8 @@ interface StylingSettingsProps {
   onFormatChange: (format: FormatOptions) => void;
   onThresholdsChange: (thresholds: ThresholdOptions | undefined) => void;
   onEdgeThresholdsChange: (thresholds: ThresholdOptions | undefined) => void;
+  /** Whether the data-driven ("From data") mode is active. */
+  isDataMode: boolean;
 }
 
 // The appearance controls shared by both the manual and data-driven tabs. Rendering the same block
@@ -57,6 +59,7 @@ function StylingSettings({
   onFormatChange,
   onThresholdsChange,
   onEdgeThresholdsChange,
+  isDataMode,
 }: StylingSettingsProps): ReactElement {
   return (
     <OptionsEditorGrid>
@@ -72,9 +75,14 @@ function StylingSettings({
         <OptionsEditorGroup title="Node color">
           <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
         </OptionsEditorGroup>
-        <OptionsEditorGroup title="Node size">
-          <NodeSizeSettings value={value} onChange={onChange} />
-        </OptionsEditorGroup>
+        {/* Node size scaling only applies to generated nodes (which opt into `sizeMode: 'threshold'`);
+            manually authored nodes have no size-mode control, so these inputs would have no effect in
+            Manual mode. Show them only in From data mode. */}
+        {isDataMode ? (
+          <OptionsEditorGroup title="Node size">
+            <NodeSizeSettings value={value} onChange={onChange} />
+          </OptionsEditorGroup>
+        ) : null}
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Edge color">
@@ -98,7 +106,16 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
 
   const onThresholdsChange = useCallback(
     (thresholds: ThresholdOptions | undefined): void => {
-      onChange({ ...value, thresholds });
+      // The per-threshold node-size multipliers are keyed by threshold value. When a color threshold
+      // is moved or removed, drop any multiplier whose value no longer matches a step so it cannot
+      // linger as an active-but-hidden scale in the panel while disappearing from the editor.
+      const stepValues = new Set(thresholds?.steps?.map((step) => step.value));
+      const nodeThresholdSizes = value.nodeThresholdSizes?.filter((size) => stepValues.has(size.value));
+      onChange({
+        ...value,
+        thresholds,
+        nodeThresholdSizes: nodeThresholdSizes?.length ? nodeThresholdSizes : undefined,
+      });
     },
     [value, onChange],
   );
@@ -143,6 +160,7 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
         onFormatChange={onFormatChange}
         onThresholdsChange={onThresholdsChange}
         onEdgeThresholdsChange={onEdgeThresholdsChange}
+        isDataMode={mode === 'auto'}
       />
 
       <OptionsEditorGroup title="Items">

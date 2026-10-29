@@ -57,15 +57,26 @@ function ThresholdScaleRow({ step, scale, format, onThresholdScaleChange }: Thre
     [step.value, onThresholdScaleChange],
   );
 
+  const thresholdLabel = formatValue(step.value, format);
+  // MUI forwards accessibility attributes to the underlying input via the `htmlInput` slot, not the
+  // top-level props, so the screen-reader name must be set there alongside the numeric constraints.
+  const scaleSlotProps = useMemo(
+    () => ({
+      ...SCALE_SLOT_PROPS,
+      htmlInput: { ...SCALE_SLOT_PROPS.htmlInput, 'aria-label': `Size multiplier for values ≥ ${thresholdLabel}` },
+    }),
+    [thresholdLabel],
+  );
+
   return (
     <Box sx={ROW_BOX_SX}>
       <Typography variant="caption" sx={ROW_CAPTION_SX}>
-        ≥ {formatValue(step.value, format)}
+        ≥ {thresholdLabel}
       </Typography>
       <TextField
         size="small"
         type="number"
-        slotProps={SCALE_SLOT_PROPS}
+        slotProps={scaleSlotProps}
         value={scale ?? ''}
         onChange={onScaleChange}
         sx={ROW_TEXT_WIDTH_SX}

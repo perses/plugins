@@ -15,11 +15,11 @@ import { useChartsTheme } from '@perses-dev/components';
 import type { ThresholdOptions } from '@perses-dev/components';
 import type { TimeSeries } from '@perses-dev/spec';
 import type { MouseEvent, ReactElement } from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useZoomContext, ZoomProvider } from '../../contexts/ZoomContext';
 import { useZoom } from '../../hooks/useZoom';
-import type { CanvasProps, CanvasSpec } from '../../model';
+import type { CanvasProps, CanvasSpec, NodeSpec } from '../../model';
 import { buildGraphFromQueries } from '../../utils/graphGeneration';
 import { layoutGraph } from '../../utils/graphLayout';
 import { scaleFromThresholds } from '../../utils/panelUtils';
@@ -167,22 +167,38 @@ export function CanvasPanel(props: CanvasProps): ReactElement | null {
     () => (generation?.enabled ? buildGraphFromQueries(generation, queryResults, spec.nodeDefaultSize) : undefined),
     [generation, queryResults, spec.nodeDefaultSize],
   );
+
+  // The force simulation is expensive (O(n²) per iteration) and must not rerun when only metric
+  // values change. Cache its origin-centered output keyed by the topology, using React's sanctioned
+  // "adjust state during render" pattern: a value-only refresh keeps the same topologyKey and reuses
+  // the cached layout, so the simulation reruns only when the set of nodes/edges actually changes.
+  const [layoutCache, setLayoutCache] = useState<{ key: string; nodes: NodeSpec[] } | undefined>(undefined);
+  let laidOutNodes = layoutCache?.nodes;
+  if (generated && layoutCache?.key !== generated.topologyKey) {
+    laidOutNodes = layoutGraph(generated.nodes, generated.edges);
+    setLayoutCache({ key: generated.topologyKey, nodes: laidOutNodes });
+  } else if (!generated && layoutCache) {
+    laidOutNodes = undefined;
+    setLayoutCache(undefined);
+  }
+
   const effectiveSpec: CanvasSpec = useMemo(() => {
-    if (!generated) {
+    if (!generated || !laidOutNodes) {
       return spec;
     }
     // layoutGraph centers the generated graph on the origin (0, 0). Under the identity zoom
     // transform the origin is the SVG's top-left corner, so the graph would render clipped into that
     // corner. Offset every node by the viewport center so the graph sits in the middle of the panel.
-    // layoutGraph returns freshly built node objects, so mutating position in place is safe here.
+    // Build fresh node objects here (never mutate the cached layout) so refreshes and resizes reuse
+    // the same origin-centered positions.
     const offsetX = (props.contentDimensions?.width ?? 600) / 2;
     const offsetY = (props.contentDimensions?.height ?? 400) / 2;
-    const nodes = layoutGraph(generated.nodes, generated.edges);
-    for (const node of nodes) {
-      node.position = { x: node.position.x + offsetX, y: node.position.y + offsetY };
-    }
+    const nodes = laidOutNodes.map((node) => ({
+      ...node,
+      position: { x: node.position.x + offsetX, y: node.position.y + offsetY },
+    }));
     return { ...spec, nodes, edges: generated.edges };
-  }, [spec, generated, props.contentDimensions?.width, props.contentDimensions?.height]);
+  }, [spec, generated, laidOutNodes, props.contentDimensions?.width, props.contentDimensions?.height]);
 
   const { svgRef, toCanvasPoint, transform, isPanning, fitView, resetPan } = useZoom({ interactionMode: 'view' });
 

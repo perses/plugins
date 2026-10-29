@@ -22,6 +22,8 @@ export interface GeneratedGraph {
   edges: EdgeSpec[];
   /** Series backing each generated node/edge id, used to resolve color/label/thickness at render time. */
   seriesByItemId: Map<string, TimeSeries>;
+  /** Stable key describing the graph topology (node + edge ids), for memoizing layout. */
+  topologyKey: string;
 }
 
 const NODE_ID_PREFIX = 'gen-node:';
@@ -96,7 +98,10 @@ export function buildGraphFromQueries(
         // Drop edges whose endpoints were not produced by the node query.
         continue;
       }
-      const id = `${EDGE_ID_PREFIX}${sourceValue}->${targetValue}`;
+      // Encode the endpoint pair unambiguously: a plain `source->target` join collides across
+      // different pairs whose values contain the separator (e.g. (`a->b`, `c`) vs (`a`, `b->c`)).
+      // JSON.stringify of the tuple escapes the values so each distinct pair maps to a distinct id.
+      const id = `${EDGE_ID_PREFIX}${JSON.stringify([sourceValue, targetValue])}`;
       if (edgeIds.has(id)) {
         continue;
       }
@@ -108,6 +113,10 @@ export function buildGraphFromQueries(
         target,
         bidirectional: config.bidirectional ?? false,
         sourceLabelTemplate: config.edgeLabelTemplate,
+        // Apply the single generation label template to both directions so a bidirectional edge
+        // shows the same caption on its forward and reverse halves instead of the reverse half
+        // falling back to the default `{{value}}`.
+        targetLabelTemplate: config.edgeLabelTemplate,
         // Drive thickness from the edge-thickness thresholds so generated edges vary in width with
         // their value; without this they would all fall back to the fixed default width.
         thicknessMode: 'threshold',
@@ -115,5 +124,7 @@ export function buildGraphFromQueries(
     }
   }
 
-  return { nodes, edges, seriesByItemId };
+  const topologyKey = [nodes.map((n) => n.id).join(','), edges.map((e) => e.id).join(',')].join('|');
+
+  return { nodes, edges, seriesByItemId, topologyKey };
 }

@@ -91,4 +91,20 @@ describe('layoutGraph', () => {
       expect(Number.isFinite(n.position.x)).toBe(true);
     }
   });
+
+  it('stays bounded on a high-degree hub-and-spoke graph', () => {
+    // A star topology clusters every spoke's repulsion onto the hub; without a bounded integration
+    // step the inverse-square forces compound into runaway coordinates (observed order 10^61).
+    const hub = node('hub');
+    const spokes = Array.from({ length: 128 }, (_, i) => node(`spoke-${i}`));
+    const edges = spokes.map((s, i) => edge(`e${i}`, 'hub', s.id));
+    const laid = layoutGraph([hub, ...spokes], edges);
+    // Every coordinate stays within a sane viewport-scale bound rather than diverging.
+    for (const n of laid) {
+      expect(Number.isFinite(n.position.x)).toBe(true);
+      expect(Number.isFinite(n.position.y)).toBe(true);
+      expect(Math.abs(n.position.x)).toBeLessThan(100_000);
+      expect(Math.abs(n.position.y)).toBeLessThan(100_000);
+    }
+  });
 });

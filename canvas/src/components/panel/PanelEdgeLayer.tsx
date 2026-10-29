@@ -91,6 +91,12 @@ export function PanelEdgeLayer({
         const clipTarget = edge.target && !edge.targetAnchor ? nodeById.get(edge.target) : undefined;
         const pts = clipLineToNodes(rawPts, clipSource, clipTarget);
 
+        // Overlapping nodes collapse the clipped segment to a point; skip it rather than draw a
+        // reversed arrow or a stray label at the overlap.
+        if (pts.start.x === pts.end.x && pts.start.y === pts.end.y) {
+          return null;
+        }
+
         const generatedSeries = seriesByItemId?.get(edge.id);
 
         function resolveSeries(queryIndex: number | undefined): TimeSeries | undefined {

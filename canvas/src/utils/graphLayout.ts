@@ -25,6 +25,8 @@ export interface LayoutOptions {
   centering?: number;
   /** Radius of the deterministic seed circle. */
   seedRadius?: number;
+  /** Maximum distance a node may move on the first iteration; decays linearly to zero. */
+  maxStep?: number;
 }
 
 const DEFAULTS: Required<LayoutOptions> = {
@@ -34,6 +36,7 @@ const DEFAULTS: Required<LayoutOptions> = {
   attraction: 0.02,
   centering: 0.01,
   seedRadius: 200,
+  maxStep: 100,
 };
 
 // Deterministic 32-bit string hash (FNV-1a) so a given node id always seeds to the same angle.
@@ -83,6 +86,11 @@ export function layoutGraph(nodes: NodeSpec[], edges: EdgeSpec[], options: Layou
   const disp: Point[] = pos.map(() => ({ x: 0, y: 0 }));
 
   for (let iter = 0; iter < opts.iterations; iter++) {
+    // Cooling schedule: the per-node step shrinks linearly to zero over the run. Capping the step
+    // keeps the simulation stable — without it the inverse-square repulsion between a hub's many
+    // tightly-seeded spokes produces enormous displacements that compound into runaway coordinates.
+    const maxStep = opts.maxStep * (1 - iter / opts.iterations);
+
     for (let i = 0; i < n; i++) {
       disp[i]!.x = 0;
       disp[i]!.y = 0;
@@ -125,10 +133,17 @@ export function layoutGraph(nodes: NodeSpec[], edges: EdgeSpec[], options: Layou
       disp[b]!.y -= fy;
     }
 
-    // Centering + integrate.
+    // Centering + integrate, clamping each node's movement to the current cooling step so the
+    // layout always stays bounded no matter how large the accumulated forces are.
     for (let i = 0; i < n; i++) {
       disp[i]!.x -= pos[i]!.x * opts.centering;
       disp[i]!.y -= pos[i]!.y * opts.centering;
+      const mag = Math.hypot(disp[i]!.x, disp[i]!.y);
+      if (mag > maxStep) {
+        const s = maxStep / mag;
+        disp[i]!.x *= s;
+        disp[i]!.y *= s;
+      }
       pos[i]!.x += disp[i]!.x;
       pos[i]!.y += disp[i]!.y;
     }

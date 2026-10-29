@@ -34,10 +34,11 @@ Configuration:
 Node colors come from the **Node color** thresholds configured for the panel, and **Node size**
 thresholds can scale a node's size by its value (relative to the configurable default node size).
 Edges use the **Edge color** thresholds when set and otherwise fall back to the node thresholds, so
-edges can carry their own color scheme independent of the nodes. Edge thickness uses the **Edge
-thickness** thresholds. Layout is deterministic: a given topology always settles to the same
-positions, so nodes stay put as their metric values change — they only move when nodes or edges are
-added or removed.
+edges can carry their own color scheme independent of the nodes. Edge thickness is set per
+breakpoint under **Edge thickness**, which shares the same thresholds as the edge color (the edge
+thresholds when set, otherwise the node thresholds). Layout is deterministic: a given topology
+always settles to the same positions, so nodes stay put as their metric values change — they only
+move when nodes or edges are added or removed.
 
 ### How to install
 

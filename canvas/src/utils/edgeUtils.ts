@@ -110,6 +110,11 @@ function perimeterDistance(node: NodeSpec, dx: number, dy: number): number {
  * Trims an edge's endpoints back to the perimeter of the nodes they connect, so the line and its
  * arrowhead touch the node boundary instead of overlapping into the node center. Endpoints that are
  * not a node center (explicit anchors or a free endpoint) are left untouched.
+ *
+ * When the nodes overlap so much that their combined perimeter distances consume the whole segment,
+ * trimming would push the endpoints past each other and reverse the line's direction. In that case
+ * the edge is collapsed to a zero-length segment at the trim point so it neither renders a reversed
+ * arrow nor points the wrong way; callers can treat a zero-length result as "nothing to draw".
  */
 export function clipLineToNodes(line: Line, source: NodeSpec | undefined, target: NodeSpec | undefined): Line {
   const dx = line.end.x - line.start.x;
@@ -120,16 +125,16 @@ export function clipLineToNodes(line: Line, source: NodeSpec | undefined, target
   }
   const ux = dx / len;
   const uy = dy / len;
-  let start = line.start;
-  let end = line.end;
-  if (source) {
-    const d = perimeterDistance(source, dx, dy);
-    start = { x: line.start.x + ux * d, y: line.start.y + uy * d };
+  const startTrim = source ? perimeterDistance(source, dx, dy) : 0;
+  const endTrim = target ? perimeterDistance(target, dx, dy) : 0;
+  if (startTrim + endTrim >= len) {
+    // The nodes overlap along this edge: the two perimeters meet or cross. Collapse the edge to a
+    // single point at the start-side trim so it does not reverse direction.
+    const point = { x: line.start.x + ux * startTrim, y: line.start.y + uy * startTrim };
+    return { start: point, end: point };
   }
-  if (target) {
-    const d = perimeterDistance(target, dx, dy);
-    end = { x: line.end.x - ux * d, y: line.end.y - uy * d };
-  }
+  const start = source ? { x: line.start.x + ux * startTrim, y: line.start.y + uy * startTrim } : line.start;
+  const end = target ? { x: line.end.x - ux * endTrim, y: line.end.y - uy * endTrim } : line.end;
   return { start, end };
 }
 
