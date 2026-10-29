@@ -189,21 +189,27 @@ describe('TimeSeriesChartBase performance', () => {
 });
 
 describe('TimeSeriesChartBase axis pointer', () => {
-  it('shows the cross axis pointer only while the chart is hovered', () => {
+  it('moves the cross line without updating chart options', () => {
     const chart = mockChart();
+    Object.assign(chart, {
+      containPixel: (): boolean => true,
+      convertToPixel: (_finder: unknown, value: number): number => (value === 0 ? 40 : 440),
+    });
     const { container } = render(chartElement({ axisPointer: { type: 'cross' } }));
     const wrapper = container.firstElementChild;
-    if (!(wrapper instanceof HTMLElement)) throw new Error('Chart wrapper is missing');
-    expect(chart.setOption.mock.calls.at(-1)?.[0].tooltip.axisPointer).toBeUndefined();
+    const canvas = document.createElement('canvas');
+    wrapper?.prepend(canvas);
+    const line = container.querySelector<HTMLElement>('[aria-hidden="true"]');
+    if (!(wrapper instanceof HTMLElement) || line === null) throw new Error('Chart elements are missing');
+    const setOptionCalls = chart.setOption.mock.calls.length;
 
     fireEvent.mouseEnter(wrapper);
-    expect(chart.setOption.mock.calls.at(-1)?.[0].tooltip.axisPointer).toEqual({
-      type: 'cross',
-      label: { show: false },
-    });
+    fireEvent.mouseMove(canvas, { clientX: 100, clientY: 120 });
+    expect(line.style.visibility).toBe('visible');
 
     fireEvent.mouseLeave(wrapper);
-    expect(chart.setOption.mock.calls.at(-1)?.[0].tooltip.axisPointer).toBeUndefined();
+    expect(line.style.visibility).toBe('hidden');
+    expect(chart.setOption).toHaveBeenCalledTimes(setOptionCalls);
   });
 });
 

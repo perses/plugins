@@ -166,7 +166,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const horizontalLineRef = useRef<HTMLDivElement>(null);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -344,8 +344,6 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     [data],
   );
 
-  const hoveredAxisPointerType = isHovered ? axisPointer?.type : undefined;
-
   const option: EChartsCoreOption = useMemo(() => {
     // The "chart" `noDataVariant` is only used when the `timeSeries` is an
     // empty array because a `null` value will throw an error.
@@ -363,7 +361,6 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
       showContent: isStackedBar,
       trigger: isStackedBar ? 'item' : 'axis',
       appendToBody: isStackedBar,
-      ...(hoveredAxisPointerType ? { axisPointer: { type: hoveredAxisPointerType, label: { show: false } } } : {}),
     };
 
     const option: EChartsCoreOption = {
@@ -429,8 +426,23 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     enablePinning,
     pinnedCrosshair,
     getTimezoneAwareAxisFormatter,
-    hoveredAxisPointerType,
   ]);
+
+  const updateHorizontalLine = (x: number, y: number): void => {
+    const line = horizontalLineRef.current;
+    const chart = chartRef.current;
+    if (line === null || chart === undefined) return;
+    if (!chart.containPixel('grid', [x, y])) {
+      line.style.visibility = 'hidden';
+      return;
+    }
+    const left = chart.convertToPixel({ xAxisIndex: 0 }, timeScale.startMs);
+    const right = chart.convertToPixel({ xAxisIndex: 0 }, timeScale.endMs);
+    line.style.left = `${left}px`;
+    line.style.width = `${right - left}px`;
+    line.style.transform = `translateY(${y}px)`;
+    line.style.visibility = 'visible';
+  };
 
   // Only changes from another chart (or new series) can clear the local pin.
   // A local click may update its coordinates without updating the shared pin.
@@ -463,7 +475,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   return (
     <Box
       ref={containerRef}
-      style={{ height }}
+      style={{ height, position: 'relative' }}
       // onContextMenu={(e) => {
       //   // TODO: confirm tooltip pinning works correctly on Windows, should e.preventDefault() be added here
       //   e.preventDefault(); // Prevent the default behaviour when right clicked
@@ -604,6 +616,9 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           return;
         }
         const { clientX } = e;
+        if (axisPointer?.type === 'cross') {
+          updateHorizontalLine(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+        }
         // ECharts does not reliably emit mouseout when the cursor moves off an exemplar marker
         // onto the plain plot area, which would keep the exemplar tooltip stuck on screen and
         // hide the regular TimeChartTooltip. Clear the hovered exemplar as soon as the cursor
@@ -637,7 +652,9 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         setShowTooltip(true);
       }}
       onMouseLeave={() => {
-        setIsHovered(false);
+        if (horizontalLineRef.current !== null) {
+          horizontalLineRef.current.style.visibility = 'hidden';
+        }
         if (tooltipPinnedCoords === null) {
           setShowTooltip(false);
         }
@@ -649,7 +666,6 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         }
       }}
       onMouseEnter={() => {
-        setIsHovered(true);
         setShowTooltip(true);
         if (chartRef.current !== undefined) {
           enableDataZoom(chartRef.current);
@@ -731,6 +747,20 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         _instance={chartRef}
         syncGroup={enableSyncGrouping ? syncGroup : undefined}
       />
+      {axisPointer?.type === 'cross' && (
+        <Box
+          ref={horizontalLineRef}
+          aria-hidden
+          sx={(theme) => ({
+            position: 'absolute',
+            top: 0,
+            height: 0,
+            borderTop: `1px dashed ${theme.palette.grey[500]}`,
+            pointerEvents: 'none',
+            visibility: 'hidden',
+          })}
+        />
+      )}
     </Box>
   );
 });
