@@ -232,11 +232,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
             Auto
           </Button>
         </ButtonGroup>
-        <Typography
-          id={exemplarsLabelID}
-          variant="body2"
-          color={exemplarsEnabledOnDatasource === false ? 'error' : 'textSecondary'}
-        >
+        <Typography id={exemplarsLabelID} variant="body2" color="textSecondary">
           Exemplars
           {exemplarsEnabledOnDatasource === false && ' (disabled on the datasource)'}
           {exemplarsEnabledOnDatasource === true && instant === true && ' (not available for instant queries)'}
