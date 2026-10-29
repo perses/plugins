@@ -16,6 +16,10 @@ import { MAX_SEARCH_SIZE } from '../../constants';
 import type { SearchBodyOptions } from './search';
 import { buildDefaultSort, buildTimeRangeFilter, DEFAULT_TIMESTAMP_FIELD, resolveSize } from './search';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 function parseBody(userJson: string): Record<string, unknown> {
   let parsed: unknown;
   try {
@@ -25,11 +29,11 @@ function parseBody(userJson: string): Record<string, unknown> {
     throw new Error(`Query DSL is not valid JSON: ${detail}`, { cause: e });
   }
 
-  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+  if (!isRecord(parsed)) {
     throw new Error('Query DSL must be a JSON object shaped like a _search request body, e.g. {"query": {...}}.');
   }
 
-  return parsed as Record<string, unknown>;
+  return parsed;
 }
 
 function resolveDslSize(userSize: unknown, limit?: number): unknown {
@@ -66,7 +70,7 @@ export function buildDslSearchBody(
   const userQuery = parsed.query;
   // A present but falsey or non-object `query` (false, null, "", 0, []) must not be read as
   // "no query" — that would silently widen the request to every document in the range.
-  if ('query' in parsed && (userQuery === null || typeof userQuery !== 'object' || Array.isArray(userQuery))) {
+  if ('query' in parsed && !isRecord(userQuery)) {
     throw new Error('Query DSL "query" must be a JSON object, e.g. {"query": {"match": {...}}}.');
   }
 

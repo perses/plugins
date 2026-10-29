@@ -79,11 +79,20 @@ Lucene and Query DSL results are sorted newest first on the timestamp field. A Q
 
 `$__from` and `$__to` are replaced with the start and end of the panel time range, in epoch milliseconds, in every query language and in `index`. Use them to bound a query yourself when `disableTimeFilter` is set, for example a SQL statement that automatic time filtering rejects:
 
-| Language | Example |
-| --- | --- |
-| SQL | ``WHERE `@timestamp` >= FROM_UNIXTIME($__from / 1000.0) AND `@timestamp` <= FROM_UNIXTIME($__to / 1000.0)`` |
-| Lucene | `@timestamp:[$__from TO $__to]` |
-| Query DSL | `{"range": {"@timestamp": {"gte": $__from, "lte": $__to, "format": "epoch_millis"}}}` |
+```sql
+-- SQL
+SELECT * FROM `logs-*`
+WHERE `@timestamp` >= FROM_UNIXTIME($__from / 1000.0) AND `@timestamp` <= FROM_UNIXTIME($__to / 1000.0)
+```
+
+```text
+# Lucene
+@timestamp:[$__from TO $__to]
+```
+
+```json
+{ "query": { "range": { "@timestamp": { "gte": $__from, "lte": $__to, "format": "epoch_millis" } } } }
+```
 
 In SQL, divide by `1000.0` rather than `1000`: integer division drops the milliseconds. A dashboard variable with the same name takes precedence.
 
@@ -95,10 +104,9 @@ A variable with several values selected, referenced without a format, is written
 | --- | --- | --- |
 | SQL | `'error','warn'` | `WHERE level IN ($level)` |
 | Lucene | `("error" OR "warn")` | `level:$level` |
-| PPL | `(error\|warn)` | Perses' default; give a format such as `${level:singlequote}` |
 | `index` | `logs-a,logs-b` | OpenSearch's multi-index syntax |
 
-An explicit format, such as `${level:csv}`, always takes precedence.
+PPL keeps Perses' default format, which `in (...)` does not accept, so give PPL a format such as `${level:singlequote}`. An explicit format, such as `${level:csv}`, always takes precedence.
 
 ### Variables in Query DSL
 
