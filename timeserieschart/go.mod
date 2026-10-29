@@ -2,7 +2,7 @@ module github.com/perses/plugins/timeserieschart
 
 go 1.27.2
 
-require github.com/perses/perses v0.55.0-rc.1
+require github.com/perses/perses v0.55.0
 
 require (
 	github.com/kr/pretty v0.3.1 // indirect
