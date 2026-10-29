@@ -29,11 +29,14 @@ export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeri
     datasource: undefined,
   }),
   dependsOn: (spec) => {
-    // Variables can be used in the query and/or in the legend format string
+    // Variables can be used in the query, the legend format string, the Min Step and the datasource
     const queryVariables = parseVariables(spec.query);
     const legendVariables = parseVariables(spec.seriesNameFormat || '');
+    const minStepVariables = parseVariables(spec.minStep || '');
     const datasourceVariable = isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource ?? '') : [];
-    const allVariables = [...new Set([...queryVariables, ...legendVariables, ...datasourceVariable])];
+    const allVariables = [
+      ...new Set([...queryVariables, ...legendVariables, ...minStepVariables, ...datasourceVariable]),
+    ];
     return {
       variables: allVariables,
     };

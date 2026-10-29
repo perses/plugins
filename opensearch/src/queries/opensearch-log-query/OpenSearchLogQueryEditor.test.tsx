@@ -13,6 +13,7 @@
 
 import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import type { Mock } from 'vitest';
 
 import { QUERY_LANGUAGES } from '../constants';
@@ -22,7 +23,7 @@ import { OpenSearchLogQueryEditor, parseLimitInput } from './OpenSearchLogQueryE
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
   ...(await importOriginal<typeof PluginSystemModule>()),
   // Like the real component, the mock names its input only through `label`.
-  DatasourceSelect: ({ label }: { label?: string }): JSX.Element => (
+  DatasourceSelect: ({ label }: { label?: string }): ReactElement => (
     <select data-testid="datasource-select" aria-label={label} />
   ),
   useDatasourceSelectValueToSelector: (): undefined => undefined,

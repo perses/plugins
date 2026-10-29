@@ -14,17 +14,38 @@
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { HistogramChartOptions } from '../histogram-chart-model';
 import { HistogramChartOptionsEditorSettings } from './HistogramChartOptionsEditorSettings';
 
+// Keeps the options in state, like a real parent of this controlled editor
+function StatefulHistogramChartOptionsEditorSettings({
+  initialValue,
+  onChange,
+}: {
+  initialValue: HistogramChartOptions;
+  onChange: (value: HistogramChartOptions) => void;
+}): ReactElement {
+  const [value, setValue] = useState(initialValue);
+  const handleChange = useCallback(
+    (next: HistogramChartOptions): void => {
+      setValue(next);
+      onChange(next);
+    },
+    [onChange],
+  );
+  return (
+    <ChartsProvider chartsTheme={testChartsTheme}>
+      <HistogramChartOptionsEditorSettings value={value} onChange={handleChange} />
+    </ChartsProvider>
+  );
+}
+
 describe('HistogramChartOptionsEditorSettings', () => {
   const renderHistogramChartOptionsEditorSettings = (value: HistogramChartOptions, onChange = vi.fn()): void => {
-    render(
-      <ChartsProvider chartsTheme={testChartsTheme}>
-        <HistogramChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsProvider>,
-    );
+    render(<StatefulHistogramChartOptionsEditorSettings initialValue={value} onChange={onChange} />);
   };
 
   it('can modify unit', () => {
