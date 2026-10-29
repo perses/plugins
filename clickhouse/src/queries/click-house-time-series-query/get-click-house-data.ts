@@ -23,31 +23,28 @@ import type { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './c
 
 const DEFAULT_STEP_MS = 30 * 1000;
 
-function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
-  const data = response?.data as TimeSeriesEntry[];
-  if (!response || !data || data.length === 0) {
-    return [];
-  }
+/**
+ * A result is read as a time range only when it has a column called `time`, the same alias the Grafana
+ * ClickHouse datasource requires to recognise a time series. Without one, the result is read as a set
+ * of records and each row becomes its own series (see #841).
+ */
+const TIME_COLUMN_NAME = 'time';
 
-  const metricNames = Object.keys(data[0] ?? {}).filter((key) => key !== 'time');
+/**
+ * Label key carrying the value column when a single result holds several of them, so consumers that
+ * read rows rather than series (the Table panel) can still tell the measurements apart.
+ */
+const VALUE_COLUMN_LABEL = 'metric';
 
-  return metricNames
-    .map((metricName) => {
-      const values: Array<[number, number | null]> = data.map((row: TimeSeriesEntry) => {
-        const timestamp = new Date(row.time).getTime();
-        const value = toTimeSeriesValue(row[metricName]);
-        return [timestamp, value];
-      });
+type Row = Record<string, unknown>;
 
-      return {
-        name: metricName,
-        values,
-      };
-    })
-    .filter((series) => series.values.some(([, value]) => value !== null));
+interface RowShape {
+  timeColumn?: string;
+  valueColumns: string[];
+  labelColumns: string[];
 }
 
-function toTimeSeriesValue(value: number | string | null | undefined): number | null {
+function toTimeSeriesValue(value: unknown): number | null {
   if (value === null || value === undefined || value === '') {
     return null;
   }
@@ -56,14 +53,179 @@ function toTimeSeriesValue(value: number | string | null | undefined): number | 
   return Number.isFinite(numericValue) ? numericValue : null;
 }
 
+function isNumericCell(value: unknown): boolean {
+  if (value === null || value === undefined || value === '') {
+    return true;
+  }
+  return Number.isFinite(Number(value));
+}
+
+function isTimestampCell(value: unknown): boolean {
+  if (value === null || value === undefined || value === '') {
+    return false;
+  }
+  if (typeof value === 'number') {
+    return Number.isFinite(value);
+  }
+  if (typeof value !== 'string') {
+    return false;
+  }
+  // Numeric strings are values, not timestamps: `new Date('41')` happily resolves to the year 41.
+  if (Number.isFinite(Number(value))) {
+    return false;
+  }
+  return Number.isFinite(Date.parse(value));
+}
+
+function listColumns(rows: Row[]): string[] {
+  const columns: string[] = [];
+  const seen = new Set<string>();
+  for (const row of rows) {
+    for (const column of Object.keys(row)) {
+      if (!seen.has(column)) {
+        seen.add(column);
+        columns.push(column);
+      }
+    }
+  }
+  return columns;
+}
+
+function findTimeColumn(rows: Row[], columns: string[]): string | undefined {
+  const candidate = columns.find((column) => column.toLowerCase() === TIME_COLUMN_NAME);
+  if (candidate === undefined) {
+    return undefined;
+  }
+  return rows.some((row) => isTimestampCell(row[candidate])) ? candidate : undefined;
+}
+
+/**
+ * Splits the columns of a result into the timestamp, the columns holding measurements and the columns
+ * holding dimensions. A column is a dimension as soon as a single one of its values is not a number,
+ * which is what keeps series such as `machine`, `repository` or `namespace` from being dropped.
+ */
+function classifyColumns(rows: Row[]): RowShape {
+  const columns = listColumns(rows);
+  const timeColumn = findTimeColumn(rows, columns);
+  const valueColumns: string[] = [];
+  const labelColumns: string[] = [];
+
+  for (const column of columns) {
+    if (column === timeColumn) {
+      continue;
+    }
+    if (rows.every((row) => isNumericCell(row[column]))) {
+      valueColumns.push(column);
+    } else {
+      labelColumns.push(column);
+    }
+  }
+
+  return { timeColumn, valueColumns, labelColumns };
+}
+
+function buildLabels(row: Row, labelColumns: string[]): Record<string, string> {
+  const labels: Record<string, string> = {};
+  for (const column of labelColumns) {
+    const value = row[column];
+    labels[column] = value === null || value === undefined ? '' : String(value);
+  }
+  return labels;
+}
+
+function buildSeriesName(labels: Record<string, string>, valueColumn: string, includeValueColumn: boolean): string {
+  const entries = Object.entries(labels);
+  if (entries.length === 0) {
+    return valueColumn;
+  }
+
+  const base = entries.map(([key, value]) => `${key}=${value}`).join(',');
+  return includeValueColumn ? `${base} ${valueColumn}` : base;
+}
+
+function toTimestampMs(row: Row, timeColumn: string | undefined, fallbackTimestampMs: number, index: number): number {
+  if (timeColumn === undefined) {
+    return fallbackTimestampMs + index;
+  }
+  return new Date(row[timeColumn] as string | number).getTime();
+}
+
+/**
+ * Pivots a ClickHouse result into Perses time series.
+ *
+ * Rows are grouped by their dimension columns and every measurement column becomes its own series, so
+ * `SELECT time, machine, count() FROM ... GROUP BY time, machine` yields one series per machine instead
+ * of a single series with duplicated timestamps.
+ *
+ * Results without a timestamp are treated as records: each row becomes a series carrying the row's
+ * dimensions as labels, which is the shape the Table panel consumes.
+ */
+function buildTimeSeries(rows: Row[], fallbackTimestampMs: number): TimeSeries[] {
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const { timeColumn, valueColumns, labelColumns } = classifyColumns(rows);
+  if (valueColumns.length === 0) {
+    return [];
+  }
+
+  const groups = new Map<string, Array<{ row: Row; index: number }>>();
+  rows.forEach((row, index) => {
+    const labels = buildLabels(row, labelColumns);
+    const key = labelColumns.map((column) => labels[column]).join('\u0000');
+    const group = groups.get(key);
+    if (group) {
+      group.push({ row, index });
+    } else {
+      groups.set(key, [{ row, index }]);
+    }
+  });
+
+  const includeValueColumn = valueColumns.length > 1;
+  const series: TimeSeries[] = [];
+
+  for (const entries of groups.values()) {
+    const identity = buildLabels(entries[0]!.row, labelColumns);
+
+    for (const valueColumn of valueColumns) {
+      const labels: Record<string, string> = { ...identity };
+      if (includeValueColumn && !Object.hasOwn(labels, VALUE_COLUMN_LABEL)) {
+        labels[VALUE_COLUMN_LABEL] = valueColumn;
+      }
+
+      const values: Array<[number, number | null]> = [];
+      for (const { row, index } of entries) {
+        const timestamp = toTimestampMs(row, timeColumn, fallbackTimestampMs, index);
+        if (!Number.isFinite(timestamp)) {
+          continue;
+        }
+        values.push([timestamp, toTimeSeriesValue(row[valueColumn])]);
+      }
+
+      if (!values.some(([, value]) => value !== null)) {
+        continue;
+      }
+
+      series.push({
+        name: buildSeriesName(identity, valueColumn, includeValueColumn),
+        ...(Object.keys(labels).length > 0 ? { labels } : {}),
+        values,
+      });
+    }
+  }
+
+  return series;
+}
+
 function inferStepMs(response?: DatasourceQueryResponse): number {
-  const data = response?.data as TimeSeriesEntry[];
-  if (!response || !data || data.length < 2) {
+  const data = response?.data;
+  if (!Array.isArray(data) || data.length < 2) {
     return DEFAULT_STEP_MS;
   }
 
   const timestamps = data
-    .map((row: TimeSeriesEntry) => new Date(row.time).getTime())
+    .map((row: TimeSeriesEntry) => (row.time === undefined ? Number.NaN : new Date(row.time).getTime()))
     .filter(Number.isFinite)
     .toSorted((a, b) => a - b);
 
@@ -100,6 +262,11 @@ function inferStepMs(response?: DatasourceQueryResponse): number {
   return inferredStep ?? DEFAULT_STEP_MS;
 }
 
+function normalizeRows(response?: DatasourceQueryResponse): Row[] {
+  const data = response?.data;
+  return Array.isArray(data) ? (data as Row[]) : [];
+}
+
 export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
   context,
@@ -126,7 +293,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQueryS
   });
 
   return {
-    series: buildTimeSeries(response),
+    series: buildTimeSeries(normalizeRows(response), end.getTime()),
     timeRange: { start, end },
     stepMs: inferStepMs(response),
     metadata: {
