@@ -13,6 +13,7 @@
 
 import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import type { Mock } from 'vitest';
 
 import { PPL_DOCS_URL } from '../constants';
@@ -21,7 +22,7 @@ import { OpenSearchLogQueryEditor } from './OpenSearchLogQueryEditor';
 
 vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
   ...(await importOriginal<typeof PluginSystemModule>()),
-  DatasourceSelect: (): JSX.Element => <div data-testid="datasource-select" />,
+  DatasourceSelect: (): ReactElement => <div data-testid="datasource-select" />,
   useDatasourceSelectValueToSelector: (): undefined => undefined,
   isVariableDatasource: (): boolean => false,
 }));

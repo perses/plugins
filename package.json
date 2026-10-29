@@ -64,17 +64,17 @@
     "e2e"
   ],
   "peerDependencies": {
-    "@types/react-dom": "^18.3.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "@types/react-dom": "^18.3.0 || ^19.0.0",
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0"
   },
   "devDependencies": {
     "@module-federation/rsbuild-plugin": "^2.9.1",
-    "@perses-dev/client": "^0.55.0",
-    "@perses-dev/components": "^0.55.0",
-    "@perses-dev/dashboards": "^0.55.0",
-    "@perses-dev/explore": "^0.55.0",
-    "@perses-dev/plugin-system": "^0.55.0",
+    "@perses-dev/client": "^0.56.0-beta.0",
+    "@perses-dev/components": "^0.56.0-beta.0",
+    "@perses-dev/dashboards": "^0.56.0-beta.0",
+    "@perses-dev/explore": "^0.56.0-beta.0",
+    "@perses-dev/plugin-system": "^0.56.0-beta.0",
     "@perses-dev/spec": "^0.3.0",
     "@rsbuild/core": "^2.2.13",
     "@rsbuild/plugin-react": "^2.1.1",
@@ -103,6 +103,7 @@
     "ts-node": "^10.9.2",
     "turbo": "^2.6.1",
     "typescript": "^7.0.2",
+    "use-resize-observer": "^10.0.0",
     "vitest": "^4.1.11",
     "zod": "^4.5.4"
   },

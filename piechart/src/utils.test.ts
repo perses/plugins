@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { LegendItem, TableFeatures } from '@perses-dev/components';
 import type { CellContext, ColumnDefTemplate } from '@tanstack/react-table';
 
 import type { PieChartData } from './PieChartBase';
@@ -147,13 +148,12 @@ describe('PieChartTableLegendMapper', () => {
       const columns = mapper.mapToLegendColumns(selectedValues as Array<'relative' | 'abs'>, formatOptions);
       expect(columns).toEqual(expectedColumns.map((v) => expect.objectContaining(v)));
       expect(selectedValues.length).toEqual(columns.length);
-      const cellFormatter: ColumnDefTemplate<CellContext<number, number>> = columns[0]?.cell as ColumnDefTemplate<
-        CellContext<number, number>
-      >;
+      type LegendCellContext = CellContext<TableFeatures, LegendItem, number>;
+      const cellFormatter = columns[0]?.cell as ColumnDefTemplate<LegendCellContext>;
       if (typeof cellFormatter === 'function') {
         const formattedValue = cellFormatter({
           getValue: () => cellValue,
-        } as CellContext<number, number>);
+        } as LegendCellContext);
         expect(formattedValue).toEqual(expectedDisplayValue);
       } else {
         throw new Error('Cell formatter is not defined');

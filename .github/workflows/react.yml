@@ -45,3 +45,21 @@ jobs:
           enable_npm: true
       - run: npm ci
       - run: npm run type-check
+
+  # Plugins are developed against React 18 (the minimum supported version); also validate them against React 19.
+  react-19:
+    name: 'type-check & test (React 19)'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - uses: perses/github-actions@v0.13.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+      - run: npm ci
+      - run: npm install --no-save react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19
+      # Fail fast if peer resolution silently kept React 18.
+      - run: node -e "const v=require('react/package.json').version; if(!v.startsWith('19.')) { console.error('Expected React 19, got', v); process.exit(1) }"
+      - run: npm run type-check
+      - run: npm run test
