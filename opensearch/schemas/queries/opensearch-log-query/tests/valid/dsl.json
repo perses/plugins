@@ -1,0 +1,4 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": { "queryLanguage": "dsl", "query": "{\"query\":{\"match\":{\"level\":\"error\"}}}", "index": "logs-*" }
+}

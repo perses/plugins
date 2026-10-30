@@ -16,8 +16,9 @@ import type { Mock } from 'vitest';
 
 import { OpenSearchDatasource } from '../../datasources/opensearch-datasource';
 import type { OpenSearchDatasourceSpec } from '../../datasources/opensearch-datasource/opensearch-datasource-types';
-import type { OpenSearchPPLResponse } from '../../model/opensearch-client-types';
-import { buildBoundedPPL, convertPPLToLogs, parseTimestamp } from './get-opensearch-log-data';
+import type { OpenSearchDatarowsResponse } from '../../model/opensearch-client-types';
+import { buildBoundedPPL } from './build/ppl';
+import { convertDatarowsToLogs, parseTimestamp } from './convert';
 import { OpenSearchLogQuery } from './OpenSearchLogQuery';
 
 const datasource: OpenSearchDatasourceSpec = {
@@ -27,7 +28,7 @@ const datasource: OpenSearchDatasourceSpec = {
 const stubClient = OpenSearchDatasource.createClient(datasource, {});
 
 stubClient.ppl = vi.fn(async () => {
-  const response: OpenSearchPPLResponse = {
+  const response: OpenSearchDatarowsResponse = {
     schema: [
       { name: '@timestamp', type: 'timestamp' },
       { name: 'message', type: 'text' },
@@ -42,6 +43,23 @@ stubClient.ppl = vi.fn(async () => {
   };
   return response;
 });
+
+stubClient.sql = vi.fn(async () => ({
+  schema: [
+    { name: '@timestamp', type: 'timestamp' },
+    { name: 'message', type: 'text' },
+  ],
+  datarows: [['2025-01-01T00:00:00.000Z', 'from sql']],
+}));
+
+stubClient.search = vi.fn(async () => ({
+  hits: {
+    total: { value: 1, relation: 'eq' as const },
+    hits: [
+      { _index: 'logs-2025', _id: 'h1', _source: { '@timestamp': '2025-01-01T00:00:00.000Z', message: 'from search' } },
+    ],
+  },
+}));
 
 const getDatasourceClient: Mock = vi.fn(() => stubClient);
 
@@ -68,10 +86,12 @@ function createStubContext(): LogQueryContext {
 describe('OpenSearchLogQuery', () => {
   afterEach(() => {
     (stubClient.ppl as Mock).mockClear();
+    (stubClient.sql as Mock).mockClear();
+    (stubClient.search as Mock).mockClear();
   });
 
-  it('creates initial options with empty query', () => {
-    expect(OpenSearchLogQuery.createInitialOptions()).toEqual({ query: '' });
+  it('creates initial options with an empty PPL query', () => {
+    expect(OpenSearchLogQuery.createInitialOptions()).toEqual({ query: '', queryLanguage: 'ppl' });
   });
 
   it('resolves variable dependencies from query and index', () => {
@@ -347,9 +367,30 @@ describe('parseTimestamp', () => {
   });
 });
 
-describe('convertPPLToLogs', () => {
+describe('convertDatarowsToLogs', () => {
+  it('flattens object columns into dotted labels instead of "[object Object]"', () => {
+    const logs = convertDatarowsToLogs({
+      schema: [
+        { name: '@timestamp', type: 'timestamp' },
+        { name: 'body', type: 'text' },
+        { name: 'service', type: 'object' },
+        { name: 'tags', type: 'array' },
+      ],
+      datarows: [['2025-01-01T00:00:00.000Z', 'hello', { name: 'api', ns: { env: 'prod' } }, ['a', 'b']]],
+    });
+    expect(logs.entries[0]?.labels).toEqual({ 'service.name': 'api', 'service.ns.env': 'prod', tags: '["a","b"]' });
+  });
+
+  it('serializes an object message column as JSON', () => {
+    const logs = convertDatarowsToLogs({
+      schema: [{ name: 'message', type: 'object' }],
+      datarows: [[{ text: 'hi' }]],
+    });
+    expect(logs.entries[0]?.line).toBe('{"text":"hi"}');
+  });
+
   it('maps @timestamp and message fields and collects remaining fields as labels', () => {
-    const logs = convertPPLToLogs({
+    const logs = convertDatarowsToLogs({
       schema: [
         { name: '@timestamp', type: 'timestamp' },
         { name: 'message', type: 'text' },
@@ -363,7 +404,7 @@ describe('convertPPLToLogs', () => {
   });
 
   it('parses numeric epoch-millis timestamps into seconds', () => {
-    const logs = convertPPLToLogs({
+    const logs = convertDatarowsToLogs({
       schema: [
         { name: '@timestamp', type: 'long' },
         { name: 'message', type: 'text' },
@@ -374,7 +415,7 @@ describe('convertPPLToLogs', () => {
   });
 
   it('falls back to a JSON dump of the row when no message field is present', () => {
-    const logs = convertPPLToLogs({
+    const logs = convertDatarowsToLogs({
       schema: [
         { name: '@timestamp', type: 'timestamp' },
         { name: 'event', type: 'text' },
@@ -385,12 +426,12 @@ describe('convertPPLToLogs', () => {
   });
 
   it('handles empty datarows', () => {
-    const logs = convertPPLToLogs({ schema: [], datarows: [] });
+    const logs = convertDatarowsToLogs({ schema: [], datarows: [] });
     expect(logs).toEqual({ entries: [], totalCount: 0 });
   });
 
   it('honors explicit timestampField and messageField overrides', () => {
-    const logs = convertPPLToLogs(
+    const logs = convertDatarowsToLogs(
       {
         schema: [
           { name: 'time', type: 'timestamp' },
@@ -407,7 +448,7 @@ describe('convertPPLToLogs', () => {
   });
 
   it('falls back to defaults when the override field is not in the schema', () => {
-    const logs = convertPPLToLogs(
+    const logs = convertDatarowsToLogs(
       {
         schema: [
           { name: '@timestamp', type: 'timestamp' },
@@ -421,7 +462,7 @@ describe('convertPPLToLogs', () => {
   });
 
   it('puts trace_id columns into labels for trace pivot', () => {
-    const logs = convertPPLToLogs({
+    const logs = convertDatarowsToLogs({
       schema: [
         { name: '@timestamp', type: 'timestamp' },
         { name: 'message', type: 'text' },
@@ -430,5 +471,182 @@ describe('convertPPLToLogs', () => {
       datarows: [['2025-01-01T00:00:00.000Z', 'hello', 'abc123']],
     });
     expect(logs.entries[0]?.labels.traceId).toBe('abc123');
+  });
+});
+
+describe('getLogData language dispatch', () => {
+  const context = createStubContext();
+
+  afterEach(() => {
+    (stubClient.ppl as Mock).mockClear();
+    (stubClient.sql as Mock).mockClear();
+    (stubClient.search as Mock).mockClear();
+  });
+
+  it('defaults to PPL when queryLanguage is absent (backward compatibility)', async () => {
+    await OpenSearchLogQuery.getLogData({ query: 'source=logs-*' }, context);
+    expect(stubClient.ppl).toHaveBeenCalledTimes(1);
+    expect(stubClient.sql).not.toHaveBeenCalled();
+    expect(stubClient.search).not.toHaveBeenCalled();
+  });
+
+  it('routes queryLanguage: sql to client.sql with the time range in its WHERE clause', async () => {
+    const result = await OpenSearchLogQuery.getLogData({ query: 'SELECT * FROM logs', queryLanguage: 'sql' }, context);
+    expect(stubClient.ppl).not.toHaveBeenCalled();
+    const [params] = (stubClient.sql as Mock).mock.calls[0]!;
+    expect(params).toEqual({
+      query:
+        "SELECT * FROM logs WHERE (`@timestamp` >= '2025-01-01T00:00:00.000Z' AND `@timestamp` <= '2025-01-01T01:00:00.000Z')",
+    });
+    expect(result.logs.entries[0]?.line).toBe('from sql');
+  });
+
+  it('routes queryLanguage: lucene to client.search with the resolved index', async () => {
+    const result = await OpenSearchLogQuery.getLogData(
+      { query: 'level:error', queryLanguage: 'lucene', index: 'logs-*' },
+      context,
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.index).toBe('logs-*');
+    expect(params.body.query.bool.filter).toHaveLength(2);
+    expect(result.logs.entries[0]?.line).toBe('from search');
+    expect(result.logs.entries[0]?.labels._index).toBe('logs-2025');
+  });
+
+  it('routes queryLanguage: dsl to client.search', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"match":{"level":"error"}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      context,
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.query.bool.must).toEqual([{ match: { level: 'error' } }]);
+  });
+
+  it('passes limit through as the search size', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: 'level:error', queryLanguage: 'lucene', index: 'logs-*', limit: 42 },
+      context,
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.size).toBe(42);
+  });
+
+  it('resolves variables in a DSL body', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"term":{"traceId":"$traceId"}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      {
+        ...context,
+        variableState: {
+          traceId: { value: 'abc123', loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.query.bool.must).toEqual([{ term: { traceId: 'abc123' } }]);
+  });
+
+  it('escapes variable values so they stay inside a DSL JSON string', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"term":{"path":"$path"}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      {
+        ...context,
+        variableState: {
+          path: { value: 'C:\\temp\\logs "x"', loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.query.bool.must).toEqual([{ term: { path: 'C:\\temp\\logs "x"' } }]);
+  });
+
+  it('does not let a DSL variable value add keys to the request body', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"term":{"level":"$level"}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      {
+        ...context,
+        variableState: {
+          level: { value: 'x"}},"size":10000,"q":{"a":"y', loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.size).toBe(500);
+    expect(params.body.query.bool.must).toEqual([{ term: { level: 'x"}},"size":10000,"q":{"a":"y' } }]);
+  });
+
+  it('leaves a DSL variable with the json format as the JSON it emits', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '{"query":{"terms":{"level":${levels:json}}}}', queryLanguage: 'dsl', index: 'logs-*' },
+      {
+        ...context,
+        variableState: {
+          levels: { value: ['error', 'warn'], loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.body.query.bool.must).toEqual([{ terms: { level: ['error', 'warn'] } }]);
+  });
+
+  it('joins a multi-value index variable with commas', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: 'level:error', queryLanguage: 'lucene', index: '$index' },
+      {
+        ...context,
+        variableState: {
+          index: { value: ['logs-a', 'logs-b'], loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(params.index).toBe('logs-a,logs-b');
+  });
+
+  it('resolves the builtin $__from / $__to to the time range in epoch milliseconds', async () => {
+    await OpenSearchLogQuery.getLogData(
+      {
+        query:
+          'SELECT * FROM logs WHERE `@timestamp` >= FROM_UNIXTIME($__from / 1000.0) AND `@timestamp` <= FROM_UNIXTIME(${__to} / 1000.0)',
+        queryLanguage: 'sql',
+        disableTimeFilter: true,
+      },
+      context,
+    );
+    const [params] = (stubClient.sql as Mock).mock.calls[0]!;
+    expect(params.query).toBe(
+      'SELECT * FROM logs WHERE `@timestamp` >= FROM_UNIXTIME(1735689600000 / 1000.0) AND `@timestamp` <= FROM_UNIXTIME(1735693200000 / 1000.0)',
+    );
+  });
+
+  it('lets a user-defined variable named __from win over the builtin', async () => {
+    await OpenSearchLogQuery.getLogData(
+      { query: '@timestamp:[$__from TO *]', queryLanguage: 'lucene', index: 'logs-*', disableTimeFilter: true },
+      {
+        ...context,
+        variableState: {
+          __from: { value: 'now-1d', loading: false },
+        } as unknown as LogQueryContext['variableState'],
+      },
+    );
+    const [params] = (stubClient.search as Mock).mock.calls[0]!;
+    expect(JSON.stringify(params.body.query)).toContain('@timestamp:[now-1d TO *]');
+  });
+
+  it.each(['lucene', 'dsl'] as const)('rejects %s without an index', async (queryLanguage) => {
+    await expect(OpenSearchLogQuery.getLogData({ query: 'level:error', queryLanguage }, context)).rejects.toThrow(
+      /index is required/i,
+    );
+    expect(stubClient.search).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { query: 'source=logs-*', queryLanguage: 'ppl' as const },
+    { query: 'SELECT * FROM logs', queryLanguage: 'sql' as const },
+    { query: 'level:error', queryLanguage: 'lucene' as const, index: 'logs-*' },
+    { query: '{"query":{"match_all":{}}}', queryLanguage: 'dsl' as const, index: 'logs-*' },
+  ])('records the executed request in metadata for $queryLanguage', async (spec) => {
+    const result = await OpenSearchLogQuery.getLogData(spec, context);
+    expect(typeof result.metadata?.executedQueryString).toBe('string');
+    expect(result.metadata?.executedQueryString.length).toBeGreaterThan(0);
   });
 });

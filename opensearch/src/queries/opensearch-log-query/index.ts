@@ -15,3 +15,5 @@ export * from './get-opensearch-log-data';
 export * from './OpenSearchLogQuery';
 export * from './OpenSearchLogQueryEditor';
 export * from './opensearch-log-query-types';
+export * from './build';
+export * from './convert';

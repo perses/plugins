@@ -1,0 +1,4 @@
+{
+  "kind": "OpenSearchLogQuery",
+  "spec": { "query": "source=logs-* | head 10" }
+}
