@@ -16,7 +16,7 @@ import { useChartsTheme } from '@perses-dev/components';
 import { useEvent } from '@perses-dev/plugin-system';
 import type { MouseEvent as ReactMouseEvent, ReactElement } from 'react';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import type { TracingGanttChartOptions } from '../../gantt-chart-model';
 import { Ticks } from '../Ticks';

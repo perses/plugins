@@ -16,7 +16,7 @@ import { PanelPluginLoader } from '@perses-dev/dashboards';
 import type { PanelData } from '@perses-dev/plugin-system';
 import type { QueryDataType, UnknownSpec } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 interface EmbeddedPanelProps {
   kind: string;
