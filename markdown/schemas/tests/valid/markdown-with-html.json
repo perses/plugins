@@ -1,0 +1,7 @@
+{
+  "kind": "Markdown",
+  "spec": {
+    "text": "## Some panels!\n<details><summary>More</summary>Hidden content</details>",
+    "renderHtml": true
+  }
+}

@@ -15,5 +15,6 @@ package model
 
 kind: "Markdown"
 spec: close({
-	text: string
+	text:        string
+	renderHtml?: bool
 })

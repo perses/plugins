@@ -21,11 +21,17 @@ kind: "Markdown"
 if #panel.mode != _|_ {
 	spec: {
 		text: #panel.content
+		if #panel.mode == "html" {
+			renderHtml: true
+		}
 	}
 }
 if #panel.options != _|_ {
 	spec: {
 		text: #panel.options.content
+		if #panel.options.mode != _|_ if #panel.options.mode == "html" {
+			renderHtml: true
+		}
 	}
 }
 if #panel.options == _|_ && #panel.mode == _|_ {

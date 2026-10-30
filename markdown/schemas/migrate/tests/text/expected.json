@@ -1,6 +1,7 @@
 {
   "kind": "Markdown",
   "spec": {
-    "text": "This dashboard does have some purpose, let me remind... uuuuh..."
+    "text": "This dashboard does have some purpose, let me remind... uuuuh...",
+    "renderHtml": true
   }
 }
