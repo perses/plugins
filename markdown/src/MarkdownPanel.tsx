@@ -116,8 +116,8 @@ const markdownWithoutHTML = new Marked({
   },
 });
 
-export function markdownToHTML(text: string, enableHtml = false): string {
-  const parser = enableHtml ? markdownWithHTML : markdownWithoutHTML;
+export function markdownToHTML(text: string, renderHtml = false): string {
+  const parser = renderHtml ? markdownWithHTML : markdownWithoutHTML;
   return parser.parse(text, { async: false });
 }
 
@@ -130,15 +130,15 @@ export function sanitizeHTML(html: string): string {
 
 export function MarkdownPanel(props: MarkdownPanelProps): ReactElement {
   const {
-    spec: { text, enableHtml = false },
+    spec: { text, renderHtml = false },
   } = props;
   const chartsTheme = useChartsTheme();
 
   const textAfterVariableReplacement = useReplaceVariablesInString(text);
 
   const html = useMemo(
-    () => markdownToHTML(textAfterVariableReplacement ?? '', enableHtml),
-    [textAfterVariableReplacement, enableHtml],
+    () => markdownToHTML(textAfterVariableReplacement ?? '', renderHtml),
+    [textAfterVariableReplacement, renderHtml],
   );
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 

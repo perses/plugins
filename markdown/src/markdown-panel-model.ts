@@ -26,7 +26,7 @@ export interface MarkdownPanelOptions {
    * When true, raw HTML in the text is rendered (after sanitization).
    * When false or omitted, raw HTML is escaped and displayed as plain text.
    */
-  enableHtml?: boolean;
+  renderHtml?: boolean;
 }
 
 export function createInitialMarkdownPanelOptions(): MarkdownPanelOptions {

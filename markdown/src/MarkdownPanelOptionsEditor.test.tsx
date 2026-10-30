@@ -19,20 +19,20 @@ import { MarkdownPanelOptionsEditor } from './MarkdownPanelOptionsEditor';
 describe('MarkdownPanelOptionsEditor', () => {
   it('shows HTML rendering as disabled by default', () => {
     render(<MarkdownPanelOptionsEditor value={{ text: 'hello' }} onChange={vi.fn()} />);
-    expect(screen.getByRole('checkbox', { name: /Enable HTML/i })).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /Render HTML/i })).not.toBeChecked();
   });
 
   it('enables HTML rendering while keeping the text', () => {
     const onChange = vi.fn();
     render(<MarkdownPanelOptionsEditor value={{ text: 'hello' }} onChange={onChange} />);
-    fireEvent.click(screen.getByRole('checkbox', { name: /Enable HTML/i }));
-    expect(onChange).toHaveBeenCalledWith({ text: 'hello', enableHtml: true });
+    fireEvent.click(screen.getByRole('checkbox', { name: /Render HTML/i }));
+    expect(onChange).toHaveBeenCalledWith({ text: 'hello', renderHtml: true });
   });
 
-  it('keeps enableHtml when the text changes', () => {
+  it('keeps renderHtml when the text changes', () => {
     const onChange = vi.fn();
-    render(<MarkdownPanelOptionsEditor value={{ text: 'hello', enableHtml: true }} onChange={onChange} />);
+    render(<MarkdownPanelOptionsEditor value={{ text: 'hello', renderHtml: true }} onChange={onChange} />);
     fireEvent.change(screen.getByRole('textbox', { name: /Text/i }), { target: { value: 'world' } });
-    expect(onChange).toHaveBeenCalledWith({ text: 'world', enableHtml: true });
+    expect(onChange).toHaveBeenCalledWith({ text: 'world', renderHtml: true });
   });
 });

@@ -15,9 +15,9 @@ import { describe, expect, it } from 'vitest';
 
 import { markdownToHTML, sanitizeHTML } from './MarkdownPanel';
 
-function render(text: string, enableHtml?: boolean): HTMLElement {
+function render(text: string, renderHtml?: boolean): HTMLElement {
   const container = document.createElement('div');
-  container.innerHTML = sanitizeHTML(markdownToHTML(text, enableHtml));
+  container.innerHTML = sanitizeHTML(markdownToHTML(text, renderHtml));
   return container;
 }
 

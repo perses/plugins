@@ -2,6 +2,6 @@
   "kind": "Markdown",
   "spec": {
     "text": "## Some panels!\n<details><summary>More</summary>Hidden content</details>",
-    "enableHtml": true
+    "renderHtml": true
   }
 }

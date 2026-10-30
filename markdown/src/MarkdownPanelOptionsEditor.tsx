@@ -30,8 +30,8 @@ export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProp
     onChange({ ...value, text: e.target.value });
   };
 
-  const handleEnableHtmlChange = (_: ChangeEvent, checked: boolean): void => {
-    onChange({ ...value, enableHtml: checked });
+  const handleRenderHtmlChange = (_: ChangeEvent, checked: boolean): void => {
+    onChange({ ...value, renderHtml: checked });
   };
 
   return (
@@ -49,9 +49,9 @@ export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProp
         onChange={handleTextChange}
       />
       <OptionsEditorControl
-        label="Enable HTML"
+        label="Render HTML"
         description="Render raw HTML tags found in the text. When disabled, HTML is displayed as plain text."
-        control={<Switch checked={!!value.enableHtml} onChange={handleEnableHtmlChange} />}
+        control={<Switch checked={!!value.renderHtml} onChange={handleRenderHtmlChange} />}
       />
     </Stack>
   );

@@ -29,9 +29,9 @@ func NewLine(text string) Option {
 	}
 }
 
-func EnableHTML(enable bool) Option {
+func RenderHTML(render bool) Option {
 	return func(builder *Builder) error {
-		builder.EnableHTML = enable
+		builder.RenderHTML = render
 		return nil
 	}
 }

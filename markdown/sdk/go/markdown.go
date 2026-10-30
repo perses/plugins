@@ -19,7 +19,7 @@ const PluginKind = "Markdown"
 
 type PluginSpec struct {
 	Text       string `json:"text" yaml:"text"`
-	EnableHTML bool   `json:"enableHtml,omitempty" yaml:"enableHtml,omitempty"`
+	RenderHTML bool   `json:"renderHtml,omitempty" yaml:"renderHtml,omitempty"`
 }
 
 type Option func(plugin *Builder) error

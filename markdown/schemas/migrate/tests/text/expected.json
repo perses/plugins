@@ -2,6 +2,6 @@
   "kind": "Markdown",
   "spec": {
     "text": "This dashboard does have some purpose, let me remind... uuuuh...",
-    "enableHtml": true
+    "renderHtml": true
   }
 }
