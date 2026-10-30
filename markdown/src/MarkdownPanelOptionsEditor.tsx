@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Link, Stack, TextField } from '@mui/material';
+import { Link, Stack, Switch, TextField } from '@mui/material';
+import { OptionsEditorControl } from '@perses-dev/components';
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import type { ChangeEvent, ReactElement } from 'react';
 
@@ -23,13 +24,14 @@ const MARKDOWN_GUIDE_URL = 'https://commonmark.org/help/';
 const TEXT_INPUT_NUM_ROWS = 20;
 
 export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProps): ReactElement {
-  const {
-    onChange,
-    value: { text },
-  } = props;
+  const { onChange, value } = props;
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    onChange({ text: e.target.value });
+  const handleTextChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    onChange({ ...value, text: e.target.value });
+  };
+
+  const handleEnableHtmlChange = (_: ChangeEvent, checked: boolean): void => {
+    onChange({ ...value, enableHtml: checked });
   };
 
   return (
@@ -43,8 +45,13 @@ export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProp
         multiline
         rows={TEXT_INPUT_NUM_ROWS}
         // Value
-        value={text}
-        onChange={handleChange}
+        value={value.text}
+        onChange={handleTextChange}
+      />
+      <OptionsEditorControl
+        label="Enable HTML"
+        description="Render raw HTML tags found in the text. When disabled, HTML is displayed as plain text."
+        control={<Switch checked={!!value.enableHtml} onChange={handleEnableHtmlChange} />}
       />
     </Stack>
   );

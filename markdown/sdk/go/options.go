@@ -28,3 +28,10 @@ func NewLine(text string) Option {
 		return nil
 	}
 }
+
+func EnableHTML(enable bool) Option {
+	return func(builder *Builder) error {
+		builder.EnableHTML = enable
+		return nil
+	}
+}

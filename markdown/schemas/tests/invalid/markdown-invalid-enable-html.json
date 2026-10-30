@@ -1,0 +1,7 @@
+{
+  "kind": "Markdown",
+  "spec": {
+    "text": "Some text",
+    "enableHtml": "yes"
+  }
+}
