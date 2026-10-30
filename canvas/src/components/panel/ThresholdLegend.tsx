@@ -24,6 +24,7 @@ const ROW_HEIGHT = 18;
 const LABEL_OFFSET = SWATCH_SIZE + 6;
 const PADDING = 8;
 const FONT_SIZE = 11;
+const TITLE_HEIGHT = 16;
 const NO_SELECT_STYLE = { userSelect: 'none' } as const;
 
 interface ThresholdLegendProps {
@@ -31,9 +32,17 @@ interface ThresholdLegendProps {
   format: FormatOptions | undefined;
   paletteColors: string[];
   position: Point;
+  /** Optional heading shown above the swatches (e.g. "Nodes" / "Edges"). */
+  title?: string;
 }
 
-export function ThresholdLegend({ thresholds, format, paletteColors, position }: ThresholdLegendProps): ReactElement {
+export function ThresholdLegend({
+  thresholds,
+  format,
+  paletteColors,
+  position,
+  title,
+}: ThresholdLegendProps): ReactElement {
   const muiTheme = useTheme();
   const defaultColor = thresholds.defaultColor ?? paletteColors[0] ?? muiTheme.palette.success.main;
   const steps = useMemo(() => thresholds.steps ?? [], [thresholds.steps]);
@@ -50,8 +59,9 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
     [steps, paletteColors, defaultColor, format],
   );
 
+  const titleOffset = title ? TITLE_HEIGHT : 0;
   const boxWidth = 110;
-  const boxHeight = rows.length * ROW_HEIGHT + PADDING * 2;
+  const boxHeight = rows.length * ROW_HEIGHT + PADDING * 2 + titleOffset;
 
   return (
     <g>
@@ -66,8 +76,20 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
         strokeWidth={1}
         rx={4}
       />
+      {title ? (
+        <text
+          x={position.x + PADDING}
+          y={position.y + PADDING + FONT_SIZE}
+          fontSize={FONT_SIZE}
+          fontWeight={600}
+          fill={muiTheme.palette.text.primary}
+          style={NO_SELECT_STYLE}
+        >
+          {title}
+        </text>
+      ) : null}
       {rows.map((row, i) => {
-        const ry = position.y + PADDING + i * ROW_HEIGHT + (ROW_HEIGHT - SWATCH_SIZE) / 2;
+        const ry = position.y + PADDING + titleOffset + i * ROW_HEIGHT + (ROW_HEIGHT - SWATCH_SIZE) / 2;
         return (
           <g key={row.key}>
             <rect x={position.x + PADDING} y={ry} width={SWATCH_SIZE} height={SWATCH_SIZE} fill={row.color} rx={2} />

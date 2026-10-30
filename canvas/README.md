@@ -31,10 +31,15 @@ Configuration:
 - **Edge label template** — optional edge caption (e.g. `{{value}}`).
 - **Bidirectional edges** — render edges with arrows in both directions.
 
-Node colors come from the **Node color** thresholds configured for the panel, and edge colors use
-those same thresholds. Edge thickness is set per breakpoint under **Edge thickness**. Layout is
-deterministic: a given topology always settles to the same positions, so nodes stay put as their
-metric values change — they only move when nodes or edges are added or removed.
+Node colors come from the **Node color** thresholds configured for the panel, and **Node size**
+thresholds can scale a node's size by its value (relative to the configurable default node size).
+Edges use the **Edge color** thresholds when set and otherwise fall back to the node thresholds, so
+edges can carry their own color scheme independent of the nodes. When edges use their own color
+scheme, the legend shows a separate **Edges** key alongside the **Nodes** key. Edge thickness is set
+per breakpoint under **Edge thickness**, which shares the same thresholds as the edge color (the edge
+thresholds when set, otherwise the node thresholds). Layout is deterministic: a given topology
+always settles to the same positions, so nodes stay put as their metric values change — they only
+move when nodes or edges are added or removed.
 
 ### How to install
 
