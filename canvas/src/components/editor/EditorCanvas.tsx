@@ -26,6 +26,7 @@ import type { CanvasSpec, FloatingEdge } from '../../model';
 import { isFloatingEdge } from '../../model';
 import type { ResizeHandleId } from '../../utils/resizeUtils';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
+import { resolveMouseShortcut, resolveKeyboardShortcut } from '../../utils/shortcuts';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { DragEdgeLine } from './DragEdgeLine';
 import { EditorEdgeItem } from './EditorEdgeItem';
@@ -167,13 +168,17 @@ export function EditorCanvas({
 
   const onSvgDoubleClick = useCallback(
     (event: MouseEvent<SVGSVGElement>): void => {
-      if (event.ctrlKey || event.metaKey) {
-        const boundingBox = nodeBoundingBox(displayNodes);
-        if (boundingBox) {
-          fitView(boundingBox, width, height);
+      switch (resolveMouseShortcut(event)?.id) {
+        case 'fitView': {
+          const boundingBox = nodeBoundingBox(displayNodes);
+          if (boundingBox) {
+            fitView(boundingBox, width, height);
+          }
+          return;
         }
-      } else {
-        resetPan();
+        case 'resetView':
+          resetPan();
+          return;
       }
     },
     [displayNodes, fitView, resetPan, width, height],
@@ -181,10 +186,7 @@ export function EditorCanvas({
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<SVGSVGElement>): void => {
-      if (event.key !== 'Delete' && event.key !== 'Backspace') {
-        return;
-      }
-      if (selectedIds.size > 0) {
+      if (resolveKeyboardShortcut(event.key)?.id === 'deleteSelected' && selectedIds.size > 0) {
         deleteSelected();
       }
     },
