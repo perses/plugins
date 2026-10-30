@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, FormControl, Stack, TextField } from '@mui/material';
+import { Button, ButtonGroup, FormControl, Stack, TextField, Typography } from '@mui/material';
 import { PanelEditorContext } from '@perses-dev/dashboards';
 import type { DatasourceSelectProps } from '@perses-dev/plugin-system';
 import {
@@ -42,7 +42,13 @@ import {
 import type { PrometheusDatasourceSpec } from '../types';
 import { DEFAULT_SCRAPE_INTERVAL } from '../types';
 import type { PrometheusTimeSeriesQueryEditorProps } from './query-editor-model';
-import { useQueryState, useFormatState, useMinStepState, useInstantState } from './query-editor-model';
+import {
+  useQueryState,
+  useFormatState,
+  useMinStepState,
+  useInstantState,
+  useEnableExemplarsState,
+} from './query-editor-model';
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
  */
@@ -57,6 +63,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const datasourceSelectValue = datasource ?? DEFAULT_PROM;
 
   const datasourceSelectLabelID = useId(); // for panels with multiple queries, this component is rendered multiple times on the same page
+  const exemplarsLabelID = useId();
 
   const selectedDatasource = useDatasourceSelectValueToSelector(
     datasourceSelectValue,
@@ -71,6 +78,12 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const { instant, handleInstantChange } = useInstantState(props);
+  const { enableExemplars, handleEnableExemplarsChange } = useEnableExemplarsState(props);
+  const datasourceSpec = datasourceResource?.plugin.spec as PrometheusDatasourceSpec | undefined;
+  // Undefined while the datasource resource is still loading: the control is disabled
+  // but no "disabled on the datasource" message is shown yet.
+  const exemplarsEnabledOnDatasource =
+    datasourceSpec === undefined ? undefined : datasourceSpec.exemplars?.enable === true;
   const minStepPlaceholder =
     minStep ??
     (datasourceResource && (datasourceResource.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
@@ -190,6 +203,43 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
             Auto
           </Button>
         </ButtonGroup>
+      </Stack>
+      <Stack direction="row" spacing={2} alignItems="center">
+        <ButtonGroup
+          aria-labelledby={exemplarsLabelID}
+          disabled={isReadonly || exemplarsEnabledOnDatasource !== true || instant === true}
+          sx={{ '& .MuiButton-root': { px: 2, py: 2 } }}
+        >
+          <Button
+            variant={enableExemplars === true ? 'contained' : 'outlined'}
+            aria-pressed={enableExemplars === true}
+            onClick={() => handleEnableExemplarsChange(true)}
+          >
+            On
+          </Button>
+          <Button
+            variant={enableExemplars === false ? 'contained' : 'outlined'}
+            aria-pressed={enableExemplars === false}
+            onClick={() => handleEnableExemplarsChange(false)}
+          >
+            Off
+          </Button>
+          <Button
+            variant={enableExemplars === undefined ? 'contained' : 'outlined'}
+            aria-pressed={enableExemplars === undefined}
+            onClick={() => handleEnableExemplarsChange(undefined)}
+          >
+            Auto
+          </Button>
+        </ButtonGroup>
+        <Typography id={exemplarsLabelID} variant="body2" color="textSecondary">
+          Exemplars
+          {exemplarsEnabledOnDatasource === false && ' (disabled on the datasource)'}
+          {exemplarsEnabledOnDatasource === true && instant === true && ' (not available for instant queries)'}
+          {exemplarsEnabledOnDatasource === true &&
+            instant === undefined &&
+            ' (skipped if the panel runs instant queries)'}
+        </Typography>
       </Stack>
     </Stack>
   );

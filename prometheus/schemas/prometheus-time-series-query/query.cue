@@ -27,4 +27,5 @@ spec: close({
 	minStep?:          =~ds.#durationRegex | =~common.#variableSyntaxRegex
 	resolution?:       number
 	instant?:          bool
+	enableExemplars?:  bool
 })
