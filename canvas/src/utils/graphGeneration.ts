@@ -140,8 +140,11 @@ export function buildGraphFromQueries(
     for (const pairKey of pairOrder) {
       const entry = pairs.get(pairKey)!;
       const isReciprocal = entry.forward !== undefined && entry.reverse !== undefined;
-      // Stable id from the entry's (first-seen) orientation.
-      const id = `${EDGE_ID_PREFIX}${JSON.stringify([entry.sourceValue, entry.targetValue])}`;
+      // Derive the id from the canonical (order-independent) pair key, not the entry's first-seen
+      // orientation. Otherwise reordering reciprocal A→B / B→A rows would flip the id and thus the
+      // topologyKey, forcing CanvasPanel to rerun the whole force simulation on an order-only
+      // refresh. Orientation is still carried by entry.source/target for the directional series.
+      const id = `${EDGE_ID_PREFIX}${pairKey}`;
       const forwardSeries = entry.forward ?? entry.reverse;
       if (forwardSeries) {
         seriesByItemId.set(id, forwardSeries);

@@ -146,6 +146,24 @@ describe('buildGraphFromQueries', () => {
     expect(graph.reverseSeriesByItemId.get(edge.id)?.values[0]?.[1]).toBe(5);
   });
 
+  it('keeps a stable edge id and topology key when reciprocal rows are reordered', () => {
+    const nodes = result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2));
+    const forwardFirst = [
+      nodes,
+      result(series({ source: 'a', target: 'b' }, 5), series({ source: 'b', target: 'a' }, 9)),
+    ];
+    const reverseFirst = [
+      nodes,
+      result(series({ source: 'b', target: 'a' }, 9), series({ source: 'a', target: 'b' }, 5)),
+    ];
+    const a = buildGraphFromQueries(baseConfig, forwardFirst);
+    const b = buildGraphFromQueries(baseConfig, reverseFirst);
+    // A reordering of the same reciprocal pair must not change the edge id or the topology key,
+    // otherwise CanvasPanel would rerun the whole force simulation on an order-only refresh.
+    expect(a.edges[0]?.id).toBe(b.edges[0]?.id);
+    expect(a.topologyKey).toBe(b.topologyKey);
+  });
+
   it('drives generated edge thickness from the edge-thickness thresholds', () => {
     const results = [
       result(series({ instance: 'a' }, 1), series({ instance: 'b' }, 2)),
