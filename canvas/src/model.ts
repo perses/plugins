@@ -50,6 +50,8 @@ export interface NodeSpec {
   queryIndex?: number;
   colorMode?: 'threshold' | 'fixed';
   color?: string;
+  /** Reserved for data-driven size scaling; generated nodes set this to `threshold`. */
+  sizeMode?: 'fixed' | 'threshold';
 }
 
 export type AnchorPoint = 'n' | 's' | 'e' | 'w' | 'nw' | 'ne' | 'sw' | 'se';
@@ -117,16 +119,44 @@ export interface BackgroundSpec {
   global?: boolean;
 }
 
+/**
+ * Configuration for the data-driven graph mode. When `enabled`, the panel derives nodes and edges
+ * live from query results on every render (ignoring the manually authored `nodes`/`edges`) and lays
+ * them out automatically. Graph structure is inferred from series labels.
+ */
+export interface GraphGenerationSpec {
+  enabled?: boolean;
+  /** Index of the query whose series define the nodes. */
+  nodeQueryIndex: number;
+  /** Series label whose value identifies a node (e.g. "instance"). */
+  nodeIdLabel: string;
+  /** Label template for a node's caption. Defaults to the value of `nodeIdLabel`. */
+  nodeLabelTemplate?: string;
+  /** Index of the query whose series define the edges. Omit for a nodes-only graph. */
+  edgeQueryIndex?: number;
+  /** Series label whose value identifies an edge's source node. */
+  edgeSourceLabel?: string;
+  /** Series label whose value identifies an edge's target node. */
+  edgeTargetLabel?: string;
+  /** Label template for an edge's caption (e.g. "{{value}}"). */
+  edgeLabelTemplate?: string;
+  /** Render edges as bidirectional. */
+  bidirectional?: boolean;
+}
+
 export interface CanvasSpec {
   legend?: LegendSpecOptions;
   thresholds?: ThresholdOptions;
   format?: FormatOptions;
   edgeThresholdWidths?: EdgeThresholdStep[];
   edgeDefaultStrokeWidth?: number;
+  /** Base width/height (px) for generated nodes. */
+  nodeDefaultSize?: number;
   querySettings?: QueryColorSettings[];
   backgrounds?: BackgroundSpec[];
   nodes?: NodeSpec[];
   edges?: EdgeSpec[];
+  graphGeneration?: GraphGenerationSpec;
 }
 
 export type CanvasSpecEditorProps = OptionsEditorProps<CanvasSpec>;

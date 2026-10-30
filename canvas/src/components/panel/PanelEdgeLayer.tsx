@@ -17,7 +17,7 @@ import { useMemo } from 'react';
 
 import { useCanvasTheme } from '../../hooks/useCanvasTheme';
 import type { CanvasSpec, ThicknessMode } from '../../model';
-import { edgeEndpoints, strokeWidthFromThresholds } from '../../utils/edgeUtils';
+import { clipLineToNodes, edgeEndpoints, strokeWidthFromThresholds } from '../../utils/edgeUtils';
 import { colorFromThresholds, interpolateLabel } from '../../utils/panelUtils';
 import { EdgeLabel } from '../shared/EdgeLabel';
 import type { LineStyle } from '../shared/EdgeLines';
@@ -26,19 +26,14 @@ import { EdgeLines, edgeLabelPoints } from '../shared/EdgeLines';
 const NS_PREFIX = 'wm-panel';
 
 function resolveEdgeStyle(
-  queryIndex: number | undefined,
+  series: TimeSeries | undefined,
   thicknessMode: ThicknessMode | undefined,
   edgeStrokeWidth: number | undefined,
-  seriesByQueryIndex: Map<number, TimeSeries>,
   spec: CanvasSpec,
   paletteColors: string[],
   fallbackColor: string,
 ): { stroke: string; strokeWidth: number } {
   const defaultWidth = edgeStrokeWidth ?? spec.edgeDefaultStrokeWidth ?? 2;
-  if (queryIndex === undefined) {
-    return { stroke: 'currentColor', strokeWidth: defaultWidth };
-  }
-  const series = seriesByQueryIndex.get(queryIndex);
   if (!series) {
     return { stroke: 'currentColor', strokeWidth: defaultWidth };
   }
@@ -63,9 +58,20 @@ interface PanelEdgeLayerProps {
   seriesByQueryIndex: Map<number, TimeSeries>;
   k: number;
   paletteColors: string[];
+  /** Series backing generated edges (data-driven mode), keyed by edge id. Takes precedence over queryIndex. */
+  seriesByItemId?: Map<string, TimeSeries>;
+  /** Series backing the reverse half of a reciprocal generated edge, keyed by edge id. */
+  reverseSeriesByItemId?: Map<string, TimeSeries>;
 }
 
-export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: PanelEdgeLayerProps): ReactElement {
+export function PanelEdgeLayer({
+  spec,
+  seriesByQueryIndex,
+  k,
+  paletteColors,
+  seriesByItemId,
+  reverseSeriesByItemId,
+}: PanelEdgeLayerProps): ReactElement {
   const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
   const edges = useMemo(() => spec.edges ?? [], [spec.edges]);
   const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
@@ -74,36 +80,60 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
   return (
     <>
       {edges.map((edge, i) => {
-        const pts = edgeEndpoints(edge, nodeById);
-        if (!pts) {
+        const rawPts = edgeEndpoints(edge, nodeById);
+        if (!rawPts) {
           return null;
         }
 
-        function resolveLabel(queryIndex: number | undefined, template: string | undefined): string | null {
-          if (queryIndex === undefined) {
-            return null;
+        // Trim each end that attaches to a node center (no explicit anchor) back to the node
+        // boundary, so the line and arrowhead touch the shape instead of running into its center.
+        const clipSource = edge.sourceAnchor ? undefined : nodeById.get(edge.source);
+        const clipTarget = edge.target && !edge.targetAnchor ? nodeById.get(edge.target) : undefined;
+        const pts = clipLineToNodes(rawPts, clipSource, clipTarget);
+
+        // Overlapping nodes collapse the clipped segment to a point; skip it rather than draw a
+        // reversed arrow or a stray label at the overlap.
+        if (pts.start.x === pts.end.x && pts.start.y === pts.end.y) {
+          return null;
+        }
+
+        const generatedSeries = seriesByItemId?.get(edge.id);
+        const generatedReverseSeries = reverseSeriesByItemId?.get(edge.id);
+
+        function resolveSeries(queryIndex: number | undefined, reverse = false): TimeSeries | undefined {
+          // For a reciprocal generated edge the reverse half has its own series; fall back to the
+          // forward series otherwise so a plain bidirectional edge still shows a value on both halves.
+          if (reverse && generatedReverseSeries) {
+            return generatedReverseSeries;
           }
-          const series = seriesByQueryIndex.get(queryIndex);
+          if (generatedSeries) {
+            return generatedSeries;
+          }
+          return queryIndex !== undefined ? seriesByQueryIndex.get(queryIndex) : undefined;
+        }
+
+        function resolveLabel(series: TimeSeries | undefined, template: string | undefined): string | null {
           if (!series) {
             return null;
           }
           return interpolateLabel(template ?? '{{value}}', series, spec.format);
         }
 
+        const fwdSeries = resolveSeries(edge.sourceQueryIndex);
+        const bwdSeries = resolveSeries(edge.targetQueryIndex, true);
+
         const fwdStyle = resolveEdgeStyle(
-          edge.sourceQueryIndex,
+          fwdSeries,
           edge.thicknessMode,
           edge.strokeWidth,
-          seriesByQueryIndex,
           spec,
           paletteColors,
           fallbackColor,
         );
         const bwdStyle = resolveEdgeStyle(
-          edge.targetQueryIndex,
+          bwdSeries,
           edge.thicknessMode,
           edge.strokeWidth,
-          seriesByQueryIndex,
           spec,
           paletteColors,
           fallbackColor,
@@ -125,8 +155,8 @@ export function PanelEdgeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
           scaledFwdStyle.strokeWidth,
           scaledBwdStyle.strokeWidth,
         );
-        const fwdLabel = resolveLabel(edge.sourceQueryIndex, edge.sourceLabelTemplate);
-        const bwdLabel = edge.bidirectional ? resolveLabel(edge.targetQueryIndex, edge.targetLabelTemplate) : null;
+        const fwdLabel = resolveLabel(fwdSeries, edge.sourceLabelTemplate);
+        const bwdLabel = edge.bidirectional ? resolveLabel(bwdSeries, edge.targetLabelTemplate) : null;
 
         return (
           <g key={edge.id}>
