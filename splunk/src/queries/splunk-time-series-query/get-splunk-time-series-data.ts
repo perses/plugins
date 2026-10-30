@@ -37,8 +37,10 @@ function convertResultsToTimeSeries(
     name: metricKey,
     values: resultsArray.map((result) => {
       const timestamp = new Date(result._time).getTime() / 1000;
-      const value = Number(result[metricKey]) || 0;
-      return [timestamp, value];
+      const raw = result[metricKey];
+      const value = raw === undefined || raw === '' ? Number.NaN : Number(raw);
+      // Leave a gap instead of plotting a false zero for missing or non-numeric values.
+      return [timestamp, Number.isNaN(value) ? null : value];
     }),
     labels: { metric: metricKey },
   }));
@@ -94,8 +96,7 @@ export const getSplunkTimeSeriesData: TimeSeriesQueryPlugin<SplunkTimeSeriesQuer
       await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 500ms between polls
       jobStatus = await client.getJobStatus(jobId);
       if (!jobStatus || !jobStatus.entry?.[0]?.content) {
-        console.warn('Failed to get job status or job status response is malformed', { jobStatus });
-        break;
+        throw new Error(`Splunk job ${jobId} returned a malformed status response`);
       }
     } while (!jobStatus.entry?.[0]?.content?.isDone);
 
