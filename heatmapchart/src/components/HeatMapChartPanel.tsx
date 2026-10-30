@@ -20,7 +20,8 @@ import { useMemo } from 'react';
 
 import type { HeatMapChartOptions, LOG_BASE } from '../heat-map-chart-model';
 import { DEFAULT_FORMAT } from '../heat-map-chart-model';
-import { generateCompleteTimestamps, getCommonTimeScaleForQueries } from '../utils';
+import { generateCompleteTimestamps, getCommonTimeScaleForQueries, getHeatMapExemplarData } from '../utils';
+import type { HeatMapExemplarDataItem } from '../utils';
 import type { HeatMapDataItem } from './HeatMapChart';
 import { HeatMapChart } from './HeatMapChart';
 
@@ -48,6 +49,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
 
   const {
     data,
+    exemplarData,
     xAxisCategories,
     min,
     max,
@@ -56,6 +58,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     timeScale,
   }: {
     data: HeatMapDataItem[];
+    exemplarData: HeatMapExemplarDataItem[];
     xAxisCategories: number[];
     min?: number;
     max?: number;
@@ -66,6 +69,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     if (!queryResults || queryResults.length === 0) {
       return {
         data: [],
+        exemplarData: [],
         xAxisCategories: [],
         min: 0,
         max: 0,
@@ -82,6 +86,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     ) {
       return {
         data: [],
+        exemplarData: [],
         xAxisCategories: [],
         min: 0,
         max: 0,
@@ -164,6 +169,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     }
     return {
       data,
+      exemplarData: getHeatMapExemplarData(queryResults[0]?.data.exemplars, xAxisCategories),
       xAxisCategories,
       min: lowestBound === Infinity ? undefined : lowestBound,
       max: highestBound === -Infinity ? undefined : highestBound,
@@ -228,6 +234,7 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
         width={contentDimensions.width}
         height={contentDimensions.height}
         data={data}
+        exemplars={exemplarData}
         xAxisCategories={xAxisCategories}
         yAxisFormat={yAxisFormat}
         countFormat={countFormat}
