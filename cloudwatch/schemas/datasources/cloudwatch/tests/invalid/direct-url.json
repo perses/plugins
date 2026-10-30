@@ -1,0 +1,6 @@
+{
+  "kind": "CloudWatchDatasource",
+  "spec": {
+    "directUrl": "https://monitoring.us-east-1.amazonaws.com"
+  }
+}
