@@ -57,4 +57,41 @@ describe('ClickHouse client', () => {
       "SELECT * FROM logs WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' FORMAT JSON",
     );
   });
+
+  it.each([
+    [
+      'SELECT format, count() FROM logs GROUP BY format',
+      'SELECT format, count() FROM logs GROUP BY format FORMAT JSON',
+    ],
+    ["SELECT if(x, 'FORMAT', 'other') FROM logs", "SELECT if(x, 'FORMAT', 'other') FROM logs FORMAT JSON"],
+    [
+      'SELECT format, count() FROM logs GROUP BY format ORDER BY format DESC',
+      'SELECT format, count() FROM logs GROUP BY format ORDER BY format DESC FORMAT JSON',
+    ],
+    ['SELECT * FROM logs FORMAT JSONCompact', 'SELECT * FROM logs FORMAT JSONCompact'],
+    ['select * from logs format JSON;', 'select * from logs format JSON;'],
+  ])('should append FORMAT JSON only when the query does not end with a FORMAT clause: %s', async (input, expected) => {
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Pick<Response, 'ok' | 'json'>>>(async () => ({
+      ok: true,
+      json: vi.fn(async () => ({ data: [] })),
+    }));
+
+    await query({ query: input }, { datasourceUrl: 'http://clickhouse.example.com', fetch: fetchMock as never });
+
+    const [calledUrl] = fetchMock.mock.calls[0]!;
+    expect(new URL(calledUrl).searchParams.get('query')).toBe(expected);
+  });
+
+  it('should reject with the ClickHouse error when the response is not ok', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 400,
+      statusText: 'Bad Request',
+      text: vi.fn(async () => 'Code: 62. DB::Exception: Syntax error'),
+    }));
+
+    await expect(
+      query({ query: 'SELEC 1' }, { datasourceUrl: 'http://clickhouse.example.com', fetch: fetchMock as never }),
+    ).rejects.toThrow('400 Bad Request: Code: 62. DB::Exception: Syntax error');
+  });
 });
