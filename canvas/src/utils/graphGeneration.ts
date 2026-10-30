@@ -78,8 +78,8 @@ export function buildGraphFromQueries(
       label: config.nodeLabelTemplate ?? `{{${config.nodeIdLabel}}}`,
       labelPosition: 'below',
       colorMode: 'threshold',
-      // Drive size from the node-size thresholds so generated nodes grow/shrink with their value;
-      // with no nodeThresholdSizes configured this is a no-op (scale 1).
+      // Opt generated nodes into data-driven size scaling. This is a no-op today (nodes keep their
+      // base size) and becomes active once node-size thresholds are available.
       sizeMode: 'threshold',
     });
   }

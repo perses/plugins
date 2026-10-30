@@ -50,7 +50,7 @@ export interface NodeSpec {
   queryIndex?: number;
   colorMode?: 'threshold' | 'fixed';
   color?: string;
-  /** When `threshold`, the node's base size is scaled by the `nodeThresholdSizes` steps. */
+  /** Reserved for data-driven size scaling; generated nodes set this to `threshold`. */
   sizeMode?: 'fixed' | 'threshold';
 }
 
@@ -100,12 +100,6 @@ export interface EdgeThresholdStep {
   strokeWidth: number;
 }
 
-export interface NodeThresholdStep {
-  value: number;
-  /** Multiplier applied to the node's base width/height. */
-  scale: number;
-}
-
 export type FloatingEdge = EdgeSpec & { freeEndpoint: Point };
 
 export function isFloatingEdge(edge: EdgeSpec): edge is FloatingEdge {
@@ -153,14 +147,10 @@ export interface GraphGenerationSpec {
 export interface CanvasSpec {
   legend?: LegendSpecOptions;
   thresholds?: ThresholdOptions;
-  /** Color scheme applied to edges. Falls back to `thresholds` when unset. */
-  edgeThresholds?: ThresholdOptions;
   format?: FormatOptions;
   edgeThresholdWidths?: EdgeThresholdStep[];
   edgeDefaultStrokeWidth?: number;
-  /** Threshold steps that scale node size by the node's bound value. */
-  nodeThresholdSizes?: NodeThresholdStep[];
-  /** Base width/height (px) for generated nodes, scaled by `nodeThresholdSizes`. */
+  /** Base width/height (px) for generated nodes. */
   nodeDefaultSize?: number;
   querySettings?: QueryColorSettings[];
   backgrounds?: BackgroundSpec[];

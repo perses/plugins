@@ -15,7 +15,7 @@ import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import { formatValue } from '@perses-dev/components';
 import type { TimeSeries } from '@perses-dev/spec';
 
-import type { BackgroundSpec, NodeThresholdStep } from '../model';
+import type { BackgroundSpec } from '../model';
 
 export function isSafeImageUrl(url: string): boolean {
   try {
@@ -75,28 +75,6 @@ export function colorFromThresholds(
     const step = thresholds.steps[i];
     if (step && thresholdValue >= step.value) {
       result = step.color ?? paletteColors[i] ?? defaultColor;
-    }
-  }
-  return result;
-}
-
-/**
- * Returns the size multiplier for a node given its bound value and the node-size threshold steps.
- * The highest step whose `value` the input reaches wins, and an empty/absent step list leaves the
- * node at its base size (scale 1). The steps need not be sorted: `nodeThresholdSizes` is persisted in
- * the order the user edited each row, so the match is chosen by the greatest reached `value` rather
- * than by array position.
- */
-export function scaleFromThresholds(value: number, steps: NodeThresholdStep[] | undefined): number {
-  if (!steps?.length) {
-    return 1;
-  }
-  let result = 1;
-  let bestValue = -Infinity;
-  for (const step of steps) {
-    if (value >= step.value && step.value >= bestValue) {
-      bestValue = step.value;
-      result = step.scale;
     }
   }
   return result;

@@ -140,12 +140,6 @@ type EdgeThresholdStep struct {
 	StrokeWidth float64 `json:"strokeWidth" yaml:"strokeWidth"`
 }
 
-type NodeThresholdStep struct {
-	Value float64 `json:"value" yaml:"value"`
-	// Scale multiplies the node's base width/height.
-	Scale float64 `json:"scale" yaml:"scale"`
-}
-
 type QueryColorSettings struct {
 	QueryIndex uint      `json:"queryIndex" yaml:"queryIndex"`
 	ColorMode  ColorMode `json:"colorMode" yaml:"colorMode"`
@@ -169,11 +163,9 @@ type GraphGenerationSpec struct {
 
 type PluginSpec struct {
 	Thresholds             *common.Thresholds   `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
-	EdgeThresholds         *common.Thresholds   `json:"edgeThresholds,omitempty" yaml:"edgeThresholds,omitempty"`
 	Format                 *common.Format       `json:"format,omitempty" yaml:"format,omitempty"`
 	EdgeThresholdWidths    []EdgeThresholdStep  `json:"edgeThresholdWidths,omitempty" yaml:"edgeThresholdWidths,omitempty"`
 	EdgeDefaultStrokeWidth *float64             `json:"edgeDefaultStrokeWidth,omitempty" yaml:"edgeDefaultStrokeWidth,omitempty"`
-	NodeThresholdSizes     []NodeThresholdStep  `json:"nodeThresholdSizes,omitempty" yaml:"nodeThresholdSizes,omitempty"`
 	NodeDefaultSize        *float64             `json:"nodeDefaultSize,omitempty" yaml:"nodeDefaultSize,omitempty"`
 	QuerySettings          []QueryColorSettings `json:"querySettings,omitempty" yaml:"querySettings,omitempty"`
 	Backgrounds            []BackgroundSpec     `json:"backgrounds,omitempty" yaml:"backgrounds,omitempty"`
@@ -231,27 +223,8 @@ func WithThresholds(thresholds common.Thresholds) Option {
 	}
 }
 
-// WithEdgeThresholds sets a color scheme applied to edges. When unset, edges fall back to the node
-// thresholds configured with WithThresholds.
-func WithEdgeThresholds(thresholds common.Thresholds) Option {
-	return func(builder *Builder) error {
-		builder.EdgeThresholds = &thresholds
-		return nil
-	}
-}
-
-// WithNodeThresholdSizes scales nodes by their bound value. Each step's Scale multiplies the node's
-// base width/height when the value reaches the step's Value. Only applies to nodes whose SizeMode is
-// "threshold" (generated nodes set this automatically).
-func WithNodeThresholdSizes(steps ...NodeThresholdStep) Option {
-	return func(builder *Builder) error {
-		builder.NodeThresholdSizes = steps
-		return nil
-	}
-}
-
-// WithNodeDefaultSize sets the base width/height (px) for generated nodes, which the node-size
-// thresholds scale. Defaults to 48 when unset.
+// WithNodeDefaultSize sets the base width/height (px) for generated nodes. Defaults to 48 when
+// unset.
 func WithNodeDefaultSize(size float64) Option {
 	return func(builder *Builder) error {
 		builder.NodeDefaultSize = &size

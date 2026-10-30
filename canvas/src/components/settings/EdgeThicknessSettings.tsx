@@ -16,7 +16,7 @@ import type { StepOptions } from '@perses-dev/components';
 import { formatValue } from '@perses-dev/components';
 import { produce } from 'immer';
 import type { ReactElement } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { CanvasSpec } from '../../model';
 
@@ -75,10 +75,7 @@ function ThresholdWidthRow({
 }
 
 export function EdgeThicknessSettings({ value, onChange }: EdgeThicknessSettingsProps): ReactElement {
-  // Width rows mirror the edge color thresholds, falling back to node thresholds just like edge
-  // color resolution does, so breakpoints match the ranges edges are actually colored by. React
-  // Compiler memoizes this derivation, so no manual useMemo is needed.
-  const thresholdSteps = (value.edgeThresholds ?? value.thresholds)?.steps ?? [];
+  const thresholdSteps = useMemo(() => value.thresholds?.steps ?? [], [value.thresholds]);
 
   const onDefaultStrokeWidthChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {

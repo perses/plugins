@@ -21,24 +21,6 @@ import type { Point } from '../model';
 
 const FIT_PADDING = 40;
 
-/**
- * Controls which gestures start a pan or zoom.
- *
- * - `edit` (default): the gestures the manual editor relies on. Pan with the
- *   middle mouse button only, and zoom with the wheel only while ctrl/meta is
- *   held. This leaves the left button free for the editor's node move, edge
- *   drag and rubber-band selection, and leaves a plain wheel free for page
- *   scrolling.
- * - `view`: the read-only display panel, which has no editing gestures to
- *   protect. Pan with the left or middle mouse button and zoom with a plain
- *   wheel, matching the Grafana node graph.
- */
-export type ZoomInteractionMode = 'edit' | 'view';
-
-export interface UseZoomOptions {
-  interactionMode?: ZoomInteractionMode;
-}
-
 export interface UseZoomResult {
   svgRef: (node: SVGSVGElement | null) => void;
   transform: ZoomTransform;
@@ -52,7 +34,7 @@ export interface UseZoomResult {
   resetPan: () => void;
 }
 
-export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZoomResult {
+export function useZoom(): UseZoomResult {
   const [transform, setTransform] = useState<ZoomTransform>(zoomIdentity);
   const [isPanning, setIsPanning] = useState(false);
   const nodeRef = useRef<SVGSVGElement | null>(null);
@@ -65,25 +47,14 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
         return;
       }
       nodeRef.current = node;
-      if (interactionMode === 'view') {
-        zoomBehavior.scaleExtent([0.05, 8]);
-      }
       zoomBehavior.filter((event: Event) => {
         if (event.type === 'dblclick') {
           return false;
         }
         if (event instanceof WheelEvent) {
-          // In view mode a plain wheel zooms; in edit mode it must be modified
-          // so that an unmodified wheel still scrolls the surrounding page.
-          return interactionMode === 'view' || event.ctrlKey || event.metaKey;
+          return event.ctrlKey || event.metaKey;
         }
-        if (!(event instanceof MouseEvent)) {
-          return false;
-        }
-        // Middle-click always pans. The left button only pans in view mode,
-        // where there are no editing gestures competing for it; d3-zoom still
-        // lets a stationary left click through to node click handlers.
-        return event.button === 1 || (interactionMode === 'view' && event.button === 0);
+        return event instanceof MouseEvent && event.button === 1;
       });
       zoomBehavior.on('start', () => setIsPanning(true));
       zoomBehavior.on('zoom', ({ transform: t }: { transform: ZoomTransform }) => {
@@ -92,7 +63,7 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
       zoomBehavior.on('end', () => setIsPanning(false));
       select<SVGSVGElement, unknown>(node).call(zoomBehavior);
     },
-    [zoomBehavior, interactionMode],
+    [zoomBehavior],
   );
 
   const resetPan = useCallback(() => {

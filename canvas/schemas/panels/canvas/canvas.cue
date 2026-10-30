@@ -21,12 +21,10 @@ kind: "Canvas"
 spec: close({
 	legend?:                 #legend
 	thresholds?:             common.#thresholds
-	edgeThresholds?:         common.#thresholds
 	format?:                 common.#format
 	querySettings?:          #querySettings
 	edgeDefaultStrokeWidth?: number & >0
 	edgeThresholdWidths?: [...#edgeThresholdStep]
-	nodeThresholdSizes?: [...#nodeThresholdStep]
 	nodeDefaultSize?: number & >0
 	backgrounds?: [...#background]
 	nodes?: [...#node]
@@ -117,9 +115,4 @@ spec: close({
 #edgeThresholdStep: {
 	value:       number
 	strokeWidth: number & >0
-}
-
-#nodeThresholdStep: {
-	value: number
-	scale: number & >0
 }

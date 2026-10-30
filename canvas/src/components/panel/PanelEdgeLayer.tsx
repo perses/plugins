@@ -43,11 +43,8 @@ function resolveEdgeStyle(
     return { stroke: 'currentColor', strokeWidth: defaultWidth };
   }
 
-  // Edges use their own color scheme when configured, falling back to the node thresholds so that
-  // existing dashboards (which only set `thresholds`) keep their current edge colors.
-  const edgeThresholds = spec.edgeThresholds ?? spec.thresholds;
-  const stroke = edgeThresholds
-    ? colorFromThresholds(lastValue, edgeThresholds, paletteColors, fallbackColor)
+  const stroke = spec.thresholds
+    ? colorFromThresholds(lastValue, spec.thresholds, paletteColors, fallbackColor)
     : 'currentColor';
   const strokeWidth =
     thicknessMode === 'threshold' && spec.edgeThresholdWidths?.length
