@@ -1,0 +1,11 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "tooltip": {
+      "enablePinning": true,
+      "axisPointer": {
+        "type": "cross"
+      }
+    }
+  }
+}

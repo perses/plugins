@@ -1,0 +1,8 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "tooltip": {
+      "axisPointer": {}
+    }
+  }
+}

@@ -190,6 +190,31 @@ describe('TimeSeriesChartBase performance', () => {
   });
 });
 
+describe('TimeSeriesChartBase axis pointer', () => {
+  it('moves the cross line without updating chart options', () => {
+    const chart = mockChart();
+    Object.assign(chart, {
+      containPixel: (): boolean => true,
+      convertToPixel: (_finder: unknown, value: number): number => (value === 0 ? 40 : 440),
+    });
+    const { container } = render(chartElement({ axisPointer: { type: 'cross' } }));
+    const wrapper = container.firstElementChild;
+    const canvas = document.createElement('canvas');
+    wrapper?.prepend(canvas);
+    const line = container.querySelector<HTMLElement>('[aria-hidden="true"]');
+    if (!(wrapper instanceof HTMLElement) || line === null) throw new Error('Chart elements are missing');
+    const setOptionCalls = chart.setOption.mock.calls.length;
+
+    fireEvent.mouseEnter(wrapper);
+    fireEvent.mouseMove(canvas, { clientX: 100, clientY: 120 });
+    expect(line.style.visibility).toBe('visible');
+
+    fireEvent.mouseLeave(wrapper);
+    expect(line.style.visibility).toBe('hidden');
+    expect(chart.setOption).toHaveBeenCalledTimes(setOptionCalls);
+  });
+});
+
 describe('TimeSeriesChartBase annotations', () => {
   it('does not add the annotation y-axis without annotations', () => {
     const chart = mockChart();

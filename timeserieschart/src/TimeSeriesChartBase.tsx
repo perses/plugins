@@ -73,6 +73,7 @@ import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState
 import { useResizeObserver } from 'use-resize-observer';
 
 import { ANNOTATION_Y_AXIS, AnnotationTooltip, buildAnnotationSeries } from './annotations/AnnotationTooltip';
+import type { TooltipAxisPointerOptions } from './time-series-chart-model';
 import type { TimeSeriesAnnotation } from './utils/annotation';
 import type { ExemplarChartData } from './utils/data-transform';
 import { EXEMPLAR_SERIES_ID_PREFIX, EXEMPLAR_SYMBOL_SIZE, getExemplarSeries } from './utils/data-transform';
@@ -128,6 +129,7 @@ export interface TimeChartProps {
   seriesFormatMap?: Map<string, FormatOptions>;
   grid?: GridComponentOption;
   tooltipConfig?: TooltipConfig;
+  axisPointer?: TooltipAxisPointerOptions;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
   isStackedBar?: boolean;
@@ -150,6 +152,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     grid,
     isStackedBar = false,
     tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
+    axisPointer,
     noDataVariant = 'message',
     syncGroup,
     onDataZoom,
@@ -163,6 +166,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance | undefined>(undefined);
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
+  const horizontalLineRef = useRef<HTMLDivElement>(null);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -350,6 +354,15 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         ? [...seriesMapping, pinnedCrosshair, ...annotationSeries, ...exemplarSeries]
         : [...seriesMapping, ...annotationSeries, ...exemplarSeries];
 
+    const tooltip: TooltipComponentOption = {
+      show: true,
+      // ECharts tooltip content hidden by default since we use custom tooltip instead.
+      // Stacked bar uses ECharts tooltip so subgroup data shows correctly.
+      showContent: isStackedBar,
+      trigger: isStackedBar ? 'item' : 'axis',
+      appendToBody: isStackedBar,
+    };
+
     const option: EChartsCoreOption = {
       dataset: dataset,
       series: updatedSeriesMapping,
@@ -371,14 +384,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         ...(annotationSeries.length > 0 ? [ANNOTATION_Y_AXIS] : []),
       ],
       animation: false,
-      tooltip: {
-        show: true,
-        // ECharts tooltip content hidden by default since we use custom tooltip instead.
-        // Stacked bar uses ECharts tooltip so subgroup data shows correctly.
-        showContent: isStackedBar,
-        trigger: isStackedBar ? 'item' : 'axis',
-        appendToBody: isStackedBar,
-      },
+      tooltip,
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
         type: 'line',
@@ -422,6 +428,22 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
     getTimezoneAwareAxisFormatter,
   ]);
 
+  const updateHorizontalLine = (x: number, y: number): void => {
+    const line = horizontalLineRef.current;
+    const chart = chartRef.current;
+    if (line === null || chart === undefined) return;
+    if (!chart.containPixel('grid', [x, y])) {
+      line.style.visibility = 'hidden';
+      return;
+    }
+    const left = chart.convertToPixel({ xAxisIndex: 0 }, timeScale.startMs);
+    const right = chart.convertToPixel({ xAxisIndex: 0 }, timeScale.endMs);
+    line.style.left = `${left}px`;
+    line.style.width = `${right - left}px`;
+    line.style.transform = `translateY(${y}px)`;
+    line.style.visibility = 'visible';
+  };
+
   // Only changes from another chart (or new series) can clear the local pin.
   // A local click may update its coordinates without updating the shared pin.
   const [previousPinState, setPreviousPinState] = useState({ lastTooltipPinnedCoords, seriesMapping });
@@ -453,7 +475,7 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
   return (
     <Box
       ref={containerRef}
-      style={{ height }}
+      style={{ height, position: 'relative' }}
       // onContextMenu={(e) => {
       //   // TODO: confirm tooltip pinning works correctly on Windows, should e.preventDefault() be added here
       //   e.preventDefault(); // Prevent the default behaviour when right clicked
@@ -594,6 +616,9 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
           return;
         }
         const { clientX } = e;
+        if (axisPointer?.type === 'cross') {
+          updateHorizontalLine(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+        }
         // ECharts does not reliably emit mouseout when the cursor moves off an exemplar marker
         // onto the plain plot area, which would keep the exemplar tooltip stuck on screen and
         // hide the regular TimeChartTooltip. Clear the hovered exemplar as soon as the cursor
@@ -627,6 +652,9 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         setShowTooltip(true);
       }}
       onMouseLeave={() => {
+        if (horizontalLineRef.current !== null) {
+          horizontalLineRef.current.style.visibility = 'hidden';
+        }
         if (tooltipPinnedCoords === null) {
           setShowTooltip(false);
         }
@@ -719,6 +747,20 @@ export const TimeSeriesChartBase = forwardRef<ChartInstance, TimeChartProps>(fun
         _instance={chartRef}
         syncGroup={enableSyncGrouping ? syncGroup : undefined}
       />
+      {axisPointer?.type === 'cross' && (
+        <Box
+          ref={horizontalLineRef}
+          aria-hidden
+          sx={(theme) => ({
+            position: 'absolute',
+            top: 0,
+            height: 0,
+            borderTop: `1px dashed ${theme.palette.grey[500]}`,
+            pointerEvents: 'none',
+            visibility: 'hidden',
+          })}
+        />
+      )}
     </Box>
   );
 });
