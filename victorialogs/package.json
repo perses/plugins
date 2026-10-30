@@ -25,7 +25,7 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@grafana/lezer-logql": "^0.2.8",
+    "@grafana/lezer-logql": "^0.4.2",
     "react-compiler-runtime": "^1.0.0"
   },
   "peerDependencies": {
