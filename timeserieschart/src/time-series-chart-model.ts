@@ -68,7 +68,7 @@ export interface TimeSeriesChartYAxisOptions {
 }
 
 export interface TooltipAxisPointerOptions {
-  type?: 'cross';
+  type: 'cross';
 }
 
 export interface TooltipSpecOptions {
