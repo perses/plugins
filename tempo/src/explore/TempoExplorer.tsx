@@ -15,9 +15,10 @@ import { Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay, useTimeZone } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
-import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, MultiQueryEditor, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
 import type { QueryDefinition } from '@perses-dev/spec';
 import { isValidTraceId } from '@perses-dev/spec';
+import isEqual from 'lodash/isEqual';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 
@@ -153,6 +154,16 @@ export function TempoExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
+  const { refresh } = useTimeRange();
+
+  const handleQueryRun = (): void => {
+    setData({ queries: queryDefinitions });
+    // Query keys are built from the query content, so running unchanged queries again would only hit the cache.
+    if (isEqual(queryDefinitions, queries)) {
+      refresh();
+    }
+  };
+
   const firstQuery = (queries[0]?.spec.plugin.spec as TempoTraceQuerySpec | undefined)?.query;
   const isSingleTrace = isValidTraceId(firstQuery ?? '');
 
@@ -162,7 +173,7 @@ export function TempoExplorer(): ReactElement {
         queryTypes={['TraceQuery']}
         onChange={(state) => setQueryDefinitions(state)}
         queries={queryDefinitions}
-        onQueryRun={() => setData({ queries: queryDefinitions })}
+        onQueryRun={handleQueryRun}
       />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>

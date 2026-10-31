@@ -26,6 +26,7 @@ import {
 } from '@perses-dev/plugin-system';
 import type { QueryDefinition } from '@perses-dev/spec';
 import { useQuery } from '@tanstack/react-query';
+import isEqual from 'lodash/isEqual';
 import type { ReactElement } from 'react';
 import { useState, useMemo } from 'react';
 
@@ -103,9 +104,17 @@ export function LogExplorer(): ReactElement {
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
   const { getPlugin } = usePluginRegistry();
-  const { absoluteTimeRange } = useTimeRange();
+  const { absoluteTimeRange, refresh } = useTimeRange();
   const datasourceStore = useDatasourceStore();
   const variableState = useAllVariableValues();
+
+  const handleQueryRun = (): void => {
+    setData({ queries: queryDefinitions });
+    // Query keys are built from the query content, so running unchanged queries again would only hit the cache.
+    if (isEqual(queryDefinitions, queries)) {
+      refresh();
+    }
+  };
 
   const logQueryContext: LogQueryContext = useMemo(
     () => ({
@@ -157,7 +166,7 @@ export function LogExplorer(): ReactElement {
         filteredQueryPlugins={logDatasourcePlugins}
         queries={queryDefinitions}
         onChange={(state) => setQueryDefinitions(state)}
-        onQueryRun={() => setData({ queries: queryDefinitions })}
+        onQueryRun={handleQueryRun}
       />
       {volumeQueries.length > 0 && <VolumeHistogramPanel queries={volumeQueries} />}
       <LogsTablePanel queries={queries} />
