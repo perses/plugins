@@ -16,7 +16,7 @@ import type * as Components from '@perses-dev/components';
 import { render } from '@testing-library/react';
 
 import type { PieChartData } from './PieChartBase';
-import { PieChartBase } from './PieChartBase';
+import { MIN_SHOW_LABEL_ANGLE, PieChartBase } from './PieChartBase';
 
 const { eChartSpy } = vi.hoisted(() => ({ eChartSpy: vi.fn() }));
 
@@ -38,7 +38,9 @@ interface EChartProps {
       emphasis: {
         scaleSize: number;
       };
+      labelLayout: { hideOverlap: boolean };
       left: number;
+      minShowLabelAngle: number;
       radius: string | [string, string];
       right: number;
       top: number;
@@ -90,5 +92,21 @@ describe('PieChartBase', () => {
 
     const props = eChartSpy.mock.lastCall?.[0] as EChartProps;
     expect(props.option.series[0]?.radius).toEqual(DONUT_RADIUS);
+  });
+
+  it('omits labels that cannot fit in a slice', () => {
+    render(
+      <ChartsProvider chartsTheme={testChartsTheme}>
+        <PieChartBase width={400} height={300} data={EMPTY_DATA} showLabels outerRadius={90} />
+      </ChartsProvider>,
+    );
+
+    const props = eChartSpy.mock.lastCall?.[0] as EChartProps;
+    expect(props.option.series[0]).toEqual(
+      expect.objectContaining({
+        minShowLabelAngle: MIN_SHOW_LABEL_ANGLE,
+        labelLayout: { hideOverlap: true },
+      }),
+    );
   });
 });
