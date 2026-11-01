@@ -12,7 +12,15 @@
 // limitations under the License.
 
 import type { BarChartData } from './BarChartBase';
-import { calculatePercentages, getOverrideColor, sortSeriesData } from './utils';
+import {
+  barLinkHref,
+  calculatePercentages,
+  fieldLinkParams,
+  getOverrideColor,
+  sortSeriesData,
+  withLiveDashboardVars,
+  withLocationTime,
+} from './utils';
 
 const MOCK_DATA: BarChartData[] = [
   {
@@ -36,6 +44,57 @@ const MOCK_DATA: BarChartData[] = [
     value: null,
   },
 ];
+
+describe('barLinkHref', () => {
+  const template =
+    '/projects/perses/dashboards/nodes?var-instance=${__field.labels.instance}&var-job=$job&var-namespace=$namespace';
+
+  it('fills the series label and the dashboard variables', () => {
+    const href = barLinkHref(template, { instance: 'node-a' }, { job: { value: 'demo', loading: false } });
+    expect(href).toContain('var-instance=node-a');
+    expect(href).toContain('var-job=demo');
+    expect(href).toContain('var-namespace=$namespace');
+    expect(href).not.toContain('__field');
+  });
+
+  it('keeps All as $__all', () => {
+    const href = barLinkHref(
+      '/projects/perses/dashboards/nodes?var-namespace=$namespace&var-job=${job:csv}',
+      {},
+      {
+        namespace: { value: '$__all', loading: false, customAllValue: '.*' },
+        job: { value: ['demo'], loading: false },
+      },
+    );
+    expect(href).toContain('var-namespace=$__all');
+    expect(href).toContain('var-job=demo');
+    expect(href).not.toContain('.*');
+  });
+
+  it('names the field-label query params', () => {
+    expect(fieldLinkParams(template)).toEqual(['var-instance']);
+  });
+
+  it('prefers the address bar and keeps the series label', () => {
+    const href = withLiveDashboardVars(
+      '/projects/perses/dashboards/nodes?var-instance=node-a&var-namespace=.*&var-job=(demo)&var-pod=.*',
+      '?var-instance=other&var-namespace=$__all&var-job=demo&start=1h',
+      fieldLinkParams(template),
+    );
+    expect(href).toContain('var-instance=node-a');
+    expect(href).toContain('var-namespace=$__all');
+    expect(href).toContain('var-job=demo');
+    expect(href).toContain('var-pod=$__all');
+    expect(href).not.toContain('.*');
+    expect(href).not.toContain('other');
+  });
+
+  it('keeps the current time range', () => {
+    expect(withLocationTime('/projects/perses/dashboards/nodes?var-instance=node-a', '?start=1h&tz=UTC')).toBe(
+      '/projects/perses/dashboards/nodes?var-instance=node-a&start=1h&tz=UTC',
+    );
+  });
+});
 
 describe('calculatePercentages', () => {
   it('calculates correct percentage values', () => {
