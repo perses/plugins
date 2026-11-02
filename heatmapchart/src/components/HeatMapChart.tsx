@@ -133,6 +133,8 @@ export function HeatMapChart({
         },
       },
       visualMap: {
+        // Keep the color scale at its existing position with ECharts 6.
+        padding: 5,
         show: showVisualMap ?? false,
         type: 'continuous',
         min: countMin,
