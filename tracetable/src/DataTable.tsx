@@ -14,7 +14,7 @@
 import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/material';
 import type { GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
-import { useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
+import { sanitizeUrl, useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import type { PanelData } from '@perses-dev/plugin-system';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
@@ -24,7 +24,6 @@ import InformationIcon from 'mdi-material-ui/Information';
 import type { ReactElement, ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 
-import { sanitizeUrl } from './link-safety';
 import type { TraceTableOptions } from './trace-table-model';
 import { getServiceColor } from './utils/utils';
 
