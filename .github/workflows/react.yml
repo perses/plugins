@@ -15,12 +15,13 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run format:check
   test-npm:
     name: 'test-npm'
     runs-on: ubuntu-latest
@@ -28,11 +29,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run test
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test
 
   type-check:
     name: 'type-check'
@@ -41,11 +43,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run type-check
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run type-check
 
   # Plugins are developed against React 18 (the minimum supported version); also validate them against React 19.
   react-19:
@@ -55,12 +58,13 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm install --no-save react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add --workspace-root --save-dev react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19
       # Fail fast if peer resolution silently kept React 18.
       - run: node -e "const v=require('react/package.json').version; if(!v.startsWith('19.')) { console.error('Expected React 19, got', v); process.exit(1) }"
-      - run: npm run type-check
-      - run: npm run test
+      - run: pnpm run type-check
+      - run: pnpm run test

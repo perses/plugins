@@ -13,20 +13,20 @@
   "type": "module",
   "engines": {
     "node": ">=24",
-    "npm": ">=11"
+    "pnpm": ">=12"
   },
   "scripts": {
-    "dev": "turbo run dev --concurrency 20",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --fix",
-    "format": "turbo run format:root",
-    "format:check": "turbo run format:root:check",
+    "dev": "pnpm -r --parallel --workspace-concurrency=20 --if-present run dev",
+    "build": "pnpm -r --if-present run build",
+    "lint": "pnpm -r --if-present run lint",
+    "lint:fix": "pnpm -r --parallel --if-present run lint:fix",
+    "format": "pnpm run format:root",
+    "format:check": "pnpm run format:root:check",
     "format:root": "oxfmt",
     "format:root:check": "oxfmt --check",
-    "test": "turbo run test",
-    "type-check": "turbo run type-check",
-    "doctor": "npx react-doctor@latest"
+    "test": "pnpm -r --if-present run test",
+    "type-check": "pnpm -r --if-present run type-check",
+    "doctor": "pnpm dlx react-doctor@latest"
   },
   "workspaces": [
     "alertmanager",
@@ -101,11 +101,21 @@
     "react-router": "^6.30.6",
     "react-router-dom": "^6.30.6",
     "ts-node": "^10.9.2",
-    "turbo": "^2.6.1",
     "typescript": "^7.0.2",
     "use-resize-observer": "^10.0.0",
     "vitest": "^4.1.11",
     "zod": "^4.5.4"
   },
-  "packageManager": "npm@11.17.0"
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.0.0",
+      "onFail": "ignore"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24.19.0",
+      "onFail": "download"
+    }
+  }
 }

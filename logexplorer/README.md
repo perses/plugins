@@ -1,4 +1,4 @@
-# Plugin Module: log-explorer 
+# Plugin Module: log-explorer
 
 ### How to install
 
@@ -7,13 +7,13 @@ This plugin requires react and react-dom 18 or 19.
 Install peer dependencies:
 
 ```bash
-npm install react@18 react-dom@18 # or react@19 react-dom@19
+pnpm add react@18 react-dom@18 # or react@19 react-dom@19
 ```
 
 Install the plugin:
 
 ```bash
-npm install @my-org/log-explorer
+pnpm add @my-org/log-explorer
 ```
 
 ## Development
@@ -23,7 +23,7 @@ npm install @my-org/log-explorer
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Get Started
@@ -31,11 +31,11 @@ npm install
 Start the dev server:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Build the plugin for distribution:
 
 ```bash
-npm run build
+pnpm run build
 ```

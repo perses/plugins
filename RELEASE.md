@@ -90,7 +90,7 @@ git push origin release/v<major>.<minor>
    - release candidates: `go run ./scripts/bump-plugin --all --type prerelease --preid rc`
    - final release: `go run ./scripts/bump-plugin --all --type minor`
    - patch release of a single plugin: `go run ./scripts/bump-plugin --name=tempo --type patch`
-3. Run `npm install` at the root of the repo to propagate this update to the root `package-lock.json`.
+3. Run `pnpm install` at the root of the repo to propagate this update to the root `pnpm-lock.yaml`.
 4. Commit these changes - as a standalone commit ("Prepare \<plugin\> release vX.Y.Z") or as part of your changes.
 5. Push the branch to GitHub and create a pull request with the release branch `release/v<major>.<minor>` as the base.
 6. Once the pull request is approved, merge it into the release branch.

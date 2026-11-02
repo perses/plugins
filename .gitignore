@@ -9,9 +9,6 @@
 node_modules
 dist/
 
-# Ignore turborepo cache
-.turbo
-
 # IDE
 .vscode/*
 !.vscode/extensions.json
@@ -25,4 +22,4 @@ dist/
 
 # ignore shared package links
 .plugins-shared-link-bk.json
-.plugins-shared-link-lock-bk.json
+.plugins-shared-link-lock-bk.yaml

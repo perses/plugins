@@ -95,7 +95,7 @@ func bumpPackage(workspace string, version string, componentNames ...string) {
 	if writeErr := os.WriteFile(pkgPath, newData, 0644); writeErr != nil {
 		logrus.WithError(writeErr).Fatalf("unable to write the file %s", pkgPath)
 	}
-	logBumpSuccess("npm", workspace, version)
+	logBumpSuccess("package", workspace, version)
 }
 
 func bumpPersesDep(workspaces []string, version string) {
@@ -120,7 +120,7 @@ func bumpSharedDep(workspaces []string, version string) {
 	}
 }
 
-// This script bumps all perse-dev and perses shared dependencies for go, cuelang and npm packages to the provided version.
+// This script bumps all perse-dev and perses shared dependencies for go, cuelang and JavaScript packages to the provided version.
 // To be used like that: go run ./scripts/bump-deps/bump-deps.go --version=<version>
 // Note: the version provided does not contain the prefix 'v'.
 // Example: go run ./scripts/bump-deps/bump-deps.go --version=0.52.0-beta.4 --shared-version=0.10.0 --spec-version=0.1.0
@@ -145,9 +145,9 @@ func main() {
 		bumpPackage("", *specVersion, specPackageNames...)
 		bumpSpecDep(workspaces, *specVersion)
 	}
-	if npmErr := command.Run("npm", "install"); npmErr != nil {
-		logrus.WithError(npmErr).Fatal("unable to run npm install")
+	if pnpmErr := command.Run("pnpm", "install"); pnpmErr != nil {
+		logrus.WithError(pnpmErr).Fatal("unable to run pnpm install")
 	} else {
-		logrus.Info("successfully ran npm install")
+		logrus.Info("successfully ran pnpm install")
 	}
 }
