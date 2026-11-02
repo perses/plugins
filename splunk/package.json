@@ -26,8 +26,8 @@
   "types": "lib/index.d.ts",
   "dependencies": {},
   "peerDependencies": {
-    "@perses-dev/components": "^0.55.0",
-    "@perses-dev/plugin-system": "^0.55.0",
+    "@perses-dev/components": "^0.55.1",
+    "@perses-dev/plugin-system": "^0.55.1",
     "@perses-dev/spec": "^0.3.0",
     "immer": "^10.1.1",
     "react": "^18.3.0",
