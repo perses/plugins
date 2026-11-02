@@ -310,11 +310,11 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
   }
 
   // Build the yAxis configuration
-  const yAxis: YAXisComponentOption = {
+  const yAxis = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: minValue,
     max: inputAxis?.max,
-  };
+  } satisfies YAXisComponentOption;
 
   // Apply logarithmic scale settings if requested
   if (inputAxis.logBase !== undefined) {

@@ -53,6 +53,12 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
   const option: EChartsCoreOption = useMemo(() => {
     if (data.value === undefined) return chartsTheme.noDataOption;
 
+    // ECharts 6 resolves progress 'auto' against the inner track's grey axis line.
+    // Use the outer scale's threshold color explicitly to preserve the gauge fill.
+    const colorStops = axisLine?.lineStyle?.color ?? [];
+    const fraction = (data.value ?? 0) / (max ?? 100);
+    const progressColor = colorStops.find(([stop]) => fraction <= stop)?.[1] ?? colorStops.at(-1)?.[1];
+
     // Base configuration shared by both series (= progress & scale)
     const baseGaugeConfig = {
       type: 'gauge' as const,
@@ -94,7 +100,7 @@ export function GaugeChartBase(props: GaugeChartBaseProps): ReactElement {
             show: true,
             width: progressWidth,
             itemStyle: {
-              color: 'auto',
+              color: progressColor,
             },
           },
           axisLine: {
