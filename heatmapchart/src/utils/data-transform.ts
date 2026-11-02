@@ -80,24 +80,48 @@ export function findNearestTimestampIndex(categories: number[], timestamp: numbe
   return low;
 }
 
+/** Returns the labels without `__name__`. */
+function withoutMetricName(labels: Labels): Labels {
+  return Object.fromEntries(Object.entries(labels).filter(([labelName]) => labelName !== '__name__'));
+}
+
+/**
+ * Whether an exemplar group belongs to the displayed histogram series: every label of the
+ * displayed series must be present, with the same value, in the group's series labels.
+ * `__name__` is ignored on both sides (Prometheus drops it from expression results).
+ *
+ * Prometheus fetches exemplars from the query's selectors, not from the evaluated expression,
+ * so a query like `h and on(route) enabled_routes` also returns exemplars for routes the
+ * histogram excludes. Requiring the displayed labels to be a subset of the group labels drops
+ * those, while still keeping exemplars for aggregated histograms: `sum by (route) (rate(h[5m]))`
+ * keeps the groups of its route, and `sum(rate(h[5m]))` (no labels) keeps every group.
+ */
+export function isExemplarGroupInSeries(groupLabels: Labels, displayedSeriesLabels: Labels): boolean {
+  return Object.entries(displayedSeriesLabels).every(
+    ([labelName, labelValue]) => labelName === '__name__' || groupLabels[labelName] === labelValue,
+  );
+}
+
 /**
  * Converts the exemplar groups of the TimeSeriesData contract into chart-friendly
  * data items for the heatmap: one flat list, since the heatmap renders a single
- * series. Exemplars outside the chart time range are dropped.
+ * series. Only groups belonging to the displayed histogram series are kept (see
+ * `isExemplarGroupInSeries`), and exemplars outside the chart time range are dropped.
+ * Without the displayed series labels, groups cannot be matched and none are kept.
  */
 export function getHeatMapExemplarData(
   groups: TimeSeriesExemplars[] | undefined,
   xAxisCategories: number[],
+  displayedSeriesLabels: Labels | undefined,
 ): HeatMapExemplarDataItem[] {
-  if (!groups || xAxisCategories.length === 0) return [];
+  if (!groups || xAxisCategories.length === 0 || displayedSeriesLabels === undefined) return [];
   const items: HeatMapExemplarDataItem[] = [];
   for (const group of groups) {
+    if (!isExemplarGroupInSeries(group.seriesLabels, displayedSeriesLabels)) continue;
     // Prometheus includes __name__ in exemplar series labels but omits it from range-query
     // labels for expressions; strip it like the TimeSeriesChart does, so the metadata
     // tooltip shows the same series labels on both panels.
-    const seriesLabels = Object.fromEntries(
-      Object.entries(group.seriesLabels).filter(([labelName]) => labelName !== '__name__'),
-    );
+    const seriesLabels = withoutMetricName(group.seriesLabels);
     for (const exemplar of group.exemplars) {
       const xIndex = findNearestTimestampIndex(xAxisCategories, exemplar.timestamp);
       if (xIndex < 0) continue;

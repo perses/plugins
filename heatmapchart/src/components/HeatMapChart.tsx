@@ -71,6 +71,11 @@ interface HoveredExemplar {
   plotted: [number, number];
 }
 
+/** Whether two hovered exemplars are the same exemplar of the same series, by value. */
+function isSameExemplar(a: HoveredExemplar, b: HoveredExemplar): boolean {
+  return isEqual(a.exemplar, b.exemplar) && isEqual(a.seriesLabels, b.seriesLabels);
+}
+
 export interface HeatMapChartProps {
   width: number;
   height: number;
@@ -361,7 +366,9 @@ export function HeatMapChart({
             plotCanvas: { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY },
             target: e.target,
           };
-          const isUnpinClick = pinnedExemplar !== null && pinnedExemplar.exemplar === hoveredExemplar.exemplar;
+          // Compare by value: a query refresh replaces the exemplar objects, and clicking the
+          // same pinned diamond must still unpin it.
+          const isUnpinClick = pinnedExemplar !== null && isSameExemplar(pinnedExemplar, hoveredExemplar);
           // Compute the next state first and call the setters separately: updater functions
           // may run more than once (e.g. StrictMode), so they must stay side-effect free.
           setPinnedExemplar(isUnpinClick ? null : hoveredExemplar);

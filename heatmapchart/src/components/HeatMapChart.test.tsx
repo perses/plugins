@@ -212,6 +212,41 @@ describe('HeatMapChart exemplars', () => {
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
+  it('unpins the pinned exemplar tooltip when clicking its marker again after a query refresh', () => {
+    const chart = mockChart();
+    const { container, rerender } = render(chartElement());
+
+    const mouseover = chart.on.mock.calls.find(([event]) => event === 'mouseover')?.[1];
+    const hover = (exemplars: HeatMapExemplarDataItem[]): void => {
+      const marker = getExemplarScatterSeries(exemplars);
+      act(() =>
+        mouseover({
+          componentType: 'series',
+          seriesType: 'scatter',
+          seriesId: marker.id,
+          data: (marker.data as HeatMapExemplarDataItem[])[0],
+        }),
+      );
+    };
+    hover(EXEMPLARS);
+    const wrapper = container.querySelector('button + div');
+    if (!(wrapper instanceof HTMLElement)) throw new Error('Chart wrapper is missing');
+    const canvas = document.createElement('canvas');
+    wrapper.appendChild(canvas);
+    fireEvent.click(canvas); // pin
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Exemplar tooltip');
+
+    // A refresh returns the same exemplars as new objects.
+    const refreshed = structuredClone(EXEMPLARS);
+    rerender(chartElement({ exemplars: refreshed }));
+    hover(refreshed);
+    fireEvent.click(canvas); // click the same diamond: unpins
+    fireEvent.mouseLeave(wrapper);
+    const mouseout = chart.on.mock.calls.find(([event]) => event === 'mouseout')?.[1];
+    act(() => mouseout({ componentType: 'series', seriesType: 'scatter', seriesId: 'exemplar-heatmap' }));
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
   it('unpins the pinned exemplar tooltip when a tooltip is pinned in another chart', () => {
     const chart = mockChart();
     const { container } = render(chartElement());

@@ -19,6 +19,7 @@ import {
   findNearestTimestampIndex,
   getExemplarScatterSeries,
   getHeatMapExemplarData,
+  isExemplarGroupInSeries,
 } from './data-transform';
 
 const CATEGORIES = [0, 60_000, 120_000, 180_000, 240_000];
@@ -63,7 +64,7 @@ describe('getHeatMapExemplarData', () => {
   ];
 
   it('maps exemplars to the nearest category index and keeps the exemplar for the tooltip', () => {
-    const items = getHeatMapExemplarData(groups, CATEGORIES);
+    const items = getHeatMapExemplarData(groups, CATEGORIES, {});
     // trace-2 at 250s is out of the categories range, so only trace-1 and trace-3 remain
     expect(items).toHaveLength(2);
     expect(items[0]).toMatchObject({
@@ -79,14 +80,51 @@ describe('getHeatMapExemplarData', () => {
   });
 
   it('drops exemplars outside the chart time range', () => {
-    const items = getHeatMapExemplarData(groups, CATEGORIES);
+    const items = getHeatMapExemplarData(groups, CATEGORIES, {});
     // trace-2 at 250s is past the last category (240s)
     expect(items.find((item) => item.exemplar.labels['trace_id'] === 'trace-2')).toBeUndefined();
   });
 
   it('returns an empty list for undefined groups or categories', () => {
-    expect(getHeatMapExemplarData(undefined, CATEGORIES)).toEqual([]);
-    expect(getHeatMapExemplarData(groups, [])).toEqual([]);
+    expect(getHeatMapExemplarData(undefined, CATEGORIES, {})).toEqual([]);
+    expect(getHeatMapExemplarData(groups, [], {})).toEqual([]);
+  });
+
+  it('keeps every group for an aggregated histogram without labels', () => {
+    // e.g. sum(rate(demo_request_duration_seconds[5m]))
+    const items = getHeatMapExemplarData(groups, CATEGORIES, {});
+    expect(items.map((item) => item.exemplar.labels['trace_id'])).toEqual(['trace-1', 'trace-3']);
+  });
+
+  it('drops groups excluded from the displayed histogram', () => {
+    // e.g. demo_request_duration_seconds and on(route) enabled_routes, with only /checkout
+    // enabled: Prometheus still returns the exemplars of /api, which must not be displayed.
+    const items = getHeatMapExemplarData(groups, CATEGORIES, {
+      __name__: 'demo_request_duration_seconds',
+      route: '/checkout',
+    });
+    expect(items.map((item) => item.exemplar.labels['trace_id'])).toEqual(['trace-1']);
+  });
+
+  it('returns an empty list without the displayed series labels', () => {
+    expect(getHeatMapExemplarData(groups, CATEGORIES, undefined)).toEqual([]);
+  });
+});
+
+describe('isExemplarGroupInSeries', () => {
+  it('matches when the displayed series labels are a subset of the group labels', () => {
+    expect(isExemplarGroupInSeries({ route: '/api', instance: 'a' }, { route: '/api' })).toBe(true);
+    expect(isExemplarGroupInSeries({ route: '/api' }, {})).toBe(true);
+  });
+
+  it('does not match a different or missing label value', () => {
+    expect(isExemplarGroupInSeries({ route: '/api' }, { route: '/checkout' })).toBe(false);
+    expect(isExemplarGroupInSeries({ instance: 'a' }, { route: '/api' })).toBe(false);
+  });
+
+  it('ignores __name__ on both sides', () => {
+    expect(isExemplarGroupInSeries({ route: '/api' }, { __name__: 'h', route: '/api' })).toBe(true);
+    expect(isExemplarGroupInSeries({ __name__: 'other', route: '/api' }, { __name__: 'h', route: '/api' })).toBe(true);
   });
 });
 
@@ -100,6 +138,7 @@ describe('getExemplarScatterSeries', () => {
         },
       ],
       CATEGORIES,
+      {},
     );
     const series = getExemplarScatterSeries(items);
     expect(series.id).toBe(`${EXEMPLAR_SERIES_ID_PREFIX}heatmap`);

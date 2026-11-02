@@ -169,7 +169,8 @@ export function HeatMapChartPanel(props: HeatMapChartPanelProps): ReactElement |
     }
     return {
       data,
-      exemplarData: getHeatMapExemplarData(queryResults[0]?.data.exemplars, xAxisCategories),
+      // Only the exemplars of the displayed histogram series, not every group Prometheus returns.
+      exemplarData: getHeatMapExemplarData(queryResults[0]?.data.exemplars, xAxisCategories, series.labels),
       xAxisCategories,
       min: lowestBound === Infinity ? undefined : lowestBound,
       max: highestBound === -Infinity ? undefined : highestBound,
