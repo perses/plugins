@@ -26,7 +26,10 @@
   "types": "lib/index.d.ts",
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.0",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.0",
     "@grafana/lezer-traceql": "^0.0.25",
+    "@lezer/common": "^1.5.2",
     "@lezer/highlight": "^1.2.3",
     "react-compiler-runtime": "^1.0.0"
   },
@@ -34,6 +37,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^5.9.1",
+    "@mui/material": "^6.1.10",
     "@perses-dev/client": "^0.56.0-beta.0",
     "@perses-dev/components": "^0.56.0-beta.0",
     "@perses-dev/dashboards": "^0.56.0-beta.0",

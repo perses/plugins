@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@types/react-dom':
-        specifier: ^18.3.0 || ^19.0.0
-        version: 18.3.7(@types/react@18.3.31)
     devDependencies:
       '@module-federation/rsbuild-plugin':
         specifier: ^2.9.1
@@ -66,6 +62,15 @@ importers:
       '@types/lodash':
         specifier: ^4.17.5
         version: 4.17.24
+      '@types/node':
+        specifier: ^24.13.3
+        version: 24.13.3
+      '@types/react':
+        specifier: ^18.3.31
+        version: 18.3.31
+      '@types/react-dom':
+        specifier: ^18.3.7
+        version: 18.3.7(@types/react@18.3.31)
       concurrently:
         specifier: ^10.0.5
         version: 10.0.6
@@ -132,6 +137,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.6.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -153,6 +161,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
+      immer:
+        specifier: ^10.1.1
+        version: 10.2.0
       lodash:
         specifier: ^4.17.21
         version: 4.18.1
@@ -177,6 +188,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -265,6 +279,9 @@ importers:
 
   clickhouse:
     dependencies:
+      '@codemirror/view':
+        specifier: ^6.43.4
+        version: 6.43.4
       '@emotion/react':
         specifier: ^11.7.1
         version: 11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2)
@@ -274,6 +291,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/client':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(react@18.3.1)
@@ -295,6 +315,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^4.39.1
         version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@uiw/react-codemirror':
+        specifier: ^4.19.1
+        version: 4.25.10(@babel/runtime@7.29.7)(@codemirror/autocomplete@6.20.3)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/state@6.7.0)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.43.4)(codemirror@6.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
@@ -337,6 +360,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -388,6 +414,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -400,6 +429,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^9.2.8
         version: 9.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      color-hash:
+        specifier: ^2.0.2
+        version: 2.0.2
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
@@ -443,6 +475,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -482,6 +517,9 @@ importers:
 
   greptimedb:
     dependencies:
+      '@codemirror/view':
+        specifier: ^6.43.4
+        version: 6.43.4
       '@emotion/react':
         specifier: ^11.7.1
         version: 11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2)
@@ -491,6 +529,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/client':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(react@18.3.1)
@@ -509,6 +550,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^4.39.1
         version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@uiw/react-codemirror':
+        specifier: ^4.19.1
+        version: 4.25.10(@babel/runtime@7.29.7)(@codemirror/autocomplete@6.20.3)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/state@6.7.0)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.43.4)(codemirror@6.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
@@ -542,6 +586,9 @@ importers:
 
   heatmapchart:
     dependencies:
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -572,6 +619,9 @@ importers:
 
   histogramchart:
     dependencies:
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -611,6 +661,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/client':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(react@18.3.1)
@@ -665,6 +718,9 @@ importers:
 
   json:
     dependencies:
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/client':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(react@18.3.1)
@@ -714,6 +770,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -778,6 +837,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@mui/system':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -817,12 +882,28 @@ importers:
       react-dom:
         specifier: ^18.3.0 || ^19.0.0
         version: 18.3.1(react@18.3.1)
+      react-virtuoso:
+        specifier: ^4.12.2
+        version: 4.18.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       use-resize-observer:
         specifier: ^10.0.0
         version: 10.0.0(react@18.3.1)
+    devDependencies:
+      '@tanstack/react-query':
+        specifier: ^4.39.1
+        version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   loki:
     dependencies:
+      '@codemirror/autocomplete':
+        specifier: ^6.20.0
+        version: 6.20.3
+      '@codemirror/language':
+        specifier: ^6.12.4
+        version: 6.12.4
+      '@codemirror/state':
+        specifier: ^6.7.0
+        version: 6.7.0
       '@emotion/react':
         specifier: ^11.7.1
         version: 11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2)
@@ -835,6 +916,15 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@lezer/common':
+        specifier: ^1.5.2
+        version: 1.5.2
+      '@lezer/highlight':
+        specifier: ^1.2.3
+        version: 1.2.3
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -853,6 +943,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^4.39.1
         version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@uiw/react-codemirror':
+        specifier: ^4.19.1
+        version: 4.25.10(@babel/runtime@7.29.7)(@codemirror/autocomplete@6.20.3)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/state@6.7.0)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.43.4)(codemirror@6.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
@@ -895,6 +988,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -946,6 +1042,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1006,6 +1105,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1015,6 +1117,9 @@ importers:
       '@perses-dev/spec':
         specifier: ^0.3.0
         version: 0.3.0
+      color-hash:
+        specifier: ^2.0.2
+        version: 2.0.2
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
@@ -1042,9 +1147,16 @@ importers:
       use-resize-observer:
         specifier: ^10.0.0
         version: 10.0.0(react@18.3.1)
+    devDependencies:
+      '@tanstack/react-table':
+        specifier: ^9.2.8
+        version: 9.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   prometheus:
     dependencies:
+      '@codemirror/view':
+        specifier: ^6.43.4
+        version: 6.43.4
       '@emotion/react':
         specifier: ^11.7.1
         version: 11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2)
@@ -1054,6 +1166,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@nexucis/fuzzy':
         specifier: ^0.5.1
         version: 0.5.1
@@ -1081,6 +1196,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^4.39.1
         version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@uiw/react-codemirror':
+        specifier: ^4.19.1
+        version: 4.25.10(@babel/runtime@7.29.7)(@codemirror/autocomplete@6.20.3)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/state@6.7.0)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.43.4)(codemirror@6.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       color-hash:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1145,6 +1263,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/client':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(react@18.3.1)
@@ -1248,12 +1369,18 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0(react@18.3.1)
     devDependencies:
+      '@tanstack/react-query':
+        specifier: ^4.39.1
+        version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router-dom:
         specifier: ^5 || ^6 || ^7
         version: 6.30.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   splunk:
     dependencies:
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1287,6 +1414,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1342,6 +1472,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1387,6 +1520,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1435,6 +1571,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1474,12 +1613,25 @@ importers:
       use-resize-observer:
         specifier: ^10.0.0
         version: 10.0.0(react@18.3.1)
+    devDependencies:
+      '@tanstack/react-query':
+        specifier: ^4.39.1
+        version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-virtuoso:
+        specifier: ^4.12.2
+        version: 4.18.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   tempo:
     dependencies:
       '@codemirror/autocomplete':
         specifier: ^6.20.0
         version: 6.20.3
+      '@codemirror/language':
+        specifier: ^6.12.4
+        version: 6.12.4
+      '@codemirror/state':
+        specifier: ^6.7.0
+        version: 6.7.0
       '@emotion/react':
         specifier: ^11.7.1
         version: 11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2)
@@ -1492,9 +1644,15 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@lezer/common':
+        specifier: ^1.5.2
+        version: 1.5.2
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/client':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(react@18.3.1)
@@ -1561,6 +1719,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1610,6 +1771,9 @@ importers:
       '@types/d3-scale-chromatic':
         specifier: ^3.1.0
         version: 3.1.0
+      react-virtuoso:
+        specifier: ^4.12.2
+        version: 4.18.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   timeseriestable:
     dependencies:
@@ -1622,6 +1786,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1658,6 +1825,10 @@ importers:
       use-resize-observer:
         specifier: ^10.0.0
         version: 10.0.0(react@18.3.1)
+    devDependencies:
+      '@tanstack/react-query':
+        specifier: ^4.39.1
+        version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   tracetable:
     dependencies:
@@ -1670,6 +1841,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mui/x-data-grid':
         specifier: ^7.20.0
         version: 7.29.13(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@mui/material@6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@mui/system@6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1682,6 +1856,9 @@ importers:
       '@perses-dev/spec':
         specifier: ^0.3.0
         version: 0.3.0
+      color-hash:
+        specifier: ^2.0.2
+        version: 2.0.2
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0
@@ -1707,6 +1884,9 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0(react@18.3.1)
     devDependencies:
+      '@tanstack/react-query':
+        specifier: ^4.39.1
+        version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router-dom:
         specifier: ^5 || ^6 || ^7
         version: 6.30.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1722,6 +1902,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/client':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(react@18.3.1)
@@ -1768,12 +1951,18 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0(react@18.3.1)
     devDependencies:
+      '@tanstack/react-query':
+        specifier: ^4.39.1
+        version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-router-dom:
         specifier: ^5 || ^6 || ^7
         version: 6.30.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   victorialogs:
     dependencies:
+      '@codemirror/language':
+        specifier: ^6.12.4
+        version: 6.12.4
       '@emotion/react':
         specifier: ^11.7.1
         version: 11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2)
@@ -1786,6 +1975,15 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.6.7)
+      '@lezer/common':
+        specifier: ^1.5.2
+        version: 1.5.2
+      '@lezer/highlight':
+        specifier: ^1.2.3
+        version: 1.2.3
+      '@mui/material':
+        specifier: ^6.1.10
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@perses-dev/components':
         specifier: ^0.56.0-beta.0
         version: 0.56.0-beta.0(154baa8474bfb58477f5809383a696c2)
@@ -1804,6 +2002,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^4.39.1
         version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@uiw/react-codemirror':
+        specifier: ^4.19.1
+        version: 4.25.10(@babel/runtime@7.29.7)(@codemirror/autocomplete@6.20.3)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/state@6.7.0)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.43.4)(codemirror@6.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
         specifier: ^4.1.0
         version: 4.4.0

@@ -33,8 +33,6 @@ packages:
   - victorialogs
   - e2e
 
-nodeLinker: hoisted
-
 allowBuilds:
   '@swc/core': true
   core-js: false
