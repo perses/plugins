@@ -18,7 +18,7 @@ import type { TimeScale } from '@perses-dev/spec';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams, CustomSeriesRenderItemReturn } from 'echarts';
 import { CustomChart } from 'echarts/charts';
 import type { EChartsCoreOption } from 'echarts/core';
-import { use as registerECharts } from 'echarts/core';
+import { graphic, use as registerECharts } from 'echarts/core';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
@@ -187,9 +187,29 @@ export function HeatMapChart({
             const width = nextX - startX;
             const height = bottomY - topY;
 
+            const { coordSys } = params;
+            if (
+              !('x' in coordSys && typeof coordSys.x === 'number') ||
+              !('y' in coordSys && typeof coordSys.y === 'number') ||
+              !('width' in coordSys && typeof coordSys.width === 'number') ||
+              !('height' in coordSys && typeof coordSys.height === 'number')
+            ) {
+              return null;
+            }
+
+            // Clip each bucket so the last time interval cannot cover the visual map.
+            // Per-item clipping also applies during progressive rendering.
+            const shape = graphic.clipRectByRect(
+              { x: startX, y: topY, width, height },
+              { x: coordSys.x, y: coordSys.y, width: coordSys.width, height: coordSys.height },
+            );
+            if (!shape) {
+              return null;
+            }
+
             return {
               type: 'rect',
-              shape: { x: startX, y: topY, width, height },
+              shape,
               style: {
                 fill: api.visual('color'),
               },
