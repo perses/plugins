@@ -1,5 +1,5 @@
-github.com/perses/perses v0.55.0-rc.1 h1:qM48LcGi8jZ9TWUH1xduM5PqID1XN9e7AbhlayVpAB4=
-github.com/perses/perses v0.55.0-rc.1/go.mod h1:+HQNAtHCNJ8YhaXYdmMvidq3rQHw46OuqbNqKasIocY=
+github.com/perses/perses v0.55.0 h1:3XoFbJ6mCRb4k7jT8sTDst9bxZewR51QGw5bUApsOOA=
+github.com/perses/perses v0.55.0/go.mod h1:+HQNAtHCNJ8YhaXYdmMvidq3rQHw46OuqbNqKasIocY=
 github.com/perses/spec v0.3.0 h1:pAkpwX32lQpdz1YLmGmmAMItdgtuVDVrkAQfWEqX6ZI=
 github.com/perses/spec v0.3.0/go.mod h1:bbTvfdCprae8P4JHknL2VnIkLkTLXqV4stpOlZyxibo=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=

@@ -145,7 +145,12 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     }
   }
 
-  // TODO: What about error responses from Prom that have a response body?
+  // Non-2xx responses are already turned into an error by fetchJson. Some backends and proxies
+  // are non compliant with Prometheus spec and answer an invalid query with a 2xx status and an error body, which must not render as an empty chart.
+  if (response.status === 'error') {
+    throw new Error(response.error || `Prometheus query failed (${response.errorType || 'unknown error'})`);
+  }
+
   const result = response.data;
 
   // Custom display for response header warnings, configurable error responses display coming next
