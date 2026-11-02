@@ -250,7 +250,8 @@ func run(opts options) error {
 //
 //	go run ./scripts/release --all
 //
-// This will release only the tempo plugin (note that the `--name` flag is set with the folder name not the plugin name):
+// This will release only the tempo plugin (note that the `--name` flag is set with the folder name, not the plugin
+// name):
 //
 //	go run ./scripts/release --name=tempo
 //

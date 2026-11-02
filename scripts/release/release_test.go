@@ -15,7 +15,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -24,6 +23,7 @@ import (
 )
 
 func TestMinorSeries(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name           string
 		version        string
@@ -57,6 +57,7 @@ func TestMinorSeries(t *testing.T) {
 }
 
 func TestParseSharedVersion(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name         string
 		versionRange string
@@ -90,8 +91,10 @@ func TestParseSharedVersion(t *testing.T) {
 }
 
 func TestGetSharedVersion(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
-	writePackage(t, dir, `{
+	pkgPath := filepath.Join(dir, "package.json")
+	writeFile(t, pkgPath, `{
   "name": "perses-plugins",
   "devDependencies": {
     "@perses-dev/components": "^0.55.0",
@@ -102,13 +105,13 @@ func TestGetSharedVersion(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "0.56.0-beta.1", got)
 
-	writePackage(t, dir, `{"name": "perses-plugins", "devDependencies": {"@perses-dev/components": "^0.56.0"}}`)
+	writeFile(t, pkgPath, `{"name": "perses-plugins", "devDependencies": {"@perses-dev/plugin-system": ">=0.56.0"}}`)
 	_, err = getSharedVersion(dir)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "@perses-dev/plugin-system is not declared in the devDependencies")
+	require.ErrorContains(t, err, `unsupported version range ">=0.56.0" for @perses-dev/plugin-system`)
 }
 
 func TestSelectPlugins(t *testing.T) {
+	t.Parallel()
 	workspaces := []string{"prometheus", "tempo"}
 	tests := []struct {
 		name        string
@@ -122,7 +125,6 @@ func TestSelectPlugins(t *testing.T) {
 		{name: "no flag", expectedErr: "either the flag --all or --name must be set"},
 		{name: "both flags", pluginName: "tempo", all: true, expectedErr: "mutually exclusive"},
 		{name: "unknown plugin", pluginName: "Tempo", expectedErr: `unknown plugin "Tempo"`},
-		{name: "e2e workspace", pluginName: "e2e", expectedErr: `unknown plugin "e2e"`},
 	}
 
 	for _, tt := range tests {
@@ -130,8 +132,7 @@ func TestSelectPlugins(t *testing.T) {
 			t.Parallel()
 			got, err := selectPlugins(workspaces, tt.pluginName, tt.all)
 			if tt.expectedErr != "" {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.expectedErr)
+				require.ErrorContains(t, err, tt.expectedErr)
 				return
 			}
 			require.NoError(t, err)
@@ -152,11 +153,11 @@ func TestPendingReleases(t *testing.T) {
 
 	writePluginPackage(t, "loki", "next")
 	_, err = pendingReleases([]string{"loki"})
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), `version "next" of the plugin loki doesn't follow the semver`)
+	require.ErrorContains(t, err, `version "next" of the plugin loki doesn't follow the semver`)
 }
 
 func TestCheckPrerelease(t *testing.T) {
+	t.Parallel()
 	betaRelease := pluginRelease{name: "tempo", version: "0.61.0-beta.1"}
 	rcRelease := pluginRelease{name: "loki", version: "0.8.0-rc.0"}
 	stableRelease := pluginRelease{name: "prometheus", version: "0.60.0"}
@@ -168,14 +169,27 @@ func TestCheckPrerelease(t *testing.T) {
 		releases      []pluginRelease
 		expectedErr   string
 	}{
-		{name: "pre-release plugins with shared beta", sharedVersion: "0.56.0-beta.0", releases: []pluginRelease{betaRelease, rcRelease}},
-		{name: "stable plugins with shared final", sharedVersion: "0.56.0", releases: []pluginRelease{stableRelease, patchRelease}},
-		{name: "pre-release plugins with shared final", sharedVersion: "0.56.1", releases: []pluginRelease{betaRelease}},
+		{
+			name:          "pre-release plugins with shared beta",
+			sharedVersion: "0.56.0-beta.0",
+			releases:      []pluginRelease{betaRelease, rcRelease},
+		},
+		{
+			name:          "stable plugins with shared final",
+			sharedVersion: "0.56.0",
+			releases:      []pluginRelease{stableRelease, patchRelease},
+		},
+		{
+			name:          "pre-release plugins with shared final",
+			sharedVersion: "0.56.1",
+			releases:      []pluginRelease{betaRelease},
+		},
 		{
 			name:          "stable plugins with shared beta",
 			sharedVersion: "0.56.0-beta.0",
 			releases:      []pluginRelease{betaRelease, stableRelease, patchRelease},
-			expectedErr:   "@perses-dev/plugin-system 0.56.0-beta.0 is a pre-release, so the plugins must be released as a pre-release (beta, rc...) too: prometheus/v0.60.0, table/v0.15.1",
+			expectedErr: "@perses-dev/plugin-system 0.56.0-beta.0 is a pre-release, so the plugins must be released " +
+				"as a pre-release (beta, rc...) too: prometheus/v0.60.0, table/v0.15.1",
 		},
 		{
 			name:          "stable plugin with shared release candidate",
@@ -190,8 +204,7 @@ func TestCheckPrerelease(t *testing.T) {
 			t.Parallel()
 			err := checkPrerelease(tt.releases, tt.sharedVersion)
 			if tt.expectedErr != "" {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.expectedErr)
+				require.ErrorContains(t, err, tt.expectedErr)
 				return
 			}
 			assert.NoError(t, err)
@@ -200,6 +213,7 @@ func TestCheckPrerelease(t *testing.T) {
 }
 
 func TestGHReleaseArgs(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		release  pluginRelease
@@ -247,13 +261,134 @@ func TestGHReleaseArgs(t *testing.T) {
 	}
 }
 
-func writePackage(t *testing.T, dir string, content string) {
+// TestRun runs the whole release process in dry-run mode, so gh is never called.
+func TestRun(t *testing.T) {
+	betaVersions := map[string]string{"prometheus": "0.60.0-beta.1", "tempo": "0.61.0-beta.1"}
+	tests := []struct {
+		name        string
+		sharedRange string
+		versions    map[string]string
+		setup       func(t *testing.T)
+		opts        options
+		expectedErr string
+	}{
+		{
+			name:        "nothing to release outside of the release branch",
+			sharedRange: "^0.56.0-beta.0",
+			versions:    betaVersions,
+			setup: func(t *testing.T) {
+				t.Helper()
+				runGit(t, "tag", "prometheus/v0.60.0-beta.1")
+				runGit(t, "tag", "tempo/v0.61.0-beta.1")
+			},
+			opts: options{all: true},
+		},
+		{
+			name:        "pending release outside of the release branch",
+			sharedRange: "^0.56.0-beta.0",
+			versions:    betaVersions,
+			setup:       func(*testing.T) {},
+			opts:        options{all: true},
+			expectedErr: `must be released from the branch release/v0.56, but the current branch is "main"`,
+		},
+		{
+			name:        "all plugins from the release branch",
+			sharedRange: "^0.56.0-beta.0",
+			versions:    betaVersions,
+			setup:       pushReleaseBranch,
+			opts:        options{all: true},
+		},
+		{
+			name:        "single plugin from the release branch",
+			sharedRange: "^0.56.0-beta.0",
+			versions:    betaVersions,
+			setup:       pushReleaseBranch,
+			opts:        options{name: "tempo"},
+		},
+		{
+			name:        "e2e workspace is not a plugin",
+			sharedRange: "^0.56.0-beta.0",
+			versions:    betaVersions,
+			setup:       pushReleaseBranch,
+			opts:        options{name: "e2e"},
+			expectedErr: `unknown plugin "e2e"`,
+		},
+		{
+			name:        "stable plugin while the shared libraries are in beta",
+			sharedRange: "^0.56.0-beta.0",
+			versions:    map[string]string{"prometheus": "0.60.0", "tempo": "0.61.0-beta.1"},
+			setup:       pushReleaseBranch,
+			opts:        options{all: true},
+			expectedErr: "so the plugins must be released as a pre-release (beta, rc...) too: prometheus/v0.60.0",
+		},
+		{
+			name:        "stable plugin already released while the shared libraries are in beta",
+			sharedRange: "^0.56.0-beta.0",
+			versions:    map[string]string{"prometheus": "0.60.0", "tempo": "0.61.0-beta.1"},
+			setup: func(t *testing.T) {
+				t.Helper()
+				runGit(t, "tag", "prometheus/v0.60.0")
+				pushReleaseBranch(t)
+			},
+			opts: options{all: true},
+		},
+		{
+			name:        "shared libraries of another series",
+			sharedRange: "^0.57.0-beta.0",
+			versions:    betaVersions,
+			setup:       pushReleaseBranch,
+			opts:        options{all: true},
+			expectedErr: `must be released from the branch release/v0.57, but the current branch is "release/v0.56"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			initPluginsRepository(t, tt.sharedRange, tt.versions)
+			tt.setup(t)
+			tags := runGit(t, "tag", "--list")
+
+			opts := tt.opts
+			opts.remote = "origin"
+			opts.dryRun = true
+			err := run(opts)
+			if tt.expectedErr != "" {
+				require.ErrorContains(t, err, tt.expectedErr)
+			} else {
+				require.NoError(t, err)
+			}
+			assert.Equal(t, tags, runGit(t, "tag", "--list"), "no tag must be created")
+		})
+	}
+}
+
+// initPluginsRepository creates a repository (see initRepository) containing the plugins with the given versions, the
+// e2e workspace, and a root package.json depending on the given version range of the shared libraries.
+func initPluginsRepository(t *testing.T, sharedRange string, versions map[string]string) {
 	t.Helper()
-	require.NoError(t, os.WriteFile(filepath.Join(dir, "package.json"), []byte(content), 0600))
+	initRepository(t)
+	writeFile(t, "package.json", fmt.Sprintf(`{
+  "name": "perses-plugins",
+  "workspaces": ["prometheus", "tempo", "e2e"],
+  "devDependencies": {"@perses-dev/plugin-system": %q}
+}`, sharedRange))
+	writePluginPackage(t, "e2e", "0.3.0-beta.0")
+	for plugin, version := range versions {
+		writePluginPackage(t, plugin, version)
+	}
+	runGit(t, "add", ".")
+	commit(t, "add the plugins")
+	runGit(t, "push", "--quiet", "origin", "main")
+}
+
+func pushReleaseBranch(t *testing.T) {
+	t.Helper()
+	runGit(t, "checkout", "--quiet", "-b", "release/v0.56")
+	runGit(t, "push", "--quiet", "origin", "release/v0.56")
 }
 
 func writePluginPackage(t *testing.T, plugin string, version string) {
 	t.Helper()
-	require.NoError(t, os.MkdirAll(plugin, 0700))
-	writePackage(t, plugin, fmt.Sprintf(`{"name": "@perses-dev/%s-plugin", "version": %q}`, plugin, version))
+	writeFile(t, filepath.Join(plugin, "package.json"),
+		fmt.Sprintf(`{"name": "@perses-dev/%s-plugin", "version": %q}`, plugin, version))
 }

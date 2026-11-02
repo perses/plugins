@@ -112,8 +112,8 @@ go run ./scripts/release --name=tempo    # or release a single plugin (folder na
 The script:
 
 - reads the version of `@perses-dev/plugin-system` in the root `package.json` and verifies that you are on the
-  matching release branch and that your local branch is in sync with the remote. If your remote pointing to
-  `perses/plugins` isn't named `origin`, use the flag `--remote <name>`.
+  matching release branch, that your working tree has no uncommitted changes, and that your local branch is in sync with
+  the remote. If your remote pointing to `perses/plugins` isn't named `origin`, use the flag `--remote <name>`.
 - skips the plugins whose version has already been released.
 - refuses to release a stable version of a plugin when the plugin-system version is a beta or a release candidate.
 - creates, for each plugin to release, the GitHub release and the tag `<plugin folder>/v<version>` on the latest commit

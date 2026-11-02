@@ -37,6 +37,7 @@ func TestPreviousTag(t *testing.T) {
 			name:    "tag of another plugin is ignored",
 			version: "0.61.0-beta.0",
 			setup: func(t *testing.T) {
+				t.Helper()
 				runGit(t, "tag", "prometheus/v0.60.0")
 				runGit(t, "tag", "logstable/v0.5.0")
 			},
@@ -46,6 +47,7 @@ func TestPreviousTag(t *testing.T) {
 			name:    "closest tag when the series has no tag yet",
 			version: "0.61.0-beta.0",
 			setup: func(t *testing.T) {
+				t.Helper()
 				runGit(t, "tag", "tempo/v0.60.0")
 				commit(t, "[FEATURE] Tempo: new feature")
 			},
@@ -55,6 +57,7 @@ func TestPreviousTag(t *testing.T) {
 			name:    "tag of the series when a tag of another series is closer",
 			version: "0.62.0-beta.1",
 			setup: func(t *testing.T) {
+				t.Helper()
 				runGit(t, "tag", "tempo/v0.62.0-beta.0")
 				commit(t, "[BUGFIX] Tempo: fix released in v0.61.1")
 				runGit(t, "tag", "tempo/v0.61.1")
@@ -77,6 +80,7 @@ func TestPreviousTag(t *testing.T) {
 }
 
 func TestPluginEntries(t *testing.T) {
+	t.Parallel()
 	entries := []string{
 		"abc [FEATURE] Tempo: new feature",
 		"def [BUGFIX] Prometheus: fix",

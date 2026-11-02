@@ -45,11 +45,21 @@ func tagExists(tag string) bool {
 
 // releaseCommit returns the commit to tag: the HEAD of the release branch matching the given series of the shared
 // components. The local branch must be in sync with the remote, as the changelog is generated from the local history.
+// The working tree must be clean, as the versions are read from the working tree while HEAD is tagged.
 func releaseCommit(sharedSeries string, remote string) (string, error) {
 	branch := releaseBranch(sharedSeries)
 	if current := git.CurrentBranch(); current != branch {
 		return "", fmt.Errorf("the plugins depending on the shared components %s must be released from the branch %s, "+
 			"but the current branch is %q", sharedSeries, branch, current)
+	}
+
+	changes, err := gitOutput("diff", "--name-only", "HEAD")
+	if err != nil {
+		return "", err
+	}
+	if changes != "" {
+		return "", fmt.Errorf("the working tree has uncommitted changes, commit and push them first: %s",
+			strings.ReplaceAll(changes, "\n", ", "))
 	}
 
 	// Fetch the branch with an explicit refspec: the configured one may not cover it (e.g. single-branch clone).
