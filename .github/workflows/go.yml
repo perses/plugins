@@ -3,12 +3,13 @@ on:
   push:
     branches:
       - main
+      - release/*
   pull_request:
   merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref_name != 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')) }}
 
 jobs:
   test-go:
