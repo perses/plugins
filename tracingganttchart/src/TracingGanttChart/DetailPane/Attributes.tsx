@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
+import { sanitizeUrl } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import type * as oltpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import type { CustomLinks } from '../../gantt-chart-model';
-import { sanitizeUrl } from '../../link-safety';
 import type { Span, Trace } from '../trace';
 import { formatDuration } from '../utils';
 
