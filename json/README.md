@@ -7,13 +7,13 @@ This plugin requires react and react-dom 18 or 19.
 Install peer dependencies:
 
 ```bash
-pnpm add react@18 react-dom@18 # or react@19 react-dom@19
+npm install react@18 react-dom@18 # or react@19 react-dom@19
 ```
 
 Install the plugin:
 
 ```bash
-pnpm add @perses-dev/json
+npm install @perses-dev/json
 ```
 
 The Perses UI packages your plugin depends on are now maintained in the [`perses/shared`](https://github.com/perses/shared) repository. If you need to develop against local copies of those packages, follow the linking instructions in that repo.

@@ -16,7 +16,7 @@
     "pnpm": ">=12"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel --workspace-concurrency=20 --if-present run dev",
+    "dev": "pnpm -r --parallel --if-present run dev",
     "build": "pnpm -r --if-present run build",
     "lint": "pnpm -r --if-present run lint",
     "lint:fix": "pnpm -r --parallel --if-present run lint:fix",

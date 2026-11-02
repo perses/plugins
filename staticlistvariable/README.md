@@ -7,13 +7,13 @@ This plugin requires react and react-dom 18 or 19.
 Install peer dependencies:
 
 ```bash
-pnpm add react@18 react-dom@18 # or react@19 react-dom@19
+npm install react@18 react-dom@18 # or react@19 react-dom@19
 ```
 
 Install the plugin:
 
 ```bash
-pnpm add @perses-dev/static-list-variable-plugin
+npm install @perses-dev/static-list-variable-plugin
 ```
 
 ## Development
