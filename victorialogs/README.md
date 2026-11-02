@@ -7,13 +7,15 @@ This plugin requires react and react-dom 18 or 19.
 Install peer dependencies:
 
 ```bash
-npm install react@18 react-dom@18 # or react@19 react-dom@19
+pnpm add react@18 react-dom@18 # or react@19 react-dom@19
+# with npm: npm install react@18 react-dom@18
 ```
 
 Install the plugin:
 
 ```bash
-npm install @perses-dev/victorialogs
+pnpm add @perses-dev/victorialogs
+# with npm: npm install @perses-dev/victorialogs
 ```
 
 ## Development
