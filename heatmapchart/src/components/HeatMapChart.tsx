@@ -114,7 +114,7 @@ export function HeatMapChart({
   const theme = useTheme();
   const { timeZone } = useTimeZone();
 
-  const chartRef = useRef<EChartsInstance>();
+  const chartRef = useRef<EChartsInstance | undefined>(undefined);
   const [hoveredExemplar, setHoveredExemplar] = useState<HoveredExemplar | null>(null);
   const [pinnedExemplar, setPinnedExemplar] = useState<HoveredExemplar | null>(null);
   const [pinnedExemplarPos, setPinnedExemplarPos] = useState<CursorCoordinates | null>(null);
