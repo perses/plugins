@@ -29,6 +29,9 @@ spec: close({
 
 #tooltip: {
 	enablePinning?: bool
+	axisPointer?: {
+		type!: "cross"
+	}
 }
 
 // Disjunction of closed structs rather than a comprehension (`if mode == "categorical"`): the comprehension
