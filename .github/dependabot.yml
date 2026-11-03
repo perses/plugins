@@ -1,3 +1,6 @@
+# Security updates (enable "Dependabot security updates" in the repository settings) are NOT grouped:
+# Dependabot opens one dedicated PR per vulnerability so they can be reviewed and merged quickly.
+# Version updates are grouped by semver update type (patch / minor / major).
 version: 2
 updates:
   - package-ecosystem: 'gomod'
@@ -7,23 +10,50 @@ updates:
     schedule:
       interval: 'weekly'
     groups:
-      gomod:
-        patterns:
-          - '*'
+      gomod-patch:
+        applies-to: version-updates
+        update-types:
+          - 'patch'
+      gomod-minor:
+        applies-to: version-updates
+        update-types:
+          - 'minor'
+      gomod-major:
+        applies-to: version-updates
+        update-types:
+          - 'major'
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
     groups:
-      actions:
-        patterns:
-          - '*'
+      actions-patch:
+        applies-to: version-updates
+        update-types:
+          - 'patch'
+      actions-minor:
+        applies-to: version-updates
+        update-types:
+          - 'minor'
+      actions-major:
+        applies-to: version-updates
+        update-types:
+          - 'major'
   - package-ecosystem: 'docker'
     directories:
       - '/'
     schedule:
       interval: 'weekly'
     groups:
-      docker:
-        patterns:
-          - '*'
+      docker-patch:
+        applies-to: version-updates
+        update-types:
+          - 'patch'
+      docker-minor:
+        applies-to: version-updates
+        update-types:
+          - 'minor'
+      docker-major:
+        applies-to: version-updates
+        update-types:
+          - 'major'
