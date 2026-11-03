@@ -114,7 +114,7 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
     <Box sx={EDITOR_COLUMN_SX}>
       <ToggleButtonGroup exclusive size="small" value={mode} onChange={onModeChange} sx={MODE_TOGGLE_SX}>
         <ToggleButton value="manual">Manual</ToggleButton>
-        <ToggleButton value="auto">From data</ToggleButton>
+        <ToggleButton value="auto">Generated</ToggleButton>
       </ToggleButtonGroup>
 
       {/* Each tab is self-contained: the same styling controls plus the tab's own item editor, so

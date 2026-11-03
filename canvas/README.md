@@ -7,13 +7,13 @@ The panel has two modes, selected in the panel's **Settings** editor under **Ite
 
 - **Manual** — draw the graph by hand: place nodes, connect them with edges, and add background
   shapes or images. Each node/edge can bind to a query to drive its color and label.
-- **From data** — generate the graph live from query results. Use this for dynamic topologies
+- **Generated** — generate the graph live from query results. Use this for dynamic topologies
   (for example, frequently changing service or host relationships) where drawing by hand is not
   feasible.
 
 ### Data-driven mode
 
-In **From data** mode the panel derives nodes and edges from your queries on every refresh and
+In **Generated** mode the panel derives nodes and edges from your queries on every refresh and
 lays them out automatically — no manual positioning. Graph structure is inferred from the labels on
 the returned time series, and each series' **last value** drives color (via the panel thresholds),
 label interpolation, and edge thickness.
