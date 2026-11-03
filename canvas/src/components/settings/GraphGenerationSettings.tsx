@@ -82,11 +82,6 @@ export function GraphGenerationSettings({ value, onChange }: GraphGenerationSett
 
   return (
     <Stack spacing={2}>
-      <Typography variant="body2" color="text.secondary">
-        Nodes and edges are generated from query results and laid out automatically. Graph structure is inferred from
-        series labels; node and edge colors use the thresholds above.
-      </Typography>
-
       <Typography variant="subtitle2">Nodes</Typography>
       <SelectField label="Node query" value={String(generation.nodeQueryIndex ?? 0)} onChange={onNodeQueryChange}>
         {queryIndexes.map((qi) => (

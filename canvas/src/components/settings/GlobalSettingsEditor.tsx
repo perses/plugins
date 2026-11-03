@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import {
   FormatControls,
@@ -34,7 +34,6 @@ import { LegendSettings } from './LegendSettings';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 const EDITOR_COLUMN_SX = { display: 'flex', flexDirection: 'column' as const, gap: 3 };
-const MODE_TOGGLE_SX = { mb: 2 };
 const DEFAULT_GENERATION: GraphGenerationSpec = { enabled: true, nodeQueryIndex: 0, nodeIdLabel: '' };
 
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
@@ -112,10 +111,17 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
 
   return (
     <Box sx={EDITOR_COLUMN_SX}>
-      <ToggleButtonGroup exclusive size="small" value={mode} onChange={onModeChange} sx={MODE_TOGGLE_SX}>
+      <ToggleButtonGroup exclusive size="small" value={mode} onChange={onModeChange}>
         <ToggleButton value="manual">Manual</ToggleButton>
         <ToggleButton value="auto">Generated</ToggleButton>
       </ToggleButtonGroup>
+
+      {mode === 'auto' ? (
+        <Typography variant="body2" color="text.secondary">
+          Nodes and edges are generated from query results and laid out automatically. Graph structure is inferred from
+          series labels; node and edge colors use the thresholds below.
+        </Typography>
+      ) : null}
 
       {/* Each tab is self-contained: the same styling controls plus the tab's own item editor, so
           every adjustment option stays together within the active mode. */}
