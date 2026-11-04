@@ -9,7 +9,7 @@ var options []log.Option
 log.OpenSearchLogQuery(`source=otel-logs-* | where severityText='ERROR'`, options...)
 ```
 
-Need to provide the PPL expression and a list of options. The expression cannot be empty.
+Need to provide the query expression and a list of options. The expression is PPL unless [QueryLanguage](#querylanguage) says otherwise. It cannot be empty, except for a Lucene query, where a blank expression matches every document.
 
 ## Default options
 
@@ -25,7 +25,7 @@ import "github.com/perses/plugins/opensearch/sdk/go/query/log"
 log.Query(`source=otel-logs-* | where severityText='ERROR' | head 20`)
 ```
 
-Define the PPL query expression for log data.
+Define the query expression for log data, in the language set by [QueryLanguage](#querylanguage).
 
 #### Datasource
 
@@ -45,7 +45,27 @@ import "github.com/perses/plugins/opensearch/sdk/go/query/log"
 log.Index("otel-logs-*")
 ```
 
-Define the index or index pattern to read from. It is prepended to the query as a `source=<index>` clause, and ignored when the query already starts with `source=`.
+Define the index or index pattern to read from. Required for the `lucene` and `dsl` languages, where it is the index in `POST /{index}/_search`. For PPL it is prepended to the query as a `source=<index>` clause, and ignored when the query already starts with `source=`. Ignored for SQL, which reads its index from the `FROM` clause.
+
+#### QueryLanguage
+
+```golang
+import "github.com/perses/plugins/opensearch/sdk/go/query/log"
+
+log.QueryLanguage("lucene")
+```
+
+Select how the query expression is interpreted: `ppl`, `sql`, `lucene` or `dsl`. When not set, the query is PPL and `queryLanguage` is omitted from the spec.
+
+#### Limit
+
+```golang
+import "github.com/perses/plugins/opensearch/sdk/go/query/log"
+
+log.Limit(200)
+```
+
+Cap the number of log documents fetched by a `lucene` or `dsl` query (the `_search` request's `size`). Must be between 1 and `log.MaxLimit` (10,000); defaults to 500 when not set. A `size` in a `dsl` body is capped at this value. Ignored for PPL and SQL.
 
 #### TimestampField
 
@@ -75,7 +95,7 @@ import "github.com/perses/plugins/opensearch/sdk/go/query/log"
 log.DisableTimeFilter(true)
 ```
 
-Stop the panel time range from being injected as a `where` clause on the timestamp field, so the query manages its own time bounds.
+Stop the panel time range from being added as a filter on the timestamp field, so the query manages its own time bounds.
 
 ## Example
 
