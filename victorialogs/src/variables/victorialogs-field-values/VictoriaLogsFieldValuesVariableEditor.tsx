@@ -40,6 +40,7 @@ export function VictoriaLogsFieldValuesVariableEditor(
     datasourceSelectValue,
     VICTORIALOGS_DATASOURCE_KIND,
   ) as VictoriaLogsDatasourceSelector;
+  // isLoading (not isPending): the query stays disabled while the LogsQL query is empty.
   const { data: fieldNames, isLoading: isFieldNamesOptionsLoading } = useFieldNames(query, selectedDatasource);
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = useCallback(
     (next) => {
