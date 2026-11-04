@@ -14,15 +14,54 @@
 package npm
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 
 	"github.com/perses/perses/scripts/pkg/npm"
+	"github.com/sirupsen/logrus"
 )
 
-func MustGetWorkspaces(dirPath string) []string {
-	excludedWorkspaces := []string{"e2e"}
-	workspaces := npm.MustGetWorkspaces(dirPath)
+var excludedWorkspaces = []string{"e2e"}
+
+// GetWorkspaces returns the plugin workspaces declared in the package.json of dirPath.
+func GetWorkspaces(dirPath string) ([]string, error) {
+	workspaces, err := npm.GetWorkspaces(dirPath)
+	if err != nil {
+		return nil, err
+	}
 	return slices.DeleteFunc(workspaces, func(w string) bool {
 		return slices.Contains(excludedWorkspaces, w)
-	})
+	}), nil
+}
+
+func MustGetWorkspaces(dirPath string) []string {
+	workspaces, err := GetWorkspaces(dirPath)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to read workspaces from package.json")
+	}
+	return workspaces
+}
+
+// GetDevDependency returns the version range of the given package declared in the devDependencies of the package.json
+// of dirPath.
+func GetDevDependency(dirPath string, name string) (string, error) {
+	pkgPath := filepath.Join(dirPath, "package.json")
+	data, err := os.ReadFile(pkgPath) //nolint: gosec
+	if err != nil {
+		return "", err
+	}
+	var pkg struct {
+		DevDependencies map[string]string `json:"devDependencies"`
+	}
+	if err := json.Unmarshal(data, &pkg); err != nil {
+		return "", fmt.Errorf("parsing %s: %w", pkgPath, err)
+	}
+	versionRange, ok := pkg.DevDependencies[name]
+	if !ok {
+		return "", fmt.Errorf("%s is not declared in the devDependencies of %s", name, pkgPath)
+	}
+	return versionRange, nil
 }
