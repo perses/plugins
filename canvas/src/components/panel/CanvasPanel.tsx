@@ -21,13 +21,15 @@ import { useZoomContext, ZoomProvider } from '../../contexts/ZoomContext';
 import { useZoom } from '../../hooks/useZoom';
 import type { CanvasProps } from '../../model';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
+import { resolveMouseShortcut } from '../../utils/shortcuts';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
-import { ThresholdLegend } from './ThresholdLegend';
+import { LEGEND_WIDTH, ThresholdLegend } from './ThresholdLegend';
 
 const SVG_STYLE_BASE = { display: 'block' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
+const LEGEND_MARGIN = 8;
 
 interface PanelSvgProps {
   svgRef: (node: SVGSVGElement | null) => void;
@@ -48,13 +50,15 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
 
   const handleDoubleClick = useCallback(
     (event: MouseEvent<SVGSVGElement>): void => {
-      if (event.ctrlKey || event.metaKey) {
-        const boundingBox = nodeBoundingBox(nodes);
-        if (boundingBox) {
-          fitView(boundingBox, width, height);
+      switch (resolveMouseShortcut(event)?.id) {
+        case 'fitView': {
+          const boundingBox = nodeBoundingBox(nodes);
+          if (boundingBox) fitView(boundingBox, width, height);
+          return;
         }
-      } else {
-        resetPan();
+        case 'resetView':
+          resetPan();
+          return;
       }
     },
     [fitView, resetPan, nodes, width, height],
@@ -63,8 +67,7 @@ function PanelSvg({ svgRef, props, seriesByQueryIndex, paletteColors }: PanelSvg
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;
   const thresholds = spec.thresholds ?? EMPTY_THRESHOLDS;
   const legendPosition = spec.legend?.position ?? 'bottom';
-  const LEGEND_MARGIN = 8;
-  const legendX = legendPosition === 'right' ? width - 118 - LEGEND_MARGIN : LEGEND_MARGIN;
+  const legendX = legendPosition === 'right' ? width - LEGEND_WIDTH - LEGEND_MARGIN : LEGEND_MARGIN;
   const legendY =
     legendPosition === 'right' ? LEGEND_MARGIN : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
 

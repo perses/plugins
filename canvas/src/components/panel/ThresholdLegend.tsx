@@ -24,7 +24,17 @@ const ROW_HEIGHT = 18;
 const LABEL_OFFSET = SWATCH_SIZE + 6;
 const PADDING = 8;
 const FONT_SIZE = 11;
+export const LEGEND_WIDTH = 110;
+const TEXT_MAX_WIDTH = LEGEND_WIDTH - PADDING - LABEL_OFFSET - PADDING;
 const NO_SELECT_STYLE = { userSelect: 'none' } as const;
+const LEGEND_FONT_FAMILY = 'sans-serif';
+// Approximate character width for font-size 11px sans-serif.
+const CHAR_WIDTH_APPROX = 6.5;
+
+function truncateLabel(label: string): string {
+  const maxChars = Math.floor(TEXT_MAX_WIDTH / CHAR_WIDTH_APPROX);
+  return label.length > maxChars ? `${label.slice(0, maxChars - 1)}…` : label;
+}
 
 interface ThresholdLegendProps {
   thresholds: ThresholdOptions;
@@ -40,17 +50,21 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
 
   const rows = useMemo(
     () => [
-      ...steps.map((step, i) => ({
-        color: step.color ?? paletteColors[i] ?? defaultColor,
-        label: `≥ ${formatValue(step.value, format)}`,
-        key: String(step.value),
-      })),
-      { color: defaultColor, label: 'default', key: 'default' },
+      ...steps.map((step, i) => {
+        const label = `≥ ${formatValue(step.value, format)}`;
+        return {
+          color: step.color ?? paletteColors[i] ?? defaultColor,
+          label,
+          displayLabel: truncateLabel(label),
+          key: String(step.value),
+        };
+      }),
+      { color: defaultColor, label: 'default', displayLabel: truncateLabel('default'), key: 'default' },
     ],
     [steps, paletteColors, defaultColor, format],
   );
 
-  const boxWidth = 110;
+  const boxWidth = LEGEND_WIDTH;
   const boxHeight = rows.length * ROW_HEIGHT + PADDING * 2;
 
   return (
@@ -75,10 +89,12 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
               x={position.x + PADDING + LABEL_OFFSET}
               y={ry + SWATCH_SIZE - 2}
               fontSize={FONT_SIZE}
+              fontFamily={LEGEND_FONT_FAMILY}
               fill={muiTheme.palette.text.primary}
               style={NO_SELECT_STYLE}
             >
-              {row.label}
+              <title>{row.label}</title>
+              {row.displayLabel}
             </text>
           </g>
         );
