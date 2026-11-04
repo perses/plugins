@@ -41,7 +41,7 @@ function mergeWithPluginDefaults(plugin: PanelPlugin, spec: UnknownSpec | undefi
  * Used for embedded GaugeChart columns only; other embedded panel kinds use defaults.
  */
 export function EmbeddedPanelOptionsEditor({ kind, spec, onChange }: EmbeddedPanelOptionsEditorProps): ReactElement {
-  const { data: plugin, isLoading, isError, error } = usePlugin('Panel', kind);
+  const { data: plugin, isPending, isError, error } = usePlugin('Panel', kind);
 
   const panelPlugin = plugin as PanelPlugin | undefined;
 
@@ -62,7 +62,7 @@ export function EmbeddedPanelOptionsEditor({ kind, spec, onChange }: EmbeddedPan
     handleChange(mergeWithPluginDefaults(panelPlugin, spec));
   }, [panelPlugin, spec, handleChange]);
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 1 }}>
         <CircularProgress size={22} />

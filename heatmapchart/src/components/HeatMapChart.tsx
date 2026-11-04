@@ -18,7 +18,7 @@ import type { Exemplar, Labels, TimeScale } from '@perses-dev/spec';
 import type { CustomSeriesRenderItemAPI, CustomSeriesRenderItemParams, CustomSeriesRenderItemReturn } from 'echarts';
 import { CustomChart, ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import type { ECharts as EChartsInstance, EChartsCoreOption } from 'echarts/core';
-import { use as registerECharts } from 'echarts/core';
+import { graphic, use as registerECharts } from 'echarts/core';
 import isEqual from 'lodash/isEqual';
 import type { ReactElement } from 'react';
 import { useMemo, useRef, useState } from 'react';
@@ -30,6 +30,13 @@ import { EXEMPLAR_SERIES_ID_PREFIX, EXEMPLAR_SYMBOL_SIZE, getExemplarScatterSeri
 import { generateTooltipHTML } from './HeatMapTooltip';
 
 registerECharts([CustomChart, EChartsScatterChart]);
+
+type CartesianCoordSys = CustomSeriesRenderItemParams['coordSys'] & {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 // The default coloring is a blue->yellow->red gradient
 const DEFAULT_VISUAL_MAP_COLORS = [
@@ -221,6 +228,8 @@ export function HeatMapChart({
         },
       },
       visualMap: {
+        // Keep the color scale at its existing position with ECharts 6.
+        padding: 5,
         show: showVisualMap ?? false,
         type: 'continuous',
         min: countMin,
@@ -275,9 +284,22 @@ export function HeatMapChart({
             const width = nextX - startX;
             const height = bottomY - topY;
 
+            // The heatmap always renders on a cartesian2d grid, whose coordSys exposes the plot area rect.
+            const plotArea = params.coordSys as CartesianCoordSys;
+
+            // Clip each bucket so the last time interval cannot cover the visual map.
+            // Per-item clipping also applies during progressive rendering.
+            const shape = graphic.clipRectByRect(
+              { x: startX, y: topY, width, height },
+              { x: plotArea.x, y: plotArea.y, width: plotArea.width, height: plotArea.height },
+            );
+            if (!shape) {
+              return null;
+            }
+
             return {
               type: 'rect',
-              shape: { x: startX, y: topY, width, height },
+              shape,
               style: {
                 fill: api.visual('color'),
               },
