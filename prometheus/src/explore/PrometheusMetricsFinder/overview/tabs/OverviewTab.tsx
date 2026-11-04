@@ -235,6 +235,7 @@ export interface OverviewTabProps extends StackProps {
   metricName: string;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  isMetadataEnabled?: boolean;
   onFilterAdd: (filter: LabelFilter) => void;
 }
 
@@ -242,10 +243,17 @@ export function OverviewTab({
   metricName,
   datasource,
   filters,
+  isMetadataEnabled = true,
   onFilterAdd,
   ...props
 }: OverviewTabProps): ReactElement {
-  const { metadata, isPending: isMetadataLoading, error: metadataError } = useMetricMetadata(metricName, datasource);
+  const {
+    metadata,
+    isPending: isMetadataPending,
+    error: metadataError,
+  } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
+  // A disabled query stays pending, so only show skeletons while metadata is actually requested.
+  const isMetadataLoading = isMetadataEnabled && isMetadataPending;
   const { series, labelValueCounters, isPending, error } = useSeriesStates(metricName, filters, datasource);
 
   return (

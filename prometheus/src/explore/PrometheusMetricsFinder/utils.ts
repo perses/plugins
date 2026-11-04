@@ -38,7 +38,7 @@ import { computeFilterExpr } from './types';
 export function useMetricMetadata(
   metricName: string,
   datasource: DatasourceSelector,
-  enabled?: boolean,
+  enabled = true,
 ): {
   isPending: boolean;
   metadata: MetricMetadata | undefined;
