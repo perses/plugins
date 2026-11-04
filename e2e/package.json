@@ -13,9 +13,9 @@
   },
   "type": "module",
   "scripts": {
-    "test:ci": "npx playwright test --workers=1 --reporter=github,list",
-    "test:install": "npx playwright install --with-deps",
-    "test:local": "npx playwright test --ui",
+    "test:ci": "pnpm exec playwright test --workers=1 --reporter=github,list",
+    "test:install": "pnpm exec playwright install --with-deps",
+    "test:local": "pnpm exec playwright test --ui",
     "build": "echo 'Skipping build for e2e tests'",
     "lint": "oxlint src"
   },

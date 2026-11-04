@@ -7,9 +7,9 @@ This repository contains the core plugins for [Perses](https://github.com/perses
 As prerequisites, you need:
 
 - NodeJS [version 24 or greater](https://nodejs.org/).
-- npm [version 11 or greater](https://www.npmjs.com/).
+- pnpm [version 12 or greater](https://pnpm.io/).
 
-You should first run `npm install` at the root of the repository.
+You should first run `pnpm install` at the root of the repository.
 
 Then in [`perses`](https://github.com/perses/perses) repository:
 
@@ -26,8 +26,8 @@ Then in [`perses`](https://github.com/perses/perses) repository:
 
 ### Code quality
 
-Run `npm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`. Run
-`npm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in GitHub
+Run `pnpm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`. Run
+`pnpm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in GitHub
 Actions. React Compiler rules and the configured React Doctor rules are enforced as errors; resolve their diagnostics
 before merging.
 
@@ -74,4 +74,4 @@ This will allow you to use the updates from perses core in your plugin so you ca
   }
 ```
 
-4. Then run `npm install` on the plugin folder to update the dependencies of your plugin (e.g., `cd perses/plugins/timeserieschart && npm install`).
+4. Then run `pnpm install` on the plugin folder to update the dependencies of your plugin (e.g., `cd perses/plugins/timeserieschart && pnpm install`).

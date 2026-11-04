@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build": "pnpm run build-mf && concurrently \"pnpm run build:esm\" \"pnpm run build:types\"",
     "build-mf": "rsbuild build",
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
@@ -27,12 +27,15 @@
   "dependencies": {
     "ansi_up": "^6.0.0",
     "dompurify": "^3.4.15",
-    "react-compiler-runtime": "^1.0.0"
+    "react-compiler-runtime": "^1.0.0",
+    "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^5.9.1",
+    "@mui/material": "^6.1.10",
+    "@mui/system": "^6.1.10",
     "@perses-dev/components": "^0.56.0-beta.0",
     "@perses-dev/dashboards": "^0.56.0-beta.0",
     "@perses-dev/plugin-system": "^0.56.0-beta.0",
@@ -44,6 +47,9 @@
     "react": "^18.3.0 || ^19.0.0",
     "react-dom": "^18.3.0 || ^19.0.0",
     "use-resize-observer": "^10.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^4.39.1"
   },
   "files": [
     "lib/**/*",

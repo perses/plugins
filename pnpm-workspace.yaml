@@ -1,0 +1,44 @@
+packages:
+  - alertmanager
+  - barchart
+  - canvas
+  - clickhouse
+  - datasourcevariable
+  - flamechart
+  - gaugechart
+  - greptimedb
+  - heatmapchart
+  - histogramchart
+  - jaeger
+  - json
+  - logexplorer
+  - logstable
+  - loki
+  - markdown
+  - opensearch
+  - piechart
+  - prometheus
+  - pyroscope
+  - scatterchart
+  - statchart
+  - staticlistvariable
+  - statushistorychart
+  - splunk
+  - table
+  - tempo
+  - timeserieschart
+  - timeseriestable
+  - tracetable
+  - tracingganttchart
+  - victorialogs
+  - e2e
+
+allowBuilds:
+  '@swc/core': true
+  core-js: false
+  esbuild: true
+
+# Our own packages are bumped right after release; do not hold them back by the 1-day
+# default minimumReleaseAge (which otherwise silently keeps the previous version).
+minimumReleaseAgeExclude:
+  - '@perses-dev/*'
