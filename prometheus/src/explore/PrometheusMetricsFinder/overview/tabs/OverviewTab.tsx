@@ -245,8 +245,8 @@ export function OverviewTab({
   onFilterAdd,
   ...props
 }: OverviewTabProps): ReactElement {
-  const { metadata, isLoading: isMetadataLoading, error: metadataError } = useMetricMetadata(metricName, datasource);
-  const { series, labelValueCounters, isLoading, error } = useSeriesStates(metricName, filters, datasource);
+  const { metadata, isPending: isMetadataLoading, error: metadataError } = useMetricMetadata(metricName, datasource);
+  const { series, labelValueCounters, isPending, error } = useSeriesStates(metricName, filters, datasource);
 
   return (
     <Stack gap={2} {...props}>
@@ -271,9 +271,9 @@ export function OverviewTab({
           )}
           {!isMetadataLoading && !metadataError && <MetricChip label={metadata?.type ?? 'unknown'} />}
           <Typography>
-            Result: {isLoading && <Skeleton variant="text" width={20} sx={{ display: 'inline-block' }} />}
-            {!isLoading && error && <strong>failed to fetch series</strong>}
-            {!isLoading && !error && <strong>{series?.length ?? 'unknown'} series</strong>}
+            Result: {isPending && <Skeleton variant="text" width={20} sx={{ display: 'inline-block' }} />}
+            {!isPending && error && <strong>failed to fetch series</strong>}
+            {!isPending && !error && <strong>{series?.length ?? 'unknown'} series</strong>}
           </Typography>
         </Stack>
       </Stack>
@@ -294,7 +294,7 @@ export function OverviewTab({
         </Stack>
       )}
       {!error && series?.length !== 0 && (
-        <LabelValuesTable labelValueCounters={labelValueCounters} onFilterAdd={onFilterAdd} isLoading={isLoading} />
+        <LabelValuesTable labelValueCounters={labelValueCounters} onFilterAdd={onFilterAdd} isLoading={isPending} />
       )}
     </Stack>
   );

@@ -40,7 +40,7 @@ export function useMetricMetadata(
   datasource: DatasourceSelector,
   enabled?: boolean,
 ): {
-  isLoading: false | true;
+  isPending: boolean;
   metadata: MetricMetadata | undefined;
   error: StatusError | null;
 } {
@@ -51,7 +51,7 @@ export function useMetricMetadata(
   // histograms and summaries timeseries desc are not always added to prefixed timeseries
   const name = metricName.replace(/(_count|_sum|_bucket)$/, '');
 
-  const { data, isLoading, error } = useQuery<MetricMetadataResponse, StatusError>({
+  const { data, isPending, error } = useQuery<MetricMetadataResponse, StatusError>({
     enabled: !!client && enabled,
     queryKey: ['metricMetadata', name], // Not indexed on datasource, assuming a metric metadata should be similar across datasources
     queryFn: async () => {
@@ -73,7 +73,7 @@ export function useMetricMetadata(
     return undefined;
   }, [data, name]);
 
-  return { metadata, isLoading, error };
+  return { metadata, isPending, error };
 }
 
 export function useLabels(
@@ -148,7 +148,7 @@ export function useSeriesStates(
 ): {
   series: Metric[] | undefined;
   labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>>;
-  isLoading: boolean;
+  isPending: boolean;
   isError: boolean;
   error: StatusError | null;
 } {
@@ -161,7 +161,7 @@ export function useSeriesStates(
 
   const {
     data: seriesData,
-    isLoading,
+    isPending,
     isError,
     error,
   } = useQuery<SeriesResponse, StatusError>({
@@ -206,5 +206,5 @@ export function useSeriesStates(
     return result;
   }, [seriesData]);
 
-  return { series: seriesData?.data, labelValueCounters, isLoading, isError, error };
+  return { series: seriesData?.data, labelValueCounters, isPending, isError, error };
 }

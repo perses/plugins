@@ -44,7 +44,7 @@ export function MetricRow({
   isMetadataEnabled,
   onExplore,
 }: MetricRowProps): ReactElement {
-  const { metadata, isLoading } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
+  const { metadata, isPending } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
 
   const searchParams = useExplorerQueryParams({
     data: { tab: 'finder', datasource, filters, exploredMetric: metricName },
@@ -57,14 +57,14 @@ export function MetricRow({
       </TableCell>
 
       <TableCell style={{ width: 115, textAlign: 'center' }}>
-        {isMetadataEnabled && isLoading ? (
+        {isMetadataEnabled && isPending ? (
           <Skeleton variant="rounded" width={75} />
         ) : (
           <MetricChip label={metadata?.type ?? 'unknown'} />
         )}
       </TableCell>
       <TableCell style={{ width: '100%' }}>
-        {isMetadataEnabled && isLoading ? (
+        {isMetadataEnabled && isPending ? (
           <Skeleton variant="text" width={180} />
         ) : (
           <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic', minWidth: '30vw' }}>
