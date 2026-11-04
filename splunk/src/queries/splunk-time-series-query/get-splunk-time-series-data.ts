@@ -13,7 +13,7 @@
 
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
-import type { AbsoluteTimeRange, HTTPAllowedEndpoint, TimeSeries } from '@perses-dev/spec';
+import type { AbsoluteTimeRange, HTTPAllowedEndpoint, TimeSeries, TimeSeriesValueTuple } from '@perses-dev/spec';
 
 import type { SplunkDatasourceSpec } from '../../datasources/splunk-datasource/splunk-datasource-types';
 import type { SplunkJobCreateResponse, SplunkJobStatusResponse, SplunkResultsResponse } from '../../model';
@@ -60,9 +60,15 @@ function gcd(a: number, b: number): number {
   return b === 0 ? a : gcd(b, a % b);
 }
 
+function getGridSlot(timestamp: number, startMs: number, stepMs: number): number {
+  return startMs + Math.ceil((timestamp - startMs) / stepMs) * stepMs;
+}
+
 /**
  * Perses charts re-grid series values from `timeRange.start` using `stepMs`, so both must match the
  * actual Splunk buckets (e.g. timechart span) rather than the panel-width-dependent suggested step.
+ * The grid is anchored on the data, so when mixed with other queries in the same panel, it only lines up with
+ * their grids if the Splunk buckets share the same alignment (e.g. timezone for day spans).
  */
 export function getTimeScaleForSeries(
   series: TimeSeries[],
@@ -91,11 +97,32 @@ export function getTimeScaleForSeries(
   const rangeMs = Math.max(requestedEndMs, lastTimestamp) - Math.min(requestedStartMs, firstTimestamp);
   stepMs = Math.max(stepMs, Math.ceil(rangeMs / MAX_GRID_POINTS));
 
-  // Align the grid start on the data so that every point lands at its real timestamp.
+  // Align the grid start on the data so that, unless the step was capped, every point lands at its real timestamp.
   const startMs = firstTimestamp - Math.max(0, Math.ceil((firstTimestamp - requestedStartMs) / stepMs)) * stepMs;
-  const endMs = Math.max(requestedEndMs, lastTimestamp);
+  const endMs = Math.max(requestedEndMs, getGridSlot(lastTimestamp, startMs, stepMs));
 
   return { timeRange: { start: new Date(startMs), end: new Date(endMs) }, stepMs };
+}
+
+/**
+ * Perses charts expect at most one value per grid slot, each exactly on the grid: an off-grid or duplicate value is
+ * placed in the next free slot, shifting every following point. Like a Prometheus range query, each slot takes the
+ * latest value at or before its timestamp. Values with an invalid timestamp are dropped.
+ */
+export function alignSeriesOnTimeScale(
+  series: TimeSeries[],
+  { timeRange, stepMs }: { timeRange: AbsoluteTimeRange; stepMs: number },
+): TimeSeries[] {
+  const startMs = timeRange.start.getTime();
+  return series.map((timeSeries) => {
+    const valuesBySlot = new Map<number, TimeSeriesValueTuple[1]>();
+    for (const [timestamp, value] of timeSeries.values) {
+      if (Number.isFinite(timestamp)) {
+        valuesBySlot.set(getGridSlot(timestamp, startMs, stepMs), value);
+      }
+    }
+    return { ...timeSeries, values: [...valuesBySlot] };
+  });
 }
 
 export const getSplunkTimeSeriesData: TimeSeriesQueryPlugin<SplunkTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
@@ -160,9 +187,11 @@ export const getSplunkTimeSeriesData: TimeSeriesQueryPlugin<SplunkTimeSeriesQuer
     resultsResponse.results as Array<{ _time: string; [key: string]: string | number }>,
   );
 
+  const timeScale = getTimeScaleForSeries(convertedSeries, { start, end }, context.suggestedStepMs || DEFAULT_STEP_MS);
+
   return {
-    series: convertedSeries,
-    ...getTimeScaleForSeries(convertedSeries, { start, end }, context.suggestedStepMs || DEFAULT_STEP_MS),
+    series: alignSeriesOnTimeScale(convertedSeries, timeScale),
+    ...timeScale,
     metadata: {
       executedQueryString: query,
     },

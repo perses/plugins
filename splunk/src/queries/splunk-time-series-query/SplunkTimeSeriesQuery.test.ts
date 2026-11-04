@@ -11,9 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { getTimeSeriesValues } from '@perses-dev/components';
 import type { TimeSeries } from '@perses-dev/spec';
 
-import { convertResultsToTimeSeries, getTimeScaleForSeries } from './get-splunk-time-series-data';
+import {
+  alignSeriesOnTimeScale,
+  convertResultsToTimeSeries,
+  getTimeScaleForSeries,
+} from './get-splunk-time-series-data';
 import { SplunkTimeSeriesQuery } from './SplunkTimeSeriesQuery';
 
 describe('SplunkTimeSeriesQuery', () => {
@@ -101,5 +106,97 @@ describe('getTimeScaleForSeries', () => {
     const result = getTimeScaleForSeries(series([start + 1, start + 3]), requestedRange, 15_000);
 
     expect(result.stepMs).toBe(Math.ceil((24 * hourMs) / 10_000));
+  });
+});
+
+describe('alignSeriesOnTimeScale', () => {
+  const hourMs = 3_600_000;
+  const requestedRange = { start: new Date(Date.UTC(2025, 0, 1, 0, 17)), end: new Date(Date.UTC(2025, 0, 2, 0, 17)) };
+
+  // Mimics how the time series chart re-grids the query result, returning the rendered non-null points.
+  function render(values: Array<[number, number]>): Array<[number, number | null]> {
+    const input: TimeSeries[] = [{ name: 'count', values }];
+    const timeScale = getTimeScaleForSeries(input, requestedRange, 15_000);
+    const startMs = timeScale.timeRange.start.getTime();
+    const endMs = timeScale.timeRange.end.getTime();
+    const [aligned] = alignSeriesOnTimeScale(input, timeScale);
+    return getTimeSeriesValues(aligned as TimeSeries, {
+      startMs,
+      endMs,
+      stepMs: timeScale.stepMs,
+      rangeMs: endMs - startMs,
+    }).filter(([, value]) => value !== null);
+  }
+
+  it('renders regular buckets at their real timestamps', () => {
+    const values: Array<[number, number]> = [1, 2, 4, 5].map((hour) => [Date.UTC(2025, 0, 1, hour), hour]);
+    expect(render(values)).toEqual(values);
+  });
+
+  it('keeps the latest value of duplicate timestamps without shifting the following points', () => {
+    const first = Date.UTC(2025, 0, 1, 1);
+    expect(
+      render([
+        [first, 1],
+        [first, 2],
+        [first + hourMs, 3],
+      ]),
+    ).toEqual([
+      [first, 2],
+      [first + hourMs, 3],
+    ]);
+  });
+
+  it('renders each value in the first grid slot at or after its timestamp when the step is capped', () => {
+    const start = requestedRange.start.getTime();
+    const values: Array<[number, number]> = [];
+    for (let i = 0; i < 20_000; i++) {
+      values.push([start + 1 + i * 4_000 + (i % 7), i]);
+    }
+
+    const rendered = render(values);
+    const stepMs = Math.ceil((24 * hourMs) / 10_000);
+
+    expect(rendered.length).toBeLessThanOrEqual(10_001);
+    for (const [timestamp, value] of rendered) {
+      const original = values[value as number] as [number, number];
+      expect(timestamp).toBeGreaterThanOrEqual(original[0]);
+      expect(timestamp - original[0]).toBeLessThan(stepMs);
+    }
+    expect(rendered[rendered.length - 1]?.[1]).toBe(values.length - 1);
+  });
+
+  it('extends the time range end to the slot of the last value', () => {
+    const start = requestedRange.start.getTime();
+    const input: TimeSeries[] = [
+      {
+        name: 'count',
+        values: [
+          [start + 1, 1],
+          [requestedRange.end.getTime() + 1, 2],
+        ],
+      },
+    ];
+    const timeScale = getTimeScaleForSeries(input, requestedRange, 15_000);
+    const [aligned] = alignSeriesOnTimeScale(input, timeScale);
+    const lastTimestamp = aligned?.values[aligned.values.length - 1]?.[0];
+
+    expect(lastTimestamp).toBeGreaterThan(requestedRange.end.getTime());
+    expect(timeScale.timeRange.end.getTime()).toBe(lastTimestamp);
+  });
+
+  it('drops values with an invalid timestamp', () => {
+    const input: TimeSeries[] = [
+      {
+        name: 'count',
+        values: [
+          [Number.NaN, 1],
+          [Date.UTC(2025, 0, 1, 1), 2],
+        ],
+      },
+    ];
+    const timeScale = getTimeScaleForSeries(input, requestedRange, 15_000);
+
+    expect(alignSeriesOnTimeScale(input, timeScale)[0]?.values).toEqual([[Date.UTC(2025, 0, 1, 1), 2]]);
   });
 });
