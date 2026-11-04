@@ -28,6 +28,13 @@ import { generateTooltipHTML } from './HeatMapTooltip';
 
 registerECharts([CustomChart]);
 
+type CartesianCoordSys = CustomSeriesRenderItemParams['coordSys'] & {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 // The default coloring is a blue->yellow->red gradient
 const DEFAULT_VISUAL_MAP_COLORS = [
   '#313695',
@@ -187,21 +194,14 @@ export function HeatMapChart({
             const width = nextX - startX;
             const height = bottomY - topY;
 
-            const { coordSys } = params;
-            if (
-              !('x' in coordSys && typeof coordSys.x === 'number') ||
-              !('y' in coordSys && typeof coordSys.y === 'number') ||
-              !('width' in coordSys && typeof coordSys.width === 'number') ||
-              !('height' in coordSys && typeof coordSys.height === 'number')
-            ) {
-              return null;
-            }
+            // The heatmap always renders on a cartesian2d grid, whose coordSys exposes the plot area rect.
+            const plotArea = params.coordSys as CartesianCoordSys;
 
             // Clip each bucket so the last time interval cannot cover the visual map.
             // Per-item clipping also applies during progressive rendering.
             const shape = graphic.clipRectByRect(
               { x: startX, y: topY, width, height },
-              { x: coordSys.x, y: coordSys.y, width: coordSys.width, height: coordSys.height },
+              { x: plotArea.x, y: plotArea.y, width: plotArea.width, height: plotArea.height },
             );
             if (!shape) {
               return null;

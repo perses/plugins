@@ -611,5 +611,25 @@ describe('TablePanel', () => {
       },
       TEST_TIMEOUT,
     );
+
+    it(
+      'should observe the new header row and release the old one when the header row is replaced',
+      async () => {
+        const { container } = render(renderFilteringTable(NARROW_DIMENSIONS));
+
+        await waitFor(() => expect(getFirstFilterCell().style.width).toBe('120px'));
+        const initialHeaderRow = container.querySelector('thead tr')!;
+        expect(observedElements.has(initialHeaderRow)).toBe(true);
+
+        headerCellWidth = 150;
+        const newHeaderRow = initialHeaderRow.cloneNode(true) as Element;
+        act(() => initialHeaderRow.replaceWith(newHeaderRow));
+
+        await waitFor(() => expect(observedElements.has(newHeaderRow)).toBe(true));
+        expect(observedElements.has(initialHeaderRow)).toBe(false);
+        expect(getFirstFilterCell().style.width).toBe('150px');
+      },
+      TEST_TIMEOUT,
+    );
   });
 });
