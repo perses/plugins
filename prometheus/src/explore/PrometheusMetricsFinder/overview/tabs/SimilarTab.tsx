@@ -38,9 +38,9 @@ export function SimilarTab({
   const filtersWithoutName: LabelFilter[] = useMemo(() => {
     return filters.filter((filter) => filter.label !== '__name__');
   }, [filters]);
-  const { data, isLoading } = useLabelValues('__name__', filtersWithoutName, datasource);
+  const { data, isPending } = useLabelValues('__name__', filtersWithoutName, datasource);
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />

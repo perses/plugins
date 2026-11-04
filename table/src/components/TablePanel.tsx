@@ -799,8 +799,8 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
     // Re-sync whenever the header row's size changes.
     const resizeObserver = new ResizeObserver(syncColumnWidths);
-    // The virtualized table remounts its header row when its width, rows, or columns change,
-    // so follow the current header row instead of observing a detached one.
+    // The virtualized table may render or replace its header row after this effect runs,
+    // so follow the current header row instead of observing a missing or detached one.
     let headerRow: Element | null = null;
     const observeHeaderRow = (): void => {
       const currentHeaderRow = scrollContainer.querySelector('thead tr');

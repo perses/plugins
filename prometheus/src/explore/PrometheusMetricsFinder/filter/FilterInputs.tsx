@@ -51,8 +51,8 @@ export function LabelFilterInput({
     [filters, value.label],
   );
 
-  const { data: labelOptions, isLoading: isLabelOptionsLoading } = useLabels(filtersWithoutCurrent, datasource);
-  const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useLabelValues(
+  const { data: labelOptions, isPending: isLabelOptionsLoading } = useLabels(filtersWithoutCurrent, datasource);
+  const { data: labelValuesOptions, isPending: isLabelValuesOptionsLoading } = useLabelValues(
     value.label,
     filtersWithoutCurrent,
     datasource,
