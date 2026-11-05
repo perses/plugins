@@ -38,7 +38,9 @@ function convertResultsToTimeSeries(
     values: resultsArray.map((result) => {
       const timestamp = new Date(result._time).getTime() / 1000;
       const raw = result[metricKey];
-      const value = raw === undefined || raw === '' ? Number.NaN : Number(raw);
+      // Number(null) and Number('  ') are both 0, so treat null and blank strings as missing before coercing.
+      const isMissing = raw === undefined || raw === null || (typeof raw === 'string' && raw.trim() === '');
+      const value = isMissing ? Number.NaN : Number(raw);
       // Leave a gap instead of plotting a false zero for missing or non-numeric values.
       return [timestamp, Number.isNaN(value) ? null : value];
     }),

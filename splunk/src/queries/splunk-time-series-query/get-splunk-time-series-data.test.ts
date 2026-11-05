@@ -39,6 +39,9 @@ describe('getSplunkTimeSeriesData', () => {
           { _time: '2026-01-01T00:01:00Z', count: '' },
           { _time: '2026-01-01T00:02:00Z', count: 'n/a' },
           { _time: '2026-01-01T00:03:00Z', count: '0' },
+          { _time: '2026-01-01T00:04:00Z', count: null },
+          { _time: '2026-01-01T00:05:00Z', count: '   ' },
+          { _time: '2026-01-01T00:06:00Z', count: 0 },
         ],
       }),
     } as unknown as SplunkClient;
@@ -48,7 +51,7 @@ describe('getSplunkTimeSeriesData', () => {
       buildContext(client, [{ endpointPattern: '/services/search/v2/jobs/export' }]),
     );
 
-    expect(data.series[0]?.values.map(([, value]) => value)).toEqual([5, null, null, 0]);
+    expect(data.series[0]?.values.map(([, value]) => value)).toEqual([5, null, null, 0, null, null, 0]);
   });
 
   it('throws when the job status response is malformed', async () => {
