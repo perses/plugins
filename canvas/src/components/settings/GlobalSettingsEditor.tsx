@@ -48,12 +48,7 @@ interface StylingSettingsProps {
 // The appearance controls shared by both the manual and data-driven tabs. Rendering the same block
 // in each tab keeps every adjustment option close together instead of split between a top section
 // and the tab contents.
-function StylingSettings({
-  value,
-  onChange,
-  onFormatChange,
-  onThresholdsChange,
-}: StylingSettingsProps): ReactElement {
+function StylingSettings({ value, onChange, onFormatChange, onThresholdsChange }: StylingSettingsProps): ReactElement {
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
