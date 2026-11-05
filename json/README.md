@@ -2,12 +2,12 @@
 
 ### How to install
 
-This plugin requires react and react-dom 17 or 18
+This plugin requires react and react-dom 18 or 19.
 
 Install peer dependencies:
 
 ```bash
-npm install react react-dom
+npm install react@18 react-dom@18 # or react@19 react-dom@19
 ```
 
 Install the plugin:

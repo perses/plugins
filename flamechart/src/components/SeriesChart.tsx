@@ -44,7 +44,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
   const { setTimeRange } = useTimeRange();
-  const chartRef = useRef<EChartsInstance>();
+  const chartRef = useRef<EChartsInstance | undefined>(undefined);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {

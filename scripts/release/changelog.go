@@ -14,7 +14,7 @@
 package main
 
 import (
-	"bytes"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -23,36 +23,49 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func getPreviousTag(pluginName string) string {
-	pluginName = strings.ToLower(pluginName)
-	data, err := exec.Command("git", "describe", "--tags", "--abbrev=0", "--match", fmt.Sprintf("%s/v*", pluginName)).Output()
+// previousTag returns the closest tag of the plugin reachable from HEAD, looking first at the tags of the minor series
+// of the given version: a tag of another series can be closer (e.g. when main has been merged into the release branch).
+// It returns an empty string when the plugin has never been released.
+func previousTag(plugin string, version string) (string, error) {
+	series, err := minorSeries(version)
 	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			if exitError.ExitCode() == 128 {
-				return ""
-			}
-		}
-
-		logrus.Fatal(err)
+		return "", err
 	}
-	return string(bytes.ReplaceAll(data, []byte("\n"), []byte("")))
+	for _, pattern := range []string{fmt.Sprintf("%s/%s.*", plugin, series), plugin + "/v*"} {
+		tag, err := gitOutput("describe", "--tags", "--abbrev=0", "--match", pattern)
+		if err == nil {
+			return tag, nil
+		}
+		// git describe exits with the code 128 when no tag matches the pattern
+		if exitErr, ok := errors.AsType[*exec.ExitError](err); !ok || exitErr.ExitCode() != 128 {
+			return "", err
+		}
+	}
+	return "", nil
 }
 
-func generateChangelog(pluginName string) string {
-	previousTag := getPreviousTag(pluginName)
-	if previousTag == "" {
-		logrus.Infof("no previous tag found for plugin %s, skipping changelog generation", pluginName)
-		return "First release"
-	}
-	logrus.Infof("previous tag for plugin %s is %s", pluginName, previousTag)
-	entries := changelog.GetGitLogs(previousTag)
-	var newEntries []string
+// pluginEntries returns the git log entries mentioning the given plugin.
+func pluginEntries(entries []string, plugin string) []string {
+	plugin = strings.ToLower(plugin)
+	result := []string{}
 	for _, entry := range entries {
-		pluginName = strings.ToLower(pluginName)
-		if !strings.Contains(strings.ToLower(entry), pluginName) {
-			continue
+		if strings.Contains(strings.ToLower(entry), plugin) {
+			result = append(result, entry)
 		}
-		newEntries = append(newEntries, entry)
 	}
-	return changelog.New(newEntries).GenerateChangelog()
+	return result
+}
+
+func generateChangelog(release pluginRelease) (string, error) {
+	tag, err := previousTag(release.name, release.version)
+	if err != nil {
+		return "", fmt.Errorf("looking for the previous tag of the plugin %s: %w", release.name, err)
+	}
+	if tag == "" {
+		logrus.Infof("no previous tag found for plugin %s, skipping changelog generation", release.name)
+		return "First release", nil
+	}
+	logrus.Infof("previous tag for plugin %s is %s", release.name, tag)
+	entries := pluginEntries(changelog.GetGitLogs(tag), release.name)
+	return changelog.New(entries).GenerateChangelog(), nil
 }

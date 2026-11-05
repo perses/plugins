@@ -13,3 +13,15 @@
 
 // jsdom does not implement the geometry API CodeMirror uses when measuring text.
 Range.prototype.getClientRects = (): DOMRectList => [] as unknown as DOMRectList;
+
+// jsdom has no layout engine nor ResizeObserver; observed elements are never measured during tests.
+if (typeof ResizeObserver === 'undefined') {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    },
+  );
+}

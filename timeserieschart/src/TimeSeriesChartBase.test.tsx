@@ -18,7 +18,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ECharts } from 'echarts/core';
 import { init } from 'echarts/core';
 import type { ReactElement } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import { ANNOTATION_Y_AXIS } from './annotations/AnnotationTooltip';
 import type { TimeChartProps } from './TimeSeriesChartBase';
@@ -36,7 +36,7 @@ vi.mock('@perses-dev/components', async (importOriginal) => ({
   ),
 }));
 
-vi.mock('use-resize-observer', () => ({ default: vi.fn(() => ({ ref: vi.fn() })) }));
+vi.mock('use-resize-observer', () => ({ useResizeObserver: vi.fn(() => ({ ref: vi.fn() })) }));
 
 const DATA: TimeSeries[] = [
   {
@@ -149,11 +149,13 @@ describe('TimeSeriesChartBase performance', () => {
     chart.resize.mockClear();
     const onResize = vi.mocked(useResizeObserver).mock.calls.at(-1)?.[0]?.onResize;
     expect(onResize).toBeDefined();
-    onResize?.({ width: 500, height: 300 });
+    const resize = (width: number, height: number): void =>
+      onResize?.({ width, height, entry: {} as ResizeObserverEntry });
+    resize(500, 300);
     expect(chart.resize).not.toHaveBeenCalled();
-    onResize?.({ width: 800, height: 300 });
+    resize(800, 300);
     expect(chart.resize).toHaveBeenLastCalledWith({ width: 800, height: 300 });
-    onResize?.({ width: 800, height: 400 });
+    resize(800, 400);
     expect(chart.resize).toHaveBeenLastCalledWith({ width: 800, height: 400 });
   });
 

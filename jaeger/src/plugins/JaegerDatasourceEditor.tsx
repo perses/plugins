@@ -35,15 +35,15 @@ export function JaegerDatasourceEditor(props: JaegerDatasourceEditorProps): Reac
       spec: {
         allowedEndpoints: [
           {
-            endpointPattern: '/api/traces',
+            endpointPattern: '/api/v3/traces',
             method: 'GET',
           },
           {
-            endpointPattern: '/api/services',
+            endpointPattern: '/api/v3/services',
             method: 'GET',
           },
           {
-            endpointPattern: '/api/operations',
+            endpointPattern: '/api/v3/operations',
             method: 'GET',
           },
         ],

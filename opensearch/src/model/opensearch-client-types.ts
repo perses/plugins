@@ -13,17 +13,25 @@
 
 export type OpenSearchRequestHeaders = Record<string, string>;
 
-export interface OpenSearchPPLColumn {
+export interface OpenSearchDatarowsColumn {
   name: string;
   type: string;
 }
 
-export interface OpenSearchPPLResponse {
-  schema: OpenSearchPPLColumn[];
-  datarows: Array<Array<string | number | boolean | null>>;
+/** The schema + datarows shape returned by _ppl and _sql. OpenSearch calls this its `jdbc` response format (?format=jdbc), which is the default. */
+export interface OpenSearchDatarowsResponse {
+  schema: OpenSearchDatarowsColumn[];
+  // Object/struct and array columns (e.g. OTel's `service`) come back as nested JSON values.
+  datarows: Array<Array<string | number | boolean | null | Record<string, unknown> | unknown[]>>;
   total?: number;
   size?: number;
 }
+
+/** @deprecated Use `OpenSearchDatarowsColumn`. */
+export type OpenSearchPPLColumn = OpenSearchDatarowsColumn;
+
+/** @deprecated Use `OpenSearchDatarowsResponse`. */
+export type OpenSearchPPLResponse = OpenSearchDatarowsResponse;
 
 export interface OpenSearchErrorResponse {
   error?: {
@@ -33,3 +41,20 @@ export interface OpenSearchErrorResponse {
   };
   status?: number;
 }
+
+export interface OpenSearchSearchHit {
+  _index?: string;
+  _id?: string;
+  _source?: Record<string, unknown>;
+}
+
+export interface OpenSearchSearchResponse {
+  hits: {
+    /** Absent when the request sets `track_total_hits: false`. */
+    total?: { value: number; relation: 'eq' | 'gte' };
+    hits: OpenSearchSearchHit[];
+  };
+}
+
+/** A `_search` request body. Kept loose so a user-supplied Query DSL body passes through unchanged. */
+export type OpenSearchSearchRequestBody = Record<string, unknown>;

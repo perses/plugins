@@ -18,6 +18,7 @@ export const MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE = [
     status: 'success',
     fetchStatus: 'idle',
     isLoading: false,
+    isPending: false,
     isSuccess: true,
     isError: false,
     data: {
@@ -71,7 +72,6 @@ export const MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE = [
     isLoadingError: false,
     isPaused: false,
     isPlaceholderData: false,
-    isPreviousData: false,
     isRefetchError: false,
     isStale: true,
   },
@@ -82,6 +82,7 @@ export const MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE = [
     status: 'success',
     fetchStatus: 'idle',
     isLoading: false,
+    isPending: false,
     isSuccess: true,
     isError: false,
     data: {
@@ -129,7 +130,6 @@ export const MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE = [
     isLoadingError: false,
     isPaused: false,
     isPlaceholderData: false,
-    isPreviousData: false,
     isRefetchError: false,
     isStale: true,
   },
@@ -214,6 +214,7 @@ export const MOCK_NULL_QUERY_RESULT = [
     status: 'success',
     fetchStatus: 'idle',
     isLoading: false,
+    isPending: false,
     isSuccess: true,
     isError: false,
     data: {
@@ -269,7 +270,6 @@ export const MOCK_NULL_QUERY_RESULT = [
     isLoadingError: false,
     isPaused: false,
     isPlaceholderData: false,
-    isPreviousData: false,
     isRefetchError: false,
     isStale: true,
   },

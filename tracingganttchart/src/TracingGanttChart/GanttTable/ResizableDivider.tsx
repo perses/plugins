@@ -17,7 +17,7 @@ import type { MouseEvent as ReactMouseEvent, ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 
 interface ResizableDividerProps {
-  parentRef: React.RefObject<Element>;
+  parentRef: React.RefObject<Element | null>;
   onMove: (left: number) => void;
 }
 

@@ -40,6 +40,7 @@ const CONTAINER_SX = { overflow: 'auto' };
 const EMPHASIS_SHADOW_BLUR = 10;
 const EMPHASIS_SCALE_SIZE = 5;
 const PIE_INSET = EMPHASIS_SHADOW_BLUR + EMPHASIS_SCALE_SIZE;
+export const MIN_SHOW_LABEL_ANGLE = 360 * 0.05;
 export interface PieChartData {
   id?: string;
   name: string;
@@ -73,7 +74,7 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const chartRef = useRef<ECharts>();
+  const chartRef = useRef<ECharts | undefined>(undefined);
 
   useLayoutEffect(() => {
     chartRef.current?.resize({ width, height });
@@ -99,6 +100,8 @@ export function PieChartBase(props: PieChartBaseProps): ReactElement {
           right: PIE_INSET,
           top: PIE_INSET,
           bottom: PIE_INSET,
+          minShowLabelAngle: MIN_SHOW_LABEL_ANGLE,
+          labelLayout: { hideOverlap: true },
           label: {
             show: Boolean(showLabels),
             position: 'inner',

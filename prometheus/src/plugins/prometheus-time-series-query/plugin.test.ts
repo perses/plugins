@@ -141,6 +141,15 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(variables).toEqual(['job', 'instance', 'foo']);
   });
 
+  it('should include the variables used in the Min Step in the variable dependencies', () => {
+    if (!PrometheusTimeSeriesQuery.dependsOn) throw new Error('dependsOn is not defined');
+    const { variables } = PrometheusTimeSeriesQuery.dependsOn(
+      { query: 'up{job="$job"}', minStep: '$resolution' as DurationString },
+      createStubContext(),
+    );
+    expect(variables).toEqual(['job', 'resolution']);
+  });
+
   it('should replace variables in seriesNameFormat', async () => {
     const ctx = createStubContext();
     ctx.variableState = {
@@ -177,6 +186,41 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(promStubClient.rangeQuery).not.toHaveBeenCalled();
     const [params] = (promStubClient.instantQuery as Mock).mock.calls[0] as [{ query: string; time: number }];
     expect(params.time).toBe(Math.floor(ctx.timeRange.end.getTime() / 1000));
+  });
+
+  it('should throw the error of a range query answered with an error body', async () => {
+    (promStubClient.rangeQuery as Mock).mockResolvedValueOnce({
+      status: 'error',
+      errorType: 'bad_data',
+      error: 'parse error: unexpected end of input',
+    } satisfies RangeQueryResponse);
+
+    await expect(PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'sum(' }, createStubContext())).rejects.toThrow(
+      'parse error: unexpected end of input',
+    );
+  });
+
+  it('should throw a fallback message when an error body has no error text', async () => {
+    (promStubClient.rangeQuery as Mock).mockResolvedValueOnce({
+      status: 'error',
+      errorType: 'bad_data',
+    } as unknown as RangeQueryResponse);
+
+    await expect(PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'sum(' }, createStubContext())).rejects.toThrow(
+      'Prometheus query failed (bad_data)',
+    );
+  });
+
+  it('should throw the error of an instant query answered with an error body', async () => {
+    (promStubClient.instantQuery as Mock).mockResolvedValueOnce({
+      status: 'error',
+      errorType: 'timeout',
+      error: 'query timed out',
+    } satisfies InstantQueryResponse);
+
+    await expect(
+      PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up', instant: true }, createStubContext()),
+    ).rejects.toThrow('query timed out');
   });
 
   it('should use instantQuery when spec.instant is true', async () => {

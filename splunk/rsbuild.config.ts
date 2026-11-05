@@ -25,10 +25,14 @@ export default createConfigForPlugin({
       './SplunkLogQuery': './src/queries/splunk-log-query',
     },
     shared: {
-      react: { requiredVersion: '18.2.0', singleton: true },
+      react: { requiredVersion: '^18.3.0 || ^19.0.0', singleton: true },
+      'react/jsx-runtime': { requiredVersion: '^18.3.0 || ^19.0.0', singleton: true },
+      'react-dom': { requiredVersion: '^18.3.0 || ^19.0.0', singleton: true },
       immer: { singleton: true },
       '@perses-dev/components': { singleton: true },
       '@perses-dev/plugin-system': { singleton: true },
+      '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
+      '@emotion/styled': { singleton: true },
     },
   },
 });
