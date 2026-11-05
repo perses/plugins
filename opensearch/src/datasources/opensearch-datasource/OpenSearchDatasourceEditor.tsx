@@ -35,6 +35,16 @@ export function OpenSearchDatasourceEditor(props: OpenSearchDatasourceEditorProp
             endpointPattern: '/_plugins/_ppl',
             method: 'POST',
           },
+          {
+            endpointPattern: '/_plugins/_sql',
+            method: 'POST',
+          },
+          {
+            // Lucene and Query DSL queries POST to /{index}/_search, so the index
+            // segment has to be matched as a pattern.
+            endpointPattern: '/.*/_search',
+            method: 'POST',
+          },
         ],
         url: '',
       },

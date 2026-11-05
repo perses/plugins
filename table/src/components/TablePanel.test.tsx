@@ -17,7 +17,7 @@ import type { PluginLoader, PluginModuleResource, VariableStateMap } from '@pers
 import { dynamicImportPluginLoader, PluginRegistry } from '@perses-dev/plugin-system';
 import type { TimeSeriesData } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { VirtuosoMockContext } from 'react-virtuoso';
@@ -556,7 +556,8 @@ describe('TablePanel', () => {
 
   describe('filter row alignment', () => {
     let headerCellWidth = 0;
-    const observedElements = new Set<Element>();
+    // Maps each observed element to a function notifying its observer of a resize.
+    const observedElements = new Map<Element, () => void>();
 
     beforeEach(() => {
       headerCellWidth = 120;
@@ -567,8 +568,11 @@ describe('TablePanel', () => {
       vi.stubGlobal(
         'ResizeObserver',
         class {
+          constructor(private readonly callback: ResizeObserverCallback) {}
           observe(element: Element): void {
-            observedElements.add(element);
+            observedElements.set(element, () =>
+              this.callback([{ target: element } as ResizeObserverEntry], this as unknown as ResizeObserver),
+            );
           }
           unobserve(element: Element): void {
             observedElements.delete(element);
@@ -586,7 +590,7 @@ describe('TablePanel', () => {
     });
 
     it(
-      'should re-sync filter cell widths when the table replaces its header row',
+      'should re-sync filter cell widths when the table header row resizes',
       async () => {
         const { container, rerender } = render(renderFilteringTable(NARROW_DIMENSIONS));
 
@@ -597,11 +601,33 @@ describe('TablePanel', () => {
         headerCellWidth = 150;
         rerender(renderFilteringTable(WIDE_DIMENSIONS));
 
-        await waitFor(() => expect(getFirstFilterCell().style.width).toBe('150px'));
+        // The virtualized table keeps its header row mounted, so the resize observer drives the re-sync.
         const currentHeaderRow = container.querySelector('thead tr');
-        expect(currentHeaderRow).not.toBe(initialHeaderRow);
+        expect(currentHeaderRow).toBe(initialHeaderRow);
         expect(observedElements.has(currentHeaderRow!)).toBe(true);
-        expect(observedElements.has(initialHeaderRow!)).toBe(false);
+
+        act(() => observedElements.get(currentHeaderRow!)?.());
+        await waitFor(() => expect(getFirstFilterCell().style.width).toBe('150px'));
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'should observe the new header row and release the old one when the header row is replaced',
+      async () => {
+        const { container } = render(renderFilteringTable(NARROW_DIMENSIONS));
+
+        await waitFor(() => expect(getFirstFilterCell().style.width).toBe('120px'));
+        const initialHeaderRow = container.querySelector('thead tr')!;
+        expect(observedElements.has(initialHeaderRow)).toBe(true);
+
+        headerCellWidth = 150;
+        const newHeaderRow = initialHeaderRow.cloneNode(true) as Element;
+        act(() => initialHeaderRow.replaceWith(newHeaderRow));
+
+        await waitFor(() => expect(observedElements.has(newHeaderRow)).toBe(true));
+        expect(observedElements.has(initialHeaderRow)).toBe(false);
+        expect(getFirstFilterCell().style.width).toBe('150px');
       },
       TEST_TIMEOUT,
     );

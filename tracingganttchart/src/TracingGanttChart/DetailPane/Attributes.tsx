@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Divider, Link, List, ListItem, ListItemText } from '@mui/material';
+import { sanitizeUrl } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import type * as oltpcommonv1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/common/v1/common';
 import type { ReactElement } from 'react';
@@ -147,9 +148,12 @@ export function AttributeItem(props: AttributeItemProps): ReactElement {
   const { name, value, link } = props;
   const { RouterComponent } = useRouterContext();
 
+  // The link is sanitized here, after the variables are interpolated, since variable values can be provided by the user
+  // (e.g. through the URL query parameters). An unsafe link (e.g. javascript:) is rendered as plain text.
+  const href = sanitizeUrl(link);
   const valueComponent =
-    RouterComponent && link ? (
-      <Link component={RouterComponent} to={link}>
+    RouterComponent && href ? (
+      <Link component={RouterComponent} to={href}>
         {value}
       </Link>
     ) : (
