@@ -14,7 +14,7 @@
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
 import type { OpenSearchClient } from '../../model/opensearch-client';
-import { ppl } from '../../model/opensearch-client';
+import { ppl, search, sql } from '../../model/opensearch-client';
 import type { OpenSearchDatasourceSpec } from './opensearch-datasource-types';
 import { OpenSearchDatasourceEditor } from './OpenSearchDatasourceEditor';
 
@@ -35,6 +35,10 @@ const createClient: DatasourcePlugin<OpenSearchDatasourceSpec, OpenSearchClient>
     },
     ppl: (params, headers, signal) =>
       ppl(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, signal),
+    sql: (params, headers, signal) =>
+      sql(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, signal),
+    search: (params, headers, signal) =>
+      search(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }, signal),
   };
 };
 

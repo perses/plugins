@@ -28,6 +28,7 @@ export interface LabelNameProps {
 export function LabelName(props: LabelNameProps): ReactElement {
   const { datasource, labelSelector, value, onChange } = props;
 
+  // isLoading (not isPending): the query stays disabled while the label selector is empty.
   const { data: labelNamesOptions, isLoading: isLabelNamesOptionsLoading } = useLabelNames(datasource, labelSelector);
 
   const filteredLabelNamesOptions = useMemo(

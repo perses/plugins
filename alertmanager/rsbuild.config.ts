@@ -41,6 +41,7 @@ export default createConfigForPlugin({
       '@emotion/react': { requiredVersion: '^11.11.3', singleton: true },
       '@emotion/styled': { singleton: true },
       '@tanstack/react-query': { singleton: true },
+      immer: { singleton: true },
     },
   },
 });

@@ -123,6 +123,29 @@ describe('Attributes', () => {
     );
   });
 
+  it('does not render a link when the attribute link uses a disallowed scheme', () => {
+    const customLinks: CustomLinks = {
+      links: { attributes: [{ name: 'k8s.pod.name', link: 'javascript:alert(document.domain)' }] },
+      variables: {},
+    };
+    const attributes = [{ key: 'k8s.pod.name', value: { stringValue: 'hotrod' } }];
+
+    renderAttributeList({ customLinks, attributes });
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText('hotrod')).not.toHaveAttribute('href');
+  });
+
+  it('does not render a link when a variable injects a disallowed scheme', () => {
+    const customLinks: CustomLinks = {
+      links: { attributes: [{ name: 'k8s.pod.name', link: '${target}' }] },
+      variables: { target: 'javascript:alert(document.domain)' },
+    };
+    const attributes = [{ key: 'k8s.pod.name', value: { stringValue: 'hotrod' } }];
+
+    renderAttributeList({ customLinks, attributes });
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('render span id and duration', () => {
     renderTraceAttributes({ trace, span: trace.rootSpans[0]!.childSpans[0]!.childSpans[0]! });
     expect(screen.getByText('sid3')).toBeInTheDocument();
