@@ -27,7 +27,7 @@ export interface ProfileTypeSelectorProps {
 export function ProfileTypeSelector(props: ProfileTypeSelectorProps): ReactElement {
   const { datasource, value, service, onChange } = props;
 
-  const { data: profileTypesOptions, isLoading: isProfileTypesOptionsLoading } = useProfileTypes(datasource, service);
+  const { data: profileTypesOptions, isPending: isProfileTypesOptionsLoading } = useProfileTypes(datasource, service);
 
   return (
     <Stack position="relative" sx={{ width: '100%' }}>

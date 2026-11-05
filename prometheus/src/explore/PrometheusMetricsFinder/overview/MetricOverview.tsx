@@ -19,7 +19,7 @@ import type { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
 import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
 import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import type { LabelFilter } from '../types';
 import { computeFilterExpr } from '../types';
@@ -122,14 +122,14 @@ export function MetricOverview({
   metricName,
   datasource,
   filters,
-  isMetadataEnabled,
+  isMetadataEnabled = true,
   isPanelEnabled,
   onExplore,
   onFiltersChange,
   ...props
 }: MetricOverviewProps): ReactElement {
   const [tab, setTab] = useState(0);
-  const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource);
+  const { metadata, isPending: isMetadataLoading } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
 
   const filtersWithMetricName: LabelFilter[] = useMemo(() => {
     const result = filters.filter((filter) => filter.label !== '__name__');
@@ -194,6 +194,7 @@ export function MetricOverview({
             metricName={metricName}
             datasource={datasource}
             filters={filtersWithMetricName}
+            isMetadataEnabled={isMetadataEnabled}
             onFilterAdd={handleFilterAdd}
           />
         )}

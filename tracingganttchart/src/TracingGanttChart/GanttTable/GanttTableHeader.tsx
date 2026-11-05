@@ -14,20 +14,23 @@
 import { Box, Stack, useTheme } from '@mui/material';
 import type { ReactElement } from 'react';
 
+import type { SpanSelection } from '../span-actions';
 import { TicksHeader } from '../Ticks';
 import type { Trace } from '../trace';
 import type { Viewport } from '../utils';
 import { rowHeight } from '../utils';
+import { SpanCheckbox } from './SpanCheckbox';
 
 interface GanttTableHeaderProps {
   trace: Trace;
   viewport: Viewport;
   nameColumnWidth: number;
   divider: React.ReactNode;
+  selection: SpanSelection;
 }
 
 export function GanttTableHeader(props: GanttTableHeaderProps): ReactElement {
-  const { trace, viewport, nameColumnWidth, divider } = props;
+  const { trace, viewport, nameColumnWidth, divider, selection } = props;
   const theme = useTheme();
 
   return (
@@ -40,9 +43,17 @@ export function GanttTableHeader(props: GanttTableHeaderProps): ReactElement {
         borderBottom: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <Box style={{ width: `${nameColumnWidth * 100}%` }}>
+      <Stack direction="row" alignItems="center" style={{ width: `${nameColumnWidth * 100}%` }}>
+        {selection.enabled && (
+          <SpanCheckbox
+            checked={selection.allSelected}
+            indeterminate={selection.someSelected}
+            onChange={selection.toggleAll}
+            aria-label="select all spans"
+          />
+        )}
         <span style={{ padding: '.25rem' }}>Service & Operation</span>
-      </Box>
+      </Stack>
       {divider}
       <Box sx={{ position: 'relative', height: '100%', flexGrow: 1 }}>
         <TicksHeader trace={trace} viewport={viewport} />

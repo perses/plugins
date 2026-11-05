@@ -36,9 +36,9 @@ export function JobList({ job, filters, datasource, isMetadataEnabled, onExplore
     return result;
   }, [filters, job]);
 
-  const { data, isLoading } = useLabelValues('__name__', filtersWithJobWithoutName, datasource);
+  const { data, isPending } = useLabelValues('__name__', filtersWithJobWithoutName, datasource);
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />
@@ -122,7 +122,7 @@ export interface JobTabProps extends StackProps {
 }
 
 export function JobTab({ filters, datasource, isMetadataEnabled, onExplore, ...props }: JobTabProps): ReactElement {
-  const { data: jobData, isLoading: isJobLoading } = useLabelValues('job', filters, datasource);
+  const { data: jobData, isPending: isJobLoading } = useLabelValues('job', filters, datasource);
 
   if (isJobLoading) {
     return (

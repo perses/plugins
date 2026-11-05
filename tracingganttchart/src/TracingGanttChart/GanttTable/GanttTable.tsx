@@ -18,6 +18,7 @@ import type { VirtuosoHandle, ListRange } from 'react-virtuoso';
 import { Virtuoso } from 'react-virtuoso';
 
 import type { CustomLinks, TracingGanttChartOptions } from '../../gantt-chart-model';
+import { useSpanSelection } from '../span-actions';
 import type { Span, Trace } from '../trace';
 import { forEachSpan } from '../trace';
 import type { Viewport } from '../utils';
@@ -40,6 +41,7 @@ export interface GanttTableProps {
 export function GanttTable(props: GanttTableProps): ReactElement {
   const { options, customLinks, trace, viewport, selectedSpan, onSpanClick, matchingSpanIds, focusedSpanId } = props;
   const { collapsedSpans, setCollapsedSpans, setVisibleSpans } = useGanttTableContext();
+  const selection = useSpanSelection(trace, options.selection?.enabled ?? false);
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -101,7 +103,8 @@ export function GanttTable(props: GanttTableProps): ReactElement {
     return index >= 0 ? index : 0;
   }, [rows, selectedSpan]);
 
-  const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
+  // stable element, required for the memoization of GanttTableRow
+  const divider = useMemo(() => <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />, []);
 
   // update currently visible spans
   function handleRangeChange({ startIndex, endIndex }: ListRange): void {
@@ -123,7 +126,13 @@ export function GanttTable(props: GanttTableProps): ReactElement {
         borderRadius: `${theme.shape.borderRadius}px`,
       }}
     >
-      <GanttTableHeader trace={trace} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
+      <GanttTableHeader
+        trace={trace}
+        viewport={viewport}
+        nameColumnWidth={nameColumnWidth}
+        divider={divider}
+        selection={selection}
+      />
       <Virtuoso
         ref={virtuosoRef}
         data={rows}
@@ -140,6 +149,8 @@ export function GanttTable(props: GanttTableProps): ReactElement {
             nameColumnWidth={nameColumnWidth}
             divider={divider}
             onClick={onSpanClick}
+            checked={selection.enabled ? selection.isSelected(span.spanId) : undefined}
+            onCheckedChange={selection.toggleSpan}
           />
         )}
         rangeChanged={handleRangeChange}

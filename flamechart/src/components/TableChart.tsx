@@ -50,10 +50,10 @@ export function TableChart(props: TableChartProps): ReactElement {
     return tableRecursionJson(data.profile.stackTrace, searchValue);
   }, [data, searchValue]);
 
-  const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
+  const columns: Array<TableColumnConfig<TableChartSample>> = useMemo(() => {
     const unit = data.metadata?.units || '';
 
-    const columnSettings: Array<TableColumnConfig<unknown>> = [
+    const columnSettings: Array<TableColumnConfig<TableChartSample>> = [
       {
         accessorKey: 'name',
         header: 'Name',
@@ -69,7 +69,7 @@ export function TableChart(props: TableChartProps): ReactElement {
               underline="hover"
               onClick={(e) => {
                 e.preventDefault();
-                const currentSample = ctx.row.original as TableChartSample;
+                const currentSample = ctx.row.original;
                 onSelectedIdChange(currentSample.id); // focus on this item in the flame graph
                 onSearchValueChange(currentSample.name);
               }}

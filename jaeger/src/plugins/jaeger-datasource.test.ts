@@ -23,7 +23,7 @@ describe('JaegerDatasource createClient', () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ data: [] }),
+      json: () => Promise.resolve({ services: [] }),
     });
 
     const client = JaegerDatasource.createClient(

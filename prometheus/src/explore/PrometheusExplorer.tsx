@@ -18,7 +18,7 @@ import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@pers
 import type { QueryDefinition } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import { DEFAULT_PROM } from '../model/prometheus-selectors';
 import { PrometheusMetricsFinder } from './PrometheusMetricsFinder';
