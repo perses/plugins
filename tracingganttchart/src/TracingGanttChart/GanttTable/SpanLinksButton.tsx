@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { IconButton, Menu, MenuItem } from '@mui/material';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
@@ -40,17 +40,27 @@ export function SpanLinksButton(props: SpanLinksButtonProps): ReactElement | nul
   // if there is a single span link, render the button directly without a menu
   if (span.links.length === 1 && span.links[0]) {
     const link = span.links[0];
+    const href = sanitizeUrl(
+      replaceVariablesInString(customLinks.links.span, variableValues, {
+        ...customLinks.variables,
+        traceId: link.traceId,
+        spanId: link.spanId,
+      }),
+    );
+    if (!href) {
+      return (
+        <InfoTooltip description="this link is disabled because its URL uses a scheme that is not allowed">
+          <span>
+            <IconButton size="small" disabled>
+              <LaunchIcon fontSize="inherit" />
+            </IconButton>
+          </span>
+        </InfoTooltip>
+      );
+    }
     return (
       <InfoTooltip description="open linked span">
-        <IconButton
-          size="small"
-          component={RouterComponent}
-          to={replaceVariablesInString(customLinks.links.span, variableValues, {
-            ...customLinks.variables,
-            traceId: link.traceId,
-            spanId: link.spanId,
-          })}
-        >
+        <IconButton size="small" component={RouterComponent} to={href}>
           <LaunchIcon fontSize="inherit" />
         </IconButton>
       </InfoTooltip>
@@ -86,20 +96,27 @@ export function SpanLinksButton(props: SpanLinksButtonProps): ReactElement | nul
         </IconButton>
       </InfoTooltip>
       <Menu anchorEl={anchorEl} open={isOpen} onClose={handleClose}>
-        {span.links.map((link) => (
-          <MenuItem
-            key={link.spanId}
-            component={RouterComponent}
-            onClick={handleClose}
-            to={replaceVariablesInString(customLinks.links.span!, variableValues, {
+        {span.links.map((link) => {
+          const href = sanitizeUrl(
+            replaceVariablesInString(customLinks.links.span!, variableValues, {
               ...customLinks.variables,
               traceId: link.traceId,
               spanId: link.spanId,
-            })}
-          >
-            Open linked span {link.spanId}
-          </MenuItem>
-        ))}
+            }),
+          );
+          if (!href) {
+            return (
+              <MenuItem key={link.spanId} disabled>
+                Open linked span {link.spanId} (disabled: URL scheme not allowed)
+              </MenuItem>
+            );
+          }
+          return (
+            <MenuItem key={link.spanId} component={RouterComponent} onClick={handleClose} to={href}>
+              Open linked span {link.spanId}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </>
   );

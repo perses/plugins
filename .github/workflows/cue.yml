@@ -34,7 +34,7 @@ jobs:
           enable_cue: true
           cue_version: 'v0.17.1'
       - name: Install percli
-        uses: perses/cli-actions/actions/install_percli@v0.2.1
+        uses: perses/cli-actions/actions/install_percli@v0.3.0
         with:
           cli-version: 'v0.55.1'
       - uses: actions/cache@v6

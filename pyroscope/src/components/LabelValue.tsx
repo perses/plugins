@@ -28,6 +28,7 @@ export interface LabelValueProps {
 export function LabelValue(props: LabelValueProps): ReactElement {
   const { datasource, labelSelector, value, labelName, onChange } = props;
 
+  // isLoading (not isPending): the query stays disabled until a label name is selected.
   const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useLabelValues(
     datasource,
     labelName,

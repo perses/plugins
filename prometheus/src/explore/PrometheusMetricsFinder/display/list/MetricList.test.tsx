@@ -23,7 +23,7 @@ import { MetricList } from './MetricList';
 vi.mock('../../utils', () => ({
   useMetricMetadata: vi
     .fn()
-    .mockReturnValue({ metadata: { type: 'gauge', help: 'my super metric desc' }, isLoading: false }),
+    .mockReturnValue({ metadata: { type: 'gauge', help: 'my super metric desc' }, isPending: false }),
 }));
 
 vi.mock('@perses-dev/explore', () => ({

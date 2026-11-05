@@ -66,7 +66,7 @@ export function PromQLEditor({
     queryExpr = replacePromBuiltinVariables(queryExpr, minStepMs, intervalMs);
   }
 
-  const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
+  const { data: parseQueryResponse, isPending, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
 
   const handleShowTreeView = (): void => {
     setTreeViewVisible(!isTreeViewVisible);
@@ -154,8 +154,8 @@ export function PromQLEditor({
                     backgroundColor: theme.palette.background.default,
                   }}
                 >
-                  {isLoading && <CircularProgress />}
-                  {!isLoading && parseQueryResponse?.data && (
+                  {isPending && <CircularProgress />}
+                  {!isPending && parseQueryResponse?.data && (
                     <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} datasource={datasource} />
                   )}
                 </div>
