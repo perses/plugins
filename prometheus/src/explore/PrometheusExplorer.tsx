@@ -14,8 +14,9 @@
 import { Box, Stack, Tab, Tabs, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
-import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs, useTimeRange } from '@perses-dev/plugin-system';
 import type { QueryDefinition } from '@perses-dev/spec';
+import isEqual from 'lodash/isEqual';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { useResizeObserver } from 'use-resize-observer';
@@ -123,6 +124,16 @@ export function PrometheusExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
+  const { refresh } = useTimeRange();
+
+  const handleQueryRun = (): void => {
+    setData({ tab, queries: queryDefinitions });
+    // Query keys are built from the query content, so running unchanged queries again would only hit the cache.
+    if (isEqual(queryDefinitions, queries)) {
+      refresh();
+    }
+  };
+
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <Tabs
@@ -142,7 +153,7 @@ export function PrometheusExplorer(): ReactElement {
               queryTypes={['TimeSeriesQuery']}
               onChange={(state) => setQueryDefinitions(state)}
               queries={queryDefinitions}
-              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
+              onQueryRun={handleQueryRun}
               filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
             />
             <MetricDataTable queries={queries} />
@@ -154,7 +165,7 @@ export function PrometheusExplorer(): ReactElement {
               queryTypes={['TimeSeriesQuery']}
               onChange={(state) => setQueryDefinitions(state)}
               queries={queryDefinitions}
-              onQueryRun={() => setData({ tab, queries: queryDefinitions })}
+              onQueryRun={handleQueryRun}
               filteredQueryPlugins={FILTERED_QUERY_PLUGINS}
             />
             <TimeSeriesPanel queries={queries} />
