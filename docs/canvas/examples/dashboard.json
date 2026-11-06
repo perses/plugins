@@ -26,9 +26,20 @@
                   { "value": 0.8, "color": "#d32f2f" }
                 ]
               },
+              "edgeThresholds": {
+                "defaultColor": "#90caf9",
+                "steps": [
+                  { "value": 0.5, "color": "#5c6bc0" },
+                  { "value": 0.8, "color": "#6a1b9a" }
+                ]
+              },
               "edgeThresholdWidths": [
                 { "value": 0.5, "strokeWidth": 4 },
                 { "value": 0.8, "strokeWidth": 8 }
+              ],
+              "nodeThresholdSizes": [
+                { "value": 0.5, "scale": 1.3 },
+                { "value": 0.8, "scale": 1.7 }
               ],
               "nodeDefaultSize": 44,
               "format": { "unit": "decimal" },
