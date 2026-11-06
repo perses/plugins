@@ -25,10 +25,24 @@ spec: close({
 	querySettings?:          #querySettings
 	edgeDefaultStrokeWidth?: number & >0
 	edgeThresholdWidths?: [...#edgeThresholdStep]
+	nodeDefaultSize?: number & >0
 	backgrounds?: [...#background]
 	nodes?: [...#node]
 	edges?: [...#edge]
+	graphGeneration?: #graphGeneration
 })
+
+#graphGeneration: {
+	enabled?:           bool
+	nodeQueryIndex:     int & >=0
+	nodeIdLabel:        string
+	nodeLabelTemplate?: string
+	edgeQueryIndex?:    int & >=0
+	edgeSourceLabel?:   string
+	edgeTargetLabel?:   string
+	edgeLabelTemplate?: string
+	bidirectional?:     bool
+}
 
 #legend: {
 	position: "bottom" | "right"
@@ -75,6 +89,7 @@ spec: close({
 	queryIndex?:      int & >=0
 	colorMode?:       "threshold" | "fixed"
 	color?:           =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+	sizeMode?:        "fixed" | "threshold"
 }
 
 #edge: {

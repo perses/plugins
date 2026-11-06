@@ -14,8 +14,9 @@
 import { Alert, Box, Stack } from '@mui/material';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
-import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, MultiQueryEditor, useTimeRange } from '@perses-dev/plugin-system';
 import type { QueryDefinition } from '@perses-dev/spec';
+import isEqual from 'lodash/isEqual';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 
@@ -57,6 +58,16 @@ export function PyroscopeExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
+  const { refresh } = useTimeRange();
+
+  const handleQueryRun = (): void => {
+    setData({ queries: queryDefinitions });
+    // Query keys are built from the query content, so running unchanged queries again would only hit the cache.
+    if (isEqual(queryDefinitions, queries)) {
+      refresh();
+    }
+  };
+
   // A profile query is only executable once a service and a profile type are selected.
   const hasIncompleteQuery = queries.some(
     (query) => !isProfileQueryComplete((query.spec?.plugin?.spec ?? {}) as Partial<PyroscopeProfileQuerySpec>),
@@ -68,7 +79,7 @@ export function PyroscopeExplorer(): ReactElement {
         queryTypes={['ProfileQuery']}
         onChange={(state) => setQueryDefinitions(state)}
         queries={queryDefinitions}
-        onQueryRun={() => setData({ queries: queryDefinitions })}
+        onQueryRun={handleQueryRun}
       />
       {hasIncompleteQuery ? (
         <Alert severity="warning">
