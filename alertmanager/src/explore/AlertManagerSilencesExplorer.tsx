@@ -15,9 +15,10 @@ import { Box, Button, Stack } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { useExplorerManagerContext } from '@perses-dev/explore';
-import { DataQueriesProvider, MultiQueryEditor, useDatasourceClient } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, MultiQueryEditor, useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 import type { DatasourceSelector, QueryDefinition } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
+import isEqual from 'lodash/isEqual';
 import BellOffIcon from 'mdi-material-ui/BellOff';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
@@ -90,6 +91,16 @@ export function AlertManagerSilencesExplorer(): ReactElement {
 
   const [queryDefinitions, setQueryDefinitions] = useState<QueryDefinition[]>(queries);
 
+  const { refresh } = useTimeRange();
+
+  const handleQueryRun = (): void => {
+    setData({ queries: queryDefinitions });
+    // Query keys are built from the query content, so running unchanged queries again would only hit the cache.
+    if (isEqual(queryDefinitions, queries)) {
+      refresh();
+    }
+  };
+
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <Stack direction="row" justifyContent="flex-end">
@@ -99,7 +110,7 @@ export function AlertManagerSilencesExplorer(): ReactElement {
         queryTypes={['SilencesQuery']}
         onChange={(state) => setQueryDefinitions(state)}
         queries={queryDefinitions}
-        onQueryRun={() => setData({ queries: queryDefinitions })}
+        onQueryRun={handleQueryRun}
       />
       <DataQueriesProvider definitions={queries}>
         <Box height={PANEL_PREVIEW_HEIGHT}>

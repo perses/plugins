@@ -34,7 +34,7 @@ const TEST_TRACE_TABLE_PROPS: Omit<TraceTablePanelProps, 'queryResults'> = {
 
 describe('TraceTablePanel', () => {
   // Helper to render the panel with some context set
-  const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
+  const renderPanel = (queryResults: Array<PanelData<TraceData>>, spec: TraceTablePanelProps['spec'] = {}): void => {
     const queryClient = new QueryClient();
 
     render(
@@ -44,7 +44,7 @@ describe('TraceTablePanel', () => {
             <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1m' }}>
               <VariableProvider>
                 <ChartsProvider chartsTheme={testChartsTheme}>
-                  <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
+                  <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} spec={spec} queryResults={queryResults} />
                 </ChartsProvider>
               </VariableProvider>
             </TimeRangeProviderBasic>
@@ -67,5 +67,20 @@ describe('TraceTablePanel', () => {
     expect(lastRow).toHaveTextContent('100ms'); // duration
     // TODO IMPORTANT: https://github.com/perses/perses/issues/4090
     expect(lastRow).toHaveTextContent('December 18, 2023 at 4:07:25.000 PM'); // start time
+  });
+
+  it('renders a trace link with a safe URL', () => {
+    renderPanel(MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT, { links: { trace: '/trace/${traceId}' } });
+
+    const link = screen.getByRole('link', { name: /service-name: span-name/ });
+    expect(link).toHaveAttribute('href', expect.stringMatching(/^\/trace\//));
+  });
+
+  it('does not render a trace link when its URL uses a disallowed scheme', () => {
+    renderPanel(MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT, { links: { trace: 'javascript:alert(document.domain)' } });
+
+    expect(screen.queryByRole('link', { name: /service-name: span-name/ })).not.toBeInTheDocument();
+    const rows = screen.getAllByRole('row');
+    expect(rows[rows.length - 1]).toHaveTextContent('service-name: span-name');
   });
 });

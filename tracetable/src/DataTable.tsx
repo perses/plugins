@@ -14,7 +14,7 @@
 import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/material';
 import type { GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { DataGrid } from '@mui/x-data-grid';
-import { useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
+import { sanitizeUrl, useChartsTheme, useSelection, useTimeZone } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import type { PanelData } from '@perses-dev/plugin-system';
 import { replaceVariablesInString, useAllVariableValues, useRouterContext } from '@perses-dev/plugin-system';
@@ -274,9 +274,12 @@ interface TraceNameProps {
 function TraceName({ row: trace }: TraceNameProps): ReactElement {
   const { RouterComponent } = useRouterContext();
 
-  if (RouterComponent && trace.traceLink) {
+  // The link is sanitized here, after the variables are interpolated, since variable values can be provided by the user
+  // (e.g. through the URL query parameters). An unsafe link (e.g. javascript:) is rendered as plain text.
+  const href = sanitizeUrl(trace.traceLink);
+  if (RouterComponent && href) {
     return (
-      <Link variant="body1" color="inherit" underline="hover" component={RouterComponent} to={trace.traceLink}>
+      <Link variant="body1" color="inherit" underline="hover" component={RouterComponent} to={href}>
         <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
       </Link>
     );
