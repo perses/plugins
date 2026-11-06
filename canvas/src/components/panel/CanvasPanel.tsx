@@ -27,8 +27,12 @@ import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLaye
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
 import { ThresholdLegend } from './ThresholdLegend';
+import { ZoomControls } from './ZoomControls';
 
-const SVG_STYLE_BASE = { display: 'block' } as const;
+// `touchAction: none` stops the browser from claiming drags/gestures over the panel (so d3-zoom
+// receives them), and `userSelect: none` stops a left-button drag from starting a text selection
+// that would preempt d3-zoom's pan tracking.
+const SVG_STYLE_BASE = { display: 'block', touchAction: 'none', userSelect: 'none' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
 
 interface PanelSvgProps {
@@ -50,7 +54,7 @@ function PanelSvg({
   seriesByItemId,
   reverseSeriesByItemId,
 }: PanelSvgProps): ReactElement {
-  const { transform, isPanning, fitView, resetPan } = useZoomContext();
+  const { transform, isPanning, fitView, resetPan, zoomIn, zoomOut, canZoomIn, canZoomOut } = useZoomContext();
 
   const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
   const backgrounds = useMemo(() => spec.backgrounds ?? [], [spec.backgrounds]);
@@ -58,18 +62,22 @@ function PanelSvg({
   const width = contentDimensions?.width ?? 600;
   const height = contentDimensions?.height ?? 400;
 
+  const fitToNodes = useCallback((): void => {
+    const boundingBox = nodeBoundingBox(nodes);
+    if (boundingBox) {
+      fitView(boundingBox, width, height);
+    }
+  }, [fitView, nodes, width, height]);
+
   const handleDoubleClick = useCallback(
     (event: MouseEvent<SVGSVGElement>): void => {
       if (event.ctrlKey || event.metaKey) {
-        const boundingBox = nodeBoundingBox(nodes);
-        if (boundingBox) {
-          fitView(boundingBox, width, height);
-        }
+        fitToNodes();
       } else {
         resetPan();
       }
     },
-    [fitView, resetPan, nodes, width, height],
+    [fitToNodes, resetPan],
   );
 
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;
@@ -83,36 +91,46 @@ function PanelSvg({
   const svgStyle = useMemo(() => ({ ...SVG_STYLE_BASE, cursor: isPanning ? 'grabbing' : 'grab' }), [isPanning]);
 
   return (
-    <svg ref={svgRef} width={width} height={height} style={svgStyle} onDoubleClick={handleDoubleClick}>
-      <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
-      <g transform={transform.toString()}>
-        <BackgroundLayer backgrounds={backgrounds} />
-        <PanelNodeLayer
-          spec={spec}
-          seriesByQueryIndex={seriesByQueryIndex}
-          k={transform.k}
-          paletteColors={paletteColors}
-          seriesByItemId={seriesByItemId}
-        />
-        <PanelEdgeLayer
-          spec={spec}
-          seriesByQueryIndex={seriesByQueryIndex}
-          k={transform.k}
-          paletteColors={paletteColors}
-          seriesByItemId={seriesByItemId}
-          reverseSeriesByItemId={reverseSeriesByItemId}
-        />
-      </g>
+    <div style={{ position: 'relative', width, height }}>
+      <svg ref={svgRef} width={width} height={height} style={svgStyle} onDoubleClick={handleDoubleClick}>
+        <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
+        <g transform={transform.toString()}>
+          <BackgroundLayer backgrounds={backgrounds} />
+          <PanelNodeLayer
+            spec={spec}
+            seriesByQueryIndex={seriesByQueryIndex}
+            k={transform.k}
+            paletteColors={paletteColors}
+            seriesByItemId={seriesByItemId}
+          />
+          <PanelEdgeLayer
+            spec={spec}
+            seriesByQueryIndex={seriesByQueryIndex}
+            k={transform.k}
+            paletteColors={paletteColors}
+            seriesByItemId={seriesByItemId}
+            reverseSeriesByItemId={reverseSeriesByItemId}
+          />
+        </g>
 
-      {showLegend ? (
-        <ThresholdLegend
-          thresholds={thresholds}
-          format={spec.format}
-          paletteColors={paletteColors}
-          position={{ x: legendX, y: legendY }}
-        />
-      ) : null}
-    </svg>
+        {showLegend ? (
+          <ThresholdLegend
+            thresholds={thresholds}
+            format={spec.format}
+            paletteColors={paletteColors}
+            position={{ x: legendX, y: legendY }}
+          />
+        ) : null}
+      </svg>
+      <ZoomControls
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onFit={fitToNodes}
+        onReset={resetPan}
+        canZoomIn={canZoomIn}
+        canZoomOut={canZoomOut}
+      />
+    </div>
   );
 }
 
@@ -175,11 +193,23 @@ export function CanvasPanel(props: CanvasProps): ReactElement | null {
     return { ...spec, nodes, edges: generated.edges };
   }, [spec, generated, positions, props.contentDimensions?.width, props.contentDimensions?.height]);
 
-  const { svgRef, toCanvasPoint, transform, isPanning, fitView, resetPan } = useZoom();
+  const {
+    svgRef,
+    toCanvasPoint,
+    transform,
+    isPanning,
+    fitView,
+    resetPan,
+    zoomIn,
+    zoomOut,
+    scale,
+    canZoomIn,
+    canZoomOut,
+  } = useZoom({ interactionMode: 'view' });
 
   const zoomValue = useMemo(
-    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan }),
-    [toCanvasPoint, transform, isPanning, fitView, resetPan],
+    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut }),
+    [toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut],
   );
 
   return (

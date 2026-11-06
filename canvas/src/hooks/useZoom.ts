@@ -21,6 +21,75 @@ import type { Point } from '../model';
 
 const FIT_PADDING = 40;
 
+// Interactive zoom bounds for `view` mode so a ctrl/meta wheel can't zoom the graph to a speck or
+// blow it up past usefulness. `edit` mode keeps d3-zoom's default (unbounded) extent.
+const VIEW_SCALE_EXTENT: [number, number] = [0.05, 8];
+const DEFAULT_SCALE_EXTENT: [number, number] = [0, Infinity];
+
+// Click vs. drag threshold (px) for `view` mode, where the left button both pans and clicks nodes.
+// d3-zoom defaults to 0, which treats sub-pixel hand jitter during a click as a drag and swallows
+// the node's click; a few pixels of slack lets a near-stationary click reach node navigation.
+const VIEW_CLICK_DISTANCE = 4;
+
+// Multiplier applied per press of the on-screen zoom-in/out buttons (zoom-out uses its reciprocal).
+export const ZOOM_STEP_FACTOR = 1.5;
+
+/**
+ * Whether a zoom scale `k` sits at (or past) either `scaleExtent` bound, within a small epsilon so
+ * float drift from repeated `scaleBy` steps doesn't leave a zoom button wrongly enabled. Drives the
+ * on-screen controls' disabled state; d3-zoom's own clamp remains the source of truth for zooming.
+ */
+export function isAtScaleLimit(k: number, [min, max]: [number, number]): { atMin: boolean; atMax: boolean } {
+  const EPSILON = 1e-6;
+  return { atMin: k <= min * (1 + EPSILON), atMax: k >= max * (1 - EPSILON) };
+}
+
+/**
+ * Controls which gestures start a pan or zoom.
+ *
+ * - `edit` (default): the gestures the manual editor relies on. Pan with the
+ *   middle mouse button only, and zoom with the wheel only while ctrl/meta is
+ *   held. This leaves the left button free for the editor's node move, edge
+ *   drag and rubber-band selection, and leaves a plain wheel free for page
+ *   scrolling.
+ * - `view`: the read-only display panel, which has no editing gestures to
+ *   protect. Pan with the left or middle mouse button and zoom with the wheel
+ *   only while ctrl/meta is held (same as `edit`).
+ */
+export type ZoomInteractionMode = 'edit' | 'view';
+
+export interface UseZoomOptions {
+  interactionMode?: ZoomInteractionMode;
+}
+
+/**
+ * d3-zoom gesture gate: decides whether a raw DOM event should start a pan/zoom.
+ *
+ * Double-click is always rejected (the panel reserves it for fit/reset). Wheel events zoom only while
+ * ctrl/meta is held, in both modes, so a plain wheel keeps scrolling the surrounding page. Among
+ * mouse buttons the middle button always pans; the left button pans only in view mode, where no
+ * editing gesture competes for it.
+ *
+ * Exported for unit testing: d3-zoom is ESM-only and awkward to drive through the DOM, so the
+ * decision lives in a pure function the hook installs via `zoomBehavior.filter`.
+ */
+export function shouldStartGesture(event: Event, interactionMode: ZoomInteractionMode): boolean {
+  if (event.type === 'dblclick') {
+    return false;
+  }
+  if (event instanceof WheelEvent) {
+    // Zoom only while ctrl/meta is held, in both modes, so a plain wheel keeps scrolling the
+    // surrounding page. A trackpad pinch arrives as a wheel event with ctrlKey set, so it still
+    // zooms; a Magic Mouse / two-finger swipe is a plain wheel and is left to the page.
+    return event.ctrlKey || event.metaKey;
+  }
+  if (!(event instanceof MouseEvent)) {
+    return false;
+  }
+  // `clickDistance` (set in view mode) lets a near-stationary left click still reach node handlers.
+  return event.button === 1 || (interactionMode === 'view' && event.button === 0);
+}
+
 export interface UseZoomResult {
   svgRef: (node: SVGSVGElement | null) => void;
   transform: ZoomTransform;
@@ -32,9 +101,17 @@ export interface UseZoomResult {
   ) => void;
   toCanvasPoint: (event: PointerEvent<SVGSVGElement>) => Point;
   resetPan: () => void;
+  /** Step the zoom up/down by `ZOOM_STEP_FACTOR` about the panel center (for the on-screen controls). */
+  zoomIn: () => void;
+  zoomOut: () => void;
+  /** Current zoom scale (`transform.k`). */
+  scale: number;
+  /** Whether a further zoom-in/out step is still within the scale extent (for disabling the buttons). */
+  canZoomIn: boolean;
+  canZoomOut: boolean;
 }
 
-export function useZoom(): UseZoomResult {
+export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZoomResult {
   const [transform, setTransform] = useState<ZoomTransform>(zoomIdentity);
   const [isPanning, setIsPanning] = useState(false);
   const nodeRef = useRef<SVGSVGElement | null>(null);
@@ -47,15 +124,13 @@ export function useZoom(): UseZoomResult {
         return;
       }
       nodeRef.current = node;
-      zoomBehavior.filter((event: Event) => {
-        if (event.type === 'dblclick') {
-          return false;
-        }
-        if (event instanceof WheelEvent) {
-          return event.ctrlKey || event.metaKey;
-        }
-        return event instanceof MouseEvent && event.button === 1;
-      });
+      // Always set the extent (not only in view mode) so the configured bounds are explicit and a
+      // future dynamic mode switch can't leave a stale clamp behind.
+      zoomBehavior.scaleExtent(interactionMode === 'view' ? VIEW_SCALE_EXTENT : DEFAULT_SCALE_EXTENT);
+      if (interactionMode === 'view') {
+        zoomBehavior.clickDistance(VIEW_CLICK_DISTANCE);
+      }
+      zoomBehavior.filter((event: Event) => shouldStartGesture(event, interactionMode));
       zoomBehavior.on('start', () => setIsPanning(true));
       zoomBehavior.on('zoom', ({ transform: t }: { transform: ZoomTransform }) => {
         setTransform(t);
@@ -63,7 +138,7 @@ export function useZoom(): UseZoomResult {
       zoomBehavior.on('end', () => setIsPanning(false));
       select<SVGSVGElement, unknown>(node).call(zoomBehavior);
     },
-    [zoomBehavior],
+    [zoomBehavior, interactionMode],
   );
 
   const resetPan = useCallback(() => {
@@ -85,6 +160,13 @@ export function useZoom(): UseZoomResult {
       const contentW = boundingBox.maxX - boundingBox.minX + FIT_PADDING * 2;
       const contentH = boundingBox.maxY - boundingBox.minY + FIT_PADDING * 2;
       const scale = Math.min(canvasWidth / contentW, canvasHeight / contentH, 1);
+      // d3-zoom clamps programmatic transforms to the current scaleExtent, so a graph whose fit
+      // scale falls below the interactive floor would stay clipped after "fit to view". Widen the
+      // lower bound to admit this scale (never above it) so fit always frames the whole graph.
+      const [minScale, maxScale] = zoomBehavior.scaleExtent();
+      if (scale < minScale) {
+        zoomBehavior.scaleExtent([scale, maxScale]);
+      }
       const tx = canvasWidth / 2 - (scale * (boundingBox.minX + boundingBox.maxX)) / 2;
       const ty = canvasHeight / 2 - (scale * (boundingBox.minY + boundingBox.maxY)) / 2;
       const t = zoomIdentity.translate(tx, ty).scale(scale);
@@ -92,6 +174,21 @@ export function useZoom(): UseZoomResult {
     },
     [zoomBehavior],
   );
+
+  const zoomBy = useCallback(
+    (factor: number): void => {
+      if (!nodeRef.current) {
+        return;
+      }
+      // No focus point given, so d3-zoom scales about the viewport center (derived from the SVG's
+      // client box, since we never call zoomBehavior.extent). scaleBy clamps to the scaleExtent.
+      select<SVGSVGElement, unknown>(nodeRef.current).call(zoomBehavior.scaleBy, factor);
+    },
+    [zoomBehavior],
+  );
+
+  const zoomIn = useCallback(() => zoomBy(ZOOM_STEP_FACTOR), [zoomBy]);
+  const zoomOut = useCallback(() => zoomBy(1 / ZOOM_STEP_FACTOR), [zoomBy]);
 
   const toCanvasPoint = useCallback(
     (event: PointerEvent<SVGSVGElement>): Point => {
@@ -106,5 +203,24 @@ export function useZoom(): UseZoomResult {
     [transform],
   );
 
-  return { svgRef, transform, isPanning, fitView, toCanvasPoint, resetPan };
+  // Disable flags come from the mode's configured extent. They're advisory UI state — d3-zoom's own
+  // clamp in scaleBy is the source of truth — so we read the static constant rather than the live
+  // behavior (which would mean touching a ref during render). The only effect is cosmetic: after a
+  // fitView that widened the floor for a huge graph, zoom-out may disable one step early.
+  const scaleExtent = interactionMode === 'view' ? VIEW_SCALE_EXTENT : DEFAULT_SCALE_EXTENT;
+  const { atMin, atMax } = isAtScaleLimit(transform.k, scaleExtent);
+
+  return {
+    svgRef,
+    transform,
+    isPanning,
+    fitView,
+    toCanvasPoint,
+    resetPan,
+    zoomIn,
+    zoomOut,
+    scale: transform.k,
+    canZoomIn: !atMax,
+    canZoomOut: !atMin,
+  };
 }

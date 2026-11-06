@@ -61,7 +61,19 @@ export function EditorItemsPanel(): ReactElement {
     state: { selectedIds },
     selectItems,
   } = useEditorContext();
-  const { svgRef, toCanvasPoint, transform, isPanning, fitView, resetPan } = useZoom();
+  const {
+    svgRef,
+    toCanvasPoint,
+    transform,
+    isPanning,
+    fitView,
+    resetPan,
+    zoomIn,
+    zoomOut,
+    scale,
+    canZoomIn,
+    canZoomOut,
+  } = useZoom();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
@@ -112,8 +124,8 @@ export function EditorItemsPanel(): ReactElement {
   const specNodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
 
   const zoomValue = useMemo(
-    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan }),
-    [toCanvasPoint, transform, isPanning, fitView, resetPan],
+    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut }),
+    [toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut],
   );
 
   return (
