@@ -44,6 +44,11 @@ export const stubZoom: ZoomContextValue = {
   }),
   fitView: vi.fn(),
   resetPan: vi.fn(),
+  zoomIn: vi.fn(),
+  zoomOut: vi.fn(),
+  scale: 1,
+  canZoomIn: true,
+  canZoomOut: true,
 };
 
 interface WrapperProps {
