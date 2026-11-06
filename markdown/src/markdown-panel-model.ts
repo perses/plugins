@@ -22,6 +22,11 @@ export interface MarkdownPanelDefinition extends Definition<MarkdownPanelOptions
 
 export interface MarkdownPanelOptions {
   text: string;
+  /**
+   * When true, raw HTML in the text is rendered (after sanitization).
+   * When false or omitted, raw HTML is escaped and displayed as plain text.
+   */
+  renderHtml?: boolean;
 }
 
 export function createInitialMarkdownPanelOptions(): MarkdownPanelOptions {
