@@ -14,7 +14,7 @@
 import { Box } from '@mui/material';
 import { useChartsTheme } from '@perses-dev/components';
 import type { CalculationType, PanelProps } from '@perses-dev/plugin-system';
-import { CalculationsMap } from '@perses-dev/plugin-system';
+import { CalculationsMap, useAllVariableValues } from '@perses-dev/plugin-system';
 import type { TimeSeriesData } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
@@ -22,7 +22,14 @@ import { useMemo } from 'react';
 import type { BarChartOptions } from './bar-chart-model';
 import type { BarChartData, StackedBarChartData, StackedBarChartSeries } from './BarChartBase';
 import { BarChartBase } from './BarChartBase';
-import { calculatePercentages, sortSeriesData } from './utils';
+import {
+  barLinkHref,
+  calculatePercentages,
+  fieldLinkParams,
+  sortSeriesData,
+  withLiveDashboardVars,
+  withLocationTime,
+} from './utils';
 
 export type BarChartPanelProps = PanelProps<BarChartOptions, TimeSeriesData>;
 
@@ -31,8 +38,11 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
     spec: { calculation, format, sort, mode, groupBy = [], isStacked = false, orientation = 'horizontal', visual },
     contentDimensions,
     queryResults,
+    definition,
   } = props;
 
+  const variables = useAllVariableValues();
+  const seriesLink = definition?.spec.links?.find((link) => link.url.includes('__field.labels'));
   const chartsTheme = useChartsTheme();
   const PADDING = chartsTheme.container.padding.default;
 
@@ -43,11 +53,20 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
     const barChartData: BarChartData[] = [];
     for (const result of queryResults) {
       for (const seriesData of result.data.series) {
-        const series = {
+        const label = seriesData.formattedName ?? '';
+        let href: string | undefined;
+        if (seriesLink) {
+          href = barLinkHref(seriesLink.url, seriesData.labels ?? {}, variables, seriesLink.renderVariables !== false);
+          if (typeof window !== 'undefined') {
+            href = withLiveDashboardVars(href, window.location.search, fieldLinkParams(seriesLink.url));
+            href = withLocationTime(href, window.location.search);
+          }
+        }
+        barChartData.push({
           value: calculate(seriesData.values) ?? null,
-          label: seriesData.formattedName ?? '',
-        };
-        barChartData.push(series);
+          label,
+          href,
+        });
       }
     }
 
@@ -57,7 +76,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
     } else {
       return sortedBarChartData;
     }
-  }, [queryResults, sort, mode, calculation, groupBy]);
+  }, [queryResults, sort, mode, calculation, groupBy, seriesLink, variables]);
 
   const stackedBarChartData: StackedBarChartData | null = useMemo(() => {
     if (groupBy.length === 0) return null;
@@ -137,6 +156,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
         isStacked={isStacked}
         orientation={orientation}
         colorOverrides={visual?.colorOverrides}
+        linkTargetBlank={seriesLink?.targetBlank}
       />
     </Box>
   );
