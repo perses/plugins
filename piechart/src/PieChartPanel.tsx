@@ -21,7 +21,7 @@ import merge from 'lodash/merge';
 import type { ReactElement } from 'react';
 import { useId, useMemo, useRef, useState } from 'react';
 
-import { getSeriesColor } from './colors';
+import { getConsistentColor, getSeriesColor } from './colors';
 import { resolvePieChartVisualOptions } from './pie-chart-model';
 import type { PieChartOptions } from './pie-chart-model';
 import type { PieChartData } from './PieChartBase';
@@ -30,6 +30,40 @@ import type { PieChartLegendMapper } from './utils';
 import { PieChartListLegendMapper, PieChartTableLegendMapper, sortSeriesData } from './utils';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
+
+function getAutomaticColorKeys(queryResults: PieChartPanelProps['queryResults']): string[] {
+  const queryNames = queryResults.map(
+    (result, queryIndex) => result.definition.spec.name ?? `Query #${queryIndex + 1}`,
+  );
+  const queryNameCounts = new Map<string, number>();
+  const seriesQueryIndexes = new Map<string, Set<number>>();
+
+  queryNames.forEach((queryName) => queryNameCounts.set(queryName, (queryNameCounts.get(queryName) ?? 0) + 1));
+  queryResults.forEach((result, queryIndex) => {
+    result.data.series?.forEach((series) => {
+      let queryIndexes = seriesQueryIndexes.get(series.name);
+      if (!queryIndexes) {
+        queryIndexes = new Set<number>();
+        seriesQueryIndexes.set(series.name, queryIndexes);
+      }
+      queryIndexes.add(queryIndex);
+    });
+  });
+
+  return queryResults.flatMap((result, queryIndex) => {
+    const queryName = queryNames[queryIndex] ?? `Query #${queryIndex + 1}`;
+    const queryIdentity = queryNameCounts.get(queryName) === 1 ? queryName : JSON.stringify([queryName, queryIndex]);
+
+    return (
+      result.data.series?.map((series) => {
+        // Preserve the existing color seed unless the series name collides across queries.
+        return seriesQueryIndexes.get(series.name)?.size === 1
+          ? series.name
+          : JSON.stringify([series.name, queryIdentity]);
+      }) ?? []
+    );
+  });
+}
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
@@ -40,22 +74,30 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const { colorPalette, innerRadius, outerRadius } = resolvePieChartVisualOptions(props.spec);
   const chartsTheme = useChartsTheme();
   const chartId = useId();
-  const seriesNames = queryResults.flatMap((result) => result?.data.series?.map((series) => series.name) || []);
 
-  // Memoize the color list so it only regenerates when color/palette/series count changes
+  // Memoize the color list for palette and query-result changes.
   const colorList = useMemo(() => {
+    const seriesNames = queryResults.flatMap((result) => result.data.series?.map((series) => series.name) ?? []);
+    if (colorPalette === undefined) {
+      const colorKeys = getAutomaticColorKeys(queryResults);
+      return seriesNames.map((seriesName, index) =>
+        getConsistentColor(colorKeys[index] ?? seriesName, seriesName.toLowerCase().includes('error')),
+      );
+    }
     return getSeriesColor(seriesNames, colorPalette);
-  }, [colorPalette, seriesNames]);
+  }, [colorPalette, queryResults]);
 
   const pieChartData = useMemo((): Array<Required<PieChartData>> => {
     const calculate = CalculationsMap[calculation as CalculationType];
     const pieChartData: Array<Required<PieChartData>> = [];
+    let colorIndex = 0;
     queryResults.forEach((result, queryIndex) => {
       const series = result?.data.series ?? [];
 
       series.forEach((seriesData, seriesIndex) => {
         const seriesId = `${chartId}${seriesData.name}${seriesIndex}${queryIndex}`;
-        const seriesColor = colorList[queryIndex * series.length + seriesIndex] ?? '#ff0000';
+        const seriesColor = colorList[colorIndex] ?? '#ff0000';
+        colorIndex += 1;
 
         const seriesItem = {
           id: seriesId,
