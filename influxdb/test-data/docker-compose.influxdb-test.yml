@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # InfluxDB V1
+  influxdb-v1:
+    image: influxdb:1.8.10
+    container_name: influxdb-v1
+    ports:
+      - "8086:8086"
+    environment:
+      INFLUXDB_DB: testdb
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: password
+    volumes:
+      - influxdb-v1-data:/var/lib/influxdb
+      - ./influxdb-v1-init.sh:/docker-entrypoint-initdb.d/init.sh
+    networks:
+      - perses-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # InfluxDB V3 (using Cloud image as V3 standalone is not in Docker Hub)
+  influxdb-v3:
+    image: influxdb:latest
+    container_name: influxdb-v3
+    ports:
+      - "8087:8086"
+    environment:
+      INFLUXDB_TOKEN: test-token-12345
+      INFLUXDB_BUCKET: testbucket
+      INFLUXDB_ORG: testorg
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: password
+    volumes:
+      - influxdb-v3-data:/var/lib/influxdb2
+    networks:
+      - perses-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  influxdb-v1-data:
+  influxdb-v3-data:
+
+networks:
+  perses-network:
+    driver: bridge
+
