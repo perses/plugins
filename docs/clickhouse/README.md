@@ -34,3 +34,12 @@ See also technical docs related to this plugin:
 
 - [Data model](./model.md#clickhouselogquery)
 - [Dashboard-as-Code Go lib](./go-sdk/log-query.md)
+
+## Trace Query (`ClickHouseTraceQuery`)
+
+The ClickHouse trace query plugin reads traces stored with the schema of the [OpenTelemetry Collector ClickHouse exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/clickhouseexporter). A trace ID returns the whole trace, for the Tracing Gantt Chart panel. A SQL query returning spans returns trace search results, for the Trace Table panel.
+
+See also technical docs related to this plugin:
+
+- [Data model](./model.md#clickhousetracequery)
+- [Dashboard-as-Code Go lib](./go-sdk/trace-query.md)

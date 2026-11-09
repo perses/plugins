@@ -84,6 +84,15 @@
           },
           "name": "ClickHouseLogQuery"
         }
+      },
+      {
+        "kind": "TraceQuery",
+        "spec": {
+          "display": {
+            "name": "ClickHouse Trace Query"
+          },
+          "name": "ClickHouseTraceQuery"
+        }
       }
     ]
   }

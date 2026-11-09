@@ -1,0 +1,6 @@
+{
+  "kind": "ClickHouseTraceQuery",
+  "spec": {
+    "query": ""
+  }
+}
