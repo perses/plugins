@@ -29,10 +29,11 @@ import { PanelNodeLayer } from './PanelNodeLayer';
 import { ThresholdLegend } from './ThresholdLegend';
 import { ZoomControls } from './ZoomControls';
 
-// `touchAction: none` stops the browser from claiming drags/gestures over the panel (so d3-zoom
-// receives them), and `userSelect: none` stops a left-button drag from starting a text selection
-// that would preempt d3-zoom's pan tracking.
-const SVG_STYLE_BASE = { display: 'block', touchAction: 'none', userSelect: 'none' } as const;
+// `userSelect: none` stops a left-button drag from starting a text selection that would preempt
+// d3-zoom's pan tracking. Native `touchAction` is intentionally left at its default: pan/zoom here
+// is mouse-only (`shouldStartGesture` rejects touch events), so suppressing touch-action would only
+// break the page scroll a touchscreen user expects when swiping over the panel, with nothing gained.
+const SVG_STYLE_BASE = { display: 'block', userSelect: 'none' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
 
 interface PanelSvgProps {

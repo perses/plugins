@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isAtScaleLimit, shouldStartGesture } from './useZoom';
+import { act, renderHook } from '@testing-library/react';
+
+import { isAtScaleLimit, shouldStartGesture, useZoom } from './useZoom';
 
 describe('shouldStartGesture', () => {
   it('never starts a gesture on double-click, in either mode', () => {
@@ -86,5 +88,51 @@ describe('isAtScaleLimit', () => {
     // as "at the limit" so the button stays disabled rather than flickering enabled.
     expect(isAtScaleLimit(0.05 * (1 + 1e-9), extent).atMin).toBe(true);
     expect(isAtScaleLimit(8 * (1 - 1e-9), extent).atMax).toBe(true);
+  });
+});
+
+// d3-zoom scales about the viewport center derived from the SVG client box. jsdom reports a zero
+// box, which collapses the center but still lets programmatic transforms apply, so we give the SVG
+// a size via a stubbed getBoundingClientRect, and stub width/height.baseVal for defaultExtent.
+function mountViewZoomWithSvg(): ReturnType<typeof renderHook<ReturnType<typeof useZoom>, unknown>> {
+  const rendered = renderHook(() => useZoom({ interactionMode: 'view' }));
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.getBoundingClientRect = (): DOMRect =>
+    ({ left: 0, top: 0, width: 400, height: 300, right: 400, bottom: 300, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
+  Object.defineProperty(svg, 'width', { value: { baseVal: { value: 400 } }, configurable: true });
+  Object.defineProperty(svg, 'height', { value: { baseVal: { value: 300 } }, configurable: true });
+  act(() => rendered.result.current.svgRef(svg));
+  return rendered;
+}
+
+describe('useZoom effective scale extent', () => {
+  it('keeps zoom-out available after fitView widens the floor below the configured extent', () => {
+    const { result } = mountViewZoomWithSvg();
+
+    // A graph far larger than the panel fits at a scale well below the 0.05 view floor; fitView
+    // widens the lower bound to admit it, leaving the scale pinned at the new floor.
+    act(() => result.current.fitView({ minX: 0, minY: 0, maxX: 40000, maxY: 30000 }, 400, 300));
+    const fittedScale = result.current.scale;
+    expect(fittedScale).toBeLessThan(0.05);
+    expect(result.current.canZoomOut).toBe(false); // at the widened floor
+    expect(result.current.canZoomIn).toBe(true);
+
+    // One zoom-in step lifts the scale off the widened floor; zoom-out must re-enable against that
+    // same widened extent rather than the static 0.05 constant.
+    act(() => result.current.zoomIn());
+    expect(result.current.scale).toBeGreaterThan(fittedScale);
+    expect(result.current.canZoomOut).toBe(true);
+  });
+
+  it('restores the configured extent on resetPan', () => {
+    const { result } = mountViewZoomWithSvg();
+
+    act(() => result.current.fitView({ minX: 0, minY: 0, maxX: 40000, maxY: 30000 }, 400, 300));
+    act(() => result.current.resetPan());
+
+    // Back at identity (scale 1) with the configured extent restored: both directions available.
+    expect(result.current.scale).toBe(1);
+    expect(result.current.canZoomIn).toBe(true);
+    expect(result.current.canZoomOut).toBe(true);
   });
 });

@@ -116,6 +116,16 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
   const [isPanning, setIsPanning] = useState(false);
   const nodeRef = useRef<SVGSVGElement | null>(null);
 
+  // The extent currently installed on the zoom behavior. It starts at the mode's configured bounds
+  // but `fitView` can widen the lower bound to frame a very large graph (see below); tracking it in
+  // state keeps the on-screen controls' disabled flags in sync with the extent d3-zoom actually
+  // clamps to, instead of the static constant.
+  const baseScaleExtent = useMemo(
+    (): [number, number] => (interactionMode === 'view' ? VIEW_SCALE_EXTENT : DEFAULT_SCALE_EXTENT),
+    [interactionMode],
+  );
+  const [scaleExtent, setScaleExtent] = useState<[number, number]>(baseScaleExtent);
+
   const zoomBehavior = useMemo(() => zoom<SVGSVGElement, unknown>(), []);
 
   const svgRef = useCallback(
@@ -125,8 +135,10 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
       }
       nodeRef.current = node;
       // Always set the extent (not only in view mode) so the configured bounds are explicit and a
-      // future dynamic mode switch can't leave a stale clamp behind.
-      zoomBehavior.scaleExtent(interactionMode === 'view' ? VIEW_SCALE_EXTENT : DEFAULT_SCALE_EXTENT);
+      // future dynamic mode switch can't leave a stale clamp behind. Reset the tracked extent to the
+      // mode's configured bounds too, discarding any widening a prior fitView applied.
+      zoomBehavior.scaleExtent(baseScaleExtent);
+      setScaleExtent(baseScaleExtent);
       if (interactionMode === 'view') {
         zoomBehavior.clickDistance(VIEW_CLICK_DISTANCE);
       }
@@ -138,15 +150,19 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
       zoomBehavior.on('end', () => setIsPanning(false));
       select<SVGSVGElement, unknown>(node).call(zoomBehavior);
     },
-    [zoomBehavior, interactionMode],
+    [zoomBehavior, interactionMode, baseScaleExtent],
   );
 
   const resetPan = useCallback(() => {
     if (!nodeRef.current) {
       return;
     }
+    // Restore the mode's configured extent, undoing any lower-bound widening a prior fitView applied,
+    // then snap back to the identity transform (which sits inside that extent).
+    zoomBehavior.scaleExtent(baseScaleExtent);
+    setScaleExtent(baseScaleExtent);
     select<SVGSVGElement, unknown>(nodeRef.current).call(zoomBehavior.transform, zoomIdentity);
-  }, [zoomBehavior]);
+  }, [zoomBehavior, baseScaleExtent]);
 
   const fitView = useCallback(
     (
@@ -165,7 +181,9 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
       // lower bound to admit this scale (never above it) so fit always frames the whole graph.
       const [minScale, maxScale] = zoomBehavior.scaleExtent();
       if (scale < minScale) {
-        zoomBehavior.scaleExtent([scale, maxScale]);
+        const widened: [number, number] = [scale, maxScale];
+        zoomBehavior.scaleExtent(widened);
+        setScaleExtent(widened);
       }
       const tx = canvasWidth / 2 - (scale * (boundingBox.minX + boundingBox.maxX)) / 2;
       const ty = canvasHeight / 2 - (scale * (boundingBox.minY + boundingBox.maxY)) / 2;
@@ -203,11 +221,10 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
     [transform],
   );
 
-  // Disable flags come from the mode's configured extent. They're advisory UI state — d3-zoom's own
-  // clamp in scaleBy is the source of truth — so we read the static constant rather than the live
-  // behavior (which would mean touching a ref during render). The only effect is cosmetic: after a
-  // fitView that widened the floor for a huge graph, zoom-out may disable one step early.
-  const scaleExtent = interactionMode === 'view' ? VIEW_SCALE_EXTENT : DEFAULT_SCALE_EXTENT;
+  // Disable flags come from the extent currently installed on the behavior, tracked in `scaleExtent`
+  // state. d3-zoom's own clamp in scaleBy remains the source of truth for zooming; these flags just
+  // mirror it so the on-screen controls stay in sync even after a fitView widens the lower bound to
+  // frame a very large graph.
   const { atMin, atMax } = isAtScaleLimit(transform.k, scaleExtent);
 
   return {
