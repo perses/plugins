@@ -25,6 +25,7 @@ import type {
   SelectMergeStacktracesResponse,
   SelectSeriesRequest,
   SelectSeriesResponse,
+  SeriesLabelsResponse,
 } from './api-types';
 
 interface PyroscopeClientOptions {
@@ -185,18 +186,28 @@ export function searchLabelValues(
 }
 
 /**
- * Returns a list of all services.
- * This is a special case of label values where the label name is "service_name".
+ * Returns all services using Pyroscope's metadata-backed Series lookup.
  */
-export function searchServices(
+export async function searchServices(
   params: SearchLabelValuesParameters,
   queryOptions: QueryOptions,
   body: Record<string, string | number>,
 ): Promise<SearchLabelValuesResponse> {
-  return fetchWithPost<SearchLabelValuesParameters, SearchLabelValuesResponse>(
-    '/querier.v1.QuerierService/LabelValues',
+  const response = await fetchWithPost<SearchLabelValuesParameters, SeriesLabelsResponse>(
+    '/querier.v1.QuerierService/Series',
     params,
     queryOptions,
-    { name: 'service_name', ...body },
+    {
+      ...body,
+      labelNames: ['service_name', '__profile_type__'],
+    },
   );
+  const names = new Set<string>();
+  for (const labelSet of response.labelsSet ?? []) {
+    const serviceName = labelSet.labels?.find((label) => label.name === 'service_name')?.value;
+    if (serviceName) {
+      names.add(serviceName);
+    }
+  }
+  return { names: [...names].toSorted() };
 }

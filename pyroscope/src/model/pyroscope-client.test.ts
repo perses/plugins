@@ -16,7 +16,7 @@ import {
   MOCK_LABEL_NAMES_RESPONSE,
   MOCK_LABEL_VALUES_RESPONSE_NAME_REGION,
 } from '../test';
-import { searchProfileTypes, searchLabelNames, searchLabelValues } from './pyroscope-client';
+import { searchProfileTypes, searchLabelNames, searchLabelValues, searchServices } from './pyroscope-client';
 
 const fetchMock = (global.fetch = vi.fn());
 
@@ -44,5 +44,51 @@ describe('pyroscope-client', () => {
 
     const results = await searchLabelValues({}, { datasourceUrl: '' }, { name: 'region' });
     expect(results).toEqual(MOCK_LABEL_VALUES_RESPONSE_NAME_REGION);
+  });
+
+  it('lists distinct services through the metadata-backed Series request', async () => {
+    fetchMock.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          labelsSet: [
+            {
+              labels: [
+                { name: '__profile_type__', value: 'cpu' },
+                { name: 'service_name', value: 'web' },
+              ],
+            },
+            {
+              labels: [
+                { name: 'service_name', value: 'api' },
+                { name: '__profile_type__', value: 'cpu' },
+              ],
+            },
+            {
+              labels: [
+                { name: 'service_name', value: 'web' },
+                { name: '__profile_type__', value: 'memory' },
+              ],
+            },
+            { labels: [{ name: '__profile_type__', value: 'cpu' }] },
+          ],
+        }),
+    });
+
+    const results = await searchServices({}, { datasourceUrl: '' }, { start: 1000, end: 2000 });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/querier.v1.QuerierService/Series?',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ start: 1000, end: 2000, labelNames: ['service_name', '__profile_type__'] }),
+      }),
+    );
+    expect(results).toEqual({ names: ['api', 'web'] });
+  });
+
+  it('returns an empty service list when the Series response has no label sets', async () => {
+    fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve({}) });
+
+    expect(await searchServices({}, { datasourceUrl: '' }, { start: 1000, end: 2000 })).toEqual({ names: [] });
   });
 });
