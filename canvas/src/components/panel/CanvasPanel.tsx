@@ -27,7 +27,7 @@ import { resolveMouseShortcut } from '../../utils/shortcuts';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
-import { LEGEND_WIDTH, ThresholdLegend } from './ThresholdLegend';
+import { legendHeight, LEGEND_WIDTH, ThresholdLegend } from './ThresholdLegend';
 
 const SVG_STYLE_BASE = { display: 'block' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
@@ -81,7 +81,9 @@ function PanelSvg({
   const legendPosition = spec.legend?.position ?? 'bottom';
   const legendX = legendPosition === 'right' ? width - LEGEND_WIDTH - LEGEND_MARGIN : LEGEND_MARGIN;
   const legendY =
-    legendPosition === 'right' ? LEGEND_MARGIN : height - ((spec.thresholds?.steps?.length ?? 0) + 1) * 18 - 24;
+    legendPosition === 'right'
+      ? LEGEND_MARGIN
+      : height - legendHeight((spec.thresholds?.steps?.length ?? 0) + 1) - LEGEND_MARGIN;
 
   const svgStyle = useMemo(() => ({ ...SVG_STYLE_BASE, cursor: isPanning ? 'grabbing' : 'grab' }), [isPanning]);
 

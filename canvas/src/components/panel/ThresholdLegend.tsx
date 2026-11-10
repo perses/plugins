@@ -18,22 +18,30 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import type { Point } from '../../model';
+import { measureTextWidth } from '../../utils/measureText';
 
 const SWATCH_SIZE = 12;
 const ROW_HEIGHT = 18;
 const LABEL_OFFSET = SWATCH_SIZE + 6;
 const PADDING = 8;
 const FONT_SIZE = 11;
+const FONT_WEIGHT = 400;
 export const LEGEND_WIDTH = 110;
 const TEXT_MAX_WIDTH = LEGEND_WIDTH - PADDING - LABEL_OFFSET - PADDING;
 const NO_SELECT_STYLE = { userSelect: 'none' } as const;
 const LEGEND_FONT_FAMILY = 'sans-serif';
-// Approximate character width for font-size 11px sans-serif.
-const CHAR_WIDTH_APPROX = 6.5;
 
 function truncateLabel(label: string): string {
-  const maxChars = Math.floor(TEXT_MAX_WIDTH / CHAR_WIDTH_APPROX);
-  return label.length > maxChars ? `${label.slice(0, maxChars - 1)}…` : label;
+  if (measureTextWidth(label, FONT_WEIGHT, FONT_SIZE, LEGEND_FONT_FAMILY) <= TEXT_MAX_WIDTH) return label;
+  let s = label;
+  while (s.length > 0 && measureTextWidth(`${s}…`, FONT_WEIGHT, FONT_SIZE, LEGEND_FONT_FAMILY) > TEXT_MAX_WIDTH) {
+    s = s.slice(0, -1);
+  }
+  return `${s}…`;
+}
+
+export function legendHeight(rowCount: number): number {
+  return rowCount * ROW_HEIGHT + PADDING * 2;
 }
 
 interface ThresholdLegendProps {
@@ -64,16 +72,13 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
     [steps, paletteColors, defaultColor, format],
   );
 
-  const boxWidth = LEGEND_WIDTH;
-  const boxHeight = rows.length * ROW_HEIGHT + PADDING * 2;
-
   return (
     <g>
       <rect
         x={position.x}
         y={position.y}
-        width={boxWidth}
-        height={boxHeight}
+        width={LEGEND_WIDTH}
+        height={legendHeight(rows.length)}
         fill={muiTheme.palette.background.paper}
         fillOpacity={0.9}
         stroke={muiTheme.palette.divider}
