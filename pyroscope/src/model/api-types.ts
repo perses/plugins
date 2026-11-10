@@ -163,3 +163,10 @@ export type SearchLabelValuesParameters = Record<string, never>;
 export interface SearchLabelValuesResponse {
   names: string[];
 }
+
+/**
+ * Response of POST /querier.v1.QuerierService/Series when requesting service and profile type labels.
+ */
+export interface SeriesLabelsResponse {
+  labelsSet?: Array<{ labels?: LabelPair[] }>;
+}
