@@ -1,0 +1,8 @@
+{
+  "kind": "TracingGanttChart",
+  "spec": {
+    "links": {
+      "trace": "javascript:alert(document.domain)"
+    }
+  }
+}

@@ -4,6 +4,7 @@
 kind: "TracingGanttChart"
 spec:
   visual: <Visual specification> # Optional
+  links: <Links specification> # Optional
   selection: <Selection specification> # Optional
   actions: <Actions specification> # Optional
 ```
@@ -19,6 +20,24 @@ palette: <Palette specification> # Optional
 ```yaml
 mode: <enum = "auto" | "categorical">
 ```
+
+## Links specification
+
+```yaml
+# Link of a trace. Besides the dashboard variables, it supports ${datasourceName} and ${traceId}.
+trace: <string> # Optional
+# Links displayed on the value of a span attribute.
+attributes: # Optional
+  - name: <string> # Name of the attribute, e.g. k8s.pod.name
+    # Besides the dashboard variables, it supports ${datasourceName} and the attributes of the span, the dots of their
+    # names being replaced by underscores, e.g. ${k8s_pod_name}.
+    link: <string>
+```
+
+Both `trace` and `link` must be relative URLs or use one of the following schemes: http, https, mailto, tel, sms,
+slack, msteams, vscode, vscode-insiders, zoommtg. Any other scheme (e.g. `javascript:`) is rejected.
+When the URL contains variables, the URL obtained after the interpolation must follow the same rule, otherwise the
+value is not displayed as a link.
 
 ## Selection specification
 
