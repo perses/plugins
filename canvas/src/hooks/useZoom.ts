@@ -90,6 +90,22 @@ export function shouldStartGesture(event: Event, interactionMode: ZoomInteractio
   return event.button === 1 || (interactionMode === 'view' && event.button === 0);
 }
 
+/**
+ * Whether we should cancel a wheel event's browser default (ctrl/meta held → the page's pinch/zoom).
+ *
+ * Mirrors the wheel branch of `shouldStartGesture`: a modified wheel is a zoom gesture we claim for
+ * the canvas, so its default must never reach the page. d3-zoom calls `preventDefault` itself when a
+ * modified wheel actually changes the transform, but it returns *before* doing so when the new scale
+ * is clamped to an unchanged value at a `scaleExtent` limit — leaving the browser free to zoom the
+ * whole dashboard page. We preventDefault these events ourselves so that can't happen, while leaving
+ * a plain (unmodified) wheel untouched so it keeps scrolling the surrounding page.
+ *
+ * Exported for unit testing alongside the other pure gesture predicates.
+ */
+export function shouldPreventWheelDefault(event: WheelEvent): boolean {
+  return event.ctrlKey || event.metaKey;
+}
+
 export interface UseZoomResult {
   svgRef: (node: SVGSVGElement | null) => void;
   transform: ZoomTransform;
@@ -115,6 +131,9 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
   const [transform, setTransform] = useState<ZoomTransform>(zoomIdentity);
   const [isPanning, setIsPanning] = useState(false);
   const nodeRef = useRef<SVGSVGElement | null>(null);
+  // The node + wheel handler we currently have a native listener attached to, so the callback ref
+  // can detach it on unmount or before re-attaching to a new node.
+  const wheelListenerRef = useRef<{ node: SVGSVGElement; handler: (event: WheelEvent) => void } | null>(null);
 
   // The extent currently installed on the zoom behavior. It starts at the mode's configured bounds
   // but `fitView` can widen the lower bound to frame a very large graph (see below); tracking it in
@@ -130,6 +149,13 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
 
   const svgRef = useCallback(
     (node: SVGSVGElement | null): void => {
+      // Detach any wheel listener from the previously-bound node first (callback-ref cleanup runs
+      // with `node === null` on unmount, and with the new node when the ref target changes).
+      const previous = wheelListenerRef.current;
+      if (previous) {
+        previous.node.removeEventListener('wheel', previous.handler);
+        wheelListenerRef.current = null;
+      }
       if (!node) {
         return;
       }
@@ -149,6 +175,17 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
       });
       zoomBehavior.on('end', () => setIsPanning(false));
       select<SVGSVGElement, unknown>(node).call(zoomBehavior);
+      // d3-zoom only calls preventDefault on a modified wheel that actually changes the transform;
+      // at a scaleExtent limit the clamped scale is unchanged and it bails early, letting the
+      // browser zoom the whole page. Cancel the default ourselves for the modified wheels we claim.
+      // Must be a non-passive native listener — a React onWheel can't reliably preventDefault.
+      const handler = (event: WheelEvent): void => {
+        if (shouldPreventWheelDefault(event)) {
+          event.preventDefault();
+        }
+      };
+      node.addEventListener('wheel', handler, { passive: false });
+      wheelListenerRef.current = { node, handler };
     },
     [zoomBehavior, interactionMode, baseScaleExtent],
   );

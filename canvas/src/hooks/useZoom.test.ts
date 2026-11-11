@@ -13,7 +13,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 
-import { isAtScaleLimit, shouldStartGesture, useZoom } from './useZoom';
+import { isAtScaleLimit, shouldPreventWheelDefault, shouldStartGesture, useZoom } from './useZoom';
 
 describe('shouldStartGesture', () => {
   it('never starts a gesture on double-click, in either mode', () => {
@@ -63,6 +63,17 @@ describe('shouldStartGesture', () => {
   });
 });
 
+describe('shouldPreventWheelDefault', () => {
+  it('cancels the default of a modified (ctrl/meta) wheel so the page never zooms', () => {
+    expect(shouldPreventWheelDefault(new WheelEvent('wheel', { ctrlKey: true }))).toBe(true);
+    expect(shouldPreventWheelDefault(new WheelEvent('wheel', { metaKey: true }))).toBe(true);
+  });
+
+  it('leaves a plain wheel untouched so it keeps scrolling the surrounding page', () => {
+    expect(shouldPreventWheelDefault(new WheelEvent('wheel'))).toBe(false);
+  });
+});
+
 describe('isAtScaleLimit', () => {
   const extent: [number, number] = [0.05, 8];
 
@@ -94,7 +105,10 @@ describe('isAtScaleLimit', () => {
 // d3-zoom scales about the viewport center derived from the SVG client box. jsdom reports a zero
 // box, which collapses the center but still lets programmatic transforms apply, so we give the SVG
 // a size via a stubbed getBoundingClientRect, and stub width/height.baseVal for defaultExtent.
-function mountViewZoomWithSvg(): ReturnType<typeof renderHook<ReturnType<typeof useZoom>, unknown>> {
+function mountViewZoomWithSvg(): {
+  rendered: ReturnType<typeof renderHook<ReturnType<typeof useZoom>, unknown>>;
+  svg: SVGSVGElement;
+} {
   const rendered = renderHook(() => useZoom({ interactionMode: 'view' }));
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.getBoundingClientRect = (): DOMRect =>
@@ -102,12 +116,22 @@ function mountViewZoomWithSvg(): ReturnType<typeof renderHook<ReturnType<typeof 
   Object.defineProperty(svg, 'width', { value: { baseVal: { value: 400 } }, configurable: true });
   Object.defineProperty(svg, 'height', { value: { baseVal: { value: 300 } }, configurable: true });
   act(() => rendered.result.current.svgRef(svg));
-  return rendered;
+  return { rendered, svg };
+}
+
+function dispatchWheel(node: SVGSVGElement, init: WheelEventInit): WheelEvent {
+  const event = new WheelEvent('wheel', { ...init, cancelable: true, bubbles: true });
+  act(() => {
+    node.dispatchEvent(event);
+  });
+  return event;
 }
 
 describe('useZoom effective scale extent', () => {
   it('keeps zoom-out available after fitView widens the floor below the configured extent', () => {
-    const { result } = mountViewZoomWithSvg();
+    const {
+      rendered: { result },
+    } = mountViewZoomWithSvg();
 
     // A graph far larger than the panel fits at a scale well below the 0.05 view floor; fitView
     // widens the lower bound to admit it, leaving the scale pinned at the new floor.
@@ -125,7 +149,9 @@ describe('useZoom effective scale extent', () => {
   });
 
   it('restores the configured extent on resetPan', () => {
-    const { result } = mountViewZoomWithSvg();
+    const {
+      rendered: { result },
+    } = mountViewZoomWithSvg();
 
     act(() => result.current.fitView({ minX: 0, minY: 0, maxX: 40000, maxY: 30000 }, 400, 300));
     act(() => result.current.resetPan());
@@ -134,5 +160,49 @@ describe('useZoom effective scale extent', () => {
     expect(result.current.scale).toBe(1);
     expect(result.current.canZoomIn).toBe(true);
     expect(result.current.canZoomOut).toBe(true);
+  });
+});
+
+describe('useZoom wheel default handling', () => {
+  it('cancels a modified wheel at the max scale limit so the page cannot zoom', () => {
+    const { rendered, svg } = mountViewZoomWithSvg();
+
+    // Pin the scale at the top of the view extent, then push further in with a ctrl+wheel. d3-zoom
+    // clamps to the unchanged max and bails before preventing the default, so our listener must.
+    act(() => rendered.result.current.fitView({ minX: 0, minY: 0, maxX: 10, maxY: 10 }, 400, 300));
+    for (let i = 0; i < 20; i++) {
+      act(() => rendered.result.current.zoomIn());
+    }
+    expect(rendered.result.current.canZoomIn).toBe(false); // at the max
+
+    const event = dispatchWheel(svg, { ctrlKey: true, deltaY: -100 });
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('cancels a modified wheel even when it does change the transform', () => {
+    const { rendered, svg } = mountViewZoomWithSvg();
+    const event = dispatchWheel(svg, { ctrlKey: true, deltaY: -100 });
+    expect(event.defaultPrevented).toBe(true);
+    expect(rendered.result.current.scale).not.toBe(1); // it also zoomed the canvas
+  });
+
+  it('leaves a plain wheel untouched so it keeps scrolling the surrounding page', () => {
+    const { svg } = mountViewZoomWithSvg();
+    const event = dispatchWheel(svg, { deltaY: -100 });
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('detaches the wheel listener when the ref is cleared', () => {
+    const { rendered, svg } = mountViewZoomWithSvg();
+    // Pin to the max scale so d3-zoom's own listener bails without preventing the default; then only
+    // our listener could cancel the event. After clearing the ref it's detached, so the default
+    // survives — proving the cleanup ran rather than leaking a listener on the orphaned node.
+    act(() => rendered.result.current.fitView({ minX: 0, minY: 0, maxX: 10, maxY: 10 }, 400, 300));
+    for (let i = 0; i < 20; i++) {
+      act(() => rendered.result.current.zoomIn());
+    }
+    act(() => rendered.result.current.svgRef(null));
+    const event = dispatchWheel(svg, { ctrlKey: true, deltaY: -100 });
+    expect(event.defaultPrevented).toBe(false);
   });
 });
