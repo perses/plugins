@@ -71,6 +71,22 @@ Enable exemplar support on the datasource: the Prometheus query plugin will also
 capable panels like the Time Series Chart. See the [plugin documentation](../README.md#exemplars) for
 the requirements (exemplar storage enabled on the Prometheus side, etc.).
 
+#### Exemplar links
+
+```golang
+import "github.com/perses/plugins/prometheus/sdk/go/datasource"
+
+datasource.EnableExemplars()
+datasource.AddExemplarLink("Jaeger", "https://jaeger.example.com/trace/${traceId}", "trace_id")
+```
+
+Add a link to the exemplars that have the given label (`trace_id` here), typically to open their trace in
+a tracing UI. The arguments are the name of the link (the URL is displayed when empty), its URL template,
+where `${traceId}` is replaced with the trace ID of the exemplar, and the name of the exemplar label that
+holds the trace ID. The option can be used several times to add several links. Links are only displayed
+when exemplars are enabled. See the [plugin documentation](../README.md#linking-exemplars-to-traces) for
+more details.
+
 ## Examples
 
 ```golang

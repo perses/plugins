@@ -296,6 +296,45 @@ describe('PrometheusTimeSeriesQuery', () => {
     ]);
   });
 
+  it('should attach the links configured on the datasource to the exemplars', async () => {
+    const ctx = createStubContext();
+    getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {
+      return {
+        default: false,
+        plugin: {
+          kind: 'PrometheusDatasource',
+          spec: {
+            ...datasource,
+            exemplars: {
+              enable: true,
+              links: [
+                { name: 'Jaeger', url: 'http://localhost:16686/trace/${traceId}', traceIDLabel: 'traceID' },
+                // The stub exemplar has no `trace_id` label: this link must be left out.
+                { name: 'Tempo', url: 'https://tempo.example.com/trace/${traceId}', traceIDLabel: 'trace_id' },
+              ],
+            },
+          },
+        },
+      };
+    });
+
+    const results = await PrometheusTimeSeriesQuery.getTimeSeriesData({ query: 'up' }, ctx);
+
+    expect(results.exemplars).toEqual([
+      {
+        seriesLabels: { job: 'node' },
+        exemplars: [
+          {
+            labels: { traceID: 'abc123' },
+            value: 10,
+            timestamp: 1686141338877,
+            links: [{ name: 'Jaeger', url: 'http://localhost:16686/trace/abc123' }],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('should not query exemplars when spec.enableExemplars is false, even if the datasource enables them', async () => {
     const ctx = createStubContext();
     getDatasource.mockImplementation((): DatasourceSpec<PrometheusDatasourceSpec> => {

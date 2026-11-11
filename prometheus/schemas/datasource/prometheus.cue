@@ -14,6 +14,8 @@
 package model
 
 import (
+	"strings"
+
 	"github.com/perses/shared/cue/common"
 	"github.com/perses/spec/cue/datasource"
 )
@@ -25,7 +27,16 @@ spec: {
 	queryParams?: {[string]: string}
 	exemplars?: {
 		enable: bool
+		links?: [...#exemplarLink]
 	}
+}
+
+// A link shown on each exemplar that carries the `traceIDLabel` label.
+// `url` is a template: `${traceId}` is replaced with the value of that label.
+#exemplarLink: {
+	name?:        strings.MinRunes(1)
+	url:          strings.MinRunes(1)
+	traceIDLabel: strings.MinRunes(1)
 }
 
 #kind: "PrometheusDatasource"

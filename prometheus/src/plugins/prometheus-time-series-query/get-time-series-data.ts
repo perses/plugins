@@ -37,6 +37,8 @@ import { getFormattedPrometheusSeriesName } from '../../utils';
 import { interpolateDatasourceProxyParams } from '../interpolation';
 import type { PrometheusDatasourceSpec } from '../types';
 import { DEFAULT_SCRAPE_INTERVAL } from '../types';
+import type { ExemplarLinkTemplate } from './exemplar-links';
+import { buildExemplarLinks, prepareExemplarLinks } from './exemplar-links';
 import { getMinStepSeconds } from './min-step';
 import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
 import type { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
@@ -177,7 +179,10 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     stepMs: step * 1000,
 
     series: buildTimeSeries(query, result, seriesNameFormat),
-    exemplars: buildExemplars(exemplarResponse?.status === 'success' ? exemplarResponse.data : undefined),
+    exemplars: buildExemplars(
+      exemplarResponse?.status === 'success' ? exemplarResponse.data : undefined,
+      prepareExemplarLinks(datasource.plugin.spec.exemplars?.links, context.variableState),
+    ),
     metadata: {
       notices,
       executedQueryString: query,
@@ -193,7 +198,10 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
  * Returns undefined when there is no exemplar data, so other panels/queries
  * that don't use exemplars keep the payload unchanged.
  */
-function buildExemplars(data?: ExemplarSeries[]): TimeSeriesExemplars[] | undefined {
+function buildExemplars(
+  data: ExemplarSeries[] | undefined,
+  linkTemplates: ExemplarLinkTemplate[],
+): TimeSeriesExemplars[] | undefined {
   if (!data) return undefined;
 
   return data.map((res) => ({
@@ -202,11 +210,16 @@ function buildExemplars(data?: ExemplarSeries[]): TimeSeriesExemplars[] | undefi
     seriesLabels: Object.fromEntries(
       Object.entries(res.seriesLabels).filter(([labelName]) => labelName !== '__name__'),
     ),
-    exemplars: res.exemplars.map((exemplar) => ({
-      labels: exemplar.labels,
-      value: parseSampleValue(exemplar.value),
-      timestamp: exemplar.timestamp * 1000,
-    })),
+    exemplars: res.exemplars.map((exemplar) => {
+      const links = buildExemplarLinks(linkTemplates, exemplar.labels);
+      return {
+        labels: exemplar.labels,
+        value: parseSampleValue(exemplar.value),
+        timestamp: exemplar.timestamp * 1000,
+        // Only set when there is a link, so the payload is unchanged for datasources without links.
+        ...(links !== undefined && { links }),
+      };
+    }),
   }));
 }
 
