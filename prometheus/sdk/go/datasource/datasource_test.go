@@ -61,3 +61,67 @@ func TestEnableExemplars(t *testing.T) {
 		t.Errorf("exemplars.enable mismatch: %v", exemplars["enable"])
 	}
 }
+
+func TestAddExemplarLink(t *testing.T) {
+	// The order of the options must not matter: enabling exemplars keeps the links already added.
+	builder, err := create(
+		DirectURL("https://prometheus.demo.do.prometheus.io"),
+		AddExemplarLink("Jaeger", "http://localhost:16686/trace/${traceId}", "trace_id"),
+		EnableExemplars(),
+		AddExemplarLink("", "https://tempo.example.com/trace/${traceId}", "traceID"),
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if builder.Exemplars == nil || !builder.Exemplars.Enable {
+		t.Fatalf("exemplars should be enabled: %v", builder.Exemplars)
+	}
+
+	raw, err := json.Marshal(builder.PluginSpec)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	expected := `{"directUrl":"https://prometheus.demo.do.prometheus.io","exemplars":{"enable":true,"links":[` +
+		`{"name":"Jaeger","url":"http://localhost:16686/trace/${traceId}","traceIDLabel":"trace_id"},` +
+		`{"url":"https://tempo.example.com/trace/${traceId}","traceIDLabel":"traceID"}]}}`
+	if string(raw) != expected {
+		t.Errorf("serialized spec mismatch:\n got: %s\nwant: %s", raw, expected)
+	}
+
+	// The serialized spec must be accepted back.
+	var spec PluginSpec
+	if err := json.Unmarshal(raw, &spec); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(spec.Exemplars.Links) != 2 {
+		t.Errorf("links mismatch: %v", spec.Exemplars.Links)
+	}
+}
+
+func TestAddExemplarLinkWithoutEnablingExemplars(t *testing.T) {
+	builder, err := create(
+		DirectURL("https://prometheus.demo.do.prometheus.io"),
+		AddExemplarLink("Jaeger", "http://localhost:16686/trace/${traceId}", "trace_id"),
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if builder.Exemplars == nil || builder.Exemplars.Enable {
+		t.Errorf("adding a link should not enable exemplars: %v", builder.Exemplars)
+	}
+}
+
+func TestInvalidExemplarLink(t *testing.T) {
+	if _, err := create(AddExemplarLink("Jaeger", "", "trace_id")); err == nil {
+		t.Error("an exemplar link without url should be rejected")
+	}
+	if _, err := create(AddExemplarLink("Jaeger", "http://localhost:16686/trace/${traceId}", "")); err == nil {
+		t.Error("an exemplar link without traceIDLabel should be rejected")
+	}
+
+	raw := `{"directUrl":"http://localhost:9090","exemplars":{"enable":true,"links":[{"url":"http://localhost:16686"}]}}`
+	var spec PluginSpec
+	if err := json.Unmarshal([]byte(raw), &spec); err == nil {
+		t.Error("a spec with an exemplar link without traceIDLabel should be rejected")
+	}
+}

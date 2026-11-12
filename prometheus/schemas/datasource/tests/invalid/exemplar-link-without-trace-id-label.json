@@ -1,0 +1,15 @@
+{
+  "kind": "PrometheusDatasource",
+  "spec": {
+    "directUrl": "http://localhost:9090",
+    "exemplars": {
+      "enable": true,
+      "links": [
+        {
+          "name": "Jaeger",
+          "url": "http://localhost:16686/trace/${traceId}"
+        }
+      ]
+    }
+  }
+}

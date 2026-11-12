@@ -26,6 +26,28 @@ export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
  */
 export interface PrometheusExemplarsSpec {
   enable: boolean;
+  /**
+   * Links attached to each exemplar, typically to open its trace in a tracing UI.
+   */
+  links?: PrometheusExemplarLinkSpec[];
+}
+
+export interface PrometheusExemplarLinkSpec {
+  /**
+   * Text of the link. The URL is displayed when not set.
+   */
+  name?: string;
+  /**
+   * URL template of the link. `${traceId}` is replaced with the trace ID of the exemplar,
+   * URL encoded unless another format is given (e.g. `${traceId:raw}`). Dashboard variables
+   * are supported too.
+   */
+  url: string;
+  /**
+   * Name of the exemplar label holding the trace ID (e.g. `trace_id`).
+   * Exemplars without this label do not get the link.
+   */
+  traceIDLabel: string;
 }
 
 export interface PrometheusDatasourceSpec {

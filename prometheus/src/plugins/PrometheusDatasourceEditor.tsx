@@ -21,6 +21,7 @@ import PlusIcon from 'mdi-material-ui/Plus';
 import type { ReactElement } from 'react';
 import { useRef, useState } from 'react';
 
+import { ExemplarLinksEditor } from './ExemplarLinksEditor';
 import type { PrometheusDatasourceSpec } from './types';
 import { DEFAULT_SCRAPE_INTERVAL } from './types';
 
@@ -177,16 +178,30 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
           <Switch
             checked={value.exemplars?.enable ?? false}
             disabled={isReadonly}
-            onChange={(e) =>
+            onChange={(e) => {
+              // The section is removed from the spec when toggled off, unless it has links:
+              // they are kept so they are not lost when exemplars are enabled again.
+              const links = value.exemplars?.links;
+              const hasLinks = links !== undefined && links.length > 0;
               onChange({
                 ...value,
-                exemplars: e.target.checked ? { enable: true } : undefined,
-              })
-            }
+                exemplars: e.target.checked || hasLinks ? { ...value.exemplars, enable: e.target.checked } : undefined,
+              });
+            }}
           />
         }
         label="Enable exemplars"
       />
+      {value.exemplars?.enable === true && (
+        <ExemplarLinksEditor
+          value={value.exemplars.links}
+          isReadonly={isReadonly}
+          onChange={(links) => {
+            const { links: _previous, ...exemplars } = value.exemplars ?? { enable: true };
+            onChange({ ...value, exemplars: links ? { ...exemplars, links } : exemplars });
+          }}
+        />
+      )}
       <HTTPSettingsEditor
         value={value}
         onChange={onChange}
