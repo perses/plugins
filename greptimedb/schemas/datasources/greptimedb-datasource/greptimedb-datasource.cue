@@ -21,9 +21,7 @@ import (
 #kind: "GreptimeDBDatasource"
 
 kind: #kind
-spec: {
-	datasource.#HTTPDatasourceSpec
-
+spec: datasource.#HTTPDatasourceSpec & {
 	// headers are forwarded on GreptimeDB SQL API requests (e.g. Authorization).
 	// Used with directUrl when the Perses server is not proxying traffic; the host app may inject
 	// headers at datasource init instead of storing credentials in dashboard JSON.
