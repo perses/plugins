@@ -21,8 +21,7 @@ import (
 #kind: "SplunkDatasource"
 
 kind: #kind
-spec: {
-	datasource.#HTTPDatasourceSpec
-}
+spec: datasource.#HTTPDatasourceSpec
+
 
 #selector: common.#datasourceSelector & {_kind: #kind}

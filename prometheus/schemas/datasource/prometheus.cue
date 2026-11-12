@@ -19,8 +19,7 @@ import (
 )
 
 kind: #kind
-spec: {
-	datasource.#HTTPDatasourceSpec
+spec: datasource.#HTTPDatasourceSpec & {
 	scrapeInterval?: =~#durationRegex
 	queryParams?: {[string]: string}
 	exemplars?: {

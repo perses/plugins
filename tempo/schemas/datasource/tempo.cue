@@ -21,8 +21,7 @@ import (
 #kind: "TempoDatasource"
 
 kind: #kind
-spec: {
-	datasource.#HTTPDatasourceSpec
-}
+spec: datasource.#HTTPDatasourceSpec
+
 
 #selector: common.#datasourceSelector & {_kind: #kind}
