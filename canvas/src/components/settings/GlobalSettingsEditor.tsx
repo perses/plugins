@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import {
   FormatControls,
+  InfoTooltip,
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
   ThresholdsEditor,
 } from '@perses-dev/components';
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import type { MouseEvent, ReactElement } from 'react';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
@@ -35,6 +37,23 @@ import { LegendSettings } from './LegendSettings';
 const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 const EDITOR_COLUMN_SX = { display: 'flex', flexDirection: 'column' as const, gap: 3 };
 const DEFAULT_GENERATION: GraphGenerationSpec = { enabled: true, nodeQueryIndex: 0, nodeIdLabel: '' };
+const EDGE_THICKNESS_INFO_ICON = (
+  <InfoTooltip
+    id="edge-thickness-info-tooltip"
+    title="Edge thickness"
+    description="When an edge has a query and its thickness mode is set to Threshold, its width follows the latest value of that query: the width of the highest matching threshold step is used. The default width applies otherwise (fixed mode without a custom width, no data, or no matching step)."
+    enterDelay={100}
+  >
+    <IconButton
+      aria-label="Edge thickness information"
+      aria-describedby="edge-thickness-info-tooltip"
+      size="small"
+      sx={{ borderRadius: 1, padding: '4px', margin: '0 2px' }}
+    >
+      <InformationOutlineIcon aria-hidden fontSize="inherit" sx={{ color: 'text.secondary' }} />
+    </IconButton>
+  </InfoTooltip>
+);
 
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
 
@@ -63,7 +82,7 @@ function StylingSettings({ value, onChange, onFormatChange, onThresholdsChange }
         <OptionsEditorGroup title="Node color">
           <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
         </OptionsEditorGroup>
-        <OptionsEditorGroup title="Edge thickness">
+        <OptionsEditorGroup title="Edge thickness" icon={EDGE_THICKNESS_INFO_ICON}>
           <EdgeThicknessSettings value={value} onChange={onChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>

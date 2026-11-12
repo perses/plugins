@@ -18,13 +18,31 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import type { Point } from '../../model';
+import { measureTextWidth } from '../../utils/measureText';
 
 const SWATCH_SIZE = 12;
 const ROW_HEIGHT = 18;
 const LABEL_OFFSET = SWATCH_SIZE + 6;
 const PADDING = 8;
 const FONT_SIZE = 11;
+const FONT_WEIGHT = 400;
+export const LEGEND_WIDTH = 110;
+const TEXT_MAX_WIDTH = LEGEND_WIDTH - PADDING - LABEL_OFFSET - PADDING;
 const NO_SELECT_STYLE = { userSelect: 'none' } as const;
+const LEGEND_FONT_FAMILY = 'sans-serif';
+
+function truncateLabel(label: string): string {
+  if (measureTextWidth(label, FONT_WEIGHT, FONT_SIZE, LEGEND_FONT_FAMILY) <= TEXT_MAX_WIDTH) return label;
+  let s = label;
+  while (s.length > 0 && measureTextWidth(`${s}…`, FONT_WEIGHT, FONT_SIZE, LEGEND_FONT_FAMILY) > TEXT_MAX_WIDTH) {
+    s = s.slice(0, -1);
+  }
+  return `${s}…`;
+}
+
+export function legendHeight(rowCount: number): number {
+  return rowCount * ROW_HEIGHT + PADDING * 2;
+}
 
 interface ThresholdLegendProps {
   thresholds: ThresholdOptions;
@@ -40,26 +58,27 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
 
   const rows = useMemo(
     () => [
-      ...steps.map((step, i) => ({
-        color: step.color ?? paletteColors[i] ?? defaultColor,
-        label: `≥ ${formatValue(step.value, format)}`,
-        key: String(step.value),
-      })),
-      { color: defaultColor, label: 'default', key: 'default' },
+      ...steps.map((step, i) => {
+        const label = `≥ ${formatValue(step.value, format)}`;
+        return {
+          color: step.color ?? paletteColors[i] ?? defaultColor,
+          label,
+          displayLabel: truncateLabel(label),
+          key: String(step.value),
+        };
+      }),
+      { color: defaultColor, label: 'default', displayLabel: truncateLabel('default'), key: 'default' },
     ],
     [steps, paletteColors, defaultColor, format],
   );
-
-  const boxWidth = 110;
-  const boxHeight = rows.length * ROW_HEIGHT + PADDING * 2;
 
   return (
     <g>
       <rect
         x={position.x}
         y={position.y}
-        width={boxWidth}
-        height={boxHeight}
+        width={LEGEND_WIDTH}
+        height={legendHeight(rows.length)}
         fill={muiTheme.palette.background.paper}
         fillOpacity={0.9}
         stroke={muiTheme.palette.divider}
@@ -75,10 +94,12 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
               x={position.x + PADDING + LABEL_OFFSET}
               y={ry + SWATCH_SIZE - 2}
               fontSize={FONT_SIZE}
+              fontFamily={LEGEND_FONT_FAMILY}
               fill={muiTheme.palette.text.primary}
               style={NO_SELECT_STYLE}
             >
-              {row.label}
+              <title>{row.label}</title>
+              {row.displayLabel}
             </text>
           </g>
         );
