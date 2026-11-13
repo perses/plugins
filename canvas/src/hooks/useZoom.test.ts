@@ -13,7 +13,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 
-import { isAtScaleLimit, shouldPreventWheelDefault, shouldStartGesture, useZoom } from './useZoom';
+import { isAtScaleLimit, shouldPreventWheelDefault, shouldStartGesture, useZoom, wheelZoomDirection } from './useZoom';
 
 describe('shouldStartGesture', () => {
   it('never starts a gesture on double-click, in either mode', () => {
@@ -74,6 +74,17 @@ describe('shouldPreventWheelDefault', () => {
   });
 });
 
+describe('wheelZoomDirection', () => {
+  it('zooms in on scroll up (deltaY < 0) and out on scroll down (deltaY > 0)', () => {
+    expect(wheelZoomDirection(-100)).toBe(1);
+    expect(wheelZoomDirection(100)).toBe(-1);
+  });
+
+  it('is a no-op for no vertical movement', () => {
+    expect(wheelZoomDirection(0)).toBe(0);
+  });
+});
+
 describe('isAtScaleLimit', () => {
   const extent: [number, number] = [0.05, 8];
 
@@ -104,22 +115,33 @@ describe('isAtScaleLimit', () => {
 
 // d3-zoom scales about the viewport center derived from the SVG client box. jsdom reports a zero
 // box, which collapses the center but still lets programmatic transforms apply, so we give the SVG
-// a size via a stubbed getBoundingClientRect, and stub width/height.baseVal for defaultExtent.
+// a size via a stubbed getBoundingClientRect, and stub width/height.baseVal for defaultExtent. The
+// SVG is nested in a container element mirroring CanvasPanel's wrapper, since the panel's wheel
+// listener now lives on the container (so it also covers the controls overlay, an SVG sibling).
 function mountViewZoomWithSvg(): {
   rendered: ReturnType<typeof renderHook<ReturnType<typeof useZoom>, unknown>>;
   svg: SVGSVGElement;
+  container: HTMLDivElement;
+  overlay: HTMLDivElement;
 } {
   const rendered = renderHook(() => useZoom({ interactionMode: 'view' }));
+  const container = document.createElement('div');
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const overlay = document.createElement('div'); // stands in for the ZoomControls overlay
+  container.append(svg, overlay);
+  document.body.append(container);
   svg.getBoundingClientRect = (): DOMRect =>
     ({ left: 0, top: 0, width: 400, height: 300, right: 400, bottom: 300, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
   Object.defineProperty(svg, 'width', { value: { baseVal: { value: 400 } }, configurable: true });
   Object.defineProperty(svg, 'height', { value: { baseVal: { value: 300 } }, configurable: true });
-  act(() => rendered.result.current.svgRef(svg));
-  return { rendered, svg };
+  act(() => {
+    rendered.result.current.svgRef(svg);
+    rendered.result.current.containerRef(container);
+  });
+  return { rendered, svg, container, overlay };
 }
 
-function dispatchWheel(node: SVGSVGElement, init: WheelEventInit): WheelEvent {
+function dispatchWheel(node: Element, init: WheelEventInit): WheelEvent {
   const event = new WheelEvent('wheel', { ...init, cancelable: true, bubbles: true });
   act(() => {
     node.dispatchEvent(event);
@@ -175,6 +197,7 @@ describe('useZoom wheel default handling', () => {
     }
     expect(rendered.result.current.canZoomIn).toBe(false); // at the max
 
+    // Dispatched on the SVG, the event bubbles to the container listener.
     const event = dispatchWheel(svg, { ctrlKey: true, deltaY: -100 });
     expect(event.defaultPrevented).toBe(true);
   });
@@ -187,22 +210,48 @@ describe('useZoom wheel default handling', () => {
   });
 
   it('leaves a plain wheel untouched so it keeps scrolling the surrounding page', () => {
-    const { svg } = mountViewZoomWithSvg();
-    const event = dispatchWheel(svg, { deltaY: -100 });
-    expect(event.defaultPrevented).toBe(false);
+    const { svg, overlay } = mountViewZoomWithSvg();
+    expect(dispatchWheel(svg, { deltaY: -100 }).defaultPrevented).toBe(false);
+    expect(dispatchWheel(overlay, { deltaY: -100 }).defaultPrevented).toBe(false);
   });
 
-  it('detaches the wheel listener when the ref is cleared', () => {
-    const { rendered, svg } = mountViewZoomWithSvg();
-    // Pin to the max scale so d3-zoom's own listener bails without preventing the default; then only
-    // our listener could cancel the event. After clearing the ref it's detached, so the default
-    // survives — proving the cleanup ran rather than leaking a listener on the orphaned node.
-    act(() => rendered.result.current.fitView({ minX: 0, minY: 0, maxX: 10, maxY: 10 }, 400, 300));
-    for (let i = 0; i < 20; i++) {
-      act(() => rendered.result.current.zoomIn());
-    }
-    act(() => rendered.result.current.svgRef(null));
-    const event = dispatchWheel(svg, { ctrlKey: true, deltaY: -100 });
-    expect(event.defaultPrevented).toBe(false);
+  it('routes a modified wheel over the controls overlay to a canvas zoom step', () => {
+    const { rendered, overlay } = mountViewZoomWithSvg();
+    expect(rendered.result.current.scale).toBe(1);
+
+    // The overlay is an SVG sibling, so d3-zoom never zooms the canvas for it. The container listener
+    // must both cancel the page zoom and route the gesture to a zoom step.
+    const zoomIn = dispatchWheel(overlay, { ctrlKey: true, deltaY: -100 });
+    expect(zoomIn.defaultPrevented).toBe(true);
+    expect(rendered.result.current.scale).toBeGreaterThan(1);
+
+    const zoomedIn = rendered.result.current.scale;
+    const zoomOut = dispatchWheel(overlay, { ctrlKey: true, deltaY: 100 });
+    expect(zoomOut.defaultPrevented).toBe(true);
+    expect(rendered.result.current.scale).toBeLessThan(zoomedIn);
+  });
+
+  it('does not double-zoom: a modified wheel over the SVG is left to d3-zoom', () => {
+    // Baseline: one on-screen zoom-in button step from identity.
+    const { rendered } = mountViewZoomWithSvg();
+    act(() => rendered.result.current.zoomIn());
+    const afterOneStep = rendered.result.current.scale;
+    expect(afterOneStep).toBeGreaterThan(1);
+
+    // A single ctrl+wheel in over the SVG: d3-zoom applies its own zoom; the container listener must
+    // not *also* fire a step zoom on top. d3's wheelDelta for ctrl+wheel deltaY -100 is a 4x zoom —
+    // if the handler double-counted we'd see it compound beyond a single d3 zoom.
+    const { rendered: r2, svg: svg2 } = mountViewZoomWithSvg();
+    dispatchWheel(svg2, { ctrlKey: true, deltaY: -100 });
+    expect(r2.result.current.scale).toBeCloseTo(4, 5);
+  });
+
+  it('detaches the container wheel listener when the ref is cleared', () => {
+    const { rendered, overlay } = mountViewZoomWithSvg();
+    // A modified wheel over the overlay is cancelled while mounted...
+    expect(dispatchWheel(overlay, { ctrlKey: true, deltaY: -100 }).defaultPrevented).toBe(true);
+    // ...and left to the page once the container ref is cleared, proving the cleanup ran.
+    act(() => rendered.result.current.containerRef(null));
+    expect(dispatchWheel(overlay, { ctrlKey: true, deltaY: -100 }).defaultPrevented).toBe(false);
   });
 });

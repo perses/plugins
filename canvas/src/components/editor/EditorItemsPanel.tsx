@@ -20,6 +20,7 @@ import { useEditorContext } from '../../contexts/EditorContext';
 import { useSpecContext } from '../../contexts/SpecContext';
 import { ZoomProvider } from '../../contexts/ZoomContext';
 import { useZoom } from '../../hooks/useZoom';
+import { EditorCanvasShortcutsTooltip } from '../shared/CanvasShortcutsTooltip';
 import { BackgroundPropertiesPanel } from './BackgroundPropertiesPanel';
 import { EdgePropertiesPanel } from './EdgePropertiesPanel';
 import { EditorCanvas } from './EditorCanvas';
@@ -63,6 +64,7 @@ export function EditorItemsPanel(): ReactElement {
   } = useEditorContext();
   const {
     svgRef,
+    containerRef: zoomContainerRef,
     toCanvasPoint,
     transform,
     isPanning,
@@ -77,12 +79,18 @@ export function EditorItemsPanel(): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
-  const containerCallbackRef = useCallback((node: HTMLDivElement | null): void => {
-    containerRef.current = node;
-    if (node) {
-      setContainerWidth(node.clientWidth);
-    }
-  }, []);
+  const containerCallbackRef = useCallback(
+    (node: HTMLDivElement | null): void => {
+      containerRef.current = node;
+      // Also drive useZoom's container ref so a modified wheel over the editor canvas can't zoom the
+      // page (keeps parity with the display panel; the editor has no on-screen controls overlay).
+      zoomContainerRef(node);
+      if (node) {
+        setContainerWidth(node.clientWidth);
+      }
+    },
+    [zoomContainerRef],
+  );
   const [firstSelectedId] = selectedIds;
   const selectedNode = selectedIds.size === 1 && firstSelectedId ? (nodeById.get(firstSelectedId) ?? null) : null;
   const selectedEdge = selectedIds.size === 1 && firstSelectedId ? (edgeById.get(firstSelectedId) ?? null) : null;
@@ -183,6 +191,7 @@ export function EditorItemsPanel(): ReactElement {
         >
           Delete
         </Button>
+        <EditorCanvasShortcutsTooltip />
       </Box>
 
       <Box sx={PROPERTIES_BOX_SX}>

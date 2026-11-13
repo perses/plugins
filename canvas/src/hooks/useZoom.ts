@@ -15,9 +15,10 @@ import { select } from 'd3-selection';
 import type { ZoomTransform } from 'd3-zoom';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import type { PointerEvent } from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Point } from '../model';
+import { resolveMouseShortcut } from '../utils/shortcuts';
 
 const FIT_PADDING = 40;
 
@@ -65,29 +66,22 @@ export interface UseZoomOptions {
 /**
  * d3-zoom gesture gate: decides whether a raw DOM event should start a pan/zoom.
  *
- * Double-click is always rejected (the panel reserves it for fit/reset). Wheel events zoom only while
- * ctrl/meta is held, in both modes, so a plain wheel keeps scrolling the surrounding page. Among
- * mouse buttons the middle button always pans; the left button pans only in view mode, where no
- * editing gesture competes for it.
+ * Delegates to the shared shortcut model (`resolveMouseShortcut`) so the gestures, their buttons and
+ * the documented tooltips stay in one place. A gesture starts only for the `zoom` (ctrl/meta wheel)
+ * and `pan` (mousedown) shortcuts; everything else — a plain wheel, a right click, a double-click —
+ * is left alone so the page keeps scrolling and the panel keeps its fit/reset double-click. The
+ * resolver is mode-aware: `view` pans with the left or middle button, `edit` with the middle button
+ * only, leaving the editor's left button free for node move, edge drag and rubber-band selection.
  *
  * Exported for unit testing: d3-zoom is ESM-only and awkward to drive through the DOM, so the
  * decision lives in a pure function the hook installs via `zoomBehavior.filter`.
  */
 export function shouldStartGesture(event: Event, interactionMode: ZoomInteractionMode): boolean {
-  if (event.type === 'dblclick') {
-    return false;
-  }
-  if (event instanceof WheelEvent) {
-    // Zoom only while ctrl/meta is held, in both modes, so a plain wheel keeps scrolling the
-    // surrounding page. A trackpad pinch arrives as a wheel event with ctrlKey set, so it still
-    // zooms; a Magic Mouse / two-finger swipe is a plain wheel and is left to the page.
-    return event.ctrlKey || event.metaKey;
-  }
   if (!(event instanceof MouseEvent)) {
     return false;
   }
-  // `clickDistance` (set in view mode) lets a near-stationary left click still reach node handlers.
-  return event.button === 1 || (interactionMode === 'view' && event.button === 0);
+  const id = resolveMouseShortcut(event, interactionMode === 'view' ? 'view' : 'editor')?.id;
+  return id === 'zoom' || id === 'pan';
 }
 
 /**
@@ -106,8 +100,31 @@ export function shouldPreventWheelDefault(event: WheelEvent): boolean {
   return event.ctrlKey || event.metaKey;
 }
 
+/**
+ * The step-zoom direction a modified wheel implies: `1` to zoom in (scroll up, `deltaY < 0`), `-1`
+ * to zoom out (scroll down), `0` for no vertical movement. Used to route modified wheels that land on
+ * the on-screen controls overlay — a sibling of the SVG that d3-zoom's own listener never sees — into
+ * a canvas zoom step, matching the overlay's +/- buttons. Exported for unit testing.
+ */
+export function wheelZoomDirection(deltaY: number): -1 | 0 | 1 {
+  if (deltaY < 0) {
+    return 1;
+  }
+  if (deltaY > 0) {
+    return -1;
+  }
+  return 0;
+}
+
 export interface UseZoomResult {
   svgRef: (node: SVGSVGElement | null) => void;
+  /**
+   * Ref for the element wrapping the SVG and the on-screen controls overlay. A non-passive wheel
+   * listener here cancels the browser's page zoom for modified wheels anywhere over the panel —
+   * including the overlay, whose events never reach the SVG's d3-zoom listener — and routes a
+   * modified wheel over the overlay into a canvas zoom step.
+   */
+  containerRef: (node: HTMLElement | null) => void;
   transform: ZoomTransform;
   isPanning: boolean;
   fitView: (
@@ -131,9 +148,12 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
   const [transform, setTransform] = useState<ZoomTransform>(zoomIdentity);
   const [isPanning, setIsPanning] = useState(false);
   const nodeRef = useRef<SVGSVGElement | null>(null);
-  // The node + wheel handler we currently have a native listener attached to, so the callback ref
-  // can detach it on unmount or before re-attaching to a new node.
-  const wheelListenerRef = useRef<{ node: SVGSVGElement; handler: (event: WheelEvent) => void } | null>(null);
+  // The container + wheel handler we currently have a native listener attached to, so the callback
+  // ref can detach it on unmount or before re-attaching to a new node.
+  const wheelListenerRef = useRef<{ node: HTMLElement; handler: (event: WheelEvent) => void } | null>(null);
+  // Latest step-zoom callbacks, read by the (stable) container wheel handler so it can route a
+  // modified wheel over the overlay without being re-created when those callbacks change identity.
+  const stepZoomRef = useRef<{ zoomIn: () => void; zoomOut: () => void }>({ zoomIn: () => {}, zoomOut: () => {} });
 
   // The extent currently installed on the zoom behavior. It starts at the mode's configured bounds
   // but `fitView` can widen the lower bound to frame a very large graph (see below); tracking it in
@@ -149,14 +169,8 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
 
   const svgRef = useCallback(
     (node: SVGSVGElement | null): void => {
-      // Detach any wheel listener from the previously-bound node first (callback-ref cleanup runs
-      // with `node === null` on unmount, and with the new node when the ref target changes).
-      const previous = wheelListenerRef.current;
-      if (previous) {
-        previous.node.removeEventListener('wheel', previous.handler);
-        wheelListenerRef.current = null;
-      }
       if (!node) {
+        nodeRef.current = null;
         return;
       }
       nodeRef.current = node;
@@ -169,26 +183,58 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
         zoomBehavior.clickDistance(VIEW_CLICK_DISTANCE);
       }
       zoomBehavior.filter((event: Event) => shouldStartGesture(event, interactionMode));
-      zoomBehavior.on('start', () => setIsPanning(true));
+      // Reflect a grabbing cursor only while panning (a drag), not while zooming. A zoom gesture's
+      // source event resolves to the `zoom` shortcut, so isPanning stays false for it.
+      zoomBehavior.on('start', ({ sourceEvent }: { sourceEvent: Event | null }) => {
+        const mode = interactionMode === 'view' ? 'view' : 'editor';
+        setIsPanning(sourceEvent instanceof MouseEvent && resolveMouseShortcut(sourceEvent, mode)?.id === 'pan');
+      });
       zoomBehavior.on('zoom', ({ transform: t }: { transform: ZoomTransform }) => {
         setTransform(t);
       });
       zoomBehavior.on('end', () => setIsPanning(false));
       select<SVGSVGElement, unknown>(node).call(zoomBehavior);
-      // d3-zoom only calls preventDefault on a modified wheel that actually changes the transform;
-      // at a scaleExtent limit the clamped scale is unchanged and it bails early, letting the
-      // browser zoom the whole page. Cancel the default ourselves for the modified wheels we claim.
-      // Must be a non-passive native listener — a React onWheel can't reliably preventDefault.
-      const handler = (event: WheelEvent): void => {
-        if (shouldPreventWheelDefault(event)) {
-          event.preventDefault();
-        }
-      };
-      node.addEventListener('wheel', handler, { passive: false });
-      wheelListenerRef.current = { node, handler };
     },
     [zoomBehavior, interactionMode, baseScaleExtent],
   );
+
+  const containerRef = useCallback((node: HTMLElement | null): void => {
+    // Detach any wheel listener from the previously-bound container first (callback-ref cleanup
+    // runs with `node === null` on unmount, and with the new node when the ref target changes).
+    const previous = wheelListenerRef.current;
+    if (previous) {
+      previous.node.removeEventListener('wheel', previous.handler);
+      wheelListenerRef.current = null;
+    }
+    if (!node) {
+      return;
+    }
+    // One non-passive listener on the panel wrapper covers both the SVG and the controls overlay.
+    // A React onWheel can't reliably preventDefault, so it must be a native `{ passive: false }`.
+    const handler = (event: WheelEvent): void => {
+      if (!shouldPreventWheelDefault(event)) {
+        return; // plain wheel: leave it to scroll the surrounding page
+      }
+      // d3-zoom only calls preventDefault on a modified wheel that changes the transform, and never
+      // sees a wheel over the overlay (an SVG sibling). Cancel the browser's page zoom ourselves.
+      event.preventDefault();
+      // The overlay is not inside the SVG, so d3-zoom won't zoom the canvas for it; route the
+      // gesture to a zoom step instead. A modified wheel over the SVG is left to d3-zoom.
+      const svg = nodeRef.current;
+      const target = event.target;
+      const overSvg = svg !== null && target instanceof Node && svg.contains(target);
+      if (!overSvg) {
+        const direction = wheelZoomDirection(event.deltaY);
+        if (direction === 1) {
+          stepZoomRef.current.zoomIn();
+        } else if (direction === -1) {
+          stepZoomRef.current.zoomOut();
+        }
+      }
+    };
+    node.addEventListener('wheel', handler, { passive: false });
+    wheelListenerRef.current = { node, handler };
+  }, []);
 
   const resetPan = useCallback(() => {
     if (!nodeRef.current) {
@@ -244,6 +290,10 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
 
   const zoomIn = useCallback(() => zoomBy(ZOOM_STEP_FACTOR), [zoomBy]);
   const zoomOut = useCallback(() => zoomBy(1 / ZOOM_STEP_FACTOR), [zoomBy]);
+  // Keep the container wheel handler's step-zoom callbacks current without re-binding the listener.
+  useEffect(() => {
+    stepZoomRef.current = { zoomIn, zoomOut };
+  }, [zoomIn, zoomOut]);
 
   const toCanvasPoint = useCallback(
     (event: PointerEvent<SVGSVGElement>): Point => {
@@ -266,6 +316,7 @@ export function useZoom({ interactionMode = 'edit' }: UseZoomOptions = {}): UseZ
 
   return {
     svgRef,
+    containerRef,
     transform,
     isPanning,
     fitView,
