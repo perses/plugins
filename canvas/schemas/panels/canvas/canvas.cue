@@ -83,7 +83,7 @@ spec: close({
 	labelPosition?:   "above" | "below" | "left" | "right" | "center"
 	labelPadding?:    number & >=0
 	icon?:            string
-	url?:             string
+	url?:             common.#linkURL
 	background?:      =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundImage?: string
 	queryIndex?:      int & >=0

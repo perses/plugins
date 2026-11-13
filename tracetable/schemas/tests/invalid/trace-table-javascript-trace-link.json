@@ -1,0 +1,8 @@
+{
+  "kind": "TraceTable",
+  "spec": {
+    "links": {
+      "trace": "javascript:alert(document.domain)"
+    }
+  }
+}

@@ -32,6 +32,10 @@ dataLink: <Data Link specification> # Optional
 ## Data Link specification
 
 ```yaml
+# It must be a relative URL or use one of the following schemes: http, https, mailto, tel, sms, slack, msteams, vscode,
+# vscode-insiders, zoommtg. Any other scheme (e.g. javascript:) is rejected.
+# When the URL contains variables, the URL obtained after the interpolation must follow the same rule, otherwise the
+# value is not displayed as a link.
 url: <string> # Required. Supports variable substitution (e.g., ${__data.fields["column_name"]})
 title: <string> # Optional
 openNewTab: <boolean> # Required

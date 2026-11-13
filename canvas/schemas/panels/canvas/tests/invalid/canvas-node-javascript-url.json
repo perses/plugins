@@ -1,0 +1,16 @@
+{
+  "kind": "Canvas",
+  "spec": {
+    "nodes": [
+      {
+        "id": "api",
+        "position": { "x": 0, "y": 0 },
+        "width": 48,
+        "height": 48,
+        "kind": "rectangle",
+        "label": "API",
+        "url": "java\tscript:alert(document.domain)"
+      }
+    ]
+  }
+}
