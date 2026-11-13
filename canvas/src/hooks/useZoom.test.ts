@@ -1,0 +1,257 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { act, renderHook } from '@testing-library/react';
+
+import { isAtScaleLimit, shouldPreventWheelDefault, shouldStartGesture, useZoom, wheelZoomDirection } from './useZoom';
+
+describe('shouldStartGesture', () => {
+  it('never starts a gesture on double-click, in either mode', () => {
+    const dblclick = new MouseEvent('dblclick');
+    expect(shouldStartGesture(dblclick, 'view')).toBe(false);
+    expect(shouldStartGesture(dblclick, 'edit')).toBe(false);
+  });
+
+  describe('wheel', () => {
+    it('never zooms on a plain wheel, in either mode (a plain wheel scrolls the page)', () => {
+      const wheel = new WheelEvent('wheel');
+      expect(shouldStartGesture(wheel, 'view')).toBe(false);
+      expect(shouldStartGesture(wheel, 'edit')).toBe(false);
+    });
+
+    it('zooms on a modified wheel (ctrl/meta) in both modes, including trackpad pinch', () => {
+      expect(shouldStartGesture(new WheelEvent('wheel', { ctrlKey: true }), 'edit')).toBe(true);
+      expect(shouldStartGesture(new WheelEvent('wheel', { metaKey: true }), 'edit')).toBe(true);
+      expect(shouldStartGesture(new WheelEvent('wheel', { ctrlKey: true }), 'view')).toBe(true);
+      expect(shouldStartGesture(new WheelEvent('wheel', { metaKey: true }), 'view')).toBe(true);
+    });
+  });
+
+  describe('mouse buttons', () => {
+    it('pans on the middle button in both modes', () => {
+      const middle = new MouseEvent('mousedown', { button: 1 });
+      expect(shouldStartGesture(middle, 'view')).toBe(true);
+      expect(shouldStartGesture(middle, 'edit')).toBe(true);
+    });
+
+    it('pans on the left button only in view mode', () => {
+      const left = new MouseEvent('mousedown', { button: 0 });
+      expect(shouldStartGesture(left, 'view')).toBe(true);
+      expect(shouldStartGesture(left, 'edit')).toBe(false);
+    });
+
+    it('ignores the right button in both modes', () => {
+      const right = new MouseEvent('mousedown', { button: 2 });
+      expect(shouldStartGesture(right, 'view')).toBe(false);
+      expect(shouldStartGesture(right, 'edit')).toBe(false);
+    });
+  });
+
+  it('ignores events that are neither wheel nor mouse', () => {
+    expect(shouldStartGesture(new Event('touchstart'), 'view')).toBe(false);
+    expect(shouldStartGesture(new Event('touchstart'), 'edit')).toBe(false);
+  });
+});
+
+describe('shouldPreventWheelDefault', () => {
+  it('cancels the default of a modified (ctrl/meta) wheel so the page never zooms', () => {
+    expect(shouldPreventWheelDefault(new WheelEvent('wheel', { ctrlKey: true }))).toBe(true);
+    expect(shouldPreventWheelDefault(new WheelEvent('wheel', { metaKey: true }))).toBe(true);
+  });
+
+  it('leaves a plain wheel untouched so it keeps scrolling the surrounding page', () => {
+    expect(shouldPreventWheelDefault(new WheelEvent('wheel'))).toBe(false);
+  });
+});
+
+describe('wheelZoomDirection', () => {
+  it('zooms in on scroll up (deltaY < 0) and out on scroll down (deltaY > 0)', () => {
+    expect(wheelZoomDirection(-100)).toBe(1);
+    expect(wheelZoomDirection(100)).toBe(-1);
+  });
+
+  it('is a no-op for no vertical movement', () => {
+    expect(wheelZoomDirection(0)).toBe(0);
+  });
+});
+
+describe('isAtScaleLimit', () => {
+  const extent: [number, number] = [0.05, 8];
+
+  it('flags the lower bound', () => {
+    expect(isAtScaleLimit(0.05, extent)).toEqual({ atMin: true, atMax: false });
+  });
+
+  it('flags the upper bound', () => {
+    expect(isAtScaleLimit(8, extent)).toEqual({ atMin: false, atMax: true });
+  });
+
+  it('flags neither in the middle of the range', () => {
+    expect(isAtScaleLimit(1, extent)).toEqual({ atMin: false, atMax: false });
+  });
+
+  it('flags a scale past either bound', () => {
+    expect(isAtScaleLimit(0.01, extent)).toEqual({ atMin: true, atMax: false });
+    expect(isAtScaleLimit(12, extent)).toEqual({ atMin: false, atMax: true });
+  });
+
+  it('tolerates float drift at the bounds via an epsilon', () => {
+    // A scale a hair above the floor / below the ceiling from repeated scaleBy steps still counts
+    // as "at the limit" so the button stays disabled rather than flickering enabled.
+    expect(isAtScaleLimit(0.05 * (1 + 1e-9), extent).atMin).toBe(true);
+    expect(isAtScaleLimit(8 * (1 - 1e-9), extent).atMax).toBe(true);
+  });
+});
+
+// d3-zoom scales about the viewport center derived from the SVG client box. jsdom reports a zero
+// box, which collapses the center but still lets programmatic transforms apply, so we give the SVG
+// a size via a stubbed getBoundingClientRect, and stub width/height.baseVal for defaultExtent. The
+// SVG is nested in a container element mirroring CanvasPanel's wrapper, since the panel's wheel
+// listener now lives on the container (so it also covers the controls overlay, an SVG sibling).
+function mountViewZoomWithSvg(): {
+  rendered: ReturnType<typeof renderHook<ReturnType<typeof useZoom>, unknown>>;
+  svg: SVGSVGElement;
+  container: HTMLDivElement;
+  overlay: HTMLDivElement;
+} {
+  const rendered = renderHook(() => useZoom({ interactionMode: 'view' }));
+  const container = document.createElement('div');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const overlay = document.createElement('div'); // stands in for the ZoomControls overlay
+  container.append(svg, overlay);
+  document.body.append(container);
+  svg.getBoundingClientRect = (): DOMRect =>
+    ({ left: 0, top: 0, width: 400, height: 300, right: 400, bottom: 300, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
+  Object.defineProperty(svg, 'width', { value: { baseVal: { value: 400 } }, configurable: true });
+  Object.defineProperty(svg, 'height', { value: { baseVal: { value: 300 } }, configurable: true });
+  act(() => {
+    rendered.result.current.svgRef(svg);
+    rendered.result.current.containerRef(container);
+  });
+  return { rendered, svg, container, overlay };
+}
+
+function dispatchWheel(node: Element, init: WheelEventInit): WheelEvent {
+  const event = new WheelEvent('wheel', { ...init, cancelable: true, bubbles: true });
+  act(() => {
+    node.dispatchEvent(event);
+  });
+  return event;
+}
+
+describe('useZoom effective scale extent', () => {
+  it('keeps zoom-out available after fitView widens the floor below the configured extent', () => {
+    const {
+      rendered: { result },
+    } = mountViewZoomWithSvg();
+
+    // A graph far larger than the panel fits at a scale well below the 0.05 view floor; fitView
+    // widens the lower bound to admit it, leaving the scale pinned at the new floor.
+    act(() => result.current.fitView({ minX: 0, minY: 0, maxX: 40000, maxY: 30000 }, 400, 300));
+    const fittedScale = result.current.scale;
+    expect(fittedScale).toBeLessThan(0.05);
+    expect(result.current.canZoomOut).toBe(false); // at the widened floor
+    expect(result.current.canZoomIn).toBe(true);
+
+    // One zoom-in step lifts the scale off the widened floor; zoom-out must re-enable against that
+    // same widened extent rather than the static 0.05 constant.
+    act(() => result.current.zoomIn());
+    expect(result.current.scale).toBeGreaterThan(fittedScale);
+    expect(result.current.canZoomOut).toBe(true);
+  });
+
+  it('restores the configured extent on resetPan', () => {
+    const {
+      rendered: { result },
+    } = mountViewZoomWithSvg();
+
+    act(() => result.current.fitView({ minX: 0, minY: 0, maxX: 40000, maxY: 30000 }, 400, 300));
+    act(() => result.current.resetPan());
+
+    // Back at identity (scale 1) with the configured extent restored: both directions available.
+    expect(result.current.scale).toBe(1);
+    expect(result.current.canZoomIn).toBe(true);
+    expect(result.current.canZoomOut).toBe(true);
+  });
+});
+
+describe('useZoom wheel default handling', () => {
+  it('cancels a modified wheel at the max scale limit so the page cannot zoom', () => {
+    const { rendered, svg } = mountViewZoomWithSvg();
+
+    // Pin the scale at the top of the view extent, then push further in with a ctrl+wheel. d3-zoom
+    // clamps to the unchanged max and bails before preventing the default, so our listener must.
+    act(() => rendered.result.current.fitView({ minX: 0, minY: 0, maxX: 10, maxY: 10 }, 400, 300));
+    for (let i = 0; i < 20; i++) {
+      act(() => rendered.result.current.zoomIn());
+    }
+    expect(rendered.result.current.canZoomIn).toBe(false); // at the max
+
+    // Dispatched on the SVG, the event bubbles to the container listener.
+    const event = dispatchWheel(svg, { ctrlKey: true, deltaY: -100 });
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('cancels a modified wheel even when it does change the transform', () => {
+    const { rendered, svg } = mountViewZoomWithSvg();
+    const event = dispatchWheel(svg, { ctrlKey: true, deltaY: -100 });
+    expect(event.defaultPrevented).toBe(true);
+    expect(rendered.result.current.scale).not.toBe(1); // it also zoomed the canvas
+  });
+
+  it('leaves a plain wheel untouched so it keeps scrolling the surrounding page', () => {
+    const { svg, overlay } = mountViewZoomWithSvg();
+    expect(dispatchWheel(svg, { deltaY: -100 }).defaultPrevented).toBe(false);
+    expect(dispatchWheel(overlay, { deltaY: -100 }).defaultPrevented).toBe(false);
+  });
+
+  it('routes a modified wheel over the controls overlay to a canvas zoom step', () => {
+    const { rendered, overlay } = mountViewZoomWithSvg();
+    expect(rendered.result.current.scale).toBe(1);
+
+    // The overlay is an SVG sibling, so d3-zoom never zooms the canvas for it. The container listener
+    // must both cancel the page zoom and route the gesture to a zoom step.
+    const zoomIn = dispatchWheel(overlay, { ctrlKey: true, deltaY: -100 });
+    expect(zoomIn.defaultPrevented).toBe(true);
+    expect(rendered.result.current.scale).toBeGreaterThan(1);
+
+    const zoomedIn = rendered.result.current.scale;
+    const zoomOut = dispatchWheel(overlay, { ctrlKey: true, deltaY: 100 });
+    expect(zoomOut.defaultPrevented).toBe(true);
+    expect(rendered.result.current.scale).toBeLessThan(zoomedIn);
+  });
+
+  it('does not double-zoom: a modified wheel over the SVG is left to d3-zoom', () => {
+    // Baseline: one on-screen zoom-in button step from identity.
+    const { rendered } = mountViewZoomWithSvg();
+    act(() => rendered.result.current.zoomIn());
+    const afterOneStep = rendered.result.current.scale;
+    expect(afterOneStep).toBeGreaterThan(1);
+
+    // A single ctrl+wheel in over the SVG: d3-zoom applies its own zoom; the container listener must
+    // not *also* fire a step zoom on top. d3's wheelDelta for ctrl+wheel deltaY -100 is a 4x zoom —
+    // if the handler double-counted we'd see it compound beyond a single d3 zoom.
+    const { rendered: r2, svg: svg2 } = mountViewZoomWithSvg();
+    dispatchWheel(svg2, { ctrlKey: true, deltaY: -100 });
+    expect(r2.result.current.scale).toBeCloseTo(4, 5);
+  });
+
+  it('detaches the container wheel listener when the ref is cleared', () => {
+    const { rendered, overlay } = mountViewZoomWithSvg();
+    // A modified wheel over the overlay is cancelled while mounted...
+    expect(dispatchWheel(overlay, { ctrlKey: true, deltaY: -100 }).defaultPrevented).toBe(true);
+    // ...and left to the page once the container ref is cleared, proving the cleanup ran.
+    act(() => rendered.result.current.containerRef(null));
+    expect(dispatchWheel(overlay, { ctrlKey: true, deltaY: -100 }).defaultPrevented).toBe(false);
+  });
+});
