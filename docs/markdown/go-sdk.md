@@ -37,6 +37,16 @@ markdown.NewLine("my super new line text")
 
 Add a new line to the markdown text.
 
+### RenderHTML
+
+```golang
+import "github.com/perses/plugins/markdown/sdk/go"
+
+markdown.RenderHTML(true)
+```
+
+Render raw HTML tags found in the markdown text. Disabled by default, in which case raw HTML is displayed as plain text.
+
 ## Example
 
 ```golang
