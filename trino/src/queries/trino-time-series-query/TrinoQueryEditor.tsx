@@ -1,0 +1,100 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Stack } from '@mui/material';
+import { createModEnterHandler } from '@perses-dev/dashboards';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource } from '@perses-dev/plugin-system';
+import { produce } from 'immer';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+
+import { ClickQLEditor } from '../../components';
+import { queryExample } from '../../components/constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
+import { useQueryState } from '../query-editor-model';
+import type { TrinoTimeSeriesQuerySpec } from './trino-query-types';
+
+type TrinoTimeSeriesQueryEditorProps = OptionsEditorProps<TrinoTimeSeriesQuerySpec>;
+
+export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProps): ReactElement {
+  const { onChange, value } = props;
+  const { datasource } = value;
+  const selectedDatasource = datasource ?? DEFAULT_DATASOURCE;
+  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
+    if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
+      onChange(
+        produce(value, (draft) => {
+          draft.datasource = newDatasourceSelection;
+        }),
+      );
+      return;
+    }
+    throw new Error('Got unexpected non Trino datasource selection');
+  };
+
+  // Immediate query execution on Enter or blur
+  const handleQueryExecute = (query: string): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.query = query;
+      }),
+    );
+  };
+
+  const handleTrinoQueryChange = useCallback(
+    (e: string) => {
+      handleQueryChange(e);
+    },
+    [handleQueryChange],
+  );
+
+  const examplesStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: '#777',
+    backgroundColor: '#f5f5f5',
+    padding: '8px',
+    borderRadius: '4px',
+    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+    whiteSpace: 'pre-wrap',
+    lineHeight: '1.3',
+  };
+
+  return (
+    <Stack spacing={1.5}>
+      <DatasourceSelect
+        datasourcePluginKind={DATASOURCE_KIND}
+        value={selectedDatasource}
+        onChange={handleDatasourceChange}
+        label="Trino Datasource"
+        notched
+      />
+      <ClickQLEditor
+        value={query}
+        onChange={handleTrinoQueryChange}
+        onBlur={handleQueryBlur}
+        onKeyDown={createModEnterHandler(() => handleQueryExecute(query))}
+        placeholder="Enter Trino SQL query"
+      />
+
+      <details>
+        <summary style={{ cursor: 'pointer', fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+          Query Examples
+        </summary>
+        <div style={examplesStyle}>{queryExample}</div>
+      </details>
+    </Stack>
+  );
+}
