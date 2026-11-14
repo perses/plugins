@@ -19,7 +19,7 @@ import { produce } from 'immer';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 
-import { ClickQLEditor } from '../../components';
+import { TrinoQLEditor } from '../../components';
 import { queryExample } from '../../components/constants';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
@@ -46,10 +46,10 @@ export function TrinoLogQueryEditor(props: TrinoQueryEditorProps): ReactElement 
   };
 
   // Immediate query execution on Enter or blur
-  const handleQueryExecute = (query: string): void => {
+  const handleQueryExecute = (queryText: string): void => {
     onChange(
       produce(value, (draft) => {
-        draft.query = query;
+        draft.query = queryText;
       }),
     );
   };
@@ -81,7 +81,7 @@ export function TrinoLogQueryEditor(props: TrinoQueryEditorProps): ReactElement 
         label="Trino Datasource"
         notched
       />
-      <ClickQLEditor
+      <TrinoQLEditor
         value={query}
         onChange={handleTrinoQueryChange}
         onBlur={handleQueryBlur}

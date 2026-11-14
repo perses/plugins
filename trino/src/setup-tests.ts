@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// oxlint-disable-next-line import/no-unassigned-import -- registers jest-dom matchers globally for tests.
 import '@testing-library/jest-dom/vitest';
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom

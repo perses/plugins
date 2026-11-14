@@ -35,8 +35,8 @@ export interface TrinoClient {
   query: (params: { start: string; end: string; query: string }) => Promise<TrinoQueryResponse>;
 }
 
-export function replaceTimeRangePlaceholders(query: string, start?: string, end?: string): string {
-  return query.replaceAll('{start}', start ?? '{start}').replaceAll('{end}', end ?? '{end}');
+export function replaceTimeRangePlaceholders(sql: string, start?: string, end?: string): string {
+  return sql.replaceAll('{start}', start ?? '{start}').replaceAll('{end}', end ?? '{end}');
 }
 
 export function formatTrinoDateTime(date: Date): string {
@@ -72,6 +72,8 @@ export async function query(
     let columns = body.columns;
     const rows: unknown[][] = [...(body.data ?? [])];
     // Trino streams results through nextUri. For proxy datasources retain the Perses proxy prefix.
+    // Trino provides the next page token only after the previous page completes.
+    // oxlint-disable no-await-in-loop -- each page token depends on the previous response.
     while (body.nextUri) {
       const next = new URL(body.nextUri);
       const base = urlBuilder(datasourceUrl);
@@ -86,6 +88,7 @@ export async function query(
       columns ??= body.columns;
       rows.push(...(body.data ?? []));
     }
+    // oxlint-enable no-await-in-loop
     if (body.error) throw new Error(body.error.message ?? 'Trino query failed');
     const names: string[] = (columns ?? []).map((column: { name: string }) => column.name);
     return {
