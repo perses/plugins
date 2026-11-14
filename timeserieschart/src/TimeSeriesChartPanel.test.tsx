@@ -42,11 +42,10 @@ vi.mock('@perses-dev/components', async (importOriginal) => {
     getFormattedMultipleYAxesLayout: (
       ...args: Parameters<typeof actual.getFormattedMultipleYAxes>
     ): { axes: ReturnType<typeof actual.getFormattedMultipleYAxes>; rightGridPadding: number } => {
-      const additionalFormats = args[2];
       return {
         axes: actual.getFormattedMultipleYAxes(...args),
-        // First right axis is covered by containLabel, same contract as shared#321.
-        rightGridPadding: additionalFormats.length > 1 ? (additionalFormats.length - 1) * 52 : 20,
+        // containLabel fits every right axis. grid.right stays the edge padding.
+        rightGridPadding: 20,
       };
     },
     EChart: (props: { option: EChartsCoreOption }): ReactElement => {
