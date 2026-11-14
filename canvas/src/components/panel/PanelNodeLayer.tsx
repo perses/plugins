@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { sanitizeUrl } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
 import type { TimeSeries } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
@@ -67,16 +68,28 @@ interface PanelNodeLayerProps {
   seriesByQueryIndex: Map<number, TimeSeries>;
   k: number;
   paletteColors: string[];
+  /** Series backing generated nodes (data-driven mode), keyed by node id. Takes precedence over queryIndex. */
+  seriesByItemId?: Map<string, TimeSeries>;
 }
 
-export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: PanelNodeLayerProps): ReactElement {
+export function PanelNodeLayer({
+  spec,
+  seriesByQueryIndex,
+  k,
+  paletteColors,
+  seriesByItemId,
+}: PanelNodeLayerProps): ReactElement {
   const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
   const variableValues = useAllVariableValues();
   const { connection: fallbackColor, nodeDefaultFill } = useCanvasTheme();
 
   const handleNodeClick = useCallback(
     (url: string) => {
-      window.open(replaceVariablesInString(url, variableValues), '_blank', 'noopener,noreferrer');
+      // The URL is verified once interpolated, as a variable can provide its scheme (e.g. javascript:).
+      const href = sanitizeUrl(replaceVariablesInString(url, variableValues));
+      if (href) {
+        window.open(href, '_blank', 'noopener,noreferrer');
+      }
     },
     [variableValues],
   );
@@ -89,7 +102,9 @@ export function PanelNodeLayer({ spec, seriesByQueryIndex, k, paletteColors }: P
         let labelOverride: string | undefined;
         let fillOverride: string | undefined;
 
-        const series = node.queryIndex !== undefined ? seriesByQueryIndex.get(node.queryIndex) : undefined;
+        const series =
+          seriesByItemId?.get(node.id) ??
+          (node.queryIndex !== undefined ? seriesByQueryIndex.get(node.queryIndex) : undefined);
         if (series && node.label) {
           labelOverride = interpolateLabel(node.label, series, spec.format);
         }

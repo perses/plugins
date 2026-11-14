@@ -122,7 +122,11 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(selectedDatasource);
 
   // Make the request to Prom
-  const exemplarsEnabled = datasource.plugin.spec.exemplars?.enable === true && !isInstant;
+  // Exemplars are gated by the datasource-level feature toggle, can be overridden
+  // per query (`enableExemplars`: undefined = Auto), and are only fetched for range
+  // queries: the exemplars API is range-based and has no instant equivalent.
+  const exemplarsEnabled =
+    datasource.plugin.spec.exemplars?.enable === true && (spec.enableExemplars ?? true) && !isInstant;
 
   let response;
   let exemplarResponse: Awaited<ReturnType<PrometheusClient['queryExemplars']>> | undefined;
