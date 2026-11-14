@@ -65,6 +65,13 @@ const (
 	ThresholdThicknessMode ThicknessMode = "threshold"
 )
 
+type SizeMode string
+
+const (
+	FixedSizeMode     SizeMode = "fixed"
+	ThresholdSizeMode SizeMode = "threshold"
+)
+
 type ImageFit string
 
 const (
@@ -94,7 +101,8 @@ type NodeSpec struct {
 	QueryIndex      *uint         `json:"queryIndex,omitempty" yaml:"queryIndex,omitempty"`
 	ColorMode       ColorMode     `json:"colorMode,omitempty" yaml:"colorMode,omitempty"`
 	// Color is a hex color string (e.g. "#ff0000").
-	Color           string        `json:"color,omitempty" yaml:"color,omitempty"`
+	Color    string   `json:"color,omitempty" yaml:"color,omitempty"`
+	SizeMode SizeMode `json:"sizeMode,omitempty" yaml:"sizeMode,omitempty"`
 }
 
 type EdgeSpec struct {
@@ -138,15 +146,32 @@ type QueryColorSettings struct {
 	ColorValue string    `json:"colorValue" yaml:"colorValue"`
 }
 
+// GraphGenerationSpec configures the data-driven graph mode. When Enabled, the panel derives nodes
+// and edges live from query results and lays them out automatically; graph structure is inferred
+// from series labels.
+type GraphGenerationSpec struct {
+	Enabled           bool   `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	NodeQueryIndex    uint   `json:"nodeQueryIndex" yaml:"nodeQueryIndex"`
+	NodeIDLabel       string `json:"nodeIdLabel" yaml:"nodeIdLabel"`
+	NodeLabelTemplate string `json:"nodeLabelTemplate,omitempty" yaml:"nodeLabelTemplate,omitempty"`
+	EdgeQueryIndex    *uint  `json:"edgeQueryIndex,omitempty" yaml:"edgeQueryIndex,omitempty"`
+	EdgeSourceLabel   string `json:"edgeSourceLabel,omitempty" yaml:"edgeSourceLabel,omitempty"`
+	EdgeTargetLabel   string `json:"edgeTargetLabel,omitempty" yaml:"edgeTargetLabel,omitempty"`
+	EdgeLabelTemplate string `json:"edgeLabelTemplate,omitempty" yaml:"edgeLabelTemplate,omitempty"`
+	Bidirectional     bool   `json:"bidirectional,omitempty" yaml:"bidirectional,omitempty"`
+}
+
 type PluginSpec struct {
-	Thresholds            *common.Thresholds   `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
-	Format                *common.Format       `json:"format,omitempty" yaml:"format,omitempty"`
-	EdgeThresholdWidths   []EdgeThresholdStep  `json:"edgeThresholdWidths,omitempty" yaml:"edgeThresholdWidths,omitempty"`
-	EdgeDefaultStrokeWidth *float64            `json:"edgeDefaultStrokeWidth,omitempty" yaml:"edgeDefaultStrokeWidth,omitempty"`
-	QuerySettings         []QueryColorSettings `json:"querySettings,omitempty" yaml:"querySettings,omitempty"`
-	Backgrounds           []BackgroundSpec     `json:"backgrounds,omitempty" yaml:"backgrounds,omitempty"`
-	Nodes                 []NodeSpec           `json:"nodes,omitempty" yaml:"nodes,omitempty"`
-	Edges                 []EdgeSpec           `json:"edges,omitempty" yaml:"edges,omitempty"`
+	Thresholds             *common.Thresholds   `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
+	Format                 *common.Format       `json:"format,omitempty" yaml:"format,omitempty"`
+	EdgeThresholdWidths    []EdgeThresholdStep  `json:"edgeThresholdWidths,omitempty" yaml:"edgeThresholdWidths,omitempty"`
+	EdgeDefaultStrokeWidth *float64             `json:"edgeDefaultStrokeWidth,omitempty" yaml:"edgeDefaultStrokeWidth,omitempty"`
+	NodeDefaultSize        *float64             `json:"nodeDefaultSize,omitempty" yaml:"nodeDefaultSize,omitempty"`
+	QuerySettings          []QueryColorSettings `json:"querySettings,omitempty" yaml:"querySettings,omitempty"`
+	Backgrounds            []BackgroundSpec     `json:"backgrounds,omitempty" yaml:"backgrounds,omitempty"`
+	Nodes                  []NodeSpec           `json:"nodes,omitempty" yaml:"nodes,omitempty"`
+	Edges                  []EdgeSpec           `json:"edges,omitempty" yaml:"edges,omitempty"`
+	GraphGeneration        *GraphGenerationSpec `json:"graphGeneration,omitempty" yaml:"graphGeneration,omitempty"`
 }
 
 type Option func(plugin *Builder) error
@@ -177,6 +202,32 @@ func Chart(options ...Option) panel.Option {
 		}
 		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = plugin.PluginSpec
+		return nil
+	}
+}
+
+// WithGraphGeneration enables the data-driven graph mode, deriving nodes and edges from query
+// results instead of a manually authored graph.
+func WithGraphGeneration(spec GraphGenerationSpec) Option {
+	return func(builder *Builder) error {
+		builder.GraphGeneration = &spec
+		return nil
+	}
+}
+
+// WithThresholds sets the color scheme applied to nodes.
+func WithThresholds(thresholds common.Thresholds) Option {
+	return func(builder *Builder) error {
+		builder.Thresholds = &thresholds
+		return nil
+	}
+}
+
+// WithNodeDefaultSize sets the base width/height (px) for generated nodes. Defaults to 48 when
+// unset.
+func WithNodeDefaultSize(size float64) Option {
+	return func(builder *Builder) error {
+		builder.NodeDefaultSize = &size
 		return nil
 	}
 }
