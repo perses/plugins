@@ -11,7 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatTrinoDateTime, query, replaceTimeRangePlaceholders } from './trino-client';
+import { addTrinoUserFromToken, formatTrinoDateTime, query, replaceTimeRangePlaceholders } from './trino-client';
+
+function jwt(payload: Record<string, unknown>): string {
+  const encodedPayload = btoa(JSON.stringify(payload)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+  return `eyJhbGciOiJub25lIn0.${encodedPayload}.signature`;
+}
 
 describe('Trino client', () => {
   afterEach(() => {
@@ -30,6 +35,16 @@ describe('Trino client', () => {
 
   it('should format time range dates for Trino SQL literals', () => {
     expect(formatTrinoDateTime(new Date('2025-01-01T00:00:00.000Z'))).toBe('2025-01-01 00:00:00');
+  });
+
+  it('sets X-Trino-User from the configured JWT claim', () => {
+    const headers = new Headers({
+      Authorization: `Bearer ${jwt({ sub: 'fallback', identity: { username: 'alice' } })}`,
+    });
+
+    addTrinoUserFromToken(headers, 'identity.username');
+
+    expect(headers.get('X-Trino-User')).toBe('alice');
   });
 
   it('should send interpolated query to Trino', async () => {
@@ -60,5 +75,34 @@ describe('Trino client', () => {
     expect(init?.body).toBe(
       "SELECT * FROM logs WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00'",
     );
+  });
+
+  it('sends the JWT subject as X-Trino-User on statement and result requests', async () => {
+    const fetchMock = vi
+      .fn<(url: string, init?: RequestInit) => Promise<Pick<Response, 'ok' | 'json' | 'text'>>>()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn(async () => ({ nextUri: 'http://trino.example.com/v1/statement/query/1' })),
+        text: vi.fn(async () => ''),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn(async () => ({ columns: [{ name: 'answer' }], data: [[42]] })),
+        text: vi.fn(async () => ''),
+      });
+
+    await query(
+      { query: 'SELECT 42' },
+      {
+        datasourceUrl: 'http://trino.example.com',
+        headers: { Authorization: `Bearer ${jwt({ sub: 'alice' })}` },
+        fetch: fetchMock as unknown as typeof fetch,
+      },
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    for (const [, init] of fetchMock.mock.calls) {
+      expect(new Headers(init?.headers).get('X-Trino-User')).toBe('alice');
+    }
   });
 });

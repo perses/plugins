@@ -6,9 +6,14 @@ plugins that can be used with the corresponding Perses panels.
 ## Datasource setup
 
 Set the datasource URL to the Trino coordinator base URL, such as `https://trino.example.com`. For a proxied datasource,
-allow `POST /v1/statement` and `GET /v1/statement/.*`. Configure the `X-Trino-User` header and, when needed,
-`X-Trino-Catalog`, `X-Trino-Schema`, and authentication headers in the datasource proxy settings. The plugin follows
-Trino's `nextUri` links through the Perses proxy and combines all result pages.
+allow `POST /v1/statement` and `GET /v1/statement/.*`. Configure the `Authorization: Bearer <JWT>` header and, when
+needed, `X-Trino-Catalog`, `X-Trino-Schema`, and other authentication headers in the datasource proxy settings. The
+plugin derives `X-Trino-User` from the configured JWT claim (default: `sub`; set the claim to match Trino's
+`http-server.authentication.oauth2.principal-field`). It sends that header with the initial statement and every result
+page. The plugin follows Trino's `nextUri` links through the Perses proxy and combines all result pages.
+
+The browser must have access to the bearer JWT to derive the claim. OAuth passthrough tokens injected only by the Perses
+server are not visible to the plugin and cannot be used for this derivation.
 
 Queries are submitted as plain SQL. Use `{start}` and `{end}` in a query to interpolate the dashboard time range in UTC,
 for example:

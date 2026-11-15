@@ -23,6 +23,9 @@ import (
 kind: #kind
 spec: {
 	datasource.#HTTPDatasourceSpec
+
+	// JWT claim used to derive X-Trino-User from the configured Authorization bearer token.
+	userClaim?: string | *"sub"
 }
 
 #selector: common.#datasourceSelector & {_kind: #kind}

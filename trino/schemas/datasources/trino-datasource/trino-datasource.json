@@ -1,6 +1,7 @@
 {
   "kind": "TrinoDatasource",
   "spec": {
-    "directUrl": "http://localhost:9440"
+    "directUrl": "http://localhost:9440",
+    "userClaim": "sub"
   }
 }

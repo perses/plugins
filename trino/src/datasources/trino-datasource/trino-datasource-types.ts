@@ -13,11 +13,10 @@
 
 import type { RequestHeaders } from '@perses-dev/client';
 import type { DatasourceClient } from '@perses-dev/plugin-system';
-import type { HTTPProxy } from '@perses-dev/spec';
+import type { HTTPDatasourceSpec } from '@perses-dev/spec';
 
-export interface TrinoDatasourceSpec {
-  directUrl?: string;
-  proxy?: HTTPProxy;
+export interface TrinoDatasourceSpec extends HTTPDatasourceSpec {
+  userClaim?: string;
 }
 
 interface QueryRequestParameters extends Record<string, string> {

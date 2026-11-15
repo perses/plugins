@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TextField } from '@mui/material';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import type { ReactElement } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import type { TrinoDatasourceSpec } from './trino-datasource-types';
 
@@ -27,9 +29,11 @@ export function TrinoDatasourceEditor(props: TrinoDatasourceEditorProps): ReactE
 
   const initialSpecDirect: TrinoDatasourceSpec = {
     directUrl: '',
+    userClaim: 'sub',
   };
 
   const initialSpecProxy: TrinoDatasourceSpec = {
+    userClaim: 'sub',
     proxy: {
       kind: 'HTTPProxy',
       spec: {
@@ -48,13 +52,31 @@ export function TrinoDatasourceEditor(props: TrinoDatasourceEditorProps): ReactE
     },
   };
 
+  const handleUserClaimChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      onChange({ ...value, userClaim: event.target.value });
+    },
+    [onChange, value],
+  );
+
   return (
-    <HTTPSettingsEditor
-      value={value}
-      onChange={onChange}
-      isReadonly={isReadonly}
-      initialSpecDirect={initialSpecDirect}
-      initialSpecProxy={initialSpecProxy}
-    />
+    <>
+      <HTTPSettingsEditor
+        value={value}
+        onChange={onChange}
+        isReadonly={isReadonly}
+        initialSpecDirect={initialSpecDirect}
+        initialSpecProxy={initialSpecProxy}
+      />
+      <TextField
+        fullWidth
+        label="JWT claim for Trino user"
+        value={value.userClaim ?? 'sub'}
+        onChange={handleUserClaimChange}
+        helperText="Used to populate X-Trino-User from the configured Authorization bearer JWT. Defaults to sub."
+        InputProps={{ readOnly: isReadonly }}
+        sx={{ mt: 2 }}
+      />
+    </>
   );
 }

@@ -23,6 +23,7 @@ export interface TrinoQueryParams {
 export interface TrinoQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  userClaim?: string;
   fetch?: FetchFn;
 }
 
@@ -46,8 +47,47 @@ export function formatTrinoDateTime(date: Date): string {
     .replace(/\.\d{3}Z$/, '');
 }
 
+/** Sets X-Trino-User from the configured claim in a bearer JWT, when present. */
+export function addTrinoUserFromToken(headers: Headers, userClaim = 'sub'): void {
+  const claimPath = userClaim.trim() || 'sub';
+  const authorization = headers.get('Authorization');
+  const match = authorization?.match(/^Bearer\s+(.+)$/i);
+  if (!match?.[1]) return;
+
+  const tokenParts = match[1].split('.');
+  if (tokenParts.length !== 3) {
+    throw new Error('Authorization bearer token must be a JWT to derive X-Trino-User');
+  }
+
+  const encodedPayload = tokenParts[1];
+  if (!encodedPayload) throw new Error('Authorization bearer token has no JWT payload');
+  const base64Payload = encodedPayload.replaceAll('-', '+').replaceAll('_', '/');
+  const paddedPayload = base64Payload.padEnd(Math.ceil(base64Payload.length / 4) * 4, '=');
+  let payload: unknown;
+  try {
+    const bytes = Uint8Array.from(atob(paddedPayload), (character) => character.charCodeAt(0));
+    payload = JSON.parse(new TextDecoder().decode(bytes));
+  } catch (e) {
+    throw new Error('Authorization bearer token has an invalid JWT payload', { cause: e });
+  }
+
+  const claimValue = claimPath
+    .split('.')
+    .filter(Boolean)
+    .reduce<unknown>(
+      (value, key) =>
+        typeof value === 'object' && value !== null ? (value as Record<string, unknown>)[key] : undefined,
+      payload,
+    );
+
+  if (typeof claimValue !== 'string' && typeof claimValue !== 'number') {
+    throw new Error(`JWT claim "${claimPath}" is missing or is not a string or number`);
+  }
+  headers.set('X-Trino-User', String(claimValue));
+}
+
 export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOptions): Promise<TrinoQueryResponse> {
-  const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
+  const { datasourceUrl, headers, userClaim, fetch: customFetch } = queryOptions;
 
   if (!params.query) {
     throw new Error('No query provided in params');
@@ -58,6 +98,7 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   const finalQuery = replaceTimeRangePlaceholders(params.query.trim(), params.start, params.end);
   const requestHeaders = new Headers(headers);
   requestHeaders.set('Content-Type', 'text/plain; charset=utf-8');
+  addTrinoUserFromToken(requestHeaders, userClaim);
 
   try {
     const doFetch = customFetch ?? fetch;
