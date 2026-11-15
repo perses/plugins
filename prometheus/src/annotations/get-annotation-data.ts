@@ -17,12 +17,43 @@ import type { AnnotationData, DatasourceSpec } from '@perses-dev/spec';
 import { parseDurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
 
-import type { PrometheusClient } from '../model';
+import type { PrometheusClient, ValueTuple } from '../model';
 import { DEFAULT_PROM, getPrometheusTimeRange, getRangeStep, PROM_DATASOURCE_KIND } from '../model';
 import type { PrometheusDatasourceSpec, PrometheusPromQLAnnotationOptions } from '../plugins';
 import { DEFAULT_SCRAPE_INTERVAL } from '../plugins';
 import { interpolateDatasourceProxyParams } from '../plugins/interpolation';
 import { formatSeriesName } from '../utils';
+
+export interface AnnotationEvent {
+  /** Timestamp of the first sample of the event, in milliseconds */
+  start: number;
+  /** Timestamp of the last sample of the event, in milliseconds. Not set when the event has a single sample. */
+  end?: number;
+}
+
+/**
+ * Split the samples of a series into events. Consecutive samples (at most one step apart) belong to the same event,
+ * so a gap in the series ends the current event and the next sample starts a new one.
+ * An event made of a single sample is a point in time and doesn't have an end.
+ * @param values samples of the series, sorted by timestamp, as returned by a range query
+ * @param step resolution of the range query, in seconds
+ */
+export function getAnnotationEvents(values: ValueTuple[], step: number): AnnotationEvent[] {
+  // Compare the timestamps in milliseconds, the precision of Prometheus, to avoid floating point errors with
+  // sub-second steps.
+  const stepMs = Math.round(step * 1000);
+  const ranges: Array<[start: number, end: number]> = [];
+  for (const [timestamp] of values) {
+    const timestampMs = Math.round(timestamp * 1000);
+    const lastRange = ranges[ranges.length - 1];
+    if (lastRange !== undefined && timestampMs - lastRange[1] <= stepMs) {
+      lastRange[1] = timestampMs;
+    } else {
+      ranges.push([timestampMs, timestampMs]);
+    }
+  }
+  return ranges.map(([start, end]) => (start === end ? { start } : { start, end }));
+}
 
 export const getAnnotationData = async (
   spec: PrometheusPromQLAnnotationOptions,
@@ -84,10 +115,9 @@ export const getAnnotationData = async (
 
   const result: AnnotationData[] = [];
   for (const series of data?.result ?? []) {
-    const start = series.values[0]?.[0];
-    const end = series.values[series.values.length - 1]?.[0];
+    const events = getAnnotationEvents(series.values, step);
 
-    if (start !== undefined && end !== undefined) {
+    if (events.length > 0) {
       const labels = series.metric ?? {};
       const title = spec.title ? formatSeriesName(spec.title, labels) : undefined;
       const legend = spec.legend ? formatSeriesName(spec.legend, labels) : undefined;
@@ -101,13 +131,14 @@ export const getAnnotationData = async (
               return acc;
             }, {})
           : labels;
-      result.push({
-        start: start * 1000,
-        end: end * 1000,
-        title: title,
-        legend: legend,
-        tags: tags,
-      });
+      for (const event of events) {
+        result.push({
+          ...event,
+          title: title,
+          legend: legend,
+          tags: tags,
+        });
+      }
     }
   }
 
