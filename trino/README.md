@@ -26,6 +26,11 @@ GROUP BY 1
 ORDER BY 1
 ```
 
+Each time series or log query can also set a catalog, schema, source label, and session properties. These populate
+`X-Trino-Catalog`, `X-Trino-Schema`, and `X-Trino-Source`. Session properties use Trino's comma-separated `name=value`
+format (for example, `join_distribution_type=AUTOMATIC, query_max_run_time=5m`) and are sent as the
+`X-Trino-Session` request header. Query-level values override corresponding headers configured on the datasource.
+
 ## Development
 
 Run `npm install` at the plugin repository root, then use `npm run dev -w trino` to start the plugin dev server or

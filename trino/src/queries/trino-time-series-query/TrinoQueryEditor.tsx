@@ -19,7 +19,8 @@ import { produce } from 'immer';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 
-import { TrinoQLEditor } from '../../components';
+import { TrinoQLEditor, TrinoQueryContextEditor } from '../../components';
+import type { TrinoQueryContext } from '../../components';
 import { queryExample } from '../../components/constants';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
 import { useQueryState } from '../query-editor-model';
@@ -43,6 +44,17 @@ export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProp
       return;
     }
     throw new Error('Got unexpected non Trino datasource selection');
+  };
+
+  const handleQueryContextChange = (context: TrinoQueryContext): void => {
+    onChange(
+      produce(value, (draft) => {
+        draft.catalog = context.catalog;
+        draft.schema = context.schema;
+        draft.sessionProperties = context.sessionProperties;
+        draft.source = context.source;
+      }),
+    );
   };
 
   // Immediate query execution on Enter or blur
@@ -81,6 +93,7 @@ export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProp
         label="Trino Datasource"
         notched
       />
+      <TrinoQueryContextEditor value={value} onChange={handleQueryContextChange} isReadonly={props.isReadonly} />
       <TrinoQLEditor
         value={query}
         onChange={handleTrinoQueryChange}

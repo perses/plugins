@@ -123,6 +123,10 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>[
     start: startTime,
     end: endTime,
     query: executedQueryString,
+    catalog: spec.catalog,
+    schema: spec.schema,
+    sessionProperties: spec.sessionProperties,
+    source: spec.source,
   });
 
   return {

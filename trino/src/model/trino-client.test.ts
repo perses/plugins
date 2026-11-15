@@ -92,7 +92,13 @@ describe('Trino client', () => {
       });
 
     await query(
-      { query: 'SELECT 42' },
+      {
+        query: 'SELECT 42',
+        catalog: 'iceberg',
+        schema: 'analytics',
+        sessionProperties: 'join_distribution_type=AUTOMATIC, query_max_run_time=5m',
+        source: 'perses-dashboard',
+      },
       {
         datasourceUrl: 'http://trino.example.com',
         headers: { Authorization: `Bearer ${jwt({ sub: 'alice' })}` },
@@ -102,7 +108,12 @@ describe('Trino client', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     for (const [, init] of fetchMock.mock.calls) {
-      expect(new Headers(init?.headers).get('X-Trino-User')).toBe('alice');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('X-Trino-User')).toBe('alice');
+      expect(headers.get('X-Trino-Catalog')).toBe('iceberg');
+      expect(headers.get('X-Trino-Schema')).toBe('analytics');
+      expect(headers.get('X-Trino-Session')).toBe('join_distribution_type=AUTOMATIC, query_max_run_time=5m');
+      expect(headers.get('X-Trino-Source')).toBe('perses-dashboard');
     }
   });
 });

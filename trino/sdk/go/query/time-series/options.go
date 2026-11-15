@@ -34,3 +34,32 @@ func Datasource(datasourceName string) Option {
 		return nil
 	}
 }
+
+func Catalog(catalog string) Option {
+	return func(builder *Builder) error {
+		builder.Catalog = catalog
+		return nil
+	}
+}
+
+func Schema(schema string) Option {
+	return func(builder *Builder) error {
+		builder.Schema = schema
+		return nil
+	}
+}
+
+// SessionProperties sets comma-separated Trino session property name=value pairs.
+func SessionProperties(properties string) Option {
+	return func(builder *Builder) error {
+		builder.SessionProperties = properties
+		return nil
+	}
+}
+
+func Source(source string) Option {
+	return func(builder *Builder) error {
+		builder.Source = source
+		return nil
+	}
+}

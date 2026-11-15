@@ -19,10 +19,14 @@ export interface TrinoDatasourceSpec extends HTTPDatasourceSpec {
   userClaim?: string;
 }
 
-interface QueryRequestParameters extends Record<string, string> {
+interface QueryRequestParameters {
   query: string;
   start: string;
   end: string;
+  catalog?: string;
+  schema?: string;
+  sessionProperties?: string;
+  source?: string;
 }
 
 interface TrinoDatasourceClientOptions {

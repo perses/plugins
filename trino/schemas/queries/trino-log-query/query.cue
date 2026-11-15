@@ -21,5 +21,9 @@ import (
 kind: "TrinoLogQuery"
 spec: close({
 	ds.#selector
-	query: strings.MinRunes(1)
+	query:              strings.MinRunes(1)
+	catalog?:           string
+	schema?:            string
+	sessionProperties?: string
+	source?:            string
 })

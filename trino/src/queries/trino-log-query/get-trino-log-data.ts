@@ -93,6 +93,10 @@ export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = 
     start: startTime,
     end: endTime,
     query: executedQueryString,
+    catalog: spec.catalog,
+    schema: spec.schema,
+    sessionProperties: spec.sessionProperties,
+    source: spec.source,
   });
 
   return {

@@ -16,6 +16,10 @@ import type { DatasourceSelector } from '@perses-dev/spec';
 export interface TrinoTimeSeriesQuerySpec {
   query: string;
   datasource?: DatasourceSelector;
+  catalog?: string;
+  schema?: string;
+  sessionProperties?: string;
+  source?: string;
 }
 
 // TODO: import this type from your datasource or an existing datasource plugin

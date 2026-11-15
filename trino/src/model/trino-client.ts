@@ -17,7 +17,10 @@ export interface TrinoQueryParams {
   query: string;
   start?: string;
   end?: string;
-  database?: string;
+  catalog?: string;
+  schema?: string;
+  sessionProperties?: string;
+  source?: string;
 }
 
 export interface TrinoQueryOptions {
@@ -33,7 +36,7 @@ export interface TrinoQueryResponse {
 }
 
 export interface TrinoClient {
-  query: (params: { start: string; end: string; query: string }) => Promise<TrinoQueryResponse>;
+  query: (params: TrinoQueryParams) => Promise<TrinoQueryResponse>;
 }
 
 export function replaceTimeRangePlaceholders(sql: string, start?: string, end?: string): string {
@@ -98,6 +101,10 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   const finalQuery = replaceTimeRangePlaceholders(params.query.trim(), params.start, params.end);
   const requestHeaders = new Headers(headers);
   requestHeaders.set('Content-Type', 'text/plain; charset=utf-8');
+  if (params.catalog) requestHeaders.set('X-Trino-Catalog', params.catalog);
+  if (params.schema) requestHeaders.set('X-Trino-Schema', params.schema);
+  if (params.sessionProperties) requestHeaders.set('X-Trino-Session', params.sessionProperties);
+  if (params.source) requestHeaders.set('X-Trino-Source', params.source);
   addTrinoUserFromToken(requestHeaders, userClaim);
 
   try {

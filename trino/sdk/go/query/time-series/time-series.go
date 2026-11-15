@@ -22,8 +22,12 @@ import (
 const PluginKind = "TrinoTimeSeriesQuery"
 
 type PluginSpec struct {
-	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Query      string               `json:"query" yaml:"query"`
+	Datasource        *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query             string               `json:"query" yaml:"query"`
+	Catalog           string               `json:"catalog,omitempty" yaml:"catalog,omitempty"`
+	Schema            string               `json:"schema,omitempty" yaml:"schema,omitempty"`
+	SessionProperties string               `json:"sessionProperties,omitempty" yaml:"sessionProperties,omitempty"`
+	Source            string               `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 type Option func(plugin *Builder) error
