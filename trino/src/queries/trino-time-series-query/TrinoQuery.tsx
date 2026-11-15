@@ -14,9 +14,9 @@
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { parseVariables } from '@perses-dev/plugin-system';
 
+import { getTimeSeriesData } from './get-trino-data';
 import type { TrinoTimeSeriesQuerySpec } from './trino-query-types';
 import { TrinoTimeSeriesQueryEditor } from './TrinoQueryEditor';
-import { getTimeSeriesData } from './get-trino-data';
 
 export const TrinoTimeSeriesQuery: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec> = {
   getTimeSeriesData,

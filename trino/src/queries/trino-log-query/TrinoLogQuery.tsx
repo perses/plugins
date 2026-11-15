@@ -14,9 +14,9 @@
 import type { LogQueryPlugin } from '@perses-dev/plugin-system';
 import { parseVariables } from '@perses-dev/plugin-system';
 
+import { getTrinoLogData } from './get-trino-log-data';
 import type { TrinoLogQuerySpec } from './trino-log-query-types';
 import { TrinoLogQueryEditor } from './TrinoLogQueryEditor';
-import { getTrinoLogData } from './get-trino-log-data';
 
 export const TrinoLogQuery: LogQueryPlugin<TrinoLogQuerySpec> = {
   getLogData: getTrinoLogData,

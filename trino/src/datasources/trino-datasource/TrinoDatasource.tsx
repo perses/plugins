@@ -17,18 +17,13 @@ import { query } from '../../model/trino-client';
 import type { TrinoDatasourceSpec, TrinoDatasourceClient } from './trino-datasource-types';
 import { TrinoDatasourceEditor } from './TrinoDatasourceEditor';
 
-const createClient: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient>['createClient'] = (
-  spec,
-  options,
-) => {
+const createClient: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
   const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
-    throw new Error(
-      'No URL specified for TrinoDatasource client. You can use directUrl in the spec to configure it.',
-    );
+    throw new Error('No URL specified for TrinoDatasource client. You can use directUrl in the spec to configure it.');
   }
 
   const specHeaders = proxy?.spec.headers || {};

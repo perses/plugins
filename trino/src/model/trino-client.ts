@@ -46,10 +46,7 @@ export function formatTrinoDateTime(date: Date): string {
     .replace(/\.\d{3}Z$/, '');
 }
 
-export async function query(
-  params: TrinoQueryParams,
-  queryOptions: TrinoQueryOptions,
-): Promise<TrinoQueryResponse> {
+export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOptions): Promise<TrinoQueryResponse> {
   const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
 
   if (!params.query) {
@@ -64,7 +61,11 @@ export async function query(
 
   try {
     const doFetch = customFetch ?? fetch;
-    let response = await doFetch(statementUrl.toString(), { method: 'POST', headers: requestHeaders, body: finalQuery });
+    let response = await doFetch(statementUrl.toString(), {
+      method: 'POST',
+      headers: requestHeaders,
+      body: finalQuery,
+    });
     if (!response.ok) {
       throw new Error(`Trino returned ${response.status}: ${await response.text()}`);
     }
@@ -79,9 +80,10 @@ export async function query(
       const base = urlBuilder(datasourceUrl);
       const proxyPath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
       const nextPath = next.pathname.replace(/^\//, '');
-      const pollUrl = datasourceUrl.startsWith('http://') || datasourceUrl.startsWith('https://')
-        ? next
-        : new URL(nextPath + next.search, `${base.origin}${proxyPath}`);
+      const pollUrl =
+        datasourceUrl.startsWith('http://') || datasourceUrl.startsWith('https://')
+          ? next
+          : new URL(nextPath + next.search, `${base.origin}${proxyPath}`);
       response = await doFetch(pollUrl.toString(), { method: 'GET', headers: requestHeaders });
       if (!response.ok) throw new Error(`Trino returned ${response.status}: ${await response.text()}`);
       body = await response.json();

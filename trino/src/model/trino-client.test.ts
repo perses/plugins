@@ -33,11 +33,13 @@ describe('Trino client', () => {
   });
 
   it('should send interpolated query to Trino', async () => {
-    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Pick<Response, 'ok' | 'json' | 'text'>>>(async () => ({
-      ok: true,
-      json: vi.fn(async () => ({ columns: [{ name: 'answer' }], data: [[42]] })),
-      text: vi.fn(async () => ''),
-    }));
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Pick<Response, 'ok' | 'json' | 'text'>>>(
+      async () => ({
+        ok: true,
+        json: vi.fn(async () => ({ columns: [{ name: 'answer' }], data: [[42]] })),
+        text: vi.fn(async () => ''),
+      }),
+    );
     global.fetch = fetchMock as unknown as typeof fetch;
 
     await query(
@@ -55,6 +57,8 @@ describe('Trino client', () => {
     const [calledUrl, init] = fetchMock.mock.calls[0]!;
     expect(calledUrl).toBe('http://trino.example.com/v1/statement');
     expect(init?.method).toBe('POST');
-    expect(init?.body).toBe("SELECT * FROM logs WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00'");
+    expect(init?.body).toBe(
+      "SELECT * FROM logs WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00'",
+    );
   });
 });
