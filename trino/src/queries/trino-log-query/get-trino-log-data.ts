@@ -97,6 +97,7 @@ export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = 
     schema: spec.schema,
     sessionProperties: spec.sessionProperties,
     source: spec.source,
+    routingGroup: spec.routingGroup,
   });
 
   return {

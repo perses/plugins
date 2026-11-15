@@ -20,6 +20,7 @@ export interface TrinoTimeSeriesQuerySpec {
   schema?: string;
   sessionProperties?: string;
   source?: string;
+  routingGroup?: string;
 }
 
 // TODO: import this type from your datasource or an existing datasource plugin

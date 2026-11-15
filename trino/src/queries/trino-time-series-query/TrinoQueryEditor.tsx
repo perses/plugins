@@ -53,6 +53,7 @@ export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProp
         draft.schema = context.schema;
         draft.sessionProperties = context.sessionProperties;
         draft.source = context.source;
+        draft.routingGroup = context.routingGroup;
       }),
     );
   };

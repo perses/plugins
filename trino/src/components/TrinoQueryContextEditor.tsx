@@ -20,6 +20,7 @@ export interface TrinoQueryContext {
   schema?: string;
   sessionProperties?: string;
   source?: string;
+  routingGroup?: string;
 }
 
 interface TrinoQueryContextEditorProps {
@@ -61,6 +62,14 @@ export function TrinoQueryContextEditor(props: TrinoQueryContextEditorProps): Re
         value={value.source ?? ''}
         onChange={handleChange('source')}
         helperText="Sets the X-Trino-Source header for query attribution."
+        InputProps={{ readOnly: isReadonly }}
+      />
+      <TextField
+        fullWidth
+        label="Routing Group"
+        value={value.routingGroup ?? ''}
+        onChange={handleChange('routingGroup')}
+        helperText="Sets the X-Trino-Routing-Group header."
         InputProps={{ readOnly: isReadonly }}
       />
       <TextField

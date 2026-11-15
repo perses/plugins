@@ -20,4 +20,5 @@ export interface TrinoLogQuerySpec {
   schema?: string;
   sessionProperties?: string;
   source?: string;
+  routingGroup?: string;
 }

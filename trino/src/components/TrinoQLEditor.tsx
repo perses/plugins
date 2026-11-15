@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { EditorView } from '@codemirror/view';
-import { useTheme, InputLabel, Stack } from '@mui/material';
+import { useTheme, InputLabel, Stack, Button, Box } from '@mui/material';
 import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import CodeMirror from '@uiw/react-codemirror';
 import type { ReactElement } from 'react';
+import { format } from 'sql-formatter';
 
 export type TrinoQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
 
@@ -23,17 +24,29 @@ export function TrinoQLEditor(props: TrinoQLEditorProps): ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
+  const formatQuery = (): void => {
+    if (props.value && props.onChange) {
+      const formatted = format(props.value, { language: 'trino' });
+      props.onChange(formatted, undefined as never);
+    }
+  };
+
   return (
     <Stack position="relative">
-      <InputLabel
-        sx={{
-          fontWeight: 500,
-          marginBottom: '4px',
-          color: theme.palette.text.primary,
-        }}
-      >
-        Trino Query
-      </InputLabel>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <InputLabel
+          sx={{
+            fontWeight: 500,
+            marginBottom: '4px',
+            color: theme.palette.text.primary,
+          }}
+        >
+          Trino Query
+        </InputLabel>
+        <Button variant="text" size="small" onClick={formatQuery}>
+          Format Query
+        </Button>
+      </Box>
       <CodeMirror
         {...props}
         style={{ border: `1px solid ${theme.palette.divider}` }}

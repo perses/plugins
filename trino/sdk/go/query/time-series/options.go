@@ -63,3 +63,10 @@ func Source(source string) Option {
 		return nil
 	}
 }
+
+func RoutingGroup(routingGroup string) Option {
+	return func(builder *Builder) error {
+		builder.RoutingGroup = routingGroup
+		return nil
+	}
+}

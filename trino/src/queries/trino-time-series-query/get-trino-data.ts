@@ -127,6 +127,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>[
     schema: spec.schema,
     sessionProperties: spec.sessionProperties,
     source: spec.source,
+    routingGroup: spec.routingGroup,
   });
 
   return {

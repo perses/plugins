@@ -21,6 +21,7 @@ export interface TrinoQueryParams {
   schema?: string;
   sessionProperties?: string;
   source?: string;
+  routingGroup?: string;
 }
 
 export interface TrinoQueryOptions {
@@ -105,6 +106,7 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   if (params.schema) requestHeaders.set('X-Trino-Schema', params.schema);
   if (params.sessionProperties) requestHeaders.set('X-Trino-Session', params.sessionProperties);
   if (params.source) requestHeaders.set('X-Trino-Source', params.source);
+  if (params.routingGroup) requestHeaders.set('X-Trino-Routing-Group', params.routingGroup);
   addTrinoUserFromToken(requestHeaders, userClaim);
 
   try {
