@@ -103,6 +103,22 @@ async function expectFormattedBytes(): Promise<void> {
   expect(screen.queryByRole('cell', { name: '27487790694' })).not.toBeInTheDocument();
   expect(screen.queryByRole('cell', { name: '150000000' })).not.toBeInTheDocument();
 }
+// The conditional text color is an inline style on the inner "original-cell" element of the table cell.
+async function findCellContent(testId: string): Promise<HTMLElement> {
+  const cell = await screen.findByTestId(testId);
+  const content = cell.firstElementChild;
+  if (!(content instanceof HTMLElement)) {
+    throw new Error(`No content element found in cell ${testId}: ${cell.outerHTML}`);
+  }
+  return content;
+}
+
+// Row order follows the query data: ns-a (0), ns-b (150000000), ns-c (27487790694).
+async function expectConditionalColors(): Promise<void> {
+  expect(await findCellContent('0_value #1')).toHaveStyle({ color: '#12470c' });
+  expect(await findCellContent('1_value #1')).toHaveStyle({ color: '#FFCC00' });
+  expect(await findCellContent('2_value #1')).toHaveStyle({ color: '#C4162a' });
+}
 
 describe('TablePanel', () => {
   // Helper to render the panel with some context set
@@ -701,6 +717,7 @@ describe('TablePanel', () => {
           ],
         });
         await expectFormattedBytes();
+        expect(await findCellContent('2_value #1')).not.toHaveStyle({ color: '#C4162a' });
       },
       TEST_TIMEOUT,
     );
@@ -716,6 +733,7 @@ describe('TablePanel', () => {
           ],
         });
         await expectFormattedBytes();
+        await expectConditionalColors();
       },
       TEST_TIMEOUT,
     );
@@ -732,6 +750,7 @@ describe('TablePanel', () => {
           cellSettings: BYTES_CELL_CONDITIONS,
         });
         await expectFormattedBytes();
+        await expectConditionalColors();
       },
       TEST_TIMEOUT,
     );
