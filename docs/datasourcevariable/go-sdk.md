@@ -33,6 +33,7 @@ Define the kind of datasource plugin that this variable should reference. Common
 - `"LokiDatasource"`
 - `"PyroscopeDatasource"`
 - `"ClickHouseDatasource"`
+- `"TrinoDatasource"`
 - `"VictoriaLogsDatasource"`
 
 ## Example

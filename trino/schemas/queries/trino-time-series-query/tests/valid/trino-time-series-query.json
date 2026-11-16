@@ -1,0 +1,15 @@
+{
+  "kind": "TrinoTimeSeriesQuery",
+  "spec": {
+    "datasource": {
+      "kind": "TrinoDatasource",
+      "name": "trino"
+    },
+    "query": "SELECT date_trunc('minute', event_time) AS time, count(*) AS events FROM events WHERE event_time BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}' GROUP BY 1",
+    "catalog": "iceberg",
+    "schema": "$tenant",
+    "sessionProperties": "query_max_run_time=5m",
+    "source": "perses",
+    "routingGroup": "adhoc"
+  }
+}

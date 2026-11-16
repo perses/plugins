@@ -72,6 +72,13 @@
         - Go SDK:
             - Datasource: tempo/go-sdk/datasource.md
             - Query: tempo/go-sdk/query.md
+    - Trino:
+        - Overview: trino/README.md
+        - Model: trino/model.md
+        - Go SDK:
+            - Datasource: trino/go-sdk/datasource.md
+            - Log Query: trino/go-sdk/log-query.md
+            - Time Series Query: trino/go-sdk/timeseries-query.md
     - VictoriaLogs:
         - Overview: victorialogs/README.md
         - Model: victorialogs/model.md
