@@ -33,9 +33,9 @@ validate that token (trusting its issuer and signing keys), and point `http-serv
 the user from the verified token.
 
 The plugin follows Trino's `nextUri` links through the Perses proxy and combines result pages up to 100,000 rows. Larger
-results are cut at that limit and the remaining query is cancelled. Requests send `X-Trino-Time-Zone: UTC`. A request that
-fails with 502, 503 or 504 is tried up to three times, so a statement retried after a gateway timeout can run twice. A 429
-is retried after its `Retry-After` only when the client sees the response; inside Perses it fails at once.
+results are cut at that limit and the remaining query is cancelled. Requests send `X-Trino-Time-Zone: UTC`. A request
+that fails with 502, 503 or 504 is tried up to three times. Inside Perses, a 429 is not retried yet: its `Retry-After`
+header doesn't reach the plugin.
 
 Queries are submitted as plain SQL. Use `{start}` and `{end}` in a query to interpolate the dashboard time range in UTC,
 for example:

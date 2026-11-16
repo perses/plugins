@@ -14,9 +14,7 @@
 import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 
 export const MAX_ROWS = 100000;
-const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
-// Errors thrown by the Perses fetch carry no Retry-After, so a thrown 429 is not retried blindly.
-const THROWN_RETRYABLE_STATUSES = new Set([502, 503, 504]);
+const RETRYABLE_STATUSES = new Set([502, 503, 504]);
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 100;
 const MAX_RETRY_AFTER_MS = 10000;
@@ -186,7 +184,6 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
       statementUrl.toString(),
       { method: 'POST', headers: requestHeaders, body: finalQuery, signal },
       doFetch,
-      signal,
     );
     let body: TrinoStatementResponse = await response.json();
     let columns = body.columns;
@@ -205,7 +202,6 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
         resolveNextUri(datasourceUrl, body.nextUri),
         { method: 'GET', headers: requestHeaders, signal },
         doFetch,
-        signal,
       );
       body = await pageResponse.json();
       columns ??= body.columns;
@@ -232,51 +228,58 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   }
 }
 
-async function fetchWithRetry(
-  url: string,
-  init: RequestInit,
-  doFetch: FetchFn,
-  signal: AbortSignal | undefined,
-): Promise<Response> {
+async function fetchWithRetry(url: string, init: RequestInit, doFetch: FetchFn): Promise<Response> {
+  const signal = init.signal ?? undefined;
   for (let attempt = 1; ; attempt++) {
-    const backoff = RETRY_DELAY_MS * attempt;
     let response: Response;
     try {
       // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
       response = await doFetch(url, init);
     } catch (e) {
-      // The Perses fetch throws on non-OK responses instead of returning them.
-      const status = retryableStatus(e);
-      if (status === undefined) throw e;
+      // The Perses fetch throws on non-OK responses, without their headers, instead of returning them.
+      const status = errorStatus(e);
+      const wait = status === undefined ? undefined : retryDelay(status, null, attempt);
+      if (wait === undefined) throw e;
       if (attempt >= MAX_ATTEMPTS) {
         const message = e instanceof Error ? e.message : String(e);
         throw new Error(`Trino returned ${status} after ${attempt} attempts: ${message}`, { cause: e });
       }
-      // oxlint-disable-next-line no-await-in-loop
-      await delay(backoff, signal);
+      // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
+      await delay(wait, signal);
       continue;
     }
     if (response.ok) return response;
-    const retryable = RETRYABLE_STATUSES.has(response.status);
-    if (!retryable || attempt >= MAX_ATTEMPTS) {
-      const suffix = retryable ? ` after ${attempt} attempts` : '';
-      // oxlint-disable-next-line no-await-in-loop
-      throw new Error(`Trino returned ${response.status}${suffix}: ${await response.text()}`);
+    const retryAfter = response.headers.get('Retry-After');
+    const wait = retryDelay(response.status, retryAfter, attempt);
+    if (wait === undefined || attempt >= MAX_ATTEMPTS) {
+      const tries = attempt > 1 ? ` after ${attempt} attempts` : '';
+      const hint = response.status === 429 && retryAfter ? ` (Retry-After: ${retryAfter})` : '';
+      // oxlint-disable-next-line no-await-in-loop -- reading the final error body.
+      throw new Error(`Trino returned ${response.status}${tries}${hint}: ${await response.text()}`);
     }
     void response.body?.cancel().catch(() => undefined);
-    const retryAfter = response.status === 429 ? parseRetryAfter(response.headers.get('Retry-After')) : undefined;
-    // oxlint-disable-next-line no-await-in-loop
-    await delay(Math.max(retryAfter ?? 0, backoff), signal);
+    // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
+    await delay(wait, signal);
   }
 }
 
-// retryableStatus returns the status of a thrown fetch error when it is worth retrying.
-function retryableStatus(e: unknown): number | undefined {
-  const status = typeof e === 'object' && e !== null ? (e as { status?: unknown }).status : undefined;
-  return typeof status === 'number' && THROWN_RETRYABLE_STATUSES.has(status) ? status : undefined;
+// retryDelay returns how long to wait before the next attempt, or undefined when the status is not retried.
+// A 429 is retried only after a Retry-After the client can read and that is within MAX_RETRY_AFTER_MS.
+function retryDelay(status: number, retryAfter: string | null, attempt: number): number | undefined {
+  const backoff = RETRY_DELAY_MS * attempt;
+  if (RETRYABLE_STATUSES.has(status)) return backoff;
+  if (status !== 429) return undefined;
+  const wait = parseRetryAfter(retryAfter);
+  return wait === undefined || wait > MAX_RETRY_AFTER_MS ? undefined : Math.max(wait, backoff);
 }
 
-// parseRetryAfter returns the Retry-After wait (delta-seconds or HTTP-date) clamped to MAX_RETRY_AFTER_MS, or undefined.
+// errorStatus returns the HTTP status carried by an error the Perses fetch throws, if any.
+function errorStatus(e: unknown): number | undefined {
+  const status = typeof e === 'object' && e !== null ? (e as { status?: unknown }).status : undefined;
+  return typeof status === 'number' ? status : undefined;
+}
+
+// parseRetryAfter returns the Retry-After wait in milliseconds (delta-seconds or HTTP-date), or undefined.
 function parseRetryAfter(value: string | null): number | undefined {
   const trimmed = value?.trim();
   if (!trimmed) return undefined;
@@ -284,8 +287,7 @@ function parseRetryAfter(value: string | null): number | undefined {
   if (/^\d+$/.test(trimmed)) ms = Number(trimmed) * 1000;
   else if (/[a-z]/i.test(trimmed)) ms = Date.parse(trimmed) - Date.now();
   else return undefined;
-  if (Number.isNaN(ms)) return undefined;
-  return Math.min(Math.max(ms, 0), MAX_RETRY_AFTER_MS);
+  return Number.isNaN(ms) ? undefined : Math.max(ms, 0);
 }
 
 // Best effort: Trino abandons an unpolled query on its own, this only frees the cluster sooner.
@@ -300,15 +302,15 @@ function delay(ms: number, signal: AbortSignal | undefined): Promise<void> {
       reject(signal.reason);
       return;
     }
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(signal.reason);
-      },
-      { once: true },
-    );
+    const onAbort = (): void => {
+      clearTimeout(timer);
+      reject(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
   });
 }
 
