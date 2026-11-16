@@ -125,7 +125,12 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
     // Trino streams results through nextUri. For proxy datasources retain the Perses proxy prefix.
     // Trino provides the next page token only after the previous page completes.
     // oxlint-disable no-await-in-loop -- each page token depends on the previous response.
+    const MAX_ROWS = 100000;
     while (body.nextUri) {
+      if (rows.length >= MAX_ROWS) {
+        console.warn(`Trino query results truncated to ${MAX_ROWS} rows to prevent memory exhaustion.`);
+        break;
+      }
       const next = new URL(body.nextUri);
       const base = urlBuilder(datasourceUrl);
       const proxyPath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;

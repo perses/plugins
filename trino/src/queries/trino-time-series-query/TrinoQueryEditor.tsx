@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack } from '@mui/material';
+import { Stack, Box } from '@mui/material';
 import { createModEnterHandler } from '@perses-dev/dashboards';
 import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
 import { DatasourceSelect, isVariableDatasource } from '@perses-dev/plugin-system';
@@ -74,17 +74,6 @@ export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProp
     [handleQueryChange],
   );
 
-  const examplesStyle: React.CSSProperties = {
-    fontSize: '11px',
-    color: '#777',
-    backgroundColor: '#f5f5f5',
-    padding: '8px',
-    borderRadius: '4px',
-    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-    whiteSpace: 'pre-wrap',
-    lineHeight: '1.3',
-  };
-
   return (
     <Stack spacing={1.5}>
       <DatasourceSelect
@@ -107,7 +96,7 @@ export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProp
         <summary style={{ cursor: 'pointer', fontSize: '12px', color: '#666', marginBottom: '8px' }}>
           Query Examples
         </summary>
-        <div style={examplesStyle}>{queryExample}</div>
+        <Box sx={(theme) => ({ fontSize: '11px', color: theme.palette.text.secondary, backgroundColor: theme.palette.background.default, padding: '8px', borderRadius: '4px', fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace', whiteSpace: 'pre-wrap', lineHeight: '1.3' })}>{queryExample}</Box>
       </details>
     </Stack>
   );

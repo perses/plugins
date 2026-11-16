@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/trino-plugin",
-  "version": "0.8.0-beta.1",
+  "version": "0.1.0-beta.1",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
   "repository": {
@@ -25,19 +25,20 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "react-compiler-runtime": "^1.0.0"
+    "react-compiler-runtime": "^1.0.0",
+    "sql-formatter": "^15.9.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@mui/material": "^6.1.10",
     "@hookform/resolvers": "^5.9.1",
+    "@mui/material": "^6.1.10",
+    "@perses-dev/client": "^0.56.0-beta.1",
     "@perses-dev/components": "^0.56.0-beta.1",
     "@perses-dev/dashboards": "^0.56.0-beta.1",
-    "@perses-dev/spec": "^0.3.0",
     "@perses-dev/explore": "^0.56.0-beta.1",
     "@perses-dev/plugin-system": "^0.56.0-beta.1",
-    "@perses-dev/client": "^0.56.0-beta.1",
+    "@perses-dev/spec": "^0.3.0",
     "@tanstack/react-query": "^5.105.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
