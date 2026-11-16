@@ -160,8 +160,9 @@ enableSorting: <boolean> # Optional
 # Initial sort of the table on this column. Only the first column with `sort` and sorting enabled is used.
 sort: <enum = "asc" | "desc"> # Optional
 
-# Defaults to "alphabetical".
-sortMode: <enum = "alphabetical" | "numeric" | "severity"> # Optional
+# Defaults to "alphabetical". "status" orders the label values as alert states, firing before resolved
+# (firing, pending, suppressed, inactive, resolved).
+sortMode: <enum = "alphabetical" | "numeric" | "severity" | "status"> # Optional
 ```
 
 ### Deduplication specification
