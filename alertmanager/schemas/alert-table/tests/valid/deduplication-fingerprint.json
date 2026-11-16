@@ -1,0 +1,9 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "deduplication": {
+      "mode": "fingerprint"
+    },
+    "allowedActions": []
+  }
+}

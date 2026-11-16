@@ -1,0 +1,29 @@
+{
+  "kind": "AlertManagerDatasource",
+  "spec": {
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "http://alertmanager:9093",
+        "allowedEndpoints": [
+          {
+            "endpointPattern": "/api/v2/alerts",
+            "method": "GET"
+          },
+          {
+            "endpointPattern": "/api/v2/silences",
+            "method": "GET"
+          },
+          {
+            "endpointPattern": "/api/v2/silences",
+            "method": "POST"
+          },
+          {
+            "endpointPattern": "/api/v2/silence/([a-zA-Z0-9_-]+)",
+            "method": "DELETE"
+          }
+        ]
+      }
+    }
+  }
+}

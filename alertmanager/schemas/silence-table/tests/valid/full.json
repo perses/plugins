@@ -1,0 +1,30 @@
+{
+  "kind": "SilenceTable",
+  "spec": {
+    "columns": [
+      {
+        "name": "status",
+        "sort": "asc",
+        "sortMode": "status"
+      },
+      {
+        "name": "matchers",
+        "enableSorting": false
+      },
+      {
+        "name": "endsAt",
+        "header": "Expires",
+        "sort": "desc",
+        "sortMode": "date"
+      },
+      {
+        "name": "createdBy",
+        "sortMode": "alphabetical"
+      },
+      {
+        "name": "comment"
+      }
+    ],
+    "allowedActions": ["expire"]
+  }
+}
