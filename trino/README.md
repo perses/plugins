@@ -40,8 +40,7 @@ ORDER BY 1
 
 Each time series or log query can also set a catalog, schema, source label, routing group, and session properties. These
 populate `X-Trino-Catalog`, `X-Trino-Schema`, `X-Trino-Source`, and `X-Trino-Routing-Group` (used by Trino Gateway).
-Session properties use Trino's comma-separated `name=value` format (for example, `join_distribution_type=AUTOMATIC,
-query_max_run_time=5m`) and are sent as the `X-Trino-Session` request header. When the same header is also set in the
+Session properties use Trino's comma-separated `name=value` format (for example, `join_distribution_type=AUTOMATIC, query_max_run_time=5m`) and are sent as the `X-Trino-Session` request header. When the same header is also set in the
 datasource proxy `headers`, the datasource value wins.
 
 ## Result shape
