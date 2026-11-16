@@ -77,7 +77,8 @@ export function formatTrinoDateTime(date: Date): string {
     .replace(/\.\d{3}Z$/, '');
 }
 
-const TRINO_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2}:\d{2})(?:\.(\d+))?)?\s*(UTC|Z|[+-]\d{2}:?\d{2})?$/;
+const TRINO_TIMESTAMP =
+  /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2}:\d{2})(?:\.(\d+))?)?(?:\s*(Z|[+-]\d{2}:?\d{2})|\s+([A-Za-z][\w+\-/]*))?$/;
 
 /**
  * parseTrinoTimestamp converts a Trino date or timestamp value to epoch milliseconds, or NaN when it cannot be parsed.
@@ -90,10 +91,38 @@ export function parseTrinoTimestamp(value: unknown): number {
   const match = value.trim().match(TRINO_TIMESTAMP);
   if (!match) return NaN;
 
-  const [, date, time = '00:00:00', fraction = '', zone] = match;
+  const [, date, time = '00:00:00', fraction = '', offset, zoneName] = match;
   const millis = fraction.padEnd(3, '0').slice(0, 3);
-  const offset = !zone || zone === 'UTC' || zone === 'Z' ? 'Z' : zone.replace(/^([+-]\d{2})(\d{2})$/, '$1:$2');
-  return Date.parse(`${date}T${time}.${millis}${offset}`);
+  const isoOffset = offset && offset !== 'Z' ? offset.replace(/^([+-]\d{2})(\d{2})$/, '$1:$2') : 'Z';
+  const instant = Date.parse(`${date}T${time}.${millis}${isoOffset}`);
+  if (!zoneName || zoneName === 'UTC') return instant;
+  return wallTimeInZone(instant, zoneName);
+}
+
+// Converts a wall-clock time (encoded as if it were UTC) in an IANA zone to the actual instant.
+function wallTimeInZone(wallAsUtc: number, zone: string): number {
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  } catch {
+    return NaN;
+  }
+  const offsetAt = (instant: number): number => {
+    const parts = Object.fromEntries(formatter.formatToParts(instant).map(({ type, value }) => [type, Number(value)]));
+    const wall = Date.UTC(parts.year!, parts.month! - 1, parts.day, parts.hour, parts.minute, parts.second);
+    return wall - (instant - (instant % 1000));
+  };
+  const firstGuess = wallAsUtc - offsetAt(wallAsUtc);
+  return wallAsUtc - offsetAt(firstGuess);
 }
 
 export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOptions): Promise<TrinoQueryResponse> {

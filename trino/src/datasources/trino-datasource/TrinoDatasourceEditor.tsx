@@ -44,6 +44,8 @@ const initialSpecProxy: TrinoDatasourceSpec = {
           method: 'DELETE',
         },
       ],
+      // Trino rejects forwarded headers with 406 unless http-server.process-forwarded is enabled.
+      dropHeaders: ['X-Forwarded-For', 'X-Forwarded-Proto'],
       url: '',
     },
   },

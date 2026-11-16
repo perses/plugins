@@ -73,11 +73,14 @@ describe('Trino client', () => {
     ['2025-01-01 00:00:00.5 UTC', '2025-01-01T00:00:00.500Z'],
     ['2025-01-01 05:30:00 +05:30', '2025-01-01T00:00:00.000Z'],
     ['2025-01-01', '2025-01-01T00:00:00.000Z'],
+    ['2025-01-01 00:00:00.000 America/New_York', '2025-01-01T05:00:00.000Z'],
+    ['2025-07-01 00:00:00.000 America/New_York', '2025-07-01T04:00:00.000Z'],
+    ['2026-03-08 03:30:00.000 America/New_York', '2026-03-08T07:30:00.000Z'],
   ])('parses Trino timestamp %s as %s', (value, expected) => {
     expect(parseTrinoTimestamp(value)).toBe(Date.parse(expected));
   });
 
-  it.each([null, undefined, '', 'yesterday', '2025-01-01 00:00:00 America/New_York'])(
+  it.each([null, undefined, '', 'yesterday', '2025-01-01 00:00:00 Not/AZone'])(
     'returns NaN for unparseable timestamp %s',
     (value) => {
       expect(parseTrinoTimestamp(value)).toBeNaN();

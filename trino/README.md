@@ -7,9 +7,10 @@ plugins that can be used with the corresponding Perses panels.
 
 Use a proxied datasource pointing at the Trino coordinator base URL, such as `https://trino.example.com`, and allow
 `POST /v1/statement`, `GET /v1/statement/.*`, and `DELETE /v1/statement/.*` (used to cancel queries that are no longer
-needed). Store credentials in a Perses Secret referenced by the proxy: Perses ignores an `Authorization` header placed
-in the proxy `headers`. A direct URL only works when the coordinator accepts unauthenticated cross-origin requests from
-the browser.
+needed). Unless Trino sets `http-server.process-forwarded=true`, it rejects the proxy's forwarded headers with HTTP 406,
+so also list `X-Forwarded-For` and `X-Forwarded-Proto` in the proxy `dropHeaders`. Store credentials in a Perses Secret
+referenced by the proxy: Perses ignores an `Authorization` header placed in the proxy `headers`. A direct URL only works
+when the coordinator accepts unauthenticated cross-origin requests from the browser.
 
 Set the datasource **user** to send `X-Trino-User`. Leave it empty when the credential already identifies the user,
 for example a JWT or OAuth2 token whose principal Trino extracts itself. The user is asserted by the browser and is not
