@@ -15,6 +15,14 @@
 #   - Demo: https://demo.perses.dev        # external link
 
 - Datasources:
+    - Alertmanager:
+        - Overview: alertmanager/README.md
+        - Model: alertmanager/model.md
+        - Go SDK:
+            - Datasource: alertmanager/go-sdk/datasource.md
+            - Alerts Query: alertmanager/go-sdk/alerts-query.md
+            - Silences Query: alertmanager/go-sdk/silences-query.md
+            - Alert Table: alertmanager/go-sdk/alert-table.md
     - ClickHouse:
         - Overview: clickhouse/README.md
         - Model: clickhouse/model.md
