@@ -15,8 +15,9 @@ import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 
 export const MAX_ROWS = 100000;
 const RETRYABLE_STATUSES = new Set([502, 503, 504]);
-const MAX_POLL_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 100;
+const MAX_RETRY_AFTER_MS = 10000;
 
 export interface TrinoQueryParams {
   query: string;
@@ -179,15 +180,11 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
 
   let pendingUri: string | undefined;
   try {
-    const response = await doFetch(statementUrl.toString(), {
-      method: 'POST',
-      headers: requestHeaders,
-      body: finalQuery,
-      signal,
-    });
-    if (!response.ok) {
-      throw new Error(`Trino returned ${response.status}: ${await response.text()}`);
-    }
+    const response = await fetchWithRetry(
+      statementUrl.toString(),
+      { method: 'POST', headers: requestHeaders, body: finalQuery, signal },
+      doFetch,
+    );
     let body: TrinoStatementResponse = await response.json();
     let columns = body.columns;
     const rows: unknown[][] = [...(body.data ?? [])];
@@ -201,7 +198,12 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
         truncated = true;
         break;
       }
-      body = await poll(resolveNextUri(datasourceUrl, body.nextUri), requestHeaders, doFetch, signal);
+      const pageResponse = await fetchWithRetry(
+        resolveNextUri(datasourceUrl, body.nextUri),
+        { method: 'GET', headers: requestHeaders, signal },
+        doFetch,
+      );
+      body = await pageResponse.json();
       columns ??= body.columns;
       rows.push(...(body.data ?? []));
     }
@@ -226,23 +228,66 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   }
 }
 
-async function poll(
-  url: string,
-  headers: Headers,
-  doFetch: FetchFn,
-  signal: AbortSignal | undefined,
-): Promise<TrinoStatementResponse> {
+async function fetchWithRetry(url: string, init: RequestInit, doFetch: FetchFn): Promise<Response> {
+  const signal = init.signal ?? undefined;
   for (let attempt = 1; ; attempt++) {
-    // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
-    const response = await doFetch(url, { method: 'GET', headers, signal });
-    if (response.ok) return response.json();
-    if (!RETRYABLE_STATUSES.has(response.status) || attempt >= MAX_POLL_ATTEMPTS) {
-      // oxlint-disable-next-line no-await-in-loop
-      throw new Error(`Trino returned ${response.status}: ${await response.text()}`);
+    let response: Response;
+    try {
+      // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
+      response = await doFetch(url, init);
+    } catch (e) {
+      // The Perses fetch throws on non-OK responses, without their headers, instead of returning them.
+      const status = errorStatus(e);
+      const wait = status === undefined ? undefined : retryDelay(status, null, attempt);
+      if (wait === undefined) throw e;
+      if (attempt >= MAX_ATTEMPTS) {
+        const message = e instanceof Error ? e.message : String(e);
+        throw new Error(`Trino returned ${status} after ${attempt} attempts: ${message}`, { cause: e });
+      }
+      // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
+      await delay(wait, signal);
+      continue;
     }
-    // oxlint-disable-next-line no-await-in-loop
-    await delay(RETRY_DELAY_MS * attempt, signal);
+    if (response.ok) return response;
+    const retryAfter = response.headers.get('Retry-After');
+    const wait = retryDelay(response.status, retryAfter, attempt);
+    if (wait === undefined || attempt >= MAX_ATTEMPTS) {
+      const tries = attempt > 1 ? ` after ${attempt} attempts` : '';
+      const hint = response.status === 429 && retryAfter ? ` (Retry-After: ${retryAfter})` : '';
+      // oxlint-disable-next-line no-await-in-loop -- reading the final error body.
+      throw new Error(`Trino returned ${response.status}${tries}${hint}: ${await response.text()}`);
+    }
+    void response.body?.cancel().catch(() => undefined);
+    // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
+    await delay(wait, signal);
   }
+}
+
+// retryDelay returns how long to wait before the next attempt, or undefined when the status is not retried.
+// A 429 is retried only after a Retry-After the client can read and that is within MAX_RETRY_AFTER_MS.
+function retryDelay(status: number, retryAfter: string | null, attempt: number): number | undefined {
+  const backoff = RETRY_DELAY_MS * attempt;
+  if (RETRYABLE_STATUSES.has(status)) return backoff;
+  if (status !== 429) return undefined;
+  const wait = parseRetryAfter(retryAfter);
+  return wait === undefined || wait > MAX_RETRY_AFTER_MS ? undefined : Math.max(wait, backoff);
+}
+
+// errorStatus returns the HTTP status carried by an error the Perses fetch throws, if any.
+function errorStatus(e: unknown): number | undefined {
+  const status = typeof e === 'object' && e !== null ? (e as { status?: unknown }).status : undefined;
+  return typeof status === 'number' ? status : undefined;
+}
+
+// parseRetryAfter returns the Retry-After wait in milliseconds (delta-seconds or HTTP-date), or undefined.
+function parseRetryAfter(value: string | null): number | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  let ms: number;
+  if (/^\d+$/.test(trimmed)) ms = Number(trimmed) * 1000;
+  else if (/[a-z]/i.test(trimmed)) ms = Date.parse(trimmed) - Date.now();
+  else return undefined;
+  return Number.isNaN(ms) ? undefined : Math.max(ms, 0);
 }
 
 // Best effort: Trino abandons an unpolled query on its own, this only frees the cluster sooner.
@@ -257,15 +302,15 @@ function delay(ms: number, signal: AbortSignal | undefined): Promise<void> {
       reject(signal.reason);
       return;
     }
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(signal.reason);
-      },
-      { once: true },
-    );
+    const onAbort = (): void => {
+      clearTimeout(timer);
+      reject(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
   });
 }
 

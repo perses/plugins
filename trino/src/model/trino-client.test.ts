@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { FetchError, UserFriendlyError } from '@perses-dev/client';
+
 import { TRINO_PROXY_HEADERS } from '../datasources/trino-datasource/TrinoDatasourceEditor';
 import {
   formatSessionProperties,
@@ -20,12 +22,16 @@ import {
   query,
   replaceTimeRangePlaceholders,
 } from './trino-client';
+import type { TrinoQueryResponse } from './trino-client';
 
-type FakeResponse = Pick<Response, 'ok' | 'status' | 'json' | 'text'>;
+type FakeResponse = Pick<Response, 'ok' | 'status' | 'json' | 'text' | 'headers'> & {
+  body?: { cancel: () => Promise<void> } | null;
+};
 type FetchMock = ReturnType<typeof vi.fn<(url: string, init?: RequestInit) => Promise<FakeResponse>>>;
 
-function page(body: unknown, status = 200): FakeResponse {
+function page(body: unknown, status = 200, headers: Record<string, string> = {}): FakeResponse {
   return {
+    headers: new Headers(headers),
     ok: status >= 200 && status < 300,
     status,
     json: async () => body,
@@ -33,20 +39,39 @@ function page(body: unknown, status = 200): FakeResponse {
   };
 }
 
+function methods(fetchMock: FetchMock): Array<string | undefined> {
+  return fetchMock.mock.calls.map(([, init]) => init?.method);
+}
+
+type Step = FakeResponse | Error;
+
 // Answers by URL and method so a wrong poll target or verb fails instead of getting the next canned page.
-function trinoServer(routes: Record<string, FakeResponse | FakeResponse[]>): FetchMock {
+// An Error step is thrown, as the Perses fetch does for non-OK responses.
+function trinoServer(routes: Record<string, Step | Step[]>): FetchMock {
   const queues = new Map(
     Object.entries(routes).map(([key, value]) => [key, Array.isArray(value) ? [...value] : [value]]),
   );
   return vi.fn(async (url: string, init?: RequestInit) => {
     const key = `${init?.method ?? 'GET'} ${url}`;
     const queue = queues.get(key);
-    if (!queue || queue.length === 0) throw new Error(`unexpected request ${key}`);
-    return queue.length > 1 ? queue.shift()! : queue[0]!;
+    const step = queue && queue.length > 1 ? queue.shift() : queue?.[0];
+    if (step === undefined) throw new Error(`unexpected request ${key}`);
+    if (step instanceof Error) throw step;
+    return step;
   });
 }
 
 const DIRECT = 'http://trino.example.com';
+
+// settle runs every pending retry timer, then returns the promise for the caller to await.
+async function settle<T>(promise: Promise<T>): Promise<T> {
+  await vi.runAllTimersAsync();
+  return promise;
+}
+
+function unavailable(): UserFriendlyError {
+  return new UserFriendlyError('unavailable', 503);
+}
 
 describe('Trino client', () => {
   afterEach(() => {
@@ -216,6 +241,298 @@ describe('Trino client', () => {
       `${DIRECT}/v1/statement/q/1`,
       expect.objectContaining({ method: 'DELETE' }),
     );
+  });
+
+  describe('retries', () => {
+    const statement = `POST ${DIRECT}/v1/statement`;
+    const pageUrl = `${DIRECT}/v1/statement/q/1`;
+    const run = (fetchMock: FetchMock, signal?: AbortSignal): Promise<TrinoQueryResponse> =>
+      query({ query: 'SELECT 1', signal }, { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch });
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it.each([502, 503, 504])('retries a transient %i on the initial POST', async (status) => {
+      const fetchMock = trinoServer({
+        [statement]: [page({}, status), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      const result = await settle(run(fetchMock));
+
+      expect(result.data).toEqual([{ n: 1 }]);
+      expect(methods(fetchMock)).toEqual(['POST', 'POST']);
+      expect(fetchMock.mock.calls[1]?.[1]?.body).toBe('SELECT 1');
+    });
+
+    it('gives up on the initial POST after repeated 503s without sending a DELETE', async () => {
+      const fetchMock = trinoServer({ [statement]: page({}, 503) });
+
+      const rejection = expect(run(fetchMock)).rejects.toThrow('Trino returned 503 after 3 attempts');
+      await vi.runAllTimersAsync();
+      await rejection;
+      expect(methods(fetchMock)).toEqual(['POST', 'POST', 'POST']);
+    });
+
+    it('cancels the body of a response it retries', async () => {
+      const cancel = vi.fn(async () => undefined);
+      const fetchMock = trinoServer({
+        [statement]: [{ ...page({}, 503), body: { cancel } }, page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      await settle(run(fetchMock));
+
+      expect(cancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes its abort listener once a retry wait ends', async () => {
+      const controller = new AbortController();
+      const removed = vi.spyOn(controller.signal, 'removeEventListener');
+      const fetchMock = trinoServer({
+        [statement]: [page({}, 503), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      await settle(run(fetchMock, controller.signal));
+
+      expect(removed).toHaveBeenCalledWith('abort', expect.any(Function));
+    });
+
+    it('does not retry a 400 on the initial POST', async () => {
+      const fetchMock = trinoServer({ [statement]: page({}, 400) });
+
+      await expect(run(fetchMock)).rejects.toThrow('Trino returned 400');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for Retry-After on a 429 before retrying the POST', async () => {
+      const fetchMock = trinoServer({
+        [statement]: [page({}, 429, { 'Retry-After': '1' }), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      const result = run(fetchMock);
+      await vi.advanceTimersByTimeAsync(999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect((await result).data).toEqual([{ n: 1 }]);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries a 429 on a result page', async () => {
+      const fetchMock = trinoServer({
+        [statement]: page({ nextUri: pageUrl }),
+        [`GET ${pageUrl}`]: [page({}, 429, { 'Retry-After': '1' }), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      const result = run(fetchMock);
+      await vi.advanceTimersByTimeAsync(999);
+      expect(methods(fetchMock)).toEqual(['POST', 'GET']);
+      await vi.advanceTimersByTimeAsync(1);
+      expect((await result).data).toEqual([{ n: 1 }]);
+      expect(methods(fetchMock)).toEqual(['POST', 'GET', 'GET']);
+    });
+
+    it('waits for a Retry-After at the 10 second cap', async () => {
+      const fetchMock = trinoServer({
+        [statement]: [page({}, 429, { 'Retry-After': '10' }), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      const result = run(fetchMock);
+      await vi.advanceTimersByTimeAsync(9999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect((await result).data).toEqual([{ n: 1 }]);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+      ['a seconds value', (): string => '11'],
+      ['an HTTP-date', (): string => new Date(Date.now() + 3_600_000).toUTCString()],
+    ])('fails at once when Retry-After is over the cap, for %s', async (_name, retryAfter) => {
+      const value = retryAfter();
+      const fetchMock = trinoServer({ [statement]: page({}, 429, { 'Retry-After': value }) });
+
+      await expect(run(fetchMock)).rejects.toThrow(`Trino returned 429 (Retry-After: ${value})`);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it.each<[string, string | undefined]>([
+      ['no', undefined],
+      ...['soon', '1.5', '0.5', '-5', '12/31/2999'].map((v): [string, string] => [v, v]),
+    ])('does not retry a 429 with %s Retry-After', async (_name, value) => {
+      const fetchMock = trinoServer({
+        [statement]: page({}, 429, value === undefined ? {} : { 'Retry-After': value }),
+      });
+
+      await expect(run(fetchMock)).rejects.toThrow('Trino returned 429');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('still pauses for the normal backoff when Retry-After is 0', async () => {
+      const fetchMock = trinoServer({
+        [statement]: [page({}, 429, { 'Retry-After': '0' }), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      const result = run(fetchMock);
+      await vi.advanceTimersByTimeAsync(99);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect((await result).data).toEqual([{ n: 1 }]);
+    });
+
+    it('honours an HTTP-date Retry-After', async () => {
+      vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+      const fetchMock = trinoServer({
+        [statement]: [
+          page({}, 429, { 'Retry-After': new Date(Date.now() + 2000).toUTCString() }),
+          page({ columns: [{ name: 'n' }], data: [[1]] }),
+        ],
+      });
+
+      const result = run(fetchMock);
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect((await result).data).toEqual([{ n: 1 }]);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('gives up after three attempts on a persistent 429', async () => {
+      const fetchMock = trinoServer({ [statement]: page({}, 429, { 'Retry-After': '1' }) });
+
+      const rejection = expect(run(fetchMock)).rejects.toThrow('Trino returned 429 after 3 attempts');
+      await vi.advanceTimersByTimeAsync(10000);
+      await rejection;
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    describe('when fetch throws on non-OK responses', () => {
+      const ok = page({ columns: [{ name: 'n' }], data: [[1]] });
+
+      it.each([502, 503, 504])('retries a thrown %i on the initial POST', async (status) => {
+        const fetchMock = trinoServer({ [statement]: [new UserFriendlyError('unavailable', status), ok] });
+
+        const result = await settle(run(fetchMock));
+
+        expect(result.data).toEqual([{ n: 1 }]);
+        expect(methods(fetchMock)).toEqual(['POST', 'POST']);
+        expect(fetchMock.mock.calls[1]?.[1]?.body).toBe('SELECT 1');
+      });
+
+      it('retries a thrown 503 on a result page', async () => {
+        const fetchMock = trinoServer({
+          [statement]: page({ nextUri: pageUrl }),
+          [`GET ${pageUrl}`]: [unavailable(), ok],
+        });
+
+        const result = await settle(run(fetchMock));
+
+        expect(result.data).toEqual([{ n: 1 }]);
+        expect(methods(fetchMock)).toEqual(['POST', 'GET', 'GET']);
+      });
+
+      it('waits for the backoff, growing on each attempt', async () => {
+        const fetchMock = trinoServer({ [statement]: [unavailable(), unavailable(), ok] });
+
+        const result = run(fetchMock);
+        await vi.advanceTimersByTimeAsync(99);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        await vi.advanceTimersByTimeAsync(199);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        await vi.advanceTimersByTimeAsync(1);
+        expect((await result).data).toEqual([{ n: 1 }]);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+      });
+
+      it('stops waiting when aborted during the backoff', async () => {
+        const controller = new AbortController();
+        const fetchMock = trinoServer({ [statement]: unavailable() });
+
+        const rejection = expect(run(fetchMock, controller.signal)).rejects.toMatchObject({ name: 'AbortError' });
+        await vi.advanceTimersByTimeAsync(50);
+        controller.abort();
+        await rejection;
+        await vi.advanceTimersByTimeAsync(1000);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      it('retries the FetchError thrown for an empty error body', async () => {
+        const fetchMock = trinoServer({ [statement]: [new FetchError(new Response(null, { status: 503 })), ok] });
+
+        const result = await settle(run(fetchMock));
+
+        expect(result.data).toEqual([{ n: 1 }]);
+        expect(methods(fetchMock)).toEqual(['POST', 'POST']);
+      });
+
+      it.each([400, 429])('does not retry a thrown %i', async (status) => {
+        const fetchMock = trinoServer({ [statement]: new UserFriendlyError('rejected', status) });
+
+        await expect(run(fetchMock)).rejects.toThrow('rejected');
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      it('gives up on a thrown retryable status after three attempts, keeping the original error', async () => {
+        const fetchMock = trinoServer({ [statement]: unavailable() });
+
+        const rejection = expect(run(fetchMock)).rejects.toMatchObject({
+          message: 'Trino query failed: Trino returned 503 after 3 attempts: unavailable',
+          cause: { cause: expect.any(UserFriendlyError) },
+        });
+        await vi.advanceTimersByTimeAsync(1000);
+        await rejection;
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+      });
+    });
+
+    it('ignores Retry-After on a 503', async () => {
+      const fetchMock = trinoServer({
+        [statement]: [page({}, 503, { 'Retry-After': '5' }), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      const result = run(fetchMock);
+      await vi.advanceTimersByTimeAsync(100);
+      expect((await result).data).toEqual([{ n: 1 }]);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('grows the backoff when fetch returns the error response', async () => {
+      const fetchMock = trinoServer({
+        [statement]: [page({}, 503), page({}, 503), page({ columns: [{ name: 'n' }], data: [[1]] })],
+      });
+
+      const result = run(fetchMock);
+      await vi.advanceTimersByTimeAsync(100);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await vi.advanceTimersByTimeAsync(199);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await vi.advanceTimersByTimeAsync(1);
+      expect((await result).data).toEqual([{ n: 1 }]);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('rejects promptly and cancels when aborted during a Retry-After wait', async () => {
+      const controller = new AbortController();
+      const fetchMock = trinoServer({
+        [statement]: page({ nextUri: pageUrl }),
+        [`GET ${pageUrl}`]: page({}, 429, { 'Retry-After': '10' }),
+        [`DELETE ${pageUrl}`]: page({}, 204),
+      });
+
+      const result = run(fetchMock, controller.signal);
+      const rejection = expect(result).rejects.toMatchObject({ name: 'AbortError' });
+      await vi.advanceTimersByTimeAsync(1000);
+      controller.abort();
+      await rejection;
+      expect(methods(fetchMock)).toEqual(['POST', 'GET', 'DELETE']);
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
   });
 
   it('truncates at MAX_ROWS and cancels the remaining query', async () => {
