@@ -49,7 +49,7 @@ import (
 )
 
 func main() {
-	dashboard.New("Alertmanager Dashboard",
+	dashboard.New("alertmanager-dashboard",
 		dashboard.AddDatasource("alertmanagerMain", amDs.AlertManager(amDs.DirectURL("http://alertmanager.example.com:9093"))),
 	)
 }

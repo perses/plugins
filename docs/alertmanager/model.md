@@ -86,7 +86,7 @@ spec:
   inhibited: false
 ```
 
-This query returns the active alerts, but not the silenced or inhibited ones, that have the `critical` severity in the environments selected by the `env` variable.
+This query returns the active and unprocessed alerts, but not the silenced or inhibited ones, that have the `critical` severity in the environments selected by the `env` variable.
 
 ## AlertManagerSilencesQuery
 
@@ -157,7 +157,7 @@ header: <string> # Optional
 # Defaults to true.
 enableSorting: <boolean> # Optional
 
-# Initial sort of the table on this column
+# Initial sort of the table on this column. Only the first column with `sort` and sorting enabled is used.
 sort: <enum = "asc" | "desc"> # Optional
 
 # Defaults to "alphabetical".
@@ -174,6 +174,8 @@ labels:
   - <string> # Optional
 ```
 
+With the `labels` mode, set a non-empty `labels` list: without `labels`, the alerts are deduplicated by fingerprint, and with an empty list, all the alerts are merged into a single row.
+
 ### Label color mapping specification
 
 ```yaml
@@ -181,13 +183,15 @@ labels:
 labelKey: <string>
 
 # Color of the values that don't match any override: "auto" computes a color from the value,
-# "severity" uses the color of the severity level of the value (critical, error, warning, info, ...),
-# and "manual" uses a gray color.
+# "severity" uses the color of the severity level of the value (critical, error, warning, info, ...)
+# and falls back to "auto" for other values, and "manual" uses a gray color.
 mode: <enum = "auto" | "severity" | "manual">
 
 # Colors applied before the mode, the first matching override wins
 overrides:
   - value: <string>
+    # When true, value is a JavaScript regular expression that can match any part of the label value:
+    # use ^ and $ to match the whole value
     isRegex: <boolean>
     color: <string>
 ```
@@ -217,7 +221,7 @@ spec:
     - labelKey: severity
       mode: severity
       overrides:
-        - value: "page"
+        - value: "P1"
           isRegex: false
           color: "#d32f2f"
 ```
@@ -244,12 +248,14 @@ The `status`, `matchers` and `comment` columns are always displayed first, and t
 # createdBy, startsAt, endsAt, duration or updatedAt
 name: <string>
 
-# Header of the column. Defaults to the name of the field, such as "Creator" for createdBy.
+# Header of the column. Defaults to a readable name of the field: "Creator", "Starts At", "Ends At", "Duration" or "Updated At".
 header: <string> # Optional
 
 # Defaults to true.
 enableSorting: <boolean> # Optional
 
+# No effect for now: the initial sort comes from the first column with `sort`,
+# which is always the built-in `status` column.
 sort: <enum = "asc" | "desc"> # Optional
 
 # Defaults to "date" for startsAt, endsAt and updatedAt, and to "alphabetical" otherwise.

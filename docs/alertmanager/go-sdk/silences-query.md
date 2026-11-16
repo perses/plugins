@@ -51,7 +51,7 @@ import (
 )
 
 func main() {
-	dashboard.New("Alertmanager Dashboard",
+	dashboard.New("alertmanager-dashboard",
 		dashboard.AddPanelGroup("Silences",
 			panelgroup.AddPanel("Platform silences",
 				panel.Plugin(plugin.Plugin{Kind: "SilenceTable", Spec: map[string]any{}}),

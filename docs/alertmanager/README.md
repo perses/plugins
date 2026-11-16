@@ -13,6 +13,22 @@ The Alertmanager datasource enables connection between Perses and your Alertmana
 
 It supports the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature of Perses that allows to restrict the access to your data source.
 
+The plugins of this package also write to Alertmanager through this datasource: the Alert Table panel and the silences explorer create silences (`POST /api/v2/silences`), and the Silence Table panel expires them (`DELETE /api/v2/silence/{id}`). The `allowedActions` option of the panels only hides their buttons. Through the proxy, anyone allowed to read the datasource can call these endpoints, and both the proxy configuration prefilled by the datasource editor and a proxy without `allowedEndpoints` allow them. A read-only datasource needs only the `GET` endpoints, for example:
+
+```yaml
+proxy:
+  kind: HTTPProxy
+  spec:
+    url: http://alertmanager:9093
+    allowedEndpoints:
+      - endpointPattern: /api/v2/alerts
+        method: GET
+      - endpointPattern: /api/v2/silences
+        method: GET
+      - endpointPattern: /api/v2/status
+        method: GET
+```
+
 See also technical docs related to this plugin:
 
 - [Data model](./model.md#alertmanagerdatasource)

@@ -101,7 +101,7 @@ import (
 )
 
 func main() {
-	dashboard.New("Alertmanager Dashboard",
+	dashboard.New("alertmanager-dashboard",
 		dashboard.AddPanelGroup("Alerts",
 			panelgroup.AddPanel("Critical alerts",
 				amPanel.AlertTable(),
