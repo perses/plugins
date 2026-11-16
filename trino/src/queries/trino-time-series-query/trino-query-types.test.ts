@@ -76,6 +76,14 @@ const createStubContext = (): TimeSeriesQueryContext => {
   return stubTimeSeriesContext as TimeSeriesQueryContext;
 };
 
+const runWithColumns = async (
+  columns: Array<{ name: string; type: string }> | undefined,
+  data: Array<Record<string, unknown>>,
+): Promise<Awaited<ReturnType<typeof TrinoTimeSeriesQuery.getTimeSeriesData>>> => {
+  (trinoStubClient.query as Mock).mockResolvedValueOnce({ status: 'success', data, columns });
+  return TrinoTimeSeriesQuery.getTimeSeriesData({ query: 'SELECT 1' }, createStubContext());
+};
+
 describe('TrinoTimeSeriesQuery', () => {
   it('should properly resolve variable dependencies', () => {
     if (!TrinoTimeSeriesQuery.dependsOn) throw new Error('dependsOn is not defined');
@@ -180,6 +188,245 @@ describe('TrinoTimeSeriesQuery', () => {
     );
 
     expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
+  });
+
+  describe('long format', () => {
+    const t1 = Date.parse('2025-09-09T05:18:00Z');
+    const t2 = Date.parse('2025-09-09T05:19:00Z');
+
+    it('splits one value column into a series per label value', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'host', type: 'varchar' },
+          { name: 'value', type: 'double' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', host: 'a', value: 1 },
+          { time: '2025-09-09 05:18:00', host: 'b', value: 2 },
+          { time: '2025-09-09 05:19:00', host: 'a', value: 3 },
+          { time: '2025-09-09 05:19:00', host: 'b', value: 4 },
+        ],
+      );
+
+      expect(response.series).toEqual([
+        {
+          name: '{host="a"}',
+          labels: { host: 'a' },
+          values: [
+            [t1, 1],
+            [t2, 3],
+          ],
+        },
+        {
+          name: '{host="b"}',
+          labels: { host: 'b' },
+          values: [
+            [t1, 2],
+            [t2, 4],
+          ],
+        },
+      ]);
+    });
+
+    it('groups by several label columns', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'host', type: 'varchar' },
+          { name: 'region', type: 'varchar' },
+          { name: 'value', type: 'bigint' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', host: 'a', region: 'eu', value: 1 },
+          { time: '2025-09-09 05:18:00', host: 'a', region: 'us', value: 2 },
+        ],
+      );
+
+      expect(response.series).toEqual([
+        { name: '{host="a", region="eu"}', labels: { host: 'a', region: 'eu' }, values: [[t1, 1]] },
+        { name: '{host="a", region="us"}', labels: { host: 'a', region: 'us' }, values: [[t1, 2]] },
+      ]);
+    });
+
+    it('prefixes the value column name when there are several value columns', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'host', type: 'varchar' },
+          { name: 'avg_cpu', type: 'double' },
+          { name: 'max_memory', type: 'integer' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', host: 'a', avg_cpu: 1.5, max_memory: 10 },
+          { time: '2025-09-09 05:18:00', host: 'b', avg_cpu: 2.5, max_memory: 20 },
+        ],
+      );
+
+      expect(response.series.map((series) => series.name)).toEqual([
+        'avg_cpu{host="a"}',
+        'avg_cpu{host="b"}',
+        'max_memory{host="a"}',
+        'max_memory{host="b"}',
+      ]);
+      expect(response.series[3]).toEqual({ name: 'max_memory{host="b"}', labels: { host: 'b' }, values: [[t1, 20]] });
+    });
+
+    it('uses an empty label value for null and escapes quotes in the name', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'host', type: 'varchar' },
+          { name: 'value', type: 'double' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', host: null, value: 1 },
+          { time: '2025-09-09 05:18:00', host: 'say "hi"', value: 2 },
+        ],
+      );
+
+      expect(response.series).toEqual([
+        { name: '{host=""}', labels: { host: '' }, values: [[t1, 1]] },
+        { name: '{host="say \\"hi\\""}', labels: { host: 'say "hi"' }, values: [[t1, 2]] },
+      ]);
+    });
+
+    it('keeps a varchar column of digits as a label and reads decimal strings as values', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'code', type: 'varchar' },
+          { name: 'value', type: 'decimal(10,2)' },
+        ],
+        [{ time: '2025-09-09 05:18:00', code: '404', value: '1.50' }],
+      );
+
+      expect(response.series).toEqual([{ name: '{code="404"}', labels: { code: '404' }, values: [[t1, 1.5]] }]);
+    });
+
+    it.each(['tinyint', 'smallint', 'integer', 'bigint', 'real', 'double', 'number', 'decimal(10,2)'])(
+      'treats %s as a value column',
+      async (type) => {
+        const response = await runWithColumns(
+          [
+            { name: 'time', type: 'timestamp(3)' },
+            { name: 'host', type: 'varchar' },
+            { name: 'value', type },
+          ],
+          [{ time: '2025-09-09 05:18:00', host: 'a', value: '2' }],
+        );
+
+        expect(response.series).toEqual([{ name: '{host="a"}', labels: { host: 'a' }, values: [[t1, 2]] }]);
+        expect(response.metadata?.notices).toBeUndefined();
+      },
+    );
+
+    it.each([
+      ['a varchar value column', [{ name: 'value', type: 'varchar' }], { value: '2' }],
+      ['only a time column', [], {}],
+    ])('warns when typed columns include no numeric column (%s)', async (_, extraColumns, extraValues) => {
+      const response = await runWithColumns(
+        [{ name: 'time', type: 'timestamp(3)' }, ...extraColumns],
+        [{ time: '2025-09-09 05:18:00', ...extraValues }],
+      );
+
+      expect(response.series).toEqual([]);
+      expect(response.metadata?.notices).toEqual([
+        { type: 'warning', message: 'No numeric columns: cast value columns to a number type such as double.' },
+      ]);
+    });
+
+    it('does not warn about numeric columns when there are no rows', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'value', type: 'varchar' },
+        ],
+        [],
+      );
+
+      expect(response.metadata?.notices).toBeUndefined();
+    });
+
+    it('keeps labels that contain the key delimiter in separate series', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'host', type: 'varchar' },
+          { name: 'region', type: 'varchar' },
+          { name: 'value', type: 'double' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', host: 'a,b', region: 'c', value: 1 },
+          { time: '2025-09-09 05:18:00', host: 'a', region: 'b,c', value: 2 },
+        ],
+      );
+
+      expect(response.series.map((series) => series.labels)).toEqual([
+        { host: 'a,b', region: 'c' },
+        { host: 'a', region: 'b,c' },
+      ]);
+    });
+
+    it('keeps null and empty-string labels in separate series, both shown as empty', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'host', type: 'varchar' },
+          { name: 'value', type: 'double' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', host: null, value: 1 },
+          { time: '2025-09-09 05:18:00', host: '', value: 2 },
+        ],
+      );
+
+      expect(response.series).toEqual([
+        { name: '{host=""}', labels: { host: '' }, values: [[t1, 1]] },
+        { name: '{host=""}', labels: { host: '' }, values: [[t1, 2]] },
+      ]);
+    });
+
+    it('serializes object label values as JSON so distinct values stay apart', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'tags', type: 'map(varchar, varchar)' },
+          { name: 'value', type: 'double' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', tags: { env: 'prod' }, value: 1 },
+          { time: '2025-09-09 05:18:00', tags: { env: 'dev' }, value: 2 },
+        ],
+      );
+
+      expect(response.series.map((series) => series.labels)).toEqual([
+        { tags: '{"env":"prod"}' },
+        { tags: '{"env":"dev"}' },
+      ]);
+    });
+
+    it('keeps the wide format when there are no label columns', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'avg_cpu', type: 'double' },
+          { name: 'max_memory', type: 'bigint' },
+        ],
+        [{ time: '2025-09-09 05:18:00', avg_cpu: 1.5, max_memory: 10 }],
+      );
+
+      expect(response.series).toEqual([
+        { name: 'avg_cpu', values: [[t1, 1.5]] },
+        { name: 'max_memory', values: [[t1, 10]] },
+      ]);
+    });
+
+    it.each([undefined, []])('treats every non-time column as a value without column types (%j)', async (columns) => {
+      const response = await runWithColumns(columns, [{ time: '2025-09-09 05:18:00', host: 'a', value: 1 }]);
+
+      expect(response.series).toEqual([{ name: 'value', values: [[t1, 1]] }]);
+    });
   });
 
   it('passes query context fields and the abort signal to the client', async () => {

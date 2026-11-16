@@ -56,15 +56,22 @@ header. When the same header is also set in the datasource proxy `headers`, the 
 
 ## Result shape
 
-Time series queries need a column named `time`. Every other column becomes a series, and non-numeric values become
-gaps. Return one column per series (wide format); grouping by a label column in long format is not split into series.
+Time series queries need a column named `time`. Number-typed columns (`tinyint`, `smallint`, `integer`, `bigint`,
+`real`, `double`, `number`, `decimal`) are values, and every other column is a label. Rows are grouped by their label
+values into one series per value column and label set, and null or non-numeric values in value columns become gaps. The
+number of series is not capped, so any extra timestamp, date, or string id column splits the result into one series per
+value: drop it, or cast it to a number. A numeric id column is a value series; cast it to `varchar` to use it as a label,
+and cast numbers stored as strings to `double` to plot them. A null label is shown as `""` but kept in its own series
+apart from an empty string. Series are named like Prometheus series: with one value column `{host="a", region="eu"}`,
+with several `avg_cpu{host="a"}`, and with no label columns the column name.
 
 Log queries take the entry time from the first column named `timestamp`, `log_time`, or `time` (case-insensitive). Every
 column becomes a label and is also rendered in the log line.
 
 Timestamps without a time zone are read as UTC, and a numeric time column is read as epoch milliseconds (`to_unixtime()`
 returns seconds, so multiply it by 1000). Rows whose time column cannot be parsed are skipped. Time series panels show a
-warning for skipped rows and for results cut at the row limit; log panels do not display these warnings yet.
+warning for skipped rows, for results cut at the row limit, and for results with rows but no number-typed column; log
+panels do not display these warnings yet.
 
 ## Development
 

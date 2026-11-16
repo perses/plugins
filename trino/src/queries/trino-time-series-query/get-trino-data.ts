@@ -14,7 +14,7 @@ import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
 import type { Notice, TimeSeries } from '@perses-dev/spec';
 
-import type { TrinoClient, TrinoRow } from '../../model/trino-client';
+import type { TrinoClient, TrinoQueryResponse, TrinoRow } from '../../model/trino-client';
 import {
   MAX_ROWS,
   formatTrinoDateTime,
@@ -39,22 +39,67 @@ function toTimedRows(rows: TrinoRow[]): TimedRow[] {
     .filter(({ timestamp }) => Number.isFinite(timestamp));
 }
 
-function buildTimeSeries(rows: TimedRow[]): TimeSeries[] {
+const NUMERIC_TYPE = /^(tinyint|smallint|integer|bigint|real|double|decimal|number)\b/;
+
+function labelValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return typeof value === 'object' ? JSON.stringify(value) : String(value);
+}
+
+// lacksNumericColumns is true when column types are known and none of the non-time columns is a number.
+function lacksNumericColumns(columns: TrinoQueryResponse['columns']): boolean {
+  if (!columns?.length) return false;
+  return !columns.some(({ name, type }) => name !== TIME_COLUMN && NUMERIC_TYPE.test(type));
+}
+
+function seriesName(valueColumn: string, labels: Record<string, string>, multipleValueColumns: boolean): string {
+  const labelNames = Object.keys(labels);
+  if (labelNames.length === 0) {
+    return valueColumn;
+  }
+  const selector = `{${labelNames.map((name) => `${name}=${JSON.stringify(labels[name])}`).join(', ')}}`;
+  return multipleValueColumns ? `${valueColumn}${selector}` : selector;
+}
+
+function buildTimeSeries(rows: TimedRow[], columns: TrinoQueryResponse['columns']): TimeSeries[] {
   const firstRow = rows[0]?.row;
   if (!firstRow) {
     return [];
   }
 
-  const metricNames = Object.keys(firstRow).filter((key) => key !== TIME_COLUMN);
+  const typed = (columns ?? []).filter(({ name }) => name !== TIME_COLUMN);
+  const hasTypes = typed.length > 0;
+  const valueColumns = hasTypes
+    ? typed.filter(({ type }) => NUMERIC_TYPE.test(type)).map(({ name }) => name)
+    : Object.keys(firstRow).filter((key) => key !== TIME_COLUMN);
+  const labelColumns = hasTypes ? typed.filter(({ type }) => !NUMERIC_TYPE.test(type)).map(({ name }) => name) : [];
 
-  return metricNames
-    .map((metricName) => ({
-      name: metricName,
-      values: rows.map(({ timestamp, row }): [number, number | null] => [
-        timestamp,
-        toTimeSeriesValue(row[metricName]),
-      ]),
-    }))
+  const groups = new Map<string, { labels: Record<string, string>; rows: TimedRow[] }>();
+  for (const timedRow of rows) {
+    const labels = Object.fromEntries(labelColumns.map((name) => [name, labelValue(timedRow.row[name])]));
+    // The key keeps null apart from '' so the two never share a series.
+    const key = JSON.stringify(labelColumns.map((name) => timedRow.row[name] ?? null));
+    const group = groups.get(key) ?? { labels, rows: [] };
+    group.rows.push(timedRow);
+    groups.set(key, group);
+  }
+
+  return valueColumns
+    .flatMap((valueColumn) =>
+      Array.from(groups.values()).map((group): TimeSeries => {
+        const series: TimeSeries = {
+          name: seriesName(valueColumn, group.labels, valueColumns.length > 1),
+          values: group.rows.map(({ timestamp, row }): [number, number | null] => [
+            timestamp,
+            toTimeSeriesValue(row[valueColumn]),
+          ]),
+        };
+        if (labelColumns.length > 0) {
+          series.labels = group.labels;
+        }
+        return series;
+      }),
+    )
     .filter((series) => series.values.some(([, value]) => value !== null));
 }
 
@@ -143,8 +188,16 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>[
     });
   }
 
+  const series = buildTimeSeries(rows, response.columns);
+  if (rows.length > 0 && lacksNumericColumns(response.columns)) {
+    notices.push({
+      type: 'warning',
+      message: 'No numeric columns: cast value columns to a number type such as double.',
+    });
+  }
+
   return {
-    series: buildTimeSeries(rows),
+    series,
     timeRange: { start, end },
     stepMs: inferStepMs(rows),
     metadata: {
