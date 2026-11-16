@@ -99,6 +99,18 @@ describe('deduplicateAlerts', () => {
     expect(result.duplicateCounts.get(result.alerts[0]!)).toBe(3);
     expect(result.duplicateCounts.has(result.alerts[1]!)).toBe(false);
   });
+
+  it('deduplicates by fingerprint when the labels mode has an empty labels list', () => {
+    const alerts: Alert[] = [
+      makeAlert({ id: 'fp1', labels: { alertname: 'A' } }),
+      makeAlert({ id: 'fp1', labels: { alertname: 'A' } }),
+      makeAlert({ id: 'fp2', labels: { alertname: 'B' } }),
+    ];
+
+    const result = deduplicateAlerts(alerts, { mode: 'labels', labels: [] });
+    expect(result.alerts).toHaveLength(2);
+    expect(result.duplicateCounts.get(result.alerts[0]!)).toBe(2);
+  });
 });
 
 describe('extractLabelKeys', () => {
