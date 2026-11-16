@@ -15,6 +15,8 @@ import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 
 export const MAX_ROWS = 100000;
 const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
+// Errors thrown by the Perses fetch carry no Retry-After, so a thrown 429 is not retried blindly.
+const THROWN_RETRYABLE_STATUSES = new Set([502, 503, 504]);
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 100;
 const MAX_RETRY_AFTER_MS = 10000;
@@ -271,7 +273,7 @@ async function fetchWithRetry(
 // retryableStatus returns the status of a thrown fetch error when it is worth retrying.
 function retryableStatus(e: unknown): number | undefined {
   const status = typeof e === 'object' && e !== null ? (e as { status?: unknown }).status : undefined;
-  return typeof status === 'number' && RETRYABLE_STATUSES.has(status) ? status : undefined;
+  return typeof status === 'number' && THROWN_RETRYABLE_STATUSES.has(status) ? status : undefined;
 }
 
 // parseRetryAfter returns the Retry-After wait (delta-seconds or HTTP-date) clamped to MAX_RETRY_AFTER_MS, or undefined.
