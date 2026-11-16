@@ -237,4 +237,41 @@ describe('TrinoTimeSeriesQuery', () => {
     expect(response.metadata?.notices?.map((notice) => notice.type)).toEqual(['warning', 'warning']);
     expect(response.metadata?.notices?.[0]?.message).toContain('truncated');
   });
+
+  it('interpolates dashboard variables in the query context fields', async () => {
+    const variableState = {
+      cat: { value: 'iceberg', loading: false },
+      tenant: { value: 'acme', loading: false },
+    } as unknown as TimeSeriesQueryContext['variableState'];
+
+    await TrinoTimeSeriesQuery.getTimeSeriesData(
+      {
+        query: 'SELECT 1',
+        catalog: '$cat',
+        schema: '${tenant}_logs',
+        sessionProperties: 'tag=$tenant',
+        source: 'perses-$tenant',
+        routingGroup: '$tenant',
+      },
+      { ...createStubContext(), variableState },
+    );
+
+    expect(trinoStubClient.query).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        catalog: 'iceberg',
+        schema: 'acme_logs',
+        sessionProperties: 'tag=acme',
+        source: 'perses-acme',
+        routingGroup: 'acme',
+      }),
+    );
+  });
+
+  it('depends on variables used in the query context fields', () => {
+    const { variables } = TrinoTimeSeriesQuery.dependsOn!(
+      { query: 'SELECT $metric', catalog: '$cat', schema: '${tenant}', routingGroup: '$cat' },
+      createStubContext(),
+    );
+    expect(variables?.toSorted()).toEqual(['cat', 'metric', 'tenant']);
+  });
 });

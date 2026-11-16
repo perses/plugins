@@ -12,22 +12,41 @@
 // limitations under the License.
 
 import { EditorView } from '@codemirror/view';
-import { useTheme, InputLabel, Stack, Button, Box } from '@mui/material';
+import { useTheme, InputLabel, Stack, Button, Box, FormHelperText } from '@mui/material';
 import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import CodeMirror from '@uiw/react-codemirror';
 import type { ReactElement } from 'react';
-import { format } from 'sql-formatter';
+import { useState } from 'react';
+import { formatDialect, trino } from 'sql-formatter';
 
-export type TrinoQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
+export type TrinoQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> & {
+  /** Called with the formatted query so the caller can commit it to the spec. */
+  onFormat?: (query: string) => void;
+};
+
+// Treat Perses variables ($var, ${var}, ${var:format}) as parameters so the formatter keeps them intact.
+const PERSES_VARIABLE = { custom: [{ regex: String.raw`\$\{[^}]+\}|\$\w+` }] };
+
+/** formatTrinoQuery pretty-prints Trino SQL without altering Perses variables. It throws on SQL it cannot parse. */
+export function formatTrinoQuery(query: string): string {
+  return formatDialect(query, { dialect: trino, paramTypes: PERSES_VARIABLE });
+}
 
 export function TrinoQLEditor(props: TrinoQLEditorProps): ReactElement {
+  const { onFormat, ...editorProps } = props;
+  const [formatError, setFormatError] = useState<string>();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
   const formatQuery = (): void => {
-    if (props.value && props.onChange) {
-      const formatted = format(props.value, { language: 'trino' });
-      props.onChange(formatted, undefined as never);
+    if (!props.value) return;
+    try {
+      const formatted = formatTrinoQuery(props.value);
+      setFormatError(undefined);
+      props.onChange?.(formatted, undefined as never);
+      onFormat?.(formatted);
+    } catch (e) {
+      setFormatError(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -48,7 +67,7 @@ export function TrinoQLEditor(props: TrinoQLEditorProps): ReactElement {
         </Button>
       </Box>
       <CodeMirror
-        {...props}
+        {...editorProps}
         style={{ border: `1px solid ${theme.palette.divider}` }}
         theme={isDarkMode ? 'dark' : 'light'}
         basicSetup={{
@@ -69,6 +88,7 @@ export function TrinoQLEditor(props: TrinoQLEditorProps): ReactElement {
         ]}
         placeholder="Write Trino Query Here..."
       />
+      {formatError && <FormHelperText error>Could not format query: {formatError}</FormHelperText>}
     </Stack>
   );
 }

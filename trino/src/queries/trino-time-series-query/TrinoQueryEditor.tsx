@@ -89,6 +89,7 @@ export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProp
         onChange={handleTrinoQueryChange}
         onBlur={handleQueryBlur}
         onKeyDown={createModEnterHandler(() => handleQueryExecute(query))}
+        onFormat={handleQueryExecute}
         placeholder="Enter Trino SQL query"
       />
 

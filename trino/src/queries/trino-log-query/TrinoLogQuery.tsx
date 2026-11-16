@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import type { LogQueryPlugin } from '@perses-dev/plugin-system';
-import { parseVariables } from '@perses-dev/plugin-system';
 
+import { queryVariables } from '../query-context';
 import { getTrinoLogData } from './get-trino-log-data';
 import type { TrinoLogQuerySpec } from './trino-log-query-types';
 import { TrinoLogQueryEditor } from './TrinoLogQueryEditor';
@@ -22,13 +22,7 @@ export const TrinoLogQuery: LogQueryPlugin<TrinoLogQuerySpec> = {
   getLogData: getTrinoLogData,
   OptionsEditorComponent: TrinoLogQueryEditor,
   createInitialOptions: () => ({ query: '' }),
-  dependsOn: (spec) => {
-    const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set(queryVariables)];
-    return {
-      variables: allVariables,
-    };
-  },
+  dependsOn: (spec) => ({ variables: queryVariables(spec) }),
   // TODO: Implement proper SQL parsing for volume queries
   createVolumeQuery: () => null,
 };

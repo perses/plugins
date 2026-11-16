@@ -22,6 +22,7 @@ import {
   replaceTimeRangePlaceholders,
 } from '../../model/trino-client';
 import { DEFAULT_DATASOURCE } from '../constants';
+import { interpolateQueryContext } from '../query-context';
 import type { TrinoTimeSeriesQuerySpec } from './trino-query-types';
 
 const DEFAULT_STEP_MS = 30 * 1000;
@@ -126,11 +127,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>[
     start: startTime,
     end: endTime,
     query: executedQueryString,
-    catalog: spec.catalog,
-    schema: spec.schema,
-    sessionProperties: spec.sessionProperties,
-    source: spec.source,
-    routingGroup: spec.routingGroup,
+    ...interpolateQueryContext(spec, context.variableState),
     signal: abortSignal,
   });
 

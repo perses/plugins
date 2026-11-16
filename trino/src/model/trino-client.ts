@@ -98,23 +98,34 @@ export function parseTrinoTimestamp(value: unknown): number {
   return wallTimeInZone(instant, zoneName);
 }
 
+const zoneFormatters = new Map<string, Intl.DateTimeFormat | null>();
+
+function zoneFormatter(zone: string): Intl.DateTimeFormat | null {
+  if (!zoneFormatters.has(zone)) {
+    let formatter: Intl.DateTimeFormat | null;
+    try {
+      formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: zone,
+        hourCycle: 'h23',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    } catch {
+      formatter = null;
+    }
+    zoneFormatters.set(zone, formatter);
+  }
+  return zoneFormatters.get(zone) ?? null;
+}
+
 // Converts a wall-clock time (encoded as if it were UTC) in an IANA zone to the actual instant.
 function wallTimeInZone(wallAsUtc: number, zone: string): number {
-  let formatter: Intl.DateTimeFormat;
-  try {
-    formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: zone,
-      hourCycle: 'h23',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-  } catch {
-    return NaN;
-  }
+  const formatter = zoneFormatter(zone);
+  if (!formatter) return NaN;
   const offsetAt = (instant: number): number => {
     const parts = Object.fromEntries(formatter.formatToParts(instant).map(({ type, value }) => [type, Number(value)]));
     const wall = Date.UTC(parts.year!, parts.month! - 1, parts.day, parts.hour, parts.minute, parts.second);
@@ -122,6 +133,26 @@ function wallTimeInZone(wallAsUtc: number, zone: string): number {
   };
   const firstGuess = wallAsUtc - offsetAt(wallAsUtc);
   return wallAsUtc - offsetAt(firstGuess);
+}
+
+/**
+ * formatSessionProperties turns `name=value` entries separated by commas or line breaks into an X-Trino-Session
+ * header value, URL-encoding each value as Trino decodes it. It returns undefined when there are no entries.
+ */
+export function formatSessionProperties(raw: string): string | undefined {
+  const entries = raw
+    .split(/[,\r\n]+/)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry !== '')
+    .map((entry) => {
+      const separator = entry.indexOf('=');
+      const name = entry.slice(0, separator).trim();
+      if (separator < 0 || name === '') {
+        throw new Error(`Invalid Trino session property "${entry}": expected name=value`);
+      }
+      return `${name}=${encodeURIComponent(entry.slice(separator + 1).trim())}`;
+    });
+  return entries.length > 0 ? entries.join(',') : undefined;
 }
 
 export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOptions): Promise<TrinoQueryResponse> {
@@ -141,7 +172,8 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   requestHeaders.set('X-Trino-Time-Zone', 'UTC');
   if (params.catalog) requestHeaders.set('X-Trino-Catalog', params.catalog);
   if (params.schema) requestHeaders.set('X-Trino-Schema', params.schema);
-  if (params.sessionProperties) requestHeaders.set('X-Trino-Session', params.sessionProperties);
+  const session = params.sessionProperties ? formatSessionProperties(params.sessionProperties) : undefined;
+  if (session) requestHeaders.set('X-Trino-Session', session);
   if (params.source) requestHeaders.set('X-Trino-Source', params.source);
   if (params.routingGroup) requestHeaders.set('X-Trino-Routing-Group', params.routingGroup);
 

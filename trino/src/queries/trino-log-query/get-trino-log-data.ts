@@ -22,6 +22,7 @@ import {
   replaceTimeRangePlaceholders,
 } from '../../model/trino-client';
 import { DEFAULT_DATASOURCE } from '../constants';
+import { interpolateQueryContext } from '../query-context';
 import type { TrinoLogQuerySpec } from './trino-log-query-types';
 
 /** Candidate names for the log time column, in order of preference, matched case-insensitively. */
@@ -109,11 +110,7 @@ export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = 
     start: startTime,
     end: endTime,
     query: executedQueryString,
-    catalog: spec.catalog,
-    schema: spec.schema,
-    sessionProperties: spec.sessionProperties,
-    source: spec.source,
-    routingGroup: spec.routingGroup,
+    ...interpolateQueryContext(spec, context.variableState),
     signal: abortSignal,
   });
 

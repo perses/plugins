@@ -168,4 +168,12 @@ describe('TrinoLogQuery', () => {
       expect.objectContaining({ catalog: 'iceberg', schema: 'logs', routingGroup: 'adhoc', signal: controller.signal }),
     );
   });
+
+  it('depends on variables used in the query context fields', () => {
+    const { variables } = TrinoLogQuery.dependsOn!(
+      { query: 'SELECT 1', sessionProperties: 'a=$x' },
+      createStubContext(),
+    );
+    expect(variables).toEqual(['x']);
+  });
 });

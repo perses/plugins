@@ -21,6 +21,18 @@ export interface TrinoDatasourceEditorProps {
   isReadonly?: boolean;
 }
 
+/** TRINO_PROXY_HEADERS lists the request headers the plugin sends, for the proxy allowHeaders default. */
+export const TRINO_PROXY_HEADERS = [
+  'Content-Type',
+  'X-Trino-User',
+  'X-Trino-Catalog',
+  'X-Trino-Schema',
+  'X-Trino-Session',
+  'X-Trino-Source',
+  'X-Trino-Time-Zone',
+  'X-Trino-Routing-Group',
+];
+
 const initialSpecDirect: TrinoDatasourceSpec = {
   directUrl: '',
 };
@@ -43,8 +55,9 @@ const initialSpecProxy: TrinoDatasourceSpec = {
           method: 'DELETE',
         },
       ],
-      // Trino rejects forwarded headers with 406 unless http-server.process-forwarded is enabled.
-      dropHeaders: ['X-Forwarded-For', 'X-Forwarded-Proto'],
+      // Trino answers 406 to any X-Forwarded-* header unless http-server.process-forwarded is enabled, and a reverse
+      // proxy in front of Perses may add several of them. Only forward the headers this plugin uses.
+      allowHeaders: TRINO_PROXY_HEADERS,
       url: '',
     },
   },

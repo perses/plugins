@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { parseVariables } from '@perses-dev/plugin-system';
 
+import { queryVariables } from '../query-context';
 import { getTimeSeriesData } from './get-trino-data';
 import type { TrinoTimeSeriesQuerySpec } from './trino-query-types';
 import { TrinoTimeSeriesQueryEditor } from './TrinoQueryEditor';
@@ -22,11 +22,5 @@ export const TrinoTimeSeriesQuery: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpe
   getTimeSeriesData,
   OptionsEditorComponent: TrinoTimeSeriesQueryEditor,
   createInitialOptions: () => ({ query: '' }),
-  dependsOn: (spec) => {
-    const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set(queryVariables)];
-    return {
-      variables: allVariables,
-    };
-  },
+  dependsOn: (spec) => ({ variables: queryVariables(spec) }),
 };

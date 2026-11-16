@@ -89,6 +89,7 @@ export function TrinoLogQueryEditor(props: TrinoQueryEditorProps): ReactElement 
         onChange={handleTrinoQueryChange}
         onBlur={handleQueryBlur}
         onKeyDown={createModEnterHandler(() => handleQueryExecute(query))}
+        onFormat={handleQueryExecute}
         placeholder="Enter Trino SQL query"
       />
 

@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TRINO_PROXY_HEADERS } from '../datasources/trino-datasource/TrinoDatasourceEditor';
 import {
-  MAX_ROWS,
+  formatSessionProperties,
   formatTrinoDateTime,
+  MAX_ROWS,
   parseTrinoTimestamp,
   query,
   replaceTimeRangePlaceholders,
@@ -265,5 +267,65 @@ describe('Trino client', () => {
       ['GET', controller.signal],
       ['DELETE', undefined],
     ]);
+  });
+
+  it.each([
+    ['a=1', 'a=1'],
+    ['a=1, b=x y', 'a=1,b=x%20y'],
+    [
+      'join_distribution_type=AUTOMATIC\nquery_max_run_time=5m\n',
+      'join_distribution_type=AUTOMATIC,query_max_run_time=5m',
+    ],
+    ['p=a+b%c', 'p=a%2Bb%25c'],
+    ['p=k=v', 'p=k%3Dv'],
+    [' , \n', undefined],
+  ])('formats session properties %j as %j', (raw, expected) => {
+    expect(formatSessionProperties(raw)).toBe(expected);
+  });
+
+  it('rejects a session property without a name or value separator', () => {
+    expect(() => formatSessionProperties('a=1\nbroken')).toThrow('Invalid Trino session property "broken"');
+  });
+
+  it('sends multiline session properties as one encoded header', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({ columns: [{ name: 'n' }], data: [[1]] }),
+    });
+
+    await query(
+      { query: 'SELECT 1', sessionProperties: 'a=1\nb=x y' },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(new Headers(fetchMock.mock.calls[0]![1]?.headers).get('X-Trino-Session')).toBe('a=1,b=x%20y');
+  });
+
+  it('only sends headers that the default proxy allowHeaders forwards', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({ columns: [{ name: 'n' }], data: [[1]] }),
+    });
+
+    await query(
+      {
+        query: 'SELECT 1',
+        catalog: 'c',
+        schema: 's',
+        sessionProperties: 'a=1',
+        source: 'src',
+        routingGroup: 'rg',
+      },
+      { datasourceUrl: DIRECT, headers: { 'X-Trino-User': 'u' }, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    const allowed = TRINO_PROXY_HEADERS.map((name) => name.toLowerCase());
+    const sent = [...new Headers(fetchMock.mock.calls[0]![1]?.headers).keys()];
+    expect(sent.filter((name) => !allowed.includes(name))).toEqual([]);
+    expect(sent).toHaveLength(allowed.length);
+  });
+
+  it('keeps returning NaN for an unknown zone once it is cached', () => {
+    expect(parseTrinoTimestamp('2025-01-01 00:00:00 Not/AZone')).toBeNaN();
+    expect(parseTrinoTimestamp('2025-01-01 00:00:00 Not/AZone')).toBeNaN();
+    expect(parseTrinoTimestamp('2025-01-01 00:00:00 Europe/Paris')).toBe(Date.parse('2024-12-31T23:00:00Z'));
   });
 });
