@@ -24,8 +24,9 @@ export type TrinoQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extension
   onFormat?: (query: string) => void;
 };
 
-// Treat Perses variables ($var, ${var}, ${var:format}) as parameters so the formatter keeps them intact.
-const PERSES_VARIABLE = { custom: [{ regex: String.raw`\$\{[^}]+\}|\$\w+` }] };
+// Treat Perses variables ($var, ${var}, ${var:format}) as parameters, together with any identifier characters
+// around them (logs_${tenant}), so the formatter keeps them intact.
+const PERSES_VARIABLE = { custom: [{ regex: String.raw`\w*(?:(?:\$\{[^}]+\}|\$\w+)\w*)+` }] };
 
 /** formatTrinoQuery pretty-prints Trino SQL without altering Perses variables. It throws on SQL it cannot parse. */
 export function formatTrinoQuery(query: string): string {
@@ -34,7 +35,7 @@ export function formatTrinoQuery(query: string): string {
 
 export function TrinoQLEditor(props: TrinoQLEditorProps): ReactElement {
   const { onFormat, ...editorProps } = props;
-  const [formatError, setFormatError] = useState<string>();
+  const [formatError, setFormatError] = useState<{ query: string; message: string }>();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
@@ -46,7 +47,7 @@ export function TrinoQLEditor(props: TrinoQLEditorProps): ReactElement {
       props.onChange?.(formatted, undefined as never);
       onFormat?.(formatted);
     } catch (e) {
-      setFormatError(e instanceof Error ? e.message : String(e));
+      setFormatError({ query: props.value, message: e instanceof Error ? e.message : String(e) });
     }
   };
 
@@ -88,7 +89,9 @@ export function TrinoQLEditor(props: TrinoQLEditorProps): ReactElement {
         ]}
         placeholder="Write Trino Query Here..."
       />
-      {formatError && <FormHelperText error>Could not format query: {formatError}</FormHelperText>}
+      {formatError && formatError.query === props.value && (
+        <FormHelperText error>Could not format query: {formatError.message}</FormHelperText>
+      )}
     </Stack>
   );
 }

@@ -24,6 +24,15 @@ describe('formatTrinoQuery', () => {
     expect(formatted).toContain("'$name'");
   });
 
+  it('keeps variables glued to identifiers intact', () => {
+    const formatted = formatTrinoQuery(
+      'SELECT * FROM ${tenant}_logs JOIN logs_$env USING (id) JOIN iceberg.${schema}.events e ON true',
+    );
+    expect(formatted).toContain('${tenant}_logs');
+    expect(formatted).toContain('logs_$env');
+    expect(formatted).toContain('iceberg.${schema}.events');
+  });
+
   it('throws on SQL it cannot parse', () => {
     expect(() => formatTrinoQuery('SELECT count(* FROM t')).toThrow();
   });
@@ -47,5 +56,15 @@ describe('TrinoQLEditor format button', () => {
 
     expect(onFormat).not.toHaveBeenCalled();
     expect(screen.getByText(/Could not format query/)).toBeInTheDocument();
+  });
+
+  it('clears the format error once the query changes', () => {
+    const { rerender } = render(<TrinoQLEditor value="SELECT count(* FROM t" onChange={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Format Query' }));
+    expect(screen.getByText(/Could not format query/)).toBeInTheDocument();
+
+    rerender(<TrinoQLEditor value="SELECT count(*) FROM t" onChange={vi.fn()} />);
+
+    expect(screen.queryByText(/Could not format query/)).not.toBeInTheDocument();
   });
 });

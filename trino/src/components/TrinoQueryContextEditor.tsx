@@ -78,7 +78,7 @@ export function TrinoQueryContextEditor(props: TrinoQueryContextEditorProps): Re
         minRows={2}
         label="Session properties"
         placeholder="join_distribution_type=AUTOMATIC, query_max_run_time=5m"
-        helperText="Comma-separated name=value pairs sent in the X-Trino-Session header."
+        helperText="name=value pairs, separated by commas or line breaks, sent in the X-Trino-Session header."
         value={value.sessionProperties ?? ''}
         onChange={handleChange('sessionProperties')}
         InputProps={{ readOnly: isReadonly }}
