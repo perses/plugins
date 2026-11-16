@@ -32,6 +32,7 @@ const (
 	AlphabeticalSort ColumnSortMode = "alphabetical"
 	NumericSort      ColumnSortMode = "numeric"
 	SeveritySort     ColumnSortMode = "severity"
+	StatusSort       ColumnSortMode = "status"
 )
 
 type DeduplicationMode string

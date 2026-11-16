@@ -21,7 +21,7 @@ spec: close({
 		header?:        string
 		enableSorting?: bool
 		sort?:          "asc" | "desc"
-		sortMode?:      "alphabetical" | "numeric" | "severity"
+		sortMode?:      "alphabetical" | "numeric" | "severity" | "status"
 	})]
 	deduplication?: close({
 		mode: "none" | "fingerprint" | "labels"
