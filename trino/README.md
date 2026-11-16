@@ -16,6 +16,13 @@ Set the datasource **user** to send `X-Trino-User`. Leave it empty when the cred
 for example a JWT or OAuth2 token whose principal Trino extracts itself. The user is asserted by the browser and is not
 verified by Perses, so do not grant the proxy credential broad impersonation rights in Trino.
 
+**Per-user identity.** To run queries as the viewer rather than a shared account, set `oauthPassthrough: true` in the
+datasource proxy spec. Perses then forwards the viewer's OIDC token (available when Perses login uses OIDC) as the
+`Authorization` bearer token. Enable Trino's JWT or OAuth2 authentication and point
+`http-server.authentication.jwt.principal-field` (or the `oauth2` equivalent) at the claim that holds the username, such
+as `preferred_username` or `email`; use `http-server.authentication.jwt.user-mapping.pattern` to reshape it if needed.
+Leave the datasource user empty so Trino takes the user from the verified token.
+
 The plugin follows Trino's `nextUri` links through the Perses proxy and combines result pages up to 100,000 rows. Larger
 results are cut at that limit, the remaining query is cancelled, and the panel shows a warning. Requests send
 `X-Trino-Time-Zone: UTC`.
