@@ -103,7 +103,7 @@ describe('Trino client', () => {
         source: 'perses-dashboard',
         routingGroup: 'etl',
       },
-      { datasourceUrl: DIRECT, user: 'alice', fetch: fetchMock as unknown as typeof fetch },
+      { datasourceUrl: DIRECT, headers: { 'X-Trino-User': 'alice' }, fetch: fetchMock as unknown as typeof fetch },
     );
 
     expect(result).toEqual({ status: 'success', data: [{ answer: 42 }], truncated: false });
@@ -134,7 +134,7 @@ describe('Trino client', () => {
 
     const result = await query(
       { query: 'SELECT n', catalog: 'iceberg' },
-      { datasourceUrl: DIRECT, user: 'alice', fetch: fetchMock as unknown as typeof fetch },
+      { datasourceUrl: DIRECT, headers: { 'X-Trino-User': 'alice' }, fetch: fetchMock as unknown as typeof fetch },
     );
 
     expect(result.data).toEqual([{ n: 1 }, { n: 2 }, { n: 3 }]);

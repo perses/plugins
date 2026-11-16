@@ -42,7 +42,6 @@ func create(options ...Option) (Builder, error) {
 
 type Builder struct {
 	datasourceSpec.HTTPDatasourceSpec `json:",inline" yaml:",inline"`
-	User                              string `json:"user,omitempty" yaml:"user,omitempty"`
 }
 
 func Trino(options ...Option) datasource.Option {
@@ -53,7 +52,7 @@ func Trino(options ...Option) datasource.Option {
 		}
 
 		builder.Spec.Plugin.Kind = PluginKind
-		builder.Spec.Plugin.Spec = plugin
+		builder.Spec.Plugin.Spec = plugin.HTTPDatasourceSpec
 		return nil
 	}
 }

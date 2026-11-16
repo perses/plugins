@@ -33,7 +33,6 @@ export interface TrinoQueryParams {
 export interface TrinoQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
-  user?: string;
   fetch?: FetchFn;
 }
 
@@ -126,7 +125,7 @@ function wallTimeInZone(wallAsUtc: number, zone: string): number {
 }
 
 export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOptions): Promise<TrinoQueryResponse> {
-  const { datasourceUrl, headers, user, fetch: customFetch } = queryOptions;
+  const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
   const { signal } = params;
 
   if (!params.query) {
@@ -140,7 +139,6 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   const requestHeaders = new Headers(headers);
   requestHeaders.set('Content-Type', 'text/plain; charset=utf-8');
   requestHeaders.set('X-Trino-Time-Zone', 'UTC');
-  if (user) requestHeaders.set('X-Trino-User', user);
   if (params.catalog) requestHeaders.set('X-Trino-Catalog', params.catalog);
   if (params.schema) requestHeaders.set('X-Trino-Schema', params.schema);
   if (params.sessionProperties) requestHeaders.set('X-Trino-Session', params.sessionProperties);

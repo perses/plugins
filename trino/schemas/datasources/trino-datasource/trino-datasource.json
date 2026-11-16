@@ -1,7 +1,6 @@
 {
   "kind": "TrinoDatasource",
   "spec": {
-    "directUrl": "http://localhost:8080",
-    "user": "perses"
+    "directUrl": "http://localhost:8080"
   }
 }

@@ -37,25 +37,29 @@ describe('TrinoDatasource.createClient', () => {
     expect(globalFetchSpy).not.toHaveBeenCalled();
   });
 
-  it('queries the direct URL when set, sending the configured user', async () => {
+  it('queries the direct URL when set', async () => {
     const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({ data: [] }) });
 
     const client = TrinoDatasource.createClient(
-      { directUrl: 'http://trino.example.com', user: 'perses' },
+      { directUrl: 'http://trino.example.com' },
       { proxyUrl: 'http://proxy:8080', fetch: mockFetch as unknown as typeof fetch },
     );
     await client.query({ query: 'SELECT 1' });
 
-    const [url, init] = mockFetch.mock.calls[0]!;
+    const [url] = mockFetch.mock.calls[0]!;
     expect(url).toBe('http://trino.example.com/v1/statement');
-    expect(new Headers(init.headers).get('X-Trino-User')).toBe('perses');
   });
 
   it('queries the proxy URL with the proxy headers when there is no direct URL', async () => {
     const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({ data: [] }) });
 
     const client = TrinoDatasource.createClient(
-      { proxy: { kind: 'HTTPProxy', spec: { url: 'http://trino:8080', headers: { 'X-Trino-Catalog': 'hive' } } } },
+      {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: { url: 'http://trino:8080', headers: { 'X-Trino-Catalog': 'hive', 'X-Trino-User': 'perses' } },
+        },
+      },
       { proxyUrl: '/proxy/globaldatasources/trino', fetch: mockFetch as unknown as typeof fetch },
     );
     await client.query({ query: 'SELECT 1' });
@@ -64,6 +68,6 @@ describe('TrinoDatasource.createClient', () => {
     expect(url).toBe(`${window.location.origin}/proxy/globaldatasources/trino/v1/statement`);
     const headers = new Headers(init.headers);
     expect(headers.get('X-Trino-Catalog')).toBe('hive');
-    expect(headers.has('X-Trino-User')).toBe(false);
+    expect(headers.get('X-Trino-User')).toBe('perses');
   });
 });

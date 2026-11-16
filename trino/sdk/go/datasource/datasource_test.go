@@ -20,8 +20,8 @@ import (
 	"github.com/perses/perses/go-sdk/datasource"
 )
 
-func TestTrinoSpecMarshalsUser(t *testing.T) {
-	builder, err := datasource.New("trino", Trino(DirectURL("http://trino:8080"), User("perses")))
+func TestTrinoSpecMarshalsDirectURL(t *testing.T) {
+	builder, err := datasource.New("trino", Trino(DirectURL("http://trino:8080")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func TestTrinoSpecMarshalsUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"kind":"TrinoDatasource","spec":{"directUrl":"http://trino:8080","user":"perses"}}`
+	want := `{"kind":"TrinoDatasource","spec":{"directUrl":"http://trino:8080"}}`
 	if string(got) != want {
 		t.Fatalf("got %s, want %s", got, want)
 	}

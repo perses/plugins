@@ -15,10 +15,7 @@ import type { HTTPDatasourceSpec } from '@perses-dev/spec';
 
 import type { TrinoClient } from '../../model/trino-client';
 
-export interface TrinoDatasourceSpec extends HTTPDatasourceSpec {
-  /** Sent as X-Trino-User. Leave empty when the Authorization credential already identifies the user. */
-  user?: string;
-}
+export type TrinoDatasourceSpec = HTTPDatasourceSpec;
 
 interface TrinoDatasourceClientOptions {
   datasourceUrl: string;

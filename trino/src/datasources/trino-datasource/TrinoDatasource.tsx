@@ -17,7 +17,7 @@ import type { TrinoDatasourceSpec, TrinoDatasourceClient } from './trino-datasou
 import { TrinoDatasourceEditor } from './TrinoDatasourceEditor';
 
 const createClient: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient>['createClient'] = (spec, options) => {
-  const { directUrl, proxy, user } = spec;
+  const { directUrl, proxy } = spec;
   const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -31,8 +31,7 @@ const createClient: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient>
     options: {
       datasourceUrl,
     },
-    query: (params, headers) =>
-      query(params, { datasourceUrl, headers: headers ?? specHeaders, user, fetch: customFetch }),
+    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
   };
 };
 

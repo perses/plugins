@@ -10,9 +10,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { TextField } from '@mui/material';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
-import type { ChangeEvent, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { TrinoDatasourceSpec } from './trino-datasource-types';
 
@@ -54,28 +53,13 @@ const initialSpecProxy: TrinoDatasourceSpec = {
 export function TrinoDatasourceEditor(props: TrinoDatasourceEditorProps): ReactElement {
   const { value, onChange, isReadonly } = props;
 
-  const handleUserChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    onChange({ ...value, user: event.target.value || undefined });
-  };
-
   return (
-    <>
-      <HTTPSettingsEditor
-        value={value}
-        onChange={onChange}
-        isReadonly={isReadonly}
-        initialSpecDirect={initialSpecDirect}
-        initialSpecProxy={initialSpecProxy}
-      />
-      <TextField
-        fullWidth
-        label="Trino user"
-        value={value.user ?? ''}
-        onChange={handleUserChange}
-        helperText="Sent as X-Trino-User. Leave empty when the configured credential already identifies the user."
-        InputProps={{ readOnly: isReadonly }}
-        sx={{ mt: 2 }}
-      />
-    </>
+    <HTTPSettingsEditor
+      value={value}
+      onChange={onChange}
+      isReadonly={isReadonly}
+      initialSpecDirect={initialSpecDirect}
+      initialSpecProxy={initialSpecProxy}
+    />
   );
 }

@@ -23,9 +23,6 @@ import (
 kind: #kind
 spec: {
 	datasource.#HTTPDatasourceSpec
-
-	// Sent as X-Trino-User. Leave unset when the Authorization credential already identifies the user.
-	user?: string
 }
 
 #selector: common.#datasourceSelector & {_kind: #kind}

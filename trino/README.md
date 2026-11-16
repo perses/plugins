@@ -12,16 +12,17 @@ so also list `X-Forwarded-For` and `X-Forwarded-Proto` in the proxy `dropHeaders
 referenced by the proxy: Perses ignores an `Authorization` header placed in the proxy `headers`. A direct URL only works
 when the coordinator accepts unauthenticated cross-origin requests from the browser.
 
-Set the datasource **user** to send `X-Trino-User`. Leave it empty when the credential already identifies the user,
-for example a JWT or OAuth2 token whose principal Trino extracts itself. The user is asserted by the browser and is not
-verified by Perses, so do not grant the proxy credential broad impersonation rights in Trino.
+For a shared Trino account, set `X-Trino-User` in the proxy `headers`. Perses sets configured headers on the server and
+they replace any value the browser sends, so viewers cannot pick another user. Leave it unset when the credential
+already identifies the user. Trino's default access control lets any principal impersonate any user, so configure
+impersonation rules when the proxy credential is shared.
 
 **Per-user identity.** To run queries as the viewer rather than a shared account, set `oauthPassthrough: true` in the
 datasource proxy spec. Perses then forwards the viewer's OIDC token (available when Perses login uses OIDC) as the
 `Authorization` bearer token. Enable Trino's JWT or OAuth2 authentication and point
 `http-server.authentication.jwt.principal-field` (or the `oauth2` equivalent) at the claim that holds the username, such
 as `preferred_username` or `email`; use `http-server.authentication.jwt.user-mapping.pattern` to reshape it if needed.
-Leave the datasource user empty so Trino takes the user from the verified token.
+Leave `X-Trino-User` unset so Trino takes the user from the verified token.
 
 The plugin follows Trino's `nextUri` links through the Perses proxy and combines result pages up to 100,000 rows. Larger
 results are cut at that limit, the remaining query is cancelled, and the panel shows a warning. Requests send
