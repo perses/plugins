@@ -29,7 +29,6 @@ type PluginSpec struct {
 	SessionProperties string               `json:"sessionProperties,omitempty" yaml:"sessionProperties,omitempty"`
 	Source            string               `json:"source,omitempty" yaml:"source,omitempty"`
 	RoutingGroup      string               `json:"routingGroup,omitempty" yaml:"routingGroup,omitempty"`
-
 }
 
 type Option func(plugin *Builder) error

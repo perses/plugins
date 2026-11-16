@@ -10,23 +10,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-export const queryExample = `-- Time Series Query
+export const queryExample = `-- Time Series Query (needs a "time" column)
 SELECT
-  date_trunc('minute', timestamp) AS time,
-  avg(cpu_usage) as avg_cpu,
-  max(memory_usage) as max_memory
+  date_trunc('minute', event_time) AS time,
+  avg(cpu_usage) AS avg_cpu,
+  max(memory_usage) AS max_memory
 FROM system_metrics
-WHERE timestamp BETWEEN '{start}' AND '{end}'
-GROUP BY time ORDER BY time
--- Logs Query
+WHERE event_time BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}'
+GROUP BY 1
+ORDER BY 1
+-- Logs Query (needs a "timestamp", "log_time", or "time" column)
 SELECT
-  Timestamp as log_time,
-  Body,
-  ServiceName,
-  ResourceAttributes,
-  SeverityNumber,
-  SeverityText
+  event_time AS timestamp,
+  severity,
+  service_name,
+  message
 FROM application_logs
-WHERE timestamp >= '{start}'
-ORDER BY time DESC LIMIT 1000`;
+WHERE event_time >= TIMESTAMP '{start}'
+ORDER BY event_time DESC
+LIMIT 1000`;

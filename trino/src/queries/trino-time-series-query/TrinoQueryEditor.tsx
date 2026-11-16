@@ -93,10 +93,23 @@ export function TrinoTimeSeriesQueryEditor(props: TrinoTimeSeriesQueryEditorProp
       />
 
       <details>
-        <summary style={{ cursor: 'pointer', fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+        <Box component="summary" sx={{ cursor: 'pointer', fontSize: '12px', color: 'text.secondary', mb: 1 }}>
           Query Examples
-        </summary>
-        <Box sx={(theme) => ({ fontSize: '11px', color: theme.palette.text.secondary, backgroundColor: theme.palette.background.default, padding: '8px', borderRadius: '4px', fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace', whiteSpace: 'pre-wrap', lineHeight: '1.3' })}>{queryExample}</Box>
+        </Box>
+        <Box
+          sx={(theme) => ({
+            fontSize: '11px',
+            color: theme.palette.text.secondary,
+            backgroundColor: theme.palette.background.default,
+            padding: '8px',
+            borderRadius: '4px',
+            fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+            whiteSpace: 'pre-wrap',
+            lineHeight: '1.3',
+          })}
+        >
+          {queryExample}
+        </Box>
       </details>
     </Stack>
   );

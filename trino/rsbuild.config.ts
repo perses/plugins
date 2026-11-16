@@ -16,7 +16,7 @@ import { createConfigForPlugin } from '../rsbuild.shared';
 export default createConfigForPlugin({
   name: 'Trino',
   rsbuildConfig: {
-    server: { port: 3123 },
+    server: { port: 3124 },
   },
   moduleFederation: {
     exposes: {
