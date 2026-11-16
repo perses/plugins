@@ -13,6 +13,11 @@
 
 import type { FetchFn, RequestHeaders } from '@perses-dev/client';
 
+export const MAX_ROWS = 100000;
+const RETRYABLE_STATUSES = new Set([502, 503, 504]);
+const MAX_POLL_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 100;
+
 export interface TrinoQueryParams {
   query: string;
   start?: string;
@@ -22,22 +27,43 @@ export interface TrinoQueryParams {
   sessionProperties?: string;
   source?: string;
   routingGroup?: string;
+  signal?: AbortSignal;
 }
 
 export interface TrinoQueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
-  userClaim?: string;
+  user?: string;
   fetch?: FetchFn;
 }
 
+export type TrinoRow = Record<string, unknown>;
+
 export interface TrinoQueryResponse {
   status: 'success' | 'error';
-  data: unknown;
+  data: TrinoRow[];
+  /** True when the result was cut at MAX_ROWS and the remaining pages were cancelled. */
+  truncated?: boolean;
 }
 
 export interface TrinoClient {
-  query: (params: TrinoQueryParams) => Promise<TrinoQueryResponse>;
+  query: (params: TrinoQueryParams, headers?: RequestHeaders) => Promise<TrinoQueryResponse>;
+}
+
+interface TrinoColumn {
+  name: string;
+}
+
+interface TrinoError {
+  message?: string;
+  errorName?: string;
+}
+
+interface TrinoStatementResponse {
+  nextUri?: string;
+  columns?: TrinoColumn[];
+  data?: unknown[][];
+  error?: TrinoError;
 }
 
 export function replaceTimeRangePlaceholders(sql: string, start?: string, end?: string): string {
@@ -51,114 +77,159 @@ export function formatTrinoDateTime(date: Date): string {
     .replace(/\.\d{3}Z$/, '');
 }
 
-/** Sets X-Trino-User from the configured claim in a bearer JWT, when present. */
-export function addTrinoUserFromToken(headers: Headers, userClaim = 'sub'): void {
-  const claimPath = userClaim.trim() || 'sub';
-  const authorization = headers.get('Authorization');
-  const match = authorization?.match(/^Bearer\s+(.+)$/i);
-  if (!match?.[1]) return;
+const TRINO_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2}:\d{2})(?:\.(\d+))?)?\s*(UTC|Z|[+-]\d{2}:?\d{2})?$/;
 
-  const tokenParts = match[1].split('.');
-  if (tokenParts.length !== 3) {
-    throw new Error('Authorization bearer token must be a JWT to derive X-Trino-User');
-  }
+/**
+ * parseTrinoTimestamp converts a Trino date or timestamp value to epoch milliseconds, or NaN when it cannot be parsed.
+ * Values without a zone are read as UTC, matching the X-Trino-Time-Zone the client sends.
+ */
+export function parseTrinoTimestamp(value: unknown): number {
+  if (typeof value === 'number') return value;
+  if (typeof value !== 'string') return NaN;
 
-  const encodedPayload = tokenParts[1];
-  if (!encodedPayload) throw new Error('Authorization bearer token has no JWT payload');
-  const base64Payload = encodedPayload.replaceAll('-', '+').replaceAll('_', '/');
-  const paddedPayload = base64Payload.padEnd(Math.ceil(base64Payload.length / 4) * 4, '=');
-  let payload: unknown;
-  try {
-    const bytes = Uint8Array.from(atob(paddedPayload), (character) => character.charCodeAt(0));
-    payload = JSON.parse(new TextDecoder().decode(bytes));
-  } catch (e) {
-    throw new Error('Authorization bearer token has an invalid JWT payload', { cause: e });
-  }
+  const match = value.trim().match(TRINO_TIMESTAMP);
+  if (!match) return NaN;
 
-  const claimValue = claimPath
-    .split('.')
-    .filter(Boolean)
-    .reduce<unknown>(
-      (value, key) =>
-        typeof value === 'object' && value !== null ? (value as Record<string, unknown>)[key] : undefined,
-      payload,
-    );
-
-  if (typeof claimValue !== 'string' && typeof claimValue !== 'number') {
-    throw new Error(`JWT claim "${claimPath}" is missing or is not a string or number`);
-  }
-  headers.set('X-Trino-User', String(claimValue));
+  const [, date, time = '00:00:00', fraction = '', zone] = match;
+  const millis = fraction.padEnd(3, '0').slice(0, 3);
+  const offset = !zone || zone === 'UTC' || zone === 'Z' ? 'Z' : zone.replace(/^([+-]\d{2})(\d{2})$/, '$1:$2');
+  return Date.parse(`${date}T${time}.${millis}${offset}`);
 }
 
 export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOptions): Promise<TrinoQueryResponse> {
-  const { datasourceUrl, headers, userClaim, fetch: customFetch } = queryOptions;
+  const { datasourceUrl, headers, user, fetch: customFetch } = queryOptions;
+  const { signal } = params;
 
   if (!params.query) {
     throw new Error('No query provided in params');
   }
 
+  const doFetch = customFetch ?? fetch;
   const baseUrl = urlBuilder(datasourceUrl);
   const statementUrl = new URL('v1/statement', baseUrl.toString().endsWith('/') ? baseUrl : `${baseUrl}/`);
   const finalQuery = replaceTimeRangePlaceholders(params.query.trim(), params.start, params.end);
   const requestHeaders = new Headers(headers);
   requestHeaders.set('Content-Type', 'text/plain; charset=utf-8');
+  requestHeaders.set('X-Trino-Time-Zone', 'UTC');
+  if (user) requestHeaders.set('X-Trino-User', user);
   if (params.catalog) requestHeaders.set('X-Trino-Catalog', params.catalog);
   if (params.schema) requestHeaders.set('X-Trino-Schema', params.schema);
   if (params.sessionProperties) requestHeaders.set('X-Trino-Session', params.sessionProperties);
   if (params.source) requestHeaders.set('X-Trino-Source', params.source);
   if (params.routingGroup) requestHeaders.set('X-Trino-Routing-Group', params.routingGroup);
-  addTrinoUserFromToken(requestHeaders, userClaim);
 
+  let pendingUri: string | undefined;
   try {
-    const doFetch = customFetch ?? fetch;
-    let response = await doFetch(statementUrl.toString(), {
+    const response = await doFetch(statementUrl.toString(), {
       method: 'POST',
       headers: requestHeaders,
       body: finalQuery,
+      signal,
     });
     if (!response.ok) {
       throw new Error(`Trino returned ${response.status}: ${await response.text()}`);
     }
-    let body = await response.json();
+    let body: TrinoStatementResponse = await response.json();
     let columns = body.columns;
     const rows: unknown[][] = [...(body.data ?? [])];
-    // Trino streams results through nextUri. For proxy datasources retain the Perses proxy prefix.
-    // Trino provides the next page token only after the previous page completes.
-    // oxlint-disable no-await-in-loop -- each page token depends on the previous response.
-    const MAX_ROWS = 100000;
+    let truncated = false;
+
+    // Each page token depends on the previous response, so pages are fetched sequentially.
+    // oxlint-disable no-await-in-loop
     while (body.nextUri) {
+      pendingUri = body.nextUri;
       if (rows.length >= MAX_ROWS) {
-        console.warn(`Trino query results truncated to ${MAX_ROWS} rows to prevent memory exhaustion.`);
+        truncated = true;
         break;
       }
-      const next = new URL(body.nextUri);
-      const base = urlBuilder(datasourceUrl);
-      const proxyPath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
-      const nextPath = next.pathname.replace(/^\//, '');
-      const pollUrl =
-        datasourceUrl.startsWith('http://') || datasourceUrl.startsWith('https://')
-          ? next
-          : new URL(nextPath + next.search, `${base.origin}${proxyPath}`);
-      response = await doFetch(pollUrl.toString(), { method: 'GET', headers: requestHeaders });
-      if (!response.ok) throw new Error(`Trino returned ${response.status}: ${await response.text()}`);
-      body = await response.json();
+      body = await poll(resolveNextUri(datasourceUrl, body.nextUri), requestHeaders, doFetch, signal);
       columns ??= body.columns;
       rows.push(...(body.data ?? []));
     }
     // oxlint-enable no-await-in-loop
-    if (body.error) throw new Error(body.error.message ?? 'Trino query failed');
-    const names: string[] = (columns ?? []).map((column: { name: string }) => column.name);
+
+    if (truncated) {
+      cancel(pendingUri, datasourceUrl, requestHeaders, doFetch);
+    }
+    pendingUri = undefined;
+    if (body.error) throw new Error(formatTrinoError(body.error));
+
+    const names = (columns ?? []).map((column) => column.name);
     return {
       status: 'success',
-      data: rows.map((row) => Object.fromEntries(names.map((name, index) => [name, row[index]]))),
+      data: rows.slice(0, MAX_ROWS).map((row) => Object.fromEntries(names.map((name, index) => [name, row[index]]))),
+      truncated,
     };
   } catch (e) {
-    throw new Error(`Trino query failed: ${e}`, { cause: e });
+    cancel(pendingUri, datasourceUrl, requestHeaders, doFetch);
+    if (signal?.aborted) throw e;
+    throw new Error(`Trino query failed: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
   }
 }
 
+async function poll(
+  url: string,
+  headers: Headers,
+  doFetch: FetchFn,
+  signal: AbortSignal | undefined,
+): Promise<TrinoStatementResponse> {
+  for (let attempt = 1; ; attempt++) {
+    // oxlint-disable-next-line no-await-in-loop -- retries are sequential by definition.
+    const response = await doFetch(url, { method: 'GET', headers, signal });
+    if (response.ok) return response.json();
+    if (!RETRYABLE_STATUSES.has(response.status) || attempt >= MAX_POLL_ATTEMPTS) {
+      // oxlint-disable-next-line no-await-in-loop
+      throw new Error(`Trino returned ${response.status}: ${await response.text()}`);
+    }
+    // oxlint-disable-next-line no-await-in-loop
+    await delay(RETRY_DELAY_MS * attempt, signal);
+  }
+}
+
+// Best effort: Trino abandons an unpolled query on its own, this only frees the cluster sooner.
+function cancel(uri: string | undefined, datasourceUrl: string, headers: Headers, doFetch: FetchFn): void {
+  if (!uri) return;
+  doFetch(resolveNextUri(datasourceUrl, uri), { method: 'DELETE', headers }).catch(() => undefined);
+}
+
+function delay(ms: number, signal: AbortSignal | undefined): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason);
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        reject(signal.reason);
+      },
+      { once: true },
+    );
+  });
+}
+
+function formatTrinoError(error: TrinoError): string {
+  const message = error.message ?? 'Trino query failed';
+  return error.errorName ? `${error.errorName}: ${message}` : message;
+}
+
+// Proxy datasources must keep the Perses proxy prefix, so only the nextUri path and query are reused.
+function resolveNextUri(datasourceUrl: string, nextUri: string): string {
+  if (isAbsoluteUrl(datasourceUrl)) return nextUri;
+  const next = new URL(nextUri);
+  const base = urlBuilder(datasourceUrl);
+  const proxyPath = base.pathname.endsWith('/') ? base.pathname : `${base.pathname}/`;
+  return `${base.origin}${proxyPath}${next.pathname.replace(/^\/+/, '')}${next.search}`;
+}
+
+function isAbsoluteUrl(url: string): boolean {
+  return url.startsWith('http://') || url.startsWith('https://');
+}
+
 function urlBuilder(datasourceUrl: string): URL {
-  if (datasourceUrl.startsWith('http://') || datasourceUrl.startsWith('https://')) {
+  if (isAbsoluteUrl(datasourceUrl)) {
     return new URL(datasourceUrl);
   }
   // if relative path (e.g. proxy url), resolve against window.location.origin

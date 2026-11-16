@@ -34,3 +34,11 @@ func HTTPProxy(url string, options ...http.Option) Option {
 		return nil
 	}
 }
+
+// User sets the Trino user sent as X-Trino-User.
+func User(user string) Option {
+	return func(builder *Builder) error {
+		builder.User = user
+		return nil
+	}
+}

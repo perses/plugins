@@ -10,44 +10,54 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
-import type { TimeSeries } from '@perses-dev/spec';
+import type { Notice, TimeSeries } from '@perses-dev/spec';
 
-import type { TrinoClient, TrinoQueryResponse } from '../../model/trino-client';
-import { formatTrinoDateTime, replaceTimeRangePlaceholders } from '../../model/trino-client';
-import type { TimeSeriesEntry } from '../../model/trino-data-types';
+import type { TrinoClient, TrinoRow } from '../../model/trino-client';
+import {
+  MAX_ROWS,
+  formatTrinoDateTime,
+  parseTrinoTimestamp,
+  replaceTimeRangePlaceholders,
+} from '../../model/trino-client';
 import { DEFAULT_DATASOURCE } from '../constants';
-import type { TrinoTimeSeriesQuerySpec, DatasourceQueryResponse } from './trino-query-types';
+import type { TrinoTimeSeriesQuerySpec } from './trino-query-types';
 
 const DEFAULT_STEP_MS = 30 * 1000;
+const TIME_COLUMN = 'time';
 
-function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
-  const data = response?.data as TimeSeriesEntry[];
-  if (!response || !data || data.length === 0) {
+interface TimedRow {
+  timestamp: number;
+  row: TrinoRow;
+}
+
+function toTimedRows(rows: TrinoRow[]): TimedRow[] {
+  return rows
+    .map((row) => ({ timestamp: parseTrinoTimestamp(row[TIME_COLUMN]), row }))
+    .filter(({ timestamp }) => Number.isFinite(timestamp));
+}
+
+function buildTimeSeries(rows: TimedRow[]): TimeSeries[] {
+  const firstRow = rows[0]?.row;
+  if (!firstRow) {
     return [];
   }
 
-  const metricNames = Object.keys(data[0] ?? {}).filter((key) => key !== 'time');
+  const metricNames = Object.keys(firstRow).filter((key) => key !== TIME_COLUMN);
 
   return metricNames
-    .map((metricName) => {
-      const values: Array<[number, number | null]> = data.map((row: TimeSeriesEntry) => {
-        const timestamp = new Date(row.time).getTime();
-        const value = toTimeSeriesValue(row[metricName]);
-        return [timestamp, value];
-      });
-
-      return {
-        name: metricName,
-        values,
-      };
-    })
+    .map((metricName) => ({
+      name: metricName,
+      values: rows.map(({ timestamp, row }): [number, number | null] => [
+        timestamp,
+        toTimeSeriesValue(row[metricName]),
+      ]),
+    }))
     .filter((series) => series.values.some(([, value]) => value !== null));
 }
 
-function toTimeSeriesValue(value: number | string | null | undefined): number | null {
+function toTimeSeriesValue(value: unknown): number | null {
   if (value === null || value === undefined || value === '') {
     return null;
   }
@@ -56,16 +66,8 @@ function toTimeSeriesValue(value: number | string | null | undefined): number | 
   return Number.isFinite(numericValue) ? numericValue : null;
 }
 
-function inferStepMs(response?: DatasourceQueryResponse): number {
-  const data = response?.data as TimeSeriesEntry[];
-  if (!response || !data || data.length < 2) {
-    return DEFAULT_STEP_MS;
-  }
-
-  const timestamps = data
-    .map((row: TimeSeriesEntry) => new Date(row.time).getTime())
-    .filter(Number.isFinite)
-    .toSorted((a, b) => a - b);
+function inferStepMs(rows: TimedRow[]): number {
+  const timestamps = rows.map(({ timestamp }) => timestamp).toSorted((a, b) => a - b);
 
   if (timestamps.length < 2) {
     return DEFAULT_STEP_MS;
@@ -103,6 +105,7 @@ function inferStepMs(response?: DatasourceQueryResponse): number {
 export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
   context,
+  abortSignal,
 ) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     return { series: [] };
@@ -119,7 +122,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>[
   const endTime = formatTrinoDateTime(end);
   const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
 
-  const response: TrinoQueryResponse = await client.query({
+  const response = await client.query({
     start: startTime,
     end: endTime,
     query: executedQueryString,
@@ -128,14 +131,28 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>[
     sessionProperties: spec.sessionProperties,
     source: spec.source,
     routingGroup: spec.routingGroup,
+    signal: abortSignal,
   });
 
+  const rows = toTimedRows(response.data ?? []);
+  const notices: Notice[] = [];
+  if (response.truncated) {
+    notices.push({ type: 'warning', message: `Results were truncated to the first ${MAX_ROWS} rows.` });
+  }
+  if (rows.length < (response.data?.length ?? 0)) {
+    notices.push({
+      type: 'warning',
+      message: `Rows without a parseable "${TIME_COLUMN}" column were skipped.`,
+    });
+  }
+
   return {
-    series: buildTimeSeries(response),
+    series: buildTimeSeries(rows),
     timeRange: { start, end },
-    stepMs: inferStepMs(response),
+    stepMs: inferStepMs(rows),
     metadata: {
       executedQueryString,
+      ...(notices.length > 0 && { notices }),
     },
   };
 };

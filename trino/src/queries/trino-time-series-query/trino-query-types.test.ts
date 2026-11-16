@@ -97,7 +97,7 @@ describe('TrinoTimeSeriesQuery', () => {
     const response = await TrinoTimeSeriesQuery.getTimeSeriesData(
       {
         query:
-          "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+          "SELECT date_trunc('minute', event_time) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE event_time BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}' GROUP BY 1 ORDER BY 1",
       },
       createStubContext(),
     );
@@ -106,27 +106,27 @@ describe('TrinoTimeSeriesQuery', () => {
       start: '2025-01-01 00:00:00',
       end: '2025-01-02 00:00:00',
       query:
-        "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time",
+        "SELECT date_trunc('minute', event_time) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE event_time BETWEEN TIMESTAMP '2025-01-01 00:00:00' AND TIMESTAMP '2025-01-02 00:00:00' GROUP BY 1 ORDER BY 1",
     });
     expect(response.series).toEqual([
       {
         name: 'avg_cpu',
         values: [
-          [new Date('2025-09-09 05:18:00').getTime(), 2.5],
-          [new Date('2025-09-09 05:19:00').getTime(), 3.5],
+          [Date.parse('2025-09-09T05:18:00Z'), 2.5],
+          [Date.parse('2025-09-09T05:19:00Z'), 3.5],
         ],
       },
       {
         name: 'max_memory',
         values: [
-          [new Date('2025-09-09 05:18:00').getTime(), 277],
-          [new Date('2025-09-09 05:19:00').getTime(), 156102],
+          [Date.parse('2025-09-09T05:18:00Z'), 277],
+          [Date.parse('2025-09-09T05:19:00Z'), 156102],
         ],
       },
     ]);
     expect(response.stepMs).toBe(60 * 1000);
     expect(response.metadata?.executedQueryString).toBe(
-      "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time",
+      "SELECT date_trunc('minute', event_time) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE event_time BETWEEN TIMESTAMP '2025-01-01 00:00:00' AND TIMESTAMP '2025-01-02 00:00:00' GROUP BY 1 ORDER BY 1",
     );
   });
 
@@ -143,7 +143,7 @@ describe('TrinoTimeSeriesQuery', () => {
     const response = await TrinoTimeSeriesQuery.getTimeSeriesData(
       {
         query:
-          "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+          "SELECT date_trunc('day', event_time) as time, sum(flights_count) as flights FROM flight WHERE event_time BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}' GROUP BY 1 ORDER BY 1",
       },
       createStubContext(),
     );
@@ -153,9 +153,9 @@ describe('TrinoTimeSeriesQuery', () => {
       {
         name: 'flights',
         values: [
-          [new Date('2026-01-01 22:00:00').getTime(), 80],
-          [new Date('2026-01-02 22:00:00').getTime(), 56],
-          [new Date('2026-01-03 22:00:00').getTime(), 32],
+          [Date.parse('2026-01-01T22:00:00Z'), 80],
+          [Date.parse('2026-01-02T22:00:00Z'), 56],
+          [Date.parse('2026-01-03T22:00:00Z'), 32],
         ],
       },
     ]);
@@ -174,11 +174,67 @@ describe('TrinoTimeSeriesQuery', () => {
     const response = await TrinoTimeSeriesQuery.getTimeSeriesData(
       {
         query:
-          "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+          "SELECT date_trunc('day', event_time) as time, sum(flights_count) as flights FROM flight WHERE event_time BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}' GROUP BY 1 ORDER BY 1",
       },
       createStubContext(),
     );
 
     expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
+  });
+
+  it('passes query context fields and the abort signal to the client', async () => {
+    const controller = new AbortController();
+    await TrinoTimeSeriesQuery.getTimeSeriesData(
+      {
+        query: 'SELECT 1',
+        catalog: 'iceberg',
+        schema: 'analytics',
+        sessionProperties: 'query_max_run_time=5m',
+        source: 'perses',
+        routingGroup: 'etl',
+      },
+      createStubContext(),
+      controller.signal,
+    );
+
+    expect(trinoStubClient.query).toHaveBeenLastCalledWith({
+      start: '2025-01-01 00:00:00',
+      end: '2025-01-02 00:00:00',
+      query: 'SELECT 1',
+      catalog: 'iceberg',
+      schema: 'analytics',
+      sessionProperties: 'query_max_run_time=5m',
+      source: 'perses',
+      routingGroup: 'etl',
+      signal: controller.signal,
+    });
+  });
+
+  it('reads zone-less timestamps as UTC whatever the browser time zone', async () => {
+    const originalTz = process.env.TZ;
+    process.env.TZ = 'America/New_York';
+    try {
+      const response = await TrinoTimeSeriesQuery.getTimeSeriesData({ query: 'SELECT 1' }, createStubContext());
+      expect(response.series[0]?.values[0]?.[0]).toBe(Date.parse('2025-09-09T05:18:00Z'));
+    } finally {
+      process.env.TZ = originalTz;
+    }
+  });
+
+  it('warns when results are truncated or rows have no parseable time', async () => {
+    (trinoStubClient.query as Mock).mockResolvedValueOnce({
+      status: 'success',
+      truncated: true,
+      data: [
+        { time: '2025-09-09 05:18:00', value: 1 },
+        { time: 'not a time', value: 2 },
+      ],
+    });
+
+    const response = await TrinoTimeSeriesQuery.getTimeSeriesData({ query: 'SELECT 1' }, createStubContext());
+
+    expect(response.series).toEqual([{ name: 'value', values: [[Date.parse('2025-09-09T05:18:00Z'), 1]] }]);
+    expect(response.metadata?.notices?.map((notice) => notice.type)).toEqual(['warning', 'warning']);
+    expect(response.metadata?.notices?.[0]?.message).toContain('truncated');
   });
 });

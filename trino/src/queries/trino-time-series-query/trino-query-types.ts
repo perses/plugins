@@ -22,10 +22,3 @@ export interface TrinoTimeSeriesQuerySpec {
   source?: string;
   routingGroup?: string;
 }
-
-// TODO: import this type from your datasource or an existing datasource plugin
-export type DatasourceQueryResponse = {
-  status: string;
-  data: unknown;
-  warnings?: string[];
-};

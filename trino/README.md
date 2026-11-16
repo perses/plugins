@@ -5,15 +5,19 @@ plugins that can be used with the corresponding Perses panels.
 
 ## Datasource setup
 
-Set the datasource URL to the Trino coordinator base URL, such as `https://trino.example.com`. For a proxied datasource,
-allow `POST /v1/statement` and `GET /v1/statement/.*`. Configure the `Authorization: Bearer <JWT>` header and, when
-needed, `X-Trino-Catalog`, `X-Trino-Schema`, and other authentication headers in the datasource proxy settings. The
-plugin derives `X-Trino-User` from the configured JWT claim (default: `sub`; set the claim to match Trino's
-`http-server.authentication.oauth2.principal-field`). It sends that header with the initial statement and every result
-page. The plugin follows Trino's `nextUri` links through the Perses proxy and combines all result pages.
+Use a proxied datasource pointing at the Trino coordinator base URL, such as `https://trino.example.com`, and allow
+`POST /v1/statement`, `GET /v1/statement/.*`, and `DELETE /v1/statement/.*` (used to cancel queries that are no longer
+needed). Store credentials in a Perses Secret referenced by the proxy: Perses ignores an `Authorization` header placed
+in the proxy `headers`. A direct URL only works when the coordinator accepts unauthenticated cross-origin requests from
+the browser.
 
-The browser must have access to the bearer JWT to derive the claim. OAuth passthrough tokens injected only by the Perses
-server are not visible to the plugin and cannot be used for this derivation.
+Set the datasource **user** to send `X-Trino-User`. Leave it empty when the credential already identifies the user,
+for example a JWT or OAuth2 token whose principal Trino extracts itself. The user is asserted by the browser and is not
+verified by Perses, so do not grant the proxy credential broad impersonation rights in Trino.
+
+The plugin follows Trino's `nextUri` links through the Perses proxy and combines result pages up to 100,000 rows. Larger
+results are cut at that limit, the remaining query is cancelled, and the panel shows a warning. Requests send
+`X-Trino-Time-Zone: UTC`.
 
 Queries are submitted as plain SQL. Use `{start}` and `{end}` in a query to interpolate the dashboard time range in UTC,
 for example:
@@ -26,10 +30,21 @@ GROUP BY 1
 ORDER BY 1
 ```
 
-Each time series or log query can also set a catalog, schema, source label, and session properties. These populate
-`X-Trino-Catalog`, `X-Trino-Schema`, and `X-Trino-Source`. Session properties use Trino's comma-separated `name=value`
-format (for example, `join_distribution_type=AUTOMATIC, query_max_run_time=5m`) and are sent as the
-`X-Trino-Session` request header. Query-level values override corresponding headers configured on the datasource.
+Each time series or log query can also set a catalog, schema, source label, routing group, and session properties. These
+populate `X-Trino-Catalog`, `X-Trino-Schema`, `X-Trino-Source`, and `X-Trino-Routing-Group` (used by Trino Gateway).
+Session properties use Trino's comma-separated `name=value` format (for example, `join_distribution_type=AUTOMATIC,
+query_max_run_time=5m`) and are sent as the `X-Trino-Session` request header. When the same header is also set in the
+datasource proxy `headers`, the datasource value wins.
+
+## Result shape
+
+Time series queries need a column named `time`. Every other column becomes a series, and non-numeric values become
+gaps. Return one column per series (wide format); grouping by a label column in long format is not split into series.
+
+Log queries take the entry time from the first column named `timestamp`, `log_time`, or `time` (case-insensitive). Every
+column becomes a label and is also rendered in the log line.
+
+Timestamps without a time zone are read as UTC. Rows whose time column cannot be parsed are skipped with a warning.
 
 ## Development
 

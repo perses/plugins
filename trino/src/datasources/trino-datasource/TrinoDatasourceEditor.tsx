@@ -10,11 +10,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import { TextField } from '@mui/material';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import type { ChangeEvent, ReactElement } from 'react';
-import { useCallback } from 'react';
 
 import type { TrinoDatasourceSpec } from './trino-datasource-types';
 
@@ -24,40 +22,39 @@ export interface TrinoDatasourceEditorProps {
   isReadonly?: boolean;
 }
 
+const initialSpecDirect: TrinoDatasourceSpec = {
+  directUrl: '',
+};
+
+const initialSpecProxy: TrinoDatasourceSpec = {
+  proxy: {
+    kind: 'HTTPProxy',
+    spec: {
+      allowedEndpoints: [
+        {
+          endpointPattern: '/v1/statement',
+          method: 'POST',
+        },
+        {
+          endpointPattern: '/v1/statement/.*',
+          method: 'GET',
+        },
+        {
+          endpointPattern: '/v1/statement/.*',
+          method: 'DELETE',
+        },
+      ],
+      url: '',
+    },
+  },
+};
+
 export function TrinoDatasourceEditor(props: TrinoDatasourceEditorProps): ReactElement {
   const { value, onChange, isReadonly } = props;
 
-  const initialSpecDirect: TrinoDatasourceSpec = {
-    directUrl: '',
-    userClaim: 'sub',
+  const handleUserChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    onChange({ ...value, user: event.target.value || undefined });
   };
-
-  const initialSpecProxy: TrinoDatasourceSpec = {
-    userClaim: 'sub',
-    proxy: {
-      kind: 'HTTPProxy',
-      spec: {
-        allowedEndpoints: [
-          {
-            endpointPattern: '/v1/statement',
-            method: 'POST',
-          },
-          {
-            endpointPattern: '/v1/statement/.*',
-            method: 'GET',
-          },
-        ],
-        url: '',
-      },
-    },
-  };
-
-  const handleUserClaimChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>): void => {
-      onChange({ ...value, userClaim: event.target.value });
-    },
-    [onChange, value],
-  );
 
   return (
     <>
@@ -70,10 +67,10 @@ export function TrinoDatasourceEditor(props: TrinoDatasourceEditorProps): ReactE
       />
       <TextField
         fullWidth
-        label="JWT claim for Trino user"
-        value={value.userClaim ?? 'sub'}
-        onChange={handleUserClaimChange}
-        helperText="Used to populate X-Trino-User from the configured Authorization bearer JWT. Defaults to sub."
+        label="Trino user"
+        value={value.user ?? ''}
+        onChange={handleUserChange}
+        helperText="Sent as X-Trino-User. Leave empty when the configured credential already identifies the user."
         InputProps={{ readOnly: isReadonly }}
         sx={{ mt: 2 }}
       />

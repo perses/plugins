@@ -11,13 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { LogData, TimeSeriesData } from '@perses-dev/spec';
+package datasource
 
-export interface TrinoTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
-}
+import (
+	"encoding/json"
+	"testing"
 
-export interface TimeSeriesEntry {
-  time: string;
-  [key: string]: number | string | null | undefined;
+	"github.com/perses/perses/go-sdk/datasource"
+)
+
+func TestTrinoSpecMarshalsUser(t *testing.T) {
+	builder, err := datasource.New("trino", Trino(DirectURL("http://trino:8080"), User("perses")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := json.Marshal(builder.Spec.Plugin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"kind":"TrinoDatasource","spec":{"directUrl":"http://trino:8080","user":"perses"}}`
+	if string(got) != want {
+		t.Fatalf("got %s, want %s", got, want)
+	}
 }

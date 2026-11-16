@@ -10,7 +10,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
 import { query } from '../../model/trino-client';
@@ -18,7 +17,7 @@ import type { TrinoDatasourceSpec, TrinoDatasourceClient } from './trino-datasou
 import { TrinoDatasourceEditor } from './TrinoDatasourceEditor';
 
 const createClient: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient>['createClient'] = (spec, options) => {
-  const { directUrl, proxy, userClaim } = spec;
+  const { directUrl, proxy, user } = spec;
   const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -33,12 +32,12 @@ const createClient: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient>
       datasourceUrl,
     },
     query: (params, headers) =>
-      query(params, { datasourceUrl, headers: headers ?? specHeaders, userClaim, fetch: customFetch }),
+      query(params, { datasourceUrl, headers: headers ?? specHeaders, user, fetch: customFetch }),
   };
 };
 
 export const TrinoDatasource: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient> = {
   createClient,
   OptionsEditorComponent: TrinoDatasourceEditor,
-  createInitialOptions: () => ({ directUrl: '', userClaim: 'sub' }),
+  createInitialOptions: () => ({ directUrl: '' }),
 };

@@ -10,38 +10,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-import type { RequestHeaders } from '@perses-dev/client';
 import type { DatasourceClient } from '@perses-dev/plugin-system';
 import type { HTTPDatasourceSpec } from '@perses-dev/spec';
 
-export interface TrinoDatasourceSpec extends HTTPDatasourceSpec {
-  userClaim?: string;
-}
+import type { TrinoClient } from '../../model/trino-client';
 
-interface QueryRequestParameters {
-  query: string;
-  start: string;
-  end: string;
-  catalog?: string;
-  schema?: string;
-  sessionProperties?: string;
-  source?: string;
+export interface TrinoDatasourceSpec extends HTTPDatasourceSpec {
+  /** Sent as X-Trino-User. Leave empty when the Authorization credential already identifies the user. */
+  user?: string;
 }
 
 interface TrinoDatasourceClientOptions {
   datasourceUrl: string;
-  headers?: RequestHeaders;
 }
 
-export interface TrinoDatasourceResponse {
-  status: string;
-  warnings?: string[];
-  // TODO: adjust this type to match your datasource response shape
-  data: unknown;
-}
-
-export interface TrinoDatasourceClient extends DatasourceClient {
+export interface TrinoDatasourceClient extends DatasourceClient, TrinoClient {
   options: TrinoDatasourceClientOptions;
-  query(params: QueryRequestParameters, headers?: RequestHeaders): Promise<TrinoDatasourceResponse>;
 }

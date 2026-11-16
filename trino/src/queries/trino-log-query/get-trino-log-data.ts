@@ -10,15 +10,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import type { LogQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
-import type { LogData, LogEntry } from '@perses-dev/spec';
+import type { LogData, LogEntry, Notice } from '@perses-dev/spec';
 
-import type { TrinoClient, TrinoQueryResponse } from '../../model/trino-client';
-import { formatTrinoDateTime, replaceTimeRangePlaceholders } from '../../model/trino-client';
+import type { TrinoClient, TrinoRow } from '../../model/trino-client';
+import {
+  MAX_ROWS,
+  formatTrinoDateTime,
+  parseTrinoTimestamp,
+  replaceTimeRangePlaceholders,
+} from '../../model/trino-client';
 import { DEFAULT_DATASOURCE } from '../constants';
 import type { TrinoLogQuerySpec } from './trino-log-query-types';
+
+/** Candidate names for the log time column, in order of preference, matched case-insensitively. */
+export const LOG_TIME_COLUMNS = ['timestamp', 'log_time', 'time'];
 
 function flattenObject(
   obj: Record<string, unknown>,
@@ -37,40 +44,49 @@ function flattenObject(
   return result;
 }
 
-function convertStreamsToLogs(streams: LogEntry[]): LogData {
-  const entries: LogEntry[] = streams.map((entry) => {
-    const flattened = flattenObject(entry as unknown as Record<string, unknown>);
-
-    if (!flattened['Timestamp'] && flattened['log_time']) {
-      flattened['Timestamp'] = flattened['log_time'];
-    }
-
-    const sortedEntry: Record<string, unknown> = {};
-    Object.keys(flattened)
-      .toSorted((a, b) => a.localeCompare(b))
-      .forEach((key) => {
-        sortedEntry[key] = flattened[key];
-      });
-
-    const line = Object.entries(sortedEntry)
-      .filter(([key]) => key !== 'Timestamp')
-      .map(([key, value]) => `<${key}> ${value === '' || value === null || value === undefined ? '--' : value}`)
-      .join(' ');
-
-    return {
-      timestamp: sortedEntry?.['Timestamp'] as unknown as number,
-      labels: sortedEntry as Record<string, string>,
-      line,
-    } as LogEntry;
-  });
-
-  return {
-    entries,
-    totalCount: entries.length,
-  };
+function findTimeColumn(row: TrinoRow): string | undefined {
+  const keys = Object.keys(row);
+  for (const candidate of LOG_TIME_COLUMNS) {
+    const key = keys.find((name) => name.toLowerCase() === candidate);
+    if (key !== undefined) return key;
+  }
+  return undefined;
 }
 
-export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = async (spec, context) => {
+function formatValue(value: unknown): string {
+  return value === '' || value === null || value === undefined ? '--' : String(value);
+}
+
+function convertRowsToLogs(rows: TrinoRow[]): { logs: LogData; skipped: number } {
+  const firstRow = rows[0];
+  const timeColumn = firstRow && findTimeColumn(firstRow);
+  if (!timeColumn) {
+    return { logs: { entries: [], totalCount: 0 }, skipped: rows.length };
+  }
+
+  const entries: LogEntry[] = [];
+  for (const row of rows) {
+    const timestampMs = parseTrinoTimestamp(row[timeColumn]);
+    if (!Number.isFinite(timestampMs)) continue;
+
+    const flattened = flattenObject(row);
+    const keys = Object.keys(flattened).toSorted((a, b) => a.localeCompare(b));
+    const labels: Record<string, string> = {};
+    for (const key of keys) {
+      labels[key] = formatValue(flattened[key]);
+    }
+    const line = keys
+      .filter((key) => key !== timeColumn)
+      .map((key) => `<${key}> ${formatValue(flattened[key])}`)
+      .join(' ');
+
+    entries.push({ timestamp: timestampMs / 1000, labels, line });
+  }
+
+  return { logs: { entries, totalCount: entries.length }, skipped: rows.length - entries.length };
+}
+
+export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = async (spec, context, abortSignal) => {
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     return {
       logs: { entries: [], totalCount: 0 },
@@ -89,7 +105,7 @@ export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = 
   const endTime = formatTrinoDateTime(end);
   const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
 
-  const response: TrinoQueryResponse = await client.query({
+  const response = await client.query({
     start: startTime,
     end: endTime,
     query: executedQueryString,
@@ -98,11 +114,24 @@ export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = 
     sessionProperties: spec.sessionProperties,
     source: spec.source,
     routingGroup: spec.routingGroup,
+    signal: abortSignal,
   });
+
+  const { logs, skipped } = convertRowsToLogs(response.data ?? []);
+  const notices: Notice[] = [];
+  if (response.truncated) {
+    notices.push({ type: 'warning', message: `Results were truncated to the first ${MAX_ROWS} rows.` });
+  }
+  if (skipped > 0) {
+    notices.push({
+      type: 'warning',
+      message: `${skipped} rows were skipped because they have no parseable time column (${LOG_TIME_COLUMNS.join(', ')}).`,
+    });
+  }
 
   return {
     timeRange: { start, end },
-    logs: convertStreamsToLogs(response.data as LogEntry[]),
+    logs: notices.length > 0 ? { ...logs, metadata: { notices } } : logs,
     metadata: {
       executedQueryString,
     },

@@ -79,7 +79,8 @@ describe('TrinoLogQuery', () => {
   it('should run query with interpolated time range', async () => {
     const response = await TrinoLogQuery.getLogData(
       {
-        query: "SELECT * FROM application_logs WHERE timestamp >= '{start}' AND timestamp <= '{end}'",
+        query:
+          "SELECT * FROM application_logs WHERE event_time >= TIMESTAMP '{start}' AND event_time <= TIMESTAMP '{end}'",
       },
       createStubContext(),
     );
@@ -88,10 +89,83 @@ describe('TrinoLogQuery', () => {
       start: '2025-01-01 00:00:00',
       end: '2025-01-02 00:00:00',
       query:
-        "SELECT * FROM application_logs WHERE timestamp >= '2025-01-01 00:00:00' AND timestamp <= '2025-01-02 00:00:00'",
+        "SELECT * FROM application_logs WHERE event_time >= TIMESTAMP '2025-01-01 00:00:00' AND event_time <= TIMESTAMP '2025-01-02 00:00:00'",
     });
     expect(response.metadata?.executedQueryString).toBe(
-      "SELECT * FROM application_logs WHERE timestamp >= '2025-01-01 00:00:00' AND timestamp <= '2025-01-02 00:00:00'",
+      "SELECT * FROM application_logs WHERE event_time >= TIMESTAMP '2025-01-01 00:00:00' AND event_time <= TIMESTAMP '2025-01-02 00:00:00'",
+    );
+  });
+
+  it('converts rows to log entries using a case-insensitive time column', async () => {
+    (trinoStubClient.query as Mock).mockResolvedValueOnce({
+      status: 'success',
+      data: [
+        {
+          Event_Time: 'ignored',
+          TIMESTAMP: '2025-01-01 00:00:01.500',
+          message: 'hello',
+          attrs: { host: 'a' },
+          tag: '',
+        },
+      ],
+    });
+
+    const response = await TrinoLogQuery.getLogData({ query: 'SELECT 1' }, createStubContext());
+
+    expect(response.logs.entries).toEqual([
+      {
+        timestamp: Date.parse('2025-01-01T00:00:01.500Z') / 1000,
+        labels: {
+          'attrs.host': 'a',
+          Event_Time: 'ignored',
+          message: 'hello',
+          tag: '--',
+          TIMESTAMP: '2025-01-01 00:00:01.500',
+        },
+        line: '<attrs.host> a <Event_Time> ignored <message> hello <tag> --',
+      },
+    ]);
+    expect(response.logs.metadata).toBeUndefined();
+  });
+
+  it('skips rows without a parseable time and warns instead of returning invalid entries', async () => {
+    (trinoStubClient.query as Mock).mockResolvedValueOnce({
+      status: 'success',
+      truncated: true,
+      data: [
+        { log_time: '2025-01-01 00:00:00', message: 'kept' },
+        { log_time: null, message: 'dropped' },
+      ],
+    });
+
+    const response = await TrinoLogQuery.getLogData({ query: 'SELECT 1' }, createStubContext());
+
+    expect(response.logs.entries.map((entry) => entry.labels['message'])).toEqual(['kept']);
+    expect(response.logs.metadata?.notices).toHaveLength(2);
+  });
+
+  it('returns no entries and a warning when no time column exists', async () => {
+    (trinoStubClient.query as Mock).mockResolvedValueOnce({
+      status: 'success',
+      data: [{ event_time: '2025-01-01 00:00:00', message: 'x' }],
+    });
+
+    const response = await TrinoLogQuery.getLogData({ query: 'SELECT 1' }, createStubContext());
+
+    expect(response.logs.entries).toEqual([]);
+    expect(response.logs.metadata?.notices?.[0]?.message).toContain('no parseable time column');
+  });
+
+  it('passes query context fields and the abort signal to the client', async () => {
+    const controller = new AbortController();
+    await TrinoLogQuery.getLogData(
+      { query: 'SELECT 1', catalog: 'iceberg', schema: 'logs', routingGroup: 'adhoc' },
+      createStubContext(),
+      controller.signal,
+    );
+
+    expect(trinoStubClient.query).toHaveBeenLastCalledWith(
+      expect.objectContaining({ catalog: 'iceberg', schema: 'logs', routingGroup: 'adhoc', signal: controller.signal }),
     );
   });
 });
