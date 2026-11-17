@@ -1,0 +1,25 @@
+{
+  "kind": "Canvas",
+  "spec": {
+    "nodes": [
+      {
+        "id": "api",
+        "position": { "x": 0, "y": 0 },
+        "width": 48,
+        "height": 48,
+        "kind": "rectangle",
+        "label": "API",
+        "url": "/projects/demo/dashboards/api?var-instance=$instance"
+      },
+      {
+        "id": "runbook",
+        "position": { "x": 100, "y": 0 },
+        "width": 48,
+        "height": 48,
+        "kind": "text",
+        "label": "Runbook",
+        "url": "https://example.com/runbooks/api"
+      }
+    ]
+  }
+}

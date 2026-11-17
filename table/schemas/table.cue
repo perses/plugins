@@ -49,7 +49,7 @@ spec: close({
 	hide?:              bool
 	cellSettings?: [...#cellSettings]
 	dataLink?: {
-		url:        string
+		url:        common.#linkURL
 		title?:     string
 		openNewTab: bool
 	}

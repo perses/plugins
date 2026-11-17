@@ -26,7 +26,7 @@ import (
 }
 
 #links: {
-	trace?: string
+	trace?: common.#linkURL
 }
 
 kind: "TraceTable"
