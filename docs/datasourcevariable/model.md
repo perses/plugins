@@ -12,4 +12,5 @@ spec:
 - `"LokiDatasource"`
 - `"PyroscopeDatasource"`
 - `"ClickHouseDatasource"`
+- `"TrinoDatasource"`
 - `"VictoriaLogsDatasource"`
