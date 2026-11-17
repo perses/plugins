@@ -277,7 +277,7 @@ describe('TrinoTimeSeriesQuery', () => {
       });
     });
 
-    it('uses an empty label value for null and escapes quotes in the name', async () => {
+    it('leaves a null label out and escapes quotes in the name', async () => {
       const response = await runWithColumns(
         [
           { name: 'time', type: 'timestamp(3)' },
@@ -291,8 +291,8 @@ describe('TrinoTimeSeriesQuery', () => {
       );
 
       expect(response.series).toEqual([
-        { name: '{host=""}', labels: { host: '' }, values: [[t1, 1]] },
         { name: '{host="say \\"hi\\""}', labels: { host: 'say "hi"' }, values: [[t1, 2]] },
+        { name: '{}', labels: {}, values: [[t1, 1]] },
       ]);
     });
 
@@ -373,28 +373,23 @@ describe('TrinoTimeSeriesQuery', () => {
       ]);
     });
 
-    it('merges null and empty-string labels into one series', async () => {
+    it('keeps null and empty-string labels in separate series', async () => {
       const response = await runWithColumns(
         [
           { name: 'time', type: 'timestamp(3)' },
           { name: 'host', type: 'varchar' },
+          { name: 'region', type: 'varchar' },
           { name: 'value', type: 'double' },
         ],
         [
-          { time: '2025-09-09 05:18:00', host: null, value: 1 },
-          { time: '2025-09-09 05:18:00', host: '', value: 2 },
+          { time: '2025-09-09 05:18:00', host: null, region: 'eu', value: 1 },
+          { time: '2025-09-09 05:18:00', host: '', region: 'eu', value: 2 },
         ],
       );
 
       expect(response.series).toEqual([
-        {
-          name: '{host=""}',
-          labels: { host: '' },
-          values: [
-            [t1, 1],
-            [t1, 2],
-          ],
-        },
+        { name: '{host="", region="eu"}', labels: { host: '', region: 'eu' }, values: [[t1, 2]] },
+        { name: '{region="eu"}', labels: { region: 'eu' }, values: [[t1, 1]] },
       ]);
     });
 

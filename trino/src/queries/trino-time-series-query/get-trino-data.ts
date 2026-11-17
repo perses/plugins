@@ -79,12 +79,14 @@ function groupByLabels(rows: TimedRow[], labelColumns: string[]): SeriesGroup[] 
   }
   const groups = new Map<string, SeriesGroup>();
   for (const timedRow of rows) {
-    // null and '' share a key, as Prometheus treats an empty label as an absent one.
-    const key = JSON.stringify(labelColumns.map((name) => labelValue(timedRow.row[name])));
+    // The key keeps null apart from '': merged, two rows at the same time would land in one series.
+    const key = JSON.stringify(labelColumns.map((name) => timedRow.row[name] ?? null));
     let group = groups.get(key);
     if (group === undefined) {
-      const labels = Object.fromEntries(labelColumns.map((name) => [name, labelValue(timedRow.row[name])]));
-      const selector = `{${labelColumns.map((name) => `${name}=${JSON.stringify(labels[name])}`).join(', ')}}`;
+      // A null label is left out, so its series doesn't look like the '' one.
+      const present = labelColumns.filter((name) => (timedRow.row[name] ?? null) !== null);
+      const labels = Object.fromEntries(present.map((name) => [name, labelValue(timedRow.row[name])]));
+      const selector = `{${present.map((name) => `${name}=${JSON.stringify(labels[name])}`).join(', ')}}`;
       group = { key, labels, selector, rows: [] };
       groups.set(key, group);
     }

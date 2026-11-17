@@ -61,10 +61,11 @@ Time series queries need a column named `time`. Number-typed columns (`tinyint`,
 a label. Rows are grouped by their label values into one series per value column and label set, and null or non-numeric
 values in value columns become gaps. An extra timestamp, date, or string id column therefore splits the result into one
 series per value: drop it, or cast it to a number. A numeric id column is a value series; cast it to `varchar` to use it
-as a label, and cast numbers stored as strings to `double` to plot them. A null label is the same as an empty one, as in
-Prometheus. Series are ordered by their labels and capped at 1000; the rest are dropped with a warning. Series are named
-like Prometheus series: with one value column `{host="a", region="eu"}`, with several `avg_cpu{host="a"}` (whose labels
-also carry `__name__="avg_cpu"`), and with no label columns the column name.
+as a label, and cast numbers stored as strings to `double` to plot them. A null label is left out of the series labels
+and kept apart from an empty one; use `coalesce(region, '')` to merge them. Series are ordered by their labels and
+capped at 1000; the rest are dropped with a warning. Series are named like Prometheus series: with one value column
+`{host="a", region="eu"}`, with several `avg_cpu{host="a"}` (whose labels also carry `__name__="avg_cpu"`), and with no
+label columns the column name.
 
 Log queries take the entry time from the first column named `timestamp`, `log_time`, or `time` (case-insensitive). Every
 column becomes a label and is also rendered in the log line.
