@@ -21,8 +21,7 @@ import (
 #kind: "PyroscopeDatasource"
 
 kind: #kind
-spec: {
-	datasource.#HTTPDatasourceSpec
+spec: datasource.#HTTPDatasourceSpec & {
 	minStep?: =~#durationRegex
 }
 

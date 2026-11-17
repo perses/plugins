@@ -21,8 +21,6 @@ import (
 #kind: "OpenSearchDatasource"
 
 kind: #kind
-spec: {
-	datasource.#HTTPDatasourceSpec
-}
+spec: datasource.#HTTPDatasourceSpec
 
 #selector: common.#datasourceSelector & {_kind: #kind}
