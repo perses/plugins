@@ -62,16 +62,35 @@ export function EditorItemsPanel(): ReactElement {
     state: { selectedIds },
     selectItems,
   } = useEditorContext();
-  const { svgRef, toCanvasPoint, transform, isPanning, fitView, resetPan } = useZoom();
+  const {
+    svgRef,
+    containerRef: zoomContainerRef,
+    toCanvasPoint,
+    transform,
+    isPanning,
+    fitView,
+    resetPan,
+    zoomIn,
+    zoomOut,
+    scale,
+    canZoomIn,
+    canZoomOut,
+  } = useZoom();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
-  const containerCallbackRef = useCallback((node: HTMLDivElement | null): void => {
-    containerRef.current = node;
-    if (node) {
-      setContainerWidth(node.clientWidth);
-    }
-  }, []);
+  const containerCallbackRef = useCallback(
+    (node: HTMLDivElement | null): void => {
+      containerRef.current = node;
+      // Also drive useZoom's container ref so a modified wheel over the editor canvas can't zoom the
+      // page (keeps parity with the display panel; the editor has no on-screen controls overlay).
+      zoomContainerRef(node);
+      if (node) {
+        setContainerWidth(node.clientWidth);
+      }
+    },
+    [zoomContainerRef],
+  );
   const [firstSelectedId] = selectedIds;
   const selectedNode = selectedIds.size === 1 && firstSelectedId ? (nodeById.get(firstSelectedId) ?? null) : null;
   const selectedEdge = selectedIds.size === 1 && firstSelectedId ? (edgeById.get(firstSelectedId) ?? null) : null;
@@ -113,8 +132,8 @@ export function EditorItemsPanel(): ReactElement {
   const specNodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
 
   const zoomValue = useMemo(
-    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan }),
-    [toCanvasPoint, transform, isPanning, fitView, resetPan],
+    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut }),
+    [toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut],
   );
 
   return (

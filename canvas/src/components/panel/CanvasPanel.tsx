@@ -28,13 +28,19 @@ import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLaye
 import { PanelEdgeLayer } from './PanelEdgeLayer';
 import { PanelNodeLayer } from './PanelNodeLayer';
 import { legendHeight, LEGEND_WIDTH, ThresholdLegend } from './ThresholdLegend';
+import { ZoomControls } from './ZoomControls';
 
-const SVG_STYLE_BASE = { display: 'block' } as const;
+// `userSelect: none` stops a left-button drag from starting a text selection that would preempt
+// d3-zoom's pan tracking. Native `touchAction` is intentionally left at its default: pan/zoom here
+// is mouse-only (`shouldStartGesture` rejects touch events), so suppressing touch-action would only
+// break the page scroll a touchscreen user expects when swiping over the panel, with nothing gained.
+const SVG_STYLE_BASE = { display: 'block', userSelect: 'none' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
 const LEGEND_MARGIN = 8;
 
 interface PanelSvgProps {
   svgRef: (node: SVGSVGElement | null) => void;
+  containerRef: (node: HTMLElement | null) => void;
   spec: CanvasSpec;
   contentDimensions: CanvasProps['contentDimensions'];
   seriesByQueryIndex: Map<number, TimeSeries>;
@@ -45,6 +51,7 @@ interface PanelSvgProps {
 
 function PanelSvg({
   svgRef,
+  containerRef,
   spec,
   contentDimensions,
   seriesByQueryIndex,
@@ -52,7 +59,7 @@ function PanelSvg({
   seriesByItemId,
   reverseSeriesByItemId,
 }: PanelSvgProps): ReactElement {
-  const { transform, isPanning, fitView, resetPan } = useZoomContext();
+  const { transform, isPanning, fitView, resetPan, zoomIn, zoomOut, canZoomIn, canZoomOut } = useZoomContext();
 
   const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
   const backgrounds = useMemo(() => spec.backgrounds ?? [], [spec.backgrounds]);
@@ -60,20 +67,25 @@ function PanelSvg({
   const width = contentDimensions?.width ?? 600;
   const height = contentDimensions?.height ?? 400;
 
+  const fitToNodes = useCallback((): void => {
+    const boundingBox = nodeBoundingBox(nodes);
+    if (boundingBox) {
+      fitView(boundingBox, width, height);
+    }
+  }, [fitView, nodes, width, height]);
+
   const handleDoubleClick = useCallback(
     (event: MouseEvent<SVGSVGElement>): void => {
-      switch (resolveMouseShortcut(event)?.id) {
-        case 'fitView': {
-          const boundingBox = nodeBoundingBox(nodes);
-          if (boundingBox) fitView(boundingBox, width, height);
+      switch (resolveMouseShortcut(event, 'view')?.id) {
+        case 'fitView':
+          fitToNodes();
           return;
-        }
         case 'resetView':
           resetPan();
           return;
       }
     },
-    [fitView, resetPan, nodes, width, height],
+    [fitToNodes, resetPan],
   );
 
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;
@@ -88,36 +100,46 @@ function PanelSvg({
   const svgStyle = useMemo(() => ({ ...SVG_STYLE_BASE, cursor: isPanning ? 'grabbing' : 'grab' }), [isPanning]);
 
   return (
-    <svg ref={svgRef} width={width} height={height} style={svgStyle} onDoubleClick={handleDoubleClick}>
-      <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
-      <g transform={transform.toString()}>
-        <BackgroundLayer backgrounds={backgrounds} />
-        <PanelNodeLayer
-          spec={spec}
-          seriesByQueryIndex={seriesByQueryIndex}
-          k={transform.k}
-          paletteColors={paletteColors}
-          seriesByItemId={seriesByItemId}
-        />
-        <PanelEdgeLayer
-          spec={spec}
-          seriesByQueryIndex={seriesByQueryIndex}
-          k={transform.k}
-          paletteColors={paletteColors}
-          seriesByItemId={seriesByItemId}
-          reverseSeriesByItemId={reverseSeriesByItemId}
-        />
-      </g>
+    <div ref={containerRef} style={{ position: 'relative', width, height }}>
+      <svg ref={svgRef} width={width} height={height} style={svgStyle} onDoubleClick={handleDoubleClick}>
+        <GlobalBackgroundLayer backgrounds={backgrounds} width={width} height={height} />
+        <g transform={transform.toString()}>
+          <BackgroundLayer backgrounds={backgrounds} />
+          <PanelNodeLayer
+            spec={spec}
+            seriesByQueryIndex={seriesByQueryIndex}
+            k={transform.k}
+            paletteColors={paletteColors}
+            seriesByItemId={seriesByItemId}
+          />
+          <PanelEdgeLayer
+            spec={spec}
+            seriesByQueryIndex={seriesByQueryIndex}
+            k={transform.k}
+            paletteColors={paletteColors}
+            seriesByItemId={seriesByItemId}
+            reverseSeriesByItemId={reverseSeriesByItemId}
+          />
+        </g>
 
-      {showLegend ? (
-        <ThresholdLegend
-          thresholds={thresholds}
-          format={spec.format}
-          paletteColors={paletteColors}
-          position={{ x: legendX, y: legendY }}
-        />
-      ) : null}
-    </svg>
+        {showLegend ? (
+          <ThresholdLegend
+            thresholds={thresholds}
+            format={spec.format}
+            paletteColors={paletteColors}
+            position={{ x: legendX, y: legendY }}
+          />
+        ) : null}
+      </svg>
+      <ZoomControls
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onFit={fitToNodes}
+        onReset={resetPan}
+        canZoomIn={canZoomIn}
+        canZoomOut={canZoomOut}
+      />
+    </div>
   );
 }
 
@@ -180,17 +202,31 @@ export function CanvasPanel(props: CanvasProps): ReactElement | null {
     return { ...spec, nodes, edges: generated.edges };
   }, [spec, generated, positions, props.contentDimensions?.width, props.contentDimensions?.height]);
 
-  const { svgRef, toCanvasPoint, transform, isPanning, fitView, resetPan } = useZoom();
+  const {
+    svgRef,
+    containerRef,
+    toCanvasPoint,
+    transform,
+    isPanning,
+    fitView,
+    resetPan,
+    zoomIn,
+    zoomOut,
+    scale,
+    canZoomIn,
+    canZoomOut,
+  } = useZoom({ interactionMode: 'view' });
 
   const zoomValue = useMemo(
-    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan }),
-    [toCanvasPoint, transform, isPanning, fitView, resetPan],
+    () => ({ toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut }),
+    [toCanvasPoint, transform, isPanning, fitView, resetPan, zoomIn, zoomOut, scale, canZoomIn, canZoomOut],
   );
 
   return (
     <ZoomProvider value={zoomValue}>
       <PanelSvg
         svgRef={svgRef}
+        containerRef={containerRef}
         spec={effectiveSpec}
         contentDimensions={props.contentDimensions}
         seriesByQueryIndex={seriesByQueryIndex}
