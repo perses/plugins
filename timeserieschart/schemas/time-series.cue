@@ -62,6 +62,7 @@ spec: close({
 		max: >=min
 	}
 	logBase?: 2 | 10
+	axisCentered?: bool
 }
 
 #querySettings: [...{

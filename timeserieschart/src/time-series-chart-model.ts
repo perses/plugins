@@ -11,21 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
-import type { LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
-import type { Definition } from '@perses-dev/spec';
-import { schemeCategory10, schemeDark2, schemeSet1, schemeSet2, schemeSet3, schemeTableau10 } from 'd3-scale-chromatic';
+import type { FormatOptions, ThresholdOptions } from "@perses-dev/components";
+import type {
+  LegendSpecOptions,
+  OptionsEditorProps,
+} from "@perses-dev/plugin-system";
+import type { Definition } from "@perses-dev/spec";
+import {
+  schemeCategory10,
+  schemeDark2,
+  schemeSet1,
+  schemeSet2,
+  schemeSet3,
+  schemeTableau10,
+} from "d3-scale-chromatic";
 
 /**
  * Line style options for time series charts.
  */
-export type LineStyleType = 'solid' | 'dashed' | 'dotted';
+export type LineStyleType = "solid" | "dashed" | "dotted";
 
 /**
  * The schema for a TimeSeriesChart panel.
  */
 export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOptions> {
-  kind: 'TimeSeriesChart';
+  kind: "TimeSeriesChart";
 }
 
 /**
@@ -42,7 +52,7 @@ export interface TimeSeriesChartOptions {
 
 export interface QuerySettingsOptions {
   queryIndex: number;
-  colorMode?: 'fixed' | 'fixed-single';
+  colorMode?: "fixed" | "fixed-single";
   colorValue?: string;
   lineStyle?: LineStyleType;
   areaOpacity?: number;
@@ -56,7 +66,8 @@ export interface QuerySettingsOptions {
   stack?: boolean;
 }
 
-export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
+export type TimeSeriesChartOptionsEditorProps =
+  OptionsEditorProps<TimeSeriesChartOptions>;
 
 export interface TimeSeriesChartYAxisOptions {
   show?: boolean;
@@ -65,13 +76,14 @@ export interface TimeSeriesChartYAxisOptions {
   min?: number;
   max?: number;
   logBase?: LOG_BASE;
+  axisCentered?: boolean;
 }
 
 export interface TooltipSpecOptions {
   enablePinning: boolean;
 }
 
-export type TimeSeriesChartPaletteMode = 'auto' | 'categorical';
+export type TimeSeriesChartPaletteMode = "auto" | "categorical";
 
 export const CATEGORICAL_PALETTE_SCHEMES = {
   category10: schemeCategory10,
@@ -84,39 +96,44 @@ export const CATEGORICAL_PALETTE_SCHEMES = {
 
 export type CategoricalPaletteName = keyof typeof CATEGORICAL_PALETTE_SCHEMES;
 
-export const CATEGORICAL_PALETTE_NAMES = Object.keys(CATEGORICAL_PALETTE_SCHEMES) as CategoricalPaletteName[];
+export const CATEGORICAL_PALETTE_NAMES = Object.keys(
+  CATEGORICAL_PALETTE_SCHEMES,
+) as CategoricalPaletteName[];
 
 export interface CategoricalSchemeMetadata {
   label: string;
 }
 
-export const CATEGORICAL_SCHEME_METADATA: Record<CategoricalPaletteName, CategoricalSchemeMetadata> = {
-  category10: { label: 'D3 Category 10' },
-  tableau10: { label: 'Tableau 10' },
-  set1: { label: 'ColorBrewer Set 1' },
-  set2: { label: 'ColorBrewer Set 2' },
-  set3: { label: 'ColorBrewer Set 3' },
-  dark2: { label: 'ColorBrewer Dark 2' },
+export const CATEGORICAL_SCHEME_METADATA: Record<
+  CategoricalPaletteName,
+  CategoricalSchemeMetadata
+> = {
+  category10: { label: "D3 Category 10" },
+  tableau10: { label: "Tableau 10" },
+  set1: { label: "ColorBrewer Set 1" },
+  set2: { label: "ColorBrewer Set 2" },
+  set3: { label: "ColorBrewer Set 3" },
+  dark2: { label: "ColorBrewer Dark 2" },
 };
 
 export type TimeSeriesChartPaletteOptions =
-  | { mode: 'auto' }
+  | { mode: "auto" }
   | {
-      mode: 'categorical';
+      mode: "categorical";
       // Omitting falls back to the ECharts theme palette.
       name?: CategoricalPaletteName;
     };
 
 export const PALETTE_DROPDOWN_TOOLTIP =
-  'Auto derives a unique color from the series name — same name always maps to the same color across panels. ' +
-  'Categorical palettes assign colors from a fixed set by series order.';
+  "Auto derives a unique color from the series name — same name always maps to the same color across panels. " +
+  "Categorical palettes assign colors from a fixed set by series order.";
 
 export type TimeSeriesChartVisualOptions = {
-  display?: 'line' | 'bar';
+  display?: "line" | "bar";
   lineWidth?: number;
   lineStyle?: LineStyleType;
   areaOpacity?: number;
-  showPoints?: 'auto' | 'always';
+  showPoints?: "auto" | "always";
   palette?: TimeSeriesChartPaletteOptions;
   pointRadius?: number;
   stack?: StackOptions;
@@ -124,31 +141,32 @@ export type TimeSeriesChartVisualOptions = {
 };
 
 export const DEFAULT_FORMAT: FormatOptions = {
-  unit: 'decimal',
+  unit: "decimal",
   shortValues: true,
 };
 
 export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   show: true,
-  label: '',
+  label: "",
   format: DEFAULT_FORMAT,
   min: undefined,
   max: undefined,
   logBase: undefined,
+  axisCentered: false,
 };
 
 export const Y_AXIS_CONFIG = {
-  show: { label: 'Show' },
-  label: { label: 'Label' },
-  unit: { label: 'Unit' },
-  min: { label: 'Min' },
-  max: { label: 'Max' },
-  logBase: { label: 'Log Base' },
+  show: { label: "Show" },
+  label: { label: "Label" },
+  unit: { label: "Unit" },
+  min: { label: "Min" },
+  max: { label: "Max" },
+  logBase: { label: "Log Base" },
 };
 
-export const DEFAULT_DISPLAY = 'line';
+export const DEFAULT_DISPLAY = "line";
 export const DEFAULT_LINE_WIDTH = 1.25;
-export const DEFAULT_LINE_STYLE = 'solid';
+export const DEFAULT_LINE_STYLE = "solid";
 export const DEFAULT_AREA_OPACITY = 0;
 // How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.
 export const POINT_SIZE_OFFSET = 1.5;
@@ -170,66 +188,68 @@ export const THRESHOLD_PLOT_INTERVAL = 15;
 
 export const VISUAL_CONFIG = {
   lineWidth: {
-    label: 'Line Width',
-    testId: 'slider-line-width',
+    label: "Line Width",
+    testId: "slider-line-width",
     min: 0.25,
     max: 3,
     step: 0.25,
   },
   lineStyle: {
-    label: 'Line Style',
+    label: "Line Style",
   },
   pointRadius: {
-    label: 'Point Radius',
-    testId: 'slider-point-radius',
+    label: "Point Radius",
+    testId: "slider-point-radius",
     min: 0,
     max: 6,
     step: 0.25,
   },
   areaOpacity: {
-    label: 'Area Opacity',
-    testId: 'slider-area-opacity',
+    label: "Area Opacity",
+    testId: "slider-area-opacity",
     min: 0,
     max: 1,
     step: 0.05,
   },
   stack: {
-    label: 'Stack Series',
+    label: "Stack Series",
   },
   colorPalette: {
-    label: 'Color Palette',
+    label: "Color Palette",
   },
   connectNulls: {
-    label: 'Connect Nulls',
+    label: "Connect Nulls",
   },
 };
 
 // None is equivalent to undefined since stack is optional
-export type StackOptions = 'none' | 'all'; // TODO: add percent option support
+export type StackOptions = "none" | "all"; // TODO: add percent option support
 
 export const STACK_CONFIG = {
-  none: { label: 'None' },
-  all: { label: 'All' },
+  none: { label: "None" },
+  all: { label: "All" },
   // TODO: enable option after 'Percent' implemented
   // percent: { label: 'Percent', disabled: true }, // hidden since not implemented yet
 };
 
-export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {
-  return {
-    id: id as StackOptions,
-    ...config,
-  };
-});
+export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(
+  ([id, config]) => {
+    return {
+      id: id as StackOptions,
+      ...config,
+    };
+  },
+);
 
 export const LINE_STYLE_CONFIG = {
-  solid: { label: 'Solid' },
-  dashed: { label: 'Dashes' },
-  dotted: { label: 'Dots' },
+  solid: { label: "Solid" },
+  dashed: { label: "Dashes" },
+  dotted: { label: "Dots" },
 };
 
 export const OPACITY_CONFIG = {
-  label: 'Opacity',
-  testId: 'slider-opacity',
+  label: "Opacity",
+  testId: "slider-opacity",
   min: 0,
   max: 1,
   step: 0.05,
@@ -239,17 +259,20 @@ export const OPACITY_CONFIG = {
 export type LOG_BASE = undefined | 2 | 10;
 
 // Single source of truth for log base configuration
-export const LOG_BASE_CONFIG: Record<string, { label: string; log: LOG_BASE }> = {
-  none: { label: 'None', log: undefined },
-  '2': { label: '2', log: 2 },
-  '10': { label: '10', log: 10 },
-};
+export const LOG_BASE_CONFIG: Record<string, { label: string; log: LOG_BASE }> =
+  {
+    none: { label: "None", log: undefined },
+    "2": { label: "2", log: 2 },
+    "10": { label: "10", log: 10 },
+  };
 
 // Options array for SettingsAutocomplete
-export const LOG_BASE_OPTIONS = Object.entries(LOG_BASE_CONFIG).map(([id, config]) => ({
-  id: id as string,
-  ...config,
-}));
+export const LOG_BASE_OPTIONS = Object.entries(LOG_BASE_CONFIG).map(
+  ([id, config]) => ({
+    id: id as string,
+    ...config,
+  }),
+);
 
 // Both of these constants help produce a value that is LESS THAN the initial value.
 // For positive values, we multiply by a number less than 1 to get this outcome.
