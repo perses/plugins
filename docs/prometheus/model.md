@@ -23,7 +23,26 @@ spec:
   # will also query the /api/v1/query_exemplars endpoint.
   exemplars:
     enable: <boolean>
+    # Links shown on each exemplar, e.g. to open its trace in a tracing UI.
+    links:
+      - <Exemplar link specification> # Optional
 ```
+
+### Exemplar link specification
+
+```yaml
+# Text of the link. The URL is displayed when not set.
+name: <string> # Optional
+
+# URL template of the link. ${traceId} is replaced with the trace ID of the exemplar.
+url: <string>
+
+# Name of the exemplar label that holds the trace ID, e.g. trace_id.
+# The link is not shown on exemplars that don't have this label.
+traceIDLabel: <string>
+```
+
+See [exemplar links](./README.md#linking-exemplars-to-traces) for more details.
 
 ### HTTP Proxy specification
 
