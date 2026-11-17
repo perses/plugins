@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { sanitizeUrl } from '@perses-dev/components';
 import { replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
 import type { TimeSeries } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
@@ -84,7 +85,11 @@ export function PanelNodeLayer({
 
   const handleNodeClick = useCallback(
     (url: string) => {
-      window.open(replaceVariablesInString(url, variableValues), '_blank', 'noopener,noreferrer');
+      // The URL is verified once interpolated, as a variable can provide its scheme (e.g. javascript:).
+      const href = sanitizeUrl(replaceVariablesInString(url, variableValues));
+      if (href) {
+        window.open(href, '_blank', 'noopener,noreferrer');
+      }
     },
     [variableValues],
   );

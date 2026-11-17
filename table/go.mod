@@ -1,9 +1,9 @@
 module github.com/perses/plugins/table
 
-go 1.27.2
+go 1.27.3
 
 require (
-	github.com/perses/perses v0.55.0
+	github.com/perses/perses v0.55.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 

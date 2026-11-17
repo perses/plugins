@@ -24,5 +24,13 @@ export interface PrometheusTimeSeriesQuerySpec {
   minStep?: DurationString;
   resolution?: number;
   instant?: boolean;
+  /**
+   * Per-query toggle for the exemplars feature. Exemplars must be enabled on the
+   * selected datasource (`exemplars.enable`); this toggle cannot turn them on for
+   * a datasource that has them disabled. `undefined` (Auto) follows the datasource
+   * setting, `true` (On) fetches them when the datasource allows it, and `false`
+   * (Off) skips fetching for this query. Exemplars are only fetched for range queries.
+   */
+  enableExemplars?: boolean;
   datasource?: DatasourceSelectValue<PrometheusDatasourceSelector>;
 }

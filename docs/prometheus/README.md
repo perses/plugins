@@ -134,7 +134,7 @@ See also technical docs related to this plugin:
 
 The Prometheus package supports displaying exemplars on the [Time Series Chart](../timeserieschart/README.md) panel:
 
-- When exemplars are enabled on the datasource (see below), the `PrometheusTimeSeriesQuery` plugin calls the Prometheus [`/api/v1/query_exemplars`](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars) endpoint in parallel with every range query, and attaches the returned exemplars to the series matching their labels.
+- When exemplars are enabled on the datasource (see below), the `PrometheusTimeSeriesQuery` plugin calls the Prometheus [`/api/v1/query_exemplars`](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars) endpoint in parallel with each range query that has not turned them off (see [per-query toggle](#per-query-toggle)), and attaches the returned exemplars to the series matching their labels.
 - On the chart, each exemplar is rendered as a diamond marker placed at its value and timestamp, using the color of the series it belongs to. Clicking a marker opens a dialog with its metadata: the labels of the series it belongs to, the exemplar labels (like `trace_id`), its value and its timestamp (e.g. to copy a trace ID and open the corresponding trace in your tracing UI).
 - A failed exemplars request never impacts the panel itself: the query results are displayed without exemplars.
 
@@ -156,6 +156,25 @@ Some requirements and caveats to be aware of:
 - The Prometheus instance (or any Prometheus-compatible backend) must have the [exemplar storage](https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage) enabled, and your telemetry pipeline must actually attach exemplars to the samples (e.g. via the OTLP receiver).
 - Exemplars are only fetched for range queries: queries executed in instant mode never display exemplars.
 - When relying on the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature, make sure the `/api/v1/query_exemplars` endpoint is allowed so exemplars can be fetched through the Perses server.
+
+### Per-query toggle
+
+Each `PrometheusTimeSeriesQuery` has an **Exemplars** option in the query editor, with three modes:
+
+- **Auto** (default, `enableExemplars` omitted): follows the datasource setting.
+- **On** (`enableExemplars: true`): fetches exemplars for this query.
+- **Off** (`enableExemplars: false`): never fetches exemplars for this query, e.g. to save the extra request on a panel that doesn't need them.
+
+The toggle can only narrow the datasource setting, not widen it: **On** still requires exemplars to be enabled on the datasource, and a range query. When the datasource has exemplars disabled, or the query runs in instant mode, no exemplars are fetched whatever the toggle says.
+
+```yaml
+kind: "PrometheusTimeSeriesQuery"
+spec:
+  query: histogram_quantile(0.99, sum by (le) (rate(http_server_duration_bucket[5m])))
+  enableExemplars: false
+```
+
+When using the Dashboard-as-Code Go lib, use the `query.EnableExemplars(false)` option.
 
 ## Annotation (`PrometheusPromQLAnnotation`)
 
