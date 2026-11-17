@@ -14,7 +14,7 @@ import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
 import type { Notice, TimeSeries } from '@perses-dev/spec';
 
-import type { TrinoClient, TrinoQueryResponse, TrinoRow } from '../../model/trino-client';
+import type { TrinoClient, TrinoColumn, TrinoRow } from '../../model/trino-client';
 import {
   MAX_ROWS,
   formatTrinoDateTime,
@@ -39,68 +39,80 @@ function toTimedRows(rows: TrinoRow[]): TimedRow[] {
     .filter(({ timestamp }) => Number.isFinite(timestamp));
 }
 
-const NUMERIC_TYPE = /^(tinyint|smallint|integer|bigint|real|double|decimal|number)\b/;
+// Booleans stay values (plotted as 0/1), as before label columns existed.
+const VALUE_TYPE = /^(tinyint|smallint|integer|bigint|real|double|decimal|number|boolean)\b/;
+export const MAX_SERIES = 1000;
+
+interface SeriesGroup {
+  key: string;
+  labels: Record<string, string>;
+  selector: string;
+  rows: TimedRow[];
+}
 
 function labelValue(value: unknown): string {
   if (value === null || value === undefined) return '';
   return typeof value === 'object' ? JSON.stringify(value) : String(value);
 }
 
-// lacksNumericColumns is true when column types are known and none of the non-time columns is a number.
-function lacksNumericColumns(columns: TrinoQueryResponse['columns']): boolean {
-  if (!columns?.length) return false;
-  return !columns.some(({ name, type }) => name !== TIME_COLUMN && NUMERIC_TYPE.test(type));
-}
-
-function seriesName(valueColumn: string, labels: Record<string, string>, multipleValueColumns: boolean): string {
-  const labelNames = Object.keys(labels);
-  if (labelNames.length === 0) {
-    return valueColumn;
-  }
-  const selector = `{${labelNames.map((name) => `${name}=${JSON.stringify(labels[name])}`).join(', ')}}`;
-  return multipleValueColumns ? `${valueColumn}${selector}` : selector;
-}
-
-function buildTimeSeries(rows: TimedRow[], columns: TrinoQueryResponse['columns']): TimeSeries[] {
-  const firstRow = rows[0]?.row;
-  if (!firstRow) {
-    return [];
-  }
-
+// classifyColumns splits the non-time columns into value and label columns by their Trino type.
+function classifyColumns(
+  firstRow: TrinoRow,
+  columns: TrinoColumn[] | undefined,
+): { valueColumns: string[]; labelColumns: string[] } {
+  const valueColumns: string[] = [];
+  const labelColumns: string[] = [];
   const typed = (columns ?? []).filter(({ name }) => name !== TIME_COLUMN);
-  const hasTypes = typed.length > 0;
-  const valueColumns = hasTypes
-    ? typed.filter(({ type }) => NUMERIC_TYPE.test(type)).map(({ name }) => name)
-    : Object.keys(firstRow).filter((key) => key !== TIME_COLUMN);
-  const labelColumns = hasTypes ? typed.filter(({ type }) => !NUMERIC_TYPE.test(type)).map(({ name }) => name) : [];
-
-  const groups = new Map<string, { labels: Record<string, string>; rows: TimedRow[] }>();
-  for (const timedRow of rows) {
-    const labels = Object.fromEntries(labelColumns.map((name) => [name, labelValue(timedRow.row[name])]));
-    // The key keeps null apart from '' so the two never share a series.
-    const key = JSON.stringify(labelColumns.map((name) => timedRow.row[name] ?? null));
-    const group = groups.get(key) ?? { labels, rows: [] };
-    group.rows.push(timedRow);
-    groups.set(key, group);
+  if (typed.length === 0) {
+    return { valueColumns: Object.keys(firstRow).filter((key) => key !== TIME_COLUMN), labelColumns };
   }
+  for (const { name, type } of typed) {
+    (VALUE_TYPE.test(type) ? valueColumns : labelColumns).push(name);
+  }
+  return { valueColumns, labelColumns };
+}
 
-  return valueColumns
-    .flatMap((valueColumn) =>
-      Array.from(groups.values()).map((group): TimeSeries => {
-        const series: TimeSeries = {
-          name: seriesName(valueColumn, group.labels, valueColumns.length > 1),
-          values: group.rows.map(({ timestamp, row }): [number, number | null] => [
-            timestamp,
-            toTimeSeriesValue(row[valueColumn]),
-          ]),
-        };
-        if (labelColumns.length > 0) {
-          series.labels = group.labels;
-        }
-        return series;
-      }),
-    )
-    .filter((series) => series.values.some(([, value]) => value !== null));
+// groupByLabels groups rows by their label values, sorted by key so the series order is stable across refreshes.
+function groupByLabels(rows: TimedRow[], labelColumns: string[]): SeriesGroup[] {
+  if (labelColumns.length === 0) {
+    return [{ key: '', labels: {}, selector: '', rows }];
+  }
+  const groups = new Map<string, SeriesGroup>();
+  for (const timedRow of rows) {
+    // null and '' share a key, as Prometheus treats an empty label as an absent one.
+    const key = JSON.stringify(labelColumns.map((name) => labelValue(timedRow.row[name])));
+    let group = groups.get(key);
+    if (group === undefined) {
+      const labels = Object.fromEntries(labelColumns.map((name) => [name, labelValue(timedRow.row[name])]));
+      const selector = `{${labelColumns.map((name) => `${name}=${JSON.stringify(labels[name])}`).join(', ')}}`;
+      group = { key, labels, selector, rows: [] };
+      groups.set(key, group);
+    }
+    group.rows.push(timedRow);
+  }
+  return Array.from(groups.values()).toSorted((a, b) => (a.key < b.key ? -1 : Number(a.key > b.key)));
+}
+
+function buildTimeSeries(rows: TimedRow[], valueColumns: string[], labelColumns: string[]): TimeSeries[] {
+  const groups = groupByLabels(rows, labelColumns);
+  const multipleValueColumns = valueColumns.length > 1;
+  return valueColumns.flatMap((valueColumn) =>
+    groups.flatMap(({ labels, selector, rows: groupRows }): TimeSeries[] => {
+      let hasValue = false;
+      const values = groupRows.map(({ timestamp, row }): [number, number | null] => {
+        const value = toTimeSeriesValue(row[valueColumn]);
+        hasValue ||= value !== null;
+        return [timestamp, value];
+      });
+      if (!hasValue) return [];
+      if (labelColumns.length === 0) return [{ name: valueColumn, values }];
+      return [
+        multipleValueColumns
+          ? { name: `${valueColumn}${selector}`, labels: { __name__: valueColumn, ...labels }, values }
+          : { name: selector, labels: { ...labels }, values },
+      ];
+    }),
+  );
 }
 
 function toTimeSeriesValue(value: unknown): number | null {
@@ -188,12 +200,21 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<TrinoTimeSeriesQuerySpec>[
     });
   }
 
-  const series = buildTimeSeries(rows, response.columns);
-  if (rows.length > 0 && lacksNumericColumns(response.columns)) {
+  const firstRow = rows[0]?.row;
+  const { valueColumns, labelColumns } = classifyColumns(firstRow ?? {}, response.columns);
+  let series = firstRow ? buildTimeSeries(rows, valueColumns, labelColumns) : [];
+  if (firstRow && (response.columns?.length ?? 0) > 0 && valueColumns.length === 0) {
     notices.push({
       type: 'warning',
       message: 'No numeric columns: cast value columns to a number type such as double.',
     });
+  }
+  if (series.length > MAX_SERIES) {
+    notices.push({
+      type: 'warning',
+      message: `Results were split into ${series.length} series; only the first ${MAX_SERIES} are shown. Drop high-cardinality label columns or cast them to a number.`,
+    });
+    series = series.slice(0, MAX_SERIES);
   }
 
   return {

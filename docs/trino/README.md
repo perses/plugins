@@ -21,8 +21,8 @@ See also technical docs related to this plugin:
 
 ## Time Series Query (`TrinoTimeSeriesQuery`)
 
-The Trino time series query runs a SQL query that returns a `time` column. Number-typed columns are values and every
-other column is a label that splits the rows into series. Use `{start}` and `{end}` to filter on the dashboard time
+The Trino time series query runs a SQL query that returns a `time` column. Number-typed and boolean columns are
+values and every other column is a label that splits the rows into series. Use `{start}` and `{end}` to filter on the dashboard time
 range.
 
 See also technical docs related to this plugin:

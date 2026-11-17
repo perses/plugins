@@ -22,6 +22,7 @@ import type { Mock } from 'vitest';
 import type { TrinoDatasourceSpec } from '../../datasources';
 import { TrinoDatasource } from '../../datasources';
 import type { TrinoQueryResponse } from '../../model/trino-client';
+import { MAX_SERIES } from './get-trino-data';
 import { TrinoTimeSeriesQuery } from './TrinoQuery';
 
 const datasource: TrinoDatasourceSpec = {
@@ -269,7 +270,11 @@ describe('TrinoTimeSeriesQuery', () => {
         'max_memory{host="a"}',
         'max_memory{host="b"}',
       ]);
-      expect(response.series[3]).toEqual({ name: 'max_memory{host="b"}', labels: { host: 'b' }, values: [[t1, 20]] });
+      expect(response.series[3]).toEqual({
+        name: 'max_memory{host="b"}',
+        labels: { __name__: 'max_memory', host: 'b' },
+        values: [[t1, 20]],
+      });
     });
 
     it('uses an empty label value for null and escapes quotes in the name', async () => {
@@ -363,12 +368,12 @@ describe('TrinoTimeSeriesQuery', () => {
       );
 
       expect(response.series.map((series) => series.labels)).toEqual([
-        { host: 'a,b', region: 'c' },
         { host: 'a', region: 'b,c' },
+        { host: 'a,b', region: 'c' },
       ]);
     });
 
-    it('keeps null and empty-string labels in separate series, both shown as empty', async () => {
+    it('merges null and empty-string labels into one series', async () => {
       const response = await runWithColumns(
         [
           { name: 'time', type: 'timestamp(3)' },
@@ -382,8 +387,14 @@ describe('TrinoTimeSeriesQuery', () => {
       );
 
       expect(response.series).toEqual([
-        { name: '{host=""}', labels: { host: '' }, values: [[t1, 1]] },
-        { name: '{host=""}', labels: { host: '' }, values: [[t1, 2]] },
+        {
+          name: '{host=""}',
+          labels: { host: '' },
+          values: [
+            [t1, 1],
+            [t1, 2],
+          ],
+        },
       ]);
     });
 
@@ -401,9 +412,75 @@ describe('TrinoTimeSeriesQuery', () => {
       );
 
       expect(response.series.map((series) => series.labels)).toEqual([
-        { tags: '{"env":"prod"}' },
         { tags: '{"env":"dev"}' },
+        { tags: '{"env":"prod"}' },
       ]);
+    });
+
+    it('keeps the series order when rows tied on time come back swapped', async () => {
+      const columns = [
+        { name: 'time', type: 'timestamp(3)' },
+        { name: 'host', type: 'varchar' },
+        { name: 'value', type: 'double' },
+      ];
+      const rowA = { time: '2025-09-09 05:18:00', host: 'a', value: 1 };
+      const rowB = { time: '2025-09-09 05:18:00', host: 'b', value: 2 };
+
+      const forward = await runWithColumns(columns, [rowA, rowB]);
+      const swapped = await runWithColumns(columns, [rowB, rowA]);
+
+      expect(swapped.series).toEqual(forward.series);
+      expect(forward.series.map((series) => series.name)).toEqual(['{host="a"}', '{host="b"}']);
+    });
+
+    it('caps the number of series and warns', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'request_id', type: 'varchar' },
+          { name: 'value', type: 'double' },
+        ],
+        Array.from({ length: MAX_SERIES + 1 }, (_, i) => ({
+          time: '2025-09-09 05:18:00',
+          request_id: String(i).padStart(5, '0'),
+          value: i,
+        })),
+      );
+
+      expect(response.series).toHaveLength(MAX_SERIES);
+      expect(response.series[0]?.labels).toEqual({ request_id: '00000' });
+      expect(response.metadata?.notices).toEqual([
+        {
+          type: 'warning',
+          message: `Results were split into ${MAX_SERIES + 1} series; only the first ${MAX_SERIES} are shown. Drop high-cardinality label columns or cast them to a number.`,
+        },
+      ]);
+    });
+
+    it('plots boolean columns as 0 and 1', async () => {
+      const response = await runWithColumns(
+        [
+          { name: 'time', type: 'timestamp(3)' },
+          { name: 'host', type: 'varchar' },
+          { name: 'is_up', type: 'boolean' },
+        ],
+        [
+          { time: '2025-09-09 05:18:00', host: 'a', is_up: true },
+          { time: '2025-09-09 05:19:00', host: 'a', is_up: false },
+        ],
+      );
+
+      expect(response.series).toEqual([
+        {
+          name: '{host="a"}',
+          labels: { host: 'a' },
+          values: [
+            [t1, 1],
+            [t2, 0],
+          ],
+        },
+      ]);
+      expect(response.metadata?.notices).toBeUndefined();
     });
 
     it('keeps the wide format when there are no label columns', async () => {

@@ -91,8 +91,8 @@ Perses supports time series queries for Trino: `TrinoTimeSeriesQuery`.
 ```yaml
 kind: "TrinoTimeSeriesQuery"
 spec:
-  # `query` is the SQL expression. It must return a `time` column; number-typed columns are values and every other column
-  # is a label that splits the result into series.
+  # `query` is the SQL expression. It must return a `time` column; number-typed and boolean columns are values and every
+  # other column is a label that splits the result into series.
   # `{start}` and `{end}` are replaced by the dashboard time range in UTC.
   query: <string>
 
