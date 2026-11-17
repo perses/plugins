@@ -48,6 +48,10 @@ export function PyroscopeDatasourceEditor(props: PyroscopeDatasourceEditorProps)
             method: 'POST',
           },
           {
+            endpointPattern: '/querier.v1.QuerierService/Series',
+            method: 'POST',
+          },
+          {
             endpointPattern: '/querier.v1.QuerierService/ProfileTypes',
             method: 'POST',
           },
