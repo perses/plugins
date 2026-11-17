@@ -175,7 +175,7 @@ labels:
   - <string> # Optional
 ```
 
-With the `labels` mode, set a non-empty `labels` list: without `labels`, the alerts are deduplicated by fingerprint, and with an empty list, all the alerts are merged into a single row.
+With the `labels` mode, set a non-empty `labels` list to deduplicate by labels: without `labels` or with an empty list, the alerts are deduplicated by fingerprint.
 
 ### Label color mapping specification
 
@@ -242,7 +242,7 @@ spec:
 
 ### Silence column specification
 
-The `status`, `matchers` and `comment` columns are always displayed first, and the table is initially sorted by status. The entries of `columns` named `status`, `matchers` or `comment` are ignored: each other entry adds a column after them.
+The `status`, `matchers` and `comment` columns are always displayed first, and the table is initially sorted by status unless an entry of `columns` sets `sort`. The entries of `columns` named `status`, `matchers` or `comment` are ignored: each other entry adds a column after them.
 
 ```yaml
 # Field of the silence displayed in the column:
@@ -255,11 +255,12 @@ header: <string> # Optional
 # Defaults to true.
 enableSorting: <boolean> # Optional
 
-# No effect for now: the initial sort comes from the first column with `sort`,
-# which is always the built-in `status` column.
+# Initial sort of the table on this column, instead of the status. Only the first column with `sort`
+# and sorting enabled is used.
 sort: <enum = "asc" | "desc"> # Optional
 
 # Defaults to "date" for startsAt, endsAt and updatedAt, and to "alphabetical" otherwise.
+# The duration column is always sorted by the length of the silence.
 sortMode: <enum = "alphabetical" | "date" | "status"> # Optional
 ```
 
@@ -272,6 +273,7 @@ spec:
     - name: createdBy
     - name: endsAt
       header: Expires
+      sort: asc
   allowedActions:
     - expire
 ```

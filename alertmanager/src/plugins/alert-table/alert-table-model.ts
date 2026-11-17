@@ -82,7 +82,7 @@ export interface GroupSummary {
 /**
  * Deduplicate alerts based on the configured deduplication mode.
  * - 'fingerprint' (default): Uses the alert's fingerprint field.
- * - 'labels': Uses a combination of specified label values.
+ * - 'labels': Uses a combination of specified label values, or the fingerprint when no label is specified.
  */
 export function deduplicateAlerts(alerts: Alert[], config: AlertDeduplicationConfig): DeduplicationResult {
   if (alerts.length === 0 || config.mode === 'none') return { alerts, duplicateCounts: new Map() };
@@ -93,7 +93,7 @@ export function deduplicateAlerts(alerts: Alert[], config: AlertDeduplicationCon
 
   for (const alert of alerts) {
     let key: string;
-    if (config.mode === 'labels' && config.labels) {
+    if (config.mode === 'labels' && config.labels?.length) {
       key = config.labels.map((l) => `${l}=${alert.labels[l] ?? ''}`).join(',');
     } else if (alert.id) {
       key = alert.id;
