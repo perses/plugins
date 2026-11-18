@@ -19,7 +19,7 @@ import { DEFAULT_SORT } from './bar-chart-model';
 import type { BarChartData } from './BarChartBase';
 
 const fieldLabelPattern = /\$\{__field\.labels\.([A-Za-z_][A-Za-z0-9_]*)\}/g;
-const fieldParamPattern = /[?&]([^=&]+)=\$\{__field\.labels\.[^}]+\}/g;
+const fieldParamPattern = /[?&]([^=&]+)=([^&#]*\$\{__field\.labels\.[^}]+\}[^&#]*)/g;
 const allSentinel = '$__all';
 
 export function fieldLinkParams(template: string): string[] {
@@ -52,38 +52,78 @@ export function barLinkHref(
   return withVars.replace(fieldLabelPattern, (_match, name: string) => encodeURIComponent(labels[name] ?? ''));
 }
 
-// withLiveDashboardVars prefers the address bar. Interpolation turns All into .*
-// and a one-element list into (Value). keepKeys are the field-label params.
-export function withLiveDashboardVars(url: string, search: string, keepKeys: readonly string[] = []): string {
-  const current = new URLSearchParams(search);
-  const base = new URL(url, 'http://perses.local');
-  for (const key of new Set(base.searchParams.keys())) {
-    if (!key.startsWith('var-') || keepKeys.includes(key)) {
+// dashboardVariableParams are the var-* parameters whose value is that same dashboard variable.
+function dashboardVariableParams(template: string): Set<string> {
+  const query = template.split('#')[0]?.split('?')[1] ?? '';
+  const keys = new Set<string>();
+  for (const part of query.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq <= 0) {
       continue;
     }
-    const live = current.get(key);
-    if (live !== null) {
-      base.searchParams.set(key, live);
+    const key = part.slice(0, eq);
+    if (!key.startsWith('var-')) {
       continue;
     }
-    if (base.searchParams.get(key) === '.*') {
-      base.searchParams.set(key, allSentinel);
+    const name = key.slice('var-'.length).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const value = part.slice(eq + 1);
+    if (new RegExp(String.raw`^\$${name}$|^\$\{${name}(?::[^}]+)?\}$`).test(value)) {
+      keys.add(key);
     }
   }
-  return `${base.pathname}${base.search}`.replace(/%24/g, '$');
+  return keys;
+}
+
+function isAbsoluteUrl(url: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:/i.test(url);
+}
+
+// withQuery edits the query string and keeps a fragment. An absolute link also keeps its origin.
+function withQuery(url: string, edit: (params: URLSearchParams) => void): string {
+  const base = new URL(url, 'http://perses.local');
+  edit(base.searchParams);
+  const path = `${base.pathname}${base.search.replace(/%24/g, '$')}${base.hash}`;
+  return isAbsoluteUrl(url) ? `${base.origin}${path}` : path;
+}
+
+// withLiveDashboardVars copies the address bar onto a dashboard variable of the same name.
+// Interpolation turns All into .* and a one-element list into (Value). keepKeys are field-label params.
+export function withLiveDashboardVars(
+  url: string,
+  search: string,
+  keepKeys: readonly string[] = [],
+  template = '',
+): string {
+  const current = new URLSearchParams(search);
+  const own = dashboardVariableParams(template);
+  return withQuery(url, (params) => {
+    for (const key of new Set(params.keys())) {
+      if (!key.startsWith('var-') || keepKeys.includes(key)) {
+        continue;
+      }
+      const live = current.get(key);
+      if (live !== null && own.has(key)) {
+        params.set(key, live);
+        continue;
+      }
+      if (params.get(key) === '.*') {
+        params.set(key, allSentinel);
+      }
+    }
+  });
 }
 
 // withLocationTime keeps the current dashboard range on an in-app link.
 export function withLocationTime(url: string, search: string): string {
   const current = new URLSearchParams(search);
-  const base = new URL(url, 'http://perses.local');
-  for (const key of ['start', 'end', 'tz']) {
-    const value = current.get(key);
-    if (value && !base.searchParams.has(key)) {
-      base.searchParams.set(key, value);
+  return withQuery(url, (params) => {
+    for (const key of ['start', 'end', 'tz']) {
+      const value = current.get(key);
+      if (value && !params.has(key)) {
+        params.set(key, value);
+      }
     }
-  }
-  return `${base.pathname}${base.search}`.replace(/%24/g, '$');
+  });
 }
 
 export function calculatePercentages(data: BarChartData[]): BarChartData[] {

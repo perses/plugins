@@ -73,6 +73,7 @@ describe('barLinkHref', () => {
 
   it('names the field-label query params', () => {
     expect(fieldLinkParams(template)).toEqual(['var-instance']);
+    expect(fieldLinkParams('/d?var-instance=node-${__field.labels.instance}')).toEqual(['var-instance']);
   });
 
   it('prefers the address bar and keeps the series label', () => {
@@ -80,6 +81,7 @@ describe('barLinkHref', () => {
       '/projects/perses/dashboards/nodes?var-instance=node-a&var-namespace=.*&var-job=(demo)&var-pod=.*',
       '?var-instance=other&var-namespace=$__all&var-job=demo&start=1h',
       fieldLinkParams(template),
+      template,
     );
     expect(href).toContain('var-instance=node-a');
     expect(href).toContain('var-namespace=$__all');
@@ -89,10 +91,46 @@ describe('barLinkHref', () => {
     expect(href).not.toContain('other');
   });
 
+  it('keeps a literal and a variable of another name', () => {
+    const href = withLiveDashboardVars(
+      '/d?var-job=backend&var-stack=api',
+      '?var-job=frontend&var-stack=frontend',
+      [],
+      '/d?var-job=backend&var-stack=$other',
+    );
+    expect(href).toContain('var-job=backend');
+    expect(href).toContain('var-stack=api');
+  });
+
+  it('keeps a field placeholder written inside the parameter value', () => {
+    const source = '/d?var-instance=node-${__field.labels.instance}';
+    const href = withLiveDashboardVars(
+      '/d?var-instance=node-a',
+      '?var-instance=other',
+      fieldLinkParams(source),
+      source,
+    );
+    expect(href).toContain('var-instance=node-a');
+  });
+
   it('keeps the current time range', () => {
     expect(withLocationTime('/projects/perses/dashboards/nodes?var-instance=node-a', '?start=1h&tz=UTC')).toBe(
       '/projects/perses/dashboards/nodes?var-instance=node-a&start=1h&tz=UTC',
     );
+  });
+
+  it('keeps an absolute origin and a fragment', () => {
+    expect(withLocationTime('https://monitor.example/explore?var-instance=node-a#details', '?start=1h')).toBe(
+      'https://monitor.example/explore?var-instance=node-a&start=1h#details',
+    );
+    expect(
+      withLiveDashboardVars(
+        'https://monitor.example/explore?var-job=demo#details',
+        '?var-job=frontend',
+        [],
+        'https://monitor.example/explore?var-job=$job#details',
+      ),
+    ).toBe('https://monitor.example/explore?var-job=frontend#details');
   });
 });
 

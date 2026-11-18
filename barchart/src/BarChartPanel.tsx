@@ -56,9 +56,17 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
         const label = seriesData.formattedName ?? '';
         let href: string | undefined;
         if (seriesLink) {
-          href = barLinkHref(seriesLink.url, seriesData.labels ?? {}, variables, seriesLink.renderVariables !== false);
+          const renderVariables = seriesLink.renderVariables !== false;
+          href = barLinkHref(seriesLink.url, seriesData.labels ?? {}, variables, renderVariables);
           if (typeof window !== 'undefined') {
-            href = withLiveDashboardVars(href, window.location.search, fieldLinkParams(seriesLink.url));
+            if (renderVariables) {
+              href = withLiveDashboardVars(
+                href,
+                window.location.search,
+                fieldLinkParams(seriesLink.url),
+                seriesLink.url,
+              );
+            }
             href = withLocationTime(href, window.location.search);
           }
         }
