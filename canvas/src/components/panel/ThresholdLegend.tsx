@@ -26,6 +26,7 @@ const LABEL_OFFSET = SWATCH_SIZE + 6;
 const PADDING = 8;
 const FONT_SIZE = 11;
 const FONT_WEIGHT = 400;
+const TITLE_HEIGHT = 16;
 export const LEGEND_WIDTH = 110;
 const TEXT_MAX_WIDTH = LEGEND_WIDTH - PADDING - LABEL_OFFSET - PADDING;
 const NO_SELECT_STYLE = { userSelect: 'none' } as const;
@@ -40,8 +41,8 @@ function truncateLabel(label: string): string {
   return `${s}…`;
 }
 
-export function legendHeight(rowCount: number): number {
-  return rowCount * ROW_HEIGHT + PADDING * 2;
+export function legendHeight(rowCount: number, hasTitle = false): number {
+  return rowCount * ROW_HEIGHT + PADDING * 2 + (hasTitle ? TITLE_HEIGHT : 0);
 }
 
 interface ThresholdLegendProps {
@@ -49,9 +50,17 @@ interface ThresholdLegendProps {
   format: FormatOptions | undefined;
   paletteColors: string[];
   position: Point;
+  /** Optional heading shown above the swatches (e.g. "Nodes" / "Edges"). */
+  title?: string;
 }
 
-export function ThresholdLegend({ thresholds, format, paletteColors, position }: ThresholdLegendProps): ReactElement {
+export function ThresholdLegend({
+  thresholds,
+  format,
+  paletteColors,
+  position,
+  title,
+}: ThresholdLegendProps): ReactElement {
   const muiTheme = useTheme();
   const defaultColor = thresholds.defaultColor ?? paletteColors[0] ?? muiTheme.palette.success.main;
   const steps = useMemo(() => thresholds.steps ?? [], [thresholds.steps]);
@@ -72,21 +81,35 @@ export function ThresholdLegend({ thresholds, format, paletteColors, position }:
     [steps, paletteColors, defaultColor, format],
   );
 
+  const titleOffset = title ? TITLE_HEIGHT : 0;
+
   return (
     <g>
       <rect
         x={position.x}
         y={position.y}
         width={LEGEND_WIDTH}
-        height={legendHeight(rows.length)}
+        height={legendHeight(rows.length, !!title)}
         fill={muiTheme.palette.background.paper}
         fillOpacity={0.9}
         stroke={muiTheme.palette.divider}
         strokeWidth={1}
         rx={4}
       />
+      {title ? (
+        <text
+          x={position.x + PADDING}
+          y={position.y + PADDING + FONT_SIZE}
+          fontSize={FONT_SIZE}
+          fontWeight={600}
+          fill={muiTheme.palette.text.primary}
+          style={NO_SELECT_STYLE}
+        >
+          {title}
+        </text>
+      ) : null}
       {rows.map((row, i) => {
-        const ry = position.y + PADDING + i * ROW_HEIGHT + (ROW_HEIGHT - SWATCH_SIZE) / 2;
+        const ry = position.y + PADDING + titleOffset + i * ROW_HEIGHT + (ROW_HEIGHT - SWATCH_SIZE) / 2;
         return (
           <g key={row.key}>
             <rect x={position.x + PADDING} y={ry} width={SWATCH_SIZE} height={SWATCH_SIZE} fill={row.color} rx={2} />

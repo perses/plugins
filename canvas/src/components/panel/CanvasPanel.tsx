@@ -22,6 +22,7 @@ import { useZoom } from '../../hooks/useZoom';
 import type { CanvasProps, CanvasSpec, Point } from '../../model';
 import { buildGraphFromQueries } from '../../utils/graphGeneration';
 import { layoutGraph } from '../../utils/graphLayout';
+import { scaleFromThresholds } from '../../utils/panelUtils';
 import { nodeBoundingBox } from '../../utils/resizeUtils';
 import { resolveMouseShortcut } from '../../utils/shortcuts';
 import { BackgroundLayer, GlobalBackgroundLayer } from '../shared/BackgroundLayer';
@@ -37,6 +38,7 @@ import { ZoomControls } from './ZoomControls';
 const SVG_STYLE_BASE = { display: 'block', userSelect: 'none' } as const;
 const EMPTY_THRESHOLDS: ThresholdOptions = {};
 const LEGEND_MARGIN = 8;
+const LEGEND_GAP = 8;
 
 interface PanelSvgProps {
   svgRef: (node: SVGSVGElement | null) => void;
@@ -61,8 +63,37 @@ function PanelSvg({
 }: PanelSvgProps): ReactElement {
   const { transform, isPanning, fitView, resetPan, zoomIn, zoomOut, canZoomIn, canZoomOut } = useZoomContext();
 
-  const nodes = useMemo(() => spec.nodes ?? [], [spec.nodes]);
-  const backgrounds = useMemo(() => spec.backgrounds ?? [], [spec.backgrounds]);
+  // Resolve node sizes up front so both layers share one geometry: nodes render at their scaled
+  // size and edges clip to that same scaled boundary. Scaling only widens/heightens a node, which
+  // keeps it centered on its position.
+  const sizedSpec = useMemo(() => {
+    const steps = spec.nodeThresholdSizes;
+    const specNodes = spec.nodes ?? [];
+    if (!steps?.length || !specNodes.some((n) => n.sizeMode === 'threshold')) {
+      return spec;
+    }
+    const nextNodes = specNodes.map((node) => {
+      if (node.sizeMode !== 'threshold') {
+        return node;
+      }
+      const series =
+        seriesByItemId?.get(node.id) ??
+        (node.queryIndex !== undefined ? seriesByQueryIndex.get(node.queryIndex) : undefined);
+      const lastValue = series?.values[series.values.length - 1]?.[1];
+      if (lastValue === null || lastValue === undefined) {
+        return node;
+      }
+      const scale = scaleFromThresholds(lastValue, steps);
+      if (scale === 1) {
+        return node;
+      }
+      return Object.assign({}, node, { width: node.width * scale, height: node.height * scale });
+    });
+    return { ...spec, nodes: nextNodes };
+  }, [spec, seriesByItemId, seriesByQueryIndex]);
+
+  const nodes = useMemo(() => sizedSpec.nodes ?? [], [sizedSpec.nodes]);
+  const backgrounds = useMemo(() => sizedSpec.backgrounds ?? [], [sizedSpec.backgrounds]);
 
   const width = contentDimensions?.width ?? 600;
   const height = contentDimensions?.height ?? 400;
@@ -90,12 +121,21 @@ function PanelSvg({
 
   const showLegend = spec.legend !== undefined && spec.thresholds !== undefined;
   const thresholds = spec.thresholds ?? EMPTY_THRESHOLDS;
+  // Show a separate edge legend only when edges use their own color scheme; otherwise they share the
+  // node colors and a single legend already describes both.
+  const edgeThresholds = spec.edgeThresholds;
   const legendPosition = spec.legend?.position ?? 'bottom';
+  const nodeLegendRows = (spec.thresholds?.steps?.length ?? 0) + 1;
+  // Node and edge legends carry a title only when both are shown; a lone legend has none.
+  const hasLegendTitles = edgeThresholds !== undefined;
+  const nodeLegendHeight = legendHeight(nodeLegendRows, hasLegendTitles);
   const legendX = legendPosition === 'right' ? width - LEGEND_WIDTH - LEGEND_MARGIN : LEGEND_MARGIN;
-  const legendY =
+  const legendY = legendPosition === 'right' ? LEGEND_MARGIN : height - nodeLegendHeight - LEGEND_MARGIN;
+  // Place the edge legend beside the node legend on the bottom, or stacked below it on the right.
+  const edgeLegendPos =
     legendPosition === 'right'
-      ? LEGEND_MARGIN
-      : height - legendHeight((spec.thresholds?.steps?.length ?? 0) + 1) - LEGEND_MARGIN;
+      ? { x: legendX, y: legendY + nodeLegendHeight + LEGEND_GAP }
+      : { x: legendX + LEGEND_WIDTH + LEGEND_GAP, y: legendY };
 
   const svgStyle = useMemo(() => ({ ...SVG_STYLE_BASE, cursor: isPanning ? 'grabbing' : 'grab' }), [isPanning]);
 
@@ -106,14 +146,14 @@ function PanelSvg({
         <g transform={transform.toString()}>
           <BackgroundLayer backgrounds={backgrounds} />
           <PanelNodeLayer
-            spec={spec}
+            spec={sizedSpec}
             seriesByQueryIndex={seriesByQueryIndex}
             k={transform.k}
             paletteColors={paletteColors}
             seriesByItemId={seriesByItemId}
           />
           <PanelEdgeLayer
-            spec={spec}
+            spec={sizedSpec}
             seriesByQueryIndex={seriesByQueryIndex}
             k={transform.k}
             paletteColors={paletteColors}
@@ -128,6 +168,16 @@ function PanelSvg({
             format={spec.format}
             paletteColors={paletteColors}
             position={{ x: legendX, y: legendY }}
+            title={edgeThresholds ? 'Nodes' : undefined}
+          />
+        ) : null}
+        {showLegend && edgeThresholds ? (
+          <ThresholdLegend
+            thresholds={edgeThresholds}
+            format={spec.format}
+            paletteColors={paletteColors}
+            position={edgeLegendPos}
+            title="Edges"
           />
         ) : null}
       </svg>
