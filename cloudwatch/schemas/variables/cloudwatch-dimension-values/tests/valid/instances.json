@@ -1,0 +1,11 @@
+{
+  "kind": "CloudWatchDimensionValuesVariable",
+  "spec": {
+    "namespace": "AWS/EC2",
+    "metricName": "CPUUtilization",
+    "dimensionKey": "InstanceId",
+    "dimensions": {
+      "AutoScalingGroupName": "$asg"
+    }
+  }
+}
