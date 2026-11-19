@@ -58,7 +58,7 @@ export async function query(
   }
 
   let finalQuery = replaceTimeRangePlaceholders(params.query.trim(), params.start, params.end);
-  if (!finalQuery.toUpperCase().includes('FORMAT')) {
+  if (!/\bFORMAT\s+(?!ASC\b|DESC\b)\w+\s*;?$/i.test(finalQuery)) {
     finalQuery += ' FORMAT JSON';
   }
 
@@ -78,11 +78,7 @@ export async function query(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('ClickHouse error response:', errorText);
-      return {
-        status: 'error',
-        data: [],
-      };
+      throw new Error(`${response.status} ${response.statusText}: ${errorText}`);
     }
 
     const body = await response.json();
