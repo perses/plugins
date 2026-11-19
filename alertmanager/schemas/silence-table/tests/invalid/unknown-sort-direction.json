@@ -1,0 +1,11 @@
+{
+  "kind": "SilenceTable",
+  "spec": {
+    "columns": [
+      {
+        "name": "startsAt",
+        "sort": "ascending"
+      }
+    ]
+  }
+}

@@ -3,7 +3,6 @@
   "spec": {
     "deduplication": {
       "mode": "fingerprint"
-    },
-    "allowedActions": []
+    }
   }
 }

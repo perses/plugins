@@ -1,0 +1,6 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "allowedActions": []
+  }
+}
