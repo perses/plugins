@@ -42,6 +42,8 @@ export type TrinoRow = Record<string, unknown>;
 export interface TrinoQueryResponse {
   status: 'success' | 'error';
   data: TrinoRow[];
+  /** Column names and Trino types from the statement API, one per name; the last duplicate wins, as in `data`. */
+  columns?: TrinoColumn[];
   /** True when the result was cut at MAX_ROWS and the remaining pages were cancelled. */
   truncated?: boolean;
 }
@@ -50,8 +52,9 @@ export interface TrinoClient {
   query: (params: TrinoQueryParams, headers?: RequestHeaders) => Promise<TrinoQueryResponse>;
 }
 
-interface TrinoColumn {
+export interface TrinoColumn {
   name: string;
+  type: string;
 }
 
 interface TrinoError {
@@ -219,6 +222,7 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
     return {
       status: 'success',
       data: rows.slice(0, MAX_ROWS).map((row) => Object.fromEntries(names.map((name, index) => [name, row[index]]))),
+      columns: Array.from(new Map((columns ?? []).map(({ name, type }) => [name, { name, type }])).values()),
       truncated,
     };
   } catch (e) {

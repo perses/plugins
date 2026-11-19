@@ -114,9 +114,51 @@ describe('Trino client', () => {
     },
   );
 
+  it('returns the column names and types', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        columns: [
+          { name: 'host', type: 'varchar' },
+          { name: 'value', type: 'decimal(10,2)' },
+        ],
+        data: [['a', '1.50']],
+      }),
+    });
+
+    const result = await query(
+      { query: 'SELECT 1' },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.columns).toEqual([
+      { name: 'host', type: 'varchar' },
+      { name: 'value', type: 'decimal(10,2)' },
+    ]);
+  });
+
+  it('keeps one column per name, the last one winning like the row data', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        columns: [
+          { name: 'value', type: 'varchar' },
+          { name: 'value', type: 'double' },
+        ],
+        data: [['x', 1]],
+      }),
+    });
+
+    const result = await query(
+      { query: 'SELECT 1' },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.columns).toEqual([{ name: 'value', type: 'double' }]);
+    expect(result.data).toEqual([{ value: 1 }]);
+  });
+
   it('posts the interpolated query with the configured headers', async () => {
     const fetchMock = trinoServer({
-      [`POST ${DIRECT}/v1/statement`]: page({ columns: [{ name: 'answer' }], data: [[42]] }),
+      [`POST ${DIRECT}/v1/statement`]: page({ columns: [{ name: 'answer', type: 'integer' }], data: [[42]] }),
     });
 
     const result = await query(
@@ -133,7 +175,12 @@ describe('Trino client', () => {
       { datasourceUrl: DIRECT, headers: { 'X-Trino-User': 'alice' }, fetch: fetchMock as unknown as typeof fetch },
     );
 
-    expect(result).toEqual({ status: 'success', data: [{ answer: 42 }], truncated: false });
+    expect(result).toEqual({
+      status: 'success',
+      data: [{ answer: 42 }],
+      columns: [{ name: 'answer', type: 'integer' }],
+      truncated: false,
+    });
     const [, init] = fetchMock.mock.calls[0]!;
     expect(init?.body).toBe("SELECT 42 WHERE TIMESTAMP '2025-01-01 00:00:00' < TIMESTAMP '2025-01-02 00:00:00'");
     const headers = new Headers(init?.headers);
