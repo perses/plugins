@@ -228,7 +228,8 @@ export function transformTimeline(
   for (const point of series?.[0]?.points ?? []) {
     const offsetSeconds = Number(point.timestamp) / MILLISECONDS - startSeconds;
     const index = Math.floor(offsetSeconds / stepSeconds);
-    if (index >= 0 && index < samples.length) {
+    // An aligned end point can occupy the slot immediately after the existing samples.
+    if (sampleCount > 0 && index >= 0 && index <= sampleCount) {
       samples[index] = point.value;
     }
   }
