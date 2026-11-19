@@ -13,7 +13,7 @@
 
 import type { Theme } from '@mui/material';
 import { Box, Typography, useTheme } from '@mui/material';
-import type { FormatOptions, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import type { FormatOptions, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { formatValue, Table, transformData, useSelection } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import type { ActionOptions, PanelData, PanelProps, VariableStateMap } from '@perses-dev/plugin-system';
@@ -141,11 +141,11 @@ function InlineGaugeCellWithRange({
   );
 }
 
-function resolveGaugeFillColor(
+function resolveCellConfig(
   value: unknown,
   globalCellSettings: CellSettings[],
   columnCellSettings: CellSettings[] | undefined,
-): string | undefined {
+): TableCellConfig | undefined {
   let cellConfig = evaluateConditionalFormatting(value, globalCellSettings);
   if (columnCellSettings?.length) {
     const columnCellConfig = evaluateConditionalFormatting(value, columnCellSettings);
@@ -153,6 +153,15 @@ function resolveGaugeFillColor(
       cellConfig = columnCellConfig;
     }
   }
+  return cellConfig;
+}
+
+function resolveGaugeFillColor(
+  value: unknown,
+  globalCellSettings: CellSettings[],
+  columnCellSettings: CellSettings[] | undefined,
+): string | undefined {
+  const cellConfig = resolveCellConfig(value, globalCellSettings, columnCellSettings);
   return cellConfig?.backgroundColor ?? cellConfig?.textColor;
 }
 
@@ -480,6 +489,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
 
     for (const key of keys) {
       const formatOption = columnsFormat?.[key];
+      const columnCellSettings = spec.columnSettings?.find((col) => col.name === key)?.cellSettings;
       uniqueValues[key] = [];
       const usedValues: Map<string, true> = new Map();
       for (const row of data) {
@@ -492,16 +502,18 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         }
 
         if (typeof val === 'string' || typeof val === 'number') {
+          const cellConfig = resolveCellConfig(val, spec.cellSettings ?? [], columnCellSettings);
           uniqueValues[key].push({
             original: val,
-            formatted: formatOption && typeof val === 'number' ? formatValue(val, formatOption) : val,
+            formatted:
+              cellConfig?.text || (formatOption && typeof val === 'number' ? formatValue(val, formatOption) : val),
           });
           usedValues.set(String(val), true);
         }
       }
     }
     return uniqueValues;
-  }, [data, keys, columnsFormat]);
+  }, [data, keys, columnsFormat, spec.cellSettings, spec.columnSettings]);
 
   const gaugeRangeByColumn = useMemo(() => {
     const result: Record<string, GaugeRange> = {};
