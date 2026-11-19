@@ -1,0 +1,102 @@
+{
+  "name": "@perses-dev/azure-plugin",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
+    "lint": "oxlint src",
+    "test": "cross-env LC_ALL=C TZ=UTC vitest run",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "peerDependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@hookform/resolvers": "^5.9.1",
+    "@perses-dev/components": "^0.56.0-beta.0",
+    "@perses-dev/dashboards": "^0.56.0-beta.0",
+    "@perses-dev/explore": "^0.56.0-beta.0",
+    "@perses-dev/plugin-system": "^0.56.0-beta.0",
+    "@perses-dev/client": "^0.56.0-beta.0",
+    "@perses-dev/spec": "^0.3.0",
+    "@tanstack/react-query": "^5.105.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "echarts": "6.1.0",
+    "immer": "^11.2.9",
+    "lodash": "^4.17.21",
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0",
+    "react-hook-form": "^7.87.0",
+    "react-router-dom": "^5 || ^6 || ^7",
+    "use-resize-observer": "^10.0.0"
+  },
+  "devDependencies": {
+  },
+  "files": [
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
+  ],
+  "perses": {
+    "schemasPath": "schemas",
+    "metadata": {
+      "name": "Azure",
+      "registry": "perses-dev"
+    },
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "Azure Resource Manager Datasource"
+          },
+          "name": "AzureResourceManagerDatasource"
+        }
+      },
+      {
+        "kind": "JsonQuery",
+        "spec": {
+          "display": {
+            "name": "Azure Resource Graph KQL Query"
+          },
+          "name": "AzureResourceGraphKqlQuery"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "Azure Resource Graph KQL Variable"
+          },
+          "name": "AzureResourceGraphKqlVariable"
+        }
+      },
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "Azure Regional Metrics Datasource"
+          },
+          "name": "AzureRegionalMetricsDatasource"
+        }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "display": {
+            "name": "Azure Metrics Batch Query"
+          },
+          "name": "AzureMetricsBatchQuery"
+        }
+      }
+    ]
+  }
+}

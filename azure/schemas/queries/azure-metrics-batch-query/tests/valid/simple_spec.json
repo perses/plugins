@@ -1,0 +1,21 @@
+{
+  "kind": "AzureMetricsBatchQuery",
+  "spec": {
+    "datasource": {
+      "kind": "AzureRegionalMetricsDatasource",
+      "name": "my-datasource"
+    },
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceIds": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg"],
+    "metricNamespace": "Microsoft.Compute/virtualMachines",
+    "metricNames": ["Percentage CPU"],
+    "aggregation": ["average", "count", "maximum", "minimum", "total"],
+    "filter": "tagName eq 'value'",
+    "interval": "PT1M",
+    "singlePoint": false,
+    "flattenMetrics": false,
+    "top": 10,
+    "orderBy": "total desc",
+    "rollupBy": "tagName"
+  }
+}
