@@ -1,5 +1,5 @@
-github.com/perses/common v0.32.0 h1:AWguYTc/RnOrcpVxbQR0tfG/4Bhuf/H5zqkM5AHm73A=
-github.com/perses/common v0.32.0/go.mod h1:wyQPbWVN8dI7h9lTWZQM5qwivFZ9yqa6YzNmqaTgkEI=
+github.com/perses/common v0.33.0 h1:TXGYw84xn/ZeTUy6P4Gkd0iHSlb4rIO6tzcqD4pfrug=
+github.com/perses/common v0.33.0/go.mod h1:WOXuYHSGjcfk50Q8pFdYlEOObIjRbpVVxB+s3Gr6pcg=
 github.com/perses/perses v0.55.1 h1:FuXS5KB1gT4OGx/GJS7u/UVhZ1aGqVlDRSjIzEaYXcY=
 github.com/perses/perses v0.55.1/go.mod h1:/8Ow2NFrG3ViGK0KgTau6L9a1WVLpB293oQ5x5Bhe50=
 github.com/sirupsen/logrus v1.10.2 h1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=
