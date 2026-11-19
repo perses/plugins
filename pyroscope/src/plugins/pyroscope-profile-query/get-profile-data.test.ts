@@ -233,6 +233,7 @@ describe('getProfileData', () => {
         points: [
           { timestamp: '1718100000000', value: 1 },
           { timestamp: '1718100015000', value: 2 },
+          { timestamp: '1718103600000', value: 3 },
         ],
       },
     ];
@@ -250,10 +251,11 @@ describe('getProfileData', () => {
     expect(timeline).toBeDefined();
     expect(timeline?.startTime).toBe(1_718_100_000);
     expect(timeline?.durationDelta).toBe(15);
-    expect(timeline?.samples).toHaveLength(240);
+    expect(timeline?.samples).toHaveLength(241);
     expect(timeline?.samples[0]).toBe(1);
     expect(timeline?.samples[1]).toBe(2);
-    expect(timeline?.samples.slice(2)).toEqual(Array(238).fill(0));
+    expect(timeline?.samples.slice(2, 240)).toEqual(Array(238).fill(0));
+    expect(timeline?.samples[240]).toBe(3);
   });
 
   it('propagates a rejection if either request fails', async () => {
@@ -390,7 +392,7 @@ describe('transformFlameGraph', () => {
 });
 
 describe('transformTimeline', () => {
-  // 1_600_000_000_000 ms .. 1_600_000_000_000 + 50_000 ms, at a 10s step -> 5 buckets.
+  // A 50s window at a 10s step has 5 intervals and 6 endpoints.
   const START_MS = 1_600_000_000_000;
   const END_MS = START_MS + 50_000;
   const STEP_SECONDS = 10;
@@ -439,6 +441,17 @@ describe('transformTimeline', () => {
     expect(result.samples).toEqual([0, 0, 9, 0, 0]);
   });
 
+  it('retains the sample at the end of an aligned range', () => {
+    const points = [0, 15, 30, 45, 60].map((seconds, index) => ({
+      timestamp: String(START_MS + seconds * 1_000),
+      value: index + 1,
+    }));
+
+    expect(transformTimeline([{ labels: [], points }], START_MS, START_MS + 60_000, 15).samples).toEqual([
+      1, 2, 3, 4, 5,
+    ]);
+  });
+
   it('ignores points outside the requested window', () => {
     const series: Series[] = [
       {
@@ -446,12 +459,26 @@ describe('transformTimeline', () => {
         points: [
           { timestamp: String(START_MS - 10_000), value: 100 }, // before start
           { timestamp: String(START_MS + 10_000), value: 2 },
-          { timestamp: String(END_MS + 10_000), value: 100 }, // at/after end
+          { timestamp: String(END_MS + 1_000), value: 100 }, // after end, in the endpoint slot
+          { timestamp: String(END_MS + 10_000), value: 100 }, // after end
         ],
       },
     ];
 
     expect(transformTimeline(series, START_MS, END_MS, STEP_SECONDS).samples).toEqual([0, 2, 0, 0, 0]);
+  });
+
+  it('ignores a point after the end of an unaligned range', () => {
+    const series: Series[] = [{ labels: [], points: [{ timestamp: String(START_MS + 60_000), value: 100 }] }];
+
+    expect(transformTimeline(series, START_MS, END_MS, 15).samples).toEqual([0, 0, 0, 0]);
+  });
+
+  it('does not append a point for an empty range', () => {
+    expect(
+      transformTimeline([{ labels: [], points: [{ timestamp: String(START_MS), value: 1 }] }], START_MS, START_MS, 15)
+        .samples,
+    ).toEqual([]);
   });
 
   it('rounds a point that does not land exactly on a bucket boundary down to that bucket', () => {
