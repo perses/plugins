@@ -245,9 +245,9 @@ spec:
 The `status`, `matchers` and `comment` columns are always displayed first, and the table is initially sorted by status unless an entry of `columns` sets `sort`. The entries of `columns` named `status`, `matchers` or `comment` are ignored: each other entry adds a column after them.
 
 ```yaml
-# Field of the silence displayed in the column:
-# createdBy, startsAt, endsAt, duration or updatedAt
-name: <string>
+# Field of the silence displayed in the column. Only createdBy, startsAt, endsAt, duration and
+# updatedAt add a column (see above).
+name: <enum = "status" | "matchers" | "createdBy" | "startsAt" | "endsAt" | "duration" | "comment" | "updatedAt">
 
 # Header of the column. Defaults to a readable name of the field: "Creator", "Starts At", "Ends At", "Duration" or "Updated At".
 header: <string> # Optional
