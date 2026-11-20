@@ -43,7 +43,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
 
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
-  const { setTimeRange } = useTimeRange();
+  const { absoluteTimeRange, setTimeRange } = useTimeRange();
   const chartRef = useRef<EChartsInstance | undefined>(undefined);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -103,7 +103,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
       xAxis: {
         type: 'time',
         min: timeLine.startTime * 1000,
-        max: (timeLine.startTime + timeLine.samples.length * timeLine.durationDelta) * 1000,
+        max: timeLine.samples.length > 0 ? absoluteTimeRange.end.getTime() : timeLine.startTime * 1000,
         axisLabel: {
           hideOverlap: true,
         },
@@ -164,7 +164,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
     };
 
     return option;
-  }, [data.timeline, data.metadata, seriesData, theme]);
+  }, [absoluteTimeRange, data.timeline, data.metadata, seriesData, theme]);
 
   const seriesChart = useMemo(
     () => (
