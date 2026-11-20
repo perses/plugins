@@ -96,14 +96,23 @@ describe('buildJsonTableData', () => {
     expect(buildJsonTableData([{} as unknown as PanelData<JsonData>])).toEqual([]);
   });
 
+  it('returns empty array for empty array data', () => {
+    expect(buildJsonTableData([makeJsonPanelData([])])).toEqual([]);
+  });
+
   it('JSON-stringifies nested object values', () => {
     const rows = buildJsonTableData([makeJsonPanelData({ meta: { env: 'prod' }, count: 1 })]);
     expect(rows).toEqual([{ meta: '{"env":"prod"}', count: 1 }]);
   });
 
-  it('JSON-stringifies nested array values', () => {
+  it('JSON-stringifies arrays nested in objects', () => {
     const rows = buildJsonTableData([makeJsonPanelData({ tags: ['a', 'b'] })]);
     expect(rows).toEqual([{ tags: '["a","b"]' }]);
+  });
+
+  it('JSON-stringifies literals in arrays nested in arrays with numeric index keys', () => {
+    const rows = buildJsonTableData([makeJsonPanelData([['a', 'b']])]);
+    expect(rows).toEqual([{ '0': 'a', '1': 'b' }]);
   });
 
   it('leaves scalar values on object rows as-is', () => {
@@ -116,14 +125,37 @@ describe('buildJsonTableData', () => {
     expect(rows).toEqual([{ id: 1 }, { id: 2 }]);
   });
 
-  it('treats an array payload as a single row using numeric index keys (stringifying objects)', () => {
+  it('produces one row per top level array entry', () => {
     const rows = buildJsonTableData([makeJsonPanelData([{ a: 1 }, { b: 2 }])]);
-    expect(rows).toEqual([{ '0': '{"a":1}', '1': '{"b":2}' }]);
+    expect(rows).toEqual([{ a: 1 }, { b: 2 }]);
   });
 
-  it('treats an array of primitives as a single row with numeric index keys', () => {
+  it('produces one row per top level array entry for each query result', () => {
+    const rows = buildJsonTableData([makeJsonPanelData([{ a: 1 }, { b: 2 }]), makeJsonPanelData([{ c: 3 }])]);
+    expect(rows).toEqual([{ a: 1 }, { b: 2 }, { c: 3 }]);
+  });
+
+  it('treats an array of primitives as individual rows wrapped in { value }', () => {
     const rows = buildJsonTableData([makeJsonPanelData([10, 20, 30])]);
-    expect(rows).toEqual([{ '0': 10, '1': 20, '2': 30 }]);
+    expect(rows).toEqual([{ value: 10 }, { value: 20 }, { value: 30 }]);
+  });
+
+  it('treats an array of null values as individual rows wrapped in { value }', () => {
+    const rows = buildJsonTableData([makeJsonPanelData([null, null])]);
+    expect(rows).toEqual([{ value: null }, { value: null }]);
+  });
+
+  it('treats an array of mixed types independently based on type', () => {
+    const rows = buildJsonTableData([
+      makeJsonPanelData([10, 'a', null, [10, 'a', null, [], {}], { key1: 1, key2: 'b' }]),
+    ]);
+    expect(rows).toEqual([
+      { value: 10 },
+      { value: 'a' },
+      { value: null },
+      { 0: 10, 1: 'a', 2: null, 3: '[]', 4: '{}' },
+      { key1: 1, key2: 'b' },
+    ]);
   });
 });
 
