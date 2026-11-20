@@ -1,0 +1,11 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "labelColorMappings": [
+      {
+        "labelKey": "severity",
+        "mode": "random"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "kind": "AlertManagerAlertsQuery",
+  "spec": {
+    "datasource": "$alertmanager"
+  }
+}

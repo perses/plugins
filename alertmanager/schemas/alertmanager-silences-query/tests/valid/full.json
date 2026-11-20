@@ -1,0 +1,10 @@
+{
+  "kind": "AlertManagerSilencesQuery",
+  "spec": {
+    "datasource": {
+      "kind": "AlertManagerDatasource",
+      "name": "alertmanager"
+    },
+    "filters": ["alertname=\"Watchdog\"", "team=~\"$team\""]
+  }
+}
