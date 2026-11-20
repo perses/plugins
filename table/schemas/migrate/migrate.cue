@@ -161,14 +161,14 @@ spec: {
 		_defaultCellType:    *#panel.fieldConfig.defaults.custom.cellOptions.type | "auto"
 		_thresholdNumericSteps: [
 			for step in (*#panel.fieldConfig.defaults.thresholds.steps | [])
-			if step.value != null && step.value != _|_ && step.color != _|_ {
+			if (*step.value | null) != null && step.color != _|_ {
 				min:   step.value
 				color: step.color
 			},
 		]
 		_thresholdBaseColors: [
 			for step in (*#panel.fieldConfig.defaults.thresholds.steps | [])
-			if (step.value == null || step.value == _|_) && step.color != _|_ {
+			if (*step.value | null) == null && step.color != _|_ {
 				color: step.color
 			},
 		]

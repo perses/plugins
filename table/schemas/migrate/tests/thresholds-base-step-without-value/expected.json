@@ -1,0 +1,101 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "cellSettings": [
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "min": 15552000
+              }
+            },
+            "textColor": "#c4162a"
+          },
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "min": 7776000
+              }
+            },
+            "textColor": "#EAB839"
+          },
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "min": 86400
+              }
+            },
+            "textColor": "#37872d"
+          },
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "max": 86400,
+                "min": -1000000000000000
+              }
+            },
+            "textColor": "#5794f2"
+          }
+        ],
+        "header": "Nodename",
+        "name": "nodename"
+      },
+      {
+        "cellSettings": [
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "min": 15552000
+              }
+            },
+            "textColor": "#c4162a"
+          },
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "min": 7776000
+              }
+            },
+            "textColor": "#EAB839"
+          },
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "min": 86400
+              }
+            },
+            "textColor": "#37872d"
+          },
+          {
+            "condition": {
+              "kind": "Range",
+              "spec": {
+                "max": 86400,
+                "min": -1000000000000000
+              }
+            },
+            "textColor": "#5794f2"
+          }
+        ],
+        "format": {
+          "unit": "seconds"
+        },
+        "header": "Uptime",
+        "name": "value"
+      },
+      {
+        "hide": true,
+        "name": "timestamp"
+      }
+    ],
+    "density": "compact"
+  }
+}
