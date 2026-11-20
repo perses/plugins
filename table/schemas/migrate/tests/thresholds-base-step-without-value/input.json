@@ -1,0 +1,28 @@
+{
+  "type": "table",
+  "title": "Thresholds whose base step has no value",
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "thresholds"
+      },
+      "custom": {
+        "cellOptions": {
+          "type": "color-text"
+        }
+      },
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "blue"
+          },
+          {
+            "color": "dark-green",
+            "value": 86400
+          }
+        ]
+      }
+    }
+  }
+}
