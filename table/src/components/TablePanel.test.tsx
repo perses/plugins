@@ -85,6 +85,41 @@ function getFirstFilterCell(): HTMLElement {
   return screen.getAllByRole('button', { name: '▼' })[0]!.parentElement!;
 }
 
+function makeData(values: Record<string, number>): TimeSeriesData {
+  return {
+    timeRange: { start: new Date(1666625535000), end: new Date(1666625535000) },
+    stepMs: 24379,
+    series: Object.entries(values).map(([namespace, value]) => ({
+      name: `namespace="${namespace}"`,
+      values: [[1666479357903, value]],
+      labels: { namespace },
+    })),
+  };
+}
+
+async function expectFormattedBytes(): Promise<void> {
+  expect(await screen.findByRole('cell', { name: /GiB/ })).toBeInTheDocument();
+  expect(await screen.findByRole('cell', { name: /MiB/ })).toBeInTheDocument();
+  expect(screen.queryByRole('cell', { name: '27487790694' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('cell', { name: '150000000' })).not.toBeInTheDocument();
+}
+// The conditional text color is an inline style on the inner "original-cell" element of the table cell.
+async function findCellContent(testId: string): Promise<HTMLElement> {
+  const cell = await screen.findByTestId(testId);
+  const content = cell.firstElementChild;
+  if (!(content instanceof HTMLElement)) {
+    throw new Error(`No content element found in cell ${testId}: ${cell.outerHTML}`);
+  }
+  return content;
+}
+
+// Row order follows the query data: ns-a (0), ns-b (150000000), ns-c (27487790694).
+async function expectConditionalColors(): Promise<void> {
+  expect(await findCellContent('0_value #1')).toHaveStyle({ color: '#12470c' });
+  expect(await findCellContent('1_value #1')).toHaveStyle({ color: '#FFCC00' });
+  expect(await findCellContent('2_value #1')).toHaveStyle({ color: '#C4162a' });
+}
+
 describe('TablePanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (data: TimeSeriesData, options?: TableOptions): void => {
@@ -628,6 +663,94 @@ describe('TablePanel', () => {
         await waitFor(() => expect(observedElements.has(newHeaderRow)).toBe(true));
         expect(observedElements.has(initialHeaderRow)).toBe(false);
         expect(getFirstFilterCell().style.width).toBe('150px');
+      },
+      TEST_TIMEOUT,
+    );
+  });
+  describe('column format with conditional cell settings', () => {
+    // value #1 holds byte values: 0, ~143 MiB and ~25.6 GiB
+    const QUERY_1 = makeData({ 'ns-a': 0, 'ns-b': 150000000, 'ns-c': 27487790694 });
+    const QUERY_2 = makeData({ 'ns-a': 1, 'ns-b': 2, 'ns-c': 3 });
+
+    const BYTES_CELL_CONDITIONS: NonNullable<TableOptions['cellSettings']> = [
+      { condition: { kind: 'Value', spec: { value: '0' } }, textColor: '#12470c' },
+      { condition: { kind: 'Range', spec: { min: 1, max: 300000000 } }, textColor: '#FFCC00' },
+      { condition: { kind: 'Range', spec: { min: 300000000, max: 100000000000000 } }, textColor: '#C4162a' },
+    ];
+
+    const renderBytesPanel = (options: TableOptions): void => {
+      const queryResults = [QUERY_1, QUERY_2].map((data) => ({
+        definition: MOCK_TIME_SERIES_QUERY_DEFINITION,
+        data,
+      }));
+      render(
+        <SelectionProvider>
+          <ItemActionsProvider>
+            <VirtuosoMockContext.Provider value={VIRTUOSO_MOCK_CONTEXT}>
+              <ChartsProvider chartsTheme={testChartsTheme}>
+                <TablePanel
+                  {...TEST_TIME_SERIES_TABLE_PROPS}
+                  spec={{
+                    transforms: [
+                      { kind: 'MergeSeries', spec: {} },
+                      { kind: 'JoinByColumnValue', spec: { columns: ['namespace'] } },
+                    ],
+                    ...options,
+                  }}
+                  queryResults={queryResults}
+                />
+              </ChartsProvider>
+            </VirtuosoMockContext.Provider>
+          </ItemActionsProvider>
+        </SelectionProvider>,
+      );
+    };
+
+    it(
+      'applies the column unit when no cell settings are configured',
+      async () => {
+        renderBytesPanel({
+          columnSettings: [
+            { name: 'timestamp', hide: true },
+            { name: 'namespace' },
+            { name: 'value #1', header: 'Mem', format: { unit: 'bytes' } },
+          ],
+        });
+        await expectFormattedBytes();
+        expect(await findCellContent('2_value #1')).not.toHaveStyle({ color: '#C4162a' });
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'keeps the column unit when column-level conditional formatting matches',
+      async () => {
+        renderBytesPanel({
+          columnSettings: [
+            { name: 'timestamp', hide: true },
+            { name: 'namespace' },
+            { name: 'value #1', header: 'Mem', format: { unit: 'bytes' }, cellSettings: BYTES_CELL_CONDITIONS },
+          ],
+        });
+        await expectFormattedBytes();
+        await expectConditionalColors();
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'keeps the column unit when global conditional formatting matches',
+      async () => {
+        renderBytesPanel({
+          columnSettings: [
+            { name: 'timestamp', hide: true },
+            { name: 'namespace' },
+            { name: 'value #1', header: 'Mem', format: { unit: 'bytes' } },
+          ],
+          cellSettings: BYTES_CELL_CONDITIONS,
+        });
+        await expectFormattedBytes();
+        await expectConditionalColors();
       },
       TEST_TIMEOUT,
     );
