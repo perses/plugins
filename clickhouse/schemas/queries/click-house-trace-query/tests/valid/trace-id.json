@@ -1,0 +1,6 @@
+{
+  "kind": "ClickHouseTraceQuery",
+  "spec": {
+    "query": "5b8efff798038103d269b633813fc60c"
+  }
+}
