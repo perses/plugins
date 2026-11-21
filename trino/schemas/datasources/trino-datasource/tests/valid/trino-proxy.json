@@ -1,0 +1,38 @@
+{
+  "kind": "TrinoDatasource",
+  "spec": {
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "https://trino.example.com",
+        "headers": {
+          "X-Trino-User": "perses"
+        },
+        "allowedEndpoints": [
+          {
+            "endpointPattern": "/v1/statement",
+            "method": "POST"
+          },
+          {
+            "endpointPattern": "/v1/statement/.*",
+            "method": "GET"
+          },
+          {
+            "endpointPattern": "/v1/statement/.*",
+            "method": "DELETE"
+          }
+        ],
+        "allowHeaders": [
+          "Content-Type",
+          "X-Trino-User",
+          "X-Trino-Catalog",
+          "X-Trino-Schema",
+          "X-Trino-Session",
+          "X-Trino-Source",
+          "X-Trino-Time-Zone",
+          "X-Trino-Routing-Group"
+        ]
+      }
+    }
+  }
+}

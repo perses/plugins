@@ -1,0 +1,19 @@
+{
+  "kind": "SilenceTable",
+  "spec": {
+    "columns": [
+      {
+        "name": "status",
+        "sort": "asc",
+        "sortMode": "status"
+      },
+      {
+        "name": "matchers",
+        "enableSorting": false
+      },
+      {
+        "name": "comment"
+      }
+    ]
+  }
+}

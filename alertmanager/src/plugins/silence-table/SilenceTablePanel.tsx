@@ -55,7 +55,7 @@ import {
   inferSortMode,
 } from './silence-table-model';
 import type { SilenceSortState } from './silence-table-sorting';
-import { compareSilencesByColumn } from './silence-table-sorting';
+import { compareSilencesByColumn, getInitialSilenceSort } from './silence-table-sorting';
 
 export type SilenceTablePanelProps = PanelProps<SilenceTableOptions, SilencesData>;
 
@@ -175,11 +175,7 @@ export function SilenceTablePanel({ spec, queryResults, contentDimensions }: Sil
     return [...DEFAULT_SILENCE_COLUMNS, ...extra];
   }, [spec.columns]);
 
-  const initialSort = useMemo<SilenceSortState | null>(() => {
-    const col = columnDefs.find((c) => c.sort && c.enableSorting !== false);
-    if (!col?.sort) return null;
-    return { fieldName: col.name, direction: col.sort, mode: col.sortMode ?? inferSortMode(col.name) };
-  }, [columnDefs]);
+  const initialSort = useMemo(() => getInitialSilenceSort(columnDefs), [columnDefs]);
   const [sortState, setSortState] = useState<SilenceSortState | null>(initialSort);
 
   const handleSortClick = useCallback((col: SilenceColumnDefinition): void => {

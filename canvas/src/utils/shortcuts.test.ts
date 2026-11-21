@@ -28,13 +28,22 @@ describe('resolveMouseShortcut', () => {
     expect(resolveMouseShortcut({ type: 'wheel', ctrlKey: false, metaKey: false })).toBeNull();
   });
 
-  it('returns pan on middle-click regardless of modifier', () => {
+  it('returns pan on middle-click regardless of modifier, in both modes', () => {
     expect(resolveMouseShortcut({ type: 'mousedown', ctrlKey: false, metaKey: false, button: 1 })?.id).toBe('pan');
     expect(resolveMouseShortcut({ type: 'mousedown', ctrlKey: true, metaKey: false, button: 1 })?.id).toBe('pan');
+    expect(resolveMouseShortcut({ type: 'mousedown', ctrlKey: false, metaKey: false, button: 1 }, 'editor')?.id).toBe(
+      'pan',
+    );
   });
 
-  it('returns null on left-click', () => {
-    expect(resolveMouseShortcut({ type: 'mousedown', ctrlKey: false, metaKey: false, button: 0 })).toBeNull();
+  it('pans on left-click in view mode but not in editor mode', () => {
+    // The read-only display panel has no editing gesture competing for the left button, so it pans;
+    // the editor keeps the left button free for node move, edge drag and rubber-band selection.
+    expect(resolveMouseShortcut({ type: 'mousedown', ctrlKey: false, metaKey: false, button: 0 })?.id).toBe('pan');
+    expect(resolveMouseShortcut({ type: 'mousedown', ctrlKey: false, metaKey: false, button: 0 }, 'view')?.id).toBe(
+      'pan',
+    );
+    expect(resolveMouseShortcut({ type: 'mousedown', ctrlKey: false, metaKey: false, button: 0 }, 'editor')).toBeNull();
   });
 
   it('returns null on right-click', () => {
