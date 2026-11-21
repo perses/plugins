@@ -18,7 +18,8 @@ import "github.com/perses/perses/go-sdk/panel"
 const PluginKind = "Markdown"
 
 type PluginSpec struct {
-	Text string `json:"text" yaml:"text"`
+	Text       string `json:"text" yaml:"text"`
+	RenderHTML bool   `json:"renderHtml,omitempty" yaml:"renderHtml,omitempty"`
 }
 
 type Option func(plugin *Builder) error

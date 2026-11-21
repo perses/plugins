@@ -1,0 +1,15 @@
+{
+  "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 1
+  },
+  "id": 4,
+  "options": {
+    "content": "# Title\n\nSome **markdown** content",
+    "mode": "markdown"
+  },
+  "title": "Markdown text",
+  "type": "text"
+}

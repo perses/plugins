@@ -28,3 +28,10 @@ func NewLine(text string) Option {
 		return nil
 	}
 }
+
+func RenderHTML(render bool) Option {
+	return func(builder *Builder) error {
+		builder.RenderHTML = render
+		return nil
+	}
+}
