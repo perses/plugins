@@ -1,0 +1,60 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "defaultGroupBy": ["alertname", "namespace"],
+    "columns": [
+      {
+        "name": "severity",
+        "header": "Severity",
+        "enableSorting": true,
+        "sort": "asc",
+        "sortMode": "severity"
+      },
+      {
+        "name": "namespace",
+        "sortMode": "alphabetical"
+      },
+      {
+        "name": "replicas",
+        "sort": "desc",
+        "sortMode": "numeric"
+      },
+      {
+        "name": "instance",
+        "enableSorting": false
+      }
+    ],
+    "deduplication": {
+      "mode": "labels",
+      "labels": ["alertname", "cluster"]
+    },
+    "allowedActions": ["silence", "runbook"],
+    "runbookAnnotationKey": "runbook_url",
+    "labelColorMappings": [
+      {
+        "labelKey": "severity",
+        "mode": "severity"
+      },
+      {
+        "labelKey": "team",
+        "mode": "manual",
+        "overrides": [
+          {
+            "value": "platform",
+            "isRegex": false,
+            "color": "#1f77b4"
+          },
+          {
+            "value": "db-.*",
+            "isRegex": true,
+            "color": "#ff7f0e"
+          }
+        ]
+      },
+      {
+        "labelKey": "cluster",
+        "mode": "auto"
+      }
+    ]
+  }
+}

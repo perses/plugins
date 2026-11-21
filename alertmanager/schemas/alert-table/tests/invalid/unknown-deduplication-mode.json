@@ -1,0 +1,8 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "deduplication": {
+      "mode": "hash"
+    }
+  }
+}

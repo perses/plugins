@@ -16,7 +16,7 @@ package model
 kind: "SilenceTable"
 spec: close({
 	columns?: [...close({
-		name:           string
+		name:           "status" | "matchers" | "createdBy" | "startsAt" | "endsAt" | "duration" | "comment" | "updatedAt"
 		header?:        string
 		enableSorting?: bool
 		sort?:          "asc" | "desc"

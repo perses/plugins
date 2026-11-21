@@ -31,9 +31,10 @@ export const TempoTraceQuery: TraceQueryPlugin<TempoTraceQuerySpec> = {
   }),
   dependsOn: (spec) => {
     const datasourceVariables = isVariableDatasource(spec.datasource) ? parseVariables(spec.datasource ?? '') : [];
+    const queryVariables = parseVariables(spec.query ?? '');
 
     return {
-      variables: [...datasourceVariables],
+      variables: [...new Set([...datasourceVariables, ...queryVariables])],
     };
   },
 };
