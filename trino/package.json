@@ -86,6 +86,33 @@
           },
           "name": "TrinoLogQuery"
         }
+      },
+      {
+        "kind": "TraceQuery",
+        "spec": {
+          "display": {
+            "name": "Trino Trace Query"
+          },
+          "name": "TrinoTraceQuery"
+        }
+      },
+      {
+        "kind": "JsonQuery",
+        "spec": {
+          "display": {
+            "name": "Trino JSON Query"
+          },
+          "name": "TrinoJsonQuery"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "Trino SQL Variable"
+          },
+          "name": "TrinoSQLVariable"
+        }
       }
     ]
   }

@@ -87,6 +87,10 @@
             - Datasource: trino/go-sdk/datasource.md
             - Log Query: trino/go-sdk/log-query.md
             - Time Series Query: trino/go-sdk/timeseries-query.md
+            - Trace Query: trino/go-sdk/trace-query.md
+            - JSON Query: trino/go-sdk/json-query.md
+            - Variables:
+                - SQL Variable: trino/go-sdk/variable.md
     - VictoriaLogs:
         - Overview: victorialogs/README.md
         - Model: victorialogs/model.md

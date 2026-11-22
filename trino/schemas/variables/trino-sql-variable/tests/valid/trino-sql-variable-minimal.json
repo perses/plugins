@@ -1,0 +1,6 @@
+{
+  "kind": "TrinoSQLVariable",
+  "spec": {
+    "query": "SELECT 1"
+  }
+}

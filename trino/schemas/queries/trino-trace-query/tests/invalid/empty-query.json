@@ -1,0 +1,6 @@
+{
+  "kind": "TrinoTraceQuery",
+  "spec": {
+    "query": ""
+  }
+}

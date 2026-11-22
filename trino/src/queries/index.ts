@@ -13,3 +13,5 @@
 
 export * from './trino-time-series-query';
 export * from './trino-log-query';
+export * from './trino-trace-query';
+export * from './trino-json-query';

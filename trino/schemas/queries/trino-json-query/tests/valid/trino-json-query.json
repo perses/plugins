@@ -1,0 +1,15 @@
+{
+  "kind": "TrinoJsonQuery",
+  "spec": {
+    "datasource": {
+      "kind": "TrinoDatasource",
+      "name": "trino"
+    },
+    "query": "SELECT service_name, count(*) AS spans FROM iceberg.otel.spans GROUP BY 1 ORDER BY 2 DESC LIMIT 10",
+    "catalog": "iceberg",
+    "schema": "$tenant",
+    "sessionProperties": "query_max_run_time=5m",
+    "source": "perses",
+    "routingGroup": "adhoc"
+  }
+}

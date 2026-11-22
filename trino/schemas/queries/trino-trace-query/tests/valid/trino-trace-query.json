@@ -1,0 +1,15 @@
+{
+  "kind": "TrinoTraceQuery",
+  "spec": {
+    "datasource": {
+      "kind": "TrinoDatasource",
+      "name": "trino"
+    },
+    "query": "SELECT lower(to_hex(trace_id)) AS trace_id, lower(to_hex(span_id)) AS span_id, service_name, start_time, end_time FROM iceberg.otel.spans WHERE start_time BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}'",
+    "catalog": "iceberg",
+    "schema": "$tenant",
+    "sessionProperties": "query_max_run_time=5m",
+    "source": "perses",
+    "routingGroup": "adhoc"
+  }
+}

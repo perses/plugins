@@ -1,0 +1,15 @@
+{
+  "kind": "TrinoSQLVariable",
+  "spec": {
+    "datasource": {
+      "kind": "TrinoDatasource",
+      "name": "trino"
+    },
+    "query": "SELECT DISTINCT region FROM iceberg.ops.hosts WHERE env = '$env'",
+    "catalog": "iceberg",
+    "schema": "$tenant",
+    "sessionProperties": "query_max_run_time=5m",
+    "source": "perses",
+    "routingGroup": "adhoc"
+  }
+}

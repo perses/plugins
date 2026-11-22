@@ -12,8 +12,14 @@
 // limitations under the License.
 
 import type { FetchFn, RequestHeaders } from '@perses-dev/client';
+import type { Notice } from '@perses-dev/spec';
 
 export const MAX_ROWS = 100000;
+/** TRUNCATED_NOTICE is the warning shown when a result was cut at MAX_ROWS. */
+export const TRUNCATED_NOTICE: Notice = {
+  type: 'warning',
+  message: `Results were truncated to the first ${MAX_ROWS} rows.`,
+};
 const RETRYABLE_STATUSES = new Set([502, 503, 504]);
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 100;
@@ -28,6 +34,10 @@ export interface TrinoQueryParams {
   sessionProperties?: string;
   source?: string;
   routingGroup?: string;
+  /** Asks Trino for timestamps with their full precision (up to nanoseconds) instead of milliseconds. */
+  fullPrecisionTimestamps?: boolean;
+  /** Cuts the result at this many rows, between 1 and MAX_ROWS (the default), and cancels the rest of the query. */
+  maxRows?: number;
   signal?: AbortSignal;
 }
 
@@ -44,7 +54,7 @@ export interface TrinoQueryResponse {
   data: TrinoRow[];
   /** Column names and Trino types from the statement API, one per name; the last duplicate wins, as in `data`. */
   columns?: TrinoColumn[];
-  /** True when the result was cut at MAX_ROWS and the remaining pages were cancelled. */
+  /** True when the result was cut at the row limit (MAX_ROWS or maxRows); any remaining pages were cancelled. */
   truncated?: boolean;
 }
 
@@ -100,6 +110,23 @@ export function parseTrinoTimestamp(value: unknown): number {
   const instant = Date.parse(`${date}T${time}.${millis}${isoOffset}`);
   if (!zoneName || zoneName === 'UTC') return instant;
   return wallTimeInZone(instant, zoneName);
+}
+
+/**
+ * parseTrinoTimestampNanos converts a Trino date or timestamp value to epoch nanoseconds, keeping up to 9 fractional
+ * digits, or returns undefined when it cannot be parsed. Numbers are epoch milliseconds.
+ */
+export function parseTrinoTimestampNanos(value: unknown): bigint | undefined {
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return undefined;
+    const whole = Math.trunc(value);
+    return BigInt(whole) * 1_000_000n + BigInt(Math.round((value - whole) * 1_000_000));
+  }
+  const millis = parseTrinoTimestamp(value);
+  if (Number.isNaN(millis)) return undefined;
+  const fraction = (value as string).trim().match(TRINO_TIMESTAMP)?.[3] ?? '';
+  const subMilli = fraction.slice(3, 9).padEnd(6, '0');
+  return BigInt(millis) * 1_000_000n + BigInt(subMilli);
 }
 
 const zoneFormatters = new Map<string, Intl.DateTimeFormat | null>();
@@ -162,6 +189,9 @@ export function formatSessionProperties(raw: string): string | undefined {
 export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOptions): Promise<TrinoQueryResponse> {
   const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
   const { signal } = params;
+  const rowLimit = Number.isFinite(params.maxRows)
+    ? Math.min(Math.max(Math.trunc(params.maxRows!), 1), MAX_ROWS)
+    : MAX_ROWS;
 
   if (!params.query) {
     throw new Error('No query provided in params');
@@ -180,6 +210,7 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   if (session) requestHeaders.set('X-Trino-Session', session);
   if (params.source) requestHeaders.set('X-Trino-Source', params.source);
   if (params.routingGroup) requestHeaders.set('X-Trino-Routing-Group', params.routingGroup);
+  if (params.fullPrecisionTimestamps) requestHeaders.set('X-Trino-Client-Capabilities', 'PARAMETRIC_DATETIME');
 
   let pendingUri: string | undefined;
   try {
@@ -197,7 +228,7 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
     // oxlint-disable no-await-in-loop
     while (body.nextUri) {
       pendingUri = body.nextUri;
-      if (rows.length >= MAX_ROWS) {
+      if (rows.length >= rowLimit) {
         truncated = true;
         break;
       }
@@ -216,12 +247,13 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
       cancel(pendingUri, datasourceUrl, requestHeaders, doFetch);
     }
     pendingUri = undefined;
+    truncated ||= rows.length > rowLimit;
     if (body.error) throw new Error(formatTrinoError(body.error));
 
     const names = (columns ?? []).map((column) => column.name);
     return {
       status: 'success',
-      data: rows.slice(0, MAX_ROWS).map((row) => Object.fromEntries(names.map((name, index) => [name, row[index]]))),
+      data: rows.slice(0, rowLimit).map((row) => Object.fromEntries(names.map((name, index) => [name, row[index]]))),
       columns: Array.from(new Map((columns ?? []).map(({ name, type }) => [name, { name, type }])).values()),
       truncated,
     };
