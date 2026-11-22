@@ -12,7 +12,7 @@
 // limitations under the License.
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
-import { query } from '../../model/trino-client';
+import { healthCheck, query } from '../../model/trino-client';
 import type { TrinoDatasourceSpec, TrinoDatasourceClient } from './trino-datasource-types';
 import { TrinoDatasourceEditor } from './TrinoDatasourceEditor';
 
@@ -32,11 +32,13 @@ const createClient: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient>
       datasourceUrl,
     },
     query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    healthCheck: () => healthCheck({ datasourceUrl, headers: specHeaders, fetch: customFetch }),
   };
 };
 
 export const TrinoDatasource: DatasourcePlugin<TrinoDatasourceSpec, TrinoDatasourceClient> = {
   createClient,
+  healthCheckPath: '/v1/info',
   OptionsEditorComponent: TrinoDatasourceEditor,
   createInitialOptions: () => ({ directUrl: '' }),
 };
