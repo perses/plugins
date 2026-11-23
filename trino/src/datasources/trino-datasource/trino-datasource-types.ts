@@ -23,4 +23,5 @@ interface TrinoDatasourceClientOptions {
 
 export interface TrinoDatasourceClient extends DatasourceClient, TrinoClient {
   options: TrinoDatasourceClientOptions;
+  healthCheck: () => Promise<boolean>;
 }

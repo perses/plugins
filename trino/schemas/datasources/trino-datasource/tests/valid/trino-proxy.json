@@ -20,6 +20,10 @@
           {
             "endpointPattern": "/v1/statement/.*",
             "method": "DELETE"
+          },
+          {
+            "endpointPattern": "/v1/info",
+            "method": "GET"
           }
         ],
         "allowHeaders": [

@@ -12,6 +12,17 @@ needed). Store credentials in a Perses Secret referenced by the proxy: Perses ig
 in the proxy `headers`. A direct URL only works when the coordinator accepts unauthenticated cross-origin requests from
 the browser.
 
+The health check calls `GET /v1/info`, which returns the server version and `starting` state without running a query.
+The client health check passes only when `/v1/info` answers with a 2xx status and a JSON body with `starting: false`, so
+a failed request, an error status, a non-JSON body, or a missing or `true` `starting` all fail it. It needs
+`GET /v1/info` in the proxy allowed endpoints, which the editor's proxy defaults include; queries do not use it.
+
+The datasource editor's Test connection button checks reachability only: not credentials (Trino's `/v1/info` does not
+require authentication) and not `starting`. With a proxy, the Perses server runs it through the proxy and adds
+`GET /v1/info` to the test request only; the saved datasource is unchanged. With a direct URL, the browser calls
+`<host>/v1/info` itself (any path prefix on the URL is dropped), so the result reflects the browser's CORS access, not
+the server's.
+
 Unless Trino sets `http-server.process-forwarded=true`, it answers HTTP 406 to any `X-Forwarded-*` header, and a reverse
 proxy in front of Perses can add several. The editor's proxy defaults therefore set `allowHeaders` to the headers the
 plugin sends: `Content-Type`, `X-Trino-User`, `X-Trino-Catalog`, `X-Trino-Schema`, `X-Trino-Session`, `X-Trino-Source`,

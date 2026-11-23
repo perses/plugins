@@ -17,13 +17,14 @@ import { TRINO_PROXY_HEADERS } from '../datasources/trino-datasource/TrinoDataso
 import {
   formatSessionProperties,
   formatTrinoDateTime,
+  healthCheck,
   MAX_ROWS,
   parseTrinoTimestamp,
   parseTrinoTimestampNanos,
   query,
   replaceTimeRangePlaceholders,
 } from './trino-client';
-import type { TrinoQueryResponse } from './trino-client';
+import type { TrinoQueryOptions, TrinoQueryResponse } from './trino-client';
 
 type FakeResponse = Pick<Response, 'ok' | 'status' | 'json' | 'text' | 'headers'> & {
   body?: { cancel: () => Promise<void> } | null;
@@ -865,5 +866,54 @@ describe('Trino client', () => {
     expect(parseTrinoTimestamp('2025-01-01 00:00:00 Not/AZone')).toBeNaN();
     expect(parseTrinoTimestamp('2025-01-01 00:00:00 Not/AZone')).toBeNaN();
     expect(parseTrinoTimestamp('2025-01-01 00:00:00 Europe/Paris')).toBe(Date.parse('2024-12-31T23:00:00Z'));
+  });
+});
+
+describe('healthCheck', () => {
+  const INFO = `${DIRECT}/v1/info`;
+  const options = (fetchMock: FetchMock): TrinoQueryOptions => ({
+    datasourceUrl: DIRECT,
+    headers: { 'X-Trino-User': 'alice' },
+    fetch: fetchMock as unknown as typeof fetch,
+  });
+
+  it('is healthy when the server is up and not starting', async () => {
+    const fetchMock = trinoServer({ [`GET ${INFO}`]: page({ nodeVersion: { version: '470' }, starting: false }) });
+    await expect(healthCheck(options(fetchMock))).resolves.toBe(true);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe(INFO);
+    expect(init?.method).toBe('GET');
+    expect(new Headers(init?.headers).get('X-Trino-User')).toBe('alice');
+  });
+
+  it('is unhealthy while the server is starting', async () => {
+    const fetchMock = trinoServer({ [`GET ${INFO}`]: page({ starting: true }) });
+    await expect(healthCheck(options(fetchMock))).resolves.toBe(false);
+  });
+
+  it('is unhealthy when starting is missing or not a boolean', async () => {
+    await expect(healthCheck(options(trinoServer({ [`GET ${INFO}`]: page({}) })))).resolves.toBe(false);
+    await expect(healthCheck(options(trinoServer({ [`GET ${INFO}`]: page({ starting: 'false' }) })))).resolves.toBe(
+      false,
+    );
+  });
+
+  it('is unhealthy on a non-OK status', async () => {
+    const fetchMock = trinoServer({ [`GET ${INFO}`]: page({ starting: false }, 503) });
+    await expect(healthCheck(options(fetchMock))).resolves.toBe(false);
+  });
+
+  it('is unhealthy when the request fails', async () => {
+    const fetchMock = trinoServer({ [`GET ${INFO}`]: new Error('network down') });
+    await expect(healthCheck(options(fetchMock))).resolves.toBe(false);
+  });
+
+  it('is unhealthy when the body is not valid JSON', async () => {
+    const response = {
+      ...page({}),
+      json: async (): Promise<never> => Promise.reject(new SyntaxError('Unexpected token')),
+    };
+    const fetchMock = trinoServer({ [`GET ${INFO}`]: response });
+    await expect(healthCheck(options(fetchMock))).resolves.toBe(false);
   });
 });

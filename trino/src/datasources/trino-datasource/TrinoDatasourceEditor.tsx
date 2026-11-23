@@ -10,16 +10,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import type { DatasourceEditorProps } from '@perses-dev/plugin-system';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 
 import type { TrinoDatasourceSpec } from './trino-datasource-types';
 
-export interface TrinoDatasourceEditorProps {
-  value: TrinoDatasourceSpec;
-  onChange: (next: TrinoDatasourceSpec) => void;
-  isReadonly?: boolean;
-}
+export type TrinoDatasourceEditorProps = DatasourceEditorProps<TrinoDatasourceSpec>;
 
 /** TRINO_PROXY_HEADERS lists the request headers the plugin sends, for the proxy allowHeaders default. */
 export const TRINO_PROXY_HEADERS = [
@@ -55,6 +52,10 @@ const initialSpecProxy: TrinoDatasourceSpec = {
           endpointPattern: '/v1/statement/.*',
           method: 'DELETE',
         },
+        {
+          endpointPattern: '/v1/info',
+          method: 'GET',
+        },
       ],
       // Trino answers 406 to any X-Forwarded-* header unless http-server.process-forwarded is enabled, and a reverse
       // proxy in front of Perses may add several of them. Only forward the headers this plugin uses.
@@ -65,13 +66,14 @@ const initialSpecProxy: TrinoDatasourceSpec = {
 };
 
 export function TrinoDatasourceEditor(props: TrinoDatasourceEditorProps): ReactElement {
-  const { value, onChange, isReadonly } = props;
+  const { value, onChange, isReadonly, testConnection } = props;
 
   return (
     <HTTPSettingsEditor
       value={value}
       onChange={onChange}
       isReadonly={isReadonly}
+      testConnection={testConnection}
       initialSpecDirect={initialSpecDirect}
       initialSpecProxy={initialSpecProxy}
     />

@@ -22,9 +22,13 @@ spec:
 
 See [common plugin definitions](https://perses.dev/perses/docs/plugins/common/#http-proxy-specification).
 
-The proxy must allow `POST /v1/statement` and `GET` and `DELETE` on `/v1/statement/.*`. Unless Trino sets
-`http-server.process-forwarded=true`, it answers HTTP 406 to any `X-Forwarded-*` header, so restrict the forwarded
-headers with `allowHeaders`. Any header set in `headers` must also be listed there.
+The proxy must allow `POST /v1/statement` and `GET` and `DELETE` on `/v1/statement/.*`. Allow `GET /v1/info` too for
+the client health check, which passes only when it answers with a 2xx status and a JSON body with `starting: false`;
+queries do not use it. The editor's Test connection button checks reachability only, not credentials or `starting`. With
+a proxy, the Perses server runs it through the proxy and adds `GET /v1/info` for the test only; with a direct URL, the
+browser calls `<host>/v1/info` itself (any path prefix is dropped), so the result reflects the browser's CORS access.
+Unless Trino sets `http-server.process-forwarded=true`, it answers HTTP 406 to any `X-Forwarded-*` header, so restrict
+the forwarded headers with `allowHeaders`. Any header set in `headers` must also be listed there.
 
 `X-Trino-Client-Capabilities` is sent by the trace query only, to receive `timestamp(9)` values with their nanoseconds. A
 proxy that does not allow it still works: trace timestamps then have millisecond precision. With a direct URL the browser
@@ -74,6 +78,8 @@ spec:
               method: "GET"
             - endpointPattern: "/v1/statement/.*"
               method: "DELETE"
+            - endpointPattern: "/v1/info"
+              method: "GET"
           allowHeaders:
             - "Content-Type"
             - "X-Trino-User"
