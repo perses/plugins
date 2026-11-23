@@ -49,7 +49,12 @@ import type { ReactElement } from 'react';
 import { memo, useCallback, useId, useMemo, useRef, useState } from 'react';
 
 import type { TimeSeriesChartOptions } from './time-series-chart-model';
-import { DEFAULT_FORMAT, DEFAULT_VISUAL, THRESHOLD_PLOT_INTERVAL } from './time-series-chart-model';
+import {
+  DEFAULT_FORMAT,
+  DEFAULT_VISUAL,
+  resolveMultipleYAxisFormats,
+  THRESHOLD_PLOT_INTERVAL,
+} from './time-series-chart-model';
 import { TimeSeriesChartBase } from './TimeSeriesChartBase';
 import type { TimeSeriesAnnotation } from './utils/annotation';
 import { convertAnnotationToTimeSeriesAnnotation } from './utils/annotation';
@@ -136,30 +141,12 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
     return convertPanelYAxis(yAxis);
   }, [yAxis]);
 
-  // Collect unique formats from query settings that differ from the base format
-  // These will create additional Y axes on the right side
-  const { additionalFormats, formatToYAxisIndex } = useMemo(() => {
-    const baseUnit = format?.unit ?? 'decimal';
-    const additionalFormats: Array<typeof format> = [];
-    const formatToYAxisIndex = new Map<string, number>();
-
-    // Index 0 is reserved for the base Y axis
-    formatToYAxisIndex.set(baseUnit, 0);
-
-    // Collect unique formats from query settings
-    for (const qs of querySettingsList ?? []) {
-      if (qs.format?.unit && qs.format.unit !== baseUnit) {
-        const unitKey = qs.format.unit;
-        if (!formatToYAxisIndex.has(unitKey)) {
-          // Add new format - index is 1 + position in additionalFormats array
-          formatToYAxisIndex.set(unitKey, 1 + additionalFormats.length);
-          additionalFormats.push(qs.format);
-        }
-      }
-    }
-
-    return { additionalFormats, formatToYAxisIndex };
-  }, [format, querySettingsList]);
+  // The left axis is the panel unit, unless every query overrides it.
+  // Extra units keep the querySettings order and are drawn on the right.
+  const { additionalFormats, formatToYAxisIndex, leftFormat } = useMemo(
+    () => resolveMultipleYAxisFormats(props.spec.yAxis?.format, querySettingsList, queryResults.length),
+    [props.spec.yAxis?.format, querySettingsList, queryResults.length],
+  );
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
@@ -432,15 +419,17 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
   ]);
 
   const multipleYLayout = useMemo(() => {
-    if (additionalFormats.length === 0) {
+    const leftUnit = leftFormat.unit ?? 'decimal';
+    const panelUnit = format.unit ?? 'decimal';
+    if (additionalFormats.length === 0 && leftUnit === panelUnit) {
       return undefined;
     }
     const maxValues = additionalFormats.map((fmt) => {
       const unitKey = fmt.unit;
       return unitKey ? (maxValuesByFormat?.get(unitKey) ?? 1000) : 1000;
     });
-    return getFormattedMultipleYAxesLayout(echartsYAxis, format, additionalFormats, maxValues);
-  }, [echartsYAxis, format, additionalFormats, maxValuesByFormat]);
+    return getFormattedMultipleYAxesLayout(echartsYAxis, leftFormat, additionalFormats, maxValues);
+  }, [echartsYAxis, format, leftFormat, additionalFormats, maxValuesByFormat]);
   const multipleYAxes = multipleYLayout?.axes;
 
   // Translate the legend values into columns for the table legend.
