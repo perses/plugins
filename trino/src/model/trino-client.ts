@@ -232,6 +232,23 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
   }
 }
 
+/**
+ * healthCheck reports whether GET /v1/info succeeds and the server is no longer starting. It never throws.
+ */
+export async function healthCheck(queryOptions: TrinoQueryOptions): Promise<boolean> {
+  const { datasourceUrl, headers, fetch: customFetch } = queryOptions;
+  try {
+    const baseUrl = urlBuilder(datasourceUrl);
+    const infoUrl = new URL('v1/info', baseUrl.toString().endsWith('/') ? baseUrl : `${baseUrl}/`);
+    const response = await (customFetch ?? fetch)(infoUrl.toString(), { method: 'GET', headers: new Headers(headers) });
+    if (!response.ok) return false;
+    const body: { starting?: unknown } | null = await response.json();
+    return body?.starting === false;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchWithRetry(url: string, init: RequestInit, doFetch: FetchFn): Promise<Response> {
   const signal = init.signal ?? undefined;
   for (let attempt = 1; ; attempt++) {
