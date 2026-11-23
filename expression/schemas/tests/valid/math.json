@@ -1,0 +1,7 @@
+{
+  "kind": "ExpressionQuery",
+  "spec": {
+    "type": "math",
+    "expression": "$1 * 100"
+  }
+}

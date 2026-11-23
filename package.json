@@ -34,6 +34,7 @@
     "canvas",
     "clickhouse",
     "datasourcevariable",
+    "expression",
     "flamechart",
     "gaugechart",
     "greptimedb",

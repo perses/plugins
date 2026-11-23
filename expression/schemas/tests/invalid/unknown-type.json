@@ -1,0 +1,8 @@
+{
+  "kind": "ExpressionQuery",
+  "spec": {
+    "type": "reduce",
+    "input": "A",
+    "reducer": "mean"
+  }
+}
