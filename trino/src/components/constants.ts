@@ -89,7 +89,7 @@ LIMIT 10`;
 export const variableQueryExample = `-- Variable values: the first column is the value, an optional second column is the display label.
 SELECT DISTINCT region FROM iceberg.ops.hosts WHERE region IS NOT NULL ORDER BY region
 -- Value and label
-SELECT host_id AS value, concat(hostname, ' (', coalesce(region, 'unknown'), ')') AS label
+SELECT CAST(host_id AS varchar) AS value, concat(hostname, ' (', coalesce(region, 'unknown'), ')') AS label
 FROM iceberg.ops.hosts
 ORDER BY label
 -- Depends on another variable and the time range

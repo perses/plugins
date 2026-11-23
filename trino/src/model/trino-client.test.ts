@@ -666,6 +666,50 @@ describe('Trino client', () => {
     );
   });
 
+  it('does not flag a result of exactly maxRows rows followed by an empty last page', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        nextUri: `${DIRECT}/v1/statement/q/1`,
+        columns: [{ name: 'n' }],
+        data: [[1], [2]],
+      }),
+      [`GET ${DIRECT}/v1/statement/q/1`]: page({}),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows: 2 },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.truncated).toBe(false);
+    expect(result.data).toEqual([{ n: 1 }, { n: 2 }]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('cancels when the page after exactly maxRows rows brings more', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        nextUri: `${DIRECT}/v1/statement/q/1`,
+        columns: [{ name: 'n' }],
+        data: [[1], [2]],
+      }),
+      [`GET ${DIRECT}/v1/statement/q/1`]: page({ nextUri: `${DIRECT}/v1/statement/q/2`, data: [[3]] }),
+      [`DELETE ${DIRECT}/v1/statement/q/2`]: page({}, 204),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows: 2 },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.truncated).toBe(true);
+    expect(result.data).toEqual([{ n: 1 }, { n: 2 }]);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      `${DIRECT}/v1/statement/q/2`,
+      expect.objectContaining({ method: 'DELETE' }),
+    );
+  });
+
   it.each([
     ['NaN', NaN, 3, false],
     ['zero', 0, 1, true],

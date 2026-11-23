@@ -101,7 +101,7 @@ func main() {
 		)),
 		dashboard.AddVariable("host", listvariable.List(
 			trinovariable.TrinoSQL(`
-				SELECT host_id AS value, concat(hostname, ' (', region, ')') AS label
+				SELECT CAST(host_id AS varchar) AS value, concat(hostname, ' (', region, ')') AS label
 				FROM iceberg.ops.hosts
 				WHERE region IN (${region:sqlstring})
 				ORDER BY label

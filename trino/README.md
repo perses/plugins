@@ -40,7 +40,8 @@ header doesn't reach the plugin.
 
 Trino sends `timestamp(9)` values to clients as milliseconds unless they ask for the full precision. Only trace queries
 do, by sending `X-Trino-Client-Capabilities: PARAMETRIC_DATETIME`; a proxy datasource that does not allow that header
-still works, with millisecond precision in traces.
+still works, with millisecond precision in traces. With a direct URL the browser sends it cross-origin, so a CORS setup
+in front of Trino with an explicit header list must include it, or trace queries fail while the other queries work.
 
 Queries are submitted as plain SQL. Use `{start}` and `{end}` in a query to interpolate the dashboard time range in UTC,
 for example:
@@ -179,12 +180,15 @@ the display label. Nulls are skipped, duplicate values are removed (the first on
 are read: the query is cancelled there and later rows are dropped without a warning. The query can use other variables
 and `{start}` and `{end}`.
 
+Trino sends `bigint` values as JSON numbers, which lose precision above 2^53. Cast large numeric ids to `varchar`
+(`SELECT CAST(host_id AS varchar) ...`) so the variable value matches the stored one.
+
 ```sql
 -- a region picker
 SELECT DISTINCT region FROM iceberg.ops.hosts WHERE region IS NOT NULL ORDER BY region
 
 -- value and display label
-SELECT host_id AS value, concat(hostname, ' (', coalesce(region, 'unknown'), ')') AS label
+SELECT CAST(host_id AS varchar) AS value, concat(hostname, ' (', coalesce(region, 'unknown'), ')') AS label
 FROM iceberg.ops.hosts
 ORDER BY label
 

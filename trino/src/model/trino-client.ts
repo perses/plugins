@@ -228,7 +228,7 @@ export async function query(params: TrinoQueryParams, queryOptions: TrinoQueryOp
     // oxlint-disable no-await-in-loop
     while (body.nextUri) {
       pendingUri = body.nextUri;
-      if (rows.length >= rowLimit) {
+      if (rows.length > rowLimit) {
         truncated = true;
         break;
       }

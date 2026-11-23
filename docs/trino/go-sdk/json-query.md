@@ -3,10 +3,10 @@
 ## Constructor
 
 ```golang
-import query "github.com/perses/plugins/trino/sdk/go/query/json"
+import jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 
-var options []json.Option
-query.TrinoJsonQuery("SELECT host_id, hostname, region FROM iceberg.ops.hosts ORDER BY region", options...)
+var options []jsonquery.Option
+jsonquery.TrinoJsonQuery("SELECT host_id, hostname, region FROM iceberg.ops.hosts ORDER BY region", options...)
 ```
 
 Need to provide the SQL query expression and a list of options.
@@ -20,9 +20,9 @@ Need to provide the SQL query expression and a list of options.
 #### Query
 
 ```golang
-import query "github.com/perses/plugins/trino/sdk/go/query/json"
+import jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 
-query.Query("SELECT host_id, hostname, region FROM iceberg.ops.hosts ORDER BY region")
+jsonquery.Query("SELECT host_id, hostname, region FROM iceberg.ops.hosts ORDER BY region")
 ```
 
 Define the SQL query expression.
@@ -30,9 +30,9 @@ Define the SQL query expression.
 #### Datasource
 
 ```golang
-import query "github.com/perses/plugins/trino/sdk/go/query/json"
+import jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 
-query.Datasource("MyTrinoDatasource")
+jsonquery.Datasource("MyTrinoDatasource")
 ```
 
 Define the datasource the query will use.
@@ -40,10 +40,10 @@ Define the datasource the query will use.
 #### Catalog and Schema
 
 ```golang
-import query "github.com/perses/plugins/trino/sdk/go/query/json"
+import jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 
-query.Catalog("iceberg")
-query.Schema("analytics")
+jsonquery.Catalog("iceberg")
+jsonquery.Schema("analytics")
 ```
 
 Set the catalog and schema sent as `X-Trino-Catalog` and `X-Trino-Schema`.
@@ -51,9 +51,9 @@ Set the catalog and schema sent as `X-Trino-Catalog` and `X-Trino-Schema`.
 #### Session Properties
 
 ```golang
-import query "github.com/perses/plugins/trino/sdk/go/query/json"
+import jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 
-query.SessionProperties("query_max_run_time=5m")
+jsonquery.SessionProperties("query_max_run_time=5m")
 ```
 
 Set `name=value` session properties, separated by commas or line breaks, sent as `X-Trino-Session`.
@@ -61,9 +61,9 @@ Set `name=value` session properties, separated by commas or line breaks, sent as
 #### Source
 
 ```golang
-import query "github.com/perses/plugins/trino/sdk/go/query/json"
+import jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 
-query.Source("perses")
+jsonquery.Source("perses")
 ```
 
 Set the source label sent as `X-Trino-Source`.
@@ -71,9 +71,9 @@ Set the source label sent as `X-Trino-Source`.
 #### Routing Group
 
 ```golang
-import query "github.com/perses/plugins/trino/sdk/go/query/json"
+import jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 
-query.RoutingGroup("adhoc")
+jsonquery.RoutingGroup("adhoc")
 ```
 
 Set the routing group sent as `X-Trino-Routing-Group`, used by Trino Gateway.
@@ -88,7 +88,7 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	table "github.com/perses/plugins/table/sdk/go"
-	trinoquery "github.com/perses/plugins/trino/sdk/go/query/json"
+	jsonquery "github.com/perses/plugins/trino/sdk/go/query/json"
 )
 
 func main() {
@@ -97,7 +97,7 @@ func main() {
 			panelgroup.AddPanel("Services with the most errors",
 				table.Table(),
 				panel.AddQuery(
-					trinoquery.TrinoJsonQuery(`
+					jsonquery.TrinoJsonQuery(`
 						SELECT
 						  service_name,
 						  count(*) AS spans,
@@ -107,7 +107,7 @@ func main() {
 						GROUP BY service_name
 						ORDER BY errors DESC
 						LIMIT 10
-					`, trinoquery.Datasource("MyTrinoDatasource")),
+					`, jsonquery.Datasource("MyTrinoDatasource")),
 				),
 			),
 		),

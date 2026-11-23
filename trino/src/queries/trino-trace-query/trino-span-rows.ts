@@ -14,11 +14,11 @@
 import type { Notice } from '@perses-dev/spec';
 import { otlptracev1 } from '@perses-dev/spec';
 
-type KeyValue = NonNullable<otlptracev1.Span['attributes']>[number];
-type AnyValue = KeyValue['value'];
-
 import type { TrinoColumn, TrinoQueryResponse } from '../../model/trino-client';
 import { parseTrinoTimestampNanos } from '../../model/trino-client';
+
+type KeyValue = NonNullable<otlptracev1.Span['attributes']>[number];
+type AnyValue = KeyValue['value'];
 
 /** Column names read from a trace query result, in order of preference, matched case-insensitively. */
 const COLUMNS = {

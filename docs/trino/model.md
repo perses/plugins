@@ -27,7 +27,8 @@ The proxy must allow `POST /v1/statement` and `GET` and `DELETE` on `/v1/stateme
 headers with `allowHeaders`. Any header set in `headers` must also be listed there.
 
 `X-Trino-Client-Capabilities` is sent by the trace query only, to receive `timestamp(9)` values with their nanoseconds. A
-proxy that does not allow it still works: trace timestamps then have millisecond precision.
+proxy that does not allow it still works: trace timestamps then have millisecond precision. With a direct URL the browser
+sends it cross-origin, so a CORS setup in front of Trino with an explicit header list must include it.
 
 To use a shared Trino account, set `X-Trino-User` in `headers`: Perses applies it on the server and replaces any value
 sent by the browser. To run queries as the viewer, set `oauthPassthrough: true` instead and let Trino take the user
@@ -357,6 +358,7 @@ spec:
   # `query` is the SQL expression. The first column is the value and an optional second column is the display label.
   # Nulls are skipped and duplicate values are removed. Only the first 10,000 rows are read: the query is cancelled
   # there and later rows are dropped without a warning.
+  # Trino sends `bigint` values as JSON numbers, which lose precision above 2^53: cast large numeric ids to `varchar`.
   # It can use other variables, and `{start}` and `{end}` for the dashboard time range in UTC.
   query: <string>
 
@@ -399,7 +401,7 @@ spec:
     kind: "TrinoSQLVariable"
     spec:
       query: |
-        SELECT host_id AS value, concat(hostname, ' (', coalesce(region, 'unknown'), ')') AS label
+        SELECT CAST(host_id AS varchar) AS value, concat(hostname, ' (', coalesce(region, 'unknown'), ')') AS label
         FROM iceberg.ops.hosts
         ORDER BY label
 ```
