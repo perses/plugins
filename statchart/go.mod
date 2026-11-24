@@ -1,8 +1,8 @@
 module github.com/perses/plugins/statchart
 
-go 1.27.2
+go 1.27.3
 
-require github.com/perses/perses v0.55.0
+require github.com/perses/perses v0.55.1
 
 require (
 	github.com/kr/pretty v0.3.1 // indirect

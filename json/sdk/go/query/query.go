@@ -53,7 +53,7 @@ type Builder struct {
 func JsonQuery(options ...Option) query.Option {
 	plg, err := create(options...)
 	return query.Option{
-		Kind: plugin.KindQuery,
+		Kind: plugin.KindJsonQuery,
 		Plugin: plugin.Plugin{
 			Kind: PluginKind,
 			Spec: plg,

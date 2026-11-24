@@ -1,0 +1,12 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "columns": [
+      {
+        "name": "state",
+        "sort": "asc",
+        "sortMode": "bogus"
+      }
+    ]
+  }
+}

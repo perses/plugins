@@ -128,6 +128,66 @@ export const DEFAULT_FORMAT: FormatOptions = {
   shortValues: true,
 };
 
+export interface MultipleYAxisFormats {
+  /** Unit drawn on the left axis. */
+  leftFormat: FormatOptions;
+  /** Units drawn on the right, in querySettings order. */
+  additionalFormats: FormatOptions[];
+  /** Unit name to Y axis index. Index 0 is the left axis. */
+  formatToYAxisIndex: Map<string, number>;
+}
+
+/**
+ * The left axis keeps the panel unit when at least one query uses it.
+ * A query without querySettings, or without a unit, uses the panel unit.
+ * When every query overrides that unit, the left axis would have no series.
+ * The unit of the lowest query index then moves to the left.
+ */
+export function resolveMultipleYAxisFormats(
+  panelFormat: FormatOptions | undefined,
+  querySettings: QuerySettingsOptions[] | undefined,
+  queryCount: number,
+): MultipleYAxisFormats {
+  const fallback = panelFormat ?? DEFAULT_FORMAT;
+  const settings = querySettings ?? [];
+  const panelUnit = fallback.unit ?? 'decimal';
+  const settingsByQuery = new Map(settings.map((querySetting) => [querySetting.queryIndex, querySetting]));
+
+  let leftUsed = queryCount === 0;
+  for (let queryIndex = 0; queryIndex < queryCount; queryIndex++) {
+    const unit = settingsByQuery.get(queryIndex)?.format?.unit;
+    if (!unit || unit === panelUnit) {
+      leftUsed = true;
+      break;
+    }
+  }
+
+  let leftFormat = fallback;
+  if (!leftUsed) {
+    let firstIndex = Number.POSITIVE_INFINITY;
+    for (const querySetting of settings) {
+      const unit = querySetting.format?.unit;
+      if (unit && unit !== panelUnit && querySetting.queryIndex < firstIndex) {
+        firstIndex = querySetting.queryIndex;
+        leftFormat = querySetting.format ?? leftFormat;
+      }
+    }
+  }
+
+  const leftUnit = leftFormat.unit ?? 'decimal';
+  const additionalFormats: FormatOptions[] = [];
+  const formatToYAxisIndex = new Map<string, number>([[leftUnit, 0]]);
+  for (const querySetting of settings) {
+    const unit = querySetting.format?.unit;
+    if (unit && unit !== leftUnit && !formatToYAxisIndex.has(unit) && querySetting.format) {
+      formatToYAxisIndex.set(unit, 1 + additionalFormats.length);
+      additionalFormats.push(querySetting.format);
+    }
+  }
+
+  return { leftFormat, additionalFormats, formatToYAxisIndex };
+}
+
 export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   show: true,
   label: '',

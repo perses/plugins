@@ -1,0 +1,15 @@
+{
+  "kind": "AlertManagerAlertsQuery",
+  "spec": {
+    "datasource": {
+      "kind": "AlertManagerDatasource",
+      "name": "alertmanager"
+    },
+    "filters": ["severity=\"critical\"", "namespace=~\"$namespace\""],
+    "active": true,
+    "silenced": false,
+    "inhibited": false,
+    "unprocessed": false,
+    "receiver": "team-.*"
+  }
+}

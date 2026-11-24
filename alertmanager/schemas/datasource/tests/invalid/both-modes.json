@@ -1,0 +1,12 @@
+{
+  "kind": "AlertManagerDatasource",
+  "spec": {
+    "directUrl": "http://localhost:9093",
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "http://alertmanager:9093"
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "kind": "SilenceTable",
+  "spec": {
+    "allowedActions": ["silence"]
+  }
+}

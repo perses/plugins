@@ -13,8 +13,13 @@
 
 import type { Silence } from '@perses-dev/spec';
 
-import type { SilenceColumnSortMode, SilenceFieldName, SortDirection } from './silence-table-model';
-import { getSilenceFieldValue } from './silence-table-model';
+import type {
+  SilenceColumnDefinition,
+  SilenceColumnSortMode,
+  SilenceFieldName,
+  SortDirection,
+} from './silence-table-model';
+import { DEFAULT_SILENCE_COLUMNS, getSilenceFieldValue, inferSortMode } from './silence-table-model';
 
 export interface SilenceSortState {
   fieldName: SilenceFieldName;
@@ -54,7 +59,16 @@ function compareStatus(a: string, b: string): number {
   return wa - wb;
 }
 
+function getSilenceDurationMs(silence: Silence): number {
+  return new Date(silence.endsAt).getTime() - new Date(silence.startsAt).getTime();
+}
+
 export function compareSilencesByColumn(a: Silence, b: Silence, sort: SilenceSortState): number {
+  // The duration column displays a formatted string ("2h", "10h"): compare the underlying lengths instead.
+  if (sort.fieldName === 'duration') {
+    return (getSilenceDurationMs(a) - getSilenceDurationMs(b)) * directionMultiplier(sort.direction);
+  }
+
   const va = getSilenceFieldValue(a, sort.fieldName);
   const vb = getSilenceFieldValue(b, sort.fieldName);
   let result: number;
@@ -73,4 +87,19 @@ export function compareSilencesByColumn(a: Silence, b: Silence, sort: SilenceSor
   }
 
   return result * directionMultiplier(sort.direction);
+}
+
+function hasInitialSort(c: SilenceColumnDefinition): boolean {
+  return !!c.sort && c.enableSorting !== false;
+}
+
+/**
+ * Initial sort of the table: the first configured column with `sort` and sorting enabled,
+ * else the first built-in column with `sort` (status).
+ */
+export function getInitialSilenceSort(columnDefs: SilenceColumnDefinition[]): SilenceSortState | null {
+  const defaultNames = new Set(DEFAULT_SILENCE_COLUMNS.map((c) => c.name));
+  const col = columnDefs.find((c) => hasInitialSort(c) && !defaultNames.has(c.name)) ?? columnDefs.find(hasInitialSort);
+  if (!col?.sort) return null;
+  return { fieldName: col.name, direction: col.sort, mode: col.sortMode ?? inferSortMode(col.name) };
 }

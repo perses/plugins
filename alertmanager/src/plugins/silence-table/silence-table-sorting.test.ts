@@ -13,8 +13,10 @@
 
 import type { Silence } from '@perses-dev/spec';
 
+import type { SilenceColumnDefinition } from './silence-table-model';
+import { DEFAULT_SILENCE_COLUMNS } from './silence-table-model';
 import type { SilenceSortState } from './silence-table-sorting';
-import { compareSilencesByColumn } from './silence-table-sorting';
+import { compareSilencesByColumn, getInitialSilenceSort } from './silence-table-sorting';
 
 const makeSilence = (overrides: Partial<Silence> = {}): Silence => ({
   id: 'silence-1',
@@ -120,5 +122,49 @@ describe('compareSilencesByColumn', () => {
       silences.sort((a, b) => compareSilencesByColumn(a, b, updatedAtSort));
       expect(silences.map((s) => s.updatedAt)).toEqual(['2024-01-01T00:00:00Z', '']);
     });
+  });
+
+  describe('duration sort', () => {
+    it('sorts by the length of the silence, not by the formatted duration', () => {
+      const silences = [
+        makeSilence({ id: '10h', startsAt: '2024-01-01T00:00:00Z', endsAt: '2024-01-01T10:00:00Z' }),
+        makeSilence({ id: '2h', startsAt: '2024-01-01T00:00:00Z', endsAt: '2024-01-01T02:00:00Z' }),
+        makeSilence({ id: '1d', startsAt: '2024-01-01T00:00:00Z', endsAt: '2024-01-02T00:00:00Z' }),
+        makeSilence({ id: '30m', startsAt: '2024-01-01T00:00:00Z', endsAt: '2024-01-01T00:30:00Z' }),
+      ];
+      const sort: SilenceSortState = { fieldName: 'duration', direction: 'asc', mode: 'alphabetical' };
+      silences.sort((a, b) => compareSilencesByColumn(a, b, sort));
+      expect(silences.map((s) => s.id)).toEqual(['30m', '2h', '10h', '1d']);
+      silences.sort((a, b) => compareSilencesByColumn(a, b, { ...sort, direction: 'desc' }));
+      expect(silences.map((s) => s.id)).toEqual(['1d', '10h', '2h', '30m']);
+    });
+  });
+});
+
+describe('getInitialSilenceSort', () => {
+  it('sorts by status by default', () => {
+    expect(getInitialSilenceSort(DEFAULT_SILENCE_COLUMNS)).toEqual({
+      fieldName: 'status',
+      direction: 'asc',
+      mode: 'status',
+    });
+  });
+
+  it('uses the first configured column with sort over the built-in status sort', () => {
+    const columns: SilenceColumnDefinition[] = [
+      ...DEFAULT_SILENCE_COLUMNS,
+      { name: 'createdBy' },
+      { name: 'endsAt', sort: 'desc' },
+      { name: 'duration', sort: 'asc' },
+    ];
+    expect(getInitialSilenceSort(columns)).toEqual({ fieldName: 'endsAt', direction: 'desc', mode: 'date' });
+  });
+
+  it('ignores a configured sort on a column with sorting disabled', () => {
+    const columns: SilenceColumnDefinition[] = [
+      ...DEFAULT_SILENCE_COLUMNS,
+      { name: 'endsAt', sort: 'desc', enableSorting: false },
+    ];
+    expect(getInitialSilenceSort(columns)?.fieldName).toBe('status');
   });
 });

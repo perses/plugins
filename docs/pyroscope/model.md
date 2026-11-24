@@ -61,12 +61,18 @@ spec:
         spec:
           url: "http://pyroscope.example.com:4040"
           allowedEndpoints:
-            - endpointPattern: "/render"
-              method: "GET"
-            - endpointPattern: "/labels"
-              method: "GET"
-            - endpointPattern: "/label-values"
-              method: "GET"
+            - endpointPattern: "/querier.v1.QuerierService/SelectMergeStacktraces"
+              method: "POST"
+            - endpointPattern: "/querier.v1.QuerierService/SelectSeries"
+              method: "POST"
+            - endpointPattern: "/querier.v1.QuerierService/Series"
+              method: "POST"
+            - endpointPattern: "/querier.v1.QuerierService/ProfileTypes"
+              method: "POST"
+            - endpointPattern: "/querier.v1.QuerierService/LabelNames"
+              method: "POST"
+            - endpointPattern: "/querier.v1.QuerierService/LabelValues"
+              method: "POST"
           secret: "pyroscope_secret_config"
 ```
 

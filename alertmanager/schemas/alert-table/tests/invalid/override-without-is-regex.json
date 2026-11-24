@@ -1,0 +1,17 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "labelColorMappings": [
+      {
+        "labelKey": "team",
+        "mode": "manual",
+        "overrides": [
+          {
+            "value": "platform",
+            "color": "#1f77b4"
+          }
+        ]
+      }
+    ]
+  }
+}

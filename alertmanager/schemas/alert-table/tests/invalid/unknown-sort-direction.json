@@ -1,0 +1,11 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "columns": [
+      {
+        "name": "severity",
+        "sort": "ascending"
+      }
+    ]
+  }
+}

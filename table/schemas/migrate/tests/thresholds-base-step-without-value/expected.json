@@ -1,0 +1,27 @@
+{
+  "kind": "Table",
+  "spec": {
+    "cellSettings": [
+      {
+        "condition": {
+          "kind": "Range",
+          "spec": {
+            "min": 86400
+          }
+        },
+        "textColor": "#37872d"
+      },
+      {
+        "condition": {
+          "kind": "Range",
+          "spec": {
+            "max": 86400,
+            "min": -1000000000000000
+          }
+        },
+        "textColor": "#5794f2"
+      }
+    ],
+    "columnSettings": []
+  }
+}
