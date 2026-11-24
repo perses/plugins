@@ -14,7 +14,7 @@
 import type { QuerySettingsOptions } from './time-series-chart-model';
 import { resolveMultipleYAxisFormats } from './time-series-chart-model';
 
-const shahrokniSettings: QuerySettingsOptions[] = [
+const queryUnitSettings: QuerySettingsOptions[] = [
   { queryIndex: 1, format: { unit: 'decbytes', shortValues: true } },
   { queryIndex: 2, format: { unit: 'decbits/sec' } },
   { queryIndex: 3, format: { unit: 'decbytes/sec' } },
@@ -25,7 +25,7 @@ describe('resolveMultipleYAxisFormats', () => {
   it('keeps an unformatted query on the left decimal axis', () => {
     const layout = resolveMultipleYAxisFormats(
       undefined,
-      shahrokniSettings.filter((settings) => settings.queryIndex !== 0),
+      queryUnitSettings.filter((settings) => settings.queryIndex !== 0),
       4,
     );
 
@@ -35,7 +35,7 @@ describe('resolveMultipleYAxisFormats', () => {
   });
 
   it('moves the first query unit to the left when every query overrides the panel unit', () => {
-    const layout = resolveMultipleYAxisFormats(undefined, shahrokniSettings, 4);
+    const layout = resolveMultipleYAxisFormats(undefined, queryUnitSettings, 4);
 
     expect(layout.leftFormat.unit).toBe('decbits');
     expect(layout.formatToYAxisIndex.get('decbits')).toBe(0);
