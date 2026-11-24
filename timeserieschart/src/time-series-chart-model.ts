@@ -65,6 +65,8 @@ export interface TimeSeriesChartYAxisOptions {
   min?: number;
   max?: number;
   logBase?: LOG_BASE;
+  // Symmetric bounds around zero, from the larger absolute value on this axis.
+  axisCenteredZero?: boolean;
 }
 
 export interface TooltipSpecOptions {
@@ -195,6 +197,7 @@ export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   min: undefined,
   max: undefined,
   logBase: undefined,
+  axisCenteredZero: false,
 };
 
 export const Y_AXIS_CONFIG = {
@@ -204,6 +207,7 @@ export const Y_AXIS_CONFIG = {
   min: { label: 'Min' },
   max: { label: 'Max' },
   logBase: { label: 'Log Base' },
+  axisCenteredZero: { label: 'Center zero' },
 };
 
 export const DEFAULT_DISPLAY = 'line';

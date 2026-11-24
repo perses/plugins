@@ -120,6 +120,12 @@ spec: {
 		yAxis: logBase: #logBase
 	}
 
+	// Grafana custom.axisCenteredZero. Only a true value is carried over.
+	#axisCenteredZero: *#panel.fieldConfig.defaults.custom.axisCenteredZero | false
+	if #axisCenteredZero == true {
+		yAxis: axisCenteredZero: true
+	}
+
 	#yAxisLabel: *#panel.fieldConfig.defaults.custom.axisLabel | null
 	if #yAxisLabel != null if len(#yAxisLabel) > 0 {
 		yAxis: label: #yAxisLabel

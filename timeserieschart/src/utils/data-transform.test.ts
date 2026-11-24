@@ -154,6 +154,25 @@ describe('convertPanelYAxis', () => {
       logBase: 10,
     });
   });
+
+  it('centers a linear axis on zero from the larger absolute bound', () => {
+    const echartsAxis = convertPanelYAxis({ show: true, axisCenteredZero: true });
+    expect(typeof echartsAxis.min).toBe('function');
+    expect(typeof echartsAxis.max).toBe('function');
+    const extent = { min: -2, max: 7 };
+    const min = echartsAxis.min as (value: { min: number; max: number }) => number;
+    const max = echartsAxis.max as (value: { min: number; max: number }) => number;
+    expect(min(extent)).toBe(-7);
+    expect(max(extent)).toBe(7);
+  });
+
+  it('keeps an explicit min or a log scale instead of centering zero', () => {
+    const explicit = convertPanelYAxis({ show: true, axisCenteredZero: true, min: -1, max: 4 });
+    expect(explicit.min).toBe(-1);
+    expect(explicit.max).toBe(4);
+    const logAxis = convertPanelYAxis({ show: true, axisCenteredZero: true, logBase: 10 });
+    expect(logAxis).toMatchObject({ type: 'log', logBase: 10, min: undefined });
+  });
 });
 
 const ROUND_DOWN_TESTS = [

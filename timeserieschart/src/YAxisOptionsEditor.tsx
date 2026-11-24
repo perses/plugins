@@ -130,6 +130,18 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
           />
         }
       />
+      <OptionsEditorControl
+        label={Y_AXIS_CONFIG.axisCenteredZero.label}
+        control={
+          <Switch
+            checked={value.axisCenteredZero ?? DEFAULT_Y_AXIS.axisCenteredZero}
+            disabled={value.logBase !== undefined || value.min !== undefined || value.max !== undefined}
+            onChange={(e): void => {
+              onChange({ ...value, axisCenteredZero: e.target.checked });
+            }}
+          />
+        }
+      />
     </OptionsEditorGroup>
   );
 }

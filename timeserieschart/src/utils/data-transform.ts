@@ -274,6 +274,25 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
   return max;
 }
 
+// centeredZeroExtent is the half-range that puts zero in the middle of one axis.
+// ECharts passes the data extent of that axis, after negativeY has flipped the series.
+export function centeredZeroExtent(value: { min: number; max: number }): number {
+  const extent = Math.max(Math.abs(value.min), Math.abs(value.max));
+  if (!Number.isFinite(extent) || extent === 0) {
+    return 1;
+  }
+  return extent;
+}
+
+function centerZeroBounds(inputAxis: TimeSeriesChartYAxisOptions): boolean {
+  return (
+    inputAxis.axisCenteredZero === true &&
+    inputAxis.logBase === undefined &&
+    inputAxis.min === undefined &&
+    inputAxis.max === undefined
+  );
+}
+
 /**
  * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options.
  * Handles both linear and logarithmic scales with appropriate min/max calculations.
@@ -281,7 +300,11 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
 export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   // Determine the appropriate min value based on scale type and user input
   let minValue: YAXisComponentOption['min'];
-  if (inputAxis.logBase !== undefined) {
+  let maxValue: YAXisComponentOption['max'] = inputAxis?.max;
+  if (centerZeroBounds(inputAxis)) {
+    minValue = (value): number => -centeredZeroExtent(value);
+    maxValue = (value): number => centeredZeroExtent(value);
+  } else if (inputAxis.logBase !== undefined) {
     // For logarithmic scales without explicit min:
     // Let ECharts auto-calculate the range based on data to avoid issues with
     // function-based calculations which can result in improper ranges (e.g., 1-10)
@@ -313,7 +336,7 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
   const yAxis = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: minValue,
-    max: inputAxis?.max,
+    max: maxValue,
   } satisfies YAXisComponentOption;
 
   // Apply logarithmic scale settings if requested

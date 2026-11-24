@@ -62,6 +62,8 @@ spec: close({
 		max: >=min
 	}
 	logBase?: 2 | 10
+	// Symmetric bounds around zero. Ignored for a log scale or when min or max is set.
+	axisCenteredZero?: bool
 }
 
 #querySettings: [...{
