@@ -178,7 +178,7 @@ When using the Dashboard-as-Code Go lib, use the `query.EnableExemplars(false)` 
 
 ## Annotation (`PrometheusPromQLAnnotation`)
 
-The annotation plugin overlays contextual events on the panels of a dashboard, like deployments, incidents or maintenance windows. The provided PromQL expression is executed as a range query over the time range of the dashboard, and each series it returns becomes an annotation spanning from the timestamp of its first sample to the timestamp of its last one.
+The annotation plugin overlays contextual events on the panels of a dashboard, like deployments, incidents or maintenance windows. The provided PromQL expression is executed as a range query over the time range of the dashboard, and the samples of each series it returns are turned into annotations: consecutive samples, at most one step of the range query apart, form a region spanning from the first to the last of them, and a gap in the series starts a new annotation. A sample with no neighbor, like the one produced by `vector(1) and on() (timestamp(vector(1)) % 3600 < 15)` every hour, becomes a point annotation, displayed as a single line on the time series charts.
 
 The `title` and `legend` displayed in the annotation tooltip can be built from the labels of the series, using the `{{label_name}}` syntax (e.g `Deployment {{service}}`). The labels shown as tags can be restricted with `tags`, all of them being displayed otherwise.
 
