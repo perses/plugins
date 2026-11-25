@@ -647,6 +647,6 @@ describe('getLogData language dispatch', () => {
   ])('records the executed request in metadata for $queryLanguage', async (spec) => {
     const result = await OpenSearchLogQuery.getLogData(spec, context);
     expect(typeof result.metadata?.executedQueryString).toBe('string');
-    expect(result.metadata?.executedQueryString.length).toBeGreaterThan(0);
+    expect(result.metadata?.executedQueryString?.length).toBeGreaterThan(0);
   });
 });
