@@ -70,4 +70,25 @@ describe('TrinoDatasource.createClient', () => {
     expect(headers.get('X-Trino-Catalog')).toBe('hive');
     expect(headers.get('X-Trino-User')).toBe('perses');
   });
+
+  it('declares the health check path', () => {
+    expect(TrinoDatasource.healthCheckPath).toBe('/v1/info');
+  });
+
+  it('health checks the info endpoint with the proxy headers through the custom fetch', async () => {
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({ starting: false }) });
+
+    const client = TrinoDatasource.createClient(
+      { proxy: { kind: 'HTTPProxy', spec: { url: 'http://trino:8080', headers: { 'X-Trino-User': 'perses' } } } },
+      { proxyUrl: '/proxy/globaldatasources/trino', fetch: mockFetch as unknown as typeof fetch },
+    );
+
+    await expect(client.healthCheck()).resolves.toBe(true);
+    const [url, init] = mockFetch.mock.calls[0]!;
+    expect(url).toBe(`${window.location.origin}/proxy/globaldatasources/trino/v1/info`);
+    expect(init.method).toBe('GET');
+    expect(new Headers(init.headers).get('X-Trino-User')).toBe('perses');
+  });
 });

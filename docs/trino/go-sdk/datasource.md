@@ -58,6 +58,7 @@ func main() {
 				http.AddAllowedEndpoint("POST", "/v1/statement"),
 				http.AddAllowedEndpoint("GET", "/v1/statement/.*"),
 				http.AddAllowedEndpoint("DELETE", "/v1/statement/.*"),
+				http.AddAllowedEndpoint("GET", "/v1/info"),
 				http.AddHeader("X-Trino-User", "perses"),
 				http.Secret("trino_secret_config"),
 			),
