@@ -207,7 +207,7 @@ export const Y_AXIS_CONFIG = {
   min: { label: 'Min' },
   max: { label: 'Max' },
   logBase: { label: 'Log Base' },
-  axisCenteredZero: { label: 'Center zero' },
+  axisCenteredZero: { label: 'Center Zero' },
 };
 
 export const DEFAULT_DISPLAY = 'line';

@@ -276,12 +276,13 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
 
 // centeredZeroExtent is the half-range that puts zero in the middle of one axis.
 // ECharts passes the data extent of that axis, after negativeY has flipped the series.
+// The extent is padded, then rounded up to one significant digit, so the last tick is not glued to the peak.
 export function centeredZeroExtent(value: { min: number; max: number }): number {
   const extent = Math.max(Math.abs(value.min), Math.abs(value.max));
   if (!Number.isFinite(extent) || extent === 0) {
     return 1;
   }
-  return extent;
+  return roundUp(extent * NEGATIVE_MIN_VALUE_MULTIPLIER);
 }
 
 function centerZeroBounds(inputAxis: TimeSeriesChartYAxisOptions): boolean {
@@ -363,4 +364,23 @@ export function roundDown(num: number): number {
   const magnitude = Math.floor(Math.log10(Math.abs(num)));
   const firstDigit = Math.floor(num / Math.pow(10, magnitude));
   return Number((firstDigit * Math.pow(10, magnitude)).toPrecision(1));
+}
+
+/**
+ * Rounds up to the nearest number with one significant digit.
+ *
+ * Examples:
+ * 1. 675 --> 700
+ * 2. 0.567 --> 0.6
+ * 3. 8.4 --> 9
+ */
+export function roundUp(num: number): number {
+  const abs = Math.abs(num);
+  const magnitude = Math.floor(Math.log10(abs));
+  const power = Math.pow(10, magnitude);
+  const firstDigit = Math.ceil(abs / power - Number.EPSILON);
+  if (firstDigit >= 10) {
+    return Number(Math.pow(10, magnitude + 1).toPrecision(1));
+  }
+  return Number((firstDigit * power).toPrecision(1));
 }

@@ -155,15 +155,18 @@ describe('convertPanelYAxis', () => {
     });
   });
 
-  it('centers a linear axis on zero from the larger absolute bound', () => {
+  it('centers a linear axis on zero using a padded nice half-range', () => {
     const echartsAxis = convertPanelYAxis({ show: true, axisCenteredZero: true });
     expect(typeof echartsAxis.min).toBe('function');
     expect(typeof echartsAxis.max).toBe('function');
-    const extent = { min: -2, max: 7 };
     const min = echartsAxis.min as (value: { min: number; max: number }) => number;
     const max = echartsAxis.max as (value: { min: number; max: number }) => number;
-    expect(min(extent)).toBe(-7);
-    expect(max(extent)).toBe(7);
+    // 7 * 1.2 = 8.4, rounded up to one significant digit.
+    expect(min({ min: -2, max: 7 })).toBe(-9);
+    expect(max({ min: -2, max: 7 })).toBe(9);
+    // A peak just under 7 must not sit on the 7 tick.
+    expect(max({ min: -6.99, max: 2 })).toBe(9);
+    expect(min({ min: -6.99, max: 2 })).toBe(-9);
   });
 
   it('keeps an explicit min or a log scale instead of centering zero', () => {

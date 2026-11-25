@@ -63,6 +63,7 @@ spec: close({
 	}
 	logBase?: 2 | 10
 	// Symmetric bounds around zero. Ignored for a log scale or when min or max is set.
+	// The rendered half-range is padded, then rounded up to one significant digit.
 	axisCenteredZero?: bool
 }
 
