@@ -267,8 +267,9 @@ spec:
   datasource: <Prometheus Datasource selector> # Optional
 
   # The promql expression, executed as a range query over the time range of the dashboard.
-  # Each series returned becomes an annotation, spanning from the timestamp of its first sample
-  # to the timestamp of its last one.
+  # Each series returned is split into annotations: consecutive samples (at most one step apart)
+  # form a region spanning from the first to the last of them, and a gap starts a new annotation.
+  # An isolated sample becomes a point annotation.
   expr: <string>
 
   # Title displayed in the annotation tooltip.
