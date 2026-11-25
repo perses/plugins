@@ -1,6 +1,6 @@
 # Expression Query Plugin
 
-An `ExpressionQuery` plugin computing a time series from the **other time series queries of the panel**, whatever their
+A `TimeSeriesExpressionQuery` plugin computing a time series from the **other time series queries of the panel**, whatever their
 datasource (Prometheus, Loki, ClickHouse...).
 
 The other queries are referenced by their 1-based position: `$1` for the first query, `$2` for the second, and so on.
@@ -159,10 +159,10 @@ queries:
         kind: PrometheusTimeSeriesQuery
         spec:
           query: sum by (job) (rate(http_requests_total[5m]))
-  - kind: ExpressionQuery
+  - kind: TimeSeriesExpressionQuery
     spec:
       plugin:
-        kind: ExpressionQuery
+        kind: TimeSeriesExpressionQuery
         spec:
           type: math
           expression: $1 / $2 * 100

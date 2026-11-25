@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { ExpressionQueryContext } from '@perses-dev/plugin-system';
+import type { TimeSeriesExpressionQueryContext } from '@perses-dev/plugin-system';
 import type { TimeSeriesData } from '@perses-dev/spec';
 
 import type { EvaluationRequest } from './engine';
@@ -23,7 +23,10 @@ function formatSeriesName(format: string, labels: Record<string, string>): strin
 }
 
 /** Constructs an {@link EvaluationRequest} from a plugin spec and its execution context. */
-export function buildEvaluationRequest(spec: ExpressionQuerySpec, ctx: ExpressionQueryContext): EvaluationRequest {
+export function buildEvaluationRequest(
+  spec: ExpressionQuerySpec,
+  ctx: TimeSeriesExpressionQueryContext,
+): EvaluationRequest {
   return {
     expression: spec.expression ?? '',
     inputs: ctx.inputs,
@@ -39,7 +42,7 @@ export function buildEvaluationRequest(spec: ExpressionQuerySpec, ctx: Expressio
  */
 export async function getExpressionData(
   spec: ExpressionQuerySpec,
-  context: ExpressionQueryContext,
+  context: TimeSeriesExpressionQueryContext,
   abortSignal?: AbortSignal,
 ): Promise<TimeSeriesData> {
   if (!spec.expression?.trim()) {

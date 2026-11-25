@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package expression provides the Go SDK of the ExpressionQuery plugin: a time series query computed from the other
-// time series queries of a panel, whatever their datasource. Only the Math type is available for now.
+// Package expression provides the Go SDK of the TimeSeriesExpressionQuery plugin: a time series query computed from
+// the other time series queries of a panel, whatever their datasource. Only the Math type is available for now.
 package expression
 
 import (
@@ -20,7 +20,7 @@ import (
 	"github.com/perses/spec/go/plugin"
 )
 
-const PluginKind = "ExpressionQuery"
+const PluginKind = "TimeSeriesExpressionQuery"
 
 type Type string
 
@@ -28,7 +28,8 @@ const (
 	TypeMath Type = "math"
 )
 
-// PluginSpec is the spec of the ExpressionQuery plugin. Depending on the Type, only a subset of the fields is used.
+// PluginSpec is the spec of the TimeSeriesExpressionQuery plugin. Depending on the Type, only a subset of the fields
+// is used.
 type PluginSpec struct {
 	Type             Type   `json:"type" yaml:"type"`
 	Expression       string `json:"expression,omitempty" yaml:"expression,omitempty"`
@@ -53,7 +54,7 @@ func build(spec PluginSpec, options ...Option) query.Option {
 		}
 	}
 	return query.Option{
-		Kind: plugin.KindTimeSeriesQuery,
+		Kind: plugin.KindTimeSeriesExpressionQuery,
 		Plugin: plugin.Plugin{
 			Kind: PluginKind,
 			Spec: spec,

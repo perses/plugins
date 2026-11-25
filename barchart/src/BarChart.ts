@@ -31,7 +31,7 @@ export const BarChart: PanelPlugin<BarChartOptions, BarChartPanelProps> = {
       content: BarChartOptionsEditorSettings,
     },
   ],
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   createInitialOptions: createInitialBarChartOptions,
   actions: [
     {

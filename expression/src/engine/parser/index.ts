@@ -27,8 +27,9 @@ export const MAX_DEPTH = 64;
 
 const { parse: mathjsParse } = create({ ...parseDependencies });
 
-// Matches query references: $1, $2, $3, ... (1-based, case-sensitive)
-const RE_QUERY_REF = /^\$(\d+)$/;
+// Matches query references: $1, $2, $3, ... (1-based, case-sensitive). The first digit must be
+// 1-9 so that $0 and leading-zero forms like $01 are rejected rather than mapped to a query index.
+const RE_QUERY_REF = /^\$([1-9]\d*)$/;
 
 /**
  * Parses a `$N` symbol name into a 0-based query index, or returns `null` if the name is not a

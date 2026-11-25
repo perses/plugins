@@ -22,7 +22,7 @@ import { StatusHistoryValueMappingEditor } from './StatusHistoryValueMappingEdit
 
 export const StatusHistoryChart: PanelPlugin<StatusHistoryChartOptions, StatusHistoryChartPanelProps> = {
   PanelComponent: StatusHistoryPanel,
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   panelOptionsEditorComponents: [
     { label: 'Settings', content: StatusHistoryChartOptionsEditorSettings },
     { label: 'Value mapping', content: StatusHistoryValueMappingEditor },

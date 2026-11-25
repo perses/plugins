@@ -20,7 +20,7 @@ export default createConfigForPlugin({
   },
   moduleFederation: {
     exposes: {
-      './ExpressionQuery': './src/ExpressionQuery.ts',
+      './TimeSeriesExpressionQuery': './src/ExpressionQuery.ts',
     },
     shared: {
       react: { requiredVersion: '^18.3.0 || ^19.0.0', singleton: true },

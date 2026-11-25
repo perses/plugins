@@ -21,7 +21,7 @@ import type { CanvasProps, CanvasSpec } from './model';
 export const Canvas: PanelPlugin<CanvasSpec, CanvasProps> = {
   PanelComponent: CanvasPanel,
   panelOptionsEditorComponents: [{ label: 'Settings', content: GlobalSettingsEditor }],
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   createInitialOptions: () => ({}),
   actions: [{ component: ViewCanvasShortcutsTooltip, location: 'header' }],
 };

@@ -147,6 +147,15 @@ describe('evaluateExpression', () => {
     }
   });
 
+  it('rejects $0 as an unknown reference (query references are 1-based)', () => {
+    expect(() => evaluateExpression(req('$0 + 1', { 0: ts([[0, 1]]) }))).toThrow(ExpressionError);
+    try {
+      evaluateExpression(req('$0 + 1', { 0: ts([[0, 1]]) }));
+    } catch (e) {
+      expect((e as ExpressionError).info.code).toBe('unknown_reference');
+    }
+  });
+
   it('throws syntax error for a bad expression', () => {
     expect(() => evaluateExpression(req('$1 + ', { 0: ts([[0, 1]]) }))).toThrow(ExpressionError);
   });

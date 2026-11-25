@@ -52,13 +52,13 @@
     "schemasPath": "schemas",
     "plugins": [
       {
-        "kind": "ExpressionQuery",
+        "kind": "TimeSeriesExpressionQuery",
         "spec": {
           "display": {
             "name": "Expression",
             "description": "Math expression computed on the other time series queries of the panel"
           },
-          "name": "ExpressionQuery"
+          "name": "TimeSeriesExpressionQuery"
         }
       }
     ]

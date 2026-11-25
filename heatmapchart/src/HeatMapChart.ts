@@ -23,7 +23,7 @@ import { createInitialHeatMapChartOptions } from './heat-map-chart-model';
  */
 export const HeatMapChart: PanelPlugin<HeatMapChartOptions, HeatMapChartPanelProps> = {
   PanelComponent: HeatMapChartPanel,
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   queryOptions: {
     mode: 'range',
   },

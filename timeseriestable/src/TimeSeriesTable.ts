@@ -23,7 +23,7 @@ import { TimeSeriesTablePanel } from './TimeSeriesTablePanel';
  */
 export const TimeSeriesTable: PanelPlugin<TimeSeriesTableOptions, TimeSeriesTableProps> = {
   PanelComponent: TimeSeriesTablePanel,
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   queryOptions: {
     mode: 'instant',
   },

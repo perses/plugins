@@ -20,7 +20,7 @@ package model
 	seriesNameFormat?: string
 }
 
-kind: "ExpressionQuery"
+kind: "TimeSeriesExpressionQuery"
 // Every type of expression is a closed definition. To support a new type, declare its definition and add it to
 // this disjunction.
 spec: #math

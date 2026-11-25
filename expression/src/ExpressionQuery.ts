@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { ExpressionQueryPlugin, ExpressionQueryPluginDependencies } from '@perses-dev/plugin-system';
+import type {
+  TimeSeriesExpressionQueryPlugin,
+  TimeSeriesExpressionQueryPluginDependencies,
+} from '@perses-dev/plugin-system';
 
 import type { ExpressionQuerySpec } from './expression-query-types';
 import { createInitialExpressionQuerySpec, getExpressionInputs } from './expression-query-types';
@@ -22,11 +25,11 @@ import { getExpressionData } from './get-expression-data';
  * An ExpressionQuery plugin computing a time series from the other time series queries of the panel,
  * whatever the datasource they come from. The evaluation runs entirely in the browser.
  */
-export const ExpressionQuery: ExpressionQueryPlugin<ExpressionQuerySpec> = {
+export const TimeSeriesExpressionQuery: TimeSeriesExpressionQueryPlugin<ExpressionQuerySpec> = {
   getTimeSeriesData: getExpressionData,
   OptionsEditorComponent: ExpressionQueryEditor,
   createInitialOptions: createInitialExpressionQuerySpec,
-  dependsOn: (spec): ExpressionQueryPluginDependencies => ({
+  dependsOn: (spec): TimeSeriesExpressionQueryPluginDependencies => ({
     queries: getExpressionInputs(spec),
   }),
 };

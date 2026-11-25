@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { ExpressionQueryContext } from '@perses-dev/plugin-system';
+import type { TimeSeriesExpressionQueryContext } from '@perses-dev/plugin-system';
 import type { TimeSeriesData } from '@perses-dev/spec';
 
 import { ExpressionError } from './engine';
 import { getExpressionInputs } from './expression-query-types';
-import { ExpressionQuery } from './ExpressionQuery';
+import { TimeSeriesExpressionQuery } from './ExpressionQuery';
 import { buildEvaluationRequest, getExpressionData } from './get-expression-data';
 
 const dataA: TimeSeriesData = {
@@ -26,14 +26,14 @@ const dataB: TimeSeriesData = {
   series: [{ name: 'b', labels: {}, values: [[1000, 2]] }],
 };
 
-function makeContext(inputs?: Record<number, TimeSeriesData>): ExpressionQueryContext {
+function makeContext(inputs?: Record<number, TimeSeriesData>): TimeSeriesExpressionQueryContext {
   return {
     timeRange: { start: new Date(1000), end: new Date(61000) },
     suggestedStepMs: 15000,
     mode: 'range',
     inputs: inputs ?? {},
     variableState: {},
-    datasourceStore: {} as ExpressionQueryContext['datasourceStore'],
+    datasourceStore: {} as TimeSeriesExpressionQueryContext['datasourceStore'],
   };
 }
 
@@ -52,7 +52,7 @@ describe('getExpressionInputs', () => {
   });
 
   it('is used as query dependencies', () => {
-    expect(ExpressionQuery.dependsOn?.({ type: 'math', expression: '$1 + $2' }, makeContext())).toEqual({
+    expect(TimeSeriesExpressionQuery.dependsOn?.({ type: 'math', expression: '$1 + $2' }, makeContext())).toEqual({
       queries: [0, 1],
     });
   });

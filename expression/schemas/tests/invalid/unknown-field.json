@@ -1,5 +1,5 @@
 {
-  "kind": "ExpressionQuery",
+  "kind": "TimeSeriesExpressionQuery",
   "spec": {
     "type": "math",
     "expression": "$1",
