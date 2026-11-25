@@ -122,6 +122,19 @@ describe('buildSamples', () => {
   };
   const palette = 'package-name';
 
+  it.each([
+    ['github.com/org/pkg/foo.Bar', 'foo.Bar'],
+    ['github.com/go-chi/chi/v5.(*Mux).ServeHTTP', 'chi/v5.(*Mux).ServeHTTP'],
+    ['gopkg.in/yaml.v3.Unmarshal', 'yaml.v3.Unmarshal'],
+    ['org/v2/pkg.Foo', 'pkg.Foo'],
+    ['main.run', 'main.run'],
+    ['github.com/org/pkg.Map[go.shape.string,github.com/x/y.T]', 'pkg.Map[go.shape.string,github.com/x/y.T]'],
+  ])('should strip the import path of %s', (name, label) => {
+    const trace: StackTrace = { ...rootJson, name, children: [] };
+    const output = buildSamples(palette, metadata, trace, '');
+    expect(output[0]?.value[3]).toBe(`${label} (1.00K)`);
+  });
+
   it('should return an empty array when jsonObj is empty', () => {
     const output = buildSamples(palette, metadata, emptyJson, '');
     expect(output).toEqual([]);

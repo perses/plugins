@@ -39,5 +39,6 @@ export function createInitialFlameChartOptions(): FlameChartOptions {
     showSeries: false,
     showTable: true,
     showFlameGraph: true,
+    traceHeight: 22,
   };
 }
