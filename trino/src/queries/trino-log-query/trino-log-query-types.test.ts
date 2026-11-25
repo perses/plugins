@@ -125,7 +125,7 @@ describe('TrinoLogQuery', () => {
         line: '<attrs.host> a <Event_Time> ignored <message> hello <tag> --',
       },
     ]);
-    expect(response.logs.metadata).toBeUndefined();
+    expect(response.metadata).toEqual({ executedQueryString: 'SELECT 1' });
   });
 
   it('skips rows without a parseable time and warns instead of returning invalid entries', async () => {
@@ -141,7 +141,14 @@ describe('TrinoLogQuery', () => {
     const response = await TrinoLogQuery.getLogData({ query: 'SELECT 1' }, createStubContext());
 
     expect(response.logs.entries.map((entry) => entry.labels['message'])).toEqual(['kept']);
-    expect(response.logs.metadata?.notices).toHaveLength(2);
+    expect(response.logs.metadata).toBeUndefined();
+    expect(response.metadata).toEqual({
+      executedQueryString: 'SELECT 1',
+      notices: [
+        { type: 'warning', message: expect.stringContaining('Results were truncated') },
+        { type: 'warning', message: expect.stringContaining('no parseable time column') },
+      ],
+    });
   });
 
   it('returns no entries and a warning when no time column exists', async () => {
@@ -153,7 +160,10 @@ describe('TrinoLogQuery', () => {
     const response = await TrinoLogQuery.getLogData({ query: 'SELECT 1' }, createStubContext());
 
     expect(response.logs.entries).toEqual([]);
-    expect(response.logs.metadata?.notices?.[0]?.message).toContain('no parseable time column');
+    expect(response.metadata).toEqual({
+      executedQueryString: 'SELECT 1',
+      notices: [{ type: 'warning', message: expect.stringContaining('no parseable time column') }],
+    });
   });
 
   it('passes query context fields and the abort signal to the client', async () => {
