@@ -15,30 +15,49 @@ import { Collapse, Divider, List, ListItemButton, ListItemText } from '@mui/mate
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
 import type { ReactElement } from 'react';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 
 import type { CustomLinks } from '../../gantt-chart-model';
 import type { Trace, Span, Event } from '../trace';
 import { formatDuration } from '../utils';
 import { AttributeItems, AttributeItem } from './Attributes';
 
+/**
+ * FocusedSpanEvent references an event to open and scroll into view.
+ * A new object is created on each request, to focus the same event again.
+ */
+export interface FocusedSpanEvent {
+  spanId: string;
+  /** index of the event in `span.events` */
+  eventIndex: number;
+}
+
 export interface SpanEventListProps {
   customLinks?: CustomLinks;
   trace: Trace;
   span: Span;
+  focusedEvent?: FocusedSpanEvent;
 }
 
 export function SpanEventList(props: SpanEventListProps): ReactElement {
-  const { customLinks, trace, span } = props;
+  const { customLinks, trace, span, focusedEvent } = props;
 
   return (
     <>
       {span.events
-        .toSorted((a, b) => a.timeUnixMs - b.timeUnixMs)
-        .map((event, i) => (
-          <Fragment key={i}>
+        .map((event, index) => ({ event, index }))
+        .toSorted((a, b) => a.event.timeUnixMs - b.event.timeUnixMs)
+        .map(({ event, index }, i) => (
+          <Fragment key={index}>
             {i > 0 && <Divider />}
-            <SpanEventItem customLinks={customLinks} trace={trace} event={event} />
+            <SpanEventItem
+              customLinks={customLinks}
+              trace={trace}
+              event={event}
+              focus={
+                focusedEvent?.spanId === span.spanId && focusedEvent.eventIndex === index ? focusedEvent : undefined
+              }
+            />
           </Fragment>
         ))}
     </>
@@ -49,20 +68,38 @@ interface SpanEventItemProps {
   customLinks?: CustomLinks;
   trace: Trace;
   event: Event;
+  /** set if this event is focused */
+  focus?: FocusedSpanEvent;
 }
 
 function SpanEventItem(props: SpanEventItemProps): ReactElement {
-  const { customLinks, trace, event } = props;
+  const { customLinks, trace, event, focus } = props;
   const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
+  const ref = useRef<HTMLUListElement>(null);
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(focus !== undefined);
   const handleClick = (): void => {
     setOpen(!open);
   };
 
+  // expand the event when it gets focused
+  const [prevFocus, setPrevFocus] = useState(focus);
+  if (focus !== prevFocus) {
+    setPrevFocus(focus);
+    if (focus) {
+      setOpen(true);
+    }
+  }
+
+  useEffect(() => {
+    if (focus) {
+      ref.current?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [focus]);
+
   return (
-    <List>
-      <ListItemButton onClick={handleClick} sx={{ px: 1 }}>
+    <List ref={ref}>
+      <ListItemButton selected={focus !== undefined} onClick={handleClick} sx={{ px: 1 }}>
         <ListItemText
           primary={
             <>

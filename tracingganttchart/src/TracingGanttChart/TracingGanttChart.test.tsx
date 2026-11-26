@@ -94,4 +94,30 @@ describe('TracingGanttChart', () => {
     const detail = JSON.parse((listener.mock.calls[0]![0] as CustomEvent<string>).detail);
     expect(detail).toMatchObject({ id: 'sid2', data: { span: { status: { message: 'Not found' } } } });
   });
+
+  it('opens the events tab with the focused event when clicking an event marker', () => {
+    // not implemented by jsdom
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    render(
+      <Providers>
+        <TracingGanttChart options={{}} trace={exampleTrace as otlptracev1.TracesData} />
+      </Providers>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Event event1_name' }));
+
+    expect(screen.getByRole('tab', { name: /Events/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('event1_value')).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+    // clicking the marker again focuses the event again, even if another tab was opened in the meantime
+    fireEvent.click(screen.getByRole('tab', { name: 'Attributes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Event event1_name' }));
+    expect(screen.getByRole('tab', { name: /Events/ })).toHaveAttribute('aria-selected', 'true');
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
+
+    Element.prototype.scrollIntoView = originalScrollIntoView;
+  });
 });

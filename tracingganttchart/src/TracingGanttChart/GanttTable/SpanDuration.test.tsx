@@ -13,7 +13,7 @@
 
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
-import { screen } from '@testing-library/dom';
+import { fireEvent, screen } from '@testing-library/dom';
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 
@@ -73,5 +73,24 @@ describe('SpanDuration', () => {
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();
     expect(screen.getByTestId('span-duration-bar').style.backgroundColor).toEqual('rgb(0, 114, 178)'); // #0072B2 from Perses color palette (theme-gen.ts)
+  });
+
+  it('render event markers at the time of the event', () => {
+    const span = trace.rootSpans[0]!.childSpans[0]!;
+    const onEventClick = vi.fn();
+    renderComponent({
+      options: {},
+      span,
+      viewport: {
+        startTimeUnixMs: trace.startTimeUnixMs,
+        endTimeUnixMs: trace.endTimeUnixMs,
+      },
+      onEventClick,
+    });
+    const marker = screen.getByRole('button', { name: 'Event event1_name' });
+    expect(parseFloat(marker.style.left)).toBeCloseTo(15); // event at 150ms of a 1s trace
+
+    fireEvent.click(marker);
+    expect(onEventClick).toHaveBeenCalledWith(span, 0);
   });
 });
