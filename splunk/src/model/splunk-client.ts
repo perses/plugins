@@ -194,8 +194,19 @@ export async function exportSearch(
   }
 
   const text = await response.text();
-  const lines = text.trim().split('\n');
-  const results = lines.filter((line: string) => line.trim()).map((line: string) => JSON.parse(line).result);
+  const results = text
+    .split('\n')
+    .filter((line: string) => line.trim())
+    .flatMap((line: string) => {
+      let parsed: { result?: unknown };
+      try {
+        parsed = JSON.parse(line);
+      } catch {
+        throw new Error(`Splunk Export API returned a line that is not valid JSON: ${line.slice(0, 200)}`);
+      }
+      // Lines such as messages or the end-of-stream marker carry no result.
+      return parsed.result === undefined ? [] : [parsed.result];
+    });
 
   return {
     results: results,
