@@ -25,11 +25,18 @@
             - Alert Table: alertmanager/go-sdk/alert-table.md
     - ClickHouse:
         - Overview: clickhouse/README.md
+        - Writing queries: clickhouse/queries.md
         - Model: clickhouse/model.md
         - Go SDK:
             - Datasource: clickhouse/go-sdk/datasource.md
             - Log Query: clickhouse/go-sdk/log-query.md
             - Time Series Query: clickhouse/go-sdk/timeseries-query.md
+            - Trace Query: clickhouse/go-sdk/trace-query.md
+            - Profile Query: clickhouse/go-sdk/profile-query.md
+            - Variable: clickhouse/go-sdk/variable.md
+            - Annotation: clickhouse/go-sdk/annotation.md
+            - ClickStack Datasource: clickhouse/go-sdk/clickstack-datasource.md
+            - ClickStack Alerts Query: clickhouse/go-sdk/clickstack-alerts-query.md
     - GreptimeDB:
         - Overview: greptimedb/README.md
         - Model: greptimedb/model.md

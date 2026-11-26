@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseSQLVariable",
+  "spec": {
+    "query": "SELECT 1",
+    "labelName": "service"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "ClickHouseDatasource",
+  "spec": {
+    "directUrl": "http://localhost:8123",
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "http://clickhouse:8123"
+      }
+    }
+  }
+}

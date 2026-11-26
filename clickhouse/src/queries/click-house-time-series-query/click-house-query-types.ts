@@ -11,16 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { DatasourceSelector } from '@perses-dev/spec';
+import type { ClickHouseQuerySpec } from '../../model/execute-query';
 
-export interface ClickHouseTimeSeriesQuerySpec {
-  query: string;
-  datasource?: DatasourceSelector;
+export interface ClickHouseTimeSeriesQuerySpec extends ClickHouseQuerySpec {
+  /**
+   * Format of the names of the series, e.g. `{{ServiceName}} - {{SpanName}}`: each `{{label}}` is replaced by the
+   * value of the label of the series.
+   */
+  seriesNameFormat?: string;
+  /**
+   * Query returning the exemplars of the series. Each row is an exemplar: a time column, a `value` column, the label
+   * columns of the series it belongs to, and any other column, such as `trace_id`, as a label of the exemplar.
+   */
+  exemplarQuery?: string;
+  /**
+   * Lower bound of the interval of the query, which is the value of the `$__interval_s` family of macros: a duration
+   * such as `1m`, or a variable holding one. Typically the interval the data is written at, when a panel asks for a
+   * shorter one.
+   */
+  minStep?: string;
 }
-
-// TODO: import this type from your datasource or an existing datasource plugin
-export type DatasourceQueryResponse = {
-  status: string;
-  data: unknown;
-  warnings?: string[];
-};

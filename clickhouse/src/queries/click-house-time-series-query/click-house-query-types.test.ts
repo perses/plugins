@@ -11,81 +11,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: This should be fixed globally in the test setup
-
-vi.mock('echarts/core');
-
 import type { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
-import type { DatasourceSpec } from '@perses-dev/spec';
-import type { Mock } from 'vitest';
 
-import type { ClickHouseDatasourceSpec } from '../../datasources';
-import { ClickHouseDatasource } from '../../datasources';
-import type { ClickHouseQueryResponse } from '../../model/click-house-client';
+import { ClickHouseError } from '../../model/click-house-client';
+import type { StubClient } from '../../test/stubs';
+import { stubClient, stubDatasourceStore, stubResponse } from '../../test/stubs';
 import { ClickHouseTimeSeriesQuery } from './ClickHouseQuery';
 
-const datasource: ClickHouseDatasourceSpec = {
-  directUrl: '/test',
-};
-
-const clickhouseStubClient = ClickHouseDatasource.createClient(datasource, {});
-
-// Mock query to only return ClickHouse "data"
-clickhouseStubClient.query = vi.fn(async () => {
-  const stubResponse: ClickHouseQueryResponse = {
-    status: 'success',
-    data: [
-      { time: '2025-09-09 05:18:00', avg_cpu: '2.5', max_memory: 277, service: 'api' },
-      { time: '2025-09-09 05:19:00', avg_cpu: '3.5', max_memory: 156102, service: 'api' },
-    ],
-  };
-  return stubResponse as ClickHouseQueryResponse;
-});
-
-const getDatasourceClient: Mock = vi.fn(() => {
-  return clickhouseStubClient;
-});
-
-const getDatasource: Mock = vi.fn((): DatasourceSpec<ClickHouseDatasourceSpec> => {
+function createContext(client: StubClient, overrides: Partial<TimeSeriesQueryContext> = {}): TimeSeriesQueryContext {
   return {
-    default: false,
-    plugin: {
-      kind: 'ClickHouseDatasource',
-      spec: datasource,
-    },
-  };
-});
-
-const createStubContext = (): TimeSeriesQueryContext => {
-  const stubTimeSeriesContext: Partial<TimeSeriesQueryContext> = {
-    datasourceStore: {
-      getDatasource: getDatasource,
-      getDatasourceClient: getDatasourceClient,
-      listDatasourceSelectItems: vi.fn(),
-      getLocalDatasources: vi.fn(),
-      setLocalDatasources: vi.fn(),
-      getSavedDatasources: vi.fn(),
-      setSavedDatasources: vi.fn(),
-    },
+    datasourceStore: stubDatasourceStore(client),
     timeRange: {
-      end: new Date('2025-01-02T00:00:00.000Z'),
       start: new Date('2025-01-01T00:00:00.000Z'),
+      end: new Date('2025-01-02T00:00:00.000Z'),
     },
     variableState: {},
-  };
-  return stubTimeSeriesContext as TimeSeriesQueryContext;
-};
+    ...overrides,
+  } as TimeSeriesQueryContext;
+}
+
+const SERIES = stubResponse(
+  [
+    ['time', "DateTime('UTC')"],
+    ['avg_cpu', 'Float64'],
+  ],
+  [
+    ['2025-01-01T05:18:00Z', 2.5],
+    ['2025-01-01T05:19:00Z', 3.5],
+  ],
+);
 
 describe('ClickHouseTimeSeriesQuery', () => {
   it('should properly resolve variable dependencies', () => {
     if (!ClickHouseTimeSeriesQuery.dependsOn) throw new Error('dependsOn is not defined');
     const { variables } = ClickHouseTimeSeriesQuery.dependsOn(
       {
-        query: '"SELECT * FROM otel_logs WHERE foo="$foo" AND bar="$bar"',
+        datasource: '$ds',
+        query: 'SELECT * FROM otel_logs WHERE $__timeFilter(Timestamp) AND foo="$foo" AND bar="$bar"',
+        exemplarQuery: 'SELECT * FROM otel_traces WHERE service = ${service:sqlstring}',
+        seriesNameFormat: '{{service}} $env',
+        minStep: '$resolution',
       },
-      createStubContext(),
+      createContext(stubClient(() => SERIES)),
     );
-    expect(variables).toEqual(['foo', 'bar']);
+    expect(variables).toEqual(['ds', 'foo', 'bar', 'service', 'env', 'resolution']);
   });
 
   it('should create initial options with empty query', () => {
@@ -93,92 +62,179 @@ describe('ClickHouseTimeSeriesQuery', () => {
     expect(initialOptions).toEqual({ query: '' });
   });
 
-  it('should run query with interpolated time range and return one series per numeric column', async () => {
+  it('should run the query with its macros, time range placeholders and variables replaced', async () => {
+    const client = stubClient(() => SERIES);
+
     const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
       {
         query:
-          "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+          "SELECT $__timeInterval(timestamp) AS time, avg(cpu) AS avg_cpu FROM metrics WHERE timestamp BETWEEN '{start}' AND '{end}' AND host IN (${host:sqlstring}) GROUP BY time",
+        seriesNameFormat: 'CPU of $env',
       },
-      createStubContext(),
+      createContext(client, {
+        suggestedStepMs: 50_000,
+        variableState: {
+          host: { value: ['a', 'b'], loading: false },
+          env: { value: 'prod', loading: false },
+        },
+      }),
     );
 
-    expect(clickhouseStubClient.query).toHaveBeenCalledWith({
-      start: '2025-01-01 00:00:00',
-      end: '2025-01-02 00:00:00',
-      query:
-        "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time",
-    });
+    const executed =
+      "SELECT toStartOfInterval(toDateTime(timestamp), INTERVAL 60 second) AS time, avg(cpu) AS avg_cpu FROM metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' AND host IN ('a','b') GROUP BY time";
+    expect(client.statements()).toEqual([executed]);
+    expect(response.metadata?.executedQueryString).toBe(executed);
     expect(response.series).toEqual([
       {
         name: 'avg_cpu',
+        formattedName: 'CPU of prod',
+        labels: {},
         values: [
-          [new Date('2025-09-09 05:18:00').getTime(), 2.5],
-          [new Date('2025-09-09 05:19:00').getTime(), 3.5],
-        ],
-      },
-      {
-        name: 'max_memory',
-        values: [
-          [new Date('2025-09-09 05:18:00').getTime(), 277],
-          [new Date('2025-09-09 05:19:00').getTime(), 156102],
+          [Date.UTC(2025, 0, 1, 5, 18), 2.5],
+          [Date.UTC(2025, 0, 1, 5, 19), 3.5],
         ],
       },
     ]);
     expect(response.stepMs).toBe(60 * 1000);
-    expect(response.metadata?.executedQueryString).toBe(
-      "SELECT toStartOfMinute(timestamp) as time, avg(cpu_usage) as avg_cpu, max(memory_usage) as max_memory FROM system_metrics WHERE timestamp BETWEEN '2025-01-01 00:00:00' AND '2025-01-02 00:00:00' GROUP BY time ORDER BY time",
-    );
+    // The time grid of the points, which charts draw on, starts at the time range.
+    expect(response.timeRange).toEqual({
+      start: new Date('2025-01-01T00:00:00.000Z'),
+      end: new Date('2025-01-02T00:00:00.000Z'),
+    });
   });
 
-  it('should infer daily query step from returned timestamps', async () => {
-    (clickhouseStubClient.query as Mock).mockResolvedValueOnce({
-      status: 'success',
-      data: [
-        { time: '2026-01-01 22:00:00', flights: 80 },
-        { time: '2026-01-02 22:00:00', flights: 56 },
-        { time: '2026-01-03 22:00:00', flights: 32 },
-      ],
-    });
+  it.each([
+    // The panel asks for a point every 5 seconds: the min step, when longer, is the interval of the macros.
+    { minStep: '1m', interval: 60 },
+    { minStep: '$resolution', interval: 120 },
+    // The shortest interval is one second: a min step is rounded up to the second.
+    { minStep: '5500ms', interval: 6 },
+    { minStep: '2s', interval: 5 },
+    { minStep: '$unset', interval: 5 },
+    { minStep: undefined, interval: 5 },
+  ])('should not use an interval shorter than the min step $minStep', async ({ minStep, interval }) => {
+    const client = stubClient(() => SERIES);
 
-    const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+    await ClickHouseTimeSeriesQuery.getTimeSeriesData(
       {
-        query:
-          "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
+        query: 'SELECT $__timeInterval(t) AS time, count() / $__interval_s AS rate FROM events GROUP BY time',
+        exemplarQuery: 'SELECT t AS time, $__interval_ms AS value FROM events',
+        minStep,
       },
-      createStubContext(),
+      createContext(client, {
+        suggestedStepMs: 5_000,
+        variableState: {
+          resolution: { value: '2m', loading: false },
+          unset: { value: '', loading: false },
+        },
+      }),
     );
 
-    expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
-    expect(response.series).toEqual([
+    expect(client.statements()).toEqual([
+      `SELECT toStartOfInterval(toDateTime(t), INTERVAL ${interval} second) AS time, count() / ${interval} AS rate FROM events GROUP BY time`,
+      `SELECT t AS time, ${interval * 1000} AS value FROM events`,
+    ]);
+  });
+
+  it('should size the interval on the time range until the panel knows its width', async () => {
+    const client = stubClient(() => SERIES);
+
+    await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      { query: 'SELECT $__interval_s AS value' },
+      createContext(client, { suggestedStepMs: 0 }),
+    );
+
+    // A day in about 300 intervals.
+    expect(client.statements()).toEqual(['SELECT 300 AS value']);
+  });
+
+  it('should ignore the FORMAT clause queries used to end with', async () => {
+    const client = stubClient(() => SERIES);
+
+    await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      { query: 'SELECT time, avg_cpu FROM metrics ORDER BY time FORMAT JSON' },
+      createContext(client),
+    );
+
+    expect(client.statements()).toEqual(['SELECT time, avg_cpu FROM metrics ORDER BY time']);
+  });
+
+  it('should keep the longer interval a panel asks for', async () => {
+    const client = stubClient(() => SERIES);
+
+    await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      { query: 'SELECT $__interval_s AS value', minStep: '1m' },
+      createContext(client, { suggestedStepMs: 240_000 }),
+    );
+
+    expect(client.statements()).toEqual(['SELECT 300 AS value']);
+  });
+
+  it('should reject a min step that is not a duration', async () => {
+    const client = stubClient(() => SERIES);
+    const context = createContext(client, { variableState: { resolution: { value: 'fast', loading: false } } });
+
+    await expect(
+      ClickHouseTimeSeriesQuery.getTimeSeriesData({ query: 'SELECT 1 AS value', minStep: 'one minute' }, context),
+    ).rejects.toThrow("Invalid Min Step 'one minute': expected a duration such as 30s or 5m");
+    await expect(
+      ClickHouseTimeSeriesQuery.getTimeSeriesData({ query: 'SELECT 1 AS value', minStep: '$resolution' }, context),
+    ).rejects.toThrow("Invalid Min Step '$resolution' (resolved to 'fast'): expected a duration such as 30s or 5m");
+    expect(client.statements()).toEqual([]);
+  });
+
+  it('should attach the exemplars of the exemplar query to the series', async () => {
+    const client = stubClient((sql) =>
+      sql.includes('otel_traces')
+        ? stubResponse(
+            [
+              ['time', "DateTime('UTC')"],
+              ['value', 'Float64'],
+              ['trace_id', 'String'],
+            ],
+            [['2025-01-01T05:18:30Z', 9, 'abc']],
+          )
+        : SERIES,
+    );
+
+    const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      { query: 'SELECT time, avg_cpu FROM metrics', exemplarQuery: 'SELECT * FROM otel_traces' },
+      createContext(client),
+    );
+
+    expect(response.exemplars).toEqual([
       {
-        name: 'flights',
-        values: [
-          [new Date('2026-01-01 22:00:00').getTime(), 80],
-          [new Date('2026-01-02 22:00:00').getTime(), 56],
-          [new Date('2026-01-03 22:00:00').getTime(), 32],
-        ],
+        seriesLabels: {},
+        exemplars: [{ timestamp: Date.UTC(2025, 0, 1, 5, 18, 30), value: 9, labels: { trace_id: 'abc' } }],
       },
     ]);
   });
 
-  it('should keep timezone daily buckets daily across daylight saving time changes', async () => {
-    (clickhouseStubClient.query as Mock).mockResolvedValueOnce({
-      status: 'success',
-      data: [
-        { time: '2026-03-28 22:00:00', flights: 80 },
-        { time: '2026-03-29 21:00:00', flights: 56 },
-        { time: '2026-03-30 21:00:00', flights: 32 },
-      ],
+  it('should still return the series when their exemplars can not be read', async () => {
+    const client = stubClient((sql) => {
+      if (sql.includes('otel_traces'))
+        throw new ClickHouseError('ClickHouse query failed: Unknown table', { code: 60 });
+      return SERIES;
     });
 
     const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
-      {
-        query:
-          "SELECT toStartOfDay(timestamp) as time, sum(flights_count) as flights FROM flight WHERE timestamp BETWEEN '{start}' AND '{end}' GROUP BY time ORDER BY time",
-      },
-      createStubContext(),
+      { query: 'SELECT time, avg_cpu FROM metrics', exemplarQuery: 'SELECT * FROM otel_traces' },
+      createContext(client),
     );
 
-    expect(response.stepMs).toBe(24 * 60 * 60 * 1000);
+    expect(response.series).toHaveLength(1);
+    expect(response.exemplars).toBeUndefined();
+    expect(response.metadata?.notices).toEqual([
+      { type: 'warning', message: 'Exemplars are not shown. ClickHouse query failed: Unknown table' },
+    ]);
+  });
+
+  it('should not run an empty query', async () => {
+    const client = stubClient(() => SERIES);
+
+    await expect(ClickHouseTimeSeriesQuery.getTimeSeriesData({ query: '  ' }, createContext(client))).resolves.toEqual({
+      series: [],
+    });
+    expect(client.statements()).toEqual([]);
   });
 });

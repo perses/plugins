@@ -12,94 +12,35 @@
 // limitations under the License.
 
 import type { LogQueryPlugin } from '@perses-dev/plugin-system';
-import { replaceVariables } from '@perses-dev/plugin-system';
-import type { LogData, LogEntry } from '@perses-dev/spec';
 
-import type { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
-import { formatClickHouseDateTime, replaceTimeRangePlaceholders } from '../../model/click-house-client';
-import { DEFAULT_DATASOURCE } from '../constants';
+import { executeQuery, truncationNotices } from '../../model/execute-query';
 import type { ClickHouseLogQuerySpec } from './click-house-log-query-types';
+import { buildLogs } from './logs';
 
-function flattenObject(
-  obj: Record<string, unknown>,
-  parentKey = '',
-  result: Record<string, unknown> = {},
-): Record<string, unknown> {
-  for (const [key, value] of Object.entries(obj)) {
-    const newKey = parentKey ? `${parentKey}.${key}` : key;
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      flattenObject(value as Record<string, unknown>, newKey, result);
-    } else {
-      result[newKey] = value;
-    }
+export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLogData'] = async (
+  spec,
+  context,
+  abortSignal,
+) => {
+  const { timeRange } = context;
+  if (!spec.query?.trim()) {
+    return { logs: { entries: [], totalCount: 0 }, timeRange };
   }
 
-  return result;
-}
-
-function convertStreamsToLogs(streams: LogEntry[]): LogData {
-  const entries: LogEntry[] = streams.map((entry) => {
-    const flattened = flattenObject(entry as unknown as Record<string, unknown>);
-
-    if (!flattened['Timestamp'] && flattened['log_time']) {
-      flattened['Timestamp'] = flattened['log_time'];
-    }
-
-    const sortedEntry: Record<string, unknown> = {};
-    Object.keys(flattened)
-      .toSorted((a, b) => a.localeCompare(b))
-      .forEach((key) => {
-        sortedEntry[key] = flattened[key];
-      });
-
-    const line = Object.entries(sortedEntry)
-      .filter(([key]) => key !== 'Timestamp')
-      .map(([key, value]) => `<${key}> ${value === '' || value === null || value === undefined ? '--' : value}`)
-      .join(' ');
-
-    return {
-      timestamp: sortedEntry?.['Timestamp'] as unknown as number,
-      labels: sortedEntry as Record<string, string>,
-      line,
-    } as LogEntry;
-  });
-
-  return {
-    entries,
-    totalCount: entries.length,
-  };
-}
-
-export const getClickHouseLogData: LogQueryPlugin<ClickHouseLogQuerySpec>['getLogData'] = async (spec, context) => {
-  if (spec.query === undefined || spec.query === null || spec.query === '') {
-    return {
-      logs: { entries: [], totalCount: 0 },
-      timeRange: { start: context.timeRange.start, end: context.timeRange.end },
-    };
+  const result = await executeQuery(
+    spec,
+    { datasourceStore: context.datasourceStore, variableState: context.variableState, timeRange },
+    abortSignal,
+  );
+  const { logs, notices } = buildLogs(result);
+  const allNotices = [...truncationNotices(result), ...notices];
+  if (allNotices.length > 0) {
+    logs.metadata = { ...logs.metadata, notices: allNotices };
   }
 
-  const query = replaceVariables(spec.query, context.variableState);
-
-  const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE,
-  )) as ClickHouseClient;
-
-  const { start, end } = context.timeRange;
-  const startTime = formatClickHouseDateTime(start);
-  const endTime = formatClickHouseDateTime(end);
-  const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
-
-  const response: ClickHouseQueryResponse = await client.query({
-    start: startTime,
-    end: endTime,
-    query: executedQueryString,
-  });
-
   return {
-    timeRange: { start, end },
-    logs: convertStreamsToLogs(response.data as LogEntry[]),
-    metadata: {
-      executedQueryString,
-    },
+    timeRange,
+    logs,
+    metadata: { executedQueryString: result.executedQueryString },
   };
 };

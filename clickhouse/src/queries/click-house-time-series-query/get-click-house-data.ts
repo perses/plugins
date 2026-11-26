@@ -13,124 +13,71 @@
 
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
-import type { TimeSeries } from '@perses-dev/spec';
+import type { Notice, TimeSeriesData, TimeSeriesExemplars } from '@perses-dev/spec';
 
-import type { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
-import { formatClickHouseDateTime, replaceTimeRangePlaceholders } from '../../model/click-house-client';
-import type { TimeSeriesEntry } from '../../model/click-house-data-types';
-import { DEFAULT_DATASOURCE } from '../constants';
-import type { ClickHouseTimeSeriesQuerySpec, DatasourceQueryResponse } from './click-house-query-types';
-
-const DEFAULT_STEP_MS = 30 * 1000;
-
-function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
-  const data = response?.data as TimeSeriesEntry[];
-  if (!response || !data || data.length === 0) {
-    return [];
-  }
-
-  const metricNames = Object.keys(data[0] ?? {}).filter((key) => key !== 'time');
-
-  return metricNames
-    .map((metricName) => {
-      const values: Array<[number, number | null]> = data.map((row: TimeSeriesEntry) => {
-        const timestamp = new Date(row.time).getTime();
-        const value = toTimeSeriesValue(row[metricName]);
-        return [timestamp, value];
-      });
-
-      return {
-        name: metricName,
-        values,
-      };
-    })
-    .filter((series) => series.values.some(([, value]) => value !== null));
-}
-
-function toTimeSeriesValue(value: number | string | null | undefined): number | null {
-  if (value === null || value === undefined || value === '') {
-    return null;
-  }
-
-  const numericValue = Number(value);
-  return Number.isFinite(numericValue) ? numericValue : null;
-}
-
-function inferStepMs(response?: DatasourceQueryResponse): number {
-  const data = response?.data as TimeSeriesEntry[];
-  if (!response || !data || data.length < 2) {
-    return DEFAULT_STEP_MS;
-  }
-
-  const timestamps = data
-    .map((row: TimeSeriesEntry) => new Date(row.time).getTime())
-    .filter(Number.isFinite)
-    .toSorted((a, b) => a - b);
-
-  if (timestamps.length < 2) {
-    return DEFAULT_STEP_MS;
-  }
-
-  const deltas: number[] = [];
-  for (let i = 1; i < timestamps.length; i++) {
-    const previous = timestamps[i - 1];
-    const current = timestamps[i];
-    if (previous === undefined || current === undefined || current <= previous) {
-      continue;
-    }
-    deltas.push(current - previous);
-  }
-
-  if (deltas.length === 0) {
-    return DEFAULT_STEP_MS;
-  }
-
-  const deltaCounts = new Map<number, number>();
-  for (const delta of deltas) {
-    deltaCounts.set(delta, (deltaCounts.get(delta) ?? 0) + 1);
-  }
-
-  const inferredStep = Array.from(deltaCounts.entries()).toSorted(([deltaA, countA], [deltaB, countB]) => {
-    if (countA !== countB) {
-      return countB - countA;
-    }
-    return deltaB - deltaA;
-  })[0]?.[0];
-
-  return inferredStep ?? DEFAULT_STEP_MS;
-}
+import type { ClickHouseQueryContext } from '../../model/execute-query';
+import { executeQuery, truncationNotices } from '../../model/execute-query';
+import type { ClickHouseTimeSeriesQuerySpec } from './click-house-query-types';
+import { getMinStepMs } from './min-step';
+import { buildExemplars, buildTimeSeries } from './time-series';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
   context,
+  abortSignal,
 ) => {
-  if (spec.query === undefined || spec.query === null || spec.query === '') {
+  if (!spec.query?.trim()) {
     return { series: [] };
   }
 
-  const query = replaceVariables(spec.query, context.variableState);
+  const { timeRange, variableState } = context;
+  const queryContext: ClickHouseQueryContext = {
+    datasourceStore: context.datasourceStore,
+    variableState,
+    timeRange,
+    suggestedStepMs: context.suggestedStepMs,
+    minStepMs: getMinStepMs(spec.minStep, variableState),
+  };
 
-  const client = (await context.datasourceStore.getDatasourceClient(
-    spec.datasource ?? DEFAULT_DATASOURCE,
-  )) as ClickHouseClient;
+  // Exemplars are points in time: they have no place in the single value of an instant query.
+  const exemplarQuery = context.mode === 'instant' ? undefined : spec.exemplarQuery?.trim();
+  const [result, exemplarResult] = await Promise.all([
+    executeQuery(spec, queryContext, abortSignal),
+    exemplarQuery
+      ? // The series are still worth showing when their exemplars can not be read: report the failure as a notice.
+        executeQuery({ datasource: spec.datasource, query: exemplarQuery }, queryContext, abortSignal).catch(
+          (error: unknown) => (error instanceof Error ? error : new Error(String(error))),
+        )
+      : undefined,
+  ]);
 
-  const { start, end } = context.timeRange;
-  const startTime = formatClickHouseDateTime(start);
-  const endTime = formatClickHouseDateTime(end);
-  const executedQueryString = replaceTimeRangePlaceholders(query, startTime, endTime);
-
-  const response: ClickHouseQueryResponse = await client.query({
-    start: startTime,
-    end: endTime,
-    query: executedQueryString,
+  const built = buildTimeSeries(result, {
+    instant: timeRange.end.getTime(),
+    rangeStart: timeRange.start.getTime(),
+    intervalMs: result.intervalMs,
+    seriesNameFormat: spec.seriesNameFormat ? replaceVariables(spec.seriesNameFormat, variableState) : undefined,
   });
 
-  return {
-    series: buildTimeSeries(response),
-    timeRange: { start, end },
-    stepMs: inferStepMs(response),
+  const notices: Notice[] = [...truncationNotices(result), ...built.notices];
+  let exemplars: TimeSeriesExemplars[] = built.exemplars;
+  if (exemplarResult instanceof Error) {
+    if (abortSignal?.aborted) throw exemplarResult;
+    notices.push({ type: 'warning', message: `Exemplars are not shown. ${exemplarResult.message}` });
+  } else if (exemplarResult) {
+    exemplars = [...exemplars, ...buildExemplars(exemplarResult, built.series)];
+    notices.push(...truncationNotices(exemplarResult));
+  }
+
+  const data: TimeSeriesData = {
+    series: built.series,
+    // The time grid of the series: charts place the points on it.
+    timeRange: { start: new Date(built.start), end: timeRange.end },
+    stepMs: built.stepMs,
     metadata: {
-      executedQueryString,
+      executedQueryString: result.executedQueryString,
+      ...(notices.length > 0 && { notices }),
     },
   };
+  if (exemplars.length > 0) data.exemplars = exemplars;
+  return data;
 };

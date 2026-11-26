@@ -11,34 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { RequestHeaders } from '@perses-dev/client';
 import type { DatasourceClient } from '@perses-dev/plugin-system';
-import type { HTTPProxy } from '@perses-dev/spec';
+import type { HTTPDatasourceSpec } from '@perses-dev/spec';
 
-export interface ClickHouseDatasourceSpec {
-  directUrl?: string;
-  proxy?: HTTPProxy;
-}
+import type { ClickHouseClient, ClickHouseQueryResponse } from '../../model/click-house-client';
 
-interface QueryRequestParameters extends Record<string, string> {
-  query: string;
-  start: string;
-  end: string;
+export interface ClickHouseDatasourceSpec extends HTTPDatasourceSpec {
+  /** Database the unqualified table names of the queries are read from. Defaults to `default`. */
+  database?: string;
 }
 
 interface ClickHouseDatasourceClientOptions {
   datasourceUrl: string;
-  headers?: RequestHeaders;
+  database: string;
 }
 
-export interface ClickHouseDatasourceResponse {
-  status: string;
-  warnings?: string[];
-  // TODO: adjust this type to match your datasource response shape
-  data: unknown;
-}
+export type ClickHouseDatasourceResponse = ClickHouseQueryResponse;
 
-export interface ClickHouseDatasourceClient extends DatasourceClient {
+export interface ClickHouseDatasourceClient extends DatasourceClient, ClickHouseClient {
   options: ClickHouseDatasourceClientOptions;
-  query(params: QueryRequestParameters, headers?: RequestHeaders): Promise<ClickHouseDatasourceResponse>;
+  healthCheck: () => Promise<boolean>;
 }

@@ -1,0 +1,6 @@
+{
+  "kind": "ClickStackDatasource",
+  "spec": {
+    "directUrl": "http://localhost:8000"
+  }
+}

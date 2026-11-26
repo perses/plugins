@@ -1,0 +1,6 @@
+{
+  "kind": "ClickHouseSQLAnnotation",
+  "spec": {
+    "query": "SELECT Timestamp AS time, Body AS title, ServiceName FROM otel_logs WHERE $__timeFilter(Timestamp) AND SeverityNumber >= 17"
+  }
+}

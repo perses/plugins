@@ -1,0 +1,6 @@
+{
+  "kind": "ClickStackAlertsQuery",
+  "spec": {
+    "states": ["firing"]
+  }
+}

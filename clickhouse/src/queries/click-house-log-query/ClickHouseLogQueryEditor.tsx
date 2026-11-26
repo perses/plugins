@@ -12,89 +12,33 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
-import { createModEnterHandler } from '@perses-dev/dashboards';
-import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { DatasourceSelect, isVariableDatasource } from '@perses-dev/plugin-system';
-import { produce } from 'immer';
+import type { OptionsEditorProps } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
-import { useCallback } from 'react';
 
-import { ClickQLEditor } from '../../components';
-import { queryExample } from '../../components/constants';
-import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from '../constants';
-import { useQueryState } from '../query-editor-model';
+import { ClickHouseDatasourceSelect, QueryExamples, SQLField } from '../../components';
+import { LOG_EXAMPLES } from '../../components/query-examples';
 import type { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 
-type ClickHouseQueryEditorProps = OptionsEditorProps<ClickHouseLogQuerySpec>;
+type ClickHouseLogQueryEditorProps = OptionsEditorProps<ClickHouseLogQuerySpec>;
 
-export function ClickHouseLogQueryEditor(props: ClickHouseQueryEditorProps): ReactElement {
-  const { onChange, value } = props;
-  const { datasource } = value;
-  const selectedDatasource = datasource ?? DEFAULT_DATASOURCE;
-  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
-
-  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
-    if (!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
-      onChange(
-        produce(value, (draft) => {
-          draft.datasource = newDatasourceSelection;
-        }),
-      );
-      return;
-    }
-    throw new Error('Got unexpected non ClickHouse datasource selection');
-  };
-
-  // Immediate query execution on Enter or blur
-  const handleQueryExecute = (query: string): void => {
-    onChange(
-      produce(value, (draft) => {
-        draft.query = query;
-      }),
-    );
-  };
-
-  const handleClickHouseQueryChange = useCallback(
-    (e: string) => {
-      handleQueryChange(e);
-    },
-    [handleQueryChange],
-  );
-
-  const examplesStyle: React.CSSProperties = {
-    fontSize: '11px',
-    color: '#777',
-    backgroundColor: '#f5f5f5',
-    padding: '8px',
-    borderRadius: '4px',
-    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-    whiteSpace: 'pre-wrap',
-    lineHeight: '1.3',
-  };
+export function ClickHouseLogQueryEditor(props: ClickHouseLogQueryEditorProps): ReactElement {
+  const { onChange, value, isReadonly } = props;
 
   return (
     <Stack spacing={1.5}>
-      <DatasourceSelect
-        datasourcePluginKind={DATASOURCE_KIND}
-        value={selectedDatasource}
-        onChange={handleDatasourceChange}
-        label="ClickHouse Datasource"
-        notched
+      <ClickHouseDatasourceSelect
+        value={value.datasource}
+        onChange={(datasource) => onChange({ ...value, datasource })}
+        isReadonly={isReadonly}
       />
-      <ClickQLEditor
-        value={query}
-        onChange={handleClickHouseQueryChange}
-        onBlur={handleQueryBlur}
-        onKeyDown={createModEnterHandler(() => handleQueryExecute(query))}
+      <SQLField
+        label="ClickHouse Query"
+        value={value.query}
+        onChange={(query) => onChange({ ...value, query })}
         placeholder="Enter ClickHouse SQL query"
+        isReadonly={isReadonly}
       />
-
-      <details>
-        <summary style={{ cursor: 'pointer', fontSize: '12px', color: '#666', marginBottom: '8px' }}>
-          Query Examples
-        </summary>
-        <div style={examplesStyle}>{queryExample}</div>
-      </details>
+      <QueryExamples examples={LOG_EXAMPLES} />
     </Stack>
   );
 }

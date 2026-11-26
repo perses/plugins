@@ -1,0 +1,13 @@
+{
+  "kind": "ClickStackAlertsQuery",
+  "spec": {
+    "datasource": {
+      "kind": "ClickStackDatasource",
+      "name": "clickstack"
+    },
+    "states": ["ALERT", "PENDING", "OK"],
+    "sources": ["saved_search", "tile"],
+    "tags": ["team:$team", "production"],
+    "search": "checkout"
+  }
+}

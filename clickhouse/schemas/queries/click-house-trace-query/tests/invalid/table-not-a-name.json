@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseTraceQuery",
+  "spec": {
+    "query": "$traceId",
+    "table": "otel_traces WHERE 1 = 1"
+  }
+}

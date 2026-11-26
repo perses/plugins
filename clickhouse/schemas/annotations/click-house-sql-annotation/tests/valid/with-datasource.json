@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseSQLAnnotation",
+  "spec": {
+    "datasource": "$clickhouse",
+    "query": "SELECT started AS start, finished AS end, name AS title FROM deployments WHERE $__timeFilter(started)"
+  }
+}

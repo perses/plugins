@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseLogQuery",
+  "spec": {
+    "query": "SELECT * FROM otel_logs",
+    "limit": 100
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "kind": "ClickHouseTimeSeriesQuery",
+  "spec": {
+    "datasource": {
+      "kind": "ClickHouseDatasource",
+      "name": "clickhouse"
+    },
+    "query": "SELECT $__timeInterval(Timestamp) AS time, ServiceName, count() / $__interval_s AS rps FROM otel_traces WHERE $__timeFilter(Timestamp) AND ServiceName IN (${service:sqlstring}) GROUP BY time, ServiceName ORDER BY time",
+    "seriesNameFormat": "{{ServiceName}}",
+    "exemplarQuery": "SELECT Timestamp AS time, Duration / 1e6 AS value, ServiceName, TraceId AS trace_id FROM otel_traces WHERE $__timeFilter(Timestamp) ORDER BY Duration DESC LIMIT 100",
+    "minStep": "1m"
+  }
+}

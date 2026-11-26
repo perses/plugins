@@ -42,6 +42,8 @@ func create(options ...Option) (Builder, error) {
 
 type Builder struct {
 	datasourceSpec.HTTPDatasourceSpec `json:",inline" yaml:",inline"`
+	// Database the unqualified table names of the queries are read from.
+	Database string `json:"database,omitempty" yaml:"database,omitempty"`
 }
 
 func ClickHouse(options ...Option) datasource.Option {
@@ -52,7 +54,7 @@ func ClickHouse(options ...Option) datasource.Option {
 		}
 
 		builder.Spec.Plugin.Kind = PluginKind
-		builder.Spec.Plugin.Spec = plugin.HTTPDatasourceSpec
+		builder.Spec.Plugin.Spec = plugin
 		return nil
 	}
 }

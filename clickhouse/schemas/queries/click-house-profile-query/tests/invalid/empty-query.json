@@ -1,0 +1,6 @@
+{
+  "kind": "ClickHouseProfileQuery",
+  "spec": {
+    "query": ""
+  }
+}

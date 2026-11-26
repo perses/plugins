@@ -1,0 +1,6 @@
+{
+  "kind": "ClickHouseSQLVariable",
+  "spec": {
+    "query": "SELECT DISTINCT ServiceName FROM otel_traces WHERE $__timeFilter(Timestamp) ORDER BY ServiceName"
+  }
+}

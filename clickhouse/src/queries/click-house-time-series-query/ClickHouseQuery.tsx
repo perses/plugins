@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
-import { parseVariables } from '@perses-dev/plugin-system';
 
+import { queryDependencies } from '../../model/execute-query';
 import type { ClickHouseTimeSeriesQuerySpec } from './click-house-query-types';
 import { ClickHouseTimeSeriesQueryEditor } from './ClickHouseQueryEditor';
 import { getTimeSeriesData } from './get-click-house-data';
@@ -22,11 +22,6 @@ export const ClickHouseTimeSeriesQuery: TimeSeriesQueryPlugin<ClickHouseTimeSeri
   getTimeSeriesData,
   OptionsEditorComponent: ClickHouseTimeSeriesQueryEditor,
   createInitialOptions: () => ({ query: '' }),
-  dependsOn: (spec) => {
-    const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set(queryVariables)];
-    return {
-      variables: allVariables,
-    };
-  },
+  dependsOn: (spec) =>
+    queryDependencies(spec.datasource, spec.query, spec.exemplarQuery, spec.seriesNameFormat, spec.minStep),
 };

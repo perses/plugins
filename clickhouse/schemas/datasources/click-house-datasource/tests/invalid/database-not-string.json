@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseDatasource",
+  "spec": {
+    "directUrl": "http://localhost:8123",
+    "database": 1
+  }
+}

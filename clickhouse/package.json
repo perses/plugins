@@ -84,6 +84,69 @@
           },
           "name": "ClickHouseLogQuery"
         }
+      },
+      {
+        "kind": "TraceQuery",
+        "spec": {
+          "display": {
+            "name": "ClickHouse Trace Query"
+          },
+          "name": "ClickHouseTraceQuery"
+        }
+      },
+      {
+        "kind": "ProfileQuery",
+        "spec": {
+          "display": {
+            "name": "ClickHouse Profile Query"
+          },
+          "name": "ClickHouseProfileQuery"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "ClickHouse SQL Variable"
+          },
+          "name": "ClickHouseSQLVariable"
+        }
+      },
+      {
+        "kind": "Annotation",
+        "spec": {
+          "display": {
+            "name": "ClickHouse SQL Annotation"
+          },
+          "name": "ClickHouseSQLAnnotation"
+        }
+      },
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "ClickStack Datasource"
+          },
+          "name": "ClickStackDatasource"
+        }
+      },
+      {
+        "kind": "AlertsQuery",
+        "spec": {
+          "display": {
+            "name": "ClickStack Alerts Query"
+          },
+          "name": "ClickStackAlertsQuery"
+        }
+      },
+      {
+        "kind": "Explore",
+        "spec": {
+          "display": {
+            "name": "ClickHouse Explorer"
+          },
+          "name": "ClickHouseExplorer"
+        }
       }
     ]
   }

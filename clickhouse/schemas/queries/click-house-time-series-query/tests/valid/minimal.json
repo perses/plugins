@@ -1,0 +1,6 @@
+{
+  "kind": "ClickHouseTimeSeriesQuery",
+  "spec": {
+    "query": "SELECT $__timeInterval(Timestamp) AS time, count() AS spans FROM otel_traces WHERE $__timeFilter(Timestamp) GROUP BY time ORDER BY time"
+  }
+}

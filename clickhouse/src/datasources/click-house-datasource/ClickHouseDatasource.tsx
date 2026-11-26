@@ -12,16 +12,41 @@
 // limitations under the License.
 
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { BuiltinVariableDefinition, HTTPAllowedEndpoint } from '@perses-dev/spec';
 
-import { query } from '../../model/click-house-client';
+import { createClickHouseClient } from '../../model/click-house-client';
 import type { ClickHouseDatasourceSpec, ClickHouseDatasourceClient } from './click-house-datasource-types';
 import { ClickHouseDatasourceEditor } from './ClickHouseDatasourceEditor';
+
+const QUERY_PATH = '/';
+/** Database of the queries of a datasource that does not name one. */
+export const DEFAULT_DATABASE = 'default';
+
+function allowsQueries(endpoint: HTTPAllowedEndpoint, method: string): boolean {
+  if (endpoint.method.toUpperCase() !== method) return false;
+  try {
+    return new RegExp(endpoint.endpointPattern).test(QUERY_PATH);
+  } catch {
+    // The pattern is a Go regular expression: when JavaScript can not read it, let the proxy decide.
+    return true;
+  }
+}
+
+/**
+ * getQueryMethod picks the HTTP method of the queries. They are sent with POST, which has no size limit, unless the
+ * proxy of the datasource only lets GET requests through, as the datasources created before POST was used do.
+ */
+export function getQueryMethod(allowedEndpoints: HTTPAllowedEndpoint[] | undefined): 'GET' | 'POST' {
+  if (!allowedEndpoints || allowedEndpoints.length === 0) return 'POST';
+  if (allowedEndpoints.some((endpoint) => allowsQueries(endpoint, 'POST'))) return 'POST';
+  return allowedEndpoints.some((endpoint) => allowsQueries(endpoint, 'GET')) ? 'GET' : 'POST';
+}
 
 const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasourceClient>['createClient'] = (
   spec,
   options,
 ) => {
-  const { directUrl, proxy } = spec;
+  const { directUrl, proxy, database } = spec;
   const { proxyUrl, fetch: customFetch } = options;
 
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -31,18 +56,60 @@ const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasou
     );
   }
 
-  const specHeaders = proxy?.spec.headers || {};
+  const queryDatabase = database?.trim() || DEFAULT_DATABASE;
+  const client = createClickHouseClient({
+    datasourceUrl,
+    database: queryDatabase,
+    headers: proxy?.spec.headers,
+    fetch: customFetch,
+    method: directUrl === undefined ? getQueryMethod(proxy?.spec.allowedEndpoints) : 'POST',
+    cors: directUrl !== undefined,
+  });
 
   return {
     options: {
       datasourceUrl,
+      database: queryDatabase,
     },
-    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders, fetch: customFetch }),
+    ...client,
   };
 };
 
+// The macros are replaced by the queries. Declaring them makes the editors document them as variables.
+const getBuiltinVariableDefinitions = (): BuiltinVariableDefinition[] =>
+  [
+    {
+      name: '__interval_s',
+      description:
+        'Interval between two data points, in seconds: a round duration of at least the step of the panel. Use it to size time buckets, e.g. `toStartOfInterval(Timestamp, INTERVAL $__interval_s second)`.',
+    },
+    {
+      name: '__interval_ms',
+      description: 'Same as $__interval_s but in milliseconds.',
+    },
+    {
+      name: '__fromTime',
+      description: 'Start of the time range as a DateTime. $__fromTime_ms has millisecond precision.',
+    },
+    {
+      name: '__toTime',
+      description: 'End of the time range as a DateTime. $__toTime_ms has millisecond precision.',
+    },
+  ].map(({ name, description }) => ({
+    kind: 'BuiltinVariable',
+    spec: {
+      name,
+      // Left as is: the queries replace it with the value computed for their time range and panel.
+      value: () => `$${name}`,
+      source: 'ClickHouse',
+      display: { name, description, hidden: true },
+    },
+  }));
+
 export const ClickHouseDatasource: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasourceClient> = {
   createClient,
+  getBuiltinVariableDefinitions,
+  healthCheckPath: '/ping',
   OptionsEditorComponent: ClickHouseDatasourceEditor,
   createInitialOptions: () => ({ directUrl: '' }),
 };

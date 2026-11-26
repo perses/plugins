@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseTimeSeriesQuery",
+  "spec": {
+    "datasource": "$clickhouse",
+    "query": "SELECT 1 AS value"
+  }
+}

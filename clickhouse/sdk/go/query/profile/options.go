@@ -11,5 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const DATASOURCE_KIND = 'ClickHouseDatasource';
-export const DEFAULT_DATASOURCE = { kind: DATASOURCE_KIND };
+package profile
+
+import (
+	clickhouseDatasource "github.com/perses/plugins/clickhouse/sdk/go/datasource"
+)
+
+func Query(expr string) Option {
+	return func(builder *Builder) error {
+		builder.Query = expr
+		return nil
+	}
+}
+
+func Datasource(datasourceName string) Option {
+	return func(builder *Builder) error {
+		sel, err := clickhouseDatasource.Selector(datasourceName)
+		if err != nil {
+			return err
+		}
+		builder.Datasource = sel
+		return nil
+	}
+}
