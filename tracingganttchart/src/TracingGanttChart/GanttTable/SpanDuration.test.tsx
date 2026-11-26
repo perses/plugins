@@ -103,8 +103,23 @@ describe('SpanDuration', () => {
         startTimeUnixMs: trace.startTimeUnixMs + 200,
         endTimeUnixMs: trace.startTimeUnixMs + 400,
       },
+      onEventClick: vi.fn(),
     });
 
     expect(screen.getByRole('button', { name: 'Event event1_name' })).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('renders non-interactive event markers without an event click handler', () => {
+    renderComponent({
+      options: {},
+      span: trace.rootSpans[0]!.childSpans[0]!,
+      viewport: {
+        startTimeUnixMs: trace.startTimeUnixMs,
+        endTimeUnixMs: trace.endTimeUnixMs,
+      },
+    });
+
+    expect(screen.queryByRole('button', { name: 'Event event1_name' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('event1_name')).not.toHaveAttribute('tabindex');
   });
 });

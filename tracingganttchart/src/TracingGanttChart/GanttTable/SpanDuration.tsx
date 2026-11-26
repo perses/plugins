@@ -41,11 +41,12 @@ const eventMarkerSx = {
   border: 'none',
   backgroundColor: 'text.primary',
   backgroundClip: 'content-box',
-  cursor: 'pointer',
   '&:hover, &:focus-visible': {
     paddingInline: '3px',
   },
 } as const;
+
+const clickableEventMarkerSx = { ...eventMarkerSx, cursor: 'pointer' } as const;
 
 /**
  * SpanDuration renders the right column of a SpanRow, i.e. the span bar and span duration
@@ -82,21 +83,28 @@ export function SpanDuration(props: SpanDurationProps): ReactElement {
       />
       {getEventMarkers(span).map(({ key, event, index }) => (
         <Tooltip key={key} title={event.name} placement="top">
-          <Box
-            component="button"
-            type="button"
-            aria-label={`Event ${event.name}`}
-            tabIndex={
-              event.timeUnixMs >= viewport.startTimeUnixMs && event.timeUnixMs <= viewport.endTimeUnixMs ? 0 : -1
-            }
-            sx={eventMarkerSx}
-            style={{ left: `${((event.timeUnixMs - viewport.startTimeUnixMs) / viewportDuration) * 100}%` }}
-            onClick={(e) => {
-              if (!onEventClick) return;
-              e.stopPropagation();
-              onEventClick(span, index);
-            }}
-          />
+          {onEventClick ? (
+            <Box
+              component="button"
+              type="button"
+              aria-label={`Event ${event.name}`}
+              tabIndex={
+                event.timeUnixMs >= viewport.startTimeUnixMs && event.timeUnixMs <= viewport.endTimeUnixMs ? 0 : -1
+              }
+              sx={clickableEventMarkerSx}
+              style={{ left: `${((event.timeUnixMs - viewport.startTimeUnixMs) / viewportDuration) * 100}%` }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEventClick(span, index);
+              }}
+            />
+          ) : (
+            <Box
+              component="span"
+              sx={eventMarkerSx}
+              style={{ left: `${((event.timeUnixMs - viewport.startTimeUnixMs) / viewportDuration) * 100}%` }}
+            />
+          )}
         </Tooltip>
       ))}
       <Box
