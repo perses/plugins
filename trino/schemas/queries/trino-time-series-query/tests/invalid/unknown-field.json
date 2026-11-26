@@ -1,0 +1,7 @@
+{
+  "kind": "TrinoTimeSeriesQuery",
+  "spec": {
+    "query": "SELECT 1",
+    "userClaim": "sub"
+  }
+}

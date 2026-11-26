@@ -1,0 +1,6 @@
+{
+  "kind": "AlertManagerDatasource",
+  "spec": {
+    "directUrl": "http://localhost:9093"
+  }
+}

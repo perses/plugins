@@ -1,0 +1,135 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { EdgeSpec, NodeSpec } from '../model';
+import { layoutGraph } from './graphLayout';
+
+function node(id: string): NodeSpec {
+  return { id, position: { x: 0, y: 0 }, width: 48, height: 48, kind: 'icon' };
+}
+
+function edge(id: string, source: string, target: string): EdgeSpec {
+  return { id, source, target };
+}
+
+// Deterministic shuffle so order-independence tests are stable.
+function shuffled<T>(xs: T[], seed: number): T[] {
+  const out = [...xs];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = (i * 1103515245 + seed) % (i + 1);
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
+describe('layoutGraph', () => {
+  it('returns an empty array for no nodes', () => {
+    expect(layoutGraph([], [])).toEqual([]);
+  });
+
+  it('centers a single node at the origin', () => {
+    const [n] = layoutGraph([node('a')], []);
+    expect(n?.position).toEqual({ x: 0, y: 0 });
+  });
+
+  it('is deterministic: identical input yields identical positions', () => {
+    const nodes = [node('a'), node('b'), node('c')];
+    const edges = [edge('e1', 'a', 'b'), edge('e2', 'b', 'c')];
+    const first = layoutGraph(nodes, edges);
+    const second = layoutGraph(nodes, edges);
+    expect(first.map((n) => n.position)).toEqual(second.map((n) => n.position));
+  });
+
+  it('does not depend on input array order (positions follow node id)', () => {
+    const a = layoutGraph([node('a'), node('b'), node('c')], []);
+    const b = layoutGraph([node('c'), node('a'), node('b')], []);
+    const posA = new Map(a.map((n) => [n.id, n.position]));
+    const posB = new Map(b.map((n) => [n.id, n.position]));
+    for (const id of ['a', 'b', 'c']) {
+      expect(posB.get(id)).toEqual(posA.get(id));
+    }
+  });
+
+  it('is order-independent for a larger connected graph with shuffled nodes and edges', () => {
+    const ids = Array.from({ length: 20 }, (_, i) => `n${i}`);
+    const nodes = ids.map(node);
+    // A connected graph: a ring plus a few chords, so the spring pass is exercised.
+    const edges: EdgeSpec[] = ids.map((id, i) => edge(`e${i}`, id, ids[(i + 1) % ids.length]!));
+    edges.push(edge('c1', 'n0', 'n10'), edge('c2', 'n3', 'n15'), edge('c3', 'n5', 'n12'));
+
+    const base = layoutGraph(nodes, edges);
+    const reordered = layoutGraph(shuffled(nodes, 7), shuffled(edges, 13));
+    const basePos = new Map(base.map((n) => [n.id, n.position]));
+    for (const n of reordered) {
+      expect(n.position).toEqual(basePos.get(n.id));
+    }
+  });
+
+  it('produces finite coordinates and separates nodes', () => {
+    const nodes = [node('a'), node('b'), node('c'), node('d')];
+    const edges = [edge('e1', 'a', 'b'), edge('e2', 'c', 'd')];
+    const laid = layoutGraph(nodes, edges);
+    for (const n of laid) {
+      expect(Number.isFinite(n.position.x)).toBe(true);
+      expect(Number.isFinite(n.position.y)).toBe(true);
+    }
+    // No two nodes end up on top of each other.
+    for (let i = 0; i < laid.length; i++) {
+      for (let j = i + 1; j < laid.length; j++) {
+        const dist = Math.hypot(laid[i]!.position.x - laid[j]!.position.x, laid[i]!.position.y - laid[j]!.position.y);
+        expect(dist).toBeGreaterThan(1);
+      }
+    }
+  });
+
+  it('centers the layout on its own centroid', () => {
+    const nodes = [node('a'), node('b'), node('c'), node('d'), node('e')];
+    const edges = [edge('e1', 'a', 'b'), edge('e2', 'b', 'c')];
+    const laid = layoutGraph(nodes, edges);
+    const cx = laid.reduce((sum, n) => sum + n.position.x, 0) / laid.length;
+    const cy = laid.reduce((sum, n) => sum + n.position.y, 0) / laid.length;
+    expect(cx).toBeCloseTo(0, 6);
+    expect(cy).toBeCloseTo(0, 6);
+  });
+
+  it('preserves node identity and other fields', () => {
+    const laid = layoutGraph([node('a'), node('b')], []);
+    expect(laid.map((n) => n.id).toSorted()).toEqual(['a', 'b']);
+    expect(laid[0]?.width).toBe(48);
+    expect(laid[0]?.kind).toBe('icon');
+  });
+
+  it('ignores edges that reference unknown nodes without crashing', () => {
+    const laid = layoutGraph([node('a'), node('b')], [edge('e1', 'a', 'ghost')]);
+    expect(laid).toHaveLength(2);
+    for (const n of laid) {
+      expect(Number.isFinite(n.position.x)).toBe(true);
+    }
+  });
+
+  it('stays bounded on a high-degree hub-and-spoke graph', () => {
+    // A star topology clusters every spoke's repulsion onto the hub; without a bounded integration
+    // step the inverse-square forces compound into runaway coordinates (observed order 10^61).
+    const hub = node('hub');
+    const spokes = Array.from({ length: 128 }, (_, i) => node(`spoke-${i}`));
+    const edges = spokes.map((s, i) => edge(`e${i}`, 'hub', s.id));
+    const laid = layoutGraph([hub, ...spokes], edges);
+    // Every coordinate stays within a sane viewport-scale bound rather than diverging.
+    for (const n of laid) {
+      expect(Number.isFinite(n.position.x)).toBe(true);
+      expect(Number.isFinite(n.position.y)).toBe(true);
+      expect(Math.abs(n.position.x)).toBeLessThan(100_000);
+      expect(Math.abs(n.position.y)).toBeLessThan(100_000);
+    }
+  });
+});

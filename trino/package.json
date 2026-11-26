@@ -1,0 +1,92 @@
+{
+  "name": "@perses-dev/trino-plugin",
+  "version": "0.1.0-beta.1",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/perses/plugins/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perses/plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/perses/plugins/issues"
+  },
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build-mf": "rsbuild build",
+    "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
+    "build:types": "tsc --project tsconfig.build.json",
+    "lint": "oxlint src",
+    "test": "cross-env LC_ALL=C TZ=UTC vitest run",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "react-compiler-runtime": "^1.0.0",
+    "sql-formatter": "^15.9.0"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@hookform/resolvers": "^5.9.1",
+    "@mui/material": "^6.1.10",
+    "@perses-dev/client": "^0.56.0-beta.2",
+    "@perses-dev/components": "^0.56.0-beta.2",
+    "@perses-dev/dashboards": "^0.56.0-beta.2",
+    "@perses-dev/explore": "^0.56.0-beta.2",
+    "@perses-dev/plugin-system": "^0.56.0-beta.2",
+    "@perses-dev/spec": "^0.3.0",
+    "@tanstack/react-query": "^5.105.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "echarts": "6.1.0",
+    "immer": "^11.2.9",
+    "lodash": "^4.17.21",
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0",
+    "react-hook-form": "^7.87.0",
+    "use-resize-observer": "^10.0.0"
+  },
+  "files": [
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
+  ],
+  "perses": {
+    "moduleName": "Trino",
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "Trino Datasource"
+          },
+          "name": "TrinoDatasource"
+        }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "display": {
+            "name": "Trino Time Series Query"
+          },
+          "name": "TrinoTimeSeriesQuery"
+        }
+      },
+      {
+        "kind": "LogQuery",
+        "spec": {
+          "display": {
+            "name": "Trino Log Query"
+          },
+          "name": "TrinoLogQuery"
+        }
+      }
+    ]
+  }
+}

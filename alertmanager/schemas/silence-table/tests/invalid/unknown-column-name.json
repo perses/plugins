@@ -1,0 +1,10 @@
+{
+  "kind": "SilenceTable",
+  "spec": {
+    "columns": [
+      {
+        "name": "receiver"
+      }
+    ]
+  }
+}

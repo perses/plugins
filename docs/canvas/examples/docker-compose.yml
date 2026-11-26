@@ -1,0 +1,17 @@
+# Self-contained demo exporter for the canvas data-driven graph mode.
+#
+# Serves metrics/topology.prom at http://localhost:9101/metrics so the Perses dev Prometheus can
+# scrape a controlled node/edge topology. See README.md for the full walkthrough.
+#
+#   docker compose --file docs/canvas/examples/docker-compose.yml up --detach
+#
+# nginx serves the static exposition file as-is; no image build required.
+services:
+  canvas-demo-metrics:
+    image: nginx:latest
+    container_name: canvas-demo-metrics
+    ports:
+      - '9101:80'
+    volumes:
+      - ./metrics/topology.prom:/usr/share/nginx/html/metrics:ro
+      - ./metrics/nginx.conf:/etc/nginx/conf.d/default.conf:ro

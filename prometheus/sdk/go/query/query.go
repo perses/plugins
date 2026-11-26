@@ -29,6 +29,7 @@ type PluginSpec struct {
 	MinStep          common.Duration      `json:"minStep,omitempty" yaml:"minStep,omitempty"`
 	Resolution       int                  `json:"resolution,omitempty" yaml:"resolution,omitempty"`
 	Instant          *bool                `json:"instant,omitempty" yaml:"instant,omitempty"`
+	EnableExemplars  *bool                `json:"enableExemplars,omitempty" yaml:"enableExemplars,omitempty"`
 }
 
 type Option func(plugin *Builder) error

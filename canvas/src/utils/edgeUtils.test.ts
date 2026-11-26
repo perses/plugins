@@ -14,6 +14,7 @@
 import type { NodeSpec } from '../model';
 import {
   anchorPosition,
+  clipLineToNodes,
   closestAnchor,
   edgeEndpoints,
   midpoint,
@@ -126,6 +127,49 @@ describe('midpoint', () => {
 
   it('handles negative coordinates', () => {
     expect(midpoint({ start: { x: -50, y: -20 }, end: { x: 50, y: 20 } })).toEqual({ x: 0, y: 0 });
+  });
+});
+
+describe('clipLineToNodes', () => {
+  it('trims a horizontal line to a rectangle boundary on both ends', () => {
+    const a = makeNode('a', 0, 0, 100, 60); // half-width 50
+    const b = makeNode('b', 200, 0, 100, 60);
+    const clipped = clipLineToNodes({ start: { x: 0, y: 0 }, end: { x: 200, y: 0 } }, a, b);
+    expect(clipped.start).toEqual({ x: 50, y: 0 });
+    expect(clipped.end).toEqual({ x: 150, y: 0 });
+  });
+
+  it('trims to the ellipse boundary for icon nodes', () => {
+    const a: NodeSpec = { id: 'a', position: { x: 0, y: 0 }, width: 48, height: 48, kind: 'icon' };
+    const b: NodeSpec = { id: 'b', position: { x: 100, y: 0 }, width: 48, height: 48, kind: 'icon' };
+    const clipped = clipLineToNodes({ start: { x: 0, y: 0 }, end: { x: 100, y: 0 } }, a, b);
+    expect(clipped.start.x).toBeCloseTo(24); // radius of the circle
+    expect(clipped.end.x).toBeCloseTo(76);
+  });
+
+  it('leaves an end untouched when its node is undefined (explicit anchor or free endpoint)', () => {
+    const a = makeNode('a', 0, 0, 100, 60);
+    const clipped = clipLineToNodes({ start: { x: 0, y: 0 }, end: { x: 200, y: 0 } }, a, undefined);
+    expect(clipped.start).toEqual({ x: 50, y: 0 });
+    expect(clipped.end).toEqual({ x: 200, y: 0 });
+  });
+
+  it('returns the line unchanged for a zero-length segment', () => {
+    const a = makeNode('a', 0, 0);
+    const line = { start: { x: 5, y: 5 }, end: { x: 5, y: 5 } };
+    expect(clipLineToNodes(line, a, a)).toEqual(line);
+  });
+
+  it('collapses to a point instead of reversing when nodes overlap', () => {
+    // Two 48px circular nodes 40px apart overlap: each radius (24) exceeds the remaining gap, so a
+    // naive clip would produce start.x=24, end.x=16 and point the edge backwards.
+    const a: NodeSpec = { id: 'a', position: { x: 0, y: 0 }, width: 48, height: 48, kind: 'icon' };
+    const b: NodeSpec = { id: 'b', position: { x: 40, y: 0 }, width: 48, height: 48, kind: 'icon' };
+    const clipped = clipLineToNodes({ start: { x: 0, y: 0 }, end: { x: 40, y: 0 } }, a, b);
+    expect(clipped.start).toEqual(clipped.end);
+    // The collapsed point sits forward of the source, never past the target center.
+    expect(clipped.start.x).toBeGreaterThanOrEqual(0);
+    expect(clipped.start.x).toBeLessThanOrEqual(40);
   });
 });
 

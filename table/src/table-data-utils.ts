@@ -121,21 +121,23 @@ function safeStringify(v: object): string {
 
 function toItemArray<T>(data: T): T[] {
   if (Array.isArray(data)) return data;
-  if (data !== null && data !== undefined) return [data];
+  if (data !== undefined) return [data];
   return [];
 }
 
 export function buildJsonTableData(queryResults: Array<PanelData<JsonData>>): Array<Record<string, unknown>> {
   return queryResults.flatMap((r: PanelData<JsonData>) => {
-    return toItemArray(r.data).map(({ data }) => {
-      if (typeof data !== 'object' || data === null) {
-        return { value: data };
-      }
-      const row: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
-        row[k] = typeof v === 'object' && v !== null ? safeStringify(v) : v;
-      }
-      return row;
-    });
+    return r.data === null || r.data === undefined
+      ? []
+      : toItemArray(r.data.data).map((data) => {
+          if (typeof data !== 'object' || data === null) {
+            return { value: data };
+          }
+          const row: Record<string, unknown> = {};
+          for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+            row[k] = typeof v === 'object' && v !== null ? safeStringify(v) : v;
+          }
+          return row;
+        });
   });
 }

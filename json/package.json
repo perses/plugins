@@ -1,6 +1,15 @@
 {
   "name": "@perses-dev/json-plugin",
   "version": "0.2.0-beta.1",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/perses/plugins/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perses/plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/perses/plugins/issues"
+  },
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",
@@ -21,8 +30,8 @@
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@perses-dev/client": "^0.56.0-beta.1",
-    "@perses-dev/plugin-system": "^0.56.0-beta.1",
+    "@perses-dev/client": "^0.56.0-beta.2",
+    "@perses-dev/plugin-system": "^0.56.0-beta.2",
     "@perses-dev/spec": "^0.3.0",
     "immer": "^11.2.9",
     "react": "^18.3.0 || ^19.0.0",

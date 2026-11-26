@@ -1,0 +1,7 @@
+{
+  "kind": "TrinoLogQuery",
+  "spec": {
+    "query": "SELECT 1",
+    "userClaim": "sub"
+  }
+}

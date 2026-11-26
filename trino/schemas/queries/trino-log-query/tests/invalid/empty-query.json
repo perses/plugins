@@ -1,0 +1,6 @@
+{
+  "kind": "TrinoLogQuery",
+  "spec": {
+    "query": ""
+  }
+}

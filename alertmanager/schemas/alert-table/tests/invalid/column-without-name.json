@@ -1,0 +1,10 @@
+{
+  "kind": "AlertTable",
+  "spec": {
+    "columns": [
+      {
+        "header": "Severity"
+      }
+    ]
+  }
+}

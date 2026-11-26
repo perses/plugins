@@ -65,3 +65,15 @@ func Instant(instant bool) Option {
 		return nil
 	}
 }
+
+// EnableExemplars sets the per-query exemplars toggle. Exemplars must still be
+// enabled on the Prometheus datasource (`exemplars.enable`): `true` cannot turn
+// them on for a datasource that has them disabled. When this option is omitted,
+// the query follows the datasource setting; `false` skips fetching exemplars for
+// this query. Exemplars are only fetched for range queries.
+func EnableExemplars(enableExemplars bool) Option {
+	return func(builder *Builder) error {
+		builder.EnableExemplars = &enableExemplars
+		return nil
+	}
+}

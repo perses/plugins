@@ -1,0 +1,31 @@
+{
+  "kind": "SilenceTable",
+  "spec": {
+    "columns": [
+      {
+        "name": "startsAt",
+        "sort": "desc",
+        "sortMode": "date"
+      },
+      {
+        "name": "endsAt",
+        "header": "Expires",
+        "sortMode": "date"
+      },
+      {
+        "name": "duration",
+        "enableSorting": false
+      },
+      {
+        "name": "createdBy",
+        "sortMode": "alphabetical"
+      },
+      {
+        "name": "updatedAt",
+        "sort": "asc",
+        "sortMode": "date"
+      }
+    ],
+    "allowedActions": ["expire"]
+  }
+}

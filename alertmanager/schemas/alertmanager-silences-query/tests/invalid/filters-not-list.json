@@ -1,0 +1,6 @@
+{
+  "kind": "AlertManagerSilencesQuery",
+  "spec": {
+    "filters": "alertname=\"Watchdog\""
+  }
+}

@@ -11,30 +11,108 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import type { FormatOptions, ThresholdOptions } from '@perses-dev/components';
 import {
   FormatControls,
+  InfoTooltip,
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
   ThresholdsEditor,
 } from '@perses-dev/components';
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
-import type { ReactElement } from 'react';
-import { useCallback } from 'react';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
+import type { MouseEvent, ReactElement } from 'react';
+import React, { useCallback } from 'react';
 
 import { EditorStateProvider } from '../../contexts/EditorContext';
 import { SpecProvider } from '../../contexts/SpecContext';
-import type { CanvasSpec } from '../../model';
+import type { CanvasSpec, GraphGenerationSpec } from '../../model';
 import { EditorItemsPanel } from '../editor/EditorItemsPanel';
 import { EdgeThicknessSettings } from './EdgeThicknessSettings';
+import { GraphGenerationSettings } from './GraphGenerationSettings';
 import { LegendSettings } from './LegendSettings';
+import { NodeSizeSettings } from './NodeSizeSettings';
 
 const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal' };
 const EDITOR_COLUMN_SX = { display: 'flex', flexDirection: 'column' as const, gap: 3 };
+const DEFAULT_GENERATION: GraphGenerationSpec = { enabled: true, nodeQueryIndex: 0, nodeIdLabel: '' };
+const EDGE_THICKNESS_INFO_ICON = (
+  <InfoTooltip
+    id="edge-thickness-info-tooltip"
+    title="Edge thickness"
+    description="When an edge has a query and its thickness mode is set to Threshold, its width follows the latest value of that query: the width of the highest matching threshold step is used. The default width applies otherwise (fixed mode without a custom width, no data, or no matching step)."
+    enterDelay={100}
+  >
+    <IconButton
+      aria-label="Edge thickness information"
+      aria-describedby="edge-thickness-info-tooltip"
+      size="small"
+      sx={{ borderRadius: 1, padding: '4px', margin: '0 2px' }}
+    >
+      <InformationOutlineIcon aria-hidden fontSize="inherit" sx={{ color: 'text.secondary' }} />
+    </IconButton>
+  </InfoTooltip>
+);
 
 type GlobalSettingsEditorProps = OptionsEditorProps<CanvasSpec>;
+
+interface StylingSettingsProps {
+  value: CanvasSpec;
+  onChange: (value: CanvasSpec) => void;
+  onFormatChange: (format: FormatOptions) => void;
+  onThresholdsChange: (thresholds: ThresholdOptions | undefined) => void;
+  onEdgeThresholdsChange: (thresholds: ThresholdOptions | undefined) => void;
+  /** Whether the data-driven ("From data") mode is active. */
+  isDataMode: boolean;
+}
+
+// The appearance controls shared by both the manual and data-driven tabs. Rendering the same block
+// in each tab keeps every adjustment option close together instead of split between a top section
+// and the tab contents.
+function StylingSettings({
+  value,
+  onChange,
+  onFormatChange,
+  onThresholdsChange,
+  onEdgeThresholdsChange,
+  isDataMode,
+}: StylingSettingsProps): ReactElement {
+  return (
+    <OptionsEditorGrid>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Legend">
+          <LegendSettings value={value} onChange={onChange} />
+        </OptionsEditorGroup>
+        <OptionsEditorGroup title="Format">
+          <FormatControls value={value.format ?? DEFAULT_FORMAT} onChange={onFormatChange} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Node color">
+          <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
+        </OptionsEditorGroup>
+        {/* Node size scaling only applies to generated nodes (which opt into `sizeMode: 'threshold'`);
+            manually authored nodes have no size-mode control, so these inputs would have no effect in
+            Manual mode. Show them only in From data mode. */}
+        {isDataMode ? (
+          <OptionsEditorGroup title="Node size">
+            <NodeSizeSettings value={value} onChange={onChange} />
+          </OptionsEditorGroup>
+        ) : null}
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Edge color">
+          <ThresholdsEditor hideDefault thresholds={value.edgeThresholds} onChange={onEdgeThresholdsChange} />
+        </OptionsEditorGroup>
+        <OptionsEditorGroup title="Edge thickness" icon={EDGE_THICKNESS_INFO_ICON}>
+          <EdgeThicknessSettings value={value} onChange={onChange} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+    </OptionsEditorGrid>
+  );
+}
 
 export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorProps): ReactElement {
   const onFormatChange = useCallback(
@@ -46,36 +124,94 @@ export function GlobalSettingsEditor({ value, onChange }: GlobalSettingsEditorPr
 
   const onThresholdsChange = useCallback(
     (thresholds: ThresholdOptions | undefined): void => {
-      onChange({ ...value, thresholds });
+      // The per-threshold node-size multipliers are keyed by threshold value. When a color threshold
+      // is moved or removed, drop any multiplier whose value no longer matches a step so it cannot
+      // linger as an active-but-hidden scale in the panel while disappearing from the editor.
+      const nodeStepValues = new Set(thresholds?.steps?.map((step) => step.value));
+      const nodeThresholdSizes = value.nodeThresholdSizes?.filter((size) => nodeStepValues.has(size.value));
+      // Edge widths key off the effective edge thresholds, which fall back to these node thresholds
+      // when no edge thresholds are set — so reconcile them here too.
+      const edgeStepValues = new Set((value.edgeThresholds ?? thresholds)?.steps?.map((step) => step.value));
+      const edgeThresholdWidths = value.edgeThresholdWidths?.filter((width) => edgeStepValues.has(width.value));
+      onChange({
+        ...value,
+        thresholds,
+        nodeThresholdSizes: nodeThresholdSizes?.length ? nodeThresholdSizes : undefined,
+        edgeThresholdWidths: edgeThresholdWidths?.length ? edgeThresholdWidths : undefined,
+      });
+    },
+    [value, onChange],
+  );
+
+  const onEdgeThresholdsChange = useCallback(
+    (edgeThresholds: ThresholdOptions | undefined): void => {
+      // Edge thickness breakpoints key off the effective edge thresholds (edge thresholds, or the
+      // node thresholds when edge thresholds are cleared). Drop any width whose value no longer
+      // matches a step so it cannot linger as an active-but-hidden width in the panel.
+      const edgeStepValues = new Set((edgeThresholds ?? value.thresholds)?.steps?.map((step) => step.value));
+      const edgeThresholdWidths = value.edgeThresholdWidths?.filter((width) => edgeStepValues.has(width.value));
+      onChange({
+        ...value,
+        edgeThresholds,
+        edgeThresholdWidths: edgeThresholdWidths?.length ? edgeThresholdWidths : undefined,
+      });
+    },
+    [value, onChange],
+  );
+
+  const mode = value.graphGeneration?.enabled ? 'auto' : 'manual';
+
+  const onModeChange = useCallback(
+    (_: MouseEvent<HTMLElement>, next: 'manual' | 'auto' | null): void => {
+      if (next === null) {
+        return;
+      }
+      if (next === 'auto') {
+        onChange({ ...value, graphGeneration: { ...DEFAULT_GENERATION, ...value.graphGeneration, enabled: true } });
+      } else {
+        onChange(
+          value.graphGeneration ? { ...value, graphGeneration: { ...value.graphGeneration, enabled: false } } : value,
+        );
+      }
     },
     [value, onChange],
   );
 
   return (
     <Box sx={EDITOR_COLUMN_SX}>
-      <OptionsEditorGrid>
-        <OptionsEditorColumn>
-          <OptionsEditorGroup title="Legend">
-            <LegendSettings value={value} onChange={onChange} />
-          </OptionsEditorGroup>
-          <OptionsEditorGroup title="Format">
-            <FormatControls value={value.format ?? DEFAULT_FORMAT} onChange={onFormatChange} />
-          </OptionsEditorGroup>
-        </OptionsEditorColumn>
-        <OptionsEditorColumn>
-          <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={onThresholdsChange} />
-          <OptionsEditorGroup title="Edge thickness">
-            <EdgeThicknessSettings value={value} onChange={onChange} />
-          </OptionsEditorGroup>
-        </OptionsEditorColumn>
-      </OptionsEditorGrid>
+      <ToggleButtonGroup exclusive size="small" value={mode} onChange={onModeChange}>
+        <ToggleButton value="manual">Manual</ToggleButton>
+        <ToggleButton value="auto">Generated</ToggleButton>
+      </ToggleButtonGroup>
+
+      {mode === 'auto' ? (
+        <Typography variant="body2" color="text.secondary">
+          Nodes and edges are generated from query results and laid out automatically. Graph structure is inferred from
+          series labels; node and edge colors use the thresholds below.
+        </Typography>
+      ) : null}
+
+      {/* Each tab is self-contained: the same styling controls plus the tab's own item editor, so
+          every adjustment option stays together within the active mode. */}
+      <StylingSettings
+        value={value}
+        onChange={onChange}
+        onFormatChange={onFormatChange}
+        onThresholdsChange={onThresholdsChange}
+        onEdgeThresholdsChange={onEdgeThresholdsChange}
+        isDataMode={mode === 'auto'}
+      />
 
       <OptionsEditorGroup title="Items">
-        <EditorStateProvider>
-          <SpecProvider spec={value} onChange={onChange}>
-            <EditorItemsPanel />
-          </SpecProvider>
-        </EditorStateProvider>
+        {mode === 'auto' ? (
+          <GraphGenerationSettings value={value} onChange={onChange} />
+        ) : (
+          <EditorStateProvider>
+            <SpecProvider spec={value} onChange={onChange}>
+              <EditorItemsPanel />
+            </SpecProvider>
+          </EditorStateProvider>
+        )}
       </OptionsEditorGroup>
     </Box>
   );
