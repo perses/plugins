@@ -8,7 +8,7 @@ weathermap-style network diagrams are one common use case.
 For user-facing documentation — the data model and a runnable example — see the
 [Canvas docs](../docs/canvas/README.md).
 
-The panel has two modes, selected in the panel's **Settings** editor under **Items**:
+The panel has two modes, selected at the top of the panel's **Settings** editor:
 
 - **Manual** — draw the graph by hand: place nodes, connect them with edges, and add background
   shapes or images. Each node/edge can bind to a query to drive its color and label.

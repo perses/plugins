@@ -16,8 +16,6 @@ spec:
   edgeDefaultStrokeWidth: <number | default = 2> # Optional
   edgeThresholdWidths:
   - <Edge Threshold Step specification> # Optional
-  querySettings:
-  - <Query Settings specification> # Optional
   backgrounds:
   - <Background specification> # Optional
   nodes:
@@ -64,6 +62,7 @@ labelPadding: <number> # Optional. Must be >= 0
 icon: <string> # Optional. Icon name, used when kind is "icon"
 url: <string> # Optional. Link opened when the node is clicked
 background: <string> # Optional. Hex color
+# Image URL. Must use https:// or be a data URI (data:image/png, jpeg, gif, webp, or avif).
 backgroundImage: <string> # Optional. Image URL
 # Index of the query whose last value drives this node's threshold color, {{value}} label, and size.
 queryIndex: <number> # Optional. Must be >= 0
@@ -112,19 +111,11 @@ width: <number> # Required. Must be > 0
 height: <number> # Required. Must be > 0
 color: <string> # Optional. Hex color
 opacity: <number> # Optional. Between 0 and 1
+# Image URL. Must use https:// or be a data URI (data:image/png, jpeg, gif, webp, or avif).
 image: <string> # Optional. Image URL
 imageFit: <enum = "cover" | "contain" | "stretch" | default = "cover"> # Optional
 # When true, the background is anchored to the viewport and does not pan/zoom with the graph.
 global: <boolean | default = false> # Optional
-```
-
-## Query Settings specification
-
-```yaml
-queryIndex: <number> # Required. Must be >= 0
-# "fixed" colors every series of the query; "fixed-single" applies to a single-series query.
-colorMode: <enum = "fixed" | "fixed-single"> # Required
-colorValue: <string> # Required. Hex color
 ```
 
 ## Node Threshold Step specification
