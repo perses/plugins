@@ -33,6 +33,12 @@ describe('markdownToHTML', () => {
     expect(container.textContent).toContain('<details><summary>More</summary>Hidden</details>');
   });
 
+  it('escapes HTML nested in raw inline tags when disabled', () => {
+    const container = render('prefix <code><img/src=//example.com/tracker></code>');
+    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('p')?.textContent).toBe('prefix <code><img/src=//example.com/tracker></code>');
+  });
+
   it('still renders markdown when HTML is disabled', () => {
     const container = render('**bold** `code` [link](https://example.com) <https://perses.dev>');
     expect(container.querySelector('strong')?.textContent).toBe('bold');

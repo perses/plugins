@@ -93,26 +93,20 @@ function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme)
   };
 }
 
-const HTML_ESCAPE_MAP: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-};
-
-function escapeHTML(text: string): string {
-  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPE_MAP[char] ?? char);
-}
-
 // Supports original markdown and GitHub Flavored markdown
 const markdownWithHTML = new Marked({ gfm: true });
 
-// Raw HTML (block and inline) is escaped so it is displayed literally, e.g. `<host>:<port>`
+// Raw HTML (block and inline) is not tokenized, so it is escaped as text and displayed literally, e.g. `<host>:<port>`.
+// Overriding the `html` renderer is not enough: content following a raw `<code>`, `<pre>`, ... tag would not be escaped.
 const markdownWithoutHTML = new Marked({
   gfm: true,
-  renderer: {
-    html: ({ text }): string => escapeHTML(text),
+  tokenizer: {
+    html(): undefined {
+      return undefined;
+    },
+    tag(): undefined {
+      return undefined;
+    },
   },
 });
 
