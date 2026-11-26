@@ -33,25 +33,17 @@ const eventMarkerSx = {
   position: 'absolute',
   top: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '9px',
+  boxSizing: 'border-box',
+  width: '10px',
   height: '18px',
-  padding: 0,
+  // the padding widens the click target, the background is only painted on the content box
+  padding: '0 4px',
   border: 'none',
-  background: 'none',
+  backgroundColor: 'text.primary',
+  backgroundClip: 'content-box',
   cursor: 'pointer',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: '50%',
-    width: '2px',
-    transform: 'translateX(-50%)',
-    borderRadius: '1px',
-    backgroundColor: 'text.primary',
-  },
-  '&:hover::before, &:focus-visible::before': {
-    width: '4px',
+  '&:hover, &:focus-visible': {
+    paddingInline: '3px',
   },
 } as const;
 
