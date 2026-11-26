@@ -72,6 +72,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
     setSelectedSpanId(undefined);
     setFocusedEvent(undefined);
   }, []);
+  const handleClearFocusedEvent = useCallback(() => setFocusedEvent(undefined), []);
   const search = useSpanSearch(trace);
 
   const itemActions =
@@ -124,6 +125,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
               actions={itemActions}
               actionItem={selectedSpanActionItem}
               focusedEvent={focusedEvent}
+              onClearFocusedEvent={handleClearFocusedEvent}
               onCloseBtnClick={handleCloseDetailPane}
             />
           </Box>

@@ -38,6 +38,7 @@ export interface DetailPaneProps {
   actionItem?: SpanActionItem;
   /** event to show in the events tab, e.g. after clicking an event marker in the timeline */
   focusedEvent?: FocusedSpanEvent;
+  onClearFocusedEvent: () => void;
   onCloseBtnClick: () => void;
 }
 
@@ -45,7 +46,7 @@ export interface DetailPaneProps {
  * DetailPane renders a sidebar showing the span attributes etc.
  */
 export function DetailPane(props: DetailPaneProps): ReactElement {
-  const { customLinks, trace, span, actions, actionItem, onCloseBtnClick } = props;
+  const { customLinks, trace, span, actions, actionItem, onClearFocusedEvent, onCloseBtnClick } = props;
   const focusedEvent = props.focusedEvent?.spanId === span.spanId ? props.focusedEvent : undefined;
   const [tab, setTab] = useState<'attributes' | 'events' | 'links'>(focusedEvent ? 'events' : 'attributes');
 
@@ -83,7 +84,14 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
         </Stack>
       ) : null}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tab} onChange={(_, tab) => setTab(tab)} variant="scrollable">
+        <Tabs
+          value={tab}
+          onChange={(_, nextTab) => {
+            setTab(nextTab);
+            onClearFocusedEvent();
+          }}
+          variant="scrollable"
+        >
           <Tab sx={{ p: 0 }} value="attributes" label="Attributes" />
           {span.events.length > 0 && (
             <Tab

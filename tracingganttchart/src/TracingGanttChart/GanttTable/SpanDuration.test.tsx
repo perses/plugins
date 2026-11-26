@@ -93,4 +93,18 @@ describe('SpanDuration', () => {
     fireEvent.click(marker);
     expect(onEventClick).toHaveBeenCalledWith(span, 0);
   });
+
+  it('does not include event markers outside the viewport in the tab order', () => {
+    const span = trace.rootSpans[0]!.childSpans[0]!;
+    renderComponent({
+      options: {},
+      span,
+      viewport: {
+        startTimeUnixMs: trace.startTimeUnixMs + 200,
+        endTimeUnixMs: trace.startTimeUnixMs + 400,
+      },
+    });
+
+    expect(screen.getByRole('button', { name: 'Event event1_name' })).toHaveAttribute('tabindex', '-1');
+  });
 });

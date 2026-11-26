@@ -15,7 +15,7 @@ import { Collapse, Divider, List, ListItemButton, ListItemText } from '@mui/mate
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
 import type { ReactElement } from 'react';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useLayoutEffect, useRef, useState } from 'react';
 
 import type { CustomLinks } from '../../gantt-chart-model';
 import type { Trace, Span, Event } from '../trace';
@@ -76,10 +76,12 @@ function SpanEventItem(props: SpanEventItemProps): ReactElement {
   const { customLinks, trace, event, focus } = props;
   const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
   const ref = useRef<HTMLUListElement>(null);
+  const previousFocusRef = useRef(focus);
 
   const [open, setOpen] = useState(focus !== undefined);
+  const previousOpenRef = useRef(open);
   const handleClick = (): void => {
-    setOpen(!open);
+    setOpen((isOpen) => !isOpen);
   };
 
   // expand the event when it gets focused
@@ -91,11 +93,13 @@ function SpanEventItem(props: SpanEventItemProps): ReactElement {
     }
   }
 
-  useEffect(() => {
-    if (focus) {
+  useLayoutEffect(() => {
+    if (focus && focus !== previousFocusRef.current && open && previousOpenRef.current) {
       ref.current?.scrollIntoView({ block: 'nearest' });
     }
-  }, [focus]);
+    previousFocusRef.current = focus;
+    previousOpenRef.current = open;
+  }, [focus, open]);
 
   return (
     <List ref={ref}>
@@ -110,7 +114,17 @@ function SpanEventItem(props: SpanEventItemProps): ReactElement {
         />
         {open ? <ChevronUp /> : <ChevronDown />}
       </ListItemButton>
-      <Collapse in={open} timeout="auto" unmountOnExit>
+      <Collapse
+        in={open}
+        timeout="auto"
+        unmountOnExit
+        appear={focus !== undefined}
+        onEntered={() => {
+          if (focus) {
+            ref.current?.scrollIntoView({ block: 'nearest' });
+          }
+        }}
+      >
         <List sx={{ px: 1 }}>
           <AttributeItem name="name" value={event.name} />
           <AttributeItem name="time" value={formatDuration(relativeTime)} />

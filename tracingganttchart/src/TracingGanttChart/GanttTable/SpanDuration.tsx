@@ -94,6 +94,9 @@ export function SpanDuration(props: SpanDurationProps): ReactElement {
             component="button"
             type="button"
             aria-label={`Event ${event.name}`}
+            tabIndex={
+              event.timeUnixMs >= viewport.startTimeUnixMs && event.timeUnixMs <= viewport.endTimeUnixMs ? 0 : -1
+            }
             sx={eventMarkerSx}
             style={{ left: `${((event.timeUnixMs - viewport.startTimeUnixMs) / viewportDuration) * 100}%` }}
             onClick={(e) => {
