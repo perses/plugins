@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { ProfileQueryPlugin } from '@perses-dev/plugin-system';
+import { isVariableDatasource } from '@perses-dev/plugin-system';
 import type { Notice, ProfileData } from '@perses-dev/spec';
 
 import { ClickHouseError } from '../../model/click-house-client';
@@ -43,6 +44,12 @@ export const getProfileData: ProfileQueryPlugin<ClickHouseProfileQuerySpec>['get
 ) => {
   if (!spec.query?.trim()) {
     return emptyProfile();
+  }
+  // Without the dashboard variables, a datasource variable would be read as the default datasource.
+  if (isVariableDatasource(spec.datasource)) {
+    throw new Error(
+      `Dashboard variables are not available to profile queries: select a datasource instead of ${spec.datasource}.`,
+    );
   }
 
   const now = Date.now();

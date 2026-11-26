@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ClickHouseDatasource, getQueryMethod } from './ClickHouseDatasource';
+import { allowsConnectionTest, getQueryMethod } from './allowed-endpoints';
+import { ClickHouseDatasource } from './ClickHouseDatasource';
 
 describe('ClickHouseDatasource.createClient', () => {
   afterEach(() => {
@@ -73,5 +74,19 @@ describe('getQueryMethod', () => {
         { endpointPattern: '^/write$', method: 'POST' },
       ]),
     ).toBe('GET');
+  });
+});
+
+describe('allowsConnectionTest', () => {
+  it('tells whether the proxy lets the connection test through', () => {
+    expect(allowsConnectionTest(undefined)).toBe(true);
+    expect(
+      allowsConnectionTest([
+        { endpointPattern: '^/$', method: 'POST' },
+        { endpointPattern: '^/ping$', method: 'GET' },
+      ]),
+    ).toBe(true);
+    // The datasources created before the connection test only allow the queries.
+    expect(allowsConnectionTest([{ endpointPattern: '^/$', method: 'GET' }])).toBe(false);
   });
 });

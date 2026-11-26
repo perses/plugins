@@ -48,8 +48,8 @@ export function asSubquery(sql: string): string {
 }
 
 interface Token {
-  kind: 'word' | 'comment';
-  /** A word in upper case, or a comment as written. */
+  kind: 'word' | 'comment' | 'quoted';
+  /** A word in upper case, or a comment, string or quoted identifier as written. */
   text: string;
   start: number;
   depth: number;
@@ -58,13 +58,13 @@ interface Token {
 const WORD_START = /[A-Za-z_]/;
 const WORD_PART = /\w/;
 const SETTINGS_CLAUSE = /^SETTINGS\s+\w+\s*=/i;
-const FORMAT_CLAUSE = /^FORMAT\s+\w+\s*$/i;
+const FORMAT_CLAUSE = /^FORMAT\s+\w+(?:\s*;)*\s*$/i;
 const FINAL_SEMICOLONS = /(?:\s*;)+$/;
 // What follows the `EXCEPT` of a set operation. After a wildcard, `EXCEPT` names the columns it leaves out.
 const SET_OPERATION_OPERANDS = new Set(['SELECT', 'WITH', 'FROM', 'ALL', 'DISTINCT']);
 
-// Yields the bare words and the comments of a statement, skipping its strings and quoted identifiers. Words come
-// with their nesting depth.
+// Yields the bare words, the comments, and the strings and quoted identifiers of a statement. Words come with their
+// nesting depth.
 function* scanTokens(sql: string): Generator<Token> {
   let depth = 0;
   let index = 0;
@@ -77,7 +77,8 @@ function* scanTokens(sql: string): Generator<Token> {
       while (index < sql.length && sql[index] !== char) {
         index += sql[index] === '\\' ? 2 : 1;
       }
-      index++;
+      index = Math.min(index + 1, sql.length);
+      yield { kind: 'quoted', text: sql.slice(start, index), start, depth };
     } else if ((char === '-' && next === '-') || char === '#') {
       const end = sql.indexOf('\n', index);
       index = end === -1 ? sql.length : end + 1;
@@ -105,13 +106,41 @@ function scanWords(sql: string): Token[] {
   return [...scanTokens(sql)].filter((token) => token.kind === 'word');
 }
 
-/** commentRanges returns where the comments of a statement are, as `[start, end[` positions. */
-export function commentRanges(sql: string): Array<[start: number, end: number]> {
+function tokenRanges(sql: string, kind: Token['kind']): Array<[start: number, end: number]> {
   const ranges: Array<[number, number]> = [];
   for (const token of scanTokens(sql)) {
-    if (token.kind === 'comment') ranges.push([token.start, token.start + token.text.length]);
+    if (token.kind === kind) ranges.push([token.start, token.start + token.text.length]);
   }
   return ranges;
+}
+
+/** commentRanges returns where the comments of a statement are, as `[start, end[` positions. */
+export function commentRanges(sql: string): Array<[start: number, end: number]> {
+  return tokenRanges(sql, 'comment');
+}
+
+/** quotedRanges returns where the strings and quoted identifiers of a statement are, as `[start, end[` positions. */
+export function quotedRanges(sql: string): Array<[start: number, end: number]> {
+  return tokenRanges(sql, 'quoted');
+}
+
+/** isInRanges reports whether a position is in one of the `[start, end[` ranges. */
+export function isInRanges(position: number, ranges: Array<[start: number, end: number]>): boolean {
+  return ranges.some(([start, end]) => position >= start && position < end);
+}
+
+/**
+ * blankComments replaces the comments of a statement with spaces, keeping its line breaks: the positions in the
+ * statement stay the same.
+ */
+export function blankComments(sql: string): string {
+  let blanked = '';
+  let position = 0;
+  for (const [start, end] of commentRanges(sql)) {
+    blanked += sql.slice(position, start) + sql.slice(start, end).replace(/[^\n]/g, ' ');
+    position = end;
+  }
+  return blanked + sql.slice(position);
 }
 
 /**
@@ -120,8 +149,10 @@ export function commentRanges(sql: string): Array<[start: number, end: number]> 
  */
 export function stripFormat(sql: string): string {
   const statement = sql.trim().replace(FINAL_SEMICOLONS, '');
+  // A comment may follow the clause.
+  const bare = blankComments(statement);
   for (const word of scanWords(statement)) {
-    if (word.depth === 0 && word.text === 'FORMAT' && FORMAT_CLAUSE.test(statement.slice(word.start))) {
+    if (word.depth === 0 && word.text === 'FORMAT' && FORMAT_CLAUSE.test(bare.slice(word.start))) {
       return statement.slice(0, word.start).trimEnd();
     }
   }
@@ -141,6 +172,7 @@ export function stripOrderAndLimit(sql: string): string | undefined {
   let settings: number | undefined;
   let format: number | undefined;
   let previous: Token | undefined;
+  const bare = blankComments(statement);
   const words = scanWords(statement);
   for (let index = 0; index < words.length; index++) {
     const word = words[index];
@@ -160,9 +192,9 @@ export function stripOrderAndLimit(sql: string): string | undefined {
       }
     } else if (word.text === 'LIMIT') {
       limit = word.start;
-    } else if (word.text === 'SETTINGS' && SETTINGS_CLAUSE.test(statement.slice(word.start))) {
+    } else if (word.text === 'SETTINGS' && SETTINGS_CLAUSE.test(bare.slice(word.start))) {
       settings ??= word.start;
-    } else if (word.text === 'FORMAT' && FORMAT_CLAUSE.test(statement.slice(word.start))) {
+    } else if (word.text === 'FORMAT' && FORMAT_CLAUSE.test(bare.slice(word.start))) {
       format = word.start;
     }
     previous = word;
@@ -239,7 +271,12 @@ export function selectedColumns(sql: string): SelectedColumns | undefined {
   const names: string[] = [];
   const excluded: string[] = [];
   let hasWildcard = false;
-  for (const item of splitList(sql.slice(select, from).replace(/^\s*DISTINCT\s+/i, ''))) {
+  // Comments may hold commas, and follow the names of the columns.
+  for (const item of splitList(
+    blankComments(sql)
+      .slice(select, from)
+      .replace(/^\s*DISTINCT\s+/i, ''),
+  )) {
     if (WILDCARD.test(item)) {
       hasWildcard = true;
       for (const [, list, single] of item.matchAll(EXCEPT_MODIFIER)) {

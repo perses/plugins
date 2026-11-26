@@ -182,6 +182,18 @@ describe('ClickHouseProfileQuery', () => {
     ]);
   });
 
+  it('refuses a datasource variable, which it can not resolve', async () => {
+    const client = stubClient((sql) => (sql.includes('GROUP BY stack') ? FLAME : TIMELINE));
+
+    await expect(
+      ClickHouseProfileQuery.getProfileData(
+        { datasource: '$ds', query: 'SELECT FunctionNames AS stack FROM otel_profiles' },
+        createContext(client),
+      ),
+    ).rejects.toThrow(/select a datasource instead of \$ds/);
+    expect(client.statements()).toEqual([]);
+  });
+
   it('tells which column a profile query must return', async () => {
     const client = stubClient((sql) => {
       // Only the flame graph reads the stacks.

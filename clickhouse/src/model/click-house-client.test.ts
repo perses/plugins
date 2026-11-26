@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ClickHouseError, createClickHouseClient, MAX_ROWS } from './click-house-client';
+import { ClickHouseError, createClickHouseClient, MAX_ROWS, READ_ONLY_TTL_MS } from './click-house-client';
 
 const FORMAT = 'JSONCompactEachRowWithNamesAndTypes';
 
@@ -91,8 +91,9 @@ describe('createClickHouseClient', () => {
       readonly: '2',
       date_time_output_format: 'iso',
       output_format_json_quote_64bit_integers: '1',
-      max_result_rows: String(MAX_ROWS),
+      max_result_rows: String(MAX_ROWS + 1),
       result_overflow_mode: 'break',
+      wait_end_of_query: '1',
     });
     expect(calledUrl(fetchMock).searchParams.has('query')).toBe(false);
   });
@@ -114,10 +115,9 @@ describe('createClickHouseClient', () => {
     const url = datasourceUrl();
     const fetchMock = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(refusedSetting('readonly'))
+      .mockResolvedValueOnce(refusedSetting('date_time_output_format'))
       // ClickHouse runs the queries of this user as read-only by itself: they need no guard.
       .mockResolvedValueOnce(result([["getSetting('readonly')"], ['UInt64'], [1]]))
-      .mockResolvedValueOnce(refusedSetting('date_time_output_format'))
       .mockImplementation(async () => result([['a'], ['UInt8'], [1]]));
 
     const client = createClickHouseClient({ datasourceUrl: url, fetch: fetchMock });
@@ -125,15 +125,81 @@ describe('createClickHouseClient', () => {
     // A client is created for each query: the next ones of the datasource go without settings at once.
     await createClickHouseClient({ datasourceUrl: url, fetch: fetchMock }).query({ query: 'SELECT 1 AS a' });
 
-    expect(fetchMock).toHaveBeenCalledTimes(5);
-    expect(calledUrl(fetchMock, 2).searchParams.has('readonly')).toBe(false);
-    expect(calledUrl(fetchMock, 2).searchParams.get('date_time_output_format')).toBe('iso');
-    for (const call of [3, 4]) {
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    for (const call of [2, 3]) {
       const params = calledUrl(fetchMock, call).searchParams;
       expect(params.has('readonly')).toBe(false);
       expect(params.has('date_time_output_format')).toBe(false);
       expect(params.get('default_format')).toBe(FORMAT);
     }
+  });
+
+  it('keeps the guard of a query whose error only reads like a refused setting', async () => {
+    const statement =
+      "SELECT throwIf(1, 'Code: 164. DB::Exception: Cannot modify ''readonly'' setting in readonly mode')";
+    const fetchMock = vi.fn<typeof fetch>(async (_url, init) =>
+      init?.body === statement
+        ? failure(
+            "Code: 395. DB::Exception: Code: 164. DB::Exception: Cannot modify 'readonly' setting in readonly mode: while executing 'FUNCTION throwIf'. (FUNCTION_THROW_IF_VALUE_IS_NON_ZERO)",
+          )
+        : result([['a'], ['UInt8'], [1]]),
+    );
+    const client = createClickHouseClient({ datasourceUrl: datasourceUrl(), fetch: fetchMock });
+
+    await expect(client.query({ query: statement })).rejects.toMatchObject({ code: 395 });
+    await client.query({ query: 'SELECT 1' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(calledUrl(fetchMock, 1).searchParams.get('readonly')).toBe('2');
+  });
+
+  it('keeps every setting when ClickHouse does not confirm that the user is read-only', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async (_url, init) =>
+      init?.body === "SELECT getSetting('readonly')"
+        ? result([["getSetting('readonly')"], ['UInt64'], ['0']])
+        : refusedSetting('date_time_output_format'),
+    );
+    const client = createClickHouseClient({ datasourceUrl: datasourceUrl(), fetch: fetchMock });
+
+    await expect(client.query({ query: 'SELECT 1' })).rejects.toMatchObject({ code: 164 });
+    await expect(client.query({ query: 'SELECT 2' })).rejects.toMatchObject({ code: 164 });
+
+    const guards = fetchMock.mock.calls
+      .filter(([, init]) => init?.body !== "SELECT getSetting('readonly')")
+      .map(([url]) => new URL(String(url)).searchParams.get('readonly'));
+    expect(guards).toEqual(['2', '2']);
+  });
+
+  it('sends the guard again to other credentials, and once the read-only probe is stale', async () => {
+    const url = datasourceUrl();
+    const readOnlyUser = { Authorization: 'Basic cmVhZGVy' };
+    const fetchMock = vi.fn<typeof fetch>(async (_url, init) => {
+      const params = new URL(String(_url)).searchParams;
+      const isReadOnlyUser = JSON.stringify(init?.headers) === JSON.stringify(readOnlyUser);
+      if (init?.body === "SELECT getSetting('readonly')") {
+        return result([["getSetting('readonly')"], ['UInt64'], [isReadOnlyUser ? '2' : '0']]);
+      }
+      return isReadOnlyUser && params.has('readonly') ? refusedSetting('readonly') : result([['a'], ['UInt8'], [1]]);
+    });
+    const now = vi.spyOn(Date, 'now').mockReturnValue(0);
+    const query = (headers?: Record<string, string>): Promise<unknown> =>
+      createClickHouseClient({ datasourceUrl: url, fetch: fetchMock }).query({ query: 'SELECT 1' }, headers);
+    const sentGuards = (): Array<string | null> =>
+      fetchMock.mock.calls
+        .filter(([, init]) => init?.body === 'SELECT 1')
+        .map(([input]) => new URL(String(input)).searchParams.get('readonly'));
+
+    try {
+      await query(readOnlyUser);
+      await query(readOnlyUser);
+      await query();
+      now.mockReturnValue(READ_ONLY_TTL_MS);
+      await query(readOnlyUser);
+    } finally {
+      now.mockRestore();
+    }
+
+    expect(sentGuards()).toEqual(['2', null, null, '2', '2', null]);
   });
 
   it('never sends without its read-only guard a query that tries to lift it', async () => {
@@ -172,9 +238,38 @@ describe('createClickHouseClient', () => {
     expect(response.truncated).toBe(true);
     const params = calledUrl(fetchMock, 1).searchParams;
     expect(params.has('max_result_rows')).toBe(false);
-    // Without a row limit, the overflow mode would have nothing to apply to.
+    // Without a row limit, the overflow mode would have nothing to apply to, and the result nothing to bound it.
     expect(params.has('result_overflow_mode')).toBe(false);
+    expect(params.has('wait_end_of_query')).toBe(false);
     expect(params.get('date_time_output_format')).toBe('iso');
+  });
+
+  it('stops buffering the results when a settings profile forbids it', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(failure('Code: 452. DB::Exception: Setting wait_end_of_query should not be changed.'))
+      .mockImplementation(async () => result([['a'], ['UInt8'], [1]]));
+    const client = createClickHouseClient({ datasourceUrl: datasourceUrl(), fetch: fetchMock });
+
+    await expect(client.query({ query: 'SELECT 1 AS a' })).resolves.toMatchObject({ rows: [[1]] });
+    const params = calledUrl(fetchMock, 1).searchParams;
+    expect(params.has('wait_end_of_query')).toBe(false);
+    expect(params.get('max_result_rows')).toBe(String(MAX_ROWS + 1));
+    expect(params.get('readonly')).toBe('2');
+  });
+
+  it.each([
+    [MAX_ROWS, false],
+    [MAX_ROWS + 1, true],
+  ])('tells whether a result of %i rows cut by ClickHouse is truncated', async (count, truncated) => {
+    const rows = Array.from({ length: count }, (_unused, index) => [index]);
+    const fetchMock = vi.fn<typeof fetch>(async () => result([['n'], ['UInt32'], ...rows]));
+    const client = createClickHouseClient({ datasourceUrl: datasourceUrl(), fetch: fetchMock });
+
+    const response = await client.query({ query: 'SELECT number AS n FROM numbers(200000)' });
+
+    expect(response.rows).toHaveLength(MAX_ROWS);
+    expect(response.truncated).toBe(truncated);
   });
 
   it('does not download the rest of a result that ClickHouse did not cut', async () => {

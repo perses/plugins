@@ -76,6 +76,12 @@ describe('stripFormat', () => {
       "SELECT formatDateTime(t, '%F') AS format FROM (SELECT 1 FORMAT) -- FORMAT JSON",
     );
   });
+
+  it('removes a FORMAT clause followed by a comment', () => {
+    expect(stripFormat('SELECT 1 FORMAT JSON -- legacy')).toBe('SELECT 1');
+    expect(stripFormat('SELECT 1 FORMAT JSON; /* legacy */')).toBe('SELECT 1');
+    expect(stripOrderAndLimit('SELECT a FROM t LIMIT 10 FORMAT JSON -- legacy')).toBe('SELECT a FROM t');
+  });
 });
 
 describe('selectedColumns', () => {
@@ -91,6 +97,14 @@ describe('selectedColumns', () => {
       names: [],
       hasWildcard: true,
       excluded: ['Body', 'Trace Id', 'SpanId'],
+    });
+  });
+
+  it('leaves the comments of the list of columns out', () => {
+    expect(selectedColumns('SELECT Timestamp -- event time, or not\n, Body /* the message, */ FROM t')).toEqual({
+      names: ['Timestamp', 'Body'],
+      hasWildcard: false,
+      excluded: [],
     });
   });
 });

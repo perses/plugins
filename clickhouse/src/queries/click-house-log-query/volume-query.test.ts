@@ -21,7 +21,7 @@ describe('buildVolumeQuery', () => {
       ),
     ).toBe(
       [
-        "SELECT $__timeInterval(`log_time`) AS time, if(lower(toString(`Severity`)) = '', 'unknown', lower(toString(`Severity`))) AS level, count() AS logs",
+        "SELECT $__timeInterval(`log_time`) AS time, if(lower(ifNull(toString(`Severity`), '')) = '', 'unknown', lower(ifNull(toString(`Severity`), ''))) AS level, count() AS logs",
         'FROM (\nSELECT log_time, message, Severity FROM app.logs WHERE $__timeFilter(log_time)\n)',
         'GROUP BY time, level',
         'ORDER BY time',
@@ -31,7 +31,7 @@ describe('buildVolumeQuery', () => {
 
   it('assumes the columns of the OpenTelemetry logs table behind a wildcard', () => {
     expect(buildVolumeQuery('SELECT * FROM otel_logs LIMIT 10')).toContain(
-      '$__timeInterval(`Timestamp`) AS time, if(lower(toString(`SeverityText`))',
+      "$__timeInterval(`Timestamp`) AS time, if(lower(ifNull(toString(`SeverityText`), ''))",
     );
     // Unless the wildcard leaves them out.
     expect(buildVolumeQuery('SELECT * EXCEPT (SeverityText, ResourceAttributes) FROM otel_logs LIMIT 10')).toBe(

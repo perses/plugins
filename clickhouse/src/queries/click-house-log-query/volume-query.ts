@@ -50,8 +50,9 @@ export function buildVolumeQuery(logQuery: string): string | undefined {
 
   const columns = [`$__timeInterval(${quoteIdentifier(time)}) AS time`];
   if (level !== undefined) {
-    // Lower case, so that the logs of services writing their levels differently, e.g. ERROR and error, add up.
-    const text = `lower(toString(${quoteIdentifier(level)}))`;
+    // Lower case, so that the logs of services writing their levels differently, e.g. ERROR and error, add up. A
+    // missing level of a Nullable column is an unknown one too.
+    const text = `lower(ifNull(toString(${quoteIdentifier(level)}), ''))`;
     columns.push(`if(${text} = '', 'unknown', ${text}) AS level`);
   }
   columns.push('count() AS logs');

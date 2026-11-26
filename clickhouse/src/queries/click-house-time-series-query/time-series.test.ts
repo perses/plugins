@@ -113,6 +113,29 @@ describe('buildTimeSeries', () => {
     expect(built.stepMs).toBe(HOUR);
   });
 
+  it('keeps every row of a table, even the ones with the same labels', () => {
+    const built = buildTimeSeries(stubResponse([['n', 'UInt64']], [['1'], ['2'], ['3']]), options);
+
+    expect(built.series.map((series) => [series.name, series.values])).toEqual([
+      ['n', [[options.instant, 1]]],
+      ['n', [[options.instant, 2]]],
+      ['n', [[options.instant, 3]]],
+    ]);
+    expect(built.notices).toEqual([]);
+  });
+
+  it('stretches the step of single points so that the grid stays bounded', () => {
+    const yearAgo = new Date(rangeStart - 365 * 24 * HOUR).toISOString().replace('.000Z', 'Z');
+    const built = buildTimeSeries(stubResponse([TIME, ['value', 'Float64']], [[yearAgo, 1]]), {
+      ...options,
+      intervalMs: 300_000,
+    });
+
+    const slots = (options.instant - built.start) / built.stepMs;
+    expect(slots).toBeLessThanOrEqual(11_000);
+    expect(built.series[0]?.values).toHaveLength(1);
+  });
+
   it('formats the name of the series from their labels', () => {
     const built = buildTimeSeries(
       stubResponse([TIME, ['service', 'String'], ['value', 'Float64']], [[at(0), 'api', 1]]),

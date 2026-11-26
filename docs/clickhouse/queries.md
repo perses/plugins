@@ -19,7 +19,7 @@ Macros give a query the time range of the dashboard and an interval suited to it
 | `$__timeFilter(column)`                     | `(column >= toDateTime(<start>) AND column <= toDateTime(<end>))`, to the second             |
 | `$__timeFilter_ms(column)`                  | The same condition, to the millisecond                                                       |
 | `$__dateFilter(column)`                     | The same condition on a `Date` column                                                        |
-| `$__dateTimeFilter(dateColumn, timeColumn)` | The conditions on a `Date` column and on a `DateTime` column, for tables partitioned by date |
+| `$__dateTimeFilter(dateColumn, timeColumn)` | The conditions on a `Date` column, widened by a day on each side, and on a `DateTime` column, for tables partitioned by date |
 | `$__timeInterval(column)`                   | `toStartOfInterval(toDateTime(column), INTERVAL <interval> second)`                          |
 | `$__timeInterval_ms(column)`                | `toStartOfInterval(toDateTime64(column, 3), INTERVAL <interval> millisecond)`                |
 | `$__interval_s`, `$__interval_ms`           | The interval, in seconds or in milliseconds                                                  |
@@ -42,6 +42,8 @@ ORDER BY time
 
 The `{start}` and `{end}` placeholders are also replaced by the time range, as `YYYY-MM-DD hh:mm:ss` in UTC: `WHERE Timestamp BETWEEN '{start}' AND '{end}'`.
 
+Macros are not replaced in comments. Inside a string, only the ones without arguments are: `'$__interval_s'` is, `'%$__timeFilter%'` is not.
+
 ### Min step
 
 A time series query can set a **min step**, the lower bound of its interval: a duration such as `1m`, or a variable holding one.
@@ -63,6 +65,8 @@ A variable with "All" selected holds every value. To drop the condition instead 
 ```sql
 WHERE $__conditionalAll(ServiceName IN (${service:sqlstring}), $service)
 ```
+
+Variables are not replaced in comments: a value could end the comment.
 
 ## Time series queries
 
@@ -99,7 +103,7 @@ ORDER BY ServiceName, time WITH FILL STEP $__interval_s
 
 ### Tables
 
-A query without a time column is a table: each row is a point at the end of the time range, and the series keep the order of the rows. Use it for the stat, gauge, bar and table panels.
+A query without a time column is a table: each row is a series of one point, at the end of the time range, even when the labels of two rows are the same, and the series keep the order of the rows. Use it for the stat, gauge, bar and table panels.
 
 ```sql
 SELECT ServiceName, count() AS spans, quantile(0.95)(Duration) / 1e6 AS p95_ms

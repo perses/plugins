@@ -47,4 +47,13 @@ describe('interpolateVariables', () => {
       'SELECT * FROM otel_logs WHERE x = ${unknown:sqlstring}',
     );
   });
+
+  it('leaves the variables of the comments alone, so that a value can not end a comment', () => {
+    const variableState = { service: { value: 'x\nDROP TABLE t */ OR 1', loading: false } };
+    const sql = 'SELECT 1 -- AND s = ${service:sqlstring}\n/* $service */ WHERE s = ${service:sqlstring}';
+
+    expect(interpolateVariables(sql, variableState)).toBe(
+      "SELECT 1 -- AND s = ${service:sqlstring}\n/* $service */ WHERE s = 'x\nDROP TABLE t */ OR 1'",
+    );
+  });
 });

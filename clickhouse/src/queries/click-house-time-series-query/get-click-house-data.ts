@@ -64,8 +64,15 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<ClickHouseTimeSeriesQueryS
     if (abortSignal?.aborted) throw exemplarResult;
     notices.push({ type: 'warning', message: `Exemplars are not shown. ${exemplarResult.message}` });
   } else if (exemplarResult) {
-    exemplars = [...exemplars, ...buildExemplars(exemplarResult, built.series)];
-    notices.push(...truncationNotices(exemplarResult));
+    try {
+      exemplars = [...exemplars, ...buildExemplars(exemplarResult, built.series)];
+      notices.push(...truncationNotices(exemplarResult));
+    } catch (error) {
+      notices.push({
+        type: 'warning',
+        message: `Exemplars are not shown. ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
   }
 
   const data: TimeSeriesData = {

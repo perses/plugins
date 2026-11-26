@@ -84,12 +84,7 @@ export const getTraceData: TraceQueryPlugin<ClickHouseTraceQuerySpec>['getTraceD
   }
 
   // The traces are summarized from all their spans, not only from the ones matched by the search.
-  const summary = await runStatement(
-    spec.datasource,
-    buildSummaryQuery(table, traceIds, matched.firstMatchMs, matched.lastMatchMs),
-    context,
-    abortSignal,
-  );
+  const summary = await runStatement(spec.datasource, buildSummaryQuery(table, traceIds), context, abortSignal);
   const notices: Notice[] = hasMoreResults
     ? [
         {

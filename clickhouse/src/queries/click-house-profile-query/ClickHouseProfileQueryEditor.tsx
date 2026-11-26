@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack } from '@mui/material';
+import { Alert, Stack } from '@mui/material';
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { isVariableDatasource } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 
 import { ClickHouseDatasourceSelect, QueryExamples, SQLField } from '../../components';
@@ -31,6 +32,11 @@ export function ClickHouseProfileQueryEditor(props: ClickHouseProfileQueryEditor
         onChange={(datasource) => onChange({ ...value, datasource })}
         isReadonly={isReadonly}
       />
+      {isVariableDatasource(value.datasource) && (
+        <Alert severity="error">
+          Dashboard variables are not available to profile queries: select a datasource instead of a variable.
+        </Alert>
+      )}
       <SQLField
         label="ClickHouse Query"
         value={value.query}

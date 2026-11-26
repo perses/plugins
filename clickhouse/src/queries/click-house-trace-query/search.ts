@@ -21,9 +21,6 @@ const NANOS_PER_MILLI = 1_000_000;
 
 export interface MatchedTraces {
   traceIds: string[];
-  /** Time span of the matched spans of these traces, in milliseconds. */
-  firstMatchMs: number;
-  lastMatchMs: number;
   /** True when more traces than the limit match. */
   hasMore: boolean;
 }
@@ -38,21 +35,13 @@ export function readMatchedTraces(response: ClickHouseQueryResponse, limit: numb
   const first = findColumn(columns, ['firstmatch']);
   const last = findColumn(columns, ['lastmatch']);
   const timeZone = getTypeTimeZone(columns[first]?.type ?? '') ?? response.timeZone;
-  const matched: MatchedTraces = {
-    traceIds: [],
-    firstMatchMs: Infinity,
-    lastMatchMs: -Infinity,
-    hasMore: rows.length > limit,
-  };
+  const matched: MatchedTraces = { traceIds: [], hasMore: rows.length > limit };
   for (const row of rows.slice(0, limit)) {
-    const firstMs = toUnixMs(row[first], timeZone);
-    const lastMs = toUnixMs(row[last], timeZone);
-    if (Number.isNaN(firstMs) || Number.isNaN(lastMs)) {
+    // The traces are ordered by their last matched span: it must be a time.
+    if (Number.isNaN(toUnixMs(row[first], timeZone)) || Number.isNaN(toUnixMs(row[last], timeZone))) {
       throw new Error('The "Timestamp" column of a trace search query must be a date/time.');
     }
     matched.traceIds.push(toText(row[traceId]));
-    matched.firstMatchMs = Math.min(matched.firstMatchMs, firstMs);
-    matched.lastMatchMs = Math.max(matched.lastMatchMs, lastMs);
   }
   return matched;
 }

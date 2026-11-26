@@ -15,7 +15,7 @@ import type { VariableStateMap } from '@perses-dev/plugin-system';
 import { parseVariables } from '@perses-dev/plugin-system';
 import type { AbsoluteTimeRange } from '@perses-dev/spec';
 
-import { commentRanges } from './sql';
+import { blankComments, commentRanges, isInRanges, quotedRanges } from './sql';
 
 /**
  * Macros of the ClickHouse queries. Their names and expansions follow the ones of the Grafana ClickHouse datasource,
@@ -65,9 +65,12 @@ export function isMacroName(name: string): boolean {
   return MACRO_NAME_SET.has(name);
 }
 
-/** parseQueryVariables lists the dashboard variables referenced by a query, leaving the macros out. */
+/**
+ * parseQueryVariables lists the dashboard variables referenced by a query, leaving the macros out, and the comments,
+ * where variables are not replaced.
+ */
 export function parseQueryVariables(sql: string): string[] {
-  return parseVariables(sql).filter((name) => !isMacroName(name));
+  return parseVariables(blankComments(sql)).filter((name) => !isMacroName(name));
 }
 
 /**
@@ -122,6 +125,11 @@ function isAllSelected(name: string | undefined, variableState: VariableStateMap
   return state.customAllValue !== undefined || state.displayValue === 'All';
 }
 
+// Writes the UTC date of a time, moved by a number of days, as a ClickHouse date.
+function dateLiteral(date: Date, days: number): string {
+  return `toDate('${new Date(date.getTime() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}')`;
+}
+
 function requireTimeRange(name: MacroName, timeRange: AbsoluteTimeRange | undefined): AbsoluteTimeRange {
   if (!timeRange) {
     throw new Error(`The $${name} macro needs a time range, which is not available for this query`);
@@ -151,8 +159,8 @@ function expandMacro(name: MacroName, args: string[], context: MacroContext): st
   const toSeconds = `toDateTime(${Math.ceil(end.getTime() / 1000)})`;
   const fromMillis = `fromUnixTimestamp64Milli(${start.getTime()})`;
   const toMillis = `fromUnixTimestamp64Milli(${end.getTime()})`;
-  const dateFilter = (column: string | undefined): string =>
-    `${column} >= toDate('${start.toISOString().slice(0, 10)}') AND ${column} <= toDate('${end.toISOString().slice(0, 10)}')`;
+  const dateFilter = (column: string | undefined, marginDays = 0): string =>
+    `${column} >= ${dateLiteral(start, -marginDays)} AND ${column} <= ${dateLiteral(end, marginDays)}`;
   const timeFilter = (column: string | undefined): string =>
     `${column} >= ${fromSeconds} AND ${column} <= ${toSeconds}`;
   switch (name) {
@@ -163,7 +171,9 @@ function expandMacro(name: MacroName, args: string[], context: MacroContext): st
     case '__dateFilter':
       return `(${dateFilter(args[0])})`;
     case '__dateTimeFilter':
-      return `(${dateFilter(args[0])} AND ${timeFilter(args[1])})`;
+      // The dates are in UTC, while the date column may be computed in another time zone, e.g. `toDate(Timestamp)` in
+      // the one of the server. A day more on each side keeps the rows of the time range: the time filter cuts them.
+      return `(${dateFilter(args[0], 1)} AND ${timeFilter(args[1])})`;
     case '__fromTime':
       return fromSeconds;
     case '__toTime':
@@ -176,14 +186,18 @@ function expandMacro(name: MacroName, args: string[], context: MacroContext): st
 }
 
 // Yields the references to macros of a query. The ones in its comments are left out: a comment mentioning a macro
-// must not make the query fail.
+// must not make the query fail. So are the macros taking arguments in its strings, e.g. `LIKE '%$__timeFilter%'`:
+// they write expressions, which have no place in a string. The other ones are values, replaced in strings too, like
+// the dashboard variables.
 function* macroReferences(sql: string): Generator<{ name: MacroName; start: number; end: number }> {
   const comments = commentRanges(sql);
+  const quoted = quotedRanges(sql);
   for (const match of sql.matchAll(MACRO)) {
     const start = match.index;
-    if (!comments.some(([from, to]) => start >= from && start < to)) {
-      yield { name: match[1] as MacroName, start, end: start + match[0].length };
-    }
+    const name = match[1] as MacroName;
+    if (isInRanges(start, comments)) continue;
+    if (ARGUMENT_COUNT[name] !== undefined && isInRanges(start, quoted)) continue;
+    yield { name, start, end: start + match[0].length };
   }
 }
 

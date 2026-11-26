@@ -150,10 +150,9 @@ describe('ClickHouseTraceQuery', () => {
         'LIMIT 3',
       ].join('\n'),
     );
-    // Only the traces within the limit, looked for an hour around the matched spans.
+    // Only the traces within the limit, from all their spans, however far from the matched ones.
     expect(summaryStatement).toContain("WHERE TraceId IN ('t2', 't1')");
-    expect(summaryStatement).toContain('Timestamp >= fromUnixTimestamp64Milli(1767258600000)');
-    expect(summaryStatement).toContain('Timestamp <= fromUnixTimestamp64Milli(1767266405000)');
+    expect(summaryStatement).not.toContain('Timestamp >=');
     expect(summaryStatement).toContain('FROM `otel_traces`');
 
     expect(response.searchResult).toEqual([

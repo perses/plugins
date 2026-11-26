@@ -30,9 +30,11 @@ describe('expandMacros', () => {
   });
 
   it('filters on a date column and a time column', () => {
+    // A day more on each side keeps the rows of a date column computed in another time zone than UTC.
     expect(expandMacros('$__dateTimeFilter(d, t)', context)).toBe(
-      "(d >= toDate('2026-01-01') AND d <= toDate('2026-01-01') AND t >= toDateTime(1767225600) AND t <= toDateTime(1767229201))",
+      "(d >= toDate('2025-12-31') AND d <= toDate('2026-01-02') AND t >= toDateTime(1767225600) AND t <= toDateTime(1767229201))",
     );
+    expect(expandMacros('$__dateFilter(d)', context)).toBe("(d >= toDate('2026-01-01') AND d <= toDate('2026-01-01'))");
   });
 
   it('buckets on the interval and exposes it', () => {
@@ -81,6 +83,12 @@ describe('expandMacros', () => {
     expect(expandMacros("SELECT '--', $__interval_s", context)).toBe("SELECT '--', 60");
   });
 
+  it('leaves the macros taking arguments in strings alone, and replaces the values', () => {
+    expect(expandMacros("WHERE Body LIKE '%$__timeFilter%' AND x = '$__interval_s'", context)).toBe(
+      "WHERE Body LIKE '%$__timeFilter%' AND x = '60'",
+    );
+  });
+
   it('rejects a macro without its arguments', () => {
     expect(() => expandMacros('WHERE $__timeFilter', context)).toThrow('The $__timeFilter macro expects 1 argument');
     expect(() => expandMacros('$__dateTimeFilter(d)', context)).toThrow('expects 2 arguments');
@@ -98,5 +106,9 @@ describe('parseQueryVariables', () => {
     expect(
       parseQueryVariables('WHERE $__timeFilter(t) AND a = $foo AND b IN (${bar:sqlstring}) AND $__interval_s > 1'),
     ).toEqual(['foo', 'bar']);
+  });
+
+  it('leaves out the variables of the comments, which are not replaced', () => {
+    expect(parseQueryVariables('SELECT 1 -- AND a = $foo\nWHERE b = $bar /* $baz */')).toEqual(['bar']);
   });
 });

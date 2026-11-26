@@ -12,35 +12,15 @@
 // limitations under the License.
 
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
-import type { BuiltinVariableDefinition, HTTPAllowedEndpoint } from '@perses-dev/spec';
+import type { BuiltinVariableDefinition } from '@perses-dev/spec';
 
 import { createClickHouseClient } from '../../model/click-house-client';
+import { getQueryMethod, HEALTH_CHECK_PATH } from './allowed-endpoints';
 import type { ClickHouseDatasourceSpec, ClickHouseDatasourceClient } from './click-house-datasource-types';
 import { ClickHouseDatasourceEditor } from './ClickHouseDatasourceEditor';
 
-const QUERY_PATH = '/';
 /** Database of the queries of a datasource that does not name one. */
 export const DEFAULT_DATABASE = 'default';
-
-function allowsQueries(endpoint: HTTPAllowedEndpoint, method: string): boolean {
-  if (endpoint.method.toUpperCase() !== method) return false;
-  try {
-    return new RegExp(endpoint.endpointPattern).test(QUERY_PATH);
-  } catch {
-    // The pattern is a Go regular expression: when JavaScript can not read it, let the proxy decide.
-    return true;
-  }
-}
-
-/**
- * getQueryMethod picks the HTTP method of the queries. They are sent with POST, which has no size limit, unless the
- * proxy of the datasource only lets GET requests through, as the datasources created before POST was used do.
- */
-export function getQueryMethod(allowedEndpoints: HTTPAllowedEndpoint[] | undefined): 'GET' | 'POST' {
-  if (!allowedEndpoints || allowedEndpoints.length === 0) return 'POST';
-  if (allowedEndpoints.some((endpoint) => allowsQueries(endpoint, 'POST'))) return 'POST';
-  return allowedEndpoints.some((endpoint) => allowsQueries(endpoint, 'GET')) ? 'GET' : 'POST';
-}
 
 const createClient: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasourceClient>['createClient'] = (
   spec,
@@ -109,7 +89,7 @@ const getBuiltinVariableDefinitions = (): BuiltinVariableDefinition[] =>
 export const ClickHouseDatasource: DatasourcePlugin<ClickHouseDatasourceSpec, ClickHouseDatasourceClient> = {
   createClient,
   getBuiltinVariableDefinitions,
-  healthCheckPath: '/ping',
+  healthCheckPath: HEALTH_CHECK_PATH,
   OptionsEditorComponent: ClickHouseDatasourceEditor,
   createInitialOptions: () => ({ directUrl: '' }),
 };

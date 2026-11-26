@@ -31,8 +31,10 @@ const HEADER_LINES = 2;
  */
 export const RESPONSE_FORMAT = 'JSONCompactEachRowWithNamesAndTypes';
 
-const READONLY_SETTING_ERROR = /Cannot modify '(\w+)' setting in readonly mode/;
-const SETTING_CONSTRAINT_ERROR = /Code: 452\. DB::Exception: Setting (\w+) /;
+// Errors of ClickHouse refusing a setting, matched on the first exception of a message only: the text of a query,
+// e.g. the message of a `throwIf`, comes after it.
+const READONLY_SETTING_ERROR = /^Code: 164\. DB::Exception: Cannot modify '(\w+)' setting in readonly mode/;
+const SETTING_CONSTRAINT_ERROR = /^Code: 452\. DB::Exception: Setting (\w+) /;
 const EXCEPTION = /Code: (\d+)\. DB::Exception: [^\n]*/;
 const SERVER_VERSION = /\s*\(version [^)]*\(official build\)\)\s*$/;
 const MAX_ERROR_LENGTH = 1000;
@@ -94,44 +96,65 @@ export class ClickHouseError extends Error {
 type Setting = readonly [name: string, value: string];
 
 const ROW_LIMIT = 'max_result_rows';
+// Buffers a bounded result, so that a query failing halfway answers with an error status instead of a cut result.
+const WAIT_END_OF_QUERY = 'wait_end_of_query';
 
 // Settings sent along with a query. A user restricted with `readonly = 1` can not change any, and a settings profile
 // can forbid some: the client then stops sending the ones ClickHouse rejects.
 const QUERY_SETTINGS: readonly Setting[] = [
   ['date_time_output_format', 'iso'],
   ['output_format_json_quote_64bit_integers', '1'],
-  [ROW_LIMIT, String(MAX_ROWS)],
+  // One row more than the client reads: a result cut by ClickHouse always tells that it was cut.
+  [ROW_LIMIT, String(MAX_ROWS + 1)],
   ['result_overflow_mode', 'break'],
+  [WAIT_END_OF_QUERY, '1'],
   ['cancel_http_readonly_queries_on_client_close', '1'],
   ['enable_http_compression', '1'],
 ];
-// Without `result_overflow_mode = break`, a result over `max_result_rows` is an error instead of being cut.
+// Without `result_overflow_mode = break`, a result over `max_result_rows` is an error instead of being cut. Without a
+// row limit, ClickHouse would buffer all of an unbounded result: it is cut by not reading its end instead.
 const ROW_LIMIT_SETTINGS = [ROW_LIMIT, 'result_overflow_mode'];
 // Setting keeping a query sent with POST from writing: it only lets it read data and change settings.
 const GUARD = 'readonly';
 const READ_ONLY_PROBE = "SELECT getSetting('readonly')";
+/**
+ * How long the answer of ClickHouse to the read-only probe is trusted. The user behind a datasource can change, e.g.
+ * when the secret of its proxy is updated: the guard is sent again from time to time, to learn it.
+ */
+export const READ_ONLY_TTL_MS = 5 * 60 * 1000;
 
 /** What the queries of a datasource taught about the settings its ClickHouse user may change. */
 interface SettingsState {
-  /** False once ClickHouse refused a setting to a user that can not change any (`readonly = 1`). */
-  allowed: boolean;
-  /** Settings ClickHouse refused to change. */
+  /** Settings ClickHouse refused to change, because of a settings profile. */
   rejected: Set<string>;
-  /** Whether ClickHouse runs the queries of the user as read-only by itself. Not set until it is asked. */
-  readOnlyUser?: Promise<boolean>;
+  /**
+   * Read-only level of the user, when ClickHouse confirmed that it runs the queries of the user as read-only by
+   * itself, and when it did. Only then do queries go without the guard (`readonly >= 1`), and without any setting
+   * (`readonly = 1`).
+   */
+  readOnly?: { level: number; confirmedAt: number };
+  /** Pending read-only probe, shared by the queries waiting for its answer. */
+  readOnlyProbe?: Promise<number>;
 }
 
-// A client is created for each query: what the first ones learn is kept for the next ones of the same datasource,
-// which would otherwise all be refused once before being sent again.
+// A client is created for each query: what the first ones learn is kept for the next ones of the same datasource and
+// credentials, which would otherwise all be refused once before being sent again.
 const settingsStates = new Map<string, SettingsState>();
 
 function getSettingsState(key: string): SettingsState {
   let state = settingsStates.get(key);
   if (!state) {
-    state = { allowed: true, rejected: new Set() };
+    state = { rejected: new Set() };
     settingsStates.set(key, state);
   }
   return state;
+}
+
+// Read-only level ClickHouse enforces by itself on the queries of the user, as long as it is trusted.
+function readOnlyLevel(state: SettingsState): number {
+  const { readOnly } = state;
+  if (readOnly === undefined || Date.now() - readOnly.confirmedAt >= READ_ONLY_TTL_MS) return 0;
+  return readOnly.level;
 }
 
 function errorText(error: unknown): string {
@@ -176,8 +199,8 @@ async function readLines(response: Response, maxLines: number): Promise<{ text: 
   let text = '';
   let lines = 0;
   let end = 0;
-  while (lines <= maxLines) {
-    // oxlint-disable-next-line no-await-in-loop -- the chunks of a stream are read one after the other.
+  // The chunks of a stream are read one after the other.
+  const readChunk = async (): Promise<{ text: string; truncated: boolean }> => {
     const { done, value } = await reader.read();
     if (done) return { text: text + decoder.decode(), truncated: false };
     const chunk = decoder.decode(value, { stream: true });
@@ -190,10 +213,12 @@ async function readLines(response: Response, maxLines: number): Promise<{ text: 
       if (lines === maxLines) end = text.length + newline;
     }
     text += chunk;
-  }
-  // Closing the response stops ClickHouse from sending the rest.
-  await reader.cancel().catch(() => undefined);
-  return { text: text.slice(0, end), truncated: true };
+    if (lines <= maxLines) return readChunk();
+    // Closing the response stops ClickHouse from sending the rest.
+    await reader.cancel().catch(() => undefined);
+    return { text: text.slice(0, end), truncated: true };
+  };
+  return readChunk();
 }
 
 function parseBody(body: string): { columns: ClickHouseColumn[]; rows: unknown[][] } {
@@ -234,11 +259,17 @@ export function createClickHouseClient(options: ClickHouseClientOptions): ClickH
     ...QUERY_SETTINGS,
     ...(cors ? ([['add_http_cors_header', '1']] as const) : []),
   ];
-  const state = getSettingsState(`${method} ${datasourceUrl} ${JSON.stringify(defaultHeaders ?? {})}`);
+  // What ClickHouse taught about the user sending the queries: the one of their headers.
+  function stateOf(headers: RequestHeaders | undefined): SettingsState {
+    return getSettingsState(`${method} ${datasourceUrl} ${JSON.stringify(headers ?? {})}`);
+  }
 
   // The settings to send with a query, given what ClickHouse refused so far.
-  function allowedSettings(): Setting[] {
-    return state.allowed ? settings.filter(([name]) => !state.rejected.has(name)) : [];
+  function allowedSettings(state: SettingsState): Setting[] {
+    const level = readOnlyLevel(state);
+    // A user that can not change any setting (`readonly = 1`).
+    if (level === 1) return [];
+    return settings.filter(([name]) => !state.rejected.has(name) && !(name === GUARD && level >= 1));
   }
 
   async function send(
@@ -252,10 +283,6 @@ export function createClickHouseClient(options: ClickHouseClientOptions): ClickH
     const queryDatabase = params.database ?? database;
     if (queryDatabase) search.set('database', queryDatabase);
     for (const [name, value] of sent) search.set(name, value);
-    // Buffer the result, so that a query failing halfway answers with an error status instead of a cut result.
-    // Not a result ClickHouse does not bound: it would buffer all of it. Such a result is cut by not reading its
-    // end, and ends with the error of a query failing halfway.
-    if (search.has(ROW_LIMIT)) search.set('wait_end_of_query', '1');
     if (method === 'GET') search.set('query', params.query);
 
     const response = await (customFetch ?? fetch)(url.toString(), {
@@ -271,23 +298,30 @@ export function createClickHouseClient(options: ClickHouseClientOptions): ClickH
     return response;
   }
 
-  // Asks ClickHouse whether it runs the queries of the user as read-only by itself. Only then can queries go
-  // without the guard: it is also refused to a query that tries to lift it, which must not be sent again without it.
-  function isReadOnlyUser(headers: RequestHeaders | undefined): Promise<boolean> {
+  // Asks ClickHouse the read-only level it runs the queries of the user with by itself. Only a read-only user can
+  // send queries without the guard: it is also refused to a query that tries to lift it, or to a query whose error
+  // reads like a refused setting, which must not be sent again without it.
+  function probeReadOnly(state: SettingsState, headers: RequestHeaders | undefined): Promise<number> {
     // Asked once for all the queries waiting for the answer, and without their signals: aborting one of them must
     // not fail the other ones.
-    state.readOnlyUser ??= send({ query: READ_ONLY_PROBE }, headers, [])
-      .then(async (response) => Number(parseBody(await response.text()).rows[0]?.[0]) >= 1)
-      .catch(() => {
-        state.readOnlyUser = undefined;
-        return false;
+    state.readOnlyProbe ??= send({ query: READ_ONLY_PROBE }, headers, [])
+      .then(async (response) => {
+        const level = Number(parseBody(await response.text()).rows[0]?.[0]);
+        if (!Number.isInteger(level) || level < 1) return 0;
+        state.readOnly = { level, confirmedAt: Date.now() };
+        return level;
+      })
+      .catch(() => 0)
+      .finally(() => {
+        state.readOnlyProbe = undefined;
       });
-    return state.readOnlyUser;
+    return state.readOnlyProbe;
   }
 
   // Stops sending the setting ClickHouse refused to a query, if its error is about one of the settings sent with
   // it. It returns false when sending the query again would not help.
   async function dropRefusedSetting(
+    state: SettingsState,
     message: string,
     sent: Setting[],
     headers: RequestHeaders | undefined,
@@ -295,21 +329,20 @@ export function createClickHouseClient(options: ClickHouseClientOptions): ClickH
     const wasSent = (name: string | undefined): name is string =>
       name !== undefined && sent.some(([setting]) => setting === name);
 
-    const readOnly = READONLY_SETTING_ERROR.exec(message)?.[1];
-    const constrained = SETTING_CONSTRAINT_ERROR.exec(message)?.[1];
+    const exception = EXCEPTION.exec(message)?.[0] ?? '';
+    const readOnly = READONLY_SETTING_ERROR.exec(exception)?.[1];
+    const constrained = SETTING_CONSTRAINT_ERROR.exec(exception)?.[1];
     const refused = wasSent(readOnly) ? readOnly : constrained;
     if (!wasSent(refused)) return false;
 
-    if (refused === GUARD) {
-      if (!(await isReadOnlyUser(headers))) return false;
-      state.rejected.add(GUARD);
-    } else if (refused === readOnly) {
-      // Only a user that can not change any setting (`readonly = 1`) is refused another setting than the guard.
-      state.allowed = false;
-    } else {
-      for (const name of ROW_LIMIT_SETTINGS.includes(refused) ? ROW_LIMIT_SETTINGS : [refused]) {
-        state.rejected.add(name);
-      }
+    if (refused === GUARD || refused === readOnly) {
+      // The query is sent with fewer settings only when ClickHouse confirms that it keeps it from writing.
+      const level = await probeReadOnly(state, headers);
+      // A setting other than the guard is only refused to a user that can not change any (`readonly = 1`).
+      return refused === GUARD ? level >= 1 : level === 1;
+    }
+    for (const name of ROW_LIMIT_SETTINGS.includes(refused) ? [...ROW_LIMIT_SETTINGS, WAIT_END_OF_QUERY] : [refused]) {
+      state.rejected.add(name);
     }
     return true;
   }
@@ -320,13 +353,17 @@ export function createClickHouseClient(options: ClickHouseClientOptions): ClickH
     params: ClickHouseQueryParams,
     headers: RequestHeaders | undefined,
   ): Promise<Response> {
-    const sent = allowedSettings();
+    const state = stateOf(headers);
+    const sent = allowedSettings(state);
     try {
       return await send(params, headers, sent);
     } catch (error) {
       if (params.signal?.aborted) throw error;
       const message = errorText(error);
-      if (await dropRefusedSetting(message, sent, headers)) return sendWithAllowedSettings(params, headers);
+      if (await dropRefusedSetting(state, message, sent, headers)) {
+        // Each attempt must send fewer settings, or the query would be refused forever.
+        if (allowedSettings(state).length < sent.length) return sendWithAllowedSettings(params, headers);
+      }
       throw toClickHouseError(message, error);
     }
   }

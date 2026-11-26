@@ -14,8 +14,6 @@
 import { asSubquery, quoteString, quoteTableName } from '../../model/sql';
 
 const ERROR_STATUS = "StatusCode IN ('Error', 'STATUS_CODE_ERROR')";
-// A trace can start before and end after the spans matched by a search. Its spans are looked for around them.
-const TRACE_WINDOW_MS = 60 * 60 * 1000;
 
 /** buildTraceQuery returns the statement reading every span of a trace. */
 export function buildTraceQuery(table: string, traceId: string): string {
@@ -41,14 +39,9 @@ export function buildMatchQuery(searchQuery: string, limit: number): string {
 
 /**
  * buildSummaryQuery returns the statement summarizing traces from all their spans: their root span, time span, and
- * number of spans and errors per service. `firstMatchMs` and `lastMatchMs` are the time span of the matched spans.
+ * number of spans and errors per service.
  */
-export function buildSummaryQuery(
-  table: string,
-  traceIds: string[],
-  firstMatchMs: number,
-  lastMatchMs: number,
-): string {
+export function buildSummaryQuery(table: string, traceIds: string[]): string {
   return [
     'SELECT',
     '  TraceId,',
@@ -62,9 +55,9 @@ export function buildSummaryQuery(
     '  sumMap(map(toString(ServiceName), toUInt64(1))) AS SpanCounts,',
     `  sumMap(map(toString(ServiceName), toUInt64(${ERROR_STATUS}))) AS ErrorCounts`,
     `FROM ${quoteTableName(table)}`,
+    // Not filtered by time, as a trace can start long before and end long after its matched spans: like the lookup
+    // of a trace, it relies on the bloom filter index the exporter creates on TraceId.
     `WHERE TraceId IN (${traceIds.map(quoteString).join(', ')})`,
-    `  AND Timestamp >= fromUnixTimestamp64Milli(${Math.floor(firstMatchMs - TRACE_WINDOW_MS)})`,
-    `  AND Timestamp <= fromUnixTimestamp64Milli(${Math.ceil(lastMatchMs + TRACE_WINDOW_MS)})`,
     'GROUP BY TraceId',
     'ORDER BY StartUnixNano DESC',
   ].join('\n');

@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextField, Typography } from '@mui/material';
+import { Alert, TextField, Typography } from '@mui/material';
 import type { DatasourceEditorProps } from '@perses-dev/plugin-system';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 
+import { allowsConnectionTest, HEALTH_CHECK_PATH } from './allowed-endpoints';
 import type { ClickHouseDatasourceSpec } from './click-house-datasource-types';
 
 export type ClickHouseDatasourceEditorProps = DatasourceEditorProps<ClickHouseDatasourceSpec>;
@@ -77,6 +78,12 @@ export function ClickHouseDatasourceEditor(props: ClickHouseDatasourceEditorProp
         initialSpecDirect={initialSpecDirect}
         initialSpecProxy={initialSpecProxy}
       />
+      {value.proxy && !allowsConnectionTest(value.proxy.spec.allowedEndpoints) && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          The connection test calls <code>GET {HEALTH_CHECK_PATH}</code>, which the allowed endpoints of the proxy do
+          not include: add the <code>^{HEALTH_CHECK_PATH}$</code> pattern with the GET method to test the connection.
+        </Alert>
+      )}
     </>
   );
 }

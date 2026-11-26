@@ -14,7 +14,7 @@
 import type { VariableStateMap } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
 
-import { quoteString } from './sql';
+import { commentRanges, isInRanges, quoteString } from './sql';
 
 // Same references as the Perses variables: `$name`, `${name}`, `${name.path}` and `${name:format}`.
 const VARIABLE_REFERENCE = /\$\w+|\$\{\w+(?:\.[^:}]+)?(?::[^}]+)?\}/g;
@@ -28,9 +28,13 @@ const SQL_STRING_REFERENCE = /^\$\{(\w+):sqlstring\}$/i;
  * a value ending with a backslash would otherwise break out of its literal.
  *
  * References are replaced in a single pass, so that a `$name` sequence inside a value is never interpolated again.
+ * The ones in comments are left as is: a value with a line break or a `*` + `/` sequence would end the comment, and
+ * a commented out filter would run, whatever its format.
  */
 export function interpolateVariables(sql: string, variableState: VariableStateMap): string {
-  return sql.replace(VARIABLE_REFERENCE, (reference) => {
+  const comments = commentRanges(sql);
+  return sql.replace(VARIABLE_REFERENCE, (reference: string, offset: number) => {
+    if (isInRanges(offset, comments)) return reference;
     const name = SQL_STRING_REFERENCE.exec(reference)?.[1];
     if (name === undefined) return replaceVariables(reference, variableState);
     const state = variableState[name];

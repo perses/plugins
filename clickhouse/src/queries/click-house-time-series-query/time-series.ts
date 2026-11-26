@@ -303,6 +303,15 @@ function countSharedSlots(series: TimeSeries[], stepMs: number): number {
  * The step is never so short that charts would fill more slots than they can.
  */
 function chooseStepMs(series: TimeSeries[], first: number, last: number, options: BuildTimeSeriesOptions): number {
+  const stepMs = naturalStepMs(series, options);
+  // A multiple of the step keeps the points that are on its grid on the one of the longer step.
+  const maxSlots = Math.min(MAX_GRID_SLOTS, Math.max(1, Math.floor(MAX_GRID_POINTS / series.length)));
+  const extent = Math.max(options.instant, last) - Math.min(options.rangeStart, first);
+  return stepMs * roundMultiple(extent / (stepMs * maxSlots));
+}
+
+// The step the points of the series are at, before it is stretched to fit the charts.
+function naturalStepMs(series: TimeSeries[], options: BuildTimeSeriesOptions): number {
   const intervals = intervalsOf(series);
   // A single point per series tells nothing.
   if (intervals.length === 0) return options.intervalMs;
@@ -319,12 +328,7 @@ function chooseStepMs(series: TimeSeries[], first: number, last: number, options
     usual !== undefined &&
     usual >= 2 * divisor &&
     countSharedSlots(series, usual) <= intervals.length * SHARED_SLOTS_TOLERANCE;
-  const stepMs = fits ? usual : divisor;
-
-  // A multiple of the step keeps the points that are on its grid on the one of the longer step.
-  const maxSlots = Math.min(MAX_GRID_SLOTS, Math.max(1, Math.floor(MAX_GRID_POINTS / series.length)));
-  const extent = Math.max(options.instant, last) - Math.min(options.rangeStart, first);
-  return stepMs * roundMultiple(extent / (stepMs * maxSlots));
+  return fits ? usual : divisor;
 }
 
 // Moves the points of a series onto the time grid `start + n * stepMs` the charts draw on: its first point to the
@@ -384,38 +388,46 @@ export interface BuiltTimeSeries {
  * - The rows are grouped by the values of their label columns: there is one series per group and value column.
  * - Without label columns, a series is named after its value column. With them, it is named after its labels, and
  *   after its value column too when there are several.
- * - A result without a time column is a table: each row is a point at the end of the time range, and the series
- *   keep the order of the rows.
+ * - A result without a time column is a table: each row is a series of its own, with a single point at the end of
+ *   the time range, and the series keep the order of the rows.
  */
 export function buildTimeSeries(response: ClickHouseQueryResponse, options: BuildTimeSeriesOptions): BuiltTimeSeries {
   const { columns, rows } = response;
   const roles = classifyColumns(columns, response.timeZone);
   const notices: Notice[] = [];
+  const isTable = roles.time === -1;
   const groups = new Map<string, SeriesGroup>();
   // Rows of a series come with the same raw label values: canonicalize the labels once per distinct combination.
   const groupsByRawLabels = new Map<string, SeriesGroup>();
   let skipped = 0;
 
   for (const row of rows) {
-    const timestamp = roles.time === -1 ? options.instant : toUnixMs(row[roles.time], roles.timeZone);
+    const timestamp = isTable ? options.instant : toUnixMs(row[roles.time], roles.timeZone);
     if (Number.isNaN(timestamp)) {
       skipped++;
       continue;
     }
     const rawKey = roles.labels.length === 0 ? '' : JSON.stringify(roles.labels.map((index) => row[index]));
-    let group = groupsByRawLabels.get(rawKey);
+    // The rows of a table are all at the same time: the ones with the same labels are not points of one series.
+    let group = isTable ? undefined : groupsByRawLabels.get(rawKey);
     if (!group) {
       const labels: Labels = {};
       for (const index of roles.labels) {
         addLabels(labels, columns[index]?.name ?? '', row[index]);
       }
       const key = labelsKey(labels);
-      group = groups.get(key);
+      group = isTable ? undefined : groups.get(key);
       if (!group) {
-        group = { labels, key, values: roles.values.map(() => []), histograms: [], exemplars: [] };
-        groups.set(key, group);
+        group = {
+          labels,
+          key,
+          values: roles.values.map(() => []),
+          histograms: [],
+          exemplars: [],
+        };
+        groups.set(isTable ? String(groups.size) : key, group);
       }
-      groupsByRawLabels.set(rawKey, group);
+      if (!isTable) groupsByRawLabels.set(rawKey, group);
     }
     for (let position = 0; position < roles.values.length; position++) {
       group.values[position]?.push([timestamp, toNumber(row[roles.values[position] ?? -1])]);
@@ -446,10 +458,9 @@ export function buildTimeSeries(response: ClickHouseQueryResponse, options: Buil
 
   // The series of a table keep the order of its rows, which the query chose, e.g. to list a top 10. The ones of a
   // time series result are sorted by labels: the order of their first rows changes from one refresh to the next.
-  const sortedGroups =
-    roles.time === -1
-      ? [...groups.values()]
-      : [...groups.values()].toSorted((a, b) => (a.key < b.key ? -1 : Number(a.key > b.key)));
+  const sortedGroups = isTable
+    ? [...groups.values()]
+    : [...groups.values()].toSorted((a, b) => (a.key < b.key ? -1 : Number(a.key > b.key)));
   const hasLabels = roles.labels.length > 0;
   const severalValues = roles.values.length > 1;
   const series: TimeSeries[] = [];
@@ -516,8 +527,9 @@ export function buildTimeSeries(response: ClickHouseQueryResponse, options: Buil
     last = Math.max(last, values.at(-1)?.[0] ?? -Infinity);
   }
   // A table has a single point per series, at the end of the time range: one step spans the whole range.
-  const stepMs =
-    roles.time === -1 ? Math.max(options.instant - options.rangeStart, 1) : chooseStepMs(series, first, last, options);
+  const stepMs = isTable
+    ? Math.max(options.instant - options.rangeStart, 1)
+    : chooseStepMs(series, first, last, options);
 
   // Anchor the time grid on the first point, then extend it back to the start of the time range.
   let start = options.rangeStart;
@@ -596,7 +608,11 @@ export function buildExemplars(response: ClickHouseQueryResponse, series: TimeSe
       };
       groups.set(key, group);
     }
-    group.exemplars.push({ timestamp, value: exemplarValue, labels: exemplarLabels });
+    group.exemplars.push({
+      timestamp,
+      value: exemplarValue,
+      labels: exemplarLabels,
+    });
   }
   for (const group of groups.values()) {
     group.exemplars.sort((a, b) => a.timestamp - b.timestamp);

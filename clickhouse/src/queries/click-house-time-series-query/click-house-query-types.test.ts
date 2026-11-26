@@ -229,6 +229,26 @@ describe('ClickHouseTimeSeriesQuery', () => {
     ]);
   });
 
+  it('should still return the series when the result of their exemplar query is not one of exemplars', async () => {
+    const client = stubClient((sql) =>
+      sql.includes('otel_traces') ? stubResponse([['trace_id', 'String']], [['abc']]) : SERIES,
+    );
+
+    const response = await ClickHouseTimeSeriesQuery.getTimeSeriesData(
+      { query: 'SELECT time, avg_cpu FROM metrics', exemplarQuery: 'SELECT * FROM otel_traces' },
+      createContext(client),
+    );
+
+    expect(response.series).toHaveLength(1);
+    expect(response.exemplars).toBeUndefined();
+    expect(response.metadata?.notices).toEqual([
+      {
+        type: 'warning',
+        message: 'Exemplars are not shown. An exemplar query must return a time column and a numeric "value" column.',
+      },
+    ]);
+  });
+
   it('should not run an empty query', async () => {
     const client = stubClient(() => SERIES);
 

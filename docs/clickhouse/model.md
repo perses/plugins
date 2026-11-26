@@ -24,7 +24,7 @@ spec:
   database: <string> # Optional
 ```
 
-Queries are sent with `POST` on the root path of the HTTP interface, and the connection test calls `GET /ping`: these are the two endpoints a proxy has to allow. A proxy that only allows `GET` on the root path still works: queries are then sent in the URL, which limits their size.
+Queries are sent with `POST` on the root path of the HTTP interface, and the connection test calls `GET /ping`: these are the two endpoints a proxy has to allow. A proxy that only allows `GET` on the root path still works: queries are then sent in the URL, which limits their size. Until it allows `GET ^/ping$` too, the connection test of such a datasource fails, and its editor says so.
 
 The plugin asks ClickHouse to run every query as read-only, but a datasource is only as restricted as its ClickHouse user: use a user that is only granted `SELECT` on the tables to display.
 
