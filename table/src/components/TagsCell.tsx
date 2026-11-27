@@ -45,6 +45,19 @@ function getTagTextColor(theme: Theme, backgroundColor: string): string {
 }
 
 /**
+ * Returns a key per tag that does not depend on its position: the label and its occurrence among tags with the same
+ * label (a value can contain the same tag several times, and different values can have the same label).
+ */
+function withTagKeys(tags: ResolvedTag[]): Array<{ key: string; tag: ResolvedTag }> {
+  const occurrences = new Map<string, number>();
+  return tags.map((tag) => {
+    const occurrence = occurrences.get(tag.label) ?? 0;
+    occurrences.set(tag.label, occurrence + 1);
+    return { key: `${tag.label}#${occurrence}`, tag };
+  });
+}
+
+/**
  * Renders the tags of a table cell as colored chips.
  */
 export function TagsCell({ tags, align }: TagsCellProps): ReactElement {
@@ -61,9 +74,9 @@ export function TagsCell({ tags, align }: TagsCellProps): ReactElement {
       justifyContent={JUSTIFY_CONTENT[align ?? 'left']}
       data-testid="table-tags"
     >
-      {tags.map((tag, index) => (
+      {withTagKeys(tags).map(({ key, tag }) => (
         <Chip
-          key={`${index}-${tag.label}`}
+          key={key}
           size="small"
           label={tag.label}
           data-testid="table-tag"

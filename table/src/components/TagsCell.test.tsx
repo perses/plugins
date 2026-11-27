@@ -35,6 +35,39 @@ describe('TagsCell', () => {
     expect(screen.getByTestId('table-tag')).toHaveStyle({ height: '100%', maxHeight: '24px' });
   });
 
+  it('keeps the tag elements when other tags are removed', () => {
+    const { rerender } = render(
+      <TagsCell
+        tags={[
+          { label: 'a', backgroundColor: '#000000' },
+          { label: 'b', backgroundColor: '#000000' },
+        ]}
+      />,
+    );
+    const tagB = screen.getByText('b').closest('[data-testid="table-tag"]');
+    rerender(<TagsCell tags={[{ label: 'b', backgroundColor: '#000000' }]} />);
+    expect(screen.getByText('b').closest('[data-testid="table-tag"]')).toBe(tagB);
+  });
+
+  it('renders duplicated tags with unique keys', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    render(
+      <TagsCell
+        tags={[
+          { label: 'prod', backgroundColor: '#000000' },
+          { label: 'prod', backgroundColor: '#000000' },
+        ]}
+      />,
+    );
+    expect(screen.getAllByTestId('table-tag')).toHaveLength(2);
+    expect(consoleError).not.toHaveBeenCalledWith(
+      expect.stringContaining('same key'),
+      expect.anything(),
+      expect.anything(),
+    );
+    consoleError.mockRestore();
+  });
+
   it('uses a contrast text color for parseable colors', () => {
     render(<TagsCell tags={[{ label: 'a', backgroundColor: '#000000' }]} />);
     expect(screen.getByTestId('table-tag')).toHaveStyle({ color: '#fff' });
