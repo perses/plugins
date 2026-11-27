@@ -61,11 +61,15 @@ export function getSpanColor(
 }
 
 export function formatDuration(timeMs: number): string {
-  if (timeMs < 1) {
-    return `${Math.round(timeMs * 1000)}μs`;
+  // Round before choosing the unit, so that a value which rounds up to the next unit is shown in that unit
+  // (e.g. 0.9996ms is "1ms", not "1000μs").
+  const timeUs = Math.round(timeMs * 1000);
+  if (timeUs < 1000) {
+    return `${timeUs}μs`;
   }
-  if (timeMs < 1000) {
-    return `${+timeMs.toFixed(2)}ms`;
+  const roundedMs = +timeMs.toFixed(2);
+  if (roundedMs < 1000) {
+    return `${roundedMs}ms`;
   }
   return `${+(timeMs / 1000).toFixed(2)}s`;
 }

@@ -23,6 +23,8 @@ describe('utils', () => {
     [1500, '1.5s'],
     [1550, '1.55s'],
     [1555, '1.55s'],
+    [0.9996, '1ms'],
+    [999.996, '1s'],
   ])('formatDuration(%f)', (x, expected) => {
     expect(formatDuration(x)).toEqual(expected);
   });
