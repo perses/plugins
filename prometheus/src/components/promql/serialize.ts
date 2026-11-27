@@ -18,7 +18,15 @@ import { convertTimeToDuration, formatDuration } from '@perses-dev/spec';
 import type { VectorSelector, StartOrEnd, MatrixSelector } from './ast';
 import type ASTNode from './ast';
 import { matchType, vectorMatchCardinality, nodeType } from './ast';
-import { aggregatorsWithParam, maybeParenthesizeBinopChild, escapeString } from './utils';
+import {
+  aggregatorsWithParam,
+  maybeParenthesizeBinopChild,
+  escapeString,
+  maybeQuoteLabelName,
+  metricContainsExtendedCharset,
+} from './utils';
+
+const labelNameList = (labels: string[]): string => labels.map((ln) => maybeQuoteLabelName(ln)).join(', ');
 
 const serializeAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, offset: number): string => {
   let at = '';
@@ -41,12 +49,18 @@ const serializeAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, 
 const serializeSelector = (node: VectorSelector | MatrixSelector): string => {
   const matchers = node.matchers
     .filter((m) => !(m.name === '__name__' && m.type === matchType.equal && m.value === node.name))
-    .map((m) => `${m.name}${m.type}"${escapeString(m.value)}"`);
+    .map((m) => `${maybeQuoteLabelName(m.name)}${m.type}"${escapeString(m.value)}"`);
+
+  // A metric name outside the legacy character set is written as a quoted name inside the braces.
+  const metricExtendedCharset = metricContainsExtendedCharset(node.name);
+  if (metricExtendedCharset) {
+    matchers.unshift(`"${escapeString(node.name)}"`);
+  }
 
   const range = node.type === nodeType.matrixSelector ? `[${formatDuration(convertTimeToDuration(node.range))}]` : '';
   const atAndOffset = serializeAtAndOffset(node.timestamp, node.startOrEnd, node.offset);
 
-  return `${node.name}${matchers.length > 0 ? `{${matchers.join(',')}}` : ''}${range}${atAndOffset}`;
+  return `${metricExtendedCharset ? '' : node.name}${matchers.length > 0 ? `{${matchers.join(',')}}` : ''}${range}${atAndOffset}`;
 };
 
 const serializeNode = (node: ASTNode, indent = 0, pretty = false, initialIndent = true): string => {
@@ -61,9 +75,9 @@ const serializeNode = (node: ASTNode, indent = 0, pretty = false, initialIndent 
     case nodeType.aggregation: {
       let grouping = '';
       if (node.without) {
-        grouping = ` without(${node.grouping.join(', ')}) `;
+        grouping = ` without(${labelNameList(node.grouping)}) `;
       } else if (node.grouping.length > 0) {
-        grouping = ` by(${node.grouping.join(', ')}) `;
+        grouping = ` by(${labelNameList(node.grouping)}) `;
       }
 
       return `${initialInd}${node.op}${grouping}(${childListSeparator}${
@@ -114,13 +128,13 @@ const serializeNode = (node: ASTNode, indent = 0, pretty = false, initialIndent 
       const vm = node.matching;
       if (vm !== null && (vm.labels.length > 0 || vm.on)) {
         if (vm.on) {
-          matching = ` on(${vm.labels.join(', ')})`;
+          matching = ` on(${labelNameList(vm.labels)})`;
         } else {
-          matching = ` ignoring(${vm.labels.join(', ')})`;
+          matching = ` ignoring(${labelNameList(vm.labels)})`;
         }
 
         if (vm.card === vectorMatchCardinality.manyToOne || vm.card === vectorMatchCardinality.oneToMany) {
-          grouping = ` group_${vm.card === vectorMatchCardinality.manyToOne ? 'left' : 'right'}(${vm.include.join(',')})`;
+          grouping = ` group_${vm.card === vectorMatchCardinality.manyToOne ? 'left' : 'right'}(${vm.include.map((ln) => maybeQuoteLabelName(ln)).join(',')})`;
         }
       }
 
