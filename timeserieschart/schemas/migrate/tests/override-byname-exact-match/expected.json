@@ -1,0 +1,17 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "querySettings": [
+      {
+        "colorMode": "fixed",
+        "colorValue": "#5794f2",
+        "queryIndex": 0
+      },
+      {
+        "colorMode": "fixed",
+        "colorValue": "#b877d9",
+        "queryIndex": 1
+      }
+    ]
+  }
+}

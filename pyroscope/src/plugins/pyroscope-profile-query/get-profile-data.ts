@@ -226,9 +226,11 @@ export function transformTimeline(
   const samples = Array<number>(sampleCount).fill(0);
 
   for (const point of series?.[0]?.points ?? []) {
-    const offsetSeconds = Number(point.timestamp) / MILLISECONDS - startSeconds;
+    const timestampMs = Number(point.timestamp);
+    const offsetSeconds = timestampMs / MILLISECONDS - startSeconds;
     const index = Math.floor(offsetSeconds / stepSeconds);
-    if (index >= 0 && index < samples.length) {
+    // An aligned end point can occupy the slot immediately after the existing samples.
+    if (sampleCount > 0 && timestampMs <= endMs && index >= 0 && index <= sampleCount) {
       samples[index] = point.value;
     }
   }

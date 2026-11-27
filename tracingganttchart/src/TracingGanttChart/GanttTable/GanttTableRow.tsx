@@ -35,6 +35,7 @@ interface GanttTableRowProps {
   nameColumnWidth: number;
   divider: React.ReactNode;
   onClick: (span: Span) => void;
+  onEventClick?: (span: Span, eventIndex: number) => void;
   /** render a checkbox to select the span, if defined */
   checked?: boolean;
   onCheckedChange?: (span: Span) => void;
@@ -52,6 +53,7 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
     nameColumnWidth,
     divider,
     onClick,
+    onEventClick,
     checked,
     onCheckedChange,
   } = props;
@@ -91,7 +93,7 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
         onCheckedChange={onCheckedChange}
       />
       {divider}
-      <SpanDuration options={options} span={span} viewport={viewport} />
+      <SpanDuration options={options} span={span} viewport={viewport} onEventClick={onEventClick} />
     </RowContainer>
   );
 });

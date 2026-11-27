@@ -34,12 +34,24 @@ export interface GanttTableProps {
   viewport: Viewport;
   selectedSpan?: Span;
   onSpanClick: (span: Span) => void;
+  /** called with the index of the event in `span.events` when an event marker is clicked */
+  onEventClick?: (span: Span, eventIndex: number) => void;
   matchingSpanIds?: string[];
   focusedSpanId?: string;
 }
 
 export function GanttTable(props: GanttTableProps): ReactElement {
-  const { options, customLinks, trace, viewport, selectedSpan, onSpanClick, matchingSpanIds, focusedSpanId } = props;
+  const {
+    options,
+    customLinks,
+    trace,
+    viewport,
+    selectedSpan,
+    onSpanClick,
+    onEventClick,
+    matchingSpanIds,
+    focusedSpanId,
+  } = props;
   const { collapsedSpans, setCollapsedSpans, setVisibleSpans } = useGanttTableContext();
   const selection = useSpanSelection(trace, options.selection?.enabled ?? false);
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
@@ -149,6 +161,7 @@ export function GanttTable(props: GanttTableProps): ReactElement {
             nameColumnWidth={nameColumnWidth}
             divider={divider}
             onClick={onSpanClick}
+            onEventClick={onEventClick}
             checked={selection.enabled ? selection.isSelected(span.spanId) : undefined}
             onCheckedChange={selection.toggleSpan}
           />

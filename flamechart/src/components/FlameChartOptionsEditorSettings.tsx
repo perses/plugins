@@ -54,6 +54,8 @@ export function FlameChartOptionsEditorSettings(props: FlameChartOptionsEditorPr
               <TextField
                 type="number"
                 value={value.traceHeight ?? ''}
+                placeholder="0"
+                helperText="Approximate height in px of each stack level. 0 or empty fits all levels in the panel."
                 slotProps={{ htmlInput: { min: 0, step: 1 } }}
                 onChange={handleTraceHeightChange}
               />

@@ -121,7 +121,6 @@ export const FlameChartPanel: FC<FlameChartPanelProps> = (props) => {
     flameChartWidth = 0.6 * contentDimensions.width;
   }
 
-  // TODO (gladorme): allow users to override height (useful for explorer for stack traces with high depth)
   return (
     <Stack
       height={contentDimensions.height}

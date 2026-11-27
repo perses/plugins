@@ -9,6 +9,11 @@ See also technical docs related to this plugin:
 - [Data model](./model.md)
 - [Dashboard-as-Code Go lib](./go-sdk.md)
 
+## Span events
+
+Span events are shown as markers on the span bars, at the time of the event. Hover a marker to see the event name,
+and click it to open the span in the detail pane, with the **Events** tab selected and the event expanded and scrolled into view.
+
 ## Item actions
 
 Item actions let you trigger events or webhooks with the details of a span, for example to open the logs of a span in another plugin or application.

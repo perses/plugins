@@ -39,6 +39,8 @@ const Y_MIN_LARGE = 20; // min value of y axis for large containers
 const LARGE_CONTAINER_THRESHOLD = 600;
 const CONTAINER_PADDING = 10;
 const BREADCRUMB_SPACE = 50;
+const HIDE_THRESHOLD = 0.5; // px, narrower items are not rendered
+const LABEL_THRESHOLD = 20; // px, narrower items get no label
 
 const renderItem: CustomSeriesRenderItem = (params: CustomSeriesRenderItemParams, api: CustomSeriesRenderItemAPI) => {
   const level = api.value(0);
@@ -46,6 +48,7 @@ const renderItem: CustomSeriesRenderItem = (params: CustomSeriesRenderItemParams
   const end = api.coord([api.value(2), level]);
   const height = (((api.size && api.size([0, 1])) || [0, 20]) as number[])[1];
   const width = (end?.[0] ?? 0) - (start?.[0] ?? 0);
+  const text = width >= LABEL_THRESHOLD ? api.value(3) : '';
 
   return {
     type: 'rect',
@@ -70,7 +73,7 @@ const renderItem: CustomSeriesRenderItem = (params: CustomSeriesRenderItemParams
     },
     textContent: {
       style: {
-        text: api.value(3),
+        text,
         fill: '#000',
         width: width - 4,
         overflow: 'truncate',
@@ -164,6 +167,10 @@ export function FlameChart(props: FlameChartProps): ReactElement {
     // compute flame chart padding top and bottom
     const padding = (height / (yAxisMax - 1) - ITEM_GAP) / 2 + 1;
 
+    // HIDE_THRESHOLD converted from px to sample units
+    const minVisibleValue = (((totalEnd ?? 0) - (totalStart ?? 0)) * HIDE_THRESHOLD) / width;
+    const visibleData = seriesData.filter((s) => s.value[2] - s.value[1] >= minVisibleValue);
+
     const option = {
       tooltip: {
         appendToBody: true,
@@ -209,7 +216,7 @@ export function FlameChart(props: FlameChartProps): ReactElement {
             x: [0, 1, 2],
             y: 0,
           },
-          data: seriesData,
+          data: visibleData,
         },
       ],
     };
