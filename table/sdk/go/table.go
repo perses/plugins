@@ -40,6 +40,14 @@ const (
 	RightAlign  Align = "right"
 )
 
+type ColorMode string
+
+const (
+	AutoColorMode    ColorMode = "auto"
+	PaletteColorMode ColorMode = "palette"
+	ManualColorMode  ColorMode = "manual"
+)
+
 type Sort string
 
 const (
@@ -65,7 +73,15 @@ type ColumnSettings struct {
 	Width             float64        `json:"width,omitempty" yaml:"width,omitempty"`
 	Hide              bool           `json:"hide,omitempty" yaml:"hide,omitempty"`
 	CellSettings      []CellSettings `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Tags              *TagsSettings  `json:"tags,omitempty" yaml:"tags,omitempty"`
 	DataLink          *DataLink      `json:"dataLink,omitempty" yaml:"dataLink,omitempty"`
+}
+
+type TagsSettings struct {
+	Delimiter string    `json:"delimiter,omitempty" yaml:"delimiter,omitempty"`
+	ColorMode ColorMode `json:"colorMode,omitempty" yaml:"colorMode,omitempty"`
+	// DefaultColor is only used (and allowed) with ManualColorMode.
+	DefaultColor string `json:"defaultColor,omitempty" yaml:"defaultColor,omitempty"`
 }
 
 type ValueConditionSpec struct {

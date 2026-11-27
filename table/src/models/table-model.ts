@@ -65,8 +65,27 @@ export interface ColumnSettings {
   hide?: boolean;
   // Customize cell display based on their value for this specific column.
   cellSettings?: CellSettings[];
+  /** When set, cells in this column are rendered as tags. */
+  tags?: TagsSettings;
 
   dataLink?: DataLink;
+}
+
+/**
+ * How tags that get no background color from a cell setting are colored:
+ * - `auto`: a color generated from the tag value.
+ * - `palette`: a color of the theme categorical palette, picked from the tag value.
+ * - `manual`: the `defaultColor`.
+ */
+export type TagsColorMode = 'auto' | 'palette' | 'manual';
+
+export interface TagsSettings {
+  /** If set, the cell value is split on this string and each part becomes a tag. */
+  delimiter?: string;
+  /** Defaults to `auto`. */
+  colorMode?: TagsColorMode;
+  /** Background color used by the `manual` color mode. Defaults to a neutral grey. */
+  defaultColor?: `#${string}`;
 }
 
 export interface DataLink {
@@ -257,6 +276,21 @@ export function evaluateCondition(condition: Condition, value: unknown): boolean
 }
 
 /**
+ * Returns the text displayed by default when a Misc condition matches a value that has no text representation.
+ */
+export function getMiscDefaultText(setting: CellSettings): string | undefined {
+  if (setting.condition.kind !== 'Misc') return undefined;
+  switch (setting.condition.spec?.value) {
+    case 'null':
+      return 'null';
+    case 'NaN':
+      return 'NaN';
+    default:
+      return undefined;
+  }
+}
+
+/**
  * Evaluates all conditions and returns the cell config for the first matching condition
  */
 export function evaluateConditionalFormatting(
@@ -266,18 +300,7 @@ export function evaluateConditionalFormatting(
 ): TableCellConfig | undefined {
   for (const setting of settings) {
     if (evaluateCondition(setting.condition, value)) {
-      // Handle special default text cases
-      let defaultText: string | undefined;
-      if (setting.condition.kind === 'Misc') {
-        switch (setting.condition.spec?.value) {
-          case 'null':
-            defaultText = 'null';
-            break;
-          case 'NaN':
-            defaultText = 'NaN';
-            break;
-        }
-      }
+      const defaultText = getMiscDefaultText(setting);
 
       return formatCellDisplay(value, setting, defaultText, columnSetting?.format);
     }

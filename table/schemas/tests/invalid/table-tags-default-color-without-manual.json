@@ -1,0 +1,6 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [{ "name": "tags", "tags": { "colorMode": "palette", "defaultColor": "#9e9e9e" } }]
+  }
+}

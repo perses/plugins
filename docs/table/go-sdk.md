@@ -92,10 +92,20 @@ table.WithColumnSettings([]table.ColumnSettings{
 			Title:      "View details",
 		},
 	},
+	{
+		Name: "tags",
+		Tags: &table.TagsSettings{
+			Delimiter:    ",",
+			ColorMode:    table.ManualColorMode,
+			DefaultColor: "#9e9e9e",
+		},
+	},
 })
 ```
 
 Configure individual columns. Available align options: `LeftAlign`, `CenterAlign`, `RightAlign`. Available sort options: `AscSort`, `DescSort`. `HeaderDescription` configures the header tooltip, `CellDescription` configures the cell tooltip, `Hide` hides the column, and `CellSettings` configures conditional styling and text for cells in the column.
+
+The `Tags` field renders the cell values as colored tags. `Delimiter` splits a value into one tag per part. Tags that get no `BackgroundColor` from `CellSettings` are colored according to `ColorMode`: `AutoColorMode` (default, a color derived from the value), `PaletteColorMode` (a color of the theme categorical palette) or `ManualColorMode` (`DefaultColor`, only allowed with this mode).
 
 The `DataLink` field allows adding a clickable link to cells in the column. It supports variable substitution in the URL (e.g., `${__data.fields["column_name"]}`).
 

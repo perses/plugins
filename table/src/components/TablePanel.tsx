@@ -14,7 +14,7 @@
 import type { Theme } from '@mui/material';
 import { Box, Typography, useTheme } from '@mui/material';
 import type { FormatOptions, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { formatValue, Table, transformData, useSelection } from '@perses-dev/components';
+import { formatValue, Table, transformData, useChartsTheme, useSelection } from '@perses-dev/components';
 import { useSelectionItemActions } from '@perses-dev/dashboards';
 import type { ActionOptions, PanelData, PanelProps, VariableStateMap } from '@perses-dev/plugin-system';
 import { CalculationsMap, replaceVariablesInString, useAllVariableValues } from '@perses-dev/plugin-system';
@@ -26,8 +26,10 @@ import { createPortal } from 'react-dom';
 
 import type { CellSettings, ColumnSettings, TableOptions } from '../models';
 import { evaluateConditionalFormatting } from '../models';
+import { resolveTags } from '../models/tag-colors';
 import { buildRawTableData, getTablePanelQueryMode } from '../table-data-utils';
 import { EmbeddedPanel } from './EmbeddedPanel';
+import { TagsCell } from './TagsCell';
 
 type FilterValuesType<T> = Array<{ original: T; formatted: T }>;
 
@@ -160,6 +162,7 @@ function generateCellContentConfig(
   column: ColumnSettings,
   gaugeRange?: GaugeRange,
   globalCellSettings: CellSettings[] = [],
+  categoricalPalette: string[] = [],
 ): Pick<TableColumnConfig<Record<string, unknown>>, 'cellDescription' | 'cell'> {
   const plugin = column.plugin;
   if (plugin !== undefined) {
@@ -183,6 +186,24 @@ function generateCellContentConfig(
         return <EmbeddedPanel kind={plugin.kind} spec={plugin.spec} queryResults={[panelData]} />;
       },
       cellDescription: column.cellDescription ? (): string => `${column.cellDescription}` : (): string => '', // disable hover text
+    };
+  }
+
+  if (column.tags !== undefined) {
+    return {
+      cell: (ctx): ReactElement => (
+        <TagsCell
+          tags={resolveTags(ctx.getValue(), column, globalCellSettings, categoricalPalette)}
+          align={column.align}
+        />
+      ),
+      // Show the raw value on hover, as the tags can be cut off when they don't fit in the cell
+      cellDescription: column.cellDescription
+        ? (): string => `${column.cellDescription}`
+        : (ctx): string => {
+            const value = ctx.getValue();
+            return value === null || value === undefined ? '' : String(value);
+          },
     };
   }
 
@@ -336,6 +357,7 @@ function generateColumnConfig(
   gaugeRangeByColumn: Record<string, GaugeRange>,
   globalCellSettings: CellSettings[] = [],
   defaultEnableSorting = false,
+  categoricalPalette: string[] = [],
 ): TableColumnConfig<Record<string, unknown>> | undefined {
   for (const column of columnSettings) {
     if (column.name === name) {
@@ -356,7 +378,7 @@ function generateColumnConfig(
         width,
         align,
         dataLink: modifiedDataLink,
-        ...generateCellContentConfig(column, gaugeRangeByColumn[name], globalCellSettings),
+        ...generateCellContentConfig(column, gaugeRangeByColumn[name], globalCellSettings, categoricalPalette),
       };
     }
   }
@@ -528,6 +550,13 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }, [data, keys]);
 
   // Generate columns and map each column accessor to its settings index and data key
+  // Theme categorical palette, used by the tags 'palette' color mode
+  const chartsTheme = useChartsTheme();
+  const categoricalPalette = useMemo((): string[] => {
+    const palette: unknown = chartsTheme.echartsTheme.color;
+    return Array.isArray(palette) ? palette.filter((color): color is string => typeof color === 'string') : [];
+  }, [chartsTheme]);
+
   const columns: Array<TableColumnConfig<Record<string, unknown>>> = useMemo(() => {
     const columns: Array<TableColumnConfig<Record<string, unknown>>> = [];
     const customizedColumns = new Set<string>();
@@ -543,6 +572,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
         gaugeRangeByColumn,
         spec.cellSettings ?? [],
         spec.enableSorting ?? false,
+        categoricalPalette,
       );
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
@@ -561,6 +591,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
             gaugeRangeByColumn,
             spec.cellSettings ?? [],
             spec.enableSorting ?? false,
+            categoricalPalette,
           );
           if (columnConfig !== undefined) {
             columns.push(columnConfig);
@@ -578,6 +609,7 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
     allVariables,
     gaugeRangeByColumn,
     spec.cellSettings,
+    categoricalPalette,
   ]);
 
   // Filtering state — declared before cellConfigs so filteredData is available for cell config evaluation
@@ -631,6 +663,10 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
       for (const [key, value] of Object.entries(extendRow)) {
         const columnSetting = spec.columnSettings?.find((col) => col.name === key);
 
+        // Tag columns resolve their colors per tag (see TagsCell), the cell itself is not formatted
+        if (columnSetting?.tags !== undefined && columnSetting.plugin === undefined) {
+          continue;
+        }
         // First, try to get cell config from global cell settings
         let cellConfig = evaluateConditionalFormatting(value, spec.cellSettings ?? [], columnSetting);
 
