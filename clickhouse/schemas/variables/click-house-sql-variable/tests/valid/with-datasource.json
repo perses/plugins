@@ -1,0 +1,10 @@
+{
+  "kind": "ClickHouseSQLVariable",
+  "spec": {
+    "datasource": {
+      "kind": "ClickHouseDatasource",
+      "name": "clickhouse"
+    },
+    "query": "SELECT DISTINCT SpanName AS value FROM otel_traces WHERE ServiceName IN (${service:sqlstring})"
+  }
+}

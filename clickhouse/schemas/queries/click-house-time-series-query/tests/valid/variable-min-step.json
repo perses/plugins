@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseTimeSeriesQuery",
+  "spec": {
+    "query": "SELECT $__timeInterval(TimeUnix) AS time, avg(Value) AS value FROM otel_metrics_gauge WHERE $__timeFilter(TimeUnix) GROUP BY time ORDER BY time",
+    "minStep": "${resolution}"
+  }
+}

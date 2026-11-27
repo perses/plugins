@@ -1,0 +1,6 @@
+{
+  "kind": "ClickHouseLogQuery",
+  "spec": {
+    "query": "SELECT Timestamp, Body, SeverityText, ServiceName FROM otel_logs WHERE $__timeFilter(Timestamp) ORDER BY Timestamp DESC LIMIT 1000"
+  }
+}

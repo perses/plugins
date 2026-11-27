@@ -1,0 +1,23 @@
+{
+  "kind": "ClickStackDatasource",
+  "spec": {
+    "uiUrl": "https://clickstack.example.com",
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "http://clickstack:8000",
+        "allowedEndpoints": [
+          {
+            "endpointPattern": "^/api/v2/alerts$",
+            "method": "GET"
+          },
+          {
+            "endpointPattern": "^/api/v2$",
+            "method": "GET"
+          }
+        ],
+        "secret": "clickstack-api-key"
+      }
+    }
+  }
+}

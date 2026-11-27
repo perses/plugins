@@ -1,0 +1,6 @@
+{
+  "kind": "ClickStackDatasource",
+  "spec": {
+    "uiUrl": "https://clickstack.example.com"
+  }
+}

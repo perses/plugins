@@ -6,10 +6,10 @@
 import log "github.com/perses/plugins/clickhouse/sdk/go/query/log"
 
 var options []log.Option
-log.ClickHouseLogQuery("SELECT timestamp, level, message FROM logs WHERE level = 'ERROR' ORDER BY timestamp DESC", options...)
+log.ClickHouseLogQuery("SELECT Timestamp, Body, SeverityText FROM otel_logs WHERE $__timeFilter(Timestamp) ORDER BY Timestamp DESC LIMIT 1000", options...)
 ```
 
-Need to provide the SQL query expression and a list of options.
+Need to provide the SQL query expression and a list of options. See [Writing log queries](../queries.md#log-queries).
 
 ## Default options
 
@@ -22,7 +22,7 @@ Need to provide the SQL query expression and a list of options.
 ```golang
 import log "github.com/perses/plugins/clickhouse/sdk/go/query/log"
 
-log.Query("SELECT timestamp, level, message, service FROM application_logs WHERE level IN ('ERROR', 'WARN')")
+log.Query("SELECT Timestamp, Body, SeverityText, ServiceName FROM otel_logs WHERE $__timeFilter(Timestamp) AND SeverityText IN ('ERROR', 'WARN')")
 ```
 
 Define the SQL query expression.
@@ -57,20 +57,15 @@ func main() {
 				logstable.LogsTable(),
 				panel.AddQuery(
 					log.ClickHouseLogQuery(`
-						SELECT 
-							timestamp,
-							level,
-							message,
-							service
-						FROM application_logs 
-						WHERE level = 'ERROR'
-						AND timestamp >= now() - INTERVAL 1 HOUR
-						ORDER BY timestamp DESC
+						SELECT Timestamp, Body, SeverityText, ServiceName
+						FROM otel_logs
+						WHERE $__timeFilter(Timestamp) AND SeverityText = 'ERROR'
+						ORDER BY Timestamp DESC
 						LIMIT 1000
 					`),
 				),
 			),
 		),
 	)
-}```
+}
 ```

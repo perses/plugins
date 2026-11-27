@@ -1,0 +1,7 @@
+{
+  "kind": "ClickHouseProfileQuery",
+  "spec": {
+    "query": "SELECT FunctionNames AS stack FROM otel_profiles",
+    "profileType": "cpu"
+  }
+}

@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './click-house-datasource';
+export * from './click-stack-datasource';

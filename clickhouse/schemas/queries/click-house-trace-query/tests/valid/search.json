@@ -1,0 +1,12 @@
+{
+  "kind": "ClickHouseTraceQuery",
+  "spec": {
+    "datasource": {
+      "kind": "ClickHouseDatasource",
+      "name": "clickhouse"
+    },
+    "query": "SELECT TraceId, Timestamp FROM otel_traces WHERE $__timeFilter(Timestamp) AND StatusCode = 'Error'",
+    "table": "otel.otel_traces",
+    "limit": 50
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "kind": "ClickHouseLogQuery",
+  "spec": {
+    "datasource": {
+      "kind": "ClickHouseDatasource",
+      "name": "clickhouse"
+    },
+    "query": "SELECT * FROM otel_logs WHERE $__timeFilter(Timestamp) ORDER BY Timestamp DESC LIMIT 100"
+  }
+}

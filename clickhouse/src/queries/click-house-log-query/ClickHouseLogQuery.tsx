@@ -12,23 +12,29 @@
 // limitations under the License.
 
 import type { LogQueryPlugin } from '@perses-dev/plugin-system';
-import { parseVariables } from '@perses-dev/plugin-system';
 
+import { queryDependencies } from '../../model/execute-query';
 import type { ClickHouseLogQuerySpec } from './click-house-log-query-types';
 import { ClickHouseLogQueryEditor } from './ClickHouseLogQueryEditor';
 import { getClickHouseLogData } from './get-click-house-log-data';
+import { buildVolumeQuery } from './volume-query';
 
 export const ClickHouseLogQuery: LogQueryPlugin<ClickHouseLogQuerySpec> = {
   getLogData: getClickHouseLogData,
   OptionsEditorComponent: ClickHouseLogQueryEditor,
   createInitialOptions: () => ({ query: '' }),
-  dependsOn: (spec) => {
-    const queryVariables = parseVariables(spec.query);
-    const allVariables = [...new Set(queryVariables)];
+  dependsOn: (spec) => queryDependencies(spec.datasource, spec.query),
+  createVolumeQuery: (spec) => {
+    const query = spec.query?.trim() ? buildVolumeQuery(spec.query) : undefined;
+    if (query === undefined) return null;
     return {
-      variables: allVariables,
+      kind: 'TimeSeriesQuery',
+      spec: {
+        plugin: {
+          kind: 'ClickHouseTimeSeriesQuery',
+          spec: { datasource: spec.datasource, query, seriesNameFormat: '{{level}}' },
+        },
+      },
     };
   },
-  // TODO: Implement proper SQL parsing for volume queries
-  createVolumeQuery: () => null,
 };

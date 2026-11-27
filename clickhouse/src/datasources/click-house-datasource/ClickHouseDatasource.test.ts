@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { allowsConnectionTest, getQueryMethod } from './allowed-endpoints';
 import { ClickHouseDatasource } from './ClickHouseDatasource';
 
 describe('ClickHouseDatasource.createClient', () => {
@@ -19,25 +20,73 @@ describe('ClickHouseDatasource.createClient', () => {
   });
 
   it('uses the custom fetch from options and not the global fetch', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({ data: [] }),
-    });
+    const mockFetch = vi.fn<typeof fetch>(async () => new Response('["a"]\n["UInt8"]\n[1]\n', { status: 200 }));
     const globalFetchSpy = vi.spyOn(globalThis, 'fetch');
 
     const client = ClickHouseDatasource.createClient(
-      { directUrl: 'http://clickhouse.example.com' },
-      { proxyUrl: 'http://proxy:8080', fetch: mockFetch as unknown as typeof fetch },
+      { directUrl: 'http://clickhouse.example.com', database: 'otel' },
+      { proxyUrl: 'http://proxy:8080', fetch: mockFetch },
     );
 
-    await client.query({
-      query: 'SELECT 1',
-      start: '2025-01-01 00:00:00',
-      end: '2025-01-02 00:00:00',
-    });
+    await expect(client.query({ query: 'SELECT 1 AS a' })).resolves.toMatchObject({ rows: [[1]] });
 
     expect(mockFetch).toHaveBeenCalled();
     expect(globalFetchSpy).not.toHaveBeenCalled();
+    const url = new URL(String(mockFetch.mock.calls[0]?.[0]));
+    expect(url.origin).toBe('http://clickhouse.example.com');
+    expect(url.searchParams.get('database')).toBe('otel');
+    // The browser calls ClickHouse directly: it needs the CORS headers.
+    expect(url.searchParams.get('add_http_cors_header')).toBe('1');
+  });
+
+  it('reads the tables of the "default" database unless the datasource names another one', async () => {
+    const mockFetch = vi.fn<typeof fetch>(async () => new Response('["a"]\n["UInt8"]\n[1]\n', { status: 200 }));
+    const client = ClickHouseDatasource.createClient({}, { proxyUrl: '/proxy/globaldatasources/ch', fetch: mockFetch });
+
+    await client.query({ query: 'SELECT 1 AS a' });
+
+    expect(new URL(String(mockFetch.mock.calls[0]?.[0])).searchParams.get('database')).toBe('default');
+  });
+
+  it('fails without a URL', () => {
+    expect(() => ClickHouseDatasource.createClient({}, {})).toThrow(/No URL specified/);
+  });
+});
+
+describe('getQueryMethod', () => {
+  it('sends queries with POST when the proxy lets them through', () => {
+    expect(getQueryMethod(undefined)).toBe('POST');
+    expect(getQueryMethod([])).toBe('POST');
+    expect(
+      getQueryMethod([
+        { endpointPattern: '^/$', method: 'POST' },
+        { endpointPattern: '^/ping$', method: 'GET' },
+      ]),
+    ).toBe('POST');
+  });
+
+  it('keeps sending them with GET through a proxy that only allows it', () => {
+    expect(getQueryMethod([{ endpointPattern: '/', method: 'GET' }])).toBe('GET');
+    // POST is allowed, but not on the path of the queries.
+    expect(
+      getQueryMethod([
+        { endpointPattern: '^/$', method: 'GET' },
+        { endpointPattern: '^/write$', method: 'POST' },
+      ]),
+    ).toBe('GET');
+  });
+});
+
+describe('allowsConnectionTest', () => {
+  it('tells whether the proxy lets the connection test through', () => {
+    expect(allowsConnectionTest(undefined)).toBe(true);
+    expect(
+      allowsConnectionTest([
+        { endpointPattern: '^/$', method: 'POST' },
+        { endpointPattern: '^/ping$', method: 'GET' },
+      ]),
+    ).toBe(true);
+    // The datasources created before the connection test only allow the queries.
+    expect(allowsConnectionTest([{ endpointPattern: '^/$', method: 'GET' }])).toBe(false);
   });
 });

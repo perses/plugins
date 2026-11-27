@@ -11,4 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './ClickHouseDatasourceSelect';
 export * from './ClickQLEditor';
+export * from './DraftTextField';
+export * from './QueryExamples';
+export * from './SQLField';
+export * from './use-draft-text';

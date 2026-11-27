@@ -1,0 +1,148 @@
+[
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "e2e-clickhouse"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "ClickHouseDatasource",
+        "spec": {
+          "database": "otel",
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "http://clickhouse.invalid:8123",
+              "allowedEndpoints": [
+                {
+                  "endpointPattern": "^/$",
+                  "method": "POST"
+                },
+                {
+                  "endpointPattern": "^/ping$",
+                  "method": "GET"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "clickhouse",
+      "project": "e2eproject"
+    },
+    "spec": {
+      "display": {
+        "name": "ClickHouse"
+      },
+      "duration": "1h",
+      "variables": [
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "service",
+            "allowAllValue": false,
+            "allowMultiple": true,
+            "defaultValue": ["checkout"],
+            "plugin": {
+              "kind": "ClickHouseSQLVariable",
+              "spec": {
+                "query": "SELECT DISTINCT ServiceName FROM otel_traces WHERE $__timeFilter(Timestamp) ORDER BY ServiceName"
+              }
+            }
+          }
+        }
+      ],
+      "panels": {
+        "requests": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Requests"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {
+                "legend": {
+                  "position": "bottom",
+                  "mode": "list"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "ClickHouseTimeSeriesQuery",
+                    "spec": {
+                      "query": "SELECT $__timeInterval(Timestamp) AS time, ServiceName, count() AS requests FROM otel_traces WHERE $__timeFilter(Timestamp) AND ServiceName IN (${service:sqlstring}) GROUP BY time, ServiceName ORDER BY time",
+                      "seriesNameFormat": "requests of {{ServiceName}}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "logs": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Logs"
+            },
+            "plugin": {
+              "kind": "LogsTable",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "LogQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "ClickHouseLogQuery",
+                    "spec": {
+                      "query": "SELECT Timestamp, Body, SeverityText, ServiceName FROM otel_logs WHERE $__timeFilter(Timestamp) ORDER BY Timestamp DESC LIMIT 100"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/requests"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/logs"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

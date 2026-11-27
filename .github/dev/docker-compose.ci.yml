@@ -1,6 +1,6 @@
 services:
   perses:
-    image: persesdev/perses:main-2026-02-26-739dc289-distroless-debug
+    image: persesdev/perses:main-2026-11-26-4d10594e-distroless-debug
     container_name: perses
     network_mode: host
     environment:

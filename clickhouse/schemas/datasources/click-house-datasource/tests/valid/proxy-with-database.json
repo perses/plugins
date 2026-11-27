@@ -1,0 +1,23 @@
+{
+  "kind": "ClickHouseDatasource",
+  "spec": {
+    "database": "otel",
+    "proxy": {
+      "kind": "HTTPProxy",
+      "spec": {
+        "url": "http://clickhouse:8123",
+        "allowedEndpoints": [
+          {
+            "endpointPattern": "^/$",
+            "method": "POST"
+          },
+          {
+            "endpointPattern": "^/ping$",
+            "method": "GET"
+          }
+        ],
+        "secret": "clickhouse"
+      }
+    }
+  }
+}

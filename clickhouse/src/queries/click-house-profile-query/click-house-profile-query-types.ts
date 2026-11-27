@@ -11,13 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { LogData, TimeSeriesData } from '@perses-dev/spec';
+import type { ClickHouseQuerySpec } from '../../model/execute-query';
 
-export interface ClickHouseTimeSeriesData extends TimeSeriesData {
-  logs?: LogData;
-}
-
-export interface TimeSeriesEntry {
-  time: string;
-  [key: string]: number | string | null | undefined;
-}
+export type ClickHouseProfileQuerySpec = ClickHouseQuerySpec;

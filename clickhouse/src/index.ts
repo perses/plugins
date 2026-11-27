@@ -14,3 +14,6 @@
 export { getPluginModule } from './getPluginModule';
 export * from './queries';
 export * from './datasources';
+export * from './variables';
+export * from './annotations';
+export * from './explore';

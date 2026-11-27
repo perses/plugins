@@ -20,9 +20,16 @@ export default createConfigForPlugin({
   },
   moduleFederation: {
     exposes: {
-      './ClickHouseDatasource': './src/datasources/click-house-datasource',
-      './ClickHouseTimeSeriesQuery': './src/queries/click-house-time-series-query',
-      './ClickHouseLogQuery': './src/queries/click-house-log-query',
+      './ClickHouseDatasource': './src/datasources/click-house-datasource/ClickHouseDatasource.tsx',
+      './ClickHouseTimeSeriesQuery': './src/queries/click-house-time-series-query/ClickHouseQuery.tsx',
+      './ClickHouseLogQuery': './src/queries/click-house-log-query/ClickHouseLogQuery.tsx',
+      './ClickHouseTraceQuery': './src/queries/click-house-trace-query/ClickHouseTraceQuery.tsx',
+      './ClickHouseProfileQuery': './src/queries/click-house-profile-query/ClickHouseProfileQuery.tsx',
+      './ClickHouseSQLVariable': './src/variables/click-house-sql-variable/ClickHouseSQLVariable.tsx',
+      './ClickHouseSQLAnnotation': './src/annotations/click-house-sql-annotation/ClickHouseSQLAnnotation.tsx',
+      './ClickStackDatasource': './src/datasources/click-stack-datasource/ClickStackDatasource.tsx',
+      './ClickStackAlertsQuery': './src/queries/click-stack-alerts-query/ClickStackAlertsQuery.tsx',
+      './ClickHouseExplorer': './src/explore/ClickHouseExplorer.tsx',
     },
     shared: {
       react: { requiredVersion: '^18.3.0 || ^19.0.0', singleton: true },

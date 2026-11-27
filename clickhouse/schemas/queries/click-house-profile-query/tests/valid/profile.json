@@ -1,0 +1,10 @@
+{
+  "kind": "ClickHouseProfileQuery",
+  "spec": {
+    "datasource": {
+      "kind": "ClickHouseDatasource",
+      "name": "clickhouse"
+    },
+    "query": "SELECT Timestamp AS time, FunctionNames AS stack, length(TimestampsUnixNano) AS value FROM otel_profiles WHERE $__timeFilter(Timestamp)"
+  }
+}

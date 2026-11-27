@@ -11,46 +11,79 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Alert, TextField, Typography } from '@mui/material';
+import type { DatasourceEditorProps } from '@perses-dev/plugin-system';
 import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 
+import { allowsConnectionTest, HEALTH_CHECK_PATH } from './allowed-endpoints';
 import type { ClickHouseDatasourceSpec } from './click-house-datasource-types';
 
-export interface ClickHouseDatasourceEditorProps {
-  value: ClickHouseDatasourceSpec;
-  onChange: (next: ClickHouseDatasourceSpec) => void;
-  isReadonly?: boolean;
-}
+export type ClickHouseDatasourceEditorProps = DatasourceEditorProps<ClickHouseDatasourceSpec>;
+
+const initialSpecDirect: ClickHouseDatasourceSpec = {
+  directUrl: '',
+};
+
+const initialSpecProxy: ClickHouseDatasourceSpec = {
+  proxy: {
+    kind: 'HTTPProxy',
+    spec: {
+      allowedEndpoints: [
+        // Queries. The plugin sends them with `readonly=2`, but only the grants of the ClickHouse user are a guarantee:
+        // connect with a read-only user.
+        {
+          endpointPattern: '^/$',
+          method: 'POST',
+        },
+        // Connection test
+        {
+          endpointPattern: '^/ping$',
+          method: 'GET',
+        },
+      ],
+      url: '',
+    },
+  },
+};
 
 export function ClickHouseDatasourceEditor(props: ClickHouseDatasourceEditorProps): ReactElement {
-  const { value, onChange, isReadonly } = props;
-
-  const initialSpecDirect: ClickHouseDatasourceSpec = {
-    directUrl: '',
-  };
-
-  const initialSpecProxy: ClickHouseDatasourceSpec = {
-    proxy: {
-      kind: 'HTTPProxy',
-      spec: {
-        allowedEndpoints: [
-          {
-            endpointPattern: '/',
-            method: 'GET',
-          },
-        ],
-        url: '',
-      },
-    },
-  };
+  const { value, onChange, isReadonly, testConnection } = props;
 
   return (
-    <HTTPSettingsEditor
-      value={value}
-      onChange={onChange}
-      isReadonly={isReadonly}
-      initialSpecDirect={initialSpecDirect}
-      initialSpecProxy={initialSpecProxy}
-    />
+    <>
+      <Typography variant="h4" mb={2}>
+        General Settings
+      </Typography>
+      <TextField
+        size="small"
+        fullWidth
+        label="Default database"
+        value={value.database ?? ''}
+        placeholder="default"
+        slotProps={{
+          input: { readOnly: isReadonly },
+          // Above the field, so that the placeholder is visible.
+          inputLabel: { shrink: true },
+        }}
+        onChange={(event) => onChange({ ...value, database: event.target.value || undefined })}
+        helperText="Database of the tables that queries do not qualify, e.g. the one holding the OpenTelemetry tables. Leave it empty to use the database named default."
+        sx={{ mb: 2 }}
+      />
+      <HTTPSettingsEditor
+        value={value}
+        onChange={onChange}
+        isReadonly={isReadonly}
+        testConnection={testConnection}
+        initialSpecDirect={initialSpecDirect}
+        initialSpecProxy={initialSpecProxy}
+      />
+      {value.proxy && !allowsConnectionTest(value.proxy.spec.allowedEndpoints) && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          The connection test calls <code>GET {HEALTH_CHECK_PATH}</code>, which the allowed endpoints of the proxy do
+          not include: add the <code>^{HEALTH_CHECK_PATH}$</code> pattern with the GET method to test the connection.
+        </Alert>
+      )}
+    </>
   );
 }

@@ -16,12 +16,36 @@ import { useTheme, InputLabel, Stack } from '@mui/material';
 import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import CodeMirror from '@uiw/react-codemirror';
 import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
-export type ClickQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
+export type ClickQLEditorProps = Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> & {
+  /** Label displayed above the editor. */
+  label?: string;
+};
+
+const BASIC_SETUP: ReactCodeMirrorProps['basicSetup'] = {
+  highlightActiveLine: false,
+  highlightActiveLineGutter: false,
+  foldGutter: false,
+  syntaxHighlighting: true,
+};
+
+const EXTENSIONS = [
+  EditorView.lineWrapping,
+  EditorView.theme({
+    '.cm-content': {
+      paddingTop: '8px',
+      paddingBottom: '8px',
+      paddingRight: '40px',
+    },
+  }),
+];
 
 export function ClickQLEditor(props: ClickQLEditorProps): ReactElement {
+  const { label = 'ClickHouse Query', ...editorProps } = props;
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  // The editor is reconfigured each time its extensions change: keep them stable.
+  const extensions = useMemo(() => [...EXTENSIONS, EditorView.contentAttributes.of({ 'aria-label': label })], [label]);
 
   return (
     <Stack position="relative">
@@ -32,29 +56,15 @@ export function ClickQLEditor(props: ClickQLEditorProps): ReactElement {
           color: theme.palette.text.primary,
         }}
       >
-        ClickHouse Query
+        {label}
       </InputLabel>
       <CodeMirror
-        {...props}
-        style={{ border: `1px solid ${theme.palette.divider}` }}
-        theme={isDarkMode ? 'dark' : 'light'}
-        basicSetup={{
-          highlightActiveLine: false,
-          highlightActiveLineGutter: false,
-          foldGutter: false,
-          syntaxHighlighting: true,
-        }}
-        extensions={[
-          EditorView.lineWrapping,
-          EditorView.theme({
-            '.cm-content': {
-              paddingTop: '8px',
-              paddingBottom: '8px',
-              paddingRight: '40px',
-            },
-          }),
-        ]}
         placeholder="Write ClickHouse Query Here..."
+        {...editorProps}
+        style={{ border: `1px solid ${theme.palette.divider}` }}
+        theme={theme.palette.mode === 'dark' ? 'dark' : 'light'}
+        basicSetup={BASIC_SETUP}
+        extensions={extensions}
       />
     </Stack>
   );

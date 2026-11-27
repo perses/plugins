@@ -34,3 +34,12 @@ func HTTPProxy(url string, options ...http.Option) Option {
 		return nil
 	}
 }
+
+// Database sets the database the unqualified table names of the queries are read from, e.g. the one holding the
+// OpenTelemetry tables. It defaults to the database named "default".
+func Database(database string) Option {
+	return func(builder *Builder) error {
+		builder.Database = database
+		return nil
+	}
+}
