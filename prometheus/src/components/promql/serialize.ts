@@ -112,14 +112,17 @@ const serializeNode = (node: ASTNode, indent = 0, pretty = false, initialIndent 
       let matching = '';
       let grouping = '';
       const vm = node.matching;
-      if (vm !== null && (vm.labels.length > 0 || vm.on)) {
+      const groupModifier =
+        vm !== null && (vm.card === vectorMatchCardinality.manyToOne || vm.card === vectorMatchCardinality.oneToMany);
+      // group_left / group_right must follow on() or ignoring(), even when the label list is empty.
+      if (vm !== null && (vm.labels.length > 0 || vm.on || groupModifier)) {
         if (vm.on) {
           matching = ` on(${vm.labels.join(', ')})`;
         } else {
           matching = ` ignoring(${vm.labels.join(', ')})`;
         }
 
-        if (vm.card === vectorMatchCardinality.manyToOne || vm.card === vectorMatchCardinality.oneToMany) {
+        if (groupModifier) {
           grouping = ` group_${vm.card === vectorMatchCardinality.manyToOne ? 'left' : 'right'}(${vm.include.join(',')})`;
         }
       }
