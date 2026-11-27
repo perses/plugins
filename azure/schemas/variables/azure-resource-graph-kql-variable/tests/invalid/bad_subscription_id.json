@@ -1,0 +1,13 @@
+{
+  "kind": "AzureResourceGraphKqlVariable",
+  "spec": {
+    "datasource": {
+      "kind": "AzureResourceManagerDatasource",
+      "name": "my-datasource"
+    },
+    "kqlQuery": "Resources | project name, type",
+    "subscriptions": ["not-a-uuid"],
+    "managementGroups": ["my-management-group"],
+    "valueColumnName": "type"
+  }
+}

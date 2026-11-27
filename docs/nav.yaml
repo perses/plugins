@@ -23,6 +23,18 @@
             - Alerts Query: alertmanager/go-sdk/alerts-query.md
             - Silences Query: alertmanager/go-sdk/silences-query.md
             - Alert Table: alertmanager/go-sdk/alert-table.md
+    - Azure:
+        - Overview: azure/README.md
+        - Model: azure/model.md
+        - Go SDK:
+            - Datasource:
+                - Regional Metrics: azure/go-sdk/datasource/regional-metrics.md
+                - Resource Manager: azure/go-sdk/datasource/resource-manager.md
+            - Query:
+                - Metrics Batch: azure/go-sdk/query/metrics-batch.md
+                - Resource Graph KQL: azure/go-sdk/query/resource-graph-kql.md
+            - Variable:
+                - Resource Graph KQL: azure/go-sdk/variable/resource-graph-kql.md
     - ClickHouse:
         - Overview: clickhouse/README.md
         - Model: clickhouse/model.md

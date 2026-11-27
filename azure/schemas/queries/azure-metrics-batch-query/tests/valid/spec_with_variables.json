@@ -1,0 +1,14 @@
+{
+  "kind": "AzureMetricsBatchQuery",
+  "spec": {
+    "datasource": {
+      "kind": "AzureRegionalMetricsDatasource",
+      "name": "my-datasource"
+    },
+    "subscriptionId": "${variable}",
+    "resourceIds": ["${variable2:csv}"],
+    "metricNamespace": "Microsoft.Compute/virtualMachines",
+    "metricNames": ["Percentage CPU"],
+    "filter": "${variable3}"
+  }
+}

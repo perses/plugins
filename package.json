@@ -30,6 +30,7 @@
   },
   "workspaces": [
     "alertmanager",
+    "azure",
     "barchart",
     "canvas",
     "clickhouse",
