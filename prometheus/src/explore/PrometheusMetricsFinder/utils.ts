@@ -121,7 +121,7 @@ export function useLabelValues(
 
   return useQuery<LabelValuesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['labelValues', labelName, 'datasource', datasource.name, 'start', start, 'end', 'filters', ...filters],
+    queryKey: ['labelValues', labelName, 'datasource', datasource.name, 'start', start, 'end', end, 'filters', ...filters],
     queryFn: async () => {
       const params: LabelValuesRequestParameters = {
         labelName: labelName,
@@ -166,7 +166,7 @@ export function useSeriesStates(
     error,
   } = useQuery<SeriesResponse, StatusError>({
     enabled: !!client,
-    queryKey: ['series', metricName, 'datasource', datasource, 'start', start, 'end', 'filters', ...filters],
+    queryKey: ['series', metricName, 'datasource', datasource, 'start', start, 'end', end, 'filters', ...filters],
     queryFn: async () => {
       const params: SeriesRequestParameters = {
         'match[]': [`{${computeFilterExpr(filters)}}`],
