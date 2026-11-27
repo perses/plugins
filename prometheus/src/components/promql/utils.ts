@@ -80,6 +80,11 @@ export const getNodeChildren = (node: ASTNode): ASTNode[] => {
 
 export const aggregatorsWithParam = ['topk', 'bottomk', 'quantile', 'count_values', 'limitk', 'limit_ratio'];
 
+// Escapes a string for a double-quoted PromQL string. A raw line break would end the string literal with a syntax
+// error, so line breaks are escaped as well (like upstream Prometheus).
 export const escapeString = (str: string): string => {
-  return str.replace(/([\\"])/g, '\\$1');
+  return str
+    .replace(/([\\"])/g, '\\$1')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
 };
