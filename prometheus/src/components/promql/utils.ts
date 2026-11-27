@@ -83,3 +83,15 @@ export const aggregatorsWithParam = ['topk', 'bottomk', 'quantile', 'count_value
 export const escapeString = (str: string): string => {
   return str.replace(/([\\"])/g, '\\$1');
 };
+
+// Metric and label names outside the legacy character sets (UTF-8 names such as "service.name") must be quoted.
+const metricNameRe = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
+const labelNameCharsetRe = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+export const metricContainsExtendedCharset = (str: string): boolean => {
+  return str !== '' && !metricNameRe.test(str);
+};
+
+export const maybeQuoteLabelName = (str: string): string => {
+  return labelNameCharsetRe.test(str) ? str : `"${escapeString(str)}"`;
+};
