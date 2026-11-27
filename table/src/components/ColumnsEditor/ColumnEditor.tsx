@@ -20,7 +20,6 @@ import {
   OptionsEditorColumn,
   OptionsEditorControl,
   OptionsEditorGrid,
-  OptionsColorPicker,
   OptionsEditorGroup,
   SortSelectorButtons,
 } from '@perses-dev/components';
@@ -28,22 +27,16 @@ import { PluginKindSelect } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 
-import type { ColumnSettings, TagsColorMode, TagsSettings } from '../../models';
-import { DEFAULT_MANUAL_TAG_COLOR, normalizeHexColor } from '../../models/tag-colors';
+import type { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
 import { DataLinkEditor } from './DataLinkEditorDialog';
 import { EmbeddedPanelOptionsEditor } from './EmbeddedPanelOptionsEditor';
+import { TagsSettingsEditor } from './TagsSettingsEditor';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
   shortValues: true,
 };
-
-const TAGS_COLOR_MODES: Array<{ mode: TagsColorMode; label: string }> = [
-  { mode: 'auto', label: 'Auto' },
-  { mode: 'palette', label: 'Palette' },
-  { mode: 'manual', label: 'Manual' },
-];
 
 type CellDisplayMode = 'text' | 'tags' | 'visualization';
 
@@ -103,40 +96,6 @@ export function ColumnEditor({
       case 'visualization':
         onChange({ ...rest, plugin: { kind: 'GaugeChart', spec: {} } });
         break;
-    }
-  }
-
-  function handleTagsChange(tags: TagsSettings): void {
-    onChange({ ...column, tags });
-  }
-
-  function handleDelimiterChange(delimiter: string): void {
-    const { delimiter: _delimiter, ...rest } = column.tags ?? {};
-    handleTagsChange(delimiter ? { ...rest, delimiter } : rest);
-  }
-
-  function handleColorModeChange(colorMode: TagsColorMode): void {
-    // defaultColor is only used by the manual color mode, auto is the default color mode
-    const { colorMode: _colorMode, defaultColor, ...rest } = column.tags ?? {};
-    if (colorMode === 'auto') {
-      handleTagsChange(rest);
-    } else if (colorMode === 'manual') {
-      handleTagsChange(defaultColor ? { ...rest, colorMode, defaultColor } : { ...rest, colorMode });
-    } else {
-      handleTagsChange({ ...rest, colorMode });
-    }
-  }
-
-  function handleDefaultColorChange(color: string | undefined): void {
-    const { defaultColor: _defaultColor, ...rest } = column.tags ?? {};
-    if (color === undefined) {
-      handleTagsChange(rest);
-      return;
-    }
-    // The color picker accepts hex colors without the leading '#', which the schema rejects
-    const defaultColor = normalizeHexColor(color);
-    if (defaultColor) {
-      handleTagsChange({ ...rest, defaultColor });
     }
   }
 
@@ -269,53 +228,7 @@ export function ColumnEditor({
             ) : (
               <>
                 {column.tags && (
-                  <>
-                    <OptionsEditorControl
-                      label="Delimiter"
-                      control={
-                        <TextField
-                          size="small"
-                          placeholder="e.g. ,"
-                          value={column.tags.delimiter ?? ''}
-                          onChange={(e) => handleDelimiterChange(e.target.value)}
-                        />
-                      }
-                    />
-                    <OptionsEditorControl
-                      label="Color mode"
-                      control={
-                        // Wrapped so the buttons keep their own accessible names
-                        <Stack direction="row" justifyContent="flex-end">
-                          <ButtonGroup aria-label="Color mode" size="small">
-                            {TAGS_COLOR_MODES.map(({ mode, label }) => (
-                              <Button
-                                key={mode}
-                                variant={(column.tags?.colorMode ?? 'auto') === mode ? 'contained' : 'outlined'}
-                                onClick={() => handleColorModeChange(mode)}
-                              >
-                                {label}
-                              </Button>
-                            ))}
-                          </ButtonGroup>
-                        </Stack>
-                      }
-                    />
-                    {column.tags.colorMode === 'manual' && (
-                      <OptionsEditorControl
-                        label="Default tag color"
-                        control={
-                          <Stack direction="row" justifyContent="flex-end">
-                            <OptionsColorPicker
-                              label="Default tag color"
-                              color={column.tags.defaultColor ?? DEFAULT_MANUAL_TAG_COLOR}
-                              onColorChange={(color) => handleDefaultColorChange(color)}
-                              onClear={column.tags.defaultColor ? () => handleDefaultColorChange(undefined) : undefined}
-                            />
-                          </Stack>
-                        }
-                      />
-                    )}
-                  </>
+                  <TagsSettingsEditor tags={column.tags} onChange={(tags) => onChange({ ...column, tags })} />
                 )}
                 <FormatControls
                   value={column.format ?? DEFAULT_FORMAT}
