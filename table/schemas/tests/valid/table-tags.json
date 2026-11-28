@@ -1,0 +1,18 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "tags",
+        "tags": { "delimiter": ",", "colorMode": "manual", "defaultColor": "#9e9e9e" },
+        "cellSettings": [
+          { "condition": { "kind": "Value", "spec": { "value": "critical" } }, "backgroundColor": "#d32f2f" }
+        ]
+      },
+      { "name": "env", "tags": {} },
+      { "name": "team", "tags": { "colorMode": "palette" } },
+      { "name": "region", "tags": { "colorMode": "auto" } },
+      { "name": "severity", "tags": { "colorMode": "manual" } }
+    ]
+  }
+}

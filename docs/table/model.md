@@ -26,6 +26,7 @@ enableSorting: <boolean> # Optional
 sort: <enum = "asc" | "desc"> # Optional
 width: <anyOf = number | "auto"> # Optional
 hide: <boolean> # Optional
+tags: <Tags specification> # Optional
 dataLink: <Data Link specification> # Optional
 ```
 
@@ -36,6 +37,25 @@ url: <string> # Required. Supports variable substitution (e.g., ${__data.fields[
 title: <string> # Optional
 openNewTab: <boolean> # Required
 ```
+
+## Tags specification
+
+When set, the column's cells are rendered as colored tags. Each tag gets the background color of the first matching
+column cell setting, then of the first matching global cell setting, otherwise a color from `colorMode`.
+
+```yaml
+delimiter: <string> # Optional. Split the value on this string, one tag per non-empty trimmed part
+colorMode: <enum = "auto" | "palette" | "manual"> # Optional. Default: "auto"
+defaultColor: <string> # Optional (hex color format). Only allowed with colorMode "manual". Default: "#9e9e9e"
+```
+
+- `auto`: a color derived from the tag value.
+- `palette`: a color of the theme categorical palette, derived from the tag value.
+- `manual`: the `defaultColor`.
+
+- Cell settings are evaluated against each tag, and their `text`, `prefix` and `suffix` apply to the tag label.
+- The column `format` only applies to numeric values when no `delimiter` is set.
+- Empty or null values render no tag, unless a cell setting matches them (e.g. a `Misc` condition on `null`).
 
 ## Cell Settings specification
 

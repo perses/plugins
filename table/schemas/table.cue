@@ -48,6 +48,14 @@ spec: close({
 	width?:             number | "auto"
 	hide?:              bool
 	cellSettings?: [...#cellSettings]
+	tags?: {
+		delimiter?: strings.MinRunes(1)
+		colorMode?: "auto" | "palette" | "manual"
+		// defaultColor is only used (and allowed) with the manual color mode
+		if colorMode != _|_ if colorMode == "manual" {
+			defaultColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+		}
+	}
 	dataLink?: {
 		url:        string
 		title?:     string

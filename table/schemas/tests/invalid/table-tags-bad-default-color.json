@@ -1,0 +1,6 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [{ "name": "tags", "tags": { "colorMode": "manual", "defaultColor": "red" } }]
+  }
+}

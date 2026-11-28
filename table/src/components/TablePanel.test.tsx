@@ -23,6 +23,7 @@ import type { ReactElement } from 'react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
 import type { TableOptions, TimeSeriesTableProps } from '../models';
+import { getPaletteColor } from '../models/tag-colors';
 import {
   MOCK_MULTI_QUERY_DATA_EMPTY,
   MOCK_MULTI_QUERY_DATA_Q1,
@@ -628,6 +629,136 @@ describe('TablePanel', () => {
         await waitFor(() => expect(observedElements.has(newHeaderRow)).toBe(true));
         expect(observedElements.has(initialHeaderRow)).toBe(false);
         expect(getFirstFilterCell().style.width).toBe('150px');
+      },
+      TEST_TIMEOUT,
+    );
+  });
+  describe('tags', () => {
+    it(
+      'renders a single tag per cell without delimiter',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, { columnSettings: [{ name: 'env', tags: {} }] });
+        const cell = await screen.findByTestId('0_env');
+        const tags = within(cell).getAllByTestId('table-tag');
+        expect(tags).toHaveLength(1);
+        expect(tags[0]).toHaveTextContent('demo');
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'splits on delimiter and drops empty parts',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          columnSettings: [{ name: 'device', tags: { delimiter: '/' } }],
+        });
+        const tags = within(await screen.findByTestId('0_device')).getAllByTestId('table-tag');
+        expect(tags.map((t) => t.textContent)).toEqual(['dev', 'vda1']);
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'global cell settings color the tag, not the cell',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          cellSettings: [
+            { condition: { kind: 'Value', spec: { value: 'demo' } }, text: 'DEMO', backgroundColor: '#ff0000' },
+          ],
+          columnSettings: [{ name: 'env', tags: {} }],
+        });
+        const cell = await screen.findByTestId('0_env');
+        const tag = within(cell).getByTestId('table-tag');
+        expect(tag).toHaveTextContent('DEMO');
+        expect(tag).toHaveStyle({ backgroundColor: '#ff0000' });
+        // The cell background is applied on the inner element, not on the <td>
+        expect(cell.querySelector('[id="original-cell"]')).not.toHaveStyle({ backgroundColor: '#ff0000' });
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'keeps conditional formatting on non-tag columns',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          cellSettings: [{ condition: { kind: 'Value', spec: { value: 'demo' } }, text: 'DEMO' }],
+          columnSettings: [{ name: 'device', tags: {} }],
+        });
+        const cell = await screen.findByTestId('0_env');
+        expect(cell).toHaveTextContent('DEMO');
+        expect(within(cell).queryByTestId('table-tag')).not.toBeInTheDocument();
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'global background-only rule paints the tag, not the cell',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          cellSettings: [{ condition: { kind: 'Value', spec: { value: 'demo' } }, backgroundColor: '#ff0000' }],
+          columnSettings: [{ name: 'env', tags: {} }],
+        });
+        const cell = await screen.findByTestId('0_env');
+        expect(within(cell).getByTestId('table-tag')).toHaveStyle({ backgroundColor: '#ff0000' });
+        expect(cell.querySelector('[id="original-cell"]')).not.toHaveStyle({ backgroundColor: '#ff0000' });
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'applies the column alignment to tags',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, { columnSettings: [{ name: 'env', tags: {}, align: 'right' }] });
+        const cell = await screen.findByTestId('0_env');
+        expect(within(cell).getByTestId('table-tags')).toHaveStyle({ justifyContent: 'flex-end' });
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'colors tags from the theme palette in palette color mode',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          columnSettings: [{ name: 'env', tags: { colorMode: 'palette' } }],
+        });
+        const palette = testChartsTheme.echartsTheme.color as string[];
+        expect(palette.length).toBeGreaterThan(0);
+        const tag = within(await screen.findByTestId('0_env')).getByTestId('table-tag');
+        expect(tag).toHaveStyle({ backgroundColor: getPaletteColor('demo', palette) });
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'plugin wins over tags',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          columnSettings: [{ name: 'value', tags: {}, plugin: { kind: 'GaugeChart', spec: {} } }],
+        });
+        const cell = await screen.findByTestId('0_value');
+        expect(within(cell).queryByTestId('table-tag')).not.toBeInTheDocument();
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'uses the column cell description on hover when set',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          columnSettings: [{ name: 'device', tags: { delimiter: '/' }, cellDescription: 'Device path' }],
+        });
+        expect(await screen.findByTestId('0_device')).toHaveAttribute('title', 'Device path');
+      },
+      TEST_TIMEOUT,
+    );
+
+    it(
+      'shows the raw value on hover',
+      async () => {
+        renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+          columnSettings: [{ name: 'device', tags: { delimiter: '/' } }],
+        });
+        expect(await screen.findByTestId('0_device')).toHaveAttribute('title', '/dev/vda1');
       },
       TEST_TIMEOUT,
     );

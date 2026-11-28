@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { StackProps } from '@mui/material';
-import { Button, ButtonGroup, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Stack, Switch, TextField, Typography } from '@mui/material';
 import type { FormatOptions } from '@perses-dev/components';
 import {
   AlignSelector,
@@ -21,6 +21,7 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  SettingsAutocomplete,
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
@@ -31,11 +32,26 @@ import type { ColumnSettings } from '../../models';
 import { ConditionalPanel } from '../ConditionalPanel';
 import { DataLinkEditor } from './DataLinkEditorDialog';
 import { EmbeddedPanelOptionsEditor } from './EmbeddedPanelOptionsEditor';
+import { TagsSettingsEditor } from './TagsSettingsEditor';
 
 const DEFAULT_FORMAT: FormatOptions = {
   unit: 'decimal',
   shortValues: true,
 };
+
+type CellDisplayMode = 'text' | 'tags' | 'visualization';
+
+function getCellDisplayMode(column: ColumnSettings): CellDisplayMode {
+  if (column.plugin) return 'visualization';
+  if (column.tags) return 'tags';
+  return 'text';
+}
+
+const CELL_DISPLAY_OPTIONS: Array<{ id: CellDisplayMode; label: string; description: string }> = [
+  { id: 'text', label: 'Text', description: 'Show the formatted value as plain text' },
+  { id: 'tags', label: 'Tags', description: 'Split the value by a delimiter and show each part as a colored tag' },
+  { id: 'visualization', label: 'Visualization', description: 'Render a panel, such as a gauge, inside the cell' },
+];
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
@@ -64,6 +80,24 @@ export function ColumnEditor({
       return;
     }
     onChange({ ...column, enableSorting: checked });
+  }
+
+  const displayMode = getCellDisplayMode(column);
+
+  function handleDisplayModeChange(mode: CellDisplayMode): void {
+    if (mode === displayMode) return;
+    const { plugin: _plugin, tags: _tags, ...rest } = column;
+    switch (mode) {
+      case 'text':
+        onChange(rest);
+        break;
+      case 'tags':
+        onChange({ ...rest, tags: column.tags ?? {} });
+        break;
+      case 'visualization':
+        onChange({ ...rest, plugin: { kind: 'GaugeChart', spec: {} } });
+        break;
+    }
   }
 
   return (
@@ -153,26 +187,12 @@ export function ColumnEditor({
             <OptionsEditorControl
               label="Cell display"
               control={
-                <Stack spacing={1}>
-                  <ButtonGroup aria-label="Cell display" size="small">
-                    <Button
-                      variant={!column.plugin ? 'contained' : 'outlined'}
-                      onClick={() => onChange({ ...column, plugin: undefined })}
-                    >
-                      Text
-                    </Button>
-                    <Button
-                      variant={column.plugin ? 'contained' : 'outlined'}
-                      onClick={() => onChange({ ...column, plugin: { kind: 'GaugeChart', spec: {} } })}
-                    >
-                      Visualization
-                    </Button>
-                  </ButtonGroup>
-                  <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 360 }}>
-                    Visualizations reuse panel settings (thresholds, units, colors). Text mode uses value formatting
-                    below.
-                  </Typography>
-                </Stack>
+                <SettingsAutocomplete
+                  value={CELL_DISPLAY_OPTIONS.find((option) => option.id === displayMode)}
+                  options={CELL_DISPLAY_OPTIONS}
+                  onChange={(_, option) => handleDisplayModeChange(option.id)}
+                  disableClearable
+                />
               }
             />
             {column.plugin ? (
@@ -188,15 +208,20 @@ export function ColumnEditor({
                 }
               />
             ) : (
-              <FormatControls
-                value={column.format ?? DEFAULT_FORMAT}
-                onChange={(newFormat): void =>
-                  onChange({
-                    ...column,
-                    format: newFormat,
-                  })
-                }
-              />
+              <>
+                {column.tags && (
+                  <TagsSettingsEditor tags={column.tags} onChange={(tags) => onChange({ ...column, tags })} />
+                )}
+                <FormatControls
+                  value={column.format ?? DEFAULT_FORMAT}
+                  onChange={(newFormat): void =>
+                    onChange({
+                      ...column,
+                      format: newFormat,
+                    })
+                  }
+                />
+              </>
             )}
             <OptionsEditorControl
               label="Alignment"

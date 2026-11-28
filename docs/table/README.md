@@ -32,6 +32,37 @@ columnSettings:
 
 Some visualizations like `GaugeChart` have their customization options fully supported through the form. For the others, you can still provide customization with direct JSON editing.
 
+## Tags
+
+Table columns can render their values as colored tags. This is configured with `tags` in `columnSettings`, and is
+useful to identify specific values at a glance, like a status, an environment or a severity. When `delimiter` is set,
+a value like `prod,eu,critical` is split into one tag per part.
+
+Each tag gets the background color of the first matching cell setting of the column, then of the first matching global
+cell setting. Tags without one are colored according to `colorMode`:
+
+- `auto` (default): a color derived from the tag value, so the same value always has the same color.
+- `palette`: a color of the theme categorical palette (the one used by charts), also derived from the tag value.
+- `manual`: the `defaultColor`, or a neutral grey when it is not set.
+
+```yaml
+columnSettings:
+  - name: "tags"
+    tags:
+      delimiter: ","
+      colorMode: "manual"
+      defaultColor: "#9e9e9e"
+    cellSettings:
+      - condition:
+          kind: "Value"
+          spec:
+            value: "critical"
+        backgroundColor: "#d32f2f"
+```
+
+To display several columns as tags in a single column, build the delimited value in the query, for example with the
+PromQL `label_join` function.
+
 ## Cell links
 The cell link feature turns static tables into powerful navigation hubs. By pulling cell values and variables directly into your URLs, you can build context-aware links that bridge your dashboards with other workflows.
 
