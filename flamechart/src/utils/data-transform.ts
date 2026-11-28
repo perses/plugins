@@ -49,9 +49,11 @@ export function filterStackTraceById(trace: StackTrace, id: number | undefined):
   return recur(trace, id) ?? trace;
 }
 
-// build the name of the corresponding flamechart item
-function formatName(item: StackTrace, rootVal: number, unit: string | undefined): string {
-  return (item.total / rootVal) * 100 < 1 ? '' : item.name + ` (${formatItemValue(unit, item.total)})`;
+const IMPORT_PATH = /^(?:[\w.-]+\/)*(?=[\w.-]+\/v\d+\.)|^(?:[\w.-]+\/)+/;
+
+// build the label of a flamechart item, without the import path (github.com/org/pkg/foo.Bar -> foo.Bar)
+function formatName(item: StackTrace, unit: string | undefined): string {
+  return item.name.replace(IMPORT_PATH, '') + ` (${formatItemValue(unit, item.total)})`;
 }
 
 /**
@@ -100,7 +102,7 @@ export function buildSamples(
         item.level,
         item.start,
         item.end,
-        formatName(item, currentVal ? currentVal : rootVal, metadata?.units),
+        formatName(item, metadata?.units),
         (item.total / rootVal) * 100,
         (item.self / rootVal) * 100,
         item.name,

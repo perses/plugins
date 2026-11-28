@@ -18,6 +18,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { CustomLinks, TracingGanttChartOptions } from '../gantt-chart-model';
 import { DetailPane } from './DetailPane/DetailPane';
+import type { FocusedSpanEvent } from './DetailPane/SpanEvents';
 import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
@@ -58,7 +59,20 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   // the span ID is stored instead of the span, as a refreshed trace model contains new span objects
   const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>(options.selectedSpanId);
   const selectedSpan = selectedSpanId ? trace.spanById.get(selectedSpanId) : undefined;
-  const handleSpanClick = useCallback((span: Span) => setSelectedSpanId(span.spanId), []);
+  const [focusedEvent, setFocusedEvent] = useState<FocusedSpanEvent | undefined>(undefined);
+  const handleSpanClick = useCallback((span: Span) => {
+    setSelectedSpanId(span.spanId);
+    setFocusedEvent(undefined);
+  }, []);
+  const handleEventClick = useCallback((span: Span, eventIndex: number) => {
+    setSelectedSpanId(span.spanId);
+    setFocusedEvent({ spanId: span.spanId, eventIndex });
+  }, []);
+  const handleCloseDetailPane = useCallback(() => {
+    setSelectedSpanId(undefined);
+    setFocusedEvent(undefined);
+  }, []);
+  const handleClearFocusedEvent = useCallback(() => setFocusedEvent(undefined), []);
   const search = useSpanSearch(trace);
 
   const itemActions =
@@ -88,6 +102,7 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
             viewport={viewport}
             selectedSpan={selectedSpan}
             onSpanClick={handleSpanClick}
+            onEventClick={handleEventClick}
             matchingSpanIds={search.matchingSpanIds}
             focusedSpanId={search.matchingSpanIds[search.focusedMatchIndex]}
           />
@@ -109,7 +124,9 @@ export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
               span={selectedSpan}
               actions={itemActions}
               actionItem={selectedSpanActionItem}
-              onCloseBtnClick={() => setSelectedSpanId(undefined)}
+              focusedEvent={focusedEvent}
+              onClearFocusedEvent={handleClearFocusedEvent}
+              onCloseBtnClick={handleCloseDetailPane}
             />
           </Box>
         </>

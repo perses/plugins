@@ -131,8 +131,7 @@ export const getSplunkLogData: LogQueryPlugin<SplunkLogQuerySpec>['getLogData'] 
       await new Promise((resolve) => setTimeout(resolve, 500));
       jobStatus = await client.getJobStatus(jobId);
       if (!jobStatus || !jobStatus.entry?.[0]?.content) {
-        console.warn('Failed to get job status or job status response is malformed', { jobStatus });
-        break;
+        throw new Error(`Splunk job ${jobId} returned a malformed status response`);
       }
     } while (!jobStatus.entry?.[0]?.content?.isDone);
 

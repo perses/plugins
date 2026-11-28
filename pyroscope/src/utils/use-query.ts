@@ -96,20 +96,22 @@ export function useProfileTypes(
         return profileTypesResponse;
       }
 
+      // Match on the full profile type ID rather than the profile name: services written in other languages can expose
+      // profile types with the same name (e.g. Go and Java "block" or "mutex" profiles only differ by period type).
       const labelValuesResponse = await client!.searchLabelValues(
         {},
         { 'content-type': 'application/json' },
         {
-          name: '__name__',
+          name: '__profile_type__',
           matchers: [`{service_name="${service}"}`],
           start: start * MILLISECONDS,
           end: end * MILLISECONDS,
         },
       );
-      const profileTypeNames = new Set(labelValuesResponse.names);
+      const profileTypeIDs = new Set(labelValuesResponse.names);
 
       return {
-        profileTypes: profileTypesResponse.profileTypes.filter((profileType) => profileTypeNames.has(profileType.name)),
+        profileTypes: profileTypesResponse.profileTypes.filter((profileType) => profileTypeIDs.has(profileType.ID)),
       };
     },
   });
