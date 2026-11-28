@@ -43,7 +43,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
 
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
-  const { setTimeRange } = useTimeRange();
+  const { absoluteTimeRange, setTimeRange } = useTimeRange();
   const chartRef = useRef<EChartsInstance | undefined>(undefined);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -97,13 +97,21 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
     };
 
     const timeLine: Timeline = data.timeline || ({} as Timeline);
+    const sampleCount = timeLine.samples.length;
+    const lastSampleMs = (timeLine.startTime + (sampleCount - 1) * timeLine.durationDelta) * 1000;
+    const nextSlotMs = (timeLine.startTime + sampleCount * timeLine.durationDelta) * 1000;
+    // Follow the selected end without clipping the last sample or extending past its slot.
+    const maxTimeMs =
+      sampleCount > 0
+        ? Math.min(nextSlotMs, Math.max(lastSampleMs, absoluteTimeRange.end.getTime()))
+        : timeLine.startTime * 1000;
 
     const option: EChartsCoreOption = {
       series: seriesMapping,
       xAxis: {
         type: 'time',
         min: timeLine.startTime * 1000,
-        max: (timeLine.startTime + timeLine.samples.length * timeLine.durationDelta) * 1000,
+        max: maxTimeMs,
         axisLabel: {
           hideOverlap: true,
         },
@@ -164,7 +172,7 @@ export function SeriesChart(props: SeriesChartProps): ReactElement {
     };
 
     return option;
-  }, [data.timeline, data.metadata, seriesData, theme]);
+  }, [absoluteTimeRange, data.timeline, data.metadata, seriesData, theme]);
 
   const seriesChart = useMemo(
     () => (

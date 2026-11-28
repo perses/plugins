@@ -206,9 +206,16 @@ spec: {
 			}
 			for override in (*#panel.fieldConfig.overrides | [])
 			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp" || override.matcher.id == "byFrameRefID") && override.matcher.options != _|_
+			// byName is an exact match. The regexp is only evaluated for byRegexp with a legendFormat: an invalid regexp or
+			// a null legendFormat in any operand of && or || would fail the whole migration.
+			let matched = [
+				if override.matcher.id == "byName" {(*target.legendFormat | null) == override.matcher.options},
+				if override.matcher.id == "byRegexp" if (*target.legendFormat | null) != null {target.legendFormat =~ strings.Trim(override.matcher.options, "/")},
+				if override.matcher.id == "byFrameRefID" {(*target.refId | null) == override.matcher.options},
+				false,
+			][0]
 			for property in override.properties
-			if (override.matcher.id == "byName" || override.matcher.id == "byRegexp") && ((*target.legendFormat | null) == override.matcher.options || (*target.legendFormat | null) =~ strings.Trim(override.matcher.options, "/")) ||
-				(override.matcher.id == "byFrameRefID" && (*target.refId | null) == override.matcher.options) {
+			if matched {
 				if property.id == "color" if (*property.value.fixedColor | null) != null {
 					colorMode:  "fixed"
 					colorValue: *commonMigrate.#mapping.color[property.value.fixedColor] | property.value.fixedColor

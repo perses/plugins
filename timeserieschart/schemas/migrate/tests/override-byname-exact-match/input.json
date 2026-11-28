@@ -1,0 +1,66 @@
+{
+  "type": "timeseries",
+  "title": "Load",
+  "targets": [
+    {
+      "refId": "A",
+      "expr": "node_load5",
+      "legendFormat": "5m"
+    },
+    {
+      "refId": "B",
+      "expr": "node_load15",
+      "legendFormat": "15m"
+    }
+  ],
+  "fieldConfig": {
+    "defaults": {},
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "5m"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "blue",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "15m"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "purple",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "rate(5m"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "red",
+              "mode": "fixed"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

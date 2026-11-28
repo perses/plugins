@@ -16,7 +16,7 @@ import { VariableProvider } from '@perses-dev/dashboards';
 import { ReactRouterProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import type * as otlptracev1 from '@perses-dev/spec/dist/dashboard/query-type/otlp/trace/v1/trace';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
@@ -93,5 +93,42 @@ describe('TracingGanttChart', () => {
     expect(listener).toHaveBeenCalledTimes(1);
     const detail = JSON.parse((listener.mock.calls[0]![0] as CustomEvent<string>).detail);
     expect(detail).toMatchObject({ id: 'sid2', data: { span: { status: { message: 'Not found' } } } });
+  });
+
+  it('opens the events tab with the focused event when clicking an event marker', async () => {
+    // not implemented by jsdom
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    try {
+      render(
+        <Providers>
+          <TracingGanttChart options={{}} trace={exampleTrace as otlptracev1.TracesData} />
+        </Providers>,
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Event event1_name' }));
+
+      expect(screen.getByRole('tab', { name: /Events/ })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByText('event1_value')).toBeInTheDocument();
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+
+      // Focusing the already-expanded event scrolls it into view without another transition.
+      fireEvent.click(screen.getByRole('button', { name: 'Event event1_name' }));
+      expect(scrollIntoView).toHaveBeenCalledTimes(2);
+
+      // Changing tabs clears focus, so returning to Events does not reopen the event.
+      fireEvent.click(screen.getByRole('tab', { name: 'Attributes' }));
+      fireEvent.click(screen.getByRole('tab', { name: /Events/ }));
+      expect(screen.queryByText('event1_value')).not.toBeInTheDocument();
+
+      // Clicking the marker again focuses the event again.
+      fireEvent.click(screen.getByRole('button', { name: 'Event event1_name' }));
+      expect(screen.getByRole('tab', { name: /Events/ })).toHaveAttribute('aria-selected', 'true');
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(3));
+    } finally {
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+    }
   });
 });

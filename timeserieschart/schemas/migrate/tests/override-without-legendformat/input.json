@@ -1,0 +1,45 @@
+{
+  "type": "timeseries",
+  "title": "Up",
+  "targets": [
+    {
+      "refId": "A",
+      "expr": "up"
+    }
+  ],
+  "fieldConfig": {
+    "defaults": {},
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "up"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "blue",
+              "mode": "fixed"
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byRegexp",
+          "options": "/up/"
+        },
+        "properties": [
+          {
+            "id": "color",
+            "value": {
+              "fixedColor": "purple",
+              "mode": "fixed"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

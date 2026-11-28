@@ -22,6 +22,7 @@ import type { SpanActionItem } from '../span-actions';
 import type { Span, Trace } from '../trace';
 import { TraceAttributes } from './Attributes';
 import { SpanActionButtons } from './SpanActionButtons';
+import type { FocusedSpanEvent } from './SpanEvents';
 import { SpanEventList } from './SpanEvents';
 import { SpanLinkList } from './SpanLinks';
 
@@ -35,6 +36,9 @@ export interface DetailPaneProps {
   actions?: ItemAction[];
   /** data of the span passed to the item actions, required to display the actions */
   actionItem?: SpanActionItem;
+  /** event to show in the events tab, e.g. after clicking an event marker in the timeline */
+  focusedEvent?: FocusedSpanEvent;
+  onClearFocusedEvent: () => void;
   onCloseBtnClick: () => void;
 }
 
@@ -42,8 +46,18 @@ export interface DetailPaneProps {
  * DetailPane renders a sidebar showing the span attributes etc.
  */
 export function DetailPane(props: DetailPaneProps): ReactElement {
-  const { customLinks, trace, span, actions, actionItem, onCloseBtnClick } = props;
-  const [tab, setTab] = useState<'attributes' | 'events' | 'links'>('attributes');
+  const { customLinks, trace, span, actions, actionItem, onClearFocusedEvent, onCloseBtnClick } = props;
+  const focusedEvent = props.focusedEvent?.spanId === span.spanId ? props.focusedEvent : undefined;
+  const [tab, setTab] = useState<'attributes' | 'events' | 'links'>(focusedEvent ? 'events' : 'attributes');
+
+  // switch to the events tab when an event gets focused
+  const [prevFocusedEvent, setPrevFocusedEvent] = useState(focusedEvent);
+  if (focusedEvent !== prevFocusedEvent) {
+    setPrevFocusedEvent(focusedEvent);
+    if (focusedEvent) {
+      setTab('events');
+    }
+  }
 
   // if the events tab is selected, and then a span without events is clicked,
   // we need to switch the current selected tab back to the attributes tab.
@@ -70,7 +84,14 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
         </Stack>
       ) : null}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tab} onChange={(_, tab) => setTab(tab)} variant="scrollable">
+        <Tabs
+          value={tab}
+          onChange={(_, nextTab) => {
+            setTab(nextTab);
+            onClearFocusedEvent();
+          }}
+          variant="scrollable"
+        >
           <Tab sx={{ p: 0 }} value="attributes" label="Attributes" />
           {span.events.length > 0 && (
             <Tab
@@ -93,7 +114,9 @@ export function DetailPane(props: DetailPaneProps): ReactElement {
         </Tabs>
       </Box>
       {tab === 'attributes' && <TraceAttributes customLinks={customLinks} trace={trace} span={span} />}
-      {tab === 'events' && <SpanEventList customLinks={customLinks} trace={trace} span={span} />}
+      {tab === 'events' && (
+        <SpanEventList customLinks={customLinks} trace={trace} span={span} focusedEvent={focusedEvent} />
+      )}
       {tab === 'links' && <SpanLinkList customLinks={customLinks} span={span} />}
     </Box>
   );

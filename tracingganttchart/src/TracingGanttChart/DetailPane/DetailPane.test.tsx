@@ -50,6 +50,7 @@ function renderComponent(actions?: ItemAction[], fetchFn: typeof fetch = fetch):
                     span={span}
                     actions={actions}
                     actionItem={actionItem}
+                    onClearFocusedEvent={noop}
                     onCloseBtnClick={noop}
                   />
                 </ItemActionsProvider>
