@@ -1,0 +1,17 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "legend": {
+      "position": "bottom",
+      "mode": "list"
+    },
+    "yAxis": {
+      "axisCenteredZero": true
+    },
+    "visual": {
+      "lineWidth": 1,
+      "areaOpacity": 0,
+      "display": "line"
+    }
+  }
+}

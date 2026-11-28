@@ -1,0 +1,34 @@
+{
+  "id": 2,
+  "type": "timeseries",
+  "title": "Centered zero off",
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "axisCenteredZero": false,
+        "drawStyle": "line",
+        "lineWidth": 1,
+        "fillOpacity": 0,
+        "stacking": {
+          "mode": "none",
+          "group": "A"
+        }
+      }
+    },
+    "overrides": []
+  },
+  "targets": [
+    {
+      "expr": "metric_one",
+      "legendFormat": "one",
+      "refId": "A"
+    }
+  ],
+  "options": {
+    "legend": {
+      "showLegend": true,
+      "displayMode": "list",
+      "placement": "bottom"
+    }
+  }
+}

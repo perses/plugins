@@ -274,6 +274,26 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
   return max;
 }
 
+// centeredZeroExtent is the half-range that puts zero in the middle of one axis.
+// ECharts passes the data extent of that axis, after negativeY has flipped the series.
+// The extent is padded, then rounded up one order below its leading digit, so the last tick is not glued to the peak.
+export function centeredZeroExtent(value: { min: number; max: number }): number {
+  const extent = Math.max(Math.abs(value.min), Math.abs(value.max));
+  if (!Number.isFinite(extent) || extent === 0) {
+    return 1;
+  }
+  return roundUp(extent * NEGATIVE_MIN_VALUE_MULTIPLIER);
+}
+
+function centerZeroBounds(inputAxis: TimeSeriesChartYAxisOptions): boolean {
+  return (
+    inputAxis.axisCenteredZero === true &&
+    inputAxis.logBase === undefined &&
+    inputAxis.min === undefined &&
+    inputAxis.max === undefined
+  );
+}
+
 /**
  * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options.
  * Handles both linear and logarithmic scales with appropriate min/max calculations.
@@ -281,7 +301,11 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
 export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   // Determine the appropriate min value based on scale type and user input
   let minValue: YAXisComponentOption['min'];
-  if (inputAxis.logBase !== undefined) {
+  let maxValue: YAXisComponentOption['max'] = inputAxis?.max;
+  if (centerZeroBounds(inputAxis)) {
+    minValue = (value): number => -centeredZeroExtent(value);
+    maxValue = (value): number => centeredZeroExtent(value);
+  } else if (inputAxis.logBase !== undefined) {
     // For logarithmic scales without explicit min:
     // Let ECharts auto-calculate the range based on data to avoid issues with
     // function-based calculations which can result in improper ranges (e.g., 1-10)
@@ -313,7 +337,7 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
   const yAxis = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: minValue,
-    max: inputAxis?.max,
+    max: maxValue,
   } satisfies YAXisComponentOption;
 
   // Apply logarithmic scale settings if requested
@@ -340,4 +364,28 @@ export function roundDown(num: number): number {
   const magnitude = Math.floor(Math.log10(Math.abs(num)));
   const firstDigit = Math.floor(num / Math.pow(10, magnitude));
   return Number((firstDigit * Math.pow(10, magnitude)).toPrecision(1));
+}
+
+/**
+ * Rounds up to the step one order below the leading digit.
+ * A value already on that step stays there.
+ *
+ * Examples:
+ * 1. 1001 --> 1100
+ * 2. 101 --> 110
+ * 3. 6.99 --> 7
+ * 4. 0.07 --> 0.07
+ */
+export function roundUp(num: number): number {
+  const abs = Math.abs(num);
+  if (!Number.isFinite(abs) || abs === 0) {
+    return 0;
+  }
+  const magnitude = Math.floor(Math.log10(abs));
+  const step = Math.pow(10, magnitude - 1);
+  const steps = abs / step;
+  const nearest = Math.round(steps);
+  const onStep = Math.abs(steps - nearest) <= 1e-8 * Math.max(1, nearest);
+  const count = onStep ? nearest : Math.ceil(steps);
+  return Number((count * step).toPrecision(12));
 }

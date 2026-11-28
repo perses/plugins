@@ -1,0 +1,8 @@
+{
+  "kind": "TimeSeriesChart",
+  "spec": {
+    "yAxis": {
+      "axisCenteredZero": true
+    }
+  }
+}

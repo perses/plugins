@@ -29,8 +29,20 @@ export interface YAxisOptionsEditorProps {
   onChange: (yAxis: TimeSeriesChartYAxisOptions) => void;
 }
 
+function centeringBlocked(value: TimeSeriesChartYAxisOptions): boolean {
+  return value.logBase !== undefined || value.min !== undefined || value.max !== undefined;
+}
+
+function clearCenteringWhenBlocked(next: TimeSeriesChartYAxisOptions): TimeSeriesChartYAxisOptions {
+  if (centeringBlocked(next)) {
+    return { ...next, axisCenteredZero: false };
+  }
+  return next;
+}
+
 export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps): ReactElement {
   const logBase = value.logBase ? LOG_BASE_CONFIG[value.logBase] : undefined;
+  const blocked = centeringBlocked(value);
 
   return (
     <OptionsEditorGroup title="Y Axis">
@@ -67,11 +79,12 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
             }}
             options={LOG_BASE_OPTIONS}
             onChange={(__, newValue) => {
-              const updatedValue: TimeSeriesChartYAxisOptions = {
-                ...value,
-                logBase: newValue.log ?? undefined,
-              };
-              onChange(updatedValue);
+              onChange(
+                clearCenteringWhenBlocked({
+                  ...value,
+                  logBase: newValue.log ?? undefined,
+                }),
+              );
             }}
             disabled={value === undefined}
             disableClearable
@@ -103,10 +116,7 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
             onChange={(e) => {
               // ensure empty value resets to undef to allow chart to calculate min
               const newValue = e.target.value ? Number(e.target.value) : undefined;
-              onChange({
-                ...value,
-                min: newValue,
-              });
+              onChange(clearCenteringWhenBlocked({ ...value, min: newValue }));
             }}
             placeholder="Default"
           />
@@ -121,12 +131,22 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
             onChange={(e) => {
               // ensure empty value resets to undef to allow chart to calculate max
               const newValue = e.target.value ? Number(e.target.value) : undefined;
-              onChange({
-                ...value,
-                max: newValue,
-              });
+              onChange(clearCenteringWhenBlocked({ ...value, max: newValue }));
             }}
             placeholder="Default"
+          />
+        }
+      />
+      <OptionsEditorControl
+        label={Y_AXIS_CONFIG.axisCenteredZero.label}
+        description="Symmetric bounds on a linear axis. Ignored when Min, Max, or Log Base is set."
+        control={
+          <Switch
+            checked={!blocked && (value.axisCenteredZero ?? DEFAULT_Y_AXIS.axisCenteredZero)}
+            disabled={blocked}
+            onChange={(e): void => {
+              onChange({ ...value, axisCenteredZero: e.target.checked });
+            }}
           />
         }
       />

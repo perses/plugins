@@ -34,6 +34,9 @@ label: <string> # Optional
 format: <Format specification> # Optional
 min: <int> # Optional
 max: <int> # Optional
+logBase: <enum = 2 | 10> # Optional
+# Symmetric bounds around zero on a linear axis. Ignored when min, max, or logBase is set.
+axisCenteredZero: <boolean> # Optional
 ```
 
 ### Format specification
