@@ -102,6 +102,9 @@
         - Overview: barchart/README.md
         - Model: barchart/model.md
         - Go SDK: barchart/go-sdk.md
+    - Canvas:
+        - Overview: canvas/README.md
+        - Model: canvas/model.md
     - Flame Chart:
         - Overview: flamechart/README.md
         - Model: flamechart/model.md
