@@ -18,7 +18,7 @@ import { useChartsTheme } from '@perses-dev/components';
 import type { PanelProps } from '@perses-dev/plugin-system';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import DOMPurify from 'dompurify';
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 
@@ -93,10 +93,26 @@ function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme)
   };
 }
 
-// Convert markdown to HTML
 // Supports original markdown and GitHub Flavored markdown
-function markdownToHTML(text: string): string {
-  return marked.parse(text, { gfm: true, async: false });
+const markdownWithHTML = new Marked({ gfm: true });
+
+// Raw HTML (block and inline) is not tokenized, so it is escaped as text and displayed literally, e.g. `<host>:<port>`.
+// Overriding the `html` renderer is not enough: content following a raw `<code>`, `<pre>`, ... tag would not be escaped.
+const markdownWithoutHTML = new Marked({
+  gfm: true,
+  tokenizer: {
+    html(): undefined {
+      return undefined;
+    },
+    tag(): undefined {
+      return undefined;
+    },
+  },
+});
+
+export function markdownToHTML(text: string, renderHtml = false): string {
+  const parser = renderHtml ? markdownWithHTML : markdownWithoutHTML;
+  return parser.parse(text, { async: false });
 }
 
 // Prevent XSS attacks by removing the vectors for attacks
@@ -108,13 +124,16 @@ export function sanitizeHTML(html: string): string {
 
 export function MarkdownPanel(props: MarkdownPanelProps): ReactElement {
   const {
-    spec: { text },
+    spec: { text, renderHtml = false },
   } = props;
   const chartsTheme = useChartsTheme();
 
   const textAfterVariableReplacement = useReplaceVariablesInString(text);
 
-  const html = useMemo(() => markdownToHTML(textAfterVariableReplacement ?? ''), [textAfterVariableReplacement]);
+  const html = useMemo(
+    () => markdownToHTML(textAfterVariableReplacement ?? '', renderHtml),
+    [textAfterVariableReplacement, renderHtml],
+  );
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 
   return (
