@@ -516,6 +516,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
     ...DEFAULT_TOOLTIP_CONFIG,
     enablePinning,
   };
+  const axisPointer = isStackedBar ? undefined : tooltip?.axisPointer;
 
   return (
     <Box sx={{ padding: `${contentPadding}px` }}>
@@ -564,6 +565,7 @@ function TimeSeriesChartPanelComponent(props: TimeSeriesChartProps): ReactElemen
                 grid={gridOverrides}
                 isStackedBar={isStackedBar}
                 tooltipConfig={tooltipConfig}
+                axisPointer={axisPointer}
                 syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
                 onDataZoom={handleDataZoom}
                 //  Show an empty chart when there is no data because the user unselected all items in

@@ -48,8 +48,19 @@ type Legend struct {
 	Values   []common.Calculation `json:"values,omitempty" yaml:"values,omitempty"`
 }
 
+type AxisPointerType string
+
+const (
+	CrossAxisPointer AxisPointerType = "cross"
+)
+
+type AxisPointer struct {
+	Type AxisPointerType `json:"type" yaml:"type"`
+}
+
 type Tooltip struct {
-	EnablePinning bool `json:"enablePinning,omitempty" yaml:"enablePinning,omitempty"`
+	EnablePinning bool         `json:"enablePinning,omitempty" yaml:"enablePinning,omitempty"`
+	AxisPointer   *AxisPointer `json:"axisPointer,omitempty" yaml:"axisPointer,omitempty"`
 }
 
 type PaletteMode string

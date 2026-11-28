@@ -98,3 +98,53 @@ func TestWithVisual_WithPaletteMode(t *testing.T) {
 		t.Errorf("Expected palette mode to be %s, got %v", AutoMode, mode)
 	}
 }
+
+func TestWithTooltip_AxisPointer(t *testing.T) {
+	builder := &Builder{}
+	err := WithTooltip(Tooltip{AxisPointer: &AxisPointer{Type: CrossAxisPointer}})(builder)
+	if err != nil {
+		t.Fatalf("WithTooltip failed: %v", err)
+	}
+
+	jsonBytes, err := json.Marshal(builder)
+	if err != nil {
+		t.Fatalf("Failed to marshal builder: %v", err)
+	}
+
+	var result map[string]any
+	err = json.Unmarshal(jsonBytes, &result)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal result: %v", err)
+	}
+
+	tooltipMap := result["tooltip"].(map[string]any)
+	axisPointerMap := tooltipMap["axisPointer"].(map[string]any)
+
+	if axisPointerMap["type"] != string(CrossAxisPointer) {
+		t.Errorf("Expected axis pointer type to be %s, got %v", CrossAxisPointer, axisPointerMap["type"])
+	}
+}
+
+func TestWithTooltip_NoAxisPointer(t *testing.T) {
+	builder := &Builder{}
+	err := WithTooltip(Tooltip{})(builder)
+	if err != nil {
+		t.Fatalf("WithTooltip failed: %v", err)
+	}
+
+	jsonBytes, err := json.Marshal(builder)
+	if err != nil {
+		t.Fatalf("Failed to marshal builder: %v", err)
+	}
+
+	var result map[string]any
+	err = json.Unmarshal(jsonBytes, &result)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal result: %v", err)
+	}
+
+	tooltipMap := result["tooltip"].(map[string]any)
+	if _, ok := tooltipMap["axisPointer"]; ok {
+		t.Error("axisPointer should not be present in JSON when nil")
+	}
+}
