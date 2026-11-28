@@ -129,6 +129,90 @@ spec:
       query: "SELECT timestamp, level, message, service FROM application_logs WHERE level = 'ERROR' AND timestamp >= now() - INTERVAL 1 HOUR ORDER BY timestamp DESC LIMIT 1000"
 ```
 
+## ClickHouseTraceQuery
+
+Perses supports trace queries for ClickHouse: `ClickHouseTraceQuery`. It reads traces stored with the schema of the [OpenTelemetry Collector ClickHouse exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/clickhouseexporter), with attributes stored either as `Map` columns (the exporter's default) or as `JSON` columns (its `json: true` option). With the latter the value types are kept, and the nesting ClickHouse's JSON type makes of dotted attribute names is flattened back into the original names.
+
+```yaml
+kind: "ClickHouseTraceQuery"
+spec:
+  # `query` is either a trace ID or a SQL query.
+  # - A trace ID (16 or 32 hexadecimal characters) returns all the spans of this trace, read from `table`.
+  # - A SQL query must return one row per span. The spans are grouped by trace into search results.
+  query: <string>
+
+  # `table` is the table storing the spans, optionally prefixed with its database.
+  # It is only used to look up a trace by ID.
+  table: <string> | default = "otel_traces" # Optional
+
+  # `limit` is the maximum number of traces returned by a search.
+  limit: <int> | default = 20 # Optional
+
+  # `datasource` is a datasource selector. If not provided, the default ClickHouseDatasource is used.
+  # See the documentation about the datasources to understand how it is selected.
+  datasource: <ClickHouse Datasource selector> # Optional
+```
+
+- See [ClickHouse Datasource selector](#clickhouse-datasource-selector)
+
+### Trace ID lookup
+
+A trace ID returns all the spans of this trace from `table`, whatever the time range of the dashboard, so that a trace can be opened from a link.
+
+!!! note
+    The lookup is not bounded by time: it relies on the bloom filter index the exporter creates on `TraceId`. On large tables, a lookup bounded with the exporter's `<table>_trace_id_ts` table (`otel_traces_trace_id_ts` by default), which maps each trace ID to its start and end time, can be faster. That table is not used because it only exists when the exporter created the schema. This choice may be revisited, for example with an option to use it.
+
+### Search query columns
+
+A search query returns one row per span, with the column names of the exporter schema. The plugin uses it as a subquery and lets ClickHouse group the spans into traces, so all of these columns are required, and the query has to be a single `SELECT` without its own `FORMAT` clause. A trailing `;` is removed.
+
+| Column | Usage |
+| :- | :- |
+| `TraceId` | Groups the spans into traces. |
+| `Timestamp` | Start time of the span, as any date-time type. |
+| `Duration` | Duration of the span in nanoseconds, used to compute the duration of the trace. |
+| `ParentSpanId` | Identifies the root span, which names the trace. When the query does not return it, the earliest span is used. |
+| `SpanName` | Name of the trace, taken from its root span. |
+| `ServiceName` | Counts the spans of each service. |
+| `StatusCode` | Counts the spans with an error in each service. |
+
+`limit` is applied by ClickHouse, which returns one trace more than asked for, so that the panels can tell whether more traces match. The span counts and the root span are computed from the spans the query returns: to list whole traces, select the trace IDs in a subquery, as in the example below.
+
+Like the other ClickHouse queries, `{start}` and `{end}` are replaced with the time range of the dashboard.
+
+### Example
+
+A trace search listing the traces that went through the `checkout` service:
+
+```yaml
+kind: "TraceQuery"
+spec:
+  plugin:
+    kind: "ClickHouseTraceQuery"
+    spec:
+      query: |
+        SELECT TraceId, ParentSpanId, SpanName, ServiceName, Timestamp, Duration, StatusCode
+        FROM otel.otel_traces
+        WHERE Timestamp BETWEEN '{start}' AND '{end}'
+          AND TraceId IN (
+            SELECT TraceId FROM otel.otel_traces
+            WHERE ServiceName = 'checkout' AND Timestamp BETWEEN '{start}' AND '{end}'
+          )
+      limit: 50
+```
+
+A trace lookup, for example in a Tracing Gantt Chart panel showing the trace selected in the `traceId` variable:
+
+```yaml
+kind: "TraceQuery"
+spec:
+  plugin:
+    kind: "ClickHouseTraceQuery"
+    spec:
+      query: "$traceId"
+      table: "otel.otel_traces"
+```
+
 ## Shared definitions
 
 ### ClickHouse Datasource selector
