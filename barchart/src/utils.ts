@@ -11,13 +11,122 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { SortOption } from '@perses-dev/components';
+import type { SortOption, VariableStateMap } from '@perses-dev/components';
+import { replaceVariablesInUrl } from '@perses-dev/components';
 
 import type { ColorOverride } from './bar-chart-model';
 import { DEFAULT_SORT } from './bar-chart-model';
 import type { BarChartData } from './BarChartBase';
 
-export function calculatePercentages(data: BarChartData[]): Array<{ label: string; value: number }> {
+const fieldLabelPattern = /\$\{__field\.labels\.([A-Za-z_][A-Za-z0-9_]*)\}/g;
+const fieldParamPattern = /[?&]([^=&]+)=([^&#]*\$\{__field\.labels\.[^}]+\}[^&#]*)/g;
+const allSentinel = '$__all';
+
+export function fieldLinkParams(template: string): string[] {
+  return [...template.matchAll(fieldParamPattern)].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
+}
+
+function isAllValue(value: VariableStateMap[string]['value'] | undefined): boolean {
+  return value === allSentinel || (Array.isArray(value) && value.length === 1 && value[0] === allSentinel);
+}
+
+// barLinkHref fills dashboard variables, then ${__field.labels.<name>} from the series.
+// All stays $__all so the next dashboard still selects its All option.
+export function barLinkHref(
+  template: string,
+  labels: Record<string, string>,
+  variables: VariableStateMap,
+  renderVariables = true,
+): string {
+  let source = template;
+  if (renderVariables) {
+    const names = Object.keys(variables).toSorted((a, b) => b.length - a.length);
+    for (const name of names) {
+      if (!isAllValue(variables[name]?.value)) {
+        continue;
+      }
+      source = source.replace(new RegExp(String.raw`\$${name}\b|\$\{${name}(?::[^}]+)?\}`, 'g'), allSentinel);
+    }
+  }
+  const withVars = renderVariables ? replaceVariablesInUrl(source, variables) : source;
+  return withVars.replace(fieldLabelPattern, (_match, name: string) => encodeURIComponent(labels[name] ?? ''));
+}
+
+// dashboardVariableParams are the var-* parameters whose value is that same dashboard variable.
+function dashboardVariableParams(template: string): Set<string> {
+  const query = template.split('#')[0]?.split('?')[1] ?? '';
+  const keys = new Set<string>();
+  for (const part of query.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq <= 0) {
+      continue;
+    }
+    const key = part.slice(0, eq);
+    if (!key.startsWith('var-')) {
+      continue;
+    }
+    const name = key.slice('var-'.length).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const value = part.slice(eq + 1);
+    if (new RegExp(String.raw`^\$${name}$|^\$\{${name}(?::[^}]+)?\}$`).test(value)) {
+      keys.add(key);
+    }
+  }
+  return keys;
+}
+
+function isAbsoluteUrl(url: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:/i.test(url);
+}
+
+// withQuery edits the query string and keeps a fragment. An absolute link also keeps its origin.
+function withQuery(url: string, edit: (params: URLSearchParams) => void): string {
+  const base = new URL(url, 'http://perses.local');
+  edit(base.searchParams);
+  const path = `${base.pathname}${base.search.replace(/%24/g, '$')}${base.hash}`;
+  return isAbsoluteUrl(url) ? `${base.origin}${path}` : path;
+}
+
+// withLiveDashboardVars copies the address bar onto a dashboard variable of the same name.
+// Interpolation turns All into .* and a one-element list into (Value). keepKeys are field-label params.
+export function withLiveDashboardVars(
+  url: string,
+  search: string,
+  keepKeys: readonly string[] = [],
+  template = '',
+): string {
+  const current = new URLSearchParams(search);
+  const own = dashboardVariableParams(template);
+  return withQuery(url, (params) => {
+    for (const key of new Set(params.keys())) {
+      if (!key.startsWith('var-') || keepKeys.includes(key)) {
+        continue;
+      }
+      const live = current.get(key);
+      if (live !== null && own.has(key)) {
+        params.set(key, live);
+        continue;
+      }
+      if (params.get(key) === '.*') {
+        params.set(key, allSentinel);
+      }
+    }
+  });
+}
+
+// withLocationTime keeps the current dashboard range on an in-app link.
+export function withLocationTime(url: string, search: string): string {
+  const current = new URLSearchParams(search);
+  return withQuery(url, (params) => {
+    for (const key of ['start', 'end', 'tz']) {
+      const value = current.get(key);
+      if (value && !params.has(key)) {
+        params.set(key, value);
+      }
+    }
+  });
+}
+
+export function calculatePercentages(data: BarChartData[]): BarChartData[] {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);
   return data.map((seriesData) => {
     const percentage = ((seriesData.value ?? 0) / sum) * 100;
