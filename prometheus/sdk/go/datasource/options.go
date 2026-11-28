@@ -14,6 +14,8 @@
 package datasource
 
 import (
+	"fmt"
+
 	"github.com/perses/perses/go-sdk/http"
 )
 
@@ -56,7 +58,28 @@ func QueryParam(key, value string) Option {
 // will also query the /api/v1/query_exemplars endpoint when running range queries.
 func EnableExemplars() Option {
 	return func(builder *Builder) error {
-		builder.Exemplars = &Exemplars{Enable: true}
+		if builder.Exemplars == nil {
+			builder.Exemplars = &Exemplars{}
+		}
+		builder.Exemplars.Enable = true
+		return nil
+	}
+}
+
+// AddExemplarLink adds a link to the exemplars that have the traceIDLabel label, typically to open
+// their trace in a tracing UI. In the url, ${traceId} is replaced with the value of that label.
+// The name is the text of the link: when empty, the URL is displayed.
+// Links are only displayed when exemplars are enabled, see EnableExemplars.
+func AddExemplarLink(name, url, traceIDLabel string) Option {
+	return func(builder *Builder) error {
+		link := ExemplarLink{Name: name, URL: url, TraceIDLabel: traceIDLabel}
+		if err := link.validate(); err != nil {
+			return fmt.Errorf("invalid exemplar link: %w", err)
+		}
+		if builder.Exemplars == nil {
+			builder.Exemplars = &Exemplars{}
+		}
+		builder.Exemplars.Links = append(builder.Exemplars.Links, link)
 		return nil
 	}
 }

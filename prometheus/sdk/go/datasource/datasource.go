@@ -37,7 +37,19 @@ type PluginSpec struct {
 // Exemplars mirrors the exemplars section of the PrometheusDatasource CUE schema.
 // When enabled, the Prometheus query plugin also queries the /api/v1/query_exemplars endpoint.
 type Exemplars struct {
-	Enable bool `json:"enable" yaml:"enable"`
+	Enable bool           `json:"enable" yaml:"enable"`
+	Links  []ExemplarLink `json:"links,omitempty" yaml:"links,omitempty"`
+}
+
+// ExemplarLink is a link shown on the exemplars that have the TraceIDLabel label,
+// typically to open their trace in a tracing UI.
+type ExemplarLink struct {
+	// Name is the text of the link. The URL is displayed when not set.
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+	// URL is the template of the link: ${traceId} is replaced with the trace ID of the exemplar.
+	URL string `json:"url" yaml:"url"`
+	// TraceIDLabel is the name of the exemplar label holding the trace ID.
+	TraceIDLabel string `json:"traceIDLabel" yaml:"traceIDLabel"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {
@@ -72,6 +84,23 @@ func (s *PluginSpec) validate() error {
 	}
 	if len(s.DirectURL) > 0 && s.Proxy != nil {
 		return fmt.Errorf("at most directUrl or proxy must be configured")
+	}
+	if s.Exemplars != nil {
+		for i, link := range s.Exemplars.Links {
+			if err := link.validate(); err != nil {
+				return fmt.Errorf("exemplars.links[%d]: %w", i, err)
+			}
+		}
+	}
+	return nil
+}
+
+func (l ExemplarLink) validate() error {
+	if len(l.URL) == 0 {
+		return fmt.Errorf("url cannot be empty")
+	}
+	if len(l.TraceIDLabel) == 0 {
+		return fmt.Errorf("traceIDLabel cannot be empty")
 	}
 	return nil
 }

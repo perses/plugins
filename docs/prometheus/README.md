@@ -132,10 +132,10 @@ See also technical docs related to this plugin:
 
 [Exemplars](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars) are references to related data — typically a trace ID — attached to individual samples of a metric. They let you go from an aggregate metric to a concrete representative request, which is handy to investigate a spike or a latency outlier directly from a dashboard.
 
-The Prometheus package supports displaying exemplars on the [Time Series Chart](../timeserieschart/README.md) panel:
+The Prometheus package supports displaying exemplars on the [Time Series Chart](../timeserieschart/README.md) and [Heatmap Chart](../heatmapchart/README.md) panels:
 
 - When exemplars are enabled on the datasource (see below), the `PrometheusTimeSeriesQuery` plugin calls the Prometheus [`/api/v1/query_exemplars`](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars) endpoint in parallel with each range query that has not turned them off (see [per-query toggle](#per-query-toggle)), and attaches the returned exemplars to the series matching their labels.
-- On the chart, each exemplar is rendered as a diamond marker placed at its value and timestamp, using the color of the series it belongs to. Clicking a marker opens a dialog with its metadata: the labels of the series it belongs to, the exemplar labels (like `trace_id`), its value and its timestamp (e.g. to copy a trace ID and open the corresponding trace in your tracing UI).
+- On the chart, each exemplar is rendered as a diamond marker placed at its value and timestamp, using the color of the series it belongs to. Hovering a marker shows a tooltip with its metadata: the labels of the series it belongs to, the exemplar labels (like `trace_id`), its value and its timestamp. Clicking the marker pins the tooltip, which gives access to the [links](#linking-exemplars-to-traces) of the exemplar, e.g. to open its trace in your tracing UI.
 - A failed exemplars request never impacts the panel itself: the query results are displayed without exemplars.
 
 ### Enabling exemplars
@@ -156,6 +156,38 @@ Some requirements and caveats to be aware of:
 - The Prometheus instance (or any Prometheus-compatible backend) must have the [exemplar storage](https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage) enabled, and your telemetry pipeline must actually attach exemplars to the samples (e.g. via the OTLP receiver).
 - Exemplars are only fetched for range queries: queries executed in instant mode never display exemplars.
 - When relying on the [proxy](https://perses.dev/perses/docs/concepts/proxy/) feature, make sure the `/api/v1/query_exemplars` endpoint is allowed so exemplars can be fetched through the Perses server.
+
+### Linking exemplars to traces
+
+The datasource can define links that are attached to each exemplar, typically to open its trace in a tracing UI (Jaeger, Tempo, the Explore page of Perses, ...). They are listed in the tooltip of the exemplar: hover a marker, click it to pin the tooltip, then click a link. Links open in a new tab.
+
+Links are configured in the **Exemplars** section of the Prometheus datasource editor, once exemplars are enabled, or in the datasource spec:
+
+```yaml
+kind: "PrometheusDatasource"
+spec:
+  exemplars:
+    enable: true
+    links:
+      - name: "Jaeger"
+        url: "https://jaeger.example.com/trace/${traceId}"
+        traceIDLabel: "trace_id"
+```
+
+Each link is made of:
+
+- `url`: the URL template of the link, where `${traceId}` is replaced with the trace ID of the exemplar. This is the same placeholder as the one used by the links of the [Trace Table](../tracetable/README.md) panel.
+- `traceIDLabel`: the name of the exemplar label that holds the trace ID. It depends on how your metrics are instrumented: OpenTelemetry uses `trace_id`, while some client libraries use `traceID`. An exemplar that doesn't have this label doesn't get the link, so links for different label names can be configured side by side.
+- `name` (optional): the text of the link. The URL is displayed when it is not set.
+
+Some details about the URL template:
+
+- The trace ID is URL encoded by default. Like for the [cell links of the Table panel](../table/README.md#dynamic-links), a format can be given to change that, e.g. `${traceId:raw}`.
+- The URL can be relative to link to a page of Perses, like the Explore page.
+- [Variables](https://perses.dev/perses/docs/concepts/variable/) of the dashboard can be used, e.g. `https://jaeger.example.com/trace/${traceId}?env=$env`. They are replaced when the query runs: if the variable is not used by the query itself, the links are only updated the next time the panel is refreshed.
+- Only links with a safe scheme (like `http` and `https`) are displayed.
+
+When using the Dashboard-as-Code Go lib, use the `datasource.AddExemplarLink()` option (see [Go SDK](./go-sdk/datasource.md#exemplar-links)).
 
 ### Per-query toggle
 
