@@ -23,19 +23,24 @@ vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
   PluginKindSelect: (): null => null,
 }));
 
+function selectOption(comboboxName: string, option: RegExp): void {
+  fireEvent.mouseDown(screen.getByRole('combobox', { name: comboboxName }));
+  fireEvent.click(screen.getByRole('option', { name: option }));
+}
+
+function renderTableColumnsEditor(value: TableOptions, onChange = vi.fn()): void {
+  render(
+    <ChartsProvider chartsTheme={testChartsTheme}>
+      <TableColumnsEditor value={value} onChange={onChange} />
+    </ChartsProvider>,
+  );
+}
+
+function expand(): void {
+  fireEvent.click(screen.getByTestId('column-toggle#column_0'));
+}
+
 describe('TableColumnsEditor', () => {
-  function renderTableColumnsEditor(value: TableOptions, onChange = vi.fn()): void {
-    render(
-      <ChartsProvider chartsTheme={testChartsTheme}>
-        <TableColumnsEditor value={value} onChange={onChange} />
-      </ChartsProvider>,
-    );
-  }
-
-  function expand(): void {
-    fireEvent.click(screen.getByTestId('column-toggle#column_0'));
-  }
-
   it('can add a new column settings', () => {
     const onChange = vi.fn();
     renderTableColumnsEditor({ columnSettings: [] }, onChange);
@@ -68,12 +73,44 @@ describe('TableColumnsEditor', () => {
     fireEvent.change(nameInput, { target: { value: 'MySuperName' } });
     expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'MySuperName' }] });
   });
+  describe('cell display', () => {
+    it('shows the selected display mode', () => {
+      renderTableColumnsEditor({ columnSettings: [{ name: 'column_0', tags: {} }] });
+      expand();
+      expect(screen.getByRole('combobox', { name: 'Cell display' })).toHaveValue('Tags');
+    });
+
+    it('describes each display mode', () => {
+      renderTableColumnsEditor({ columnSettings: [{ name: 'column_0' }] });
+      expand();
+      fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Cell display' }));
+      expect(screen.getByRole('option', { name: /^Text/ })).toHaveTextContent('Show the formatted value as plain text');
+      expect(screen.getByRole('option', { name: /^Tags/ })).toHaveTextContent(
+        'Split the value by a delimiter and show each part as a colored tag',
+      );
+      expect(screen.getByRole('option', { name: /^Visualization/ })).toHaveTextContent(
+        'Render a panel, such as a gauge, inside the cell',
+      );
+    });
+
+    it('keeps the visualization kind when re-selecting visualization', () => {
+      const onChange = vi.fn();
+      renderTableColumnsEditor(
+        { columnSettings: [{ name: 'column_0', plugin: { kind: 'StatChart', spec: {} } }] },
+        onChange,
+      );
+      expand();
+      selectOption('Cell display', /^Visualization/);
+      expect(onChange).not.toHaveBeenCalled();
+    });
+  });
+
   describe('tags', () => {
     it('switches a column to tags mode', () => {
       const onChange = vi.fn();
       renderTableColumnsEditor({ columnSettings: [{ name: 'column_0' }] }, onChange);
       expand();
-      fireEvent.click(screen.getByRole('button', { name: 'Tags' }));
+      selectOption('Cell display', /^Tags/);
       expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'column_0', tags: {} }] });
     });
 
@@ -81,7 +118,7 @@ describe('TableColumnsEditor', () => {
       const onChange = vi.fn();
       renderTableColumnsEditor({ columnSettings: [{ name: 'column_0', tags: { delimiter: ',' } }] }, onChange);
       expand();
-      fireEvent.click(screen.getByRole('button', { name: 'Text' }));
+      selectOption('Cell display', /^Text/);
       expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'column_0' }] });
     });
 
@@ -89,7 +126,7 @@ describe('TableColumnsEditor', () => {
       const onChange = vi.fn();
       renderTableColumnsEditor({ columnSettings: [{ name: 'column_0', tags: {} }] }, onChange);
       expand();
-      fireEvent.click(screen.getByRole('button', { name: 'Visualization' }));
+      selectOption('Cell display', /^Visualization/);
       expect(onChange).toHaveBeenCalledWith({
         columnSettings: [{ name: 'column_0', plugin: { kind: 'GaugeChart', spec: {} } }],
       });
@@ -110,11 +147,11 @@ describe('TableColumnsEditor', () => {
       const onChange = vi.fn();
       renderTableColumnsEditor({ columnSettings: [{ name: 'column_0', tags: { delimiter: ',' } }] }, onChange);
       expand();
-      fireEvent.click(screen.getByRole('button', { name: 'Palette' }));
+      selectOption('Color mode', /^Palette/);
       expect(onChange).toHaveBeenLastCalledWith({
         columnSettings: [{ name: 'column_0', tags: { delimiter: ',', colorMode: 'palette' } }],
       });
-      fireEvent.click(screen.getByRole('button', { name: 'Manual' }));
+      selectOption('Color mode', /^Manual/);
       expect(onChange).toHaveBeenLastCalledWith({
         columnSettings: [{ name: 'column_0', tags: { delimiter: ',', colorMode: 'manual' } }],
       });
@@ -123,8 +160,32 @@ describe('TableColumnsEditor', () => {
     it('shows the color mode control', () => {
       renderTableColumnsEditor({ columnSettings: [{ name: 'column_0', tags: {} }] });
       expand();
-      expect(screen.getByText('Color mode')).toBeInTheDocument();
-      expect(screen.getByRole('group', { name: 'Color mode' })).toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: 'Color mode' })).toHaveValue('Auto');
+      expect(screen.getByText('Conditional Cell Format rules take priority over the color mode.')).toBeInTheDocument();
+    });
+
+    it('describes each color mode', () => {
+      renderTableColumnsEditor({ columnSettings: [{ name: 'column_0', tags: {} }] });
+      expand();
+      fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Color mode' }));
+      expect(screen.getByRole('option', { name: /^Auto/ })).toHaveTextContent(
+        'Color generated from the tag value, the same value keeps its color',
+      );
+      expect(screen.getByRole('option', { name: /^Palette/ })).toHaveTextContent(
+        'Color from the theme chart palette, picked from the tag value',
+      );
+      expect(screen.getByRole('option', { name: /^Manual/ })).toHaveTextContent('Every tag uses the default tag color');
+    });
+
+    it('keeps the default color when re-selecting manual', () => {
+      const onChange = vi.fn();
+      renderTableColumnsEditor(
+        { columnSettings: [{ name: 'column_0', tags: { colorMode: 'manual', defaultColor: '#123456' } }] },
+        onChange,
+      );
+      expand();
+      selectOption('Color mode', /^Manual/);
+      expect(onChange).not.toHaveBeenCalled();
     });
 
     it('removes the color mode and default color when switching to automatic', () => {
@@ -134,7 +195,7 @@ describe('TableColumnsEditor', () => {
         onChange,
       );
       expand();
-      fireEvent.click(screen.getByRole('button', { name: 'Auto' }));
+      selectOption('Color mode', /^Auto/);
       expect(onChange).toHaveBeenLastCalledWith({ columnSettings: [{ name: 'column_0', tags: {} }] });
     });
 
@@ -145,7 +206,7 @@ describe('TableColumnsEditor', () => {
         onChange,
       );
       expand();
-      fireEvent.click(screen.getByRole('button', { name: 'Palette' }));
+      selectOption('Color mode', /^Palette/);
       expect(onChange).toHaveBeenLastCalledWith({
         columnSettings: [{ name: 'column_0', tags: { colorMode: 'palette' } }],
       });
@@ -204,7 +265,7 @@ describe('TableColumnsEditor', () => {
       renderTableColumnsEditor({ columnSettings: [{ name: 'column_0', plugin: { kind: 'StatChart', spec: {} } }] });
       expand();
       expect(screen.queryByRole('textbox', { name: /Delimiter/i })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Auto' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('combobox', { name: 'Color mode' })).not.toBeInTheDocument();
     });
 
     it('hides tag controls in text mode', () => {

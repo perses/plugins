@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, Stack, TextField } from '@mui/material';
-import { OptionsColorPicker, OptionsEditorControl } from '@perses-dev/components';
+import { Stack, TextField, Typography } from '@mui/material';
+import { OptionsColorPicker, OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
 import type { ReactElement } from 'react';
 
 import type { TagsColorMode, TagsSettings } from '../../models';
 import { DEFAULT_MANUAL_TAG_COLOR, normalizeHexColor } from '../../models/tag-colors';
 
-const TAGS_COLOR_MODES: Array<{ mode: TagsColorMode; label: string }> = [
-  { mode: 'auto', label: 'Auto' },
-  { mode: 'palette', label: 'Palette' },
-  { mode: 'manual', label: 'Manual' },
+const TAGS_COLOR_MODES: Array<{ id: TagsColorMode; label: string; description: string }> = [
+  { id: 'auto', label: 'Auto', description: 'Color generated from the tag value, the same value keeps its color' },
+  { id: 'palette', label: 'Palette', description: 'Color from the theme chart palette, picked from the tag value' },
+  { id: 'manual', label: 'Manual', description: 'Every tag uses the default tag color' },
 ];
 
 export interface TagsSettingsEditorProps {
@@ -38,15 +38,20 @@ export function TagsSettingsEditor({ tags, onChange }: TagsSettingsEditorProps):
     onChange(delimiter ? { ...rest, delimiter } : rest);
   }
 
-  function handleColorModeChange(colorMode: TagsColorMode): void {
+  const colorMode = tags.colorMode ?? 'auto';
+
+  function handleColorModeChange(newColorMode: TagsColorMode): void {
+    if (newColorMode === colorMode) return;
     // defaultColor is only used by the manual color mode, auto is the default color mode
     const { colorMode: _colorMode, defaultColor, ...rest } = tags;
-    if (colorMode === 'auto') {
+    if (newColorMode === 'auto') {
       onChange(rest);
-    } else if (colorMode === 'manual') {
-      onChange(defaultColor ? { ...rest, colorMode, defaultColor } : { ...rest, colorMode });
+    } else if (newColorMode === 'manual') {
+      onChange(
+        defaultColor ? { ...rest, colorMode: newColorMode, defaultColor } : { ...rest, colorMode: newColorMode },
+      );
     } else {
-      onChange({ ...rest, colorMode });
+      onChange({ ...rest, colorMode: newColorMode });
     }
   }
 
@@ -79,22 +84,17 @@ export function TagsSettingsEditor({ tags, onChange }: TagsSettingsEditorProps):
       <OptionsEditorControl
         label="Color mode"
         control={
-          // Wrapped so the buttons keep their own accessible names
-          <Stack direction="row" justifyContent="flex-end">
-            <ButtonGroup aria-label="Color mode" size="small">
-              {TAGS_COLOR_MODES.map(({ mode, label }) => (
-                <Button
-                  key={mode}
-                  variant={(tags.colorMode ?? 'auto') === mode ? 'contained' : 'outlined'}
-                  onClick={() => handleColorModeChange(mode)}
-                >
-                  {label}
-                </Button>
-              ))}
-            </ButtonGroup>
-          </Stack>
+          <SettingsAutocomplete
+            value={TAGS_COLOR_MODES.find((option) => option.id === colorMode)}
+            options={TAGS_COLOR_MODES}
+            onChange={(_, option) => handleColorModeChange(option.id)}
+            disableClearable
+          />
         }
       />
+      <Typography variant="caption" color="text.secondary">
+        Conditional Cell Format rules take priority over the color mode.
+      </Typography>
       {tags.colorMode === 'manual' && (
         <OptionsEditorControl
           label="Default tag color"

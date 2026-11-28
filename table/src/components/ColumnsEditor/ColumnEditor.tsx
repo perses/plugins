@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { StackProps } from '@mui/material';
-import { Button, ButtonGroup, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Stack, Switch, TextField, Typography } from '@mui/material';
 import type { FormatOptions } from '@perses-dev/components';
 import {
   AlignSelector,
@@ -21,6 +21,7 @@ import {
   OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
+  SettingsAutocomplete,
   SortSelectorButtons,
 } from '@perses-dev/components';
 import { PluginKindSelect } from '@perses-dev/plugin-system';
@@ -46,12 +47,11 @@ function getCellDisplayMode(column: ColumnSettings): CellDisplayMode {
   return 'text';
 }
 
-const CELL_DISPLAY_CAPTIONS: Record<CellDisplayMode, string> = {
-  text: 'Visualizations reuse panel settings (thresholds, units, colors). Text mode uses value formatting below.',
-  visualization:
-    'Visualizations reuse panel settings (thresholds, units, colors). Text mode uses value formatting below.',
-  tags: 'Conditional Cell Format rules color each tag. Tags that match no rule are colored from their value (Auto), from the theme palette (Palette), or with the default tag color (Manual).',
-};
+const CELL_DISPLAY_OPTIONS: Array<{ id: CellDisplayMode; label: string; description: string }> = [
+  { id: 'text', label: 'Text', description: 'Show the formatted value as plain text' },
+  { id: 'tags', label: 'Tags', description: 'Split the value by a delimiter and show each part as a colored tag' },
+  { id: 'visualization', label: 'Visualization', description: 'Render a panel, such as a gauge, inside the cell' },
+];
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
@@ -85,6 +85,7 @@ export function ColumnEditor({
   const displayMode = getCellDisplayMode(column);
 
   function handleDisplayModeChange(mode: CellDisplayMode): void {
+    if (mode === displayMode) return;
     const { plugin: _plugin, tags: _tags, ...rest } = column;
     switch (mode) {
       case 'text':
@@ -186,31 +187,12 @@ export function ColumnEditor({
             <OptionsEditorControl
               label="Cell display"
               control={
-                <Stack spacing={1}>
-                  <ButtonGroup aria-label="Cell display" size="small">
-                    <Button
-                      variant={displayMode === 'text' ? 'contained' : 'outlined'}
-                      onClick={() => handleDisplayModeChange('text')}
-                    >
-                      Text
-                    </Button>
-                    <Button
-                      variant={displayMode === 'tags' ? 'contained' : 'outlined'}
-                      onClick={() => handleDisplayModeChange('tags')}
-                    >
-                      Tags
-                    </Button>
-                    <Button
-                      variant={displayMode === 'visualization' ? 'contained' : 'outlined'}
-                      onClick={() => handleDisplayModeChange('visualization')}
-                    >
-                      Visualization
-                    </Button>
-                  </ButtonGroup>
-                  <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 360 }}>
-                    {CELL_DISPLAY_CAPTIONS[displayMode]}
-                  </Typography>
-                </Stack>
+                <SettingsAutocomplete
+                  value={CELL_DISPLAY_OPTIONS.find((option) => option.id === displayMode)}
+                  options={CELL_DISPLAY_OPTIONS}
+                  onChange={(_, option) => handleDisplayModeChange(option.id)}
+                  disableClearable
+                />
               }
             />
             {column.plugin ? (
