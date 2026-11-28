@@ -24,6 +24,7 @@ import {
   getExemplarSeries,
   getTimeSeries,
   roundDown,
+  roundUp,
 } from './data-transform';
 
 const MAX_VALUE = 120;
@@ -161,12 +162,12 @@ describe('convertPanelYAxis', () => {
     expect(typeof echartsAxis.max).toBe('function');
     const min = echartsAxis.min as (value: { min: number; max: number }) => number;
     const max = echartsAxis.max as (value: { min: number; max: number }) => number;
-    // 7 * 1.2 = 8.4, rounded up to one significant digit.
-    expect(min({ min: -2, max: 7 })).toBe(-9);
-    expect(max({ min: -2, max: 7 })).toBe(9);
-    // A peak just under 7 must not sit on the 7 tick.
-    expect(max({ min: -6.99, max: 2 })).toBe(9);
-    expect(min({ min: -6.99, max: 2 })).toBe(-9);
+    // 7 * 1.2 = 8.4, already on the tenth step.
+    expect(min({ min: -2, max: 7 })).toBe(-8.4);
+    expect(max({ min: -2, max: 7 })).toBe(8.4);
+    // 6.99 * 1.2 = 8.388, rounded up to 8.4.
+    expect(max({ min: -6.99, max: 2 })).toBe(8.4);
+    expect(min({ min: -6.99, max: 2 })).toBe(-8.4);
   });
 
   it('keeps an explicit min or a log scale instead of centering zero', () => {
@@ -224,6 +225,23 @@ const ROUND_DOWN_TESTS = [
 describe('roundDown', () => {
   it.each(ROUND_DOWN_TESTS)('returns $expected when the input is $value', ({ value, expected }) => {
     expect(roundDown(value)).toEqual(expected);
+  });
+});
+
+const ROUND_UP_TESTS = [
+  { value: 1000, expected: 1000 },
+  { value: 1001, expected: 1100 },
+  { value: 101, expected: 110 },
+  { value: 6.99, expected: 7 },
+  { value: 0.07, expected: 0.07 },
+  { value: 8.4, expected: 8.4 },
+  { value: 675, expected: 680 },
+  { value: 0.567, expected: 0.57 },
+];
+
+describe('roundUp', () => {
+  it.each(ROUND_UP_TESTS)('returns $expected when the input is $value', ({ value, expected }) => {
+    expect(roundUp(value)).toEqual(expected);
   });
 });
 
