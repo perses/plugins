@@ -1,0 +1,22 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "job",
+        "dataLink": {
+          "url": "/projects/demo/dashboards/jobs?var-job=${__data.fields[\"job\"]}",
+          "title": "Job details",
+          "openNewTab": false
+        }
+      },
+      {
+        "name": "instance",
+        "dataLink": {
+          "url": "https://example.com/hosts/${__data.fields[\"instance\"]}",
+          "openNewTab": true
+        }
+      }
+    ]
+  }
+}

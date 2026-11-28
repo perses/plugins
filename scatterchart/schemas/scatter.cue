@@ -13,8 +13,12 @@
 
 package model
 
+import (
+	"github.com/perses/shared/cue/common"
+)
+
 kind: "ScatterChart"
 spec: close({
 	sizeRange?: [number & <sizeRange[1], number]
-	link?: string
+	link?: common.#linkURL
 })

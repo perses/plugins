@@ -1,0 +1,14 @@
+{
+  "kind": "Table",
+  "spec": {
+    "columnSettings": [
+      {
+        "name": "job",
+        "dataLink": {
+          "url": "javascript:alert(document.domain)",
+          "openNewTab": false
+        }
+      }
+    ]
+  }
+}

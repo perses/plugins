@@ -26,13 +26,13 @@ import (
 }
 
 #links: {
-	trace?: string
+	trace?: common.#linkURL
 	attributes?: [...#attributeLink]
 }
 
 #attributeLink: {
 	name: string
-	link: string
+	link: common.#linkURL
 }
 
 kind: "TracingGanttChart"

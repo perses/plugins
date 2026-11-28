@@ -1,0 +1,8 @@
+{
+  "kind": "TracingGanttChart",
+  "spec": {
+    "links": {
+      "attributes": [{ "name": "k8s.pod.name", "link": "data:text/html,<script>alert(document.domain)</script>" }]
+    }
+  }
+}
