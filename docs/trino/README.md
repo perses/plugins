@@ -39,3 +39,36 @@ See also technical docs related to this plugin:
 
 - [Data model](./model.md#trinologquery)
 - [Dashboard-as-Code Go lib](./go-sdk/log-query.md)
+
+## Trace Query (`TrinoTraceQuery`)
+
+The Trino trace query reads spans stored in a Trino table, for example OpenTelemetry spans exported to Iceberg or Hive.
+Rows are grouped by `trace_id` into search results for the TraceTable and ScatterChart panels. When the result holds a
+single `trace_id`, it returns only the full trace for the TracingGanttChart panel (a search that matches exactly one trace is shown as that
+trace, so TraceTable and ScatterChart see no search results for it). Use `{start}` and `{end}` to filter
+on the dashboard time range.
+
+See also technical docs related to this plugin:
+
+- [Data model](./model.md#trinotracequery)
+- [Dashboard-as-Code Go lib](./go-sdk/trace-query.md)
+
+## JSON Query (`TrinoJsonQuery`)
+
+The Trino JSON query runs a SQL query and returns each row as an object keyed by column name, for the Table panel. No
+`time` column is needed. A JSON query has no dashboard time range, so `{start}` and `{end}` are not replaced.
+
+See also technical docs related to this plugin:
+
+- [Data model](./model.md#trinojsonquery)
+- [Dashboard-as-Code Go lib](./go-sdk/json-query.md)
+
+## SQL Variable (`TrinoSQLVariable`)
+
+The Trino SQL variable fills a list variable from a SQL query: the first column is the value and an optional second
+column is the display label.
+
+See also technical docs related to this plugin:
+
+- [Data model](./model.md#trinosqlvariable)
+- [Dashboard-as-Code Go lib](./go-sdk/variable.md)

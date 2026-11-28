@@ -20,6 +20,7 @@ import {
   healthCheck,
   MAX_ROWS,
   parseTrinoTimestamp,
+  parseTrinoTimestampNanos,
   query,
   replaceTimeRangePlaceholders,
 } from './trino-client';
@@ -115,6 +116,28 @@ describe('Trino client', () => {
     },
   );
 
+  it.each([
+    ['2025-01-01 00:00:00', 1735689600000000000n],
+    ['2025-01-01 00:00:00.123', 1735689600123000000n],
+    ['2025-01-01 00:00:00.123456', 1735689600123456000n],
+    ['2025-01-01 00:00:00.123456789', 1735689600123456789n],
+    ['2025-01-01 00:00:00.5 UTC', 1735689600500000000n],
+    ['2025-01-01 05:30:00.000000001 +05:30', 1735689600000000001n],
+    ['2025-01-01 00:00:00.000000007 America/New_York', 1735707600000000007n],
+    ['2025-01-01', 1735689600000000000n],
+    [1735689600123, 1735689600123000000n],
+    [1735689600123.5, 1735689600123500000n],
+  ])('parses Trino timestamp %s to nanoseconds', (value, expected) => {
+    expect(parseTrinoTimestampNanos(value)).toBe(expected);
+  });
+
+  it.each([null, undefined, '', 'yesterday', NaN, '2025-01-01 00:00:00 Not/AZone'])(
+    'returns undefined for unparseable nanosecond timestamp %s',
+    (value) => {
+      expect(parseTrinoTimestampNanos(value)).toBeUndefined();
+    },
+  );
+
   it('returns the column names and types', async () => {
     const fetchMock = trinoServer({
       [`POST ${DIRECT}/v1/statement`]: page({
@@ -155,6 +178,19 @@ describe('Trino client', () => {
 
     expect(result.columns).toEqual([{ name: 'value', type: 'double' }]);
     expect(result.data).toEqual([{ value: 1 }]);
+  });
+
+  it('sends X-Trino-Client-Capabilities only when full precision timestamps are requested', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({ columns: [{ name: 'a', type: 'integer' }], data: [[1]] }),
+    });
+    const options = { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch };
+
+    await query({ query: 'SELECT 1' }, options);
+    await query({ query: 'SELECT 1', fullPrecisionTimestamps: true }, options);
+
+    const sent = fetchMock.mock.calls.map(([, init]) => new Headers(init?.headers).get('X-Trino-Client-Capabilities'));
+    expect(sent).toEqual([null, 'PARAMETRIC_DATETIME']);
   });
 
   it('posts the interpolated query with the configured headers', async () => {
@@ -607,6 +643,143 @@ describe('Trino client', () => {
     );
   });
 
+  it('stops paging and cancels the query at maxRows', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        nextUri: `${DIRECT}/v1/statement/q/1`,
+        columns: [{ name: 'n' }],
+        data: [[1], [2], [3], [4]],
+      }),
+      [`DELETE ${DIRECT}/v1/statement/q/1`]: page({}, 204),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows: 3 },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.truncated).toBe(true);
+    expect(result.data).toEqual([{ n: 1 }, { n: 2 }, { n: 3 }]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      `${DIRECT}/v1/statement/q/1`,
+      expect.objectContaining({ method: 'DELETE' }),
+    );
+  });
+
+  it('does not flag a result of exactly maxRows rows followed by an empty last page', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        nextUri: `${DIRECT}/v1/statement/q/1`,
+        columns: [{ name: 'n' }],
+        data: [[1], [2]],
+      }),
+      [`GET ${DIRECT}/v1/statement/q/1`]: page({}),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows: 2 },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.truncated).toBe(false);
+    expect(result.data).toEqual([{ n: 1 }, { n: 2 }]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('cancels when the page after exactly maxRows rows brings more', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        nextUri: `${DIRECT}/v1/statement/q/1`,
+        columns: [{ name: 'n' }],
+        data: [[1], [2]],
+      }),
+      [`GET ${DIRECT}/v1/statement/q/1`]: page({ nextUri: `${DIRECT}/v1/statement/q/2`, data: [[3]] }),
+      [`DELETE ${DIRECT}/v1/statement/q/2`]: page({}, 204),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows: 2 },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.truncated).toBe(true);
+    expect(result.data).toEqual([{ n: 1 }, { n: 2 }]);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      `${DIRECT}/v1/statement/q/2`,
+      expect.objectContaining({ method: 'DELETE' }),
+    );
+  });
+
+  it.each([
+    ['NaN', NaN, 3, false],
+    ['zero', 0, 1, true],
+    ['negative', -5, 1, true],
+    ['above the number of rows', 10, 3, false],
+  ])('clamps maxRows given as %s', async (_name, maxRows, length, truncated) => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({ columns: [{ name: 'n' }], data: [[1], [2], [3]] }),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.data).toHaveLength(length);
+    expect(result.truncated).toBe(truncated);
+  });
+
+  it('never reads more than MAX_ROWS even when maxRows asks for more', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        nextUri: `${DIRECT}/v1/statement/q/1`,
+        columns: [{ name: 'n' }],
+        data: Array.from({ length: MAX_ROWS + 5 }, (_, i) => [i]),
+      }),
+      [`DELETE ${DIRECT}/v1/statement/q/1`]: page({}, 204),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows: MAX_ROWS + 10 },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.data).toHaveLength(MAX_ROWS);
+    expect(result.truncated).toBe(true);
+  });
+
+  it('flags a final page that goes past the limit as truncated without cancelling', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({ columns: [{ name: 'n' }], data: [[1], [2], [3]] }),
+    });
+
+    const result = await query(
+      { query: 'SELECT n', maxRows: 2 },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(result.data).toEqual([{ n: 1 }, { n: 2 }]);
+    expect(result.truncated).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('puts integer-like column names first in the row objects', async () => {
+    const fetchMock = trinoServer({
+      [`POST ${DIRECT}/v1/statement`]: page({
+        columns: [{ name: 'b' }, { name: '2' }, { name: 'a' }, { name: '1' }],
+        data: [[1, 2, 3, 4]],
+      }),
+    });
+
+    const result = await query(
+      { query: 'SELECT 1' },
+      { datasourceUrl: DIRECT, fetch: fetchMock as unknown as typeof fetch },
+    );
+
+    expect(Object.keys(result.data[0]!)).toEqual(['1', '2', 'b', 'a']);
+  });
+
   it('passes the abort signal to fetch and cancels the query when aborted', async () => {
     const controller = new AbortController();
     const fetchMock = trinoServer({
@@ -678,6 +851,7 @@ describe('Trino client', () => {
         sessionProperties: 'a=1',
         source: 'src',
         routingGroup: 'rg',
+        fullPrecisionTimestamps: true,
       },
       { datasourceUrl: DIRECT, headers: { 'X-Trino-User': 'u' }, fetch: fetchMock as unknown as typeof fetch },
     );

@@ -28,6 +28,7 @@ export const TRINO_PROXY_HEADERS = [
   'X-Trino-Source',
   'X-Trino-Time-Zone',
   'X-Trino-Routing-Group',
+  'X-Trino-Client-Capabilities',
 ];
 
 const initialSpecDirect: TrinoDatasourceSpec = {

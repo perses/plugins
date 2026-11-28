@@ -23,6 +23,9 @@ export default createConfigForPlugin({
       './TrinoDatasource': './src/datasources/trino-datasource',
       './TrinoTimeSeriesQuery': './src/queries/trino-time-series-query',
       './TrinoLogQuery': './src/queries/trino-log-query',
+      './TrinoTraceQuery': './src/queries/trino-trace-query',
+      './TrinoJsonQuery': './src/queries/trino-json-query',
+      './TrinoSQLVariable': './src/variables',
     },
     shared: {
       react: { requiredVersion: '^18.3.0 || ^19.0.0', singleton: true },
