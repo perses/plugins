@@ -1,0 +1,43 @@
+# Plugin Module: traceheatmapchart 
+
+### How to install
+
+This plugin requires react and react-dom 18
+
+Install peer dependencies:
+
+```bash
+npm install react@18 react-dom@18
+```
+
+Install the plugin:
+
+```bash
+npm install @my-org/traceheatmapchart
+```
+
+The Perses UI packages your plugin depends on are now maintained in the [`perses/shared`](https://github.com/perses/shared) repository. If you need to develop against local copies of those packages, follow the linking instructions in that repo.
+
+## Development
+
+### Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+### Get Started
+
+Start the dev server:
+
+```bash
+npm run dev
+```
+
+Build the plugin for distribution:
+
+```bash
+npm run build
+```
