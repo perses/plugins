@@ -30,6 +30,6 @@ export const PieChart: PanelPlugin<PieChartOptions, PieChartPanelProps> = {
       content: PieChartOptionsEditorSettings,
     },
   ],
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   createInitialOptions: createInitialPieChartOptions,
 };

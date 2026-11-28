@@ -23,7 +23,7 @@ import { TimeSeriesExportAction } from './TimeSeriesExportAction';
 
 export const TimeSeriesChart: PanelPlugin<TimeSeriesChartOptions, TimeSeriesChartProps> = {
   PanelComponent: TimeSeriesChartPanel,
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   supportsAnnotations: true,
   panelOptionsEditorComponents: [
     { label: 'General Settings', content: TimeSeriesChartGeneralSettings },

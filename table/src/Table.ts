@@ -32,7 +32,7 @@ import { TableExportAction } from './TableExportAction';
  */
 export const Table: PanelPlugin<TableOptions, TableProps> = {
   PanelComponent: TablePanel,
-  supportedQueryTypes: ['TimeSeriesQuery', 'JsonQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery', 'JsonQuery'],
   queryOptions: getTablePanelQueryOptions,
   panelOptionsEditorComponents: [
     { label: 'General Settings', content: TableSettingsEditor },

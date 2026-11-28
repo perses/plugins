@@ -23,7 +23,7 @@ import { createInitialHistogramChartOptions } from './histogram-chart-model';
  */
 export const HistogramChart: PanelPlugin<HistogramChartOptions, HistogramChartPanelProps> = {
   PanelComponent: HistogramChartPanel,
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   queryOptions: {
     mode: 'instant',
   },

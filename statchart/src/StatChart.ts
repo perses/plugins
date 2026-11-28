@@ -25,7 +25,7 @@ import { StatChartValueMappingEditor } from './StatChartValueMappingEditor';
  */
 export const StatChart: PanelPlugin<StatChartOptions, StatChartPanelProps> = {
   PanelComponent: StatChartPanel,
-  supportedQueryTypes: ['TimeSeriesQuery'],
+  supportedQueryTypes: ['TimeSeriesQuery', 'TimeSeriesExpressionQuery'],
   panelOptionsEditorComponents: [
     {
       label: 'Settings',
