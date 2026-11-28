@@ -12,7 +12,7 @@
 // limitations under the License.
 import type { LogQueryPlugin } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
-import type { LogData, LogEntry, Notice } from '@perses-dev/spec';
+import type { LogData, LogEntry, LogMetadata, Notice } from '@perses-dev/spec';
 
 import type { TrinoClient, TrinoRow } from '../../model/trino-client';
 import {
@@ -126,11 +126,10 @@ export const getTrinoLogData: LogQueryPlugin<TrinoLogQuerySpec>['getLogData'] = 
     });
   }
 
-  return {
-    timeRange: { start, end },
-    logs: notices.length > 0 ? { ...logs, metadata: { notices } } : logs,
-    metadata: {
-      executedQueryString,
-    },
-  };
+  const metadata = {
+    executedQueryString,
+    ...(notices.length > 0 && { notices }),
+  } satisfies LogMetadata;
+
+  return { timeRange: { start, end }, logs, metadata };
 };

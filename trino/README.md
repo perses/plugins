@@ -82,9 +82,9 @@ Log queries take the entry time from the first column named `timestamp`, `log_ti
 column becomes a label and is also rendered in the log line.
 
 Timestamps without a time zone are read as UTC, and a numeric time column is read as epoch milliseconds (`to_unixtime()`
-returns seconds, so multiply it by 1000). Rows whose time column cannot be parsed are skipped. Time series panels show a
-warning for skipped rows, for results cut at the row limit, for results cut at the series limit, and for results with
-rows but no value column; log panels do not display these warnings yet.
+returns seconds, so multiply it by 1000). Rows whose time column cannot be parsed are skipped. Time series and log panels
+show a warning when rows are skipped or results are truncated at the row limit. Time series panels also warn when
+results exceed the series limit or contain rows without a value column.
 
 ## Development
 
